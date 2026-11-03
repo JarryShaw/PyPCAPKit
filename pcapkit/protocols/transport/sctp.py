@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=dict-item
 """SCTP - Stream Control Transmission Protocol
-================================================
+=================================================
 
 .. module:: pcapkit.protocols.transport.sctp
 
@@ -35,9 +35,9 @@ from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
 from pcapkit.const.sctp.parameter import Parameter as Enum_Parameter
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.transport.sctp import SCTP as Data_SCTP
 from pcapkit.protocols.data.transport.sctp import AbortChunk as Data_AbortChunk
 from pcapkit.protocols.data.transport.sctp import CookieACKChunk as Data_CookieACKChunk
@@ -455,6 +455,16 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          :meth:`~pcapkit.protocols.transport.transport.Transport.from_data` as
          captured, where it lost the octets after its last whole chunk
          (:issue:`2673`).
+       * The type of each chunk given to :meth:`make`, the type of each
+         parameter and the code of each error cause given to a chunk maker,
+         and each enumeration field of the chunk, parameter and error cause
+         makers -- a DATA chunk's payload protocol identifier, and the
+         parameter types listed by a supported address types parameter or a
+         missing mandatory parameter cause -- take a member or an
+         :class:`int` code, resolved with the enumeration's ``get``, and a
+         code no member holds is written as given; a name, a :obj:`bool` for a
+         field wider than one bit, or a code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2594`).
 
     """
 
@@ -694,7 +704,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
              dstport: 'Enum_AppType | int' = 0,
              vtag: 'int' = 0,
              chksum: 'Optional[bytes]' = None,
-             chunks: 'Optional[list[Schema_Chunk | tuple[Enum_Chunk, dict[str, Any]] | bytes] | Chunks]' = None,  # pylint: disable=line-too-long
+             chunks: 'Optional[list[Schema_Chunk | tuple[Enum_Chunk | int, dict[str, Any]] | bytes] | Chunks]' = None,  # pylint: disable=line-too-long
              trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_SCTP':
         """Make (construct) packet data.
@@ -717,7 +727,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Raises:
             ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`
                 (:issue:`2287`), ``vtag`` does not fit 32 bits, ``chksum`` is
-                not four octets, or a chunk maker rejects its chunk.
+                not four octets, a chunk's type is a name, a :obj:`bool`, or a
+                code the 8-bit type field cannot carry (:issue:`2594`), or a
+                chunk maker rejects its chunk.
 
         Note:
             There is no ``payload`` argument: SCTP carries its user data in the
@@ -1024,7 +1036,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             chunks.add(code, _keep_padding(schema, meth(schema, chunks=chunks)))
         return chunks
 
-    def _make_sctp_chunks(self, chunks: 'list[Schema_Chunk | tuple[Enum_Chunk, dict[str, Any]] | bytes] | Chunks') -> 'list[Schema_Chunk | bytes]':  # pylint: disable=line-too-long
+    def _make_sctp_chunks(self, chunks: 'list[Schema_Chunk | tuple[Enum_Chunk | int, dict[str, Any]] | bytes] | Chunks') -> 'list[Schema_Chunk | bytes]':  # pylint: disable=line-too-long
         """Make chunks for SCTP.
 
         Args:
@@ -1054,11 +1066,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 elif isinstance(schema, Schema):
                     chunks_list.append(schema)
                 else:
-                    code, args = cast('tuple[Enum_Chunk, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_Chunk | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Chunk, bits=8, name='chunk type')
                     chunks_list.append(self._make_sctp_chunk(code, None, **args))
             return _last_item_only(chunks_list)
 
-        for code, chunk in chunks.items(multi=True):
+        for key, chunk in chunks.items(multi=True):
+            code = self._make_index(key, Enum_Chunk, bits=8, name='chunk type')
             chunks_list.append(self._make_sctp_chunk(code, chunk))
         return _last_item_only(chunks_list)
 
@@ -1146,7 +1160,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             parameters.add(code, _keep_padding(schema, meth(schema, parameters=parameters)))
         return parameters
 
-    def _make_sctp_parameters(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters') -> 'list[Schema_Parameter | bytes]':  # pylint: disable=line-too-long
+    def _make_sctp_parameters(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters') -> 'list[Schema_Parameter | bytes]':  # pylint: disable=line-too-long
         """Make chunk parameters for SCTP.
 
         Args:
@@ -1163,11 +1177,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 if isinstance(schema, (bytes, Schema)):
                     parameters_list.append(schema)
                 else:
-                    code, args = cast('tuple[Enum_Parameter, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_Parameter | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Parameter, bits=16, name='parameter type')
                     parameters_list.append(self._make_sctp_parameter(code, None, **args))
             return _last_item_only(parameters_list)
 
-        for code, parameter in parameters.items(multi=True):
+        for key, parameter in parameters.items(multi=True):
+            code = self._make_index(key, Enum_Parameter, bits=16, name='parameter type')
             parameters_list.append(self._make_sctp_parameter(code, parameter))
         return _last_item_only(parameters_list)
 
@@ -1218,7 +1234,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             causes.add(code, _keep_padding(schema, meth(schema, causes=causes)))
         return causes
 
-    def _make_sctp_causes(self, causes: 'list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes') -> 'list[Schema_ErrorCause | bytes]':  # pylint: disable=line-too-long
+    def _make_sctp_causes(self, causes: 'list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes') -> 'list[Schema_ErrorCause | bytes]':  # pylint: disable=line-too-long
         """Make error causes for SCTP.
 
         Args:
@@ -1235,11 +1251,13 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 if isinstance(schema, (bytes, Schema)):
                     causes_list.append(schema)
                 else:
-                    code, args = cast('tuple[Enum_CauseCode, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_CauseCode | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_CauseCode, bits=16, name='cause code')
                     causes_list.append(self._make_sctp_cause(code, None, **args))
             return _last_item_only(causes_list)
 
-        for code, cause in causes.items(multi=True):
+        for key, cause in causes.items(multi=True):
+            code = self._make_index(key, Enum_CauseCode, bits=16, name='cause code')
             causes_list.append(self._make_sctp_cause(code, cause))
         return _last_item_only(causes_list)
 
@@ -1302,27 +1320,22 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Args:
             types: parameter types, each given as a
-                :class:`~pcapkit.const.sctp.parameter.Parameter` or an
-                :obj:`int`
+                :class:`~pcapkit.const.sctp.parameter.Parameter` member or an
+                :obj:`int` code
 
         Returns:
-            The :class:`~pcapkit.const.sctp.parameter.Parameter` for each
-            item.
+            The :class:`~pcapkit.const.sctp.parameter.Parameter` member each
+            item resolves to with ``get``, or the code itself where no member
+            holds it.
 
         Raises:
-            ProtocolError: If an item is a :obj:`bool`, or is neither a
-                :class:`~pcapkit.const.sctp.parameter.Parameter` nor an
-                :obj:`int` (:issue:`2288`).
+            ProtocolError: If an item is a :obj:`bool` (:issue:`2288`), a name,
+                any other non-:obj:`int`, or a code the 16-bit parameter type
+                field cannot carry (:issue:`2594`).
 
         """
-        types_value = []  # type: list[Enum_Parameter]
-        for item in types or []:
-            # NOTE: ``bool`` is an ``int`` subclass, so ``Parameter.get``
-            # would look ``True`` up as parameter type 1 (#2288).
-            if isinstance(item, bool) or not isinstance(item, int):
-                raise ProtocolError(f'{self.alias}: invalid parameter type: {item!r}')
-            types_value.append(Enum_Parameter.get(item))
-        return types_value
+        return [self._make_index(item, Enum_Parameter, bits=16, name='parameter type')
+                for item in types or []]
 
     def _read_chunk_donone(self, schema: 'Schema_UnknownChunk', *, chunks: 'Chunks') -> 'Data_UnknownChunk':  # pylint: disable=unused-argument
         """Read SCTP chunk of an unsupported type.
@@ -1964,7 +1977,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             tsn: transmission sequence number
             stream_id: stream identifier
             stream_seq: stream sequence number
-            ppid: payload protocol identifier
+            ppid: payload protocol identifier, as a member or an :obj:`int`
+                code
             data: user data
             **kwargs: arbitrary keyword arguments
 
@@ -1973,8 +1987,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Raises:
             ProtocolError: If ``data`` is empty, since :rfc:`9260#section-3.3.1`
-                requires at least one byte of user data, or a field does not
-                fit its width.
+                requires at least one byte of user data, a field does not fit
+                its width, or ``ppid`` is a name, a :obj:`bool` or a code the
+                field cannot carry.
 
         """
         if chunk is not None:
@@ -2006,7 +2021,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             tsn=self._make_uint(tsn, bits=32, name=f'[Chunk {code}] tsn'),
             stream_id=self._make_uint(stream_id, bits=16, name=f'[Chunk {code}] stream_id'),
             stream_seq=self._make_uint(stream_seq, bits=16, name=f'[Chunk {code}] stream_seq'),
-            ppid=self._make_uint(ppid, bits=32, name=f'[Chunk {code}] ppid'),
+            ppid=self._make_index(ppid, Enum_PayloadProtocolIdentifier, bits=32,
+                                  name=f'[Chunk {code}] ppid'),
             data=data,
         )
 
@@ -2017,7 +2033,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                          outbound_streams: 'int' = 1,
                          inbound_streams: 'int' = 1,
                          init_tsn: 'int' = 0,
-                         parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
+                         parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                          **kwargs: 'Any') -> 'Schema_INITChunk':
         """Make SCTP INIT chunk.
 
@@ -2082,7 +2098,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                              outbound_streams: 'int' = 1,
                              inbound_streams: 'int' = 1,
                              init_tsn: 'int' = 0,
-                             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
+                             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                              **kwargs: 'Any') -> 'Schema_INITACKChunk':
         """Make SCTP INIT ACK chunk.
 
@@ -2207,7 +2223,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     def _make_chunk_heartbeat(self, code: 'Enum_Chunk', chunk: 'Optional[Data_HeartbeatChunk]' = None, *,
                               flags: 'bytes' = b'\x00',
-                              parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
+                              parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                               **kwargs: 'Any') -> 'Schema_HeartbeatChunk':
         """Make SCTP HEARTBEAT chunk.
 
@@ -2247,7 +2263,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     def _make_chunk_heartbeat_ack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_HeartbeatACKChunk]' = None, *,
                                   flags: 'bytes' = b'\x00',
-                                  parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
+                                  parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters]' = None,  # pylint: disable=line-too-long
                                   **kwargs: 'Any') -> 'Schema_HeartbeatACKChunk':
         """Make SCTP HEARTBEAT ACK chunk.
 
@@ -2288,7 +2304,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     def _make_chunk_abort(self, code: 'Enum_Chunk', chunk: 'Optional[Data_AbortChunk]' = None, *,
                           reserved: 'int' = 0,
                           T: 'bool' = False,
-                          error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
+                          error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
                           **kwargs: 'Any') -> 'Schema_AbortChunk':
         """Make SCTP ABORT chunk.
 
@@ -2394,7 +2410,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
     def _make_chunk_error(self, code: 'Enum_Chunk', chunk: 'Optional[Data_ErrorChunk]' = None, *,
                           flags: 'bytes' = b'\x00',
-                          error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
+                          error: 'Optional[list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes]' = None,  # pylint: disable=line-too-long
                           **kwargs: 'Any') -> 'Schema_ErrorChunk':
         """Make SCTP ERROR chunk.
 
@@ -3068,7 +3084,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: parameter type
             param: parameter data
-            types: supported address types, given as address parameter types
+            types: supported address types, given as address parameter types,
+                each a member or an :obj:`int` code
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -3634,7 +3651,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Args:
             code: error cause code
             cause: error cause data
-            types: missing parameter types
+            types: missing parameter types, each a member or an :obj:`int`
+                code
             **kwargs: arbitrary keyword arguments
 
         Returns:

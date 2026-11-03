@@ -11,7 +11,7 @@ instead of the file's produces the right answer anyway.
 
 That is how a defect such as GitHub issue #605 goes unseen: with ``Frame.unpack`` seeding the
 byte order under the key ``bytesorder`` where ``byteorder_callback``
-(:file:`pcapkit/corekit/fields/byteorder.py`) reads ``byteorder``, the lookup
+(:file:`pcapkit/corekit/schema/byteorder.py`) reads ``byteorder``, the lookup
 always misses and always falls back to :data:`sys.byteorder`. Reading a
 big-endian capture then byte-swaps ``ts_sec``, ``ts_usec``, ``incl_len`` and
 ``orig_len`` -- and because ``incl_len`` is the payload length, the first record

@@ -84,9 +84,9 @@ from pcapkit.const.mh.upa_status import \
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.data.internet.mh import \
     AccessNetworkIdentifierOption as Data_AccessNetworkIdentifierOption
@@ -505,11 +505,9 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from datetime import timedelta
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address, IPv6Network
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -1141,22 +1139,38 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     .. versionchanged:: 1.6.0
 
-       :meth:`make` and the message, option and sub-option makers, given an
-       integer argument its field cannot carry -- negative, too wide, or a
-       :obj:`bool` for a field wider than one bit -- raise
-       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
-       writing a different value or raising another exception; so does the
-       access network identifier sub-option maker for a raw geo-location
-       degree that does not fit 24 bits as two's complement, where it masked
-       it. The option makers check their registry codes and their one-octet
-       ``Option Length`` too; the message makers' registry codes are not
-       range-checked (:issue:`2614`).
+       * :meth:`make` and the message, option and sub-option makers, given an
+         integer argument its field cannot carry -- negative, too wide, or a
+         :obj:`bool` for a field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception; so does the
+         access network identifier sub-option maker for a raw geo-location
+         degree that does not fit 24 bits as two's complement, where it masked
+         it. The option makers check their registry codes and their one-octet
+         ``Option Length`` too (:issue:`2614`).
+       * Each enumeration field of :meth:`make` and of the message, option and
+         sub-option makers, and the type of each option, sub-option, QoS
+         attribute and CGA extension given to them, takes a member or an
+         :class:`int` code, resolved with the enumeration's ``get``; a name, a
+         :obj:`bool` for a field wider than one bit, or a code the field cannot
+         carry raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than resolving against an enumeration inferred from the
+         caller's frame or writing a different value. The Binding Error
+         maker resolves ``status`` with
+         :class:`~pcapkit.const.mh.binding_error.BindingError`, the registry
+         its schema holds, rather than with
+         :class:`~pcapkit.const.mh.status_code.StatusCode` (:issue:`2594`).
 
     .. versionremoved:: 1.6.0
 
-       ``_decode_signed``, the two's-complement decoder of the geo-location
-       degrees; :meth:`~pcapkit.protocols.protocol.Protocol._read_sint` reads
-       them instead (:issue:`2614`).
+       * ``_decode_signed``, the two's-complement decoder of the geo-location
+         degrees; :meth:`~pcapkit.protocols.protocol.Protocol._read_sint` reads
+         them instead (:issue:`2614`).
+       * The ``X_default``, ``X_namespace`` and ``X_reversed`` arguments that
+         went with each enumeration field ``X`` of :meth:`make` and of the
+         message and option makers; resolve a name with
+         :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+         (:issue:`2594`).
 
     """
 
@@ -1434,14 +1448,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return self._decode_next_layer(mh, schema.next, length - mh.length)
 
     def make(self,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
-             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Binding_Refresh_Request,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             type: 'Enum_Packet | int' = Enum_Packet.Binding_Refresh_Request,
              reserved: 'int' = 0,
              chksum: 'bytes' = b'',
              data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
@@ -1451,13 +1459,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Args:
             next: Next header type.
-            next_default: Default value for next header type field.
-            next_namespace: Namespace of next header type field.
-            next_reversed: Whether the namespace of next header type field is reversed.
             type: Mobility Header type.
-            type_default: Default value for Mobility Header type field.
-            type_namespace: Namespace of Mobility Header type field.
-            type_reversed: Whether the namespace of Mobility Header type field is reversed.
             reserved: Reserved octet after the MH type.
             chksum: Checksum.
             data: Message data.
@@ -1473,7 +1475,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :class:`~pcapkit.protocols.data.internet.mh.MH` data model or a
                 :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema;
                 or if ``reserved``, or the header length of the message, does
-                not fit in one octet.
+                not fit in one octet; or if ``next`` or ``type`` is a name, a
+                :obj:`bool` or a code its field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -1481,10 +1484,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            every later positional argument.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,
-                                    reversed=next_reversed, pack=False)
-        type_val = self._make_index(type, type_default, namespace=type_namespace,
-                                    reversed=type_reversed, pack=False)
+        next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
+        type_val = self._make_index(type, Enum_Packet, bits=8, name='MH type')
 
         if isinstance(data, bytes):
             data_val = data  # type: bytes | Schema_Packet
@@ -3350,14 +3351,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        prefix = cast('IPv6Network',
-                      ipaddress.ip_network((schema.prefix, schema.prefix_length)))
-
+        # NOTE: The prefix and its length stay apart, as captured: an IPv6Network
+        # holds neither bits set past the length nor a length past 128. RFC 3963
+        # section 6.2 reads both fields as given, and answers a prefix the home
+        # agent cannot use with a status rather than discarding the option (#2702).
         data = Data_MobileNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
             reserved=schema.reserved,
-            prefix=prefix,
+            prefix_length=schema.prefix_length,
+            prefix=schema.prefix,
         )
         return data
 
@@ -4020,9 +4023,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
-        if schema.prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
+        # NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213
+        # section 5.3.2 answers a prefix the local mobility anchor cannot
+        # authorise with a status rather than discarding the option (#2702).
         data = Data_HomeNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
@@ -4237,12 +4241,23 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         seconds = schema.timestamp['seconds']
         fraction = schema.timestamp['fraction']
 
+        try:
+            # NOTE: Not the stdlib's ``fromtimestamp``, which takes no time
+            # after 3000 on Windows (#2099). The whole seconds go in as an int
+            # and the fraction as a timedelta, which rounds it to microseconds
+            # half to even as one float did, but loses no precision to the
+            # seconds, so the last second of 9999 is not carried past it.
+            timestamp = (fromtimestamp(seconds, datetime.timezone.utc)
+                         + datetime.timedelta(seconds=fraction / 65536))  # type: Optional[dt_type]
+        except ValueError:
+            # past the year 9999, which the 48-bit count reaches and datetime
+            # cannot hold, so pmip_timestamp alone keeps it (#2702)
+            timestamp = None
+
         data = Data_TimestampOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
-            # not the stdlib's ``fromtimestamp``, which takes no time after 3000
-            # on Windows (#2099)
-            timestamp=fromtimestamp(seconds + fraction / 65536, datetime.timezone.utc),
+            timestamp=timestamp,
             pmip_timestamp=Data_PMIPv6Timestamp(seconds=seconds, fraction=fraction),
         )
         return data
@@ -6776,7 +6791,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_brr(self, message: 'Optional[Data_BindingRefreshRequestMessage]' = None, *,
                       msg_reserved: 'int' = 0,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       **kwargs: 'Any') -> 'Schema_BindingRefreshRequestMessage':
         """Make MH binding refresh request (BRR) message type.
 
@@ -6806,7 +6821,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_hoti(self, message: 'Optional[Data_HomeTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
-                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                        msg_reserved: 'bytes' = b'\x00\x00',
                        **kwargs: 'Any') -> 'Schema_HomeTestInitMessage':
         """Make MH home test init (HoTI) message type.
@@ -6838,7 +6853,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_coti(self, message: 'Optional[Data_CareofTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
-                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                        msg_reserved: 'bytes' = b'\x00\x00',
                        **kwargs: 'Any') -> 'Schema_CareofTestInitMessage':
         """Make MH care-of test init (CoTI) message type.
@@ -6872,7 +6887,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       nonce_index: 'int' = 0,
                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                       token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       **kwargs: 'Any') -> 'Schema_HomeTestMessage':
         """Make MH home test (HoT) message type.
 
@@ -6910,7 +6925,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       nonce_index: 'int' = 0,
                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                       token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       **kwargs: 'Any') -> 'Schema_CareofTestMessage':
         """Make MH care-of test (CoT) message type.
 
@@ -6960,7 +6975,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      dmm: 'bool' = False,
                      flags_reserved: 'int' = 0,
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      **kwargs: 'Any') -> 'Schema_BindingUpdateMessage':
         """Make MH binding update (BU) message type.
 
@@ -7041,10 +7056,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_ba(self, message: 'Optional[Data_BindingAcknowledgementMessage]' = None, *,
-                     status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
-                     status_default: 'Optional[int]' = None,
-                     status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                     status_reversed: 'bool' = False,
+                     status: 'Enum_StatusCode | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,  # pylint: disable=line-too-long
                      key_mngt: 'bool' = False,
                      mobile_router: 'bool' = False,
                      proxy_reg: 'bool' = False,
@@ -7055,16 +7067,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      flags_reserved: 'int' = 0,
                      seq: 'int' = 0,
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      **kwargs: 'Any') -> 'Schema_BindingAcknowledgementMessage':
         """Make MH binding acknowledge (BA) message type.
 
         Args:
             message: Message data model.
             status: Status code.
-            status_default: Default status code.
-            status_namespace: Status code namespace.
-            status_reversed: Reverse status code namespace.
             key_mngt: Key management mobility option flag.
             mobile_router: Mobile router flag (``R``).
             proxy_reg: Proxy registration flag (``P``).
@@ -7084,7 +7093,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
-                its field.
+                its field, or ``status`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if message is not None:
@@ -7101,8 +7111,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_StatusCode, bits=8, name='status')
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
             options = options or []
 
@@ -7129,22 +7138,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_be(self, message: 'Optional[Data_BindingErrorMessage]' = None, *,
-                     status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
-                     status_default: 'Optional[int]' = None,
-                     status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                     status_reversed: 'bool' = False,
+                     status: 'Enum_BindingError | int' = 0,
                      home: 'IPv6Address | int | str | bytes' = '::',
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      msg_reserved: 'bytes' = b'\x00',
                      **kwargs: 'Any') -> 'Schema_BindingErrorMessage':
         """Make MH binding error (BE) message type.
 
         Args:
             message: Message data model.
-            status: Status code.
-            status_default: Default status code.
-            status_namespace: Status code namespace.
-            status_reversed: Reverse status code namespace.
+            status: Status [:rfc:`6275#section-6.1.9`]; ``0`` by default, a
+                code no status is assigned.
             home: Home address.
             options: Mobility options.
             msg_reserved: The reserved octet of the message body as captured,
@@ -7154,6 +7158,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``status`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
+
         """
         if message is not None:
             msg_reserved = getattr(message, 'msg_reserved', b'\x00')
@@ -7161,8 +7169,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             home = message.home
             options = message.options
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_BindingError, bits=8, name='status')
             options = options or []
 
         return Schema_BindingErrorMessage(
@@ -7179,7 +7186,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       lla_compat: 'bool' = False,
                       key_mngt: 'bool' = False,
                       lifetime: 'int | timedelta' = 4,  # reasonable default value
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_FastBindingUpdateMessage':
         """Make MH fast binding update (FBU) message type.
@@ -7234,14 +7241,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_fback(self, message: 'Optional[Data_FastBindingAcknowledgmentMessage]' = None, *,
-                        status: 'FastBindingAcknowledgmentStatus | StdlibEnum | AenumEnum | str | int' = FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted,
-                        status_default: 'Optional[int]' = None,
-                        status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                        status_reversed: 'bool' = False,
+                        status: 'FastBindingAcknowledgmentStatus | int' = FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted,  # pylint: disable=line-too-long
                         key_mngt: 'bool' = False,
                         seq: 'int' = 0,
                         lifetime: 'int | timedelta' = 4,  # reasonable default value
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         flags_reserved: 'int' = 0,
                         **kwargs: 'Any') -> 'Schema_FastBindingAcknowledgmentMessage':
         """Make MH fast binding acknowledgment (FBack) message type.
@@ -7250,9 +7254,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             status: Status code, see
                 :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.
-            status_default: Default status code.
-            status_namespace: Status code namespace.
-            status_reversed: Reverse status code namespace.
             key_mngt: Key management mobility option flag.
             seq: Sequence number.
             lifetime: Lifetime, in seconds or as a
@@ -7268,7 +7269,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
-                its field.
+                its field, or ``status`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if message is not None:
@@ -7279,8 +7281,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, FastBindingAcknowledgmentStatus, bits=8,
+                                          name='status')
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
             options = options or []
 
@@ -7296,7 +7298,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_fna(self, message: 'Optional[Data_FastNeighborAdvertisementMessage]' = None, *,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       msg_reserved: 'bytes' = b'\x00\x00',
                       **kwargs: 'Any') -> 'Schema_FastNeighborAdvertisementMessage':
         """Make MH fast neighbor advertisement (FNA) message type.
@@ -7350,11 +7352,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      buffer: 'bool' = False,
                      proxy: 'bool' = False,
                      forward: 'bool' = False,
-                     code: 'Enum_HandoverInitiateStatus | StdlibEnum | AenumEnum | str | int' = Enum_HandoverInitiateStatus.FBU_with_the_PCoA_as_source_IP_address,
-                     code_default: 'Optional[int]' = None,
-                     code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                     code_reversed: 'bool' = False,
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     code: 'Enum_HandoverInitiateStatus | int' = Enum_HandoverInitiateStatus.FBU_with_the_PCoA_as_source_IP_address,  # pylint: disable=line-too-long
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HandoverInitiateMessage':
         """Make MH handover initiate (HI) message type.
@@ -7367,9 +7366,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             proxy: Proxy flag.
             forward: Forwarding flag.
             code: Code.
-            code_default: Default code.
-            code_namespace: Code namespace.
-            code_reversed: Reverse code namespace.
             options: Mobility options.
             flags_reserved: Reserved bits, i.e. the four bits after the ``F`` flag.
             **kwargs: Arbitrary keyword arguments.
@@ -7378,7 +7374,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field,
+                or ``code`` is a name, a :obj:`bool` or a code its field cannot
+                carry.
 
         """
         if message is not None:
@@ -7391,8 +7389,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code_val = message.code
             options = message.options
         else:
-            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
-                                        reversed=code_reversed, pack=False)
+            code_val = self._make_index(code, Enum_HandoverInitiateStatus, bits=8, name='code')
             options = options or []
 
         return Schema_HandoverInitiateMessage(
@@ -7413,11 +7410,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                        buffer: 'bool' = False,
                        proxy: 'bool' = False,
                        forward: 'bool' = False,
-                       code: 'Enum_HandoverACKStatus | StdlibEnum | AenumEnum | str | int' = Enum_HandoverACKStatus.Handover_Accepted_with_NCoA_valid,
-                       code_default: 'Optional[int]' = None,
-                       code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                       code_reversed: 'bool' = False,
-                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       code: 'Enum_HandoverACKStatus | int' = Enum_HandoverACKStatus.Handover_Accepted_with_NCoA_valid,
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                        flags_reserved: 'int' = 0,
                        **kwargs: 'Any') -> 'Schema_HandoverAcknowledgeMessage':
         """Make MH handover acknowledge (HAck) message type.
@@ -7429,9 +7423,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             proxy: Proxy flag.
             forward: Forwarding flag.
             code: Code.
-            code_default: Default code.
-            code_namespace: Code namespace.
-            code_reversed: Reverse code namespace.
             options: Mobility options.
             flags_reserved: Reserved bits, i.e. the five bits after the ``F`` flag.
             **kwargs: Arbitrary keyword arguments.
@@ -7440,7 +7431,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field,
+                or ``code`` is a name, a :obj:`bool` or a code its field cannot
+                carry.
 
         """
         if message is not None:
@@ -7452,8 +7445,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code_val = message.code
             options = message.options
         else:
-            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
-                                        reversed=code_reversed, pack=False)
+            code_val = self._make_index(code, Enum_HandoverACKStatus, bits=8, name='code')
             options = options or []
 
         return Schema_HandoverAcknowledgeMessage(
@@ -7470,7 +7462,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_has(self, message: 'Optional[Data_HomeAgentSwitchMessage]' = None, *,
                       addresses: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       msg_reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_HomeAgentSwitchMessage':
         """Make MH home agent switch (HAS) message type.
@@ -7507,7 +7499,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      unsolicited: 'bool' = False,
                      response: 'bool' = False,
                      seq: 'int' = 0,
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HeartbeatMessage':
         """Make MH heartbeat message type.
@@ -7548,19 +7540,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_brm(self, message: 'Optional[Data_BindingRevocationMessage]' = None, *,
-                      br_type: 'Enum_BindingRevocation | StdlibEnum | AenumEnum | str | int' = Enum_BindingRevocation.Binding_Revocation_Indication,
-                      br_type_default: 'Optional[int]' = None,
-                      br_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      br_type_reversed: 'bool' = False,
-                      code: 'Enum_RevocationTrigger | Enum_RevocationStatusCode | StdlibEnum | AenumEnum | str | int' = Enum_RevocationTrigger.Unspecified,
-                      code_default: 'Optional[int]' = None,
-                      code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      code_reversed: 'bool' = False,
+                      br_type: 'Enum_BindingRevocation | int' = Enum_BindingRevocation.Binding_Revocation_Indication,
+                      code: 'Enum_RevocationTrigger | Enum_RevocationStatusCode | int' = Enum_RevocationTrigger.Unspecified,  # pylint: disable=line-too-long
                       seq: 'int' = 0,
                       proxy: 'bool' = False,
                       ipv4_hoa: 'bool' = False,
                       global_revocation: 'bool' = False,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_BindingRevocationMessage':
         """Make MH binding revocation (BRM) message type.
@@ -7569,14 +7555,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             br_type: Binding revocation type, saying which form of the message
                 this is.
-            br_type_default: Default binding revocation type.
-            br_type_namespace: Binding revocation type namespace.
-            br_type_reversed: Reverse binding revocation type namespace.
             code: Revocation trigger, for an indication, or acknowledgement
-                status, for an acknowledgement.
-            code_default: Default code.
-            code_namespace: Code namespace.
-            code_reversed: Reverse code namespace.
+                status, for an acknowledgement; resolved in the registry of the
+                form ``br_type`` names.
             seq: Sequence number.
             proxy: Proxy binding flag.
             ipv4_hoa: IPv4 home address binding only flag.
@@ -7589,7 +7570,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field,
+                or ``br_type`` or ``code`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if message is not None:
@@ -7602,10 +7585,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags_reserved = message.flags_reserved
             options = message.options
         else:
-            br_type_val = self._make_index(br_type, br_type_default, namespace=br_type_namespace,  # type: ignore[assignment]
-                                           reversed=br_type_reversed, pack=False)
-            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
-                                        reversed=code_reversed, pack=False)
+            br_type_val = self._make_index(br_type, Enum_BindingRevocation, bits=8,
+                                           name='binding revocation type')
+            # NOTE: The registry ``br_code_selector`` reads the octet from.
+            if br_type_val == Enum_BindingRevocation.Binding_Revocation_Acknowledgement:
+                code_val = self._make_index(code, Enum_RevocationStatusCode, bits=8, name='status')
+            else:
+                code_val = self._make_index(code, Enum_RevocationTrigger, bits=8,
+                                            name='revocation trigger')
             options = options or []
 
         return Schema_BindingRevocationMessage(
@@ -7624,7 +7611,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_lri(self, message: 'Optional[Data_LocalizedRoutingInitiationMessage]' = None, *,
                       seq: 'int' = 0,
                       lifetime: 'int | timedelta' = 0,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       msg_reserved: 'bytes' = b'\x00\x00',
                       **kwargs: 'Any') -> 'Schema_LocalizedRoutingInitiationMessage':
         """Make MH localized routing initiation (LRI) message type.
@@ -7667,12 +7654,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_lra(self, message: 'Optional[Data_LocalizedRoutingAcknowledgmentMessage]' = None, *,
                       seq: 'int' = 0,
                       unsolicited: 'bool' = False,
-                      status: 'LocalizedRoutingStatus | StdlibEnum | AenumEnum | str | int' = LocalizedRoutingStatus.Success,
-                      status_default: 'Optional[int]' = None,
-                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      status_reversed: 'bool' = False,
+                      status: 'LocalizedRoutingStatus | int' = LocalizedRoutingStatus.Success,
                       lifetime: 'int | timedelta' = 0,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_LocalizedRoutingAcknowledgmentMessage':
         """Make MH localized routing acknowledgment (LRA) message type.
@@ -7683,9 +7667,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             unsolicited: Unsolicited flag.
             status: Status, see
                 :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             lifetime: Lifetime, in seconds or as a
                 :class:`~datetime.timedelta`.
             options: Mobility options.
@@ -7697,7 +7678,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``seq``, ``flags_reserved`` or the lifetime does not fit
-                its field.
+                its field, or ``status`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if message is not None:
@@ -7708,8 +7690,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, LocalizedRoutingStatus, bits=8, name='status')
             lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
             options = options or []
 
@@ -7726,13 +7707,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_upn(self, message: 'Optional[Data_UpdateNotificationMessage]' = None, *,
                       seq: 'int' = 0,
-                      reason: 'Enum_UpdateNotificationReason | StdlibEnum | AenumEnum | str | int' = Enum_UpdateNotificationReason.FORCE_REREGISTRATION,
-                      reason_default: 'Optional[int]' = None,
-                      reason_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      reason_reversed: 'bool' = False,
+                      reason: 'Enum_UpdateNotificationReason | int' = Enum_UpdateNotificationReason.FORCE_REREGISTRATION,  # pylint: disable=line-too-long
                       ack: 'bool' = False,
                       retransmit: 'bool' = False,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_UpdateNotificationMessage':
         """Make MH update notification (UPN) message type.
@@ -7741,9 +7719,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             seq: Sequence number.
             reason: Notification reason.
-            reason_default: Default notification reason.
-            reason_namespace: Notification reason namespace.
-            reason_reversed: Reverse notification reason namespace.
             ack: Acknowledgement requested flag.
             retransmit: Retransmission flag.
             options: Mobility options.
@@ -7754,7 +7729,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field,
+                or ``reason`` is a name, a :obj:`bool` or a code its field cannot
+                carry.
 
         """
         if message is not None:
@@ -7765,8 +7742,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags_reserved = message.flags_reserved
             options = message.options
         else:
-            reason_val = self._make_index(reason, reason_default, namespace=reason_namespace,  # type: ignore[assignment]
-                                          reversed=reason_reversed, pack=False)
+            reason_val = self._make_index(reason, Enum_UpdateNotificationReason, bits=16,
+                                          name='notification reason')
             options = options or []
 
         return Schema_UpdateNotificationMessage(
@@ -7782,11 +7759,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_upa(self, message: 'Optional[Data_UpdateNotificationAcknowledgementMessage]' = None, *,
                       seq: 'int' = 0,
-                      status: 'Enum_UpdateNotificationACKStatus | StdlibEnum | AenumEnum | str | int' = Enum_UpdateNotificationACKStatus.SUCCESS,
-                      status_default: 'Optional[int]' = None,
-                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      status_reversed: 'bool' = False,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      status: 'Enum_UpdateNotificationACKStatus | int' = Enum_UpdateNotificationACKStatus.SUCCESS,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       msg_reserved: 'bytes' = b'\x00\x00\x00',
                       **kwargs: 'Any') -> 'Schema_UpdateNotificationAcknowledgementMessage':
         """Make MH update notification acknowledgement (UPA) message type.
@@ -7795,9 +7769,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             seq: Sequence number.
             status: Status.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             options: Mobility options.
             msg_reserved: The three reserved octets of the message body as captured,
                 truncated or zero-filled to 3 octets.
@@ -7807,7 +7778,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` does not fit its field.
+            ProtocolError: If ``seq`` does not fit its field, or ``status`` is a
+                name, a :obj:`bool` or a code its field cannot carry.
 
         """
         if message is not None:
@@ -7816,8 +7788,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_val = message.status  # type: Enum_UpdateNotificationACKStatus
             options = message.options
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_UpdateNotificationACKStatus, bits=8,
+                                          name='status')
             options = options or []
 
         return Schema_UpdateNotificationAcknowledgementMessage(
@@ -7828,17 +7800,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_fbm(self, message: 'Optional[Data_FlowBindingMessage]' = None, *,
-                      fb_type: 'Enum_FlowBindingType | StdlibEnum | AenumEnum | str | int' = Enum_FlowBindingType.Indication,
-                      fb_type_default: 'Optional[int]' = None,
-                      fb_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      fb_type_reversed: 'bool' = False,
+                      fb_type: 'Enum_FlowBindingType | int' = Enum_FlowBindingType.Indication,
                       seq: 'int' = 0,
-                      code: 'Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus | StdlibEnum | AenumEnum | str | int' = Enum_FlowBindingIndicationTrigger.Unspecified,
-                      code_default: 'Optional[int]' = None,
-                      code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      code_reversed: 'bool' = False,
+                      code: 'Enum_FlowBindingIndicationTrigger | Enum_FlowBindingACKStatus | int' = Enum_FlowBindingIndicationTrigger.Unspecified,  # pylint: disable=line-too-long
                       ack: 'bool' = False,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       flags_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_FlowBindingMessage':
         """Make MH flow binding (FB) message type.
@@ -7846,15 +7812,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             message: Message data model.
             fb_type: Flow binding type, saying which form of the message this is.
-            fb_type_default: Default flow binding type.
-            fb_type_namespace: Flow binding type namespace.
-            fb_type_reversed: Reverse flow binding type namespace.
             seq: Sequence number.
             code: Indication trigger, for an indication, or acknowledgement
-                status, for an acknowledgement.
-            code_default: Default code.
-            code_namespace: Code namespace.
-            code_reversed: Reverse code namespace.
+                status, for an acknowledgement; resolved in the registry of the
+                form ``fb_type`` names.
             ack: Acknowledgement requested flag. Meaningful only in an
                 indication.
             options: Mobility options.
@@ -7865,7 +7826,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed message type.
 
         Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field,
+                or ``fb_type`` or ``code`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if message is not None:
@@ -7876,10 +7839,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags_reserved = message.flags_reserved
             options = message.options
         else:
-            fb_type_val = self._make_index(fb_type, fb_type_default, namespace=fb_type_namespace,  # type: ignore[assignment]
-                                           reversed=fb_type_reversed, pack=False)
-            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
-                                        reversed=code_reversed, pack=False)
+            fb_type_val = self._make_index(fb_type, Enum_FlowBindingType, bits=16,
+                                           name='flow binding type')
+            # NOTE: The registry ``fb_code_selector`` reads the octet from.
+            if fb_type_val == Enum_FlowBindingType.Acknowledgement:
+                code_val = self._make_index(code, Enum_FlowBindingACKStatus, bits=8, name='status')
+            else:
+                code_val = self._make_index(code, Enum_FlowBindingIndicationTrigger, bits=8,
+                                            name='trigger')
             options = options or []
 
         return Schema_FlowBindingMessage(
@@ -7895,7 +7862,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_sq(self, message: 'Optional[Data_SubscriptionQueryMessage]' = None, *,
                      seq: 'int' = 0,
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      msg_reserved: 'bytes' = b'\x00',
                      **kwargs: 'Any') -> 'Schema_SubscriptionQueryMessage':
         """Make MH subscription query (SQ) message type.
@@ -7931,7 +7898,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_sr(self, message: 'Optional[Data_SubscriptionResponseMessage]' = None, *,
                      seq: 'int' = 0,
                      info: 'bool' = False,
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                      flags_reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_SubscriptionResponseMessage':
         """Make MH subscription response (SR) message type.
@@ -8007,7 +7974,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
         return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
 
-    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':
+    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':  # pylint: disable=line-too-long
         """Make options for MH.
 
         Args:
@@ -8015,6 +7982,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Mobility options list.
+
+        Raises:
+            ProtocolError: If the type of an option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
 
         """
         if isinstance(options, list):
@@ -8027,7 +7999,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 elif isinstance(schema, Schema):
                     data = schema
                 else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Option, bits=8, name='option type')
                     name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_opt_{name}'
@@ -8041,7 +8014,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             return options_list
 
         options_list = []
-        for code, option in options.items(multi=True):
+        for key, option in options.items(multi=True):
+            code = self._make_index(key, Enum_Option, bits=8, name='option type')
             name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
@@ -8258,7 +8232,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mnp(self, type: 'Enum_Option', option: 'Optional[Data_MobileNetworkPrefixOption]' = None, *,
-                      prefix: 'bytes | str | IPv6Network' = '::/0',
+                      prefix: 'bytes | str | int | IPv6Address | IPv6Network' = '::/0',
+                      prefix_length: 'Optional[int]' = None,
                       reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_MobileNetworkPrefixOption':
         """Make MH mobile network prefix option.
@@ -8266,7 +8241,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            prefix: Mobile network prefix.
+            prefix: Mobile network prefix, an IPv6 address or network, whose
+                bits past ``prefix_length`` are written as given.
+            prefix_length: Prefix length; defaults to that of a network or of
+                text ending in ``/<length>``, and to 128 for an address.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
             **kwargs: Arbitrary keyword arguments.
@@ -8274,16 +8252,42 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix`` is not an IPv6 address or network, or
+                ``prefix_length`` is negative, a :obj:`bool`, or does not fit in
+                one octet.
+
+        Note:
+            The prefix length is checked against its 8-bit field alone, as
+            :rfc:`3963#section-6.2` has a home agent answer a prefix it cannot
+            use with a status rather than discard the option, so whatever the
+            reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           New argument ``prefix_length``. ``prefix`` keeps the bits set past
+           its length, rather than raising :exc:`ValueError`, and a prefix
+           length past 128 is written (:issue:`2702`).
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
-            prefix = option.prefix
-
-        prefix_val = ipaddress.ip_network(prefix)
-        if prefix_val.version != 6:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid mobile network prefix: {prefix!r}')
-        prefix_length = prefix_val.prefixlen
-        prefix_addr = prefix_val.network_address
+            prefix_length = option.prefix_length
+            prefix_addr = option.prefix
+        else:
+            try:
+                # NOTE: An interface, unlike a network, keeps the bits past its
+                # length, and takes an address, a network or text alike. A bool
+                # is refused first, as it would pass for the address ``::1``.
+                prefix_val = None if isinstance(prefix, bool) else ipaddress.IPv6Interface(prefix)
+            except ValueError:
+                prefix_val = None
+            if prefix_val is None:
+                raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid mobile network prefix: {prefix!r}')
+            if prefix_length is None:
+                prefix_length = prefix_val.network.prefixlen
+            prefix_addr = prefix_val.ip
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
 
         return Schema_MobileNetworkPrefixOption(
             type=type,
@@ -8323,10 +8327,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mn_id(self, type: 'Enum_Option', option: 'Optional[Data_MNIDOption]' = None, *,
-                       subtype: 'Enum_MNIDSubtype | StdlibEnum | AenumEnum | str | int' = Enum_MNIDSubtype.IPv6_Address,
-                       subtype_default: 'Optional[int]' = None,
-                       subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                       subtype_reversed: 'bool' = False,
+                       subtype: 'Enum_MNIDSubtype | int' = Enum_MNIDSubtype.IPv6_Address,
                        identifier: 'bytes | str | IPv6Address | int' = '::',
                        **kwargs: 'Any') -> 'Schema_MNIDOption':
         """Make MH mobile node identifier option.
@@ -8335,9 +8336,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             subtype: MN-ID subtype.
-            subtype_default: MN-ID subtype default value.
-            subtype_namespace: MN-ID subtype namespace.
-            subtype_reversed: MN-ID subtype reversed flag.
             identifier: Identifier. An :obj:`int` is accepted for every
                 subtype except ``NAI``, with the sole exception of a
                 :obj:`bool`, which is rejected for every subtype -- see
@@ -8374,8 +8372,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 subtypes -- an :obj:`int` is converted rather than rejected
                 there -- or anything :class:`ipaddress.IPv6Address` itself does
                 not accept for ``IPv6_Address``.
-                Also if ``subtype`` does not fit in one octet, or the option is too long
-                for its one-octet ``Option Length``.
+                Also if ``subtype`` is a name, a :obj:`bool` or a code its field
+                cannot carry, or the option is too long for its one-octet
+                ``Option Length``.
 
         .. versionchanged:: 1.6.0
 
@@ -8386,9 +8385,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             subtype_val = option.subtype
             identifier = option.identifier
+            self._make_uint(subtype_val, bits=8, name='MN-ID subtype')
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
-                                           reversed=subtype_reversed, pack=False)
+            subtype_val = self._make_index(subtype, Enum_MNIDSubtype, bits=8, name='MN-ID subtype')
 
         if isinstance(identifier, int) and identifier < 0:
             # NOTE: checked before the subtype dispatch below, not inside it,
@@ -8400,19 +8399,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # guard living inside the ``elif isinstance(identifier, int)`` branch
             # could not catch, since the ``IPv6_Address`` dispatch never reaches
             # it.
-            try:
-                # ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back
-                # into a named member for the message below -- but its own
-                # ``_missing_`` only auto-extends 9-15 and 16-255, so 0,
-                # negatives and anything above 255 make the constructor itself
-                # raise a bare ``ValueError``, which would defeat the point of
-                # this guard. Caught here and the raw value used instead
-                # rather than let it propagate.
-                subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
-            except ValueError:
-                subtype_repr = repr(subtype_val)
             raise ProtocolError(
-                f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
+                f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_val!r} '
                 f'identifier must be a non-negative int, not {identifier!r}')
 
         if isinstance(identifier, bool):
@@ -8531,16 +8519,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # ``struct.error`` as str/list/dict), so it is rejected with
             # everything else rather than let through to leak anyway.
             if not isinstance(identifier, (bytes, bytearray)):
-                try:
-                    subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
-                except ValueError:
-                    subtype_repr = repr(subtype_val)
                 raise ProtocolError(
-                    f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_val!r} '
                     f'identifier must be bytes, not {identifier!r}')
             id_len = len(identifier)
 
-        self._make_uint(subtype_val, bits=8, name='MN-ID subtype')
         return Schema_MNIDOption(
             type=type,
             length=self._make_uint(1 + id_len, bits=8, name='Option Length'),
@@ -8549,10 +8532,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_auth(self, type: 'Enum_Option', option: 'Optional[Data_AuthOption]' = None, *,
-                       subtype: 'Enum_AuthSubtype | StdlibEnum | AenumEnum | str | int' = Enum_AuthSubtype.MN_HA,
-                       subtype_default: 'Optional[int]' = None,
-                       subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                       subtype_reversed: 'bool' = False,
+                       subtype: 'Enum_AuthSubtype | int' = Enum_AuthSubtype.MN_HA,
                        spi: 'int' = 0,
                        data: 'bytes' = b'',
                        **kwargs: 'Any') -> 'Schema_AuthOption':
@@ -8562,9 +8542,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             subtype: Authentication subtype.
-            subtype_default: Authentication subtype default value.
-            subtype_namespace: Authentication subtype namespace.
-            subtype_reversed: Authentication subtype reversed flag.
             spi: Security parameter index.
             data: Authentication data.
             **kwargs: Arbitrary keyword arguments.
@@ -8577,7 +8554,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 four, which is the only length leaving an ``Option Length`` of
                 ``5 + len(data)`` that :meth:`_read_opt_auth` accepts; or if
                 ``spi`` does not fit in four octets.
-                Also if the option is too long for its one-octet ``Option Length``.
+                Also if ``subtype`` is a name, a :obj:`bool` or a code its field
+                cannot carry, or the option is too long for its one-octet
+                ``Option Length``.
 
         """
         if option is not None:
@@ -8585,8 +8564,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             spi = option.spi
             data = option.data
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
-                                           reversed=subtype_reversed, pack=False)
+            subtype_val = self._make_index(subtype, Enum_AuthSubtype, bits=8, name='subtype')
 
         if (len(data) + 6) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: must be two octets '
@@ -8885,10 +8863,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_ipv6_ap(self, type: 'Enum_Option', option: 'Optional[Data_IPv6AddressPrefixOption]' = None, *,
-                          code: 'IPv6AddressPrefixCode | StdlibEnum | AenumEnum | str | int' = IPv6AddressPrefixCode.New_Care_of_Address,
-                          code_default: 'Optional[int]' = None,
-                          code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                          code_reversed: 'bool' = False,
+                          code: 'IPv6AddressPrefixCode | int' = IPv6AddressPrefixCode.New_Care_of_Address,
                           prefix_length: 'int' = 128,
                           address: 'bytes | str | int | IPv6Address' = '::',
                           **kwargs: 'Any') -> 'Schema_IPv6AddressPrefixOption':
@@ -8899,9 +8874,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             code: Option code, see
                 :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
-            code_default: Default option code.
-            code_namespace: Option code namespace.
-            code_reversed: Reverse option code namespace.
             prefix_length: Prefix length.
             address: IPv6 address/prefix.
             **kwargs: Arbitrary keyword arguments.
@@ -8911,8 +8883,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``code`` is an :obj:`int` that
-                does not fit in one octet.
+                or longer than the address, or ``code`` is a name, a
+                :obj:`bool` or a code its field cannot carry.
 
         """
         if option is not None:
@@ -8920,12 +8892,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             address = option.address
         else:
-            if isinstance(code, int):
-                # NOTE: Before the lookup, whose strict registry would raise a
-                # bare EnumValueError naming neither MH nor the field.
-                self._make_uint(code, bits=8, name='code')
-            code_val = self._make_index(code, code_default, namespace=code_namespace,  # type: ignore[assignment]
-                                        reversed=code_reversed, pack=False)
+            code_val = self._make_index(code, IPv6AddressPrefixCode, bits=8, name='code')
 
         prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
         if prefix_length > 128:
@@ -8940,10 +8907,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_dns(self, type: 'Enum_Option', option: 'Optional[Data_DNSUpdateOption]' = None, *,
-                      status: 'Enum_DNSStatusCode | StdlibEnum | AenumEnum | str | int' = Enum_DNSStatusCode.DNS_update_performed,
-                      status_default: 'Optional[int]' = None,
-                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      status_reversed: 'bool' = False,
+                      status: 'Enum_DNSStatusCode | int' = Enum_DNSStatusCode.DNS_update_performed,
                       remove: 'bool' = False,
                       identity: 'bytes' = b'',
                       reserved: 'int' = 0,
@@ -8954,9 +8918,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             status: Status.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             remove: Remove flag.
             identity: Mobile node identity, in FQDN form.
             reserved: Reserved bits, i.e. the seven bits after the ``R`` flag.
@@ -8967,8 +8928,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``reserved`` does not fit its field.
-                Also if ``status`` does not fit in one octet, or the option is too long
-                for its one-octet ``Option Length``.
+                Also if ``status`` is a name, a :obj:`bool` or a code its field
+                cannot carry, or the option is too long for its one-octet
+                ``Option Length``.
 
         """
         if option is not None:
@@ -8976,11 +8938,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             remove = option.remove
             reserved = option.reserved
             identity = option.identity
+            self._make_uint(status_val, bits=8, name='status')
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_DNSStatusCode, bits=8, name='status')
 
-        self._make_uint(status_val, bits=8, name='status')
         return Schema_DNSUpdateOption(
             type=type,
             length=self._make_uint(2 + len(identity), bits=8, name='Option Length'),
@@ -9088,7 +9049,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address.
+                or does not fit in one octet.
+
+        Note:
+            The prefix length is checked against its 8-bit field alone, as
+            :rfc:`5213#section-5.3.2` has a local mobility anchor answer a
+            prefix it cannot authorise with a status rather than discard the
+            option, so whatever the reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, as the reader keeps one (:issue:`2702`).
 
         """
         if option is not None:
@@ -9097,8 +9069,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix = option.prefix
 
         prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
-        if prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_HomeNetworkPrefixOption(
             type=type,
@@ -9109,10 +9079,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_hi(self, type: 'Enum_Option', option: 'Optional[Data_HandoffIndicatorOption]' = None, *,
-                     hi: 'Enum_HandoffType | StdlibEnum | AenumEnum | str | int' = Enum_HandoffType.Attachment_over_a_new_interface,
-                     hi_default: 'Optional[int]' = None,
-                     hi_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                     hi_reversed: 'bool' = False,
+                     hi: 'Enum_HandoffType | int' = Enum_HandoffType.Attachment_over_a_new_interface,
                      reserved: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_HandoffIndicatorOption':
         """Make MH handoff indicator option.
@@ -9121,9 +9088,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             hi: Handoff indicator.
-            hi_default: Default handoff indicator.
-            hi_namespace: Handoff indicator namespace.
-            hi_reversed: Reverse handoff indicator namespace.
             reserved: Reserved octet before the handoff indicator.
             **kwargs: Arbitrary keyword arguments.
 
@@ -9132,17 +9096,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``reserved`` does not fit its field.
-                Also if ``hi`` does not fit in one octet.
+                Also if ``hi`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         """
         if option is not None:
             hi_val = option.hi  # type: Enum_HandoffType
             reserved = option.reserved
+            self._make_uint(hi_val, bits=8, name='handoff type')
         else:
-            hi_val = self._make_index(hi, hi_default, namespace=hi_namespace,  # type: ignore[assignment]
-                                      reversed=hi_reversed, pack=False)
+            hi_val = self._make_index(hi, Enum_HandoffType, bits=8, name='handoff type')
 
-        self._make_uint(hi_val, bits=8, name='handoff type')
         return Schema_HandoffIndicatorOption(
             type=type,
             length=2,
@@ -9151,10 +9115,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_att(self, type: 'Enum_Option', option: 'Optional[Data_AccessTechnologyTypeOption]' = None, *,
-                      att: 'Enum_AccessType | StdlibEnum | AenumEnum | str | int' = Enum_AccessType.Virtual,
-                      att_default: 'Optional[int]' = None,
-                      att_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      att_reversed: 'bool' = False,
+                      att: 'Enum_AccessType | int' = Enum_AccessType.Virtual,
                       reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_AccessTechnologyTypeOption':
         """Make MH access technology type option.
@@ -9163,9 +9124,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             att: Access technology type.
-            att_default: Default access technology type.
-            att_namespace: Access technology type namespace.
-            att_reversed: Reverse access technology type namespace.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
             **kwargs: Arbitrary keyword arguments.
@@ -9174,17 +9132,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``att`` does not fit in one octet.
+            ProtocolError: If ``att`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             att_val = option.att  # type: Enum_AccessType
+            self._make_uint(att_val, bits=8, name='access technology type')
         else:
-            att_val = self._make_index(att, att_default, namespace=att_namespace,  # type: ignore[assignment]
-                                       reversed=att_reversed, pack=False)
+            att_val = self._make_index(att, Enum_AccessType, bits=8, name='access technology type')
 
-        self._make_uint(att_val, bits=8, name='access technology type')
         return Schema_AccessTechnologyTypeOption(
             type=type,
             length=2,
@@ -9369,10 +9327,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_ipv4_ack(self, type: 'Enum_Option',
                                                       option: 'Optional[Data_IPv4AddressAcknowledgementOption]' = None, *,
-                           status: 'Enum_DSMIPv6HomeAddress | StdlibEnum | AenumEnum | str | int' = Enum_DSMIPv6HomeAddress.Success,
-                           status_default: 'Optional[int]' = None,
-                           status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                           status_reversed: 'bool' = False,
+                           status: 'Enum_DSMIPv6HomeAddress | int' = Enum_DSMIPv6HomeAddress.Success,
                            prefix_length: 'int' = 32,
                            address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                            reserved: 'int' = 0,
@@ -9383,9 +9338,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             status: Status.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             prefix_length: Allocated prefix length.
             address: Assigned IPv4 home address.
             reserved: Reserved bits, i.e. the two bits after the prefix length.
@@ -9397,7 +9349,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
                 :obj:`bool`, or does not fit its field.
-                Also if ``status`` does not fit in one octet.
+                Also if ``status`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         Note:
             The prefix length is checked against its 6-bit field alone, as
@@ -9415,13 +9368,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             reserved = option.reserved
             address = option.address
+            self._make_uint(status_val, bits=8, name='status')
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_DSMIPv6HomeAddress, bits=8, name='status')
 
         prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
 
-        self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4AddressAcknowledgementOption(
             type=type,
             length=6,
@@ -9534,10 +9486,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_bid(self, type: 'Enum_Option', option: 'Optional[Data_BindingIdentifierOption]' = None, *,
                       bid: 'int' = 1,
-                      status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
-                      status_default: 'Optional[int]' = None,
-                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      status_reversed: 'bool' = False,
+                      status: 'Enum_StatusCode | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,  # pylint: disable=line-too-long
                       simultaneous: 'bool' = False,
                       bid_pri: 'int' = 0,
                       address: 'Optional[bytes | str | int | IPv4Address | IPv6Address]' = None,
@@ -9549,9 +9498,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             bid: Binding identifier.
             status: Status, overriding the message status for this binding alone.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             simultaneous: Simultaneous home and foreign binding flag.
             bid_pri: Binding priority.
             address: Care-of address, or :obj:`None` to omit it.
@@ -9562,7 +9508,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``bid`` or ``bid_pri`` does not fit its field.
-                Also if ``status`` does not fit in one octet.
+                Also if ``status`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         Note:
             The option length is derived from the address family, since that is
@@ -9576,9 +9523,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             simultaneous = option.simultaneous
             bid_pri = option.bid_pri
             address = option.address
+            self._make_uint(status_val, bits=8, name='status')
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_StatusCode, bits=8, name='status')
 
         bid = self._make_uint(bid, bits=16, name='binding identifier')
         bid_pri = self._make_uint(bid_pri, bits=7, name='binding priority')
@@ -9599,7 +9546,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length = 8 if addr.version == 4 else 20
             address = addr
 
-        self._make_uint(status_val, bits=8, name='status')
         return Schema_BindingIdentifierOption(
             type=type,
             length=length,
@@ -9662,10 +9608,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_ipv4_hoa_rep(self, type: 'Enum_Option', option: 'Optional[Data_IPv4HomeAddressReplyOption]' = None, *,
-                               status: 'Enum_HomeAddressReply | StdlibEnum | AenumEnum | str | int' = Enum_HomeAddressReply.Success,
-                               status_default: 'Optional[int]' = None,
-                               status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               status_reversed: 'bool' = False,
+                               status: 'Enum_HomeAddressReply | int' = Enum_HomeAddressReply.Success,
                                prefix_length: 'int' = 32,
                                address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                                reserved: 'int' = 0,
@@ -9676,9 +9619,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             status: Status.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             prefix_length: Prefix length of the assigned home network.
             address: Assigned IPv4 home address.
             reserved: Reserved bits, i.e. the two bits after the prefix length.
@@ -9690,7 +9630,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``prefix_length`` or ``reserved`` is negative, a
                 :obj:`bool`, or does not fit its field.
-                Also if ``status`` does not fit in one octet.
+                Also if ``status`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         Note:
             The prefix length is checked against its 6-bit field alone, as
@@ -9708,13 +9649,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             reserved = option.reserved
             address = option.address
+            self._make_uint(status_val, bits=8, name='status')
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_HomeAddressReply, bits=8, name='status')
 
         prefix_length = self._make_uint(prefix_length, bits=6, name='prefix length')
 
-        self._make_uint(status_val, bits=8, name='status')
         return Schema_IPv4HomeAddressReplyOption(
             type=type,
             length=6,
@@ -9755,10 +9695,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_ipv4_dhcp(self, type: 'Enum_Option', option: 'Optional[Data_IPv4DHCPSupportModeOption]' = None, *,
-                            mode: 'Enum_DHCPSupportMode | StdlibEnum | AenumEnum | str | int' = Enum_DHCPSupportMode.Unassigned_0x0,
-                            mode_default: 'Optional[int]' = None,
-                            mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                            mode_reversed: 'bool' = False,
+                            mode: 'Enum_DHCPSupportMode | int' = Enum_DHCPSupportMode.Unassigned_0x0,
                             reserved: 'int' = 0,
                             **kwargs: 'Any') -> 'Schema_IPv4DHCPSupportModeOption':
         """Make MH IPv4 DHCP support mode option.
@@ -9767,9 +9704,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             mode: DHCP support mode.
-            mode_default: Default DHCP support mode.
-            mode_namespace: DHCP support mode namespace.
-            mode_reversed: Reverse DHCP support mode namespace.
             reserved: Reserved bits, i.e. the 15 bits before the ``S`` flag.
             **kwargs: Arbitrary keyword arguments.
 
@@ -9778,17 +9712,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the mode does not fit the one-bit ``S`` flag, or
-                ``reserved`` does not fit its field.
+                ``reserved`` does not fit its field; or if ``mode`` is a name.
 
         """
         if option is not None:
-            mode_val = int(option.mode)
+            mode_val = self._make_uint(int(option.mode), bits=1, name='DHCP support mode')
             reserved = option.reserved
         else:
-            mode_val = self._make_index(mode, mode_default, namespace=mode_namespace,
-                                        reversed=mode_reversed, pack=False)
-
-        mode_val = self._make_uint(mode_val, bits=1, name='DHCP support mode')
+            mode_val = int(self._make_index(mode, Enum_DHCPSupportMode, bits=1,
+                                            name='DHCP support mode'))
 
         return Schema_IPv4DHCPSupportModeOption(
             type=type,
@@ -9817,7 +9749,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
+                ``Option Length``, or the mobility option type of a pair is a
+                name, a :obj:`bool` or a code its field cannot carry.
 
         """
         if option is not None:
@@ -9833,7 +9766,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 req_type, value = int(request.type), request.value
             else:
                 raw_type, value = request
-                req_type = int(raw_type)
+                req_type = int(self._make_index(raw_type, Enum_Option, bits=8, name='request type'))
 
             if len(value) > 0xFF:
                 raise ProtocolError(f'{self.alias}: [OptNo {type}] context request value of '
@@ -9851,10 +9784,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_lmaa(self, type: 'Enum_Option', option: 'Optional[Data_LMAAddressOption]' = None, *,
-                       code: 'Optional[LMAAddressCode | StdlibEnum | AenumEnum | str | int]' = None,
-                       code_default: 'Optional[int]' = None,
-                       code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                       code_reversed: 'bool' = False,
+                       code: 'Optional[LMAAddressCode | int]' = None,
                        address: 'bytes | str | int | IPv4Address | IPv6Address' = '::',
                        reserved: 'bytes' = b'\x00',
                        **kwargs: 'Any') -> 'Schema_LMAAddressOption':
@@ -9866,9 +9796,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code: Option code, see
                 :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`. If not
                 given, the code of the address family of ``address``.
-            code_default: Default option code.
-            code_namespace: Option code namespace.
-            code_reversed: Reverse option code namespace.
             address: Local mobility anchor address.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
@@ -9880,7 +9807,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If an explicit ``code`` is not the code
                 :rfc:`5949#section-6.2.2` gives the address family of
-                ``address`` (:issue:`2280`), or does not fit in one octet.
+                ``address`` (:issue:`2280`), or is a name, a :obj:`bool` or a
+                code its field cannot carry.
 
         Note:
             The option length is derived from the address family rather than from
@@ -9891,14 +9819,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
-            code_val = int(option.code)  # type: Optional[int]
+            code_val = self._make_uint(int(option.code), bits=8, name='code')  # type: Optional[int]
             address = option.address
         elif code is None:
             code_val = None
         else:
-            code_val = self._make_index(code, code_default,
-                                        namespace=code_namespace if code_namespace is not None else LMAAddressCode,
-                                        reversed=code_reversed, pack=False)
+            code_val = self._make_index(code, LMAAddressCode, bits=8, name='code')
 
         if isinstance(address, bytes) and len(address) not in (4, 16):
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid address: {address!r}')
@@ -9928,7 +9854,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LMAAddressOption(
             type=type,
             length=6 if addr.version == 4 else 18,
-            code=self._make_uint(code_val, bits=8, name='code'),
+            code=code_val,
             reserved=reserved,
             address=addr,
         )
@@ -10042,7 +9968,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_fid_suboptions(
         self,
-        suboptions: 'FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]',
+        suboptions: 'FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
     ) -> 'list[Schema_FlowIdentificationSuboption | bytes]':
         """Make MH flow identification sub-options.
 
@@ -10053,6 +9979,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Sub-option schema list.
 
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_FlowIdentificationSuboption | bytes]
@@ -10060,12 +9991,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_FlowIdentificationSuboption | bytes', item))
                 else:
-                    code, args = cast('tuple[Enum_FlowIDSuboption, dict[str, Any]]', item)
+                    kind, args = cast('tuple[Enum_FlowIDSuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_FlowIDSuboption, bits=8, name='sub-option type')
                     entries.append(self._make_fid_suboption(code, **args))
             return entries
 
-        return [self._make_fid_suboption(code, option)
-                for code, option in suboptions.items(multi=True)]
+        return [self._make_fid_suboption(
+                    self._make_index(key, Enum_FlowIDSuboption, bits=8, name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
 
     def _make_fid_suboption(self, code: 'Enum_FlowIDSuboption',
                             option: 'Optional[Data_FlowIdentificationSuboption]' = None,
@@ -10082,7 +10015,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If an entry of a ``BID_Reference`` sub-option's ``bid`` does
-                not fit its field.
+                not fit its field, or a ``ts_format`` or ``action`` is a name, a
+                :obj:`bool` or a code its field cannot carry.
 
         Note:
             The data model parameter is named ``option`` rather than ``data``
@@ -10128,9 +10062,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 selector = selector_opt.selector
                 reserved = getattr(selector_opt, 'reserved', b'\x00')
             else:
-                ts_format = cast('Enum_TrafficSelector | int',
-                                 kwargs.get('ts_format',
-                                            Enum_TrafficSelector.IPv6_Binary_Traffic_Selector))
+                ts_format = self._make_index(
+                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
+                    Enum_TrafficSelector, bits=8, name='TS format')
                 selector = cast('bytes', kwargs.get('selector', b''))
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_TrafficSelectorSuboption(
@@ -10144,8 +10078,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                               option).action  # type: Enum_FlowBindingAction | int
                 reserved = getattr(option, 'reserved', b'\x00')
             else:
-                action = cast('Enum_FlowBindingAction | int',
-                              kwargs.get('action', Enum_FlowBindingAction.Add))
+                action = self._make_index(kwargs.get('action', Enum_FlowBindingAction.Add),
+                                          Enum_FlowBindingAction, bits=8, name='action')
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_FlowBindingActionSuboption(
                 type=code, length=2, reserved=reserved,
@@ -10178,11 +10112,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_fid(self, type: 'Enum_Option', option: 'Optional[Data_FlowIdentificationOption]' = None, *,
                       fid: 'int' = 1,
                       fid_pri: 'int' = 1,
-                      status: 'Enum_FlowIDStatus | StdlibEnum | AenumEnum | str | int' = Enum_FlowIDStatus.Flow_binding_successful,
-                      status_default: 'Optional[int]' = None,
-                      status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      status_reversed: 'bool' = False,
-                      suboptions: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]]' = None,
+                      status: 'Enum_FlowIDStatus | int' = Enum_FlowIDStatus.Flow_binding_successful,
+                      suboptions: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_FlowIdentificationOption':
         """Make MH flow identification mobility option.
@@ -10193,9 +10124,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             fid: Flow identifier.
             fid_pri: Flow priority.
             status: Status.
-            status_default: Default status.
-            status_namespace: Status namespace.
-            status_reversed: Reverse status namespace.
             suboptions: Sub-options.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
@@ -10206,8 +10134,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``fid`` or ``fid_pri`` does not fit its field.
-                Also if ``status`` does not fit in one octet, or the option is too long
-                for its one-octet ``Option Length``.
+                Also if ``status`` is a name, a :obj:`bool` or a code its field
+                cannot carry, or the option is too long for its one-octet
+                ``Option Length``.
 
         """
         if option is not None:
@@ -10216,16 +10145,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             fid_pri = option.fid_pri
             status_val = option.status  # type: Enum_FlowIDStatus
             suboptions = option.suboptions
+            self._make_uint(status_val, bits=8, name='status')
         else:
-            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
-                                          reversed=status_reversed, pack=False)
+            status_val = self._make_index(status, Enum_FlowIDStatus, bits=8, name='status')
             suboptions = suboptions or []
 
         entries = self._make_fid_suboptions(suboptions)
         length = 6 + sum(len(entry) if isinstance(entry, bytes) else len(entry.pack())
                          for entry in entries)
 
-        self._make_uint(status_val, bits=8, name='status')
         return Schema_FlowIdentificationOption(
             type=type,
             length=self._make_uint(length, bits=8, name='Option Length'),
@@ -10376,10 +10304,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mn_group(self, type: 'Enum_Option', option: 'Optional[Data_MNGroupIdentifierOption]' = None, *,
-                           subtype: 'Enum_MNGroupID | StdlibEnum | AenumEnum | str | int' = Enum_MNGroupID.Bulk_Binding_Update_Group,
-                           subtype_default: 'Optional[int]' = None,
-                           subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                           subtype_reversed: 'bool' = False,
+                           subtype: 'Enum_MNGroupID | int' = Enum_MNGroupID.Bulk_Binding_Update_Group,
                            group_id: 'int' = 1,
                            reserved: 'bytes' = b'\x00',
                            **kwargs: 'Any') -> 'Schema_MNGroupIdentifierOption':
@@ -10389,9 +10314,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             subtype: Sub-type.
-            subtype_default: Default sub-type.
-            subtype_namespace: Sub-type namespace.
-            subtype_reversed: Reverse sub-type namespace.
             group_id: Mobile node group identifier.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
@@ -10402,18 +10324,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``group_id`` does not fit its field.
-                Also if ``subtype`` does not fit in one octet.
+                Also if ``subtype`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             subtype_val = option.subtype  # type: Enum_MNGroupID
             group_id = option.group_id
+            self._make_uint(subtype_val, bits=8, name='group identifier subtype')
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
-                                           reversed=subtype_reversed, pack=False)
+            subtype_val = self._make_index(subtype, Enum_MNGroupID, bits=8,
+                                           name='group identifier subtype')
 
-        self._make_uint(subtype_val, bits=8, name='group identifier subtype')
         return Schema_MNGroupIdentifierOption(
             type=type,
             length=6,
@@ -10461,7 +10384,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_ani_suboptions(
         self,
-        suboptions: 'ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption, dict[str, Any]] | bytes]',
+        suboptions: 'ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption | int, dict[str, Any]] | bytes]',
     ) -> 'list[Schema_ANISuboption | bytes]':
         """Make MH access network identifier sub-options.
 
@@ -10472,6 +10395,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Sub-option schema list.
 
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_ANISuboption | bytes]
@@ -10479,12 +10407,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_ANISuboption | bytes', item))
                 else:
-                    code, args = cast('tuple[Enum_ANISuboption, dict[str, Any]]', item)
+                    kind, args = cast('tuple[Enum_ANISuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_ANISuboption, bits=8, name='sub-option type')
                     entries.append(self._make_ani_suboption(code, **args))
             return entries
 
-        return [self._make_ani_suboption(code, option)
-                for code, option in suboptions.items(multi=True)]
+        return [self._make_ani_suboption(
+                    self._make_index(key, Enum_ANISuboption, bits=8, name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
 
     def _make_ani_suboption(self, code: 'Enum_ANISuboption',
                             option: 'Optional[Data_ANISuboption]' = None,
@@ -10502,7 +10432,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If a raw geo-location degree does not fit in 24
                 bits as two's complement, or a sub-option's ``reserved``,
-                ``format``, ``group_id`` or ``timer`` does not fit its field.
+                ``format``, ``group_id`` or ``timer`` does not fit its field, or
+                ``op_id_type`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         Note:
             The geo-location degrees are re-encoded from the **raw** signed
@@ -10553,8 +10485,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 op_id_type = operator.op_id_type  # type: Enum_OperatorID | int
                 identifier = operator.identifier
             else:
-                op_id_type = cast('Enum_OperatorID | int',
-                                  kwargs.get('op_id_type', Enum_OperatorID.Realm_of_the_Operator))
+                op_id_type = self._make_index(
+                    kwargs.get('op_id_type', Enum_OperatorID.Realm_of_the_Operator),
+                    Enum_OperatorID, bits=8, name='Op-ID type')
                 identifier = cast('bytes', kwargs.get('identifier', b''))
             return Schema_ANIOperatorIdentifierSuboption(
                 type=code, length=1 + len(identifier),
@@ -10601,7 +10534,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_UnassignedANISuboption(type=code, length=len(payload), data=payload)
 
     def _make_opt_ani(self, type: 'Enum_Option', option: 'Optional[Data_AccessNetworkIdentifierOption]' = None, *,
-                      suboptions: 'Optional[ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption, dict[str, Any]] | bytes]]' = None,
+                      suboptions: 'Optional[ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       **kwargs: 'Any') -> 'Schema_AccessNetworkIdentifierOption':
         """Make MH access network identifier option.
 
@@ -10640,7 +10573,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_offload(self, type: 'Enum_Option',
                                                      option: 'Optional[Data_IPv4TrafficOffloadSelectorOption]' = None, *,
                           mode: 'bool' = False,
-                          selector: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]]' = None,
+                          selector: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                           reserved: 'int' = 0,
                           **kwargs: 'Any') -> 'Schema_IPv4TrafficOffloadSelectorOption':
         """Make MH IPv4 traffic offload selector option.
@@ -10855,7 +10788,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_qos_attributes(
         self,
-        attributes: 'QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]',
+        attributes: 'QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute | int, dict[str, Any]] | bytes]',
     ) -> 'list[Schema_QoSAttribute | bytes]':
         """Make MH quality-of-service attributes.
 
@@ -10866,6 +10799,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Attribute schema list.
 
+        Raises:
+            ProtocolError: If the type of an attribute, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
         """
         if isinstance(attributes, list):
             entries = []  # type: list[Schema_QoSAttribute | bytes]
@@ -10873,12 +10811,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_QoSAttribute | bytes', item))
                 else:
-                    code, args = cast('tuple[Enum_QoSAttribute, dict[str, Any]]', item)
+                    kind, args = cast('tuple[Enum_QoSAttribute | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_QoSAttribute, bits=8, name='attribute type')
                     entries.append(self._make_qos_attribute(code, **args))
             return entries
 
-        return [self._make_qos_attribute(code, option)
-                for code, option in attributes.items(multi=True)]
+        return [self._make_qos_attribute(
+                    self._make_index(key, Enum_QoSAttribute, bits=8, name='attribute type'), option)
+                for key, option in attributes.items(multi=True)]
 
     def _make_qos_attribute(self, code: 'Enum_QoSAttribute',
                             option: 'Optional[Data_QoSAttribute]' = None,
@@ -10895,7 +10835,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If a rate, priority, vendor or reserved value does not fit
-                its field.
+                its field, or ``ts_format`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         Note:
             The data model parameter is named ``option`` rather than ``data``
@@ -10970,9 +10911,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 selector = ts_attr.selector
                 octets = getattr(ts_attr, 'reserved', b'\x00')
             else:
-                ts_format = cast('Enum_TrafficSelector | int',
-                                 kwargs.get('ts_format',
-                                            Enum_TrafficSelector.IPv6_Binary_Traffic_Selector))
+                ts_format = self._make_index(
+                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
+                    Enum_TrafficSelector, bits=8, name='TS format')
                 selector = cast('bytes', kwargs.get('selector', b''))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_QoSTrafficSelectorAttribute(
@@ -11005,7 +10946,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       sr_id: 'int' = 0,
                       dscp: 'int' = 0,
                       oc: 'int' = 0,
-                      attributes: 'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]]' = None,
+                      attributes: 'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       reserved: 'bytes' = b'\x00\x00\x00',
                       tc_reserved: 'int' = 0,
                       **kwargs: 'Any') -> 'Schema_QualityOfServiceOption':
@@ -11195,7 +11136,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_lcmp_suboptions(
         self,
-        suboptions: 'LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption, dict[str, Any]] | bytes]',
+        suboptions: 'LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
     ) -> 'list[Schema_LMAControlledMAGSuboption | bytes]':
         """Make MH LMA-controlled MAG parameters sub-options.
 
@@ -11206,6 +11147,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Sub-option schema list.
 
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_LMAControlledMAGSuboption | bytes]
@@ -11213,13 +11159,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_LMAControlledMAGSuboption | bytes', item))
                 else:
-                    code, args = cast(
-                        'tuple[Enum_LMAControlledMAGSuboption, dict[str, Any]]', item)
+                    kind, args = cast(
+                        'tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_LMAControlledMAGSuboption, bits=8,
+                                            name='sub-option type')
                     entries.append(self._make_lcmp_suboption(code, **args))
             return entries
 
-        return [self._make_lcmp_suboption(code, option)
-                for code, option in suboptions.items(multi=True)]
+        return [self._make_lcmp_suboption(
+                    self._make_index(key, Enum_LMAControlledMAGSuboption, bits=8,
+                                     name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
 
     @staticmethod
     def _seconds(value: 'int | timedelta', unit: 'int' = 1) -> 'int':
@@ -11304,7 +11254,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=code, length=len(payload), data=payload)
 
     def _make_opt_lcmp(self, type: 'Enum_Option', option: 'Optional[Data_LMAControlledMAGParametersOption]' = None, *,
-                       suboptions: 'Optional[LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption, dict[str, Any]] | bytes]]' = None,
+                       suboptions: 'Optional[LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                        **kwargs: 'Any') -> 'Schema_LMAControlledMAGParametersOption':
         """Make MH LMA-controlled MAG parameters option.
 
@@ -11341,10 +11291,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mag_mp(self, type: 'Enum_Option', option: 'Optional[Data_MAGMultipathBindingOption]' = None, *,
-                         att: 'Enum_AccessType | StdlibEnum | AenumEnum | str | int' = Enum_AccessType.Virtual,
-                         att_default: 'Optional[int]' = None,
-                         att_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         att_reversed: 'bool' = False,
+                         att: 'Enum_AccessType | int' = Enum_AccessType.Virtual,
                          label: 'int' = 0,
                          bid: 'int' = 1,
                          bulk: 'bool' = False,
@@ -11357,9 +11304,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             att: Interface access-technology type.
-            att_default: Default access-technology type.
-            att_namespace: Access-technology type namespace.
-            att_reversed: Reverse access-technology type namespace.
             label: Interface label.
             bid: Binding identifier; ``0`` and ``255`` are reserved.
             bulk: Bulk re-registration flag.
@@ -11374,7 +11318,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If both flags are set, which
                 :rfc:`8278#section-4.1` forbids, or if ``label``, ``bid`` or
                 ``reserved`` does not fit its field.
-                Also if ``att`` does not fit in one octet.
+                Also if ``att`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
 
         """
         if option is not None:
@@ -11384,15 +11329,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             bulk = option.bulk
             overwrite = option.overwrite
             reserved = option.reserved
+            self._make_uint(att_val, bits=8, name='access technology type')
         else:
-            att_val = self._make_index(att, att_default, namespace=att_namespace,  # type: ignore[assignment]
-                                       reversed=att_reversed, pack=False)
+            att_val = self._make_index(att, Enum_AccessType, bits=8, name='access technology type')
 
         if bulk and overwrite:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] the bulk re-registration and '
                                 'registration overwrite flags are mutually exclusive')
 
-        self._make_uint(att_val, bits=8, name='access technology type')
         return Schema_MAGMultipathBindingOption(
             type=type,
             length=6,
@@ -11407,10 +11351,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mag_id(self, type: 'Enum_Option', option: 'Optional[Data_MAGIdentifierOption]' = None, *,
-                         subtype: 'Enum_MNIDSubtype | StdlibEnum | AenumEnum | str | int' = Enum_MNIDSubtype.NAI,
-                         subtype_default: 'Optional[int]' = None,
-                         subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         subtype_reversed: 'bool' = False,
+                         subtype: 'Enum_MNIDSubtype | int' = Enum_MNIDSubtype.NAI,
                          identifier: 'bytes' = b'',
                          reserved: 'bytes' = b'\x00',
                          **kwargs: 'Any') -> 'Schema_MAGIdentifierOption':
@@ -11420,9 +11361,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             subtype: Sub-type, from the mobile node identifier subtype registry.
-            subtype_default: Default sub-type.
-            subtype_namespace: Sub-type namespace.
-            subtype_reversed: Reverse sub-type namespace.
             identifier: Identifier.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
@@ -11432,19 +11370,20 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``subtype`` does not fit in one octet, or the option is
-                too long for its one-octet ``Option Length``.
+            ProtocolError: If ``subtype`` is a name, a :obj:`bool` or a code its
+                field cannot carry, or the option is too long for its one-octet
+                ``Option Length``.
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
             subtype_val = option.subtype  # type: Enum_MNIDSubtype
             identifier = option.identifier
+            self._make_uint(subtype_val, bits=8, name='MAG identifier subtype')
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
-                                           reversed=subtype_reversed, pack=False)
+            subtype_val = self._make_index(subtype, Enum_MNIDSubtype, bits=8,
+                                           name='MAG identifier subtype')
 
-        self._make_uint(subtype_val, bits=8, name='MAG identifier subtype')
         return Schema_MAGIdentifierOption(
             type=type,
             length=self._make_uint(2 + len(identifier), bits=8, name='Option Length'),
@@ -11661,7 +11600,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lla=lla,
         )
 
-    def _make_cga_extensions(self, extensions: 'Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_CGAExtension | bytes], int]':
+    def _make_cga_extensions(self, extensions: 'Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension | int, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_CGAExtension | bytes], int]':  # pylint: disable=line-too-long
         """Make CGA extensions for MH.
 
         Args:
@@ -11669,6 +11608,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Tuple of extensions and total length of extensions.
+
+        Raises:
+            ProtocolError: If the type of an extension, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry.
 
         """
         total_length = 0
@@ -11684,7 +11628,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     data = schema
                     data_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_CGAExtension, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_CGAExtension | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_CGAExtension, bits=16,
+                                            name='extension type')
                     name = self._lookup_registry(self.__extension__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_ext_{name}'
@@ -11701,7 +11647,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             return extensions_list, total_length
 
         extensions_list = []
-        for code, extension in extensions.items(multi=True):
+        for key, extension in extensions.items(multi=True):
+            code = self._make_index(key, Enum_CGAExtension, bits=16, name='extension type')
             name = self._lookup_registry(self.__extension__, code)
             if isinstance(name, str):
                 meth_name = f'_make_ext_{name}'

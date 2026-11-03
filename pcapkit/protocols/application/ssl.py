@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """SSL - Secure Sockets Layer
-===============================
+================================
 
 .. module:: pcapkit.protocols.application.ssl
 
@@ -1494,12 +1494,17 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         Returns:
             Encoded extension list, with no further length prefix of its own.
 
+        Raises:
+            ProtocolError: If the type of a ``(type, kwargs)`` pair is a name,
+                a :obj:`bool`, or a member or code the 16-bit extension type
+                field cannot carry.
+
         """
         out = bytearray()
         for extension in extensions:
             if isinstance(extension, tuple):
                 code, kwargs = extension
-                ext_type = Enum_ExtensionType.get(code)
+                ext_type = self._make_index(code, Enum_ExtensionType, bits=16, name='extension type')
                 data = None  # type: Optional[Data_ExtensionData | bytes]
             else:
                 ext_type, data, kwargs = extension.type, extension.data, {}

@@ -56,9 +56,9 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
 from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckDataParameter
 from pcapkit.protocols.data.internet.hip import ACKParameter as Data_ACKParameter
@@ -215,11 +215,9 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal, NotRequired
 
@@ -417,15 +415,31 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     .. versionchanged:: 1.6.0
 
-       :meth:`make` and the parameter makers, given an integer argument its
-       field cannot carry -- negative, too wide, or a :obj:`bool` for a field
-       wider than one bit -- raise
-       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than writing
-       a different value or raising another exception; so does :meth:`make`
-       for parameters too long for the Header Length, and so do the
-       ``PUZZLE`` and registration makers for a lifetime that is a
-       :obj:`bool` or not a finite number of seconds. Registry codes are not
-       range-checked (:issue:`2614`).
+       * :meth:`make` and the parameter makers, given an integer argument its
+         field cannot carry -- negative, too wide, or a :obj:`bool` for a
+         field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception; so does
+         :meth:`make` for parameters too long for the Header Length, and so do
+         the ``PUZZLE`` and registration makers for a lifetime that is a
+         :obj:`bool` or not a finite number of seconds (:issue:`2614`).
+       * Each enumeration field of :meth:`make` and of the parameter makers,
+         and the code of each parameter in ``parameters``, as a ``(code,
+         value)`` pair or parsed data, takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool` for a
+         field wider than one bit, or a code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame or
+         writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``*_default``, ``*_namespace`` and ``*_reversed`` arguments that
+       went with each enumeration field of :meth:`make` and of the parameter
+       makers, such as ``next_default`` for ``next`` and ``group_default`` for
+       the items of ``groups``; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -642,14 +656,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return self._decode_next_layer(hip, schema.next, length - hip.length)
 
     def make(self,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
-             packet: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.HIP_DATA,
-             packet_default: 'Optional[int]' = None,
-             packet_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             packet_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             packet: 'Enum_Packet | int' = Enum_Packet.HIP_DATA,
              packet_fixed: 'int' = 0,
              version: 'int' = 2,
              version_reserved: 'int' = 0,
@@ -659,20 +667,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              controls_reserved: 'int' = 0,
              shit: 'int' = 0,
              rhit: 'int' = 0,
-             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
+             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HIP':
         """Make (construct) packet data.
 
         Args:
             next: Next header type.
-            next_default: Default value for next header type.
-            next_namespace: Namespace for next header type.
-            next_reversed: If the next header type is reversed.
             packet: HIP packet type.
-            packet_default: Default value for HIP packet type.
-            packet_namespace: Namespace for HIP packet type.
-            packet_reversed: If the HIP packet type is reversed.
             packet_fixed: The fixed leading bit of the ``Packet Type`` octet;
                 :rfc:`7401#section-5.1` prescribes ``0`` when sending.
             version: HIP version.
@@ -693,9 +695,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``version``, a fixed or reserved bit, ``shit`` or
-                ``rhit`` does not fit its field, or the parameters make a header
-                too long for its one-octet Header Length.
+            ProtocolError: If ``next``, ``packet``, ``version``, a fixed or
+                reserved bit, ``shit`` or ``rhit`` does not fit its field,
+                ``next`` or ``packet`` is a name, the code of a parameter in
+                ``parameters`` is a name, a :obj:`bool` or a code its field
+                cannot carry, or the parameters make a header too long for its
+                one-octet Header Length.
 
         .. versionchanged:: 1.5.0
 
@@ -706,10 +711,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            argument.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,
-                                      reversed=next_reversed, pack=False)
-        packet_value = self._make_index(packet, packet_default, namespace=packet_namespace,
-                                        reversed=packet_reversed, pack=False)
+        next_value = self._make_index(next, Enum_TransType, bits=8, name='next header',
+                                      alias=f'HIPv{version}')
+        packet_value = self._make_index(packet, Enum_Packet, bits=7, name='packet type',
+                                        alias=f'HIPv{version}')
 
         if parameters is not None:
             parameters_value, total_length = self._make_hip_param(parameters, version=version)
@@ -722,7 +727,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             parameters_value, length = [], 4
 
         return Schema_HIP(
-            next=next_value,  # type: ignore[arg-type]
+            next=next_value,
             len=self._make_uint(length, bits=8, name='header length', alias=f'HIPv{version}'),
             pkt = {
                 'bit_0': self._make_uint(packet_fixed, bits=1, name='packet type fixed bit',
@@ -908,7 +913,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: invalid format')
         return options
 
-    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
+    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
                         version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
         """Make HIP parameter.
 
@@ -925,6 +930,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Returns:
             HIP parameters and total length.
+
+        Raises:
+            ProtocolError: If the code of a ``(code, value)`` pair, or the key
+                of a parameter given as parsed data, is a name, a :obj:`bool` or
+                a code its field cannot carry.
 
         """
         total_length = 0
@@ -944,8 +954,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                     parameters_list.append(schema_packed)
                     total_length += len(schema_packed)
                 else:
-                    code, args = cast('tuple[Enum_Parameter, Data_Parameter | dict[str, Any]]',
+                    item, args = cast('tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]]',
                                       schema)
+                    code = self._make_index(item, Enum_Parameter, bits=16, name='parameter type',
+                                            alias=f'HIPv{version}')
                     name = self._lookup_registry(self.__parameter__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_param_{name}'
@@ -966,7 +978,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             return parameters_list, total_length
 
         parameters_list = []
-        for code, param in parameters.items(multi=True):
+        for key, param in parameters.items(multi=True):
+            code = self._make_index(key, Enum_Parameter, bits=16, name='parameter type',
+                                    alias=f'HIPv{version}')
             name = self._lookup_registry(self.__parameter__, code)
             if isinstance(name, str):
                 meth_name = f'_make_param_{name}'
@@ -3935,10 +3949,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Optional[Data_DHGroupListParameter]' = None, *,  # pylint: disable=unused-argument
                                   version: 'int',
-                                  groups: 'Optional[list[Enum_Group | StdlibEnum | AenumEnum | str | int]]' = None,
-                                  group_default: 'Optional[int]' = None,
-                                  group_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                  group_reversed: 'bool' = False,
+                                  groups: 'Optional[list[Enum_Group | int]]' = None,
                                   **kwargs: 'Any') -> 'Schema_DHGroupListParameter':
         """Make HIP ``DH_GROUP_LIST`` parameter.
 
@@ -3947,16 +3958,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             groups: list of group ID
-            group_default: default group ID
-            group_namespace: group ID namespace
-            group_reversed: reverse group ID namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: The parameter is **NOT** supported in HIPv1.
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``groups`` is a name or does not fit its field.
 
         """
         if version == 1:
@@ -3965,20 +3974,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             group_id = cast('list[Enum_Group]', param.group_id)
         else:
-            if groups is None:
-                groups = []
-
-            # NOTE: ``group`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if group_namespace is None:
-                group_namespace = Enum_Group
-
-            group_id = []
-            for group in groups:
-                group_id.append(self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[arg-type]
-                                                 reversed=group_reversed, pack=False))
+            group_id = [self._make_index(group, Enum_Group, bits=8, name='DH group ID',
+                                         alias=f'HIPv{version}')
+                        for group in groups or []]
 
         return Schema_DHGroupListParameter(
             type=code,
@@ -3988,10 +3986,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Optional[Data_DiffieHellmanParameter]' = None, *,  # pylint: disable=unused-argument
                                    version: 'int',
-                                   group: 'Enum_Group | StdlibEnum | AenumEnum | str | int' = Enum_Group.NIST_P_256,
-                                   group_default: 'Optional[int]' = None,
-                                   group_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                   group_reversed: 'bool' = False,
+                                   group: 'Enum_Group | int' = Enum_Group.NIST_P_256,
                                    pub_val: 'int' = 0,
                                    **kwargs: 'Any') -> 'Schema_DiffieHellmanParameter':
         """Make HIP ``DIFFIE_HELLMAN`` parameter.
@@ -4001,9 +3996,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             group: group ID
-            group_default: default group ID
-            group_namespace: group ID namespace
-            group_reversed: reverse group ID namespace
             pub_val: public value
             **kwargs: arbitrary keyword arguments
 
@@ -4011,8 +4003,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``pub_val`` is negative, a :obj:`bool`, or wider
-                than its ``pub_len`` octets.
+            ProtocolError: If ``group`` is a name or does not fit its field, or
+                ``pub_val`` is negative, a :obj:`bool`, or wider than its
+                ``pub_len`` octets.
 
         """
         if param is not None:
@@ -4020,8 +4013,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             pub_len = param.pub_len
             pub_val = param.pub_val
         else:
-            group_id = self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[assignment]
-                                     reversed=group_reversed, pack=False)
+            group_id = self._make_index(group, Enum_Group, bits=8, name='group ID',
+                                        alias=f'HIPv{version}')
             pub_len = self._uint_size(pub_val)
 
         return Schema_DiffieHellmanParameter(
@@ -4035,10 +4028,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransformParameter]' = None, *,  # pylint: disable=unused-argument
                                   version: 'int',
-                                  suites: 'Optional[list[Enum_Suite | StdlibEnum | AenumEnum | str | int]]' = None,
-                                  suite_default: 'Optional[int]' = None,
-                                  suite_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                  suite_reversed: 'bool' = False,
+                                  suites: 'Optional[list[Enum_Suite | int]]' = None,
                                   **kwargs: 'Any') -> 'Schema_HIPTransformParameter':
         """Make HIP ``HIP_TRANSFORM`` parameter.
 
@@ -4047,16 +4037,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             suites: list of suite ID
-            suite_default: default suite ID
-            suite_namespace: suite ID namespace
-            suite_reversed: reverse suite ID namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: The parameter is **NOT** supported outside HIPv1.
+            ProtocolError: The parameter is **NOT** supported outside HIPv1, or
+                an entry of ``suites`` is a name or does not fit its field.
 
         """
         # ``HIP_TRANSFORM`` is :rfc:`5201#section-5.2.7` only -- :rfc:`7401`
@@ -4070,20 +4058,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             suite_id = cast('list[Enum_Suite]', param.suite_id)
         else:
-            if suites is None:
-                suites = []
-
-            # NOTE: ``suite`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if suite_namespace is None:
-                suite_namespace = Enum_Suite
-
-            suite_id = []
-            for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
-                                                 reversed=suite_reversed, pack=False))
+            suite_id = [self._make_index(suite, Enum_Suite, bits=16, name='suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
 
         return Schema_HIPTransformParameter(
             type=code,
@@ -4093,10 +4070,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_hip_cipher(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPCipherParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
-                               ciphers: 'Optional[list[Enum_Cipher | StdlibEnum | AenumEnum | str | int]]' = None,
-                               cipher_default: 'Optional[int]' = None,
-                               cipher_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               cipher_reversed: 'bool' = False,
+                               ciphers: 'Optional[list[Enum_Cipher | int]]' = None,
                                **kwargs: 'Any') -> 'Schema_HIPCipherParameter':
         """Make HIP ``HIP_CIPHER`` parameter.
 
@@ -4105,16 +4079,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             ciphers: list of cipher ID
-            cipher_default: default cipher ID
-            cipher_namespace: cipher ID namespace
-            cipher_reversed: reverse cipher ID namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: The parameter is **NOT** supported in HIPv1.
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``ciphers`` is a name or does not fit its field.
 
         """
         if version == 1:
@@ -4123,20 +4095,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             cipher_id = cast('list[Enum_Cipher]', param.cipher_id)
         else:
-            if ciphers is None:
-                ciphers = []
-
-            # NOTE: ``cipher`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if cipher_namespace is None:
-                cipher_namespace = Enum_Cipher
-
-            cipher_id = []
-            for cipher in ciphers:
-                cipher_id.append(self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[arg-type]
-                                                  reversed=cipher_reversed, pack=False))
+            cipher_id = [self._make_index(cipher, Enum_Cipher, bits=16, name='cipher ID',
+                                          alias=f'HIPv{version}')
+                         for cipher in ciphers or []]
 
         return Schema_HIPCipherParameter(
             type=code,
@@ -4146,10 +4107,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_nat_traversal_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_NATTraversalModeParameter]' = None, *,  # pylint: disable=unused-argument
                                        version: 'int',
-                                       modes: 'Optional[list[Enum_NATTraversal | StdlibEnum | AenumEnum | str | int]]' = None,
-                                       mode_default: 'Optional[int]' = None,
-                                       mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                       mode_reversed: 'bool' = False,
+                                       modes: 'Optional[list[Enum_NATTraversal | int]]' = None,
                                        reserved: 'bytes' = b'\x00\x00',
                                        **kwargs: 'Any') -> 'Schema_NATTraversalModeParameter':
         """Make HIP ``NAT_TRAVERSAL_MODE`` parameter.
@@ -4159,9 +4117,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             modes: list of mode ID
-            mode_default: default mode ID
-            mode_namespace: mode ID namespace
-            mode_reversed: reverse mode ID namespace
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
@@ -4169,25 +4124,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If an entry of ``modes`` is a name or does not fit
+                its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
             mode_id = cast('list[Enum_NATTraversal]', param.mode_id)
         else:
-            if modes is None:
-                modes = []
-
-            # NOTE: ``mode`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if mode_namespace is None:
-                mode_namespace = Enum_NATTraversal
-
-            mode_id = []
-            for mode in modes:
-                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[arg-type]
-                                                reversed=mode_reversed, pack=False))
+            mode_id = [self._make_index(mode, Enum_NATTraversal, bits=16, name='mode ID',
+                                        alias=f'HIPv{version}')
+                       for mode in modes or []]
 
         return Schema_NATTraversalModeParameter(
             reserved=reserved,
@@ -4227,10 +4175,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Optional[Data_EncryptedParameter]' = None, *,  # pylint: disable=unused-argument
                               version: 'int',
-                              cipher: 'Enum_Cipher | StdlibEnum | AenumEnum | str | int' = Enum_Cipher.NULL_ENCRYPT,
-                              cipher_default: 'Optional[int]' = None,
-                              cipher_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                              cipher_reversed: 'bool' = False,
+                              cipher: 'Enum_Cipher | int' = Enum_Cipher.NULL_ENCRYPT,
                               iv: 'Optional[bytes]' = None,
                               data: 'bytes' = b'',
                               reserved: 'bytes' = b'\x00\x00\x00\x00',
@@ -4241,10 +4186,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            cipher: cipher ID
-            cipher_default: default cipher ID
-            cipher_namespace: cipher ID namespace
-            cipher_reversed: reverse cipher ID namespace
+            cipher: cipher ID, of the width ``HIP_CIPHER`` carries it in
             iv: initialization vector (optional depending on cipher ID)
             data: encrypted data
             reserved: the four reserved octets, truncated or
@@ -4255,8 +4197,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If the cipher is ``AES-128-CBC`` or ``AES-256-CBC``
-                and ``iv`` is missing or **NOT** 16 octets.
+            ProtocolError: If ``cipher`` is a name or does not fit its field,
+                or the cipher is ``AES-128-CBC`` or ``AES-256-CBC`` and ``iv``
+                is missing or **NOT** 16 octets.
 
         """
         if param is not None:
@@ -4265,8 +4208,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             iv = param.iv
             data = param.data
         else:
-            cipher_id = self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[assignment]
-                                         reversed=cipher_reversed, pack=False)
+            cipher_id = self._make_index(cipher, Enum_Cipher, bits=16, name='cipher ID',
+                                         alias=f'HIPv{version}')
 
         if cipher_id in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC):
             if iv is None:
@@ -4299,15 +4242,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                             hi: 'Optional[Data_HostIdentity | bytes | Schema_HostIdentity]' = None,
                             hi_curve: 'Optional[Enum_ECDSACurve | Enum_ECDSALowCurve | Enum_EdDSACurve]' = None,  # pylint: disable=line-too-long
                             hi_pub_key: 'bytes' = b'',
-                            hi_algorithm: 'Enum_HIAlgorithm | StdlibEnum | AenumEnum | str | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
-                            hi_algorithm_default: 'Optional[int]' = None,
-                            hi_algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                            hi_algorithm_reversed: 'bool' = False,
+                            hi_algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
                             di: 'bytes' = b'',
-                            di_type: 'Enum_DITypes | StdlibEnum | AenumEnum | str | int' = Enum_DITypes.none_included,
-                            di_type_default: 'Optional[int]' = None,
-                            di_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                            di_type_reversed: 'bool' = False,
+                            di_type: 'Enum_DITypes | int' = Enum_DITypes.none_included,
                             **kwargs: 'Any') -> 'Schema_HostIDParameter':
         """Make HIP ``HOST_ID`` parameter.
 
@@ -4319,21 +4256,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hi_curve: host identity curve
             hi_pub_key: host identity public key
             hi_algorithm: host identity algorithm
-            hi_algorithm_default: default host identity algorithm
-            hi_algorithm_namespace: host identity algorithm namespace
-            hi_algorithm_reversed: reverse host identity algorithm namespace
             di: domain identifier
             di_type: domain identifier type
-            di_type_default: default domain identifier type
-            di_type_namespace: domain identifier type namespace
-            di_type_reversed: reverse domain identifier type namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If neither ``hi`` nor ``param`` is given and
+            ProtocolError: If ``hi_algorithm`` or ``di_type`` is a name or does
+                not fit its field, if neither ``hi`` nor ``param`` is given and
                 ``hi_curve`` is not an ECDSA, ECDSA_LOW or EdDSA curve, or if
                 ``hi`` is a :class:`~pcapkit.protocols.data.internet.hip.HostIdentity`
                 whose ``curve`` is none of those.
@@ -4348,10 +4280,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             algorithm = param.algorithm  # type: int | Enum_HIAlgorithm
         else:
             di_len = len(di)
-            di_enum = self._make_index(di_type, di_type_default, namespace=di_type_namespace,  # type: ignore[assignment]
-                                       reversed=di_type_reversed, pack=False)
-            algorithm = self._make_index(hi_algorithm, hi_algorithm_default, namespace=hi_algorithm_namespace,
-                                         reversed=hi_algorithm_reversed, pack=False)
+            di_enum = self._make_index(di_type, Enum_DITypes, bits=4, name='DI-type',
+                                       alias=f'HIPv{version}')
+            algorithm = self._make_index(hi_algorithm, Enum_HIAlgorithm, bits=16, name='algorithm',
+                                         alias=f'HIPv{version}')
 
         if hi is None:
             hi_len = 2 + len(hi_pub_key)
@@ -4421,10 +4353,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_hit_suite_list(self, code: 'Enum_Parameter', param: 'Optional[Data_HITSuiteListParameter]' = None, *,  # pylint: disable=unused-argument
                                    version: 'int',
-                                   suites: 'Optional[list[Enum_HITSuite | StdlibEnum | AenumEnum | str | int]]' = None,
-                                   suite_default: 'Optional[int]' = None,
-                                   suite_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                   suite_reversed: 'bool' = False,
+                                   suites: 'Optional[list[Enum_HITSuite | int]]' = None,
                                    **kwargs: 'Any') -> 'Schema_HITSuiteListParameter':
         """Make HIP ``HIT_SUITE_LIST`` parameter.
 
@@ -4433,16 +4362,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             suites: list of suites
-            suite_default: default suite
-            suite_namespace: suite namespace
-            suite_reversed: reverse suite namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: The parameter is **NOT** supported in HIPv1.
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``suites`` is a name or does not fit its field.
 
         """
         if version == 1:
@@ -4451,20 +4378,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             suite_id = cast('list[Enum_HITSuite]', param.suite_id)
         else:
-            if suites is None:
-                suites = []
-
-            # NOTE: ``suite`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if suite_namespace is None:
-                suite_namespace = Enum_HITSuite
-
-            suite_id = []
-            for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
-                                                 reversed=suite_reversed, pack=False))
+            suite_id = [self._make_index(suite, Enum_HITSuite, bits=8, name='HIT suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
 
         return Schema_HITSuiteListParameter(
             type=code,
@@ -4477,10 +4393,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                          cert_group: 'int' = 0,
                          cert_count: 'int' = 0,
                          cert_id: 'int' = 0,
-                         cert_type: 'Enum_Certificate | StdlibEnum | AenumEnum | str | int' = Enum_Certificate.X_509_v3,
-                         cert_type_default: 'Optional[int]' = None,
-                         cert_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         cert_type_reversed: 'bool' = False,
+                         cert_type: 'Enum_Certificate | int' = Enum_Certificate.X_509_v3,
                          cert: 'bytes' = b'',
                          **kwargs: 'Any') -> 'Schema_CertParameter':
         """Make HIP ``CERT`` parameter.
@@ -4494,9 +4407,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             cert_count: certificate count
             cert_id: certificate ID
             cert_type: certificate type
-            cert_type_default: default certificate type
-            cert_type_namespace: certificate type namespace
-            cert_type_reversed: reverse certificate type namespace
             cert: certificate data
             **kwargs: arbitrary keyword arguments
 
@@ -4504,8 +4414,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``cert_group``, ``cert_count`` or ``cert_id`` does not fit
-                its field.
+            ProtocolError: If ``cert_group``, ``cert_count``, ``cert_id`` or
+                ``cert_type`` does not fit its field, or ``cert_type`` is a name.
 
         .. versionchanged:: 1.5.0
 
@@ -4526,8 +4436,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             group = cert_group
             count = cert_count
             id = cert_id
-            type = self._make_index(cert_type, cert_type_default, namespace=cert_type_namespace,  # type: ignore[assignment]
-                                    reversed=cert_type_reversed, pack=False)
+            type = self._make_index(cert_type, Enum_Certificate, bits=8, name='certificate type',
+                                    alias=f'HIPv{version}')
 
         return Schema_CertParameter(
             type=code,
@@ -4543,10 +4453,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_notification(self, code: 'Enum_Parameter', param: 'Optional[Data_NotificationParameter]' = None, *,  # pylint: disable=unused-argument
                                  version: 'int',
-                                 msg_type: 'Enum_NotifyMessage | StdlibEnum | AenumEnum | str | int' = Enum_NotifyMessage.I2_ACKNOWLEDGEMENT,
-                                 msg_type_default: 'Optional[int]' = None,
-                                 msg_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                 msg_type_reversed: 'bool' = False,
+                                 msg_type: 'Enum_NotifyMessage | int' = Enum_NotifyMessage.I2_ACKNOWLEDGEMENT,
                                  msg: 'bytes' = b'',
                                  reserved: 'bytes' = b'\x00\x00',
                                  **kwargs: 'Any') -> 'Schema_NotificationParameter':
@@ -4557,9 +4464,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             msg_type: notification message type
-            msg_type_default: default notification message type
-            msg_type_namespace: notification message type namespace
-            msg_type_reversed: reverse notification message type namespace
             msg: notification message
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
@@ -4568,14 +4472,17 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``msg_type`` is a name or does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
             type = param.msg_type
             msg = param.msg
         else:
-            type = self._make_index(msg_type, msg_type_default, namespace=msg_type_namespace,  # type: ignore[assignment]
-                                    reversed=msg_type_reversed, pack=False)
+            type = self._make_index(msg_type, Enum_NotifyMessage, bits=16,
+                                    name='notify message type', alias=f'HIPv{version}')
 
         return Schema_NotificationParameter(
             reserved=reserved,
@@ -4617,10 +4524,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                              max_lifetime: 'timedelta | int | float' = 0xf,
                              min_lifetime_exponent: 'Optional[int]' = None,
                              max_lifetime_exponent: 'Optional[int]' = None,
-                             reg_info: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
-                             reg_info_default: 'Optional[int]' = None,
-                             reg_info_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                             reg_info_reversed: 'bool' = False,
+                             reg_info: 'Optional[list[Enum_Registration | int]]' = None,
                              **kwargs: 'Any') -> 'Schema_RegInfoParameter':
         """Make HIP ``REG_INFO`` parameter.
 
@@ -4639,18 +4543,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 ``2^((lifetime - 64)/8)`` seconds
             max_lifetime_exponent: the ``Max Lifetime`` octet itself
             reg_info: registration information list
-            reg_info_default: default registration information
-            reg_info_namespace: registration information namespace
-            reg_info_reversed: reverse registration information namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If either exponent does not fit one octet, or either
-                lifetime cannot be encoded; see
-                ``_make_registration_lifetime``.
+            ProtocolError: If either exponent does not fit one octet, either
+                lifetime cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of ``reg_info`` is a
+                name or does not fit its field.
 
         .. versionchanged:: 1.5.0
 
@@ -4667,20 +4569,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if max_lifetime_exponent is None:
                 max_lifetime_exponent = param.lifetime.max_exponent
         else:
-            if reg_info is None:
-                reg_info = []
-
-            # NOTE: ``reg`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if reg_info_namespace is None:
-                reg_info_namespace = Enum_Registration
-
-            reg_type = []
-            for reg in reg_info:
-                reg_type.append(self._make_index(reg, reg_info_default, namespace=reg_info_namespace,  # type: ignore[arg-type]
-                                                 reversed=reg_info_reversed, pack=False))
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_info or []]
 
         min_lt = self._make_lifetime_octet(code, version, min_lifetime_exponent, min_lifetime)
         max_lt = self._make_lifetime_octet(code, version, max_lifetime_exponent, max_lifetime)
@@ -4697,10 +4588,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                 version: 'int',
                                 lifetime: 'timedelta | int | float' = 0,
                                 lifetime_exponent: 'Optional[int]' = None,
-                                reg_request: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
-                                reg_request_default: 'Optional[int]' = None,
-                                reg_request_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                reg_request_reversed: 'bool' = False,
+                                reg_request: 'Optional[list[Enum_Registration | int]]' = None,
                                 **kwargs: 'Any') -> 'Schema_RegRequestParameter':
         """Make HIP ``REG_REQUEST`` parameter.
 
@@ -4713,18 +4601,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
                 :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
             reg_request: registration request list
-            reg_request_default: default registration request
-            reg_request_namespace: registration request namespace
-            reg_request_reversed: reverse registration request namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
-                ``lifetime`` cannot be encoded; see
-                ``_make_registration_lifetime``.
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of ``reg_request``
+                is a name or does not fit its field.
 
         .. versionchanged:: 1.5.0
 
@@ -4738,20 +4624,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if lifetime_exponent is None:
                 lifetime_exponent = param.lifetime_exponent
         else:
-            if reg_request is None:
-                reg_request = []
-
-            # NOTE: ``reg`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if reg_request_namespace is None:
-                reg_request_namespace = Enum_Registration
-
-            reg_type = []
-            for reg in reg_request:
-                reg_type.append(self._make_index(reg, reg_request_default, namespace=reg_request_namespace,  # type: ignore[arg-type]
-                                                 reversed=reg_request_reversed, pack=False))
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_request or []]
 
         lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
 
@@ -4766,10 +4641,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                  version: 'int',
                                  lifetime: 'timedelta | int | float' = 0,
                                  lifetime_exponent: 'Optional[int]' = None,
-                                 reg_response: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
-                                 reg_response_default: 'Optional[int]' = None,
-                                 reg_response_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                 reg_response_reversed: 'bool' = False,
+                                 reg_response: 'Optional[list[Enum_Registration | int]]' = None,
                                  **kwargs: 'Any') -> 'Schema_RegResponseParameter':
         """Make HIP ``REG_RESPONSE`` parameter.
 
@@ -4782,18 +4654,16 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
                 :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
             reg_response: registration response list
-            reg_response_default: default registration response
-            reg_response_namespace: registration response namespace
-            reg_response_reversed: reverse registration response namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
-                ``lifetime`` cannot be encoded; see
-                ``_make_registration_lifetime``.
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of
+                ``reg_response`` is a name or does not fit its field.
 
         .. versionchanged:: 1.5.0
 
@@ -4807,20 +4677,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             if lifetime_exponent is None:
                 lifetime_exponent = param.lifetime_exponent
         else:
-            if reg_response is None:
-                reg_response = []
-
-            # NOTE: ``reg`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if reg_response_namespace is None:
-                reg_response_namespace = Enum_Registration
-
-            reg_type = []
-            for reg in reg_response:
-                reg_type.append(self._make_index(reg, reg_response_default, namespace=reg_response_namespace,  # type: ignore[arg-type]
-                                                 reversed=reg_response_reversed, pack=False))
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_response or []]
 
         lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
 
@@ -4833,14 +4692,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_reg_failed(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFailedParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
-                               failure_type: 'Enum_RegistrationFailure | StdlibEnum | AenumEnum | str | int' = Enum_RegistrationFailure.Registration_requires_additional_credentials,  # pylint: disable=line-too-long
-                               failure_type_default: 'Optional[int]' = None,
-                               failure_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               failure_type_reversed: 'bool' = False,
-                               reg_failed: 'Optional[list[Enum_Registration | StdlibEnum | AenumEnum | str | int]]' = None,
-                               reg_failed_default: 'Optional[int]' = None,
-                               reg_failed_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               reg_failed_reversed: 'bool' = False,
+                               failure_type: 'Enum_RegistrationFailure | int' = Enum_RegistrationFailure.Registration_requires_additional_credentials,  # pylint: disable=line-too-long
+                               reg_failed: 'Optional[list[Enum_Registration | int]]' = None,
                                **kwargs: 'Any') -> 'Schema_RegFailedParameter':
         """Make HIP ``REG_FAILED`` parameter.
 
@@ -4855,42 +4708,26 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             failure_type: registration failure type
-            failure_type_default: default registration failure type
-            failure_type_namespace: registration failure type namespace
-            failure_type_reversed: reverse registration failure type namespace
             reg_failed: list of registration types that failed
-            reg_failed_default: default registration type
-            reg_failed_namespace: registration type namespace
-            reg_failed_reversed: reverse registration type namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``failure_type`` or an entry of ``reg_failed`` is
+                a name or does not fit its field.
 
         """
         if param is not None:
             failure = param.failure_type
             reg_type = cast('list[Enum_Registration]', param.reg_type)
         else:
-            failure = self._make_index(failure_type, failure_type_default, namespace=failure_type_namespace,  # type: ignore[assignment]
-                                       reversed=failure_type_reversed, pack=False)
-
-            if reg_failed is None:
-                reg_failed = []
-
-            # NOTE: ``reg`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394). ``failure_type`` above is a
-            # scalar whose own default is an enumeration member, so it has been
-            # resolving a member name by inference all along.
-            if reg_failed_namespace is None:
-                reg_failed_namespace = Enum_Registration
-
-            reg_type = []
-            for reg in reg_failed:
-                reg_type.append(self._make_index(reg, reg_failed_default, namespace=reg_failed_namespace,  # type: ignore[arg-type]
-                                                 reversed=reg_failed_reversed, pack=False))
+            failure = self._make_index(failure_type, Enum_RegistrationFailure, bits=8,
+                                       name='failure type', alias=f'HIPv{version}')
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_failed or []]
 
         return Schema_RegFailedParameter(
             type=code,
@@ -4902,10 +4739,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_reg_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFromParameter]' = None, *,  # pylint: disable=unused-argument
                              version: 'int',
                              port: 'int' = 0,
-                             protocol: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-                             protocol_default: 'Optional[int]' = None,
-                             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                             protocol_reversed: 'bool' = False,
+                             protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
                              address: 'IPv6Address | str | int | bytes' = '::',
                              reserved: 'bytes' = b'\x00',
                              **kwargs: 'Any') -> 'Schema_RegFromParameter':
@@ -4917,9 +4751,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             port: port number
             protocol: transport protocol
-            protocol_default: default transport protocol
-            protocol_namespace: transport protocol namespace
-            protocol_reversed: reverse transport protocol namespace
             address: IPv6 address
             reserved: the reserved octet, truncated or
                 zero-filled to 1 octet
@@ -4929,7 +4760,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``port`` does not fit its field.
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
 
         """
         if param is not None:
@@ -4938,8 +4770,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
-                                     reversed=protocol_reversed, pack=False)
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
 
         return Schema_RegFromParameter(
             reserved=reserved,
@@ -4978,10 +4810,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_transport_format_list(self, code: 'Enum_Parameter', param: 'Optional[Data_TransportFormatListParameter]' = None, *,  # pylint: disable=unused-argument
                                           version: 'int',
-                                          formats: 'Optional[list[Enum_Parameter | StdlibEnum | AenumEnum | str | int]]' = None,
-                                          format_default: 'Optional[int]' = None,
-                                          format_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                          format_reversed: 'bool' = False,
+                                          formats: 'Optional[list[Enum_Parameter | int]]' = None,
                                           **kwargs: 'Any') -> 'Schema_TransportFormatListParameter':
         """Make HIP ``TRANSPORT_FORMAT_LIST`` parameter.
 
@@ -4989,17 +4818,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            formats: transport format list
-            format_default: default transport format
-            format_namespace: transport format namespace
-            format_reversed: reverse transport format namespace
+            formats: transport format list, each a parameter type
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: The parameter is **NOT** supported in HIPv1.
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``formats`` is a name or does not fit its field.
 
         """
         if version == 1:
@@ -5008,21 +4835,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             tf_type = cast('list[Enum_Parameter]', param.tf_type)
         else:
-            if formats is None:
-                formats = []
-
-            # NOTE: ``tf`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394). A transport format is a
-            # parameter code, so the namespace is ``Enum_Parameter`` itself.
-            if format_namespace is None:
-                format_namespace = Enum_Parameter
-
-            tf_type = []
-            for tf in formats:
-                tf_type.append(self._make_index(tf, format_default, namespace=format_namespace,  # type: ignore[arg-type]
-                                                reversed=format_reversed, pack=False))
+            tf_type = [self._make_index(tf, Enum_Parameter, bits=16, name='transport format type',
+                                        alias=f'HIPv{version}')
+                       for tf in formats or []]
 
         return Schema_TransportFormatListParameter(
             type=code,
@@ -5032,10 +4847,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_esp_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPTransformParameter]' = None, *,  # pylint: disable=unused-argument
                                   version: 'int',
-                                  suites: 'Optional[list[Enum_ESPTransformSuite | StdlibEnum | AenumEnum | str | int]]' = None,
-                                  suite_default: 'Optional[int]' = None,
-                                  suite_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                  suite_reversed: 'bool' = False,
+                                  suites: 'Optional[list[Enum_ESPTransformSuite | int]]' = None,
                                   reserved: 'bytes' = b'\x00\x00',
                                   **kwargs: 'Any') -> 'Schema_ESPTransformParameter':
         """Make HIP ``ESP_TRANSFORM`` parameter.
@@ -5045,9 +4857,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             suites: ESP transform suite list
-            suite_default: default ESP transform suite
-            suite_namespace: ESP transform suite namespace
-            suite_reversed: reverse ESP transform suite namespace
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
             **kwargs: arbitrary keyword arguments
@@ -5055,25 +4864,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If an entry of ``suites`` is a name or does not fit
+                its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00')
             suite_id = cast('list[Enum_ESPTransformSuite]', param.suite_id)
         else:
-            if suites is None:
-                suites = []
-
-            # NOTE: ``suite`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if suite_namespace is None:
-                suite_namespace = Enum_ESPTransformSuite
-
-            suite_id = []
-            for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
-                                                 reversed=suite_reversed, pack=False))
+            suite_id = [self._make_index(suite, Enum_ESPTransformSuite, bits=16, name='suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
 
         return Schema_ESPTransformParameter(
             reserved=reserved,
@@ -5148,10 +4950,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_payload_mic(self, code: 'Enum_Parameter', param: 'Optional[Data_PayloadMICParameter]' = None, *,  # pylint: disable=unused-argument
                                 version: 'int',
-                                next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-                                next_default: 'Optional[int]' = None,
-                                next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                next_reversed: 'bool' = False,
+                                next: 'Enum_TransType | int' = Enum_TransType.UDP,
                                 payload: 'bytes' = b'',
                                 mic: 'bytes' = b'',
                                 reserved: 'bytes' = b'\x00\x00\x00',
@@ -5163,9 +4962,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             next: next protocol
-            next_default: default next protocol
-            next_namespace: next protocol namespace
-            next_reversed: reverse next protocol namespace
             payload: payload data
             mic: message integrity code
             reserved: the three reserved octets, truncated or
@@ -5175,6 +4971,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``next`` is a name or does not fit its field.
+
         """
         if param is not None:
             reserved = getattr(param, 'reserved', b'\x00\x00\x00')
@@ -5182,8 +4981,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             payload = param.payload
             mic = param.mic
         else:
-            protocol = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[assignment]
-                                        reversed=next_reversed, pack=False)
+            protocol = self._make_index(next, Enum_TransType, bits=8, name='next header',
+                                        alias=f'HIPv{version}')
 
         return Schema_PayloadMICParameter(
             reserved=reserved,
@@ -5383,10 +5182,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_hip_transport_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransportModeParameter]' = None, *,  # pylint: disable=unused-argument
                                        version: 'int',
                                        port: 'int' = 0,
-                                       modes: 'Optional[list[Enum_Transport | StdlibEnum | AenumEnum | str | int]]' = None,
-                                       mode_default: 'Optional[int]' = None,
-                                       mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                       mode_reversed: 'bool' = False,
+                                       modes: 'Optional[list[Enum_Transport | int]]' = None,
                                        **kwargs: 'Any') -> 'Schema_HIPTransportModeParameter':
         """Make HIP ``HIP_TRANSPORT_MODE`` parameter.
 
@@ -5396,36 +5192,23 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             port: port number
             modes: transport mode list
-            mode_default: default transport mode
-            mode_namespace: transport mode namespace
-            mode_reversed: reverse transport mode namespace
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``port`` does not fit its field.
+            ProtocolError: If ``port`` or an entry of ``modes`` does not fit its
+                field, or an entry of ``modes`` is a name.
 
         """
         if param is not None:
             port = param.port
             mode_id = cast('list[Enum_Transport]', param.mode_id)
         else:
-            if modes is None:
-                modes = []
-
-            # NOTE: ``mode`` is a loop variable rather than an argument of this
-            # maker, so ``_make_index`` has no argument default to infer the
-            # namespace of a :obj:`str` member name from; name it here rather than
-            # leave the name unresolvable (#2394).
-            if mode_namespace is None:
-                mode_namespace = Enum_Transport
-
-            mode_id = []
-            for mode in modes:
-                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[arg-type]
-                                                reversed=mode_reversed, pack=False))
+            mode_id = [self._make_index(mode, Enum_Transport, bits=16, name='mode ID',
+                                        alias=f'HIPv{version}')
+                       for mode in modes or []]
 
         return Schema_HIPTransportModeParameter(
             type=code,
@@ -5488,10 +5271,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignature2Parameter]' = None, *,  # pylint: disable=unused-argument
                                     version: 'int',
-                                    algorithm: 'Enum_HIAlgorithm | StdlibEnum | AenumEnum | str | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
-                                    algorithm_default: 'Optional[int]' = None,
-                                    algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                    algorithm_reversed: 'bool' = False,
+                                    algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
                                     signature: 'bytes' = b'',
                                     **kwargs: 'Any') -> 'Schema_HIPSignature2Parameter':
         """Make HIP ``HIP_SIGNATURE_2`` parameter.
@@ -5501,22 +5281,22 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             algorithm: signature algorithm
-            algorithm_default: default signature algorithm
-            algorithm_namespace: signature algorithm namespace
-            algorithm_reversed: reverse signature algorithm namespace
             signature: signature value
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``algorithm`` is a name or does not fit its field.
+
         """
         if param is not None:
             algo = param.algorithm
             signature = param.signature
         else:
-            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
-                                    reversed=algorithm_reversed, pack=False)
+            algo = self._make_index(algorithm, Enum_HIAlgorithm, bits=16,
+                                    name='signature algorithm', alias=f'HIPv{version}')
 
         return Schema_HIPSignature2Parameter(
             type=code,
@@ -5527,10 +5307,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignatureParameter]' = None, *,  # pylint: disable=unused-argument
                                   version: 'int',
-                                  algorithm: 'Enum_HIAlgorithm | StdlibEnum | AenumEnum | str | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
-                                  algorithm_default: 'Optional[int]' = None,
-                                  algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                  algorithm_reversed: 'bool' = False,
+                                  algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
                                   signature: 'bytes' = b'',
                                   **kwargs: 'Any') -> 'Schema_HIPSignatureParameter':
         """Make HIP ``HIP_SIGNATURE`` parameter.
@@ -5540,22 +5317,22 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             algorithm: signature algorithm
-            algorithm_default: default signature algorithm
-            algorithm_namespace: signature algorithm namespace
-            algorithm_reversed: reverse signature algorithm namespace
             signature: signature value
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If ``algorithm`` is a name or does not fit its field.
+
         """
         if param is not None:
             algo = param.algorithm
             signature = param.signature
         else:
-            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
-                                    reversed=algorithm_reversed, pack=False)
+            algo = self._make_index(algorithm, Enum_HIAlgorithm, bits=16,
+                                    name='signature algorithm', alias=f'HIPv{version}')
 
         return Schema_HIPSignatureParameter(
             type=code,
@@ -5619,10 +5396,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayFromParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
                                port: 'int' = 0,
-                               protocol: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-                               protocol_default: 'Optional[int]' = None,
-                               protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               protocol_reversed: 'bool' = False,
+                               protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
                                address: 'IPv6Address | str | int | bytes' = '::',
                                reserved: 'bytes' = b'\x00',
                                **kwargs: 'Any') -> 'Schema_RelayFromParameter':
@@ -5634,9 +5408,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             port: port number
             protocol: transport protocol
-            protocol_default: default transport protocol
-            protocol_namespace: transport protocol namespace
-            protocol_reversed: reverse transport protocol namespace
             address: the address the relay server received the relayed
                 packet from (:rfc:`5770`)
             reserved: the reserved octet, truncated or
@@ -5647,7 +5418,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``port`` does not fit its field.
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
 
         """
         if param is not None:
@@ -5656,8 +5428,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
-                                     reversed=protocol_reversed, pack=False)
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
 
         return Schema_RelayFromParameter(
             reserved=reserved,
@@ -5671,10 +5443,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayToParameter]' = None, *,  # pylint: disable=unused-argument
                              version: 'int',
                              port: 'int' = 0,
-                             protocol: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-                             protocol_default: 'Optional[int]' = None,
-                             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                             protocol_reversed: 'bool' = False,
+                             protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
                              address: 'IPv6Address | str | int | bytes' = '::',
                              reserved: 'bytes' = b'\x00',
                              **kwargs: 'Any') -> 'Schema_RelayToParameter':
@@ -5686,9 +5455,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             port: port number
             protocol: transport protocol
-            protocol_default: default transport protocol
-            protocol_namespace: transport protocol namespace
-            protocol_reversed: reverse transport protocol namespace
             address: the address the relay server forwards the packet to
                 (:rfc:`5770`)
             reserved: the reserved octet, truncated or
@@ -5699,7 +5465,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``port`` does not fit its field.
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
 
         """
         if param is not None:
@@ -5708,8 +5475,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
-                                     reversed=protocol_reversed, pack=False)
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
 
         return Schema_RelayToParameter(
             reserved=reserved,

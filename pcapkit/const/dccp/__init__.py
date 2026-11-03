@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.transport.dccp.DCCP` Constant Enumerations
-==========================================================================
+===========================================================================
 
 .. module:: pcapkit.const.dccp
 

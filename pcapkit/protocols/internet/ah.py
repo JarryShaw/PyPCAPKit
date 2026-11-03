@@ -36,10 +36,8 @@ from pcapkit.protocols.schema.internet.ah import AH_HEADER_LEN
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import IO, Any, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
@@ -70,6 +68,22 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
 
        A rebuild writes the reserved field back as captured rather than as
        zero (:issue:`1327`).
+
+    .. versionchanged:: 1.6.0
+
+       ``next`` of :meth:`make` takes a member or an :class:`int` code,
+       resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+       code that does not fit in one octet raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``next_default``, ``next_namespace`` and ``next_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -200,10 +214,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         return self._decode_next_layer(ah, schema.next, length - ah.length, declared=False)
 
     def make(self,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
              reserved: 'int' = 0,
              spi: 'int' = 0,
              seq: 'int' = 0,
@@ -214,9 +225,6 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
 
         Args:
             next: Next header type.
-            next_default: Default value of next header type.
-            next_namespace: Namespace of next header type.
-            next_reversed: If the namespace is reversed.
             reserved: Reserved field; zero on send per :rfc:`4302#section-2.3`,
                 but written as given so that a parsed header rebuilds unchanged.
             spi: Security Parameters Index.
@@ -228,18 +236,21 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet.
+
         .. versionchanged:: 1.5.0
 
            Takes ``reserved`` ahead of ``spi`` (:issue:`1327`), which shifts
            every later positional argument.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,
-                                      reversed=next_reversed, pack=False)
+        next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
         length = (len(icv) + AH_HEADER_LEN) // 4 - 2
 
         return Schema_AH(
-            next=next_value,  # type: ignore[arg-type]
+            next=next_value,
             len=length,
             reserved=reserved,
             spi=spi,

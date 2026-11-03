@@ -185,11 +185,9 @@ __all__ = ['ESP', 'ESPStatus', 'Cipher', 'Integrity', 'CipherSuite', 'IntegrityS
            'CIPHER_SUITES', 'INTEGRITY_SUITES', 'SecurityAssociation', 'ESPContext']
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
     from typing import IO, Any, NoReturn, Optional, Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -791,7 +789,7 @@ class SecurityAssociation:
         if isinstance(destination, bool):
             # NOTE: checked before the ``ipaddress.ip_address`` call below, for
             # the same reason as ``_reject_bool`` in
-            # ``pcapkit.corekit.fields.ipaddress`` (this module calls
+            # ``pcapkit.corekit.schema.ipaddress`` (this module calls
             # ``ipaddress.ip_address`` directly rather than through a Field, so
             # it needs its own copy of the guard): ``bool`` is an ``int``
             # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
@@ -1006,6 +1004,24 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         extension header". The library follows IANA's registry rather than
         that sentence (decided on :issue:`895`).
 
+    .. versionchanged:: 1.6.0
+
+       ``next`` of :meth:`make`, written when ``encrypt`` is :data:`True`,
+       takes a member or an :class:`int` code, resolved with the
+       enumeration's ``get``; a name, a :obj:`bool`, or a code that does not
+       fit in one octet raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame,
+       writing a different value or raising another exception
+       (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``next_default``, ``next_namespace`` and ``next_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
     """
 
     ##########################################################################
@@ -1213,10 +1229,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
     def make(self,
              spi: 'int' = 0,
              seq: 'int' = 0,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,  # pylint: disable=redefined-builtin
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,  # pylint: disable=redefined-builtin
              encrypt: 'bool' = False,
              iv: 'Optional[bytes]' = None,
              pad_len: 'Optional[int]' = None,
@@ -1242,9 +1255,6 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             seq: Sequence number.
             next: Next header type, written into the ESP trailer. Only used
                 when ``encrypt`` is :data:`True`.
-            next_default: Default value of next header type.
-            next_namespace: Namespace of next header type.
-            next_reversed: If the namespace is reversed.
             encrypt: Whether to protect ``payload``, as described above.
             iv: Explicit IV to use; a random one is generated when omitted.
                 Only used when ``encrypt`` is :data:`True`.
@@ -1261,9 +1271,10 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
 
         Raises:
             ProtocolError: If ``encrypt`` is :data:`True` and no Security
-                Association is available for ``spi``, if ``pad_len`` is
-                outside ``0`` to ``255`` or does not satisfy the algorithm's
-                alignment requirement, or if
+                Association is available for ``spi``, ``next`` is a name, a
+                :obj:`bool`, or a member or code that does not fit in one
+                octet, or ``pad_len`` is outside ``0`` to ``255`` or does not
+                satisfy the algorithm's alignment requirement, or if
                 :meth:`SecurityAssociation.encrypt` rejects ``iv`` or cannot
                 run without |cryptography|_.
 
@@ -1283,8 +1294,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             raise ProtocolError(f'{self.alias}: no security association for SPI {spi:#010x}; '
                                 f'encrypt=True needs one')
 
-        next_value = self._make_index(next, next_default, namespace=next_namespace,
-                                      reversed=next_reversed, pack=False)
+        next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
         plain = self._payload_bytes(payload)
         align = max(association.cipher_suite.block_size, 4)

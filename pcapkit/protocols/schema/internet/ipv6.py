@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for internet protocol version 6"""
+"""header schema for internet protocol version 6
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length``, now
+   :func:`pcapkit.corekit.schema.jumbogram.jumbo_payload_length` (:issue:`2674`).
+
+"""
 
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -94,7 +101,8 @@ class IPv6(Schema):
         A jumbogram [:rfc:`2675`] declares a Payload Length of zero and
         carries its real length in a Jumbo Payload option instead, so the
         :attr:`payload` field reads nothing and every octet lands in
-        :attr:`trailer`. When :func:`jumbo_payload_length` finds that option,
+        :attr:`trailer`. When
+        :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length` finds that option,
         the two are split again at the Jumbo Payload Length, and only the
         octets beyond it stay in :attr:`trailer`. The octets themselves are
         untouched, so the packed header is unchanged.
@@ -126,43 +134,6 @@ class IPv6(Schema):
                      trailer: 'bytes' = b'') -> None: ...
 
 
-def jumbo_payload_length(next: 'int', data: 'bytes') -> 'Optional[int]':  # pylint: disable=redefined-builtin
-    """Find the Jumbo Payload Length of an IPv6 packet [:rfc:`2675`].
-
-    The Jumbo Payload option is only honoured in a Hop-by-Hop Options header
-    that immediately follows the IPv6 header, as :rfc:`2675#section-2` and
-    :rfc:`8200#section-4.1` place it there; one anywhere else is left to the
-    extension header that carries it.
-
-    Args:
-        next: Next Header of the IPv6 header.
-        data: Octets following the IPv6 header.
-
-    Returns:
-        The Jumbo Payload Length, or :data:`None` if ``data`` does not start
-        with a Hop-by-Hop Options header carrying a well-formed (four-octet)
-        Jumbo Payload option.
-
-    """
-    if next != Enum_TransType.HOPOPT or len(data) < 2:
-        return None
-
-    end = min((data[1] + 1) * 8, len(data))
-    ptr = 2
-    while ptr < end:
-        code = data[ptr]
-        if code == Enum_Option.Pad1:
-            ptr += 1
-            continue
-        if ptr + 1 >= end:
-            break
-        size = data[ptr + 1]
-        if code == Enum_Option.Jumbo_Payload and size == 4 and ptr + 6 <= end:
-            return int.from_bytes(data[ptr + 2:ptr + 6], 'big', signed=False)
-        ptr += 2 + size
-    return None
-
-
 def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disable=redefined-builtin
                     fragment: 'Optional[Callable[[], bool]]' = None) -> 'Optional[str]':
     """Name the error :rfc:`2675#section-3` has a receiver detect in an IPv6 packet, if any.
@@ -176,7 +147,8 @@ def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disabl
     * a Jumbo Payload option whose Jumbo Payload Length is below 65,536;
     * a Jumbo Payload option and a Fragment header.
 
-    The option counts only where :func:`jumbo_payload_length` finds it.
+    The option counts only where
+    :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length` finds it.
 
     Args:
         length: Payload Length of the IPv6 header.

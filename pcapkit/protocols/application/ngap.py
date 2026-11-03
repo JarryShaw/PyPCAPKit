@@ -347,7 +347,17 @@ def _revert(value: 'Any') -> 'Any':
 
 class NGAP(Application[Data_NGAP, Schema_NGAP],
            data=Data_NGAP, schema=Schema_NGAP):
-    """This class implements NG Application Protocol."""
+    """This class implements NG Application Protocol.
+
+    .. versionchanged:: 1.6.0
+
+       ``procedure`` and ``criticality`` of :meth:`make` take a member or an
+       :class:`int` code, resolved with the enumeration's ``get``; a name or a
+       :obj:`bool` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+       where a name resolved to its member and a :obj:`bool` was taken as a
+       code (:issue:`2594`).
+
+    """
 
     ##########################################################################
     # Properties.
@@ -471,7 +481,7 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
     def make(self,
              kind: 'PDUKind | str' = PDUKind.INITIATING_MESSAGE,
              procedure: 'Optional[Enum_ProcedureCode | int]' = None,
-             criticality: 'Criticality | int | str' = Criticality.reject,
+             criticality: 'Criticality | int' = Criticality.reject,
              message: 'Optional[str]' = None,
              value: 'Any' = None,
              data: 'Optional[bytes]' = None,
@@ -497,9 +507,11 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
 
         Raises:
             ProtocolError: If ``data`` is not given and either ``procedure`` or
-                ``message`` is missing, if |pycrate|_ is not installed, or if
-                the arguments do not describe a message the specification can
-                encode.
+                ``message`` is missing, if ``procedure`` (``0..255``) or
+                ``criticality`` (two bits) is a name, a :obj:`bool`, or a
+                member or code its field cannot carry, if |pycrate|_ is not
+                installed, or if the arguments do not describe a message the
+                specification can encode.
 
         """
         if data is not None:
@@ -508,6 +520,10 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
         if procedure is None or message is None:
             raise ProtocolError("NGAP: 'procedure' and 'message' are required "
                                 "when 'data' is not given")
+        # NOTE: ProcedureCode is INTEGER (0..255); Criticality, an ENUMERATED of
+        # three, takes two bits in aligned PER (3GPP TS 38.413).
+        procedure_ = self._make_index(procedure, Enum_ProcedureCode, bits=8, name='procedure code')
+        criticality_ = self._make_index(criticality, Criticality, bits=2, name='criticality')
 
         pdu = load_pycrate()
         if pdu is None:
@@ -517,8 +533,8 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
         with _PDU_LOCK:
             try:
                 pdu.set_val((PDUKind(kind).value, {
-                    'procedureCode': int(Enum_ProcedureCode.get(procedure)),
-                    'criticality': Criticality.get(criticality).name,
+                    'procedureCode': int(procedure_),
+                    'criticality': getattr(criticality_, 'name', criticality_),
                     'value': (message, _revert(value)),
                 }))
                 encoded = pdu.to_aper()

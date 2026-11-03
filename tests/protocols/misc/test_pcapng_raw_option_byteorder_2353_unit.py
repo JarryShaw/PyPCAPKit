@@ -291,7 +291,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         :meth:`SchemaField.pack
         <pcapkit.corekit.fields.misc.SchemaField.pack>` hands a nested schema
         its parent's packet data under a ``__packet__`` key of its own, so
-        :func:`~pcapkit.corekit.fields.byteorder.packet_byteorder` looks one
+        :func:`~pcapkit.corekit.schema.byteorder.packet_byteorder` looks one
         level up when the outer level declares no order. A block made from such
         packet data is written in the nested order, so that is the order its raw
         options are read in.

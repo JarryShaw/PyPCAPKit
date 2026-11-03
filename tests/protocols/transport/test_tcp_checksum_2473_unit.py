@@ -60,6 +60,7 @@ class TCPChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -69,6 +70,7 @@ class TCPChecksumTests(unittest.TestCase):
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.IPv4, self.IPv6, self.TCP, self.IP_Pseudo = IPv4, IPv6, TCP, IP_Pseudo
+        self.TransType = TransType
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
@@ -145,10 +147,10 @@ class TCPChecksumTests(unittest.TestCase):
     def test_ipv6_and_truncation(self) -> None:
         segment = self.TCP(srcport=80, dstport=40000, seq_no=1, ack=True, ack_no=2, payload=b'odd').data
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', True):
-            packet = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next='TCP', payload=segment).data
+            packet = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP, payload=segment).data
         self.assertEqual(self.status(packet, cls=self.IPv6), (self.Status.NOT_COMPUTED, []))
 
-        made = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next='TCP',
+        made = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.TCP,
                          payload=self.TCP(srcport=80, dstport=40000, payload=b'odd')).data
         self.assertEqual(made[56:58], expected(pseudo6(wire.IPV6_A, wire.IPV6_B, 23), made[40:]))
         self.assertEqual(self.status(made, cls=self.IPv6), (self.Status.VALID, []))
@@ -165,7 +167,7 @@ class TCPChecksumTests(unittest.TestCase):
         """The octets of an IPv4 packet carrying a TCP segment made with ``kwargs``."""
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', compute):
             tcp = self.TCP(srcport=40000, dstport=80, seq_no=7, syn=True, payload=b'hello', **kwargs)
-            return self.IPv4(src='192.0.2.1', dst='198.51.100.2', ttl=64, protocol='TCP', payload=tcp).data
+            return self.IPv4(src='192.0.2.1', dst='198.51.100.2', ttl=64, protocol=self.TransType.TCP, payload=tcp).data
 
     def test_the_ip_layer_computes_it(self) -> None:
         octets = self.make()
@@ -179,7 +181,7 @@ class TCPChecksumTests(unittest.TestCase):
         from pcapkit.const.ipv4.option_number import OptionNumber
 
         tcp = self.TCP(srcport=40000, dstport=80, payload=b'routed')
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='TCP', payload=tcp,
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, payload=tcp,
                            options=[(OptionNumber.LSR, {'counts': 2, 'route': ['203.0.113.1'],
                                                         'remaining': ['203.0.113.9']})]).data
         hdr = (octets[0] & 0x0F) * 4
@@ -191,7 +193,7 @@ class TCPChecksumTests(unittest.TestCase):
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', True), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            ipv4 = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='TCP', checksum=b'\xbe\xef',
+            ipv4 = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, checksum=b'\xbe\xef',
                              payload=self.TCP(srcport=40000, dstport=80))
         messages = [(item.category, str(item.message))
                     for item in caught if issubclass(item.category, self.ProtocolWarning)]
@@ -201,7 +203,7 @@ class TCPChecksumTests(unittest.TestCase):
         self.assertIs(ipv4['TCP'].info.checksum_status, self.Status.VALID)
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol='TCP', upper_length=0)
+        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.TCP, upper_length=0)
         segment = self.TCP(srcport=40000, dstport=80, payload=b'alone', pseudo=pseudo).data
         prefix = wire.IPV4_A + wire.IPV4_B + b'\x00\x06' + len(segment).to_bytes(2, 'big')
         self.assertEqual(segment[16:18], expected(prefix, segment))

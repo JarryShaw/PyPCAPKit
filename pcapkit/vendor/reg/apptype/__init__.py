@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """Application Layer Protocol Numbers Vendor Crawlers
-=======================================================
+========================================================
 
 .. module:: pcapkit.vendor.reg.apptype
 

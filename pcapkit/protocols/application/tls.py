@@ -64,7 +64,7 @@ this is routine.
 .. versionadded:: 1.6.0
 
 """
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.corekit.decorators import beholder
@@ -81,11 +81,8 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import hold_warnings
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from typing import Any, Optional
-    from typing import Type as _Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -225,10 +222,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
         return self._read_tls_record(length, **kwargs)
 
     def make(self,
-             content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
-             content_type_default: 'Optional[int]' = None,
-             content_type_namespace: 'Optional[dict[str, int] | dict[int, str] | _Type[StdlibEnum] | _Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             content_type_reversed: 'bool' = False,
+             content_type: 'Enum_ContentType | int' = Enum_ContentType.application_data,
              version: 'int' = 0x0303,
              content: 'Any' = b'',
              data: 'Optional[bytes]' = None,
@@ -238,9 +232,6 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
         Args:
             content_type: Record content type.
-            content_type_default: Default value for ``content_type``.
-            content_type_namespace: Namespace for ``content_type``.
-            content_type_reversed: Reverse namespace for ``content_type``.
             version: Legacy record version (``major << 8 | minor``), e.g.
                 ``0x0303`` for TLS 1.2 and (the legacy value TLS 1.3 keeps
                 here) TLS 1.3.
@@ -261,18 +252,20 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             Constructed packet data.
 
         Raises:
-            StructError: If a record-header field, or a field of ``content``,
-                does not fit its width.
+            ProtocolError: If ``content_type`` is a name, a :obj:`bool`, or a
+                member or code the 8-bit content type field cannot carry, or
+                an extension of ``content`` given as a ``(type, kwargs)`` pair
+                has such a type for its 16-bit field.
+            StructError: If ``version`` or the record length, or a field of
+                ``content``, does not fit its width.
 
         """
-        content_type_ = cast('Enum_ContentType', self._make_index(
-            content_type, content_type_default, namespace=content_type_namespace,
-            reversed=content_type_reversed, pack=False))
+        content_type_ = self._make_index(content_type, Enum_ContentType, bits=8, name='content type')
 
         fragment = data if data is not None else self._make_tls_content(content_type_, content, dtls=False)
         # NOTE: the schema masks a field to its width, so each is packed here first, to
         # refuse a wider value with the StructError the content makers raise.
-        for value, size in ((int(content_type_), 1), (version, 2), (len(fragment), 2)):
+        for value, size in ((version, 2), (len(fragment), 2)):
             self._make_pack(value, size=size)
         return Schema_TLS(
             content_type=content_type_,

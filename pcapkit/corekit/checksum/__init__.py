@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """Checksums
-=============
+===============
 
 .. module:: pcapkit.corekit.checksum
 

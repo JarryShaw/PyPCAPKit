@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Reset Codes
-===================
+======================
 
 .. module:: pcapkit.vendor.dccp.reset_code
 

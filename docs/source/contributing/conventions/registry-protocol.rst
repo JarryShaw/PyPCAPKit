@@ -878,6 +878,43 @@ above, and each type's layout is a
 :class:`~pcapkit.protocols.schema.link.radiotap.RadiotapField` subclass, whose fields
 are the type's subfields and whose ``__align__`` is its alignment.
 
+.. _registry-protocol-make-fields:
+
+Enumeration Fields of ``make()``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**A** ``make()`` **field that holds an enumeration takes the member or an**
+:class:`int` **code, resolved with the enumeration's**
+:meth:`~pcapkit.corekit.enum.EnumLookup.get`. Ruled in review of :pr:`2593`
+(:issue:`2489`), for every ``make()`` and every ``_make_*`` maker. Nothing inside
+``make()`` turns a :obj:`str` into a member: a name is refused, and a caller holding
+one resolves it first with :meth:`Protocol.resolve_index
+<pcapkit.protocols.protocol.Protocol.resolve_index>`, which takes the name, a
+default, the namespace and whether a :obj:`dict` namespace maps names to codes. No
+such field takes an ``X_default``, ``X_namespace`` or ``X_reversed`` keyword beside
+it, and none is kept as a shim, ruled on :issue:`2594`.
+
+* **Resolve through** :meth:`~pcapkit.protocols.protocol.Protocol._make_index`, giving
+  the enumeration and the field's width in bits. It checks the code as
+  ``_make_uint()`` checks an integer -- a :obj:`bool` passes only for a one-bit
+  field, and a negative or too wide code is refused -- and each refusal is
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError`, never a masked or wrapped
+  code, by :issue:`2617`'s ruling. The field's width decides what is refused, not
+  the enumeration's range, so every code the field carries builds and parses
+  back. It returns what ``get`` resolves, which is a minted ``Unassigned`` member
+  for most registries' unassigned codes. Where ``get`` raises :exc:`ValueError` for
+  a code the field carries, it returns the code itself as an :class:`int`.
+* **An option, a sub-option or a chunk given as a** ``(code, arguments)`` **pair
+  resolves its code the same way**, before anything reads it, so that a
+  :obj:`bool` is refused rather than read as a padding code.
+* **The enumeration is named at the call**, never read from the caller's frame or
+  from its arguments' defaults: that inference is what :issue:`2356` and
+  :issue:`2394` broke.
+
+:file:`tests/project/test_make_keyword_groups_2594_unit.py` fails on a maker taking
+an ``X_default``, ``X_namespace`` or ``X_reversed`` parameter, on a ``_make_index``
+call without the field's width, and on the resolver reaching a frame.
+
 .. _registry-protocol-index:
 
 The Registry Index

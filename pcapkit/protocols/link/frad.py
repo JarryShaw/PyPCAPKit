@@ -69,6 +69,12 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
     whose OUI names a bridged medium rather than an EtherType) is kept as
     :class:`~pcapkit.protocols.misc.raw.Raw`, exactly as every ``arphrd_type``
     this module's docstring lists already was before this class existed.
+    A frame whose Q.922 address is not the 2-octet form is refused:
+    :meth:`read` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+    It becomes :class:`~pcapkit.protocols.misc.raw.Raw` only behind a caller
+    that catches the error, such as
+    :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` or a
+    ``LINKTYPE_FRELAY`` capture.
 
     """
 
@@ -148,12 +154,24 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If the address is not the 2-octet Q.922 form, the
+                only one the schema reads (:rfc:`2427#section-3`): an EA bit
+                other than ``0`` then ``1``. An EA bit the capture cut off is
+                not checked.
+
         """
         if length is None:
             length = len(self)
         schema = self.__header__
 
         addr = schema.addr
+        # NOTE: The data model keeps no EA bits, so another address form would
+        # rebuild as the 2-octet one (#2710).
+        cut = schema.__dict__.get('__short_read__')
+        if addr['ea1'] or not (addr['ea2'] or (cut is not None and cut[0] == 'addr')):
+            raise ProtocolError(f'{self.alias}: not a 2-octet Q.922 address: '
+                                f'EA bits {addr["ea1"]} and {addr["ea2"]}')
         _dlci = (addr['dlci_hi'] << 4) | addr['dlci_lo']
 
         _raw_nlpid = schema.nlpid
@@ -232,15 +250,19 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
                 ``0x80``.
 
         Note:
-            ``nlpid`` is not refused for being ``0`` -- the SNAP pad marker,
-            never a value of its own on the wire -- even though no caller
+            ``nlpid`` is not refused for being ``0`` -- the value of the one
+            pad octet :rfc:`2427#section-3` allows, if present, ahead of any
+            NLPID, never an NLPID of its own -- even though no caller
             building a frame from scratch should pass it: :meth:`from_data
             <pcapkit.protocols.link.link.Link.from_data>` replays a capture
             that ended inside the header through this same method, and a
             capture cut short of the ``nlpid`` octet reads as ``0`` (zero
             rather than missing). Rejecting it here would make a short
             capture fail to rebuild, the one invariant every protocol in
-            this package keeps (:issue:`1458`).
+            this package keeps (:issue:`1458`). It is written as the pad and
+            an NLPID of ``0``, the octets that read back as it, and the
+            schema's own short read cuts them back to those captured
+            (:issue:`2710`).
 
         """
         dlci = self._make_uint(dlci, bits=10, name='DLCI')
@@ -263,6 +285,10 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
                                     f'when nlpid is 0x80, not {nlpid!r}')
             _schema_nlpid, _ext_nlpid = nlpid, None
             _oui, _pid = None, None
+            if not nlpid:
+                # NOTE: A zero NLPID is the pad, which the schema follows with
+                # ``ext_nlpid``, so that is written too (#2710).
+                _ext_nlpid = 0
 
         return Schema_FRAD(
             addr={

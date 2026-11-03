@@ -325,9 +325,11 @@ def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
         from pcapkit.protocols.link.gre import GRE
         return 0x0800, bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if arphrd_type == ARPHRD.IEEE80211_RADIOTAP:
+        from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
+        from pcapkit.const.ieee802_11.type import Type
         from pcapkit.protocols.link.ieee802_11 import IEEE802_11
         from pcapkit.protocols.link.radiotap import Radiotap
-        ack = bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+        ack = bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
         return 0, bytes(Radiotap(payload=ack))
     if arphrd_type == ARPHRD.NETLINK:
         from pcapkit.protocols.link.netlink import Netlink

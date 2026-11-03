@@ -11,7 +11,7 @@ order and uses :data:`sys.byteorder` produces exactly the right answer.
 This guards against GitHub issue #605, where
 :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` seeded the
 order under the key ``bytesorder``, while ``byteorder_callback``
-(:file:`pcapkit/corekit/fields/byteorder.py`) reads ``byteorder``, so the
+(:file:`pcapkit/corekit/schema/byteorder.py`) reads ``byteorder``, so the
 ``.get()`` never found the key and always fell back to the host's order -- the
 sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>`
 spelled it correctly, which is what marks it as a slip rather than a second

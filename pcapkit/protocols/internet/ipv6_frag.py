@@ -34,10 +34,8 @@ from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import IO, Any, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
@@ -54,6 +52,22 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
     .. versionchanged:: 1.5.0
 
        A rebuild keeps the reserved bits (:issue:`1235`).
+
+    .. versionchanged:: 1.6.0
+
+       ``next`` of :meth:`make` takes a member or an :class:`int` code,
+       resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+       code that does not fit in one octet raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``next_default``, ``next_namespace`` and ``next_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -166,10 +180,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         return self._decode_next_layer(ipv6_frag, schema.next, length - self.length)
 
     def make(self,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
              reserved_octet: 'bytes' = b'\x00',
              offset: 'int' = 0,
              reserved: 'int' = 0,
@@ -181,9 +192,6 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         Args:
             next: Next header.
-            next_default: Default value of next header.
-            next_namespace: Namespace of next header.
-            next_reversed: If the namespace of next header is reversed.
             reserved_octet: The reserved octet after the next header, truncated or
                 zero-filled to one octet.
             offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).
@@ -199,6 +207,10 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet.
+
         .. versionchanged:: 1.5.0
 
            Takes ``reserved_octet`` ahead of ``offset`` (:issue:`1223`) and
@@ -206,11 +218,10 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
            later positional argument.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,
-                                    reversed=next_reversed, pack=False)
+        next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
         return Schema_IPv6_Frag(
-            next=next_val,  # type: ignore[arg-type]
+            next=next_val,
             reserved=reserved_octet,
             flags={
                 'offset': offset,

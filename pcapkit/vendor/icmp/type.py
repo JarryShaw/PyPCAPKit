@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ICMP Type Numbers
-======================
+=======================
 
 .. module:: pcapkit.vendor.icmp.type
 

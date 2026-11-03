@@ -185,14 +185,16 @@ class LinuxSLL2(LinuxSLL[Data_LinuxSLL2, Schema_LinuxSLL2],
 
         Raises:
             ProtocolError: If ``link_addr`` does not fit in 8 octets, or
-                ``link_addr_length`` is given outside ``0`` to ``0xFF``.
+                ``link_addr_length`` is given outside ``0`` to ``0xFF``; or
+                if ``protocol_type`` or ``arphrd_type`` is a name, a
+                :obj:`bool`, or a member or code its field cannot carry.
 
         """
         _addr, link_addr_length = _validate_link_addr(
             self.alias, link_addr, link_addr_length, max_length=0xFF)
 
-        _arphrd = self._make_index(arphrd_type, pack=False)
-        _proto = self._make_index(protocol_type, pack=False)
+        _arphrd = self._make_index(arphrd_type, Enum_Hardware, bits=16, name='ARPHRD type')
+        _proto = self._make_index(protocol_type, Enum_EtherType, bits=16, name='protocol type')
 
         return Schema_LinuxSLL2(
             protocol_type=_proto,

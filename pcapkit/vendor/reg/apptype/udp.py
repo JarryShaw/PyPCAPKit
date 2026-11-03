@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Application Layer Protocol Numbers (UDP)
-=============================================
+==============================================
 
 .. module:: pcapkit.vendor.reg.apptype.udp
 

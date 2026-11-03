@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IP Datagram Analysis
-========================
+==========================
 
 .. module:: pcapkit.foundation.analysis.ip
 

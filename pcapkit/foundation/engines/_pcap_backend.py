@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Which distribution owns the |pcap|_ module?
-=====================================================
+=================================================
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 

@@ -50,10 +50,10 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
 from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
 from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK
@@ -142,11 +142,9 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Callable, ClassVar, DefaultDict, Optional, Type
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -353,6 +351,25 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          :class:`~datetime.timedelta` raises the same, rather than an
          :exc:`AttributeError`. The Quick-Start TTL Diff wraps, as
          :rfc:`4782` defines it modulo 256 (:issue:`2614`).
+       * Each enumeration field of the option makers, the alternate checksum
+         ``algorithm`` and the Multipath TCP ``subtype``, and the kind of each
+         option given to :meth:`make`, takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+         code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame,
+         writing a different value or raising another exception
+         (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``algorithm_default``, ``algorithm_namespace`` and
+       ``algorithm_reversed`` arguments of the alternate checksum request
+       option maker, and the ``subtype_default``, ``subtype_namespace`` and
+       ``subtype_reversed`` arguments of the Multipath TCP option maker;
+       resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -622,7 +639,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
              window: 'int' = 65535,  # reasonable default value
              checksum: 'Optional[bytes]' = None,
              urgent: 'int' = 0,
-             options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             options: 'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              padding: 'bytes' = b'',
              reserved: 'int' = 0,
@@ -921,7 +938,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             raise ProtocolError('TCP: invalid format')
         return options
 
-    def _make_tcp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option',
+    def _make_tcp_options(self,
+                          options: 'list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option',
                           padding: 'bytes' = b'') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for TCP.
 
@@ -933,12 +951,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Tuple of options and total length of options.
 
         Raises:
-            ProtocolError: If an option maker rejects its option, e.g. a user
-                timeout too large for 15 bits of minutes, or an MPTCP option
-                whose fields, or the segment's flags, it cannot encode.
-            ProtocolNotImplemented: If an option argument given by name, an
-                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is
-                not in its namespace and has no default.
+            ProtocolError: If an option's kind is a name, a :obj:`bool`, or a
+                code the 8-bit kind octet cannot carry (:issue:`2594`), or if
+                an option maker rejects its option, e.g. a user timeout too
+                large for 15 bits of minutes, an MPTCP ``subtype`` or an
+                alternate checksum ``algorithm`` given by name, or an MPTCP
+                option whose fields, or the segment's flags, it cannot encode.
             FieldValueError: If an ADD_ADDR ``addr`` is a :obj:`bool` or not a
                 valid IP address.
 
@@ -966,7 +984,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                     data = schema
                     data_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Option, bits=8, name='option kind')
                     name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_mode_{name}'
@@ -981,7 +1000,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 options_list.append(data)
                 total_length += data_len
         else:
-            for code, option in options.items(multi=True):
+            for key, option in options.items(multi=True):
+                code = self._make_index(key, Enum_Option, bits=8, name='option kind')
                 name = self._lookup_registry(self.__option__, code)
                 if isinstance(name, str):
                     meth_name = f'_make_mode_{name}'
@@ -2728,10 +2748,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
     def _make_mode_chkreq(self, code: 'Enum_Option', opt: 'Optional[Data_AlternateChecksumRequest]' = None, *,
-                          algorithm: 'Enum_Checksum | StdlibEnum | AenumEnum | int | str' = Enum_Checksum.TCP_checksum,
-                          algorithm_default: 'Optional[int]' = None,
-                          algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                          algorithm_reversed: 'bool' = False,
+                          algorithm: 'Enum_Checksum | int' = Enum_Checksum.TCP_checksum,
                           **kwargs: 'Any') -> 'Schema_AlternateChecksumRequest':
         """Make TCP alternate checksum request option.
 
@@ -2739,28 +2756,23 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             code: option code
             opt: option data
             algorithm: checksum algorithm
-            algorithm_default: default value for checksum algorithm
-            algorithm_namespace: namespace for checksum algorithm
-            algorithm_reversed: reversed flag for checksum algorithm
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``algorithm`` does not fit 8 bits.
+            ProtocolError: If ``algorithm`` is a name, a :obj:`bool`, or a
+                member or code that does not fit 8 bits.
 
         """
         if opt is not None:
-            algorithm_val = opt.chksum
-        else:
-            algorithm_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
-                                             reversed=algorithm_reversed, pack=False)
+            algorithm = opt.chksum
 
         return Schema_AlternateChecksumRequest(
             kind=code,
             length=3,
-            algorithm=cast('Enum_Checksum', self._make_uint(algorithm_val, bits=8, name=f'[OptNo {code}] algorithm')),
+            algorithm=self._make_index(algorithm, Enum_Checksum, bits=8, name=f'[OptNo {code}] algorithm'),
         )
 
     def _make_mode_chksum(self, code: 'Enum_Option', opt: 'Optional[Data_AlternateChecksumData]' = None, *,
@@ -2968,10 +2980,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
     def _make_mode_mp(self, code: 'Enum_Option', opt: 'Optional[Data_MPTCP]' = None, *,
-                      subtype: 'Enum_MPTCPOption | StdlibEnum | AenumEnum | int | str' = Enum_MPTCPOption.MP_CAPABLE,
-                      subtype_default: 'Optional[int]' = None,
-                      subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      subtype_reversed: 'bool' = False,
+                      subtype: 'Enum_MPTCPOption | int' = Enum_MPTCPOption.MP_CAPABLE,
                       **kwargs: 'Any') -> 'Schema_MPTCP':
         """Make multipath TCP option.
 
@@ -2979,21 +2988,19 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             code: option code
             opt: option data
             subtype: MPTCP subtype
-            subtype_default: default value for MPTCP subtype
-            subtype_namespace: namespace for MPTCP subtype
-            subtype_reversed: reversed flag for MPTCP subtype
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``subtype`` is a name, a :obj:`bool`, or a member
+                or code that does not fit 4 bits.
+
         """
         if opt is not None:
-            subtype_val = opt.subtype
-        else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
-                                           reversed=subtype_reversed, pack=False)
-            subtype_val = Enum_MPTCPOption.get(subtype_val)
+            subtype = opt.subtype
+        subtype_val = self._make_index(subtype, Enum_MPTCPOption, bits=4, name=f'[OptNo {code}] subtype')
 
         name = self._lookup_registry(self.__mp_option__, subtype_val)
         if isinstance(name, str):
@@ -3054,7 +3061,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=3 + len(data[1:]),
             test={
-                'subtype': subtype.value,
+                'subtype': int(subtype),
                 'data': self._make_uint(data[0], bits=4, name=f'[OptNo {Enum_Option.Multipath_TCP}] '
                                         f'subtype {subtype} first data octet') if data else 0,
             },

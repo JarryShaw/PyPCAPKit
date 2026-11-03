@@ -21,8 +21,8 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
-from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import frame_length, rebuilding
 from pcapkit.utilities.exceptions import stacklevel

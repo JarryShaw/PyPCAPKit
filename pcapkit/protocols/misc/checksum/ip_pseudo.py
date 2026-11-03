@@ -61,24 +61,23 @@ from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.data.misc.checksum.ip_pseudo import IP_Pseudo as Data_IP_Pseudo
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPv6
 from pcapkit.protocols.misc.no_payload import NoPayload
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH, jumbo_payload_length
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IPV4_PSEUDO_LEN, IPV6_PSEUDO_LEN
 from pcapkit.protocols.schema.misc.checksum.ip_pseudo import IP_Pseudo as Schema_IP_Pseudo
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import IO, Any, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
 __all__ = ['IP_Pseudo', 'pseudo_header', 'verify_upper']
@@ -206,10 +205,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
              ip: 'Optional[IPv4 | IPv6]' = None,
              src: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
              dst: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
-             protocol: 'Optional[Enum_TransType | StdlibEnum | AenumEnum | int | str]' = None,
-             protocol_default: 'Optional[int]' = None,
-             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             protocol_reversed: 'bool' = False,
+             protocol: 'Optional[Enum_TransType | int]' = None,
              upper_length: 'Optional[int]' = None,
              zero: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IP_Pseudo':
@@ -229,10 +225,6 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
             src: Source address; its IP version selects the layout.
             dst: Destination address, of the same IP version as ``src``.
             protocol: Upper-layer protocol number.
-            protocol_default: Default value of ``protocol``.
-            protocol_namespace: Namespace of ``protocol``;
-                :class:`~pcapkit.const.reg.transtype.TransType` by default.
-            protocol_reversed: Whether to reverse the namespace of ``protocol``.
             upper_length: Upper-layer packet length, header included.
             zero: Reserved octets, truncated or zero-filled to the layout's width.
             **kwargs: Arbitrary keyword arguments.
@@ -242,8 +234,10 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
 
         Raises:
             ProtocolError: If ``ip`` is neither IPv4 nor IPv6, a value is given
-                by neither the arguments nor ``ip``, or a header of ``ip`` is
-                malformed or not parsed.
+                by neither the arguments nor ``ip``, a header of ``ip`` is
+                malformed or not parsed, or ``protocol`` is a name, a
+                :obj:`bool`, or a member or code the 8-bit protocol field
+                cannot carry.
             FieldValueError: If ``src`` or ``dst`` is not a valid address,
                 they differ in IP version, or ``upper_length`` does not fit
                 the layout's length field.
@@ -274,10 +268,7 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         if not 0 <= upper_length <= limit:
             raise FieldValueError(f'{self.alias}: upper-layer length {upper_length} '
                                   f'out of range 0 to {limit:#x}')
-        if protocol_namespace is None:
-            protocol_namespace = Enum_TransType
-        proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,
-                                 reversed=protocol_reversed, pack=False)
+        proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol')
 
         # NOTE: Kept at the layout's width, so that a constructed data model
         # matches the parsed one.

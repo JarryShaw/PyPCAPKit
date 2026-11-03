@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Application Layer Protocol Numbers (DCCP)
-==============================================
+===============================================
 
 .. module:: pcapkit.vendor.reg.apptype.dccp
 

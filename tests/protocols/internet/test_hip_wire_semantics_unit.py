@@ -106,8 +106,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
 
                 self.assertEqual(parsed.id, 1)  # type: ignore[attr-defined]
                 self.assertEqual(parsed.id_len, 4)  # type: ignore[attr-defined]
-                # The whole point: byte-exact, where it used to come back as
-                # ``...000101000000``.
+                # The whole point: byte-exact, not ``...000101000000``.
                 self.assertEqual(self._params(code, parsed).hex(), raw_hex)
 
     def test_an_identifier_width_may_be_declared_or_inferred(self) -> None:
@@ -141,7 +140,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         ``_read_param_hip_transform`` all along -- the packet is parsed back on
         the way out. Going through the public path therefore cannot tell a
         gated maker from an ungated one, which is the distinction the issue is
-        about: the maker used to return ``0241000200010000`` for HIPv2, octets
+        about: an ungated maker returns ``0241000200010000`` for HIPv2, octets
         its own reader rejects.
 
         """
@@ -179,8 +178,8 @@ class HIPWireSemanticsTests(unittest.TestCase):
                                 {'locator_set': [{'ip': '2001:db8::1',
                                                   'type': 1, 'spi': 7}]})
 
-        # ``spi=`` alone used to raise ``FieldValueError: invalid locator type
-        # or length``; it now agrees with the form that restates the type.
+        # ``spi=`` alone agrees with the form that restates the type, rather
+        # than raising ``FieldValueError: invalid locator type or length``.
         self.assertEqual(derived.hex(), restated.hex())
         # Locator Type 1, Locator Length 5 -- the SPI plus a 128-bit address.
         self.assertEqual(derived[4:7].hex(), '000105')
@@ -251,7 +250,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """#2281: the makers take a duration and encode it per the RFC."""
         from pcapkit.const.hip.parameter import Parameter
 
-        # One second is octet 64, not octet 1; the old maker wrote 1.
+        # One second is octet 64, not octet 1.
         self.assertEqual(
             self._params(Parameter.REG_REQUEST,
                          {'lifetime': datetime.timedelta(seconds=1),
@@ -313,7 +312,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         self.assertEqual(raw.hex(), 'fa0b000400050000')
 
         parsed = self._parse(Parameter.OVERLAY_TTL, raw)
-        # It used to come back as ``timedelta(seconds=5)``.
+        # An int, not ``timedelta(seconds=5)``.
         self.assertEqual(parsed.ttl, 5)  # type: ignore[attr-defined]
         self.assertIsInstance(parsed.ttl, int)  # type: ignore[attr-defined]
         self.assertNotIsInstance(parsed.ttl, datetime.timedelta)  # type: ignore[attr-defined]
@@ -330,8 +329,8 @@ class HIPWireSemanticsTests(unittest.TestCase):
                             'cert_id': 1, 'cert': b'x'})
         parsed = self._parse(Parameter.CERT, raw)
 
-        # ``7`` used to decode as ``<Group.NIST_P_256: 7>``, a Diffie-Hellman
-        # curve name on a field :rfc:`8002#section-2` leaves to the sender.
+        # ``7`` stays an int, not the curve ``<Group.NIST_P_256: 7>``, on a field
+        # :rfc:`8002#section-2` leaves to the sender.
         self.assertEqual(parsed.cert_group, 7)  # type: ignore[attr-defined]
         self.assertIs(type(parsed.cert_group), int)  # type: ignore[attr-defined]
         self.assertEqual(self._params(Parameter.CERT, parsed).hex(), raw.hex())
@@ -352,8 +351,9 @@ class HIPWireSemanticsTests(unittest.TestCase):
         for dropped in ('cert_group_default', 'cert_group_namespace',
                         'cert_group_reversed'):
             self.assertNotIn(dropped, keywords)
-        # ``cert_type`` keeps its own, since :rfc:`8002` really does register it.
-        self.assertIn('cert_type_namespace', keywords)
+        # ``cert_type`` stays an enumeration field, since :rfc:`8002` really
+        # does register it; it takes the member or its code (#2594).
+        self.assertIn('Enum_Certificate', str(keywords['cert_type'].annotation))
 
     # -- #2299 ------------------------------------------------------------
 

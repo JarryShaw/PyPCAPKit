@@ -35,9 +35,10 @@ NO_VERSION_FIELDS = '^ICMP: no version to build with; pass version=4 or version=
 
 def pseudo() -> 'object':
     """An IPv6 pseudo-header, which only ICMPv6 takes."""
+    from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
 
-    return IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol='IPv6_ICMP', upper_length=0)
+    return IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol=TransType.IPv6_ICMP, upper_length=0)
 
 
 class ICMPBaseDispatchTests(unittest.TestCase):

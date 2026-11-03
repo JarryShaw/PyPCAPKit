@@ -67,8 +67,10 @@ def _payload(code: 'Any') -> 'tuple[bytes, bool]':
 
 def _wlan_ack() -> 'bytes':
     """An 802.11 Ack frame, which carries no body."""
+    from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
+    from pcapkit.const.ieee802_11.type import Type
     from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-    return bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+    return bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
 
 
 def _radiotap(payload: 'bytes') -> 'bytes':

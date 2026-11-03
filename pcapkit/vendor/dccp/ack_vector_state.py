@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Ack Vector States
-=========================
+============================
 
 .. module:: pcapkit.vendor.dccp.ack_vector_state
 

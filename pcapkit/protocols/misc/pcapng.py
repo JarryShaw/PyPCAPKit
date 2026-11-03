@@ -63,12 +63,13 @@ from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.corekit.fields.byteorder import packet_byteorder
-from pcapkit.corekit.fields.strings import DecodedString, pad_length
+from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.infoclass import OrderedMultiInfo
 from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.byteorder import packet_byteorder
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as Data_CommentOption
@@ -223,12 +224,10 @@ if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from datetime import timedelta, timezone
     from decimal import Decimal
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import (IO, Any, Callable, ClassVar, Counter, DefaultDict, Optional, Tuple, Type,
                         TypeVar, Union)
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -331,27 +330,31 @@ def _unassigned_member(enum_cls: 'Type[_FlagsEnum]', value: 'int') -> '_FlagsEnu
     return obj
 
 
-def _block_type_name(block_type: 'Enum_BlockType') -> 'str':
+def _block_type_name(block_type: 'Enum_BlockType | int') -> 'str':
     """Return the name of a block type, for an option's placement message.
 
     Args:
-        block_type: The block type to name.
+        block_type: The block type to name, a member or a plain :obj:`int`
+            code.
 
     Returns:
-        The block type's name, e.g. ``Enhanced_Packet_Block``.
+        The block type's name, e.g. ``Enhanced_Packet_Block``; ``Block`` and
+        the code, e.g. ``Block 256``, for a code no member holds.
 
     Note:
         ``block_type`` is looked up rather than having its :attr:`~enum.Enum.name`
-        read directly, because :attr:`PCAPNG._type <PCAPNG._type>` is only an
-        :class:`~pcapkit.const.pcapng.block_type.BlockType` on the parse path.
-        On the make path :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
-        returns a plain :obj:`int`, which the assignment in
-        :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>` only
-        :func:`~typing.cast` to the enumeration, so reading ``.name`` off it
-        there raises :exc:`AttributeError` (:issue:`2301`).
+        read directly, because :attr:`PCAPNG._type <PCAPNG._type>` is not
+        always a member on the make path (:issue:`2301`).
+        :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>` assigns
+        what :meth:`~pcapkit.protocols.protocol.Protocol._make_index` resolves
+        the code to: its member, or the plain :obj:`int` for a code in range
+        that no member holds (:issue:`2594`).
 
     """
-    return Enum_BlockType(block_type).name
+    try:
+        return Enum_BlockType(block_type).name
+    except ValueError:
+        return f'Block {int(block_type)}'
 
 
 class PacketDirection(EnumLookup, enum.IntEnum):
@@ -717,6 +720,29 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
        :class:`~pcapkit.protocols.protocol.ProtocolBase`, on every block. The
        block's section ``Context``, which ``context`` returned through 1.4.x,
        is :attr:`section_context` (:issue:`2172`).
+
+    .. versionchanged:: 1.6.0
+
+       Each enumeration field of :meth:`make` and of the block and option
+       makers, and the code of each option and the type of each name
+       resolution record given to a block maker, takes a member or an
+       :class:`int` code, resolved with the enumeration's ``get``, an option
+       code in the block's namespace; a name, a :obj:`bool` for a field wider
+       than one bit, or a code the field cannot carry raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame,
+       writing a different value or raising another exception
+       (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace`` and ``type_reversed``
+       arguments of :meth:`make`, and the ``_default``, ``_namespace`` and
+       ``_reversed`` arguments that went with each enumeration field of the
+       block and option makers -- ``linktype``, ``secrets_type``, ``filter``,
+       ``direction``, ``reception``, ``algorithm`` and ``verdict``; resolve a
+       name with :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index`
+       first (:issue:`2594`).
 
     """
 
@@ -1481,19 +1507,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         return block
 
     def make(self,
-             type: 'Enum_BlockType | StdlibEnum | AenumEnum | str | int' = Enum_BlockType.Simple_Packet_Block,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_BlockType | int' = Enum_BlockType.Simple_Packet_Block,
              block: 'bytes | Data_PCAPNG | Schema_BlockType | dict[str, Any]' = b'',
              **kwargs: 'Any') -> 'Schema_PCAPNG':
         """Make PCAP-NG block data.
 
         Args:
             type: Block type.
-            type_default: Default block type.
-            type_namespace: Block type namespace.
-            type_reversed: Whether to reverse block type namespace.
             block: Block data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1501,15 +1521,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``block`` is none of the forms this maker reads --
-                raw :obj:`bytes`, a :obj:`dict` of block arguments, a
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code the 32-bit Block Type field cannot carry; or if
+                ``block`` is none of the forms this maker reads -- raw
+                :obj:`bytes`, a :obj:`dict` of block arguments, a
                 :class:`~pcapkit.protocols.data.misc.pcapng.PCAPNG` data model
                 or a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
         """
-        type_val = cast('Enum_BlockType',
-                        self._make_index(type, type_default, namespace=type_namespace,
-                                         reversed=type_reversed, pack=False))
+        type_val = self._make_index(type, Enum_BlockType, bits=32, name='block type', alias='PCAP-NG')
         self._type = type_val
 
         # NOTE: An option or record handed over as raw octets has its type code
@@ -4497,7 +4517,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         major_version: 'Optional[int]' = None,
                         minor_version: 'Optional[int]' = None,
                         section_length: 'int' = -1,
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         byteorder: 'Literal["big", "little"]' = sys.byteorder,
                         **kwargs: 'Any') -> 'Schema_SectionHeaderBlock':
         """Make PCAP-NG section header block (SHB).
@@ -4571,21 +4591,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_block_idb(self, block: 'Optional[Data_InterfaceDescriptionBlock]' = None, *,
-                        linktype: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
-                        linktype_default: 'Optional[int]' = None,
-                        linktype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                        linktype_reversed: 'bool' = False,
+                        linktype: 'Enum_LinkType | int' = Enum_LinkType.NULL,
                         snaplen: 'int' = 0,
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         **kwargs: 'Any') -> 'Schema_InterfaceDescriptionBlock':
         """Make PCAP-NG interface description block (IDB).
 
         Args:
             block: Block data model.
             linktype: Link layer protocol type.
-            linktype_default: Default value of link layer protocol type.
-            linktype_namespace: Namespace of link layer protocol type.
-            linktype_reversed: Reversed flag for link layer protocol type namespace.
             snaplen: Snap length, an unsigned 32-bit value; 0, the default,
                 means no limit.
             options: Block options.
@@ -4595,9 +4609,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed block schema.
 
         Raises:
-            ProtocolError: If ``snaplen`` is not an :obj:`int` (a :obj:`bool`
-                included), or is outside ``0`` to ``0xFFFFFFFF``, which the
-                32-bit SnapLen field would truncate (:issue:`2278`).
+            ProtocolError: If ``linktype`` is a name, a :obj:`bool`, or a
+                member or code the 16-bit LinkType field cannot carry; or if
+                ``snaplen`` is not an :obj:`int` (a :obj:`bool` included), or
+                is outside ``0`` to ``0xFFFFFFFF``, which the 32-bit SnapLen
+                field would truncate (:issue:`2278`).
 
         .. versionchanged:: 1.5.0
 
@@ -4622,8 +4638,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             snaplen = block.snaplen
             options = self._block_area(block, 'options')
         else:
-            linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[assignment]
-                                            reversed=linktype_reversed, pack=False)
+            linktype_val = self._make_index(linktype, Enum_LinkType, bits=16, name='[IDB] linktype',
+                                            alias='PCAP-NG')
         snaplen = self._make_uint(snaplen, bits=32, name='[IDB] snaplen', alias='PCAP-NG')
 
         if options is not None:
@@ -4646,7 +4662,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         captured_len: 'Optional[int]' = None,
                         original_len: 'Optional[int]' = None,
                         packet_data: 'bytes | ProtocolBase | Schema' = b'',
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         **kwargs: 'Any') -> 'Schema_EnhancedPacketBlock':
         """Make PCAP-NG enhanced packet block (EPB).
 
@@ -4754,8 +4770,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         ), block, 'padding', 'padding_data')
 
     def _make_block_nrb(self, block: 'Optional[Data_NameResolutionBlock]' = None, *,
-                        records: 'Optional[Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]]' = None,
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        records: 'Optional[Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         **kwargs: 'Any') -> 'Schema_NameResolutionBlock':
         """Make PCAP-NG name resolution block (NRB).
 
@@ -4794,7 +4810,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def _make_block_isb(self, block: 'Optional[Data_InterfaceStatisticsBlock]' = None, *,
                         interface_id: 'int' = 0,
                         timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         **kwargs: 'Any') -> 'Schema_InterfaceStatisticsBlock':
         """Make PCAP-NG interface statistics block (ISB).
 
@@ -4871,21 +4887,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_block_dsb(self, block: 'Optional[Data_DecryptionSecretsBlock]' = None, *,
-                        secrets_type: 'Enum_SecretsType | StdlibEnum | AenumEnum | str | int' = Enum_SecretsType.TLS_Key_Log,
-                        secrets_type_default: 'Optional[int]' = None,
-                        secrets_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                        secrets_type_reversed: 'bool' = False,
+                        secrets_type: 'Enum_SecretsType | int' = Enum_SecretsType.TLS_Key_Log,
                         secrets_data: 'Schema_DSBSecrets | Data_DSBSecrets | bytes | dict[str, Any]' = b'',
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                         **kwargs: 'Any') -> 'Schema_DecryptionSecretsBlock':
         """Make PCAP-NG decryption secrets block (DSB).
 
         Args:
             block: Block data model.
             secrets_type: Decryption secrets type.
-            secrets_type_default: Default value of decryption secrets type.
-            secrets_type_namespace: Namespace of decryption secrets type.
-            secrets_type_reversed: Reversed flag for namespace of decryption secrets type.
             secrets_data: Decryption secrets data. Raw :obj:`bytes` are read as
                 the Secrets Data of a parsed block are, through the schema
                 registered for ``secrets_type`` (:issue:`2273`).
@@ -4896,8 +4906,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed block schema.
 
         Raises:
-            ProtocolError: If ``secrets_data`` is none of the forms this maker
-                reads -- raw :obj:`bytes`, a :obj:`dict` of secrets arguments, a
+            ProtocolError: If ``secrets_type`` is a name, a :obj:`bool`, or a
+                member or code the 32-bit Secrets Type field cannot carry; or
+                if ``secrets_data`` is none of the forms this maker reads --
+                raw :obj:`bytes`, a :obj:`dict` of secrets arguments, a
                 :class:`~pcapkit.protocols.data.misc.pcapng.DSBSecrets` data
                 model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
@@ -4909,8 +4921,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             declared = block.secrets_length
             options = self._block_area(block, 'options')
         else:
-            secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[assignment]
-                                                reversed=secrets_type_reversed, pack=False)
+            secrets_type_val = self._make_index(secrets_type, Enum_SecretsType, bits=32,
+                                                name='[DSB] secrets_type', alias='PCAP-NG')
 
         if isinstance(secrets_data, bytes):
             from pcapkit.protocols.schema.misc.pcapng import dsb_secrets_selector
@@ -4986,7 +4998,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     def _make_block_cb(self, block: 'Optional[Data_CustomBlock]' = None, *,
                        pen: 'int' = 0,
                        data: 'Schema | bytes' = b'',
-                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                        **kwargs: 'Any') -> 'Schema_CustomBlock':
         """Make PCAP-NG custom block (CB).
 
@@ -5041,7 +5053,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                            captured_len: 'Optional[int]' = None,
                            original_len: 'Optional[int]' = None,
                            packet_data: 'bytes | ProtocolBase | Schema' = b'',
-                           options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                           options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                            **kwargs: 'Any') -> 'Schema_PacketBlock':
         """Make PCAP-NG packet block (obsolete).
 
@@ -5123,16 +5135,22 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
         ), block, 'padding_data')
 
-    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes] | bytes',
+    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes] | bytes',  # pylint: disable=line-too-long
                              namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.
 
         Args:
-            options: PCAP-NG options.
+            options: PCAP-NG options. An option's code is a member, kept as
+                given, or an :class:`int`, resolved in ``namespace``.
             namespace: Namespace of options.
 
         Returns:
             Tuple of options and total length of options.
+
+        Raises:
+            ProtocolError: If an option's code is a name, a :obj:`bool`, or a
+                code the 16-bit option code field cannot carry
+                (:issue:`2594`).
 
         """
         # an option area kept as captured is written back verbatim
@@ -5162,7 +5180,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data = schema
                     data_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_OptionType, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_OptionType | int, dict[str, Any]]', schema)
+                    # NOTE: a member is a str, which ``_make_index`` refuses, and a code is
+                    # resolved in the block's namespace, as a raw option's is.
+                    code = kind if isinstance(kind, Enum_OptionType) else Enum_OptionType.get(
+                        self._make_uint(kind, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
                     if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                         has_endofopt = True
                         continue
@@ -5189,7 +5211,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             return options_list, total_length
 
         options_list = []
-        for code, option in options.items(multi=True):
+        for key, option in options.items(multi=True):
+            code = key if isinstance(key, Enum_OptionType) else Enum_OptionType.get(
+                self._make_uint(key, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
             if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                 has_endofopt = True
                 continue
@@ -5629,10 +5653,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_if_filter(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_FilterOption]' = None, *,
-                               filter: 'Enum_FilterType  | StdlibEnum | AenumEnum | str | int' = Enum_FilterType(0),
-                               filter_default: 'Optional[int]' = None,
-                               filter_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               filter_reversed: 'bool' = False,
+                               filter: 'Enum_FilterType | int' = Enum_FilterType(0),
                                expression: 'bytes | str' = b'',
                                **kwargs: 'Any') -> 'Schema_IF_FilterOption':
         """Make PCAP-NG ``if_filter`` option.
@@ -5641,14 +5662,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             filter: Filter type.
-            filter_default: Default filter value.
-            filter_namespace: Filter namespace.
-            filter_reversed: Whether filter namespace is reversed.
             expression: Filter expression.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``filter`` is a name, a :obj:`bool`, or a member
+                or code the 8-bit filter type field cannot carry.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -5662,8 +5684,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             filter_val = option.code
             expr_val = option.expression
         else:
-            filter_val = self._make_index(filter, filter_default, namespace=filter_namespace,  # type: ignore[assignment]
-                                          reversed=filter_reversed, pack=False)
+            filter_val = self._make_index(filter, Enum_FilterType, bits=8, name='[if_filter] filter',
+                                          alias='PCAP-NG')
             expr_val = expression if isinstance(expression, bytes) else expression.encode()
 
         return Schema_IF_FilterOption(
@@ -5873,14 +5895,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_epb_flags(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_FlagsOption]' = None, *,
-                               direction: 'PacketDirection | StdlibEnum | AenumEnum | str | int' = PacketDirection.UNKNOWN,
-                               direction_default: 'Optional[int]' = None,
-                               direction_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               direction_reversed: 'bool' = False,
-                               reception: 'PacketReception | StdlibEnum | AenumEnum | str | int' = PacketReception.UNKNOWN,
-                               reception_default: 'Optional[int]' = None,
-                               reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               reception_reversed: 'bool' = False,
+                               direction: 'PacketDirection | int' = PacketDirection.UNKNOWN,
+                               reception: 'PacketReception | int' = PacketReception.UNKNOWN,
                                fcs_len: 'int' = 0,
                                checksum_not_ready: 'bool' = False,
                                checksum_valid: 'bool' = False,
@@ -5901,13 +5917,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             direction: Packet direction.
-            direction_default: Default value of packet direction.
-            direction_namespace: Namespace of packet direction.
-            direction_reversed: Whether to reverse packet direction namespace.
             reception: Packet reception.
-            reception_default: Default value of packet reception.
-            reception_namespace: Namespace of packet reception.
-            reception_reversed: Whether to reverse packet reception namespace.
             fcs_len: Length of FCS field, in bytes.
             checksum_not_ready: Whether the checksum is not ready.
             checksum_valid: Whether the checksum is valid.
@@ -5925,6 +5935,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``direction`` or ``reception`` is a name, a
+                :obj:`bool`, or a member or code its 2-bit or 3-bit sub-field
+                cannot carry.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -5951,10 +5966,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             preamble_error = option.preamble_error
             symbol_error = option.symbol_error
         else:
-            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[assignment]
-                                             reversed=direction_reversed, pack=False)
-            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[assignment]
-                                             reversed=reception_reversed, pack=False)
+            direction_val = self._make_index(direction, PacketDirection, bits=2,
+                                             name='[epb_flags] direction', alias='PCAP-NG')
+            reception_val = self._make_index(reception, PacketReception, bits=3,
+                                             name='[epb_flags] reception', alias='PCAP-NG')
 
         return Schema_EPB_FlagsOption(
             type=type,
@@ -5979,10 +5994,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_epb_hash(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_HashOption]' = None, *,
-                              algorithm: 'Enum_HashAlgorithm | StdlibEnum | AenumEnum | int | str' = Enum_HashAlgorithm.two_s_complement,
-                              algorithm_default: 'Optional[int]' = None,
-                              algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                              algorithm_reversed: 'bool' = False,
+                              algorithm: 'Enum_HashAlgorithm | int' = Enum_HashAlgorithm.two_s_complement,
                               hash: 'bytes' = b'',
                               **kwargs: 'Any') -> 'Schema_EPB_HashOption':
         """Make PCAP-NG ``epb_hash`` option.
@@ -5991,14 +6003,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             algorithm: Hash algorithm.
-            algorithm_default: Default value of hash algorithm.
-            algorithm_namespace: Namespace of hash algorithm.
-            algorithm_reversed: Whether to reverse hash algorithm namespace.
             hash: Hash value.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``algorithm`` is a name, a :obj:`bool`, or a
+                member or code the 8-bit hash algorithm field cannot carry.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -6009,8 +6022,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             algo_val = option.algorithm
             hash = option.hash
         else:
-            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
-                                        reversed=algorithm_reversed, pack=False)
+            algo_val = self._make_index(algorithm, Enum_HashAlgorithm, bits=8,
+                                        name='[epb_hash] algorithm', alias='PCAP-NG')
 
         return Schema_EPB_HashOption(
             type=type,
@@ -6113,10 +6126,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_epb_verdict(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_VerdictOption]' = None, *,
-                                 verdict: 'Enum_VerdictType  | StdlibEnum | AenumEnum | str | int' = Enum_VerdictType.Hardware,
-                                 verdict_default: 'Optional[int]' = None,
-                                 verdict_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                 verdict_reversed: 'bool' = False,
+                                 verdict: 'Enum_VerdictType | int' = Enum_VerdictType.Hardware,
                                  value: 'bytes' = b'',
                                  **kwargs: 'Any') -> 'Schema_EPB_VerdictOption':
         """Make PCAP-NG ``epb_verdict`` option.
@@ -6125,14 +6135,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             verdict: Verdict type.
-            verdict_default: Default value for verdict.
-            verdict_namespace: Namespace for verdict.
-            verdict_reversed: Whether to reverse the namespace.
             value: Verdict value.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``verdict`` is a name, a :obj:`bool`, or a
+                member or code the 8-bit verdict type field cannot carry.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -6145,8 +6156,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             verdict_val = option.verdict
             value = option.value
         else:
-            verdict_val = self._make_index(verdict, verdict_default, namespace=verdict_namespace,  # type: ignore[assignment]
-                                          reversed=verdict_reversed, pack=False)
+            verdict_val = self._make_index(verdict, Enum_VerdictType, bits=8,
+                                           name='[epb_verdict] verdict', alias='PCAP-NG')
 
         return Schema_EPB_VerdictOption(
             type=type,
@@ -6470,14 +6481,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_pack_flags(self, type: 'Enum_OptionType', option: 'Optional[Data_PACK_FlagsOption]' = None, *,
-                                direction: 'PacketDirection | StdlibEnum | AenumEnum | str | int' = PacketDirection.UNKNOWN,
-                                direction_default: 'Optional[int]' = None,
-                                direction_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                direction_reversed: 'bool' = False,
-                                reception: 'PacketReception | StdlibEnum | AenumEnum | str | int' = PacketReception.UNKNOWN,
-                                reception_default: 'Optional[int]' = None,
-                                reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                reception_reversed: 'bool' = False,
+                                direction: 'PacketDirection | int' = PacketDirection.UNKNOWN,
+                                reception: 'PacketReception | int' = PacketReception.UNKNOWN,
                                 fcs_len: 'int' = 0,
                                 checksum_not_ready: 'bool' = False,
                                 checksum_valid: 'bool' = False,
@@ -6498,13 +6503,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             direction: Packet direction.
-            direction_default: Default value of packet direction.
-            direction_namespace: Namespace of packet direction.
-            direction_reversed: Whether to reverse packet direction namespace.
             reception: Packet reception.
-            reception_default: Default value of packet reception.
-            reception_namespace: Namespace of packet reception.
-            reception_reversed: Whether to reverse packet reception namespace.
             fcs_len: Length of FCS field, in bytes.
             checksum_not_ready: Whether the checksum is not ready.
             checksum_valid: Whether the checksum is valid.
@@ -6522,6 +6521,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``direction`` or ``reception`` is a name, a
+                :obj:`bool`, or a member or code its 2-bit or 3-bit sub-field
+                cannot carry.
 
         """
         if self._type != Enum_BlockType.Packet_Block:
@@ -6548,10 +6552,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             preamble_error = option.preamble_error
             symbol_error = option.symbol_error
         else:
-            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[assignment]
-                                             reversed=direction_reversed, pack=False)
-            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[assignment]
-                                             reversed=reception_reversed, pack=False)
+            direction_val = self._make_index(direction, PacketDirection, bits=2,
+                                             name='[pack_flags] direction', alias='PCAP-NG')
+            reception_val = self._make_index(reception, PacketReception, bits=3,
+                                             name='[pack_flags] reception', alias='PCAP-NG')
 
         return Schema_PACK_FlagsOption(
             type=type,
@@ -6576,10 +6580,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_pack_hash(self, type: 'Enum_OptionType', option: 'Optional[Data_PACK_HashOption]' = None, *,
-                               algorithm: 'Enum_HashAlgorithm | StdlibEnum | AenumEnum | int | str' = Enum_HashAlgorithm.two_s_complement,
-                               algorithm_default: 'Optional[int]' = None,
-                               algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                               algorithm_reversed: 'bool' = False,
+                               algorithm: 'Enum_HashAlgorithm | int' = Enum_HashAlgorithm.two_s_complement,
                                hash: 'bytes' = b'',
                                **kwargs: 'Any') -> 'Schema_PACK_HashOption':
         """Make PCAP-NG ``pack_hash`` option.
@@ -6588,14 +6589,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             type: Option type.
             option: Option data model.
             algorithm: Hash algorithm.
-            algorithm_default: Default value of hash algorithm.
-            algorithm_namespace: Namespace of hash algorithm.
-            algorithm_reversed: Whether to reverse hash algorithm namespace.
             hash: Hash value.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``algorithm`` is a name, a :obj:`bool`, or a
+                member or code the 8-bit hash algorithm field cannot carry.
 
         """
         if self._type != Enum_BlockType.Packet_Block:
@@ -6606,8 +6608,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             algo_val = option.algorithm
             hash = option.hash
         else:
-            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
-                                        reversed=algorithm_reversed, pack=False)
+            algo_val = self._make_index(algorithm, Enum_HashAlgorithm, bits=8,
+                                        name='[pack_hash] algorithm', alias='PCAP-NG')
 
         return Schema_PACK_HashOption(
             type=type,
@@ -6616,7 +6618,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data=hash,
         )
 
-    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes] | bytes') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':
+    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType | int, dict[str, Any]] | bytes] | bytes') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':  # pylint: disable=line-too-long
         """Make name resolution records for PCAP-NG.
 
         Args:
@@ -6624,6 +6626,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             Tuple of name resolution records and total length of the records.
+
+        Raises:
+            ProtocolError: If a record's type is a name, a :obj:`bool`, or a
+                code the 16-bit record type field cannot carry
+                (:issue:`2594`).
 
         """
         # a record area kept as captured is written back verbatim
@@ -6652,7 +6659,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data = schema
                     data_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_RecordType, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_RecordType | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
                     if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True
                         continue
@@ -6678,7 +6686,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             return records_list, total_length
 
         records_list = []
-        for code, record in records.items(multi=True):
+        for key, record in records.items(multi=True):
+            code = self._make_index(key, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
             if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                 has_record_end = True
                 continue
@@ -6833,6 +6842,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     def _make_secrets_tls(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_TLSKeyLog]' = None, *,
                           entries: 'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
+                          data: 'Optional[str]' = None,
                           **kwargs: 'Any') -> 'Schema_TLSKeyLog':
         """Make PCAP-NG TLS Key Log secrets.
 
@@ -6843,37 +6853,48 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 On a parsed model the text wins, so an edit to its
                 ``entries`` alone is silently ignored.
             entries: TLS Key Log entries.
+            data: TLS key log text, written back verbatim in place of
+                ``entries``, as the text of ``secrets`` is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed secrets schema.
 
+        .. versionchanged:: 1.6.0
+
+           Takes the key log text as ``data``, so that the :obj:`dict` of a
+           parsed model rebuilds the log as captured, as the model itself does,
+           rather than as its entries under a generated comment
+           (:issue:`2698`).
+
         """
         from pcapkit import __version__
 
         if secrets is not None:
-            text = secrets.get('data')
-            if isinstance(text, str):
-                return Schema_TLSKeyLog(
-                    data=text,
-                )
+            data = secrets.get('data')
+        if isinstance(data, str):
+            return Schema_TLSKeyLog(
+                data=data,
+            )
+        if secrets is not None:
             # NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.
             entries = cast('dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]', secrets.entries)
 
         if entries is None:
             entries = {}
 
-        data = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
+        lines = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
         for label, entry in entries.items():
             for k, v in entry.items(multi=True):
-                data.append(f'{label.name} {k.hex()} {v.hex()}\n')
+                lines.append(f'{label.name} {k.hex()} {v.hex()}\n')
 
         return Schema_TLSKeyLog(
-            data=''.join(data),
+            data=''.join(lines),
         )
 
     def _make_secrets_wireguard(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_WireGuardKeyLog]' = None, *,
                                 entries: 'Optional[OrderedMultiDict[WireGuardKeyLabel, bytes]]' = None,
+                                data: 'Optional[str]' = None,
                                 **kwargs: 'Any') -> 'Schema_WireGuardKeyLog':
         """Make PCAP-NG WireGuard secrets.
 
@@ -6884,36 +6905,45 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 On a parsed model the text wins, so an edit to its
                 ``entries`` alone is silently ignored.
             entries: WireGuard Key Log entries.
+            data: WireGuard key log text, written back verbatim in place of
+                ``entries``, as the text of ``secrets`` is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed secrets schema.
 
+        .. versionchanged:: 1.6.0
+
+           Takes the key log text as ``data``, as
+           :meth:`_make_secrets_tls` does (:issue:`2698`).
+
         """
         from pcapkit import __version__
 
         if secrets is not None:
-            text = secrets.get('data')
-            if isinstance(text, str):
-                return Schema_WireGuardKeyLog(
-                    data=text,
-                )
+            data = secrets.get('data')
+        if isinstance(data, str):
+            return Schema_WireGuardKeyLog(
+                data=data,
+            )
+        if secrets is not None:
             entries = secrets.entries
 
         if entries is None:
             entries = OrderedMultiDict()
 
-        data = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
+        lines = [f'# generated by PyPCAPKit v{__version__}\n']  # type: list[str]
         for label, value in entries.items(multi=True):
-            data.append(f'{label.name} = {base64.b64encode(value).decode()}\n')
+            lines.append(f'{label.name} = {base64.b64encode(value).decode()}\n')
 
         return Schema_WireGuardKeyLog(
-            data=''.join(data),
+            data=''.join(lines),
         )
 
     def _make_secrets_zigbee_nwk(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeNWKKey]' = None, *,
                                  nwk_key: 'bytes' = b'',
                                  pan_id: 'int' = 0,
+                                 data: 'Optional[bytes]' = None,
                                  **kwargs: 'Any') -> 'Schema_ZigBeeNWKKey':
         """Make PCAP-NG ZigBee NWK Key secrets.
 
@@ -6927,16 +6957,25 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 ignored.
             nwk_key: NWK key.
             pan_id: PAN ID.
+            data: Secrets Data octets, written back verbatim in place of
+                ``nwk_key`` and ``pan_id``, as the octets of ``secrets`` are.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed secrets schema.
 
+        .. versionchanged:: 1.6.0
+
+           Takes the Secrets Data octets as ``data``, so that the :obj:`dict`
+           of a parsed model rebuilds the key as captured, as the model itself
+           does, rather than as its zero-filled fields (:issue:`2698`).
+
         """
         if secrets is not None:
-            held = secrets.get('data')
-            if isinstance(held, bytes):
-                return zigbee_key_held(Schema_ZigBeeNWKKey, held)
+            data = secrets.get('data')
+        if isinstance(data, bytes):
+            return zigbee_key_held(Schema_ZigBeeNWKKey, data)
+        if secrets is not None:
             nwk_key = secrets.nwk_key
             pan_id = secrets.pan_id
 
@@ -6949,6 +6988,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                                  aps_key: 'bytes' = b'',
                                  pan_id: 'int' = 0,
                                  short_address: 'int' = 0,
+                                 data: 'Optional[bytes]' = None,
                                  **kwargs: 'Any') -> 'Schema_ZigBeeAPSKey':
         """Make PCAP-NG ZigBee APS Key secrets.
 
@@ -6960,16 +7000,24 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             aps_key: APS key.
             pan_id: PAN ID.
             short_address: Short address.
+            data: Secrets Data octets, written back verbatim in place of the
+                fields, as the octets of ``secrets`` are.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed secrets schema.
 
+        .. versionchanged:: 1.6.0
+
+           Takes the Secrets Data octets as ``data``, as
+           :meth:`_make_secrets_zigbee_nwk` does (:issue:`2698`).
+
         """
         if secrets is not None:
-            held = secrets.get('data')
-            if isinstance(held, bytes):
-                return zigbee_key_held(Schema_ZigBeeAPSKey, held)
+            data = secrets.get('data')
+        if isinstance(data, bytes):
+            return zigbee_key_held(Schema_ZigBeeAPSKey, data)
+        if secrets is not None:
             aps_key = secrets.aps_key
             pan_id = secrets.pan_id
             short_address = secrets.short_address

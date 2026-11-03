@@ -124,21 +124,27 @@ class IPPseudoUnitTests(unittest.TestCase):
         self.assertEqual(pseudo.protocol, TransType.UDP)
 
     def test_explicit_ipv6(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
 
-        pseudo = IP_Pseudo(src=self.SRC6, dst=self.DST6, protocol='TCP', upper_length=0x10203)
+        pseudo = IP_Pseudo(src=self.SRC6, dst=self.DST6, protocol=TransType.TCP, upper_length=0x10203)
         self.assertEqual(pseudo.data, self.ADDRS6 + bytes.fromhex('00010203' '000000' '06'))
         self.assertEqual(pseudo.length, 40)
         self.assertEqual(pseudo.src, ipaddress.IPv6Address(self.SRC6))
         self.assertEqual(pseudo.dst, ipaddress.IPv6Address(self.DST6))
 
     def test_protocol_namespace(self) -> None:
+        """#2594: a name in a namespace of its own resolves first, and ``make`` refuses the name."""
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
 
-        pseudo = IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol='spam',
-                           protocol_namespace={99: 'spam'}, upper_length=0)
+        code = IP_Pseudo.resolve_index('spam', namespace={99: 'spam'})
+        self.assertEqual(code, 99)
+        pseudo = IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol=code, upper_length=0)
         self.assertEqual(pseudo.data[9], 99)
         self.assertEqual(pseudo.read().protocol, 99)
+        with self.assertRaises(ProtocolError):
+            IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol='spam', upper_length=0)
 
     def test_make_read_round_trip(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
@@ -160,10 +166,11 @@ class IPPseudoUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(IP_Pseudo.from_data(parsed.info)), octets)
 
     def test_explicit_values_override_the_layer(self) -> None:
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
 
-        ip = IPv4(src='10.0.0.1', dst='10.0.0.2', protocol='TCP', payload=bytes(20))
+        ip = IPv4(src='10.0.0.1', dst='10.0.0.2', protocol=TransType.TCP, payload=bytes(20))
         self.assertEqual(IP_Pseudo(ip=ip).data, bytes.fromhex('0a000001' '0a000002' '00' '06' '0014'))
         self.assertEqual(IP_Pseudo(ip=ip, dst='10.0.0.3', upper_length=7).data,
                          bytes.fromhex('0a000001' '0a000003' '00' '06' '0007'))

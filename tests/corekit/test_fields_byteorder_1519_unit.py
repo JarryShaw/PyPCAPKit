@@ -10,10 +10,10 @@ library hands it, since :meth:`Frame.pack
 <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` always seed ``byteorder``.
 This pins the helper, its ``__packet__`` fallback, and that both schemas use it.
 
-Per GitHub issue #1711 the helper lives in
-:mod:`pcapkit.corekit.fields.byteorder`, with no re-export at
-``pcapkit.protocols.schema.misc.byteorder``. This also pins that importing it
-fails, and that the module reaches no higher than
+GitHub issue #1711 moved the helper out of the schemas, with no re-export at
+``pcapkit.protocols.schema.misc.byteorder``, and #2674 moved its module whole to
+:mod:`pcapkit.corekit.schema.byteorder`. This also pins that importing the first
+of those fails, and that the module reaches no higher than
 :mod:`pcapkit.corekit`.
 
 """
@@ -31,13 +31,13 @@ from tests._support import reimport_once_per_class
 #: differ by interpreter.
 __tier__ = 'ALL'
 
-SHARED = 'pcapkit.corekit.fields.byteorder'
+SHARED = 'pcapkit.corekit.schema.byteorder'
 
 #: The path the helper moved from (#1711); nothing is left there, not even a re-export.
 OLD_PATH = 'pcapkit.protocols.schema.misc.byteorder'
 
 #: Source of :data:`SHARED`, read with :mod:`ast` rather than imported.
-MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / 'fields' / 'byteorder.py'
+MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / 'schema' / 'byteorder.py'
 
 #: The byte order that is not the host's, so a fallback to the host is visible.
 OTHER = 'big' if sys.byteorder == 'little' else 'little'

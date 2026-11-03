@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ICMP - Internet Control Message Protocol
-===============================================
+==============================================
 
 .. module:: pcapkit.protocols.internet.icmp
 

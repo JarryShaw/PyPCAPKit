@@ -30,6 +30,8 @@ def _build(code: 'Any') -> 'Any':
     case.
 
     """
+    from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
+    from pcapkit.const.ieee802_11.type import Type
     from pcapkit.const.linux.arphrd import ARPHRD
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.protocols.link.ieee802_11 import IEEE802_11
@@ -38,7 +40,7 @@ def _build(code: 'Any') -> 'Any':
 
     if code != LinkType.IEEE802_11:
         raise ValueError(f'no radiotap case for link type {code!r}')
-    ack = bytes(IEEE802_11(type='Control', subtype='ACK', addr1='02:00:00:00:00:01'))
+    ack = bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
     frame = bytes(LinuxSLL1(arphrd_type=ARPHRD.IEEE80211_RADIOTAP, payload=bytes(Radiotap(payload=ack))))
     return generator._extract_first(generator._pcap_bytes((frame,), linktype=int(LinkType.LINUX_SLL)),
                                     '.pcap')

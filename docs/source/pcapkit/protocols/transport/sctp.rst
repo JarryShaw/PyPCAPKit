@@ -323,6 +323,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.transport.sctp.PaddedOptionField
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.transport.sctp.ChunkListField
    :members:
    :show-inheritance:

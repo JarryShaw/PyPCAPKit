@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
-"""schema for protocol headers"""
+"""schema for protocol headers
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.schema.keep_short_read`` and
+   ``pcapkit.protocols.schema.schema.replay_short_read``, now
+   :func:`pcapkit.corekit.schema.shortread.keep_short_read` and
+   :func:`pcapkit.corekit.schema.shortread.replay_short_read` (:issue:`2674`).
+
+"""
 
 import abc
 import collections
@@ -27,10 +36,6 @@ if TYPE_CHECKING:
     from typing import IO, Any, Callable, DefaultDict, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
-
-    from pcapkit.protocols.protocol import ProtocolBase
-
-    _PB = TypeVar('_PB', bound=ProtocolBase)
 
 __all__ = ['Schema', 'EnumSchema', 'schema_final']
 
@@ -727,9 +732,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             declares the size of the whole area it may read, but stops at the
             end-of-option-list marker and reports the unconsumed remainder
             through ``__option_padding__``. Since that remainder has not been
-            parsed, we rewind ``data`` by it, so that the fields which size
-            themselves from ``__option_padding__`` read the remainder itself
-            rather than the same number of octets from beyond it.
+            parsed, we rewind ``data`` by as much of it as was read, so that the
+            fields which size themselves from ``__option_padding__`` read the
+            remainder itself rather than the same number of octets from beyond
+            it, and record a cut inside it (:issue:`2685`).
 
         """
         # force cast arg type since decorator changed their signatures
@@ -793,7 +799,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # NOTE: bounded as the payload read above is (#1975).
             byte = data.read(min(length, sys.maxsize))
             self.__buffer__[field.name] = byte
-            if not isinstance(field, ForwardMatchField):
+            if not isinstance(field, (ForwardMatchField, OptionField)):
                 self._note_short_read(field.name, length, byte)
 
             value = field.unpack(byte, packet.copy())
@@ -837,15 +843,22 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
             elif isinstance(field, OptionField) and field.option_padding > 0:
-                # the option list ended before the declared field length was
-                # exhausted; give the unconsumed remainder back to ``data``
-                # so that the following fields can read it
-                data.seek(-field.option_padding, io.SEEK_CUR)
+                # NOTE: The option list ended before the declared area did, and
+                # ``option_padding`` is the rest of that area; give back as much
+                # of it as was read, so that the following fields read it and
+                # record a cut inside it themselves (#2685).
                 consumed = length - field.option_padding
+                kept = min(consumed, len(byte))
+                if kept < len(byte):
+                    data.seek(kept - len(byte), io.SEEK_CUR)
 
-                self.__buffer__[field.name] = byte[:consumed]
+                self.__buffer__[field.name] = byte[:kept]
                 packet['__length__'] -= consumed
+                if kept == len(byte):
+                    self._note_short_read(field.name, length, byte)
             else:
+                if isinstance(field, OptionField):
+                    self._note_short_read(field.name, length, byte)
                 packet['__length__'] -= length
 
             if packet['__length__'] < 0:
@@ -1487,77 +1500,3 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                     warn(f'schema {_code} already registered, overwriting '
                          f'{incumbent!r} with {cls!r}', RegistryWarning)
                 cls.__enum__[_code] = (cls)  # type: ignore[index]
-
-
-def keep_short_read(protocol: 'ProtocolBase') -> 'None':
-    """Carry a parsed header's short read into the protocol's info.
-
-    Args:
-        protocol: Protocol instance, just parsed.
-
-    Called by the layer base classes, and by the PCAP global
-    :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.
-    When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``
-    record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can
-    cut the rebuild back to what was captured (:issue:`1458`). The key is listed
-    in :attr:`Data.__included__ <pcapkit.protocols.data.data.Data.__included__>`,
-    so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries it
-    and ``from_data(info.to_dict())`` replays it too; it is absent for a header
-    that was captured whole.
-
-    """
-    header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
-    if header is None:
-        return
-    record = header.__dict__.get('__short_read__')
-    if record is not None:
-        protocol._info.__update__({'__short_read__': record})  # pylint: disable=protected-access
-
-
-def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
-    """Cut a protocol rebuilt by ``from_data`` back to the octets its header had.
-
-    Args:
-        protocol: Protocol instance, just built by ``from_data``.
-        data: The info it was built from.
-
-    Returns:
-        ``protocol`` itself.
-
-    The rebuild packs every field at full width, the missing octets as the
-    zeros they were read as. The ``__short_read__`` record that
-    :func:`keep_short_read` left in ``data`` names the field the capture ended
-    inside and how much of it there was, so everything from that point on is
-    dropped (:issue:`1458`). A header cut short has no payload past it, so it
-    ends the rebuilt data, and what the protocol writes ahead of it is kept:
-    the HTTP/2 connection preface ``HTTP.pack`` writes (:issue:`2665`). This
-    holds while ``pack`` writes nothing after the header schema, as no protocol
-    rebuilt here does; a trailer would keep as many of the cut octets.
-
-    """
-    record = data.get('__short_read__') if isinstance(data, collections.abc.Mapping) else None
-    header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
-    if record is None or header is None:
-        return protocol
-
-    name, count = record
-    # NOTE: Where the header starts, past what is written ahead of it (#2665); the
-    # width is summed from the buffers, as ``Schema.unpack`` sums it, not repacked.
-    offset = len(protocol._data) - sum(map(len, header.__buffer__.values()))  # pylint: disable=protected-access
-    for key in header.__fields__:
-        if key == name:
-            offset += min(count, len(header.__buffer__[key]))
-            break
-        offset += len(header.__buffer__[key])
-    else:
-        return protocol
-
-    header.__dict__['__short_read__'] = record
-    header._cut_short_read()  # pylint: disable=protected-access
-
-    # pylint: disable=protected-access
-    protocol._data = protocol._data[:offset]
-    protocol._file = io.BytesIO(protocol._data)
-    protocol.__cached__.pop('__len__', None)
-    protocol._info.__update__({'__short_read__': record})
-    return protocol

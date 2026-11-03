@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Mobile Node Identifier Option Subtypes
-===============================================
+============================================
 
 .. module:: pcapkit.vendor.mh.mn_id_subtype
 

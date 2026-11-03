@@ -90,6 +90,7 @@ class DCCPTestCase(unittest.TestCase):
         from pcapkit.const.dccp.option import Option
         from pcapkit.const.dccp.packet_type import PacketType
         from pcapkit.const.dccp.reset_code import ResetCode
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -100,6 +101,7 @@ class DCCPTestCase(unittest.TestCase):
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.DCCP, self.IPv4, self.IPv6, self.IP_Pseudo = DCCP, IPv4, IPv6, IP_Pseudo
+        self.TransType = TransType
         self.Type, self.Option, self.Feature, self.ResetCode = PacketType, Option, Feature, ResetCode
         self.State, self.DropCode, self.Status = AckVectorState, DropCode, ChecksumStatus
         self.config, self.ProtocolError = config, ProtocolError
@@ -502,15 +504,15 @@ class DCCPChecksumTests(DCCPTestCase):
     def test_the_ip_layer_computes_it(self) -> None:
         dccp = self.DCCP(srcport=SRC, dstport=DST, type=0, seq=1, service_code=0x12345678,
                          options=[(self.Option.Change_L, {'feature': 1, 'value': b'\x02'})], payload=b'hello')
-        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='DCCP', payload=dccp).data
+        octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
         self.assertEqual(octets, CHECKSUMMED[0])
         dccp = self.DCCP(srcport=SRC, dstport=DST, type=7, seq=9, ack=8, reset_code=5,
                          reset_data=b'\x20\x01\x02', payload=b'odd')
-        octets = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next='DCCP', payload=dccp).data
+        octets = self.IPv6(src='2001:db8::1', dst='2001:db8::2', next=self.TransType.DCCP, payload=dccp).data
         self.assertEqual(octets, CHECKSUMMED[2])
 
     def test_make_takes_the_pseudo_header(self) -> None:
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol='DCCP', upper_length=0)
+        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
         made = self.DCCP(srcport=SRC, dstport=DST, type=4, x=False, seq=7, ack=6, cscov=2,
                          options=[(self.Option.Timestamp, {'timestamp': 5})],
                          payload=b'0123456789abcdef', pseudo=pseudo).data
@@ -518,14 +520,14 @@ class DCCPChecksumTests(DCCPTestCase):
 
     def test_a_coverage_reaching_the_end_is_written_as_zero(self) -> None:
         # As Linux's dccp_csum_outgoing: CsCov 0 wherever the coverage reaches the end.
-        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol='DCCP', upper_length=0)
+        pseudo = self.IP_Pseudo(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, upper_length=0)
         for cscov, payload in ((15, b'abc'), (2, b'abcd')):
             with self.subTest(cscov=cscov, payload=payload):
                 made = self.DCCP(type=2, x=False, ccval=5, cscov=cscov, payload=payload, pseudo=pseudo).data
                 self.assertEqual(made[5], 0x50)
                 self.assertEqual(made[6:8], expected(pseudo4(len(made)), made, len(made)))
                 dccp = self.DCCP(type=2, x=False, ccval=5, cscov=cscov, payload=payload)
-                octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='DCCP', payload=dccp).data
+                octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP, payload=dccp).data
                 self.assertEqual(octets[20:], made)
                 self.assertEqual(self.status(octets), (self.Status.VALID, []))
         # One short of the end, and one written as given, keep their value.
@@ -534,7 +536,7 @@ class DCCPChecksumTests(DCCPTestCase):
 
     def test_off_or_given_is_written_as_is(self) -> None:
         with mock.patch.object(self.config, 'CHECKSUM_COMPUTE', False):
-            octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol='DCCP',
+            octets = self.IPv4(src='192.0.2.1', dst='198.51.100.2', protocol=self.TransType.DCCP,
                                payload=self.DCCP(type=2, x=False)).data
         self.assertEqual(octets[26:28], b'\x00\x00')
         self.assertEqual(self.DCCP(type=2, checksum=b'\xbe\xef').data[6:8], b'\xbe\xef')

@@ -81,10 +81,8 @@ from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -245,10 +243,7 @@ class GRE(Link[Data_GRE, Schema_GRE],
              sequence_number: 'Optional[int]' = None,
              reserved: 'int' = 0,
              version: 'Literal[0]' = 0,
-             protocol_type: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,  # pylint: disable=line-too-long
-             protocol_type_default: 'Optional[int]' = None,
-             protocol_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             protocol_type_reversed: 'bool' = False,
+             protocol_type: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_GRE':
         """Make (construct) packet data.
@@ -281,9 +276,6 @@ class GRE(Link[Data_GRE, Schema_GRE],
             version: Version Number; :rfc:`2784` fixes this at ``0``.
             protocol_type: Protocol Type: the EtherType of the encapsulated
                 payload.
-            protocol_type_default: Default value of ``protocol_type``.
-            protocol_type_namespace: Namespace of ``protocol_type``.
-            protocol_type_reversed: Reversed namespace of ``protocol_type``.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -293,15 +285,15 @@ class GRE(Link[Data_GRE, Schema_GRE],
         Raises:
             ProtocolError: If ``checksum`` or ``reserved1`` is given with ``C``
                 clear; if ``reserved`` sets a bit outside ``0x4FF8``; if ``version``
-                does not fit in 3 bits; or if ``checksum``, ``key`` or
-                ``sequence_number`` is given but does not fit the width of
-                its field (16 bits for ``checksum``, 32 bits for ``key`` and
-                ``sequence_number``).
+                does not fit in 3 bits; if ``protocol_type`` is a name, a
+                :obj:`bool`, or a member or code its field cannot carry; or if
+                ``checksum``, ``key`` or ``sequence_number`` is given but does
+                not fit the width of its field (16 bits for ``checksum``, 32
+                bits for ``key`` and ``sequence_number``).
 
         """
-        protocol_type_ = self._make_index(protocol_type, protocol_type_default,
-                                          namespace=protocol_type_namespace,
-                                          reversed=protocol_type_reversed, pack=False)
+        protocol_type_ = self._make_index(protocol_type, Enum_EtherType, bits=16,
+                                          name='protocol type')
 
         if checksum_present is None:
             checksum_present = checksum is not None
@@ -338,7 +330,7 @@ class GRE(Link[Data_GRE, Schema_GRE],
                 'reserved_2': (reserved >> 3) & 0x1FF,
                 'version': version,
             },
-            protocol_type=protocol_type_,  # type: ignore[arg-type]
+            protocol_type=protocol_type_,
             checksum=0 if checksum_present and checksum is None else checksum,
             reserved1=reserved1,
             key=key,

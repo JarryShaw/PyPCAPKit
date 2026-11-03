@@ -35,20 +35,18 @@ import sys
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.header import GLOBAL_HEADER_LEN, MAGIC_NUMBER
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
-from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import EndianError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import IO, Any, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
 
 __all__ = ['Header']
@@ -62,7 +60,25 @@ _DECLARED_MAGIC = {declared: magic for magic, declared in MAGIC_NUMBER.items()}
 
 class Header(ProtocolBase[Data_Header, Schema_Header],
              schema=Schema_Header, data=Data_Header):
-    """PCAP file global header extractor."""
+    """PCAP file global header extractor.
+
+    .. versionchanged:: 1.6.0
+
+       The ``network`` field of :meth:`make` takes a member or an :class:`int`
+       code, resolved with the enumeration's ``get``; a name, a :obj:`bool`,
+       or a code the field cannot carry raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``network_default``, ``network_namespace`` and ``network_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
 
     ##########################################################################
     # Properties.
@@ -183,10 +199,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
              version_minor: 'Optional[int]' = None,
              thiszone: int = 0, sigfigs: int = 0,
              snaplen: int = 0x40_000,
-             network: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
-             network_default: 'Optional[int]' = None,
-             network_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
-             network_reversed: bool = False,
+             network: 'Enum_LinkType | int' = Enum_LinkType.NULL,
              **kwargs: 'Any') -> 'Schema_Header':
         """Make (construct) packet data.
 
@@ -202,13 +215,14 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             sigfigs: accuracy of timestamps
             snaplen: max length of captured packets, in octets
             network: data link type
-            network_default: default value for unknown data link type
-            network_namespace: data link type namespace
-            network_reversed: if namespace is ``str -> int`` pairs
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
+
+        Raises:
+            ProtocolError: If ``network`` is a name, a :obj:`bool`, or a
+                member or code the 32-bit ``network`` field cannot carry.
 
         """
         # make magic number
@@ -226,8 +240,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             thiszone=thiszone,
             sigfigs=sigfigs,
             snaplen=snaplen,
-            network=self._make_index(network, network_default, namespace=network_namespace,
-                                     reversed=network_reversed, pack=False),
+            network=self._make_index(network, Enum_LinkType, bits=32, name='network', alias='PCAP'),
         )
 
     @classmethod

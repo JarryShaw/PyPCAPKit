@@ -31,13 +31,9 @@ V4 = '198.51.100.7'
 LONG_KEY = b'\x30\x81\x9f' + bytes(range(159))
 
 #: Options a one-octet change makes the reader raise an error that is not
-#: pcapkit's, by the reader: its data model has no form for the octets, a prefix
-#: with host bits set or a time past datetime.MAXYEAR. Inside IPv6 the header is
-#: then Raw, so the round trip holds. Found by this sweep, not fixed here.
-KNOWN_CRASHES = {
-    'Mobile_Network_Prefix_Option': '_read_opt_mnp',
-    'Timestamp_Option': '_read_opt_timestamp',
-}
+#: pcapkit's, by the reader whose data model has no form for the octets. Inside
+#: IPv6 the header is then Raw, so the round trip holds.
+KNOWN_CRASHES = {}  # type: dict[str, str]
 
 
 def _ipv6(body: bytes) -> bytes:

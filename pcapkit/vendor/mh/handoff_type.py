@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Handoff Indicator Option Type Values
-===============================================
+==========================================
 
 .. module:: pcapkit.vendor.mh.handoff_type
 

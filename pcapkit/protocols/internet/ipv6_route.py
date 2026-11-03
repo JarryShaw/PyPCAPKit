@@ -29,8 +29,8 @@ from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import parse_ip_address
-from pcapkit.corekit.fields.strings import pad_length
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
@@ -51,11 +51,9 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -119,13 +117,26 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
     .. versionchanged:: 1.6.0
 
-       :meth:`make` and the RPL source route maker, given a value a
-       fixed-width field cannot carry -- negative, too wide, or a :obj:`bool`
-       for a field wider than one bit -- raise
-       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than writing
-       a different value or raising another exception. The registry codes
-       :meth:`make` takes, ``next`` and ``type``, are not range-checked
-       (:issue:`2614`).
+       * :meth:`make` and the RPL source route maker, given a value a
+         fixed-width field cannot carry -- negative, too wide, or a
+         :obj:`bool` for a field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception
+         (:issue:`2614`).
+       * Each enumeration field of :meth:`make`, ``next`` and ``type``, takes
+         a member or an :class:`int` code, resolved with the enumeration's
+         ``get``; a name, a :obj:`bool`, or a code that does not fit in one
+         octet raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than resolving against an enumeration inferred from the
+         caller's frame or writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``next_default``, ``next_namespace``, ``next_reversed``,
+       ``type_default``, ``type_namespace`` and ``type_reversed`` arguments of
+       :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -254,14 +265,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
     def make(self,
              dst: 'Optional[IPv6Address | str | int| bytes]' = None,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
-             type: 'Enum_Routing | StdlibEnum | AenumEnum | str | int' = Enum_Routing.Source_Route,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             type: 'Enum_Routing | int' = Enum_Routing.Source_Route,
              seg_left: 'int' = 0,
              data: 'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
              hdr_ext_len: 'Optional[int]' = None,
@@ -272,13 +277,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Args:
             dst: Destination address.
             next: Next header type.
-            next_default: Default value of next header type.
-            next_namespace: Namespace of next header type.
-            next_reversed: If the namespace of next header type is reversed.
             type: Routing type.
-            type_default: Default value of routing type.
-            type_namespace: Namespace of routing type.
-            type_reversed: If the namespace of routing type is reversed.
             seg_left: Segments left.
             data: Routing data.
             hdr_ext_len: ``Hdr Ext Len`` field value; computed from ``data``
@@ -291,14 +290,15 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Raises:
             FieldValueError: If ``dst`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`)
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`)
                 and ``data`` is a :obj:`dict` or a data model; ``dst`` is not
                 read for any other ``data``.
-            ProtocolError: If ``data`` is :obj:`bytes` that do not parse as
-                the routing data of ``type``, or is of none of the accepted
-                types; or if ``seg_left``, or ``hdr_ext_len`` or the
-                ``Hdr Ext Len`` computed from ``data``, does not fit in one
-                octet.
+            ProtocolError: If ``next`` or ``type`` is a name, a :obj:`bool`,
+                or a member or code that does not fit in one octet; if
+                ``data`` is :obj:`bytes` that do not parse as the routing data
+                of ``type``, or is of none of the accepted types; or if
+                ``seg_left``, or ``hdr_ext_len`` or the ``Hdr Ext Len``
+                computed from ``data``, does not fit in one octet.
 
         .. versionchanged:: 1.5.0
 
@@ -306,12 +306,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
            shifts a positional ``payload``.
 
         """
-        next_val = cast('Enum_TransType',
-                        self._make_index(next, next_default, namespace=next_namespace,
-                                         reversed=next_reversed, pack=False))
-        type_val = cast('Enum_Routing',
-                        self._make_index(type, type_default, namespace=type_namespace,
-                                         reversed=type_reversed, pack=False))
+        next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
+        type_val = self._make_index(type, Enum_Routing, bits=8, name='routing type')
 
         if isinstance(data, bytes):
             # ``data`` here *is* the type-specific data (no per-type
@@ -865,7 +861,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Raises:
             FieldValueError: If an entry of ``ip`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
             ProtocolError: If ``ip`` is empty, or ``reserved`` does not fit in
                 its twenty bits.
 

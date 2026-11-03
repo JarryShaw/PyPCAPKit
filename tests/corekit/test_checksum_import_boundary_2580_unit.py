@@ -81,8 +81,11 @@ class ChecksumImportBoundaryTests(unittest.TestCase):
                     if crosses_the_boundary(name)]
         self.assertEqual(crossing, [
             (4, 'pcapkit.protocols.protocol'),
+            (4, 'pcapkit.protocols.protocol._rebuilding'),
             (6, 'pcapkit.protocols.misc.checksum.ip_pseudo'),
+            (6, 'pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo'),
             (8, 'pcapkit.protocols.internet.ah'),
+            (8, 'pcapkit.protocols.internet.ah.AH'),
             (9, 'pcapkit.foundation'),
         ])
 

@@ -54,12 +54,14 @@ class OSPFChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+        from pcapkit.const.ospf.packet import Packet
         from pcapkit.protocols.application.ospf import OSPF
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 
         self.OSPF = OSPF
+        self.Hello = Packet.Hello
         self.Status = ChecksumStatus
         self.config = config
         self.ProtocolWarning = ProtocolWarning
@@ -93,7 +95,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_cryptographic_authentication_leaves_it_unused(self) -> None:
         packet = BUILT[0][:14] + b'\x00\x02' + bytes([0, 0, 1, 16]) + bytes(4) + HELLO
         self.assertEqual(self.status(packet), (self.Status.NOT_COMPUTED, []))
-        made = self.OSPF(type='Hello', router_id='192.0.2.1', auth_type=2,
+        made = self.OSPF(type=self.Hello, router_id='192.0.2.1', auth_type=2,
                          auth_data={'key_id': 1, 'len': 16, 'seq': 0}, payload=HELLO).data
         self.assertEqual(made[12:14], b'\x00\x00')
 
@@ -115,7 +117,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_computes_the_checksum(self) -> None:
         for packet, kwargs in zip(BUILT, ({}, {'auth_type': 1, 'auth_data': b'secret!!'})):
             with self.subTest(kwargs=kwargs):
-                made = self.OSPF(type='Hello', router_id='192.0.2.1', payload=HELLO, **kwargs).data
+                made = self.OSPF(type=self.Hello, router_id='192.0.2.1', payload=HELLO, **kwargs).data
                 self.assertEqual(made, packet)
                 ospf, messages = self.parse(made)
                 self.assertEqual((ospf.info.checksum_status, messages), (self.Status.VALID, []))
@@ -125,7 +127,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def test_make_agrees_with_scapy(self) -> None:
         from scapy.contrib.ospf import OSPF_Hdr
 
-        made = self.OSPF(type='Hello', router_id='192.0.2.1', payload=HELLO).data
+        made = self.OSPF(type=self.Hello, router_id='192.0.2.1', payload=HELLO).data
         packet = OSPF_Hdr(made)
         del packet.chksum
         self.assertEqual(bytes(packet), made)

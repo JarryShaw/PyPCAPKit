@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Application Layer Protocol Numbers (TCP)
-=============================================
+==============================================
 
 .. module:: pcapkit.vendor.reg.apptype.tcp
 

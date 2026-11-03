@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """DCCP Feature Numbers
-=======================
+==========================
 
 .. module:: pcapkit.vendor.dccp.feature
 

@@ -10,6 +10,13 @@ IP Address Fields
    packed :obj:`True` and :obj:`False` as ``0.0.0.1`` and ``0.0.0.0``
    (:issue:`491`).
 
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.corekit.fields.ipaddress.parse_ip_address`` and
+   ``pcapkit.corekit.fields.ipaddress._reject_bool``, now
+   :func:`pcapkit.corekit.schema.ipaddress.parse_ip_address` and
+   :func:`pcapkit.corekit.schema.ipaddress._reject_bool` (:issue:`2674`).
+
 IP Addresses
 ~~~~~~~~~~~~
 
@@ -32,11 +39,6 @@ IP Interface
    :members:
    :show-inheritance:
 
-Construction Helpers
-~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: pcapkit.corekit.fields.ipaddress.parse_ip_address
-
 Internal Definitions
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -55,8 +57,6 @@ Internal Definitions
 .. autoclass:: pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface
    :members:
    :show-inheritance:
-
-.. autofunction:: pcapkit.corekit.fields.ipaddress._reject_bool
 
 Type Variables
 ~~~~~~~~~~~~~~

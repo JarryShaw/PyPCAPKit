@@ -322,8 +322,6 @@ NOT_A_COPY = {
     ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
         "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
         '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
-    ('pcapkit/protocols/schema/internet/ipv6.py', 'ptr + 6'):
-        'the end of a Jumbo Payload option (2 octets of header, 4 of value)',
     ('pcapkit/protocols/schema/link/frad.py', "{'cr': (6, 1)}"):
         'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
         'not the IPv6 Next Header offset',
@@ -643,8 +641,9 @@ def _context(text: 'str', operand: 'ast.Constant', parents: 'dict[int, ast.AST]'
     return _segment(text, node)
 
 
-#: Value helpers and the keyword each takes a field width by, in bits or octets (#2614).
-_WIDTHS = {'_make_uint': 'bits', '_make_sint': 'bits', '_make_pack': 'size',
+#: Value helpers and the keyword each takes a field width by, in bits or octets (#2614,
+#: #2594).
+_WIDTHS = {'_make_uint': 'bits', '_make_sint': 'bits', '_make_index': 'bits', '_make_pack': 'size',
            '_read_uint': 'size', '_make_octets': 'size'}
 
 
@@ -838,8 +837,8 @@ class TestNotReinlined(unittest.TestCase):
             else:
                 offenders.append(f'{rel}:{lineno}: {context} (a copy of a homed constant?)')
         self.assertEqual(offenders, [])
-        # an entry that no longer matches anything is stale, and would hide a
-        # copy that later took its place
+        # an entry that matches nothing is stale, and would hide a copy that
+        # took its place
         self.assertEqual(sorted(set(NOT_A_COPY) - seen_copy), [])
         listed = {(rel, value) for rel, (values, _) in UNRELATED.items() for value in values}
         self.assertEqual(sorted(listed - seen_unrelated), [])

@@ -4,7 +4,7 @@
 import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import FieldBase, _zero_fill_items
+from pcapkit.corekit.fields.field import FieldBase, _zero_filled_items
 from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -175,8 +175,8 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
         Raises:
             FieldValueError: If the items overrun the field, if a schema item
-                consumes nothing from ``buffer`` -- see the note below -- or if
-                schema items short of the field's length cannot be zero-filled.
+                consumes nothing from ``buffer``, or if schema items short of the
+                field's length cannot be zero-filled.
 
         When ``buffer`` falls short of the field's length, schema items are read
         from its octets zero-filled to that length, as
@@ -212,7 +212,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # before, from the first one -- is still an instance of the original.
         # ``isinstance`` against the new class would report :data:`False` for an
         # item that plainly is a ``SchemaField``, ``is_schema`` would go the
-        # wrong way, and this method's other branch would bill each item by its
+        # wrong way, and the item loop's other branch would bill each item by its
         # *declared* length instead of by what it actually consumed -- so a
         # malformed TCP SACK option's length check could raise
         # :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead
@@ -231,13 +231,34 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             present = file.seek(0, io.SEEK_END) - start
             file.seek(start, io.SEEK_SET)
             if present < length:
-                file = io.BytesIO(_zero_fill_items(self.name, length, file.read()))
+                with _zero_filled_items(self.name, length, file.read()) as filled:
+                    return self._unpack_items(io.BytesIO(filled), packet, is_schema)
+        return self._unpack_items(file, packet, is_schema)
+
+    def _unpack_items(self, file: 'IO[bytes]', packet: 'dict[str, Any]', is_schema: 'bool') -> 'list[_TL]':
+        """Unpack the field's items from ``file``.
+
+        Args:
+            file: Stream the items are read from.
+            packet: Packet data.
+            is_schema: Whether the items are schemas.
+
+        Returns:
+            Unpacked items.
+
+        Raises:
+            FieldValueError: If the items overrun the field, or if a schema item
+                consumes nothing from ``file`` -- see the note below.
+
+        """
+        length = self._length
+        item_type = cast('FieldBase', self._item_type)
 
         # NOTE: The item-typed branch below sizes each item by ``field.length``,
         # which is what it read, but the schema branch sizes it by ``len(data)``,
         # which is only what the schema *recorded*. A schema that reads nothing
         # records nothing, so ``length -= len(data)`` makes no progress and the
-        # loop spins forever. The zero-fill above gives every item octets to read,
+        # loop spins forever. The zero-fill in ``unpack`` gives every item octets,
         # but an item schema may still consume none of them. Remembering where the
         # previous item ended is what bounds the iteration count, since it does
         # not depend on what the schema reports. Cf. #431, which is the same
@@ -252,7 +273,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
         temp = []  # type: list[_TL]
         while length > 0:
-            field = self._item_type(packet)
+            field = item_type(packet)
 
             if is_schema:
                 data = cast('SchemaField', field).unpack(file, packet)
@@ -428,7 +449,8 @@ class OptionField(ListField, Generic[_TS]):
             FieldValueError: If an option consumes nothing from ``buffer``, since
                 the loop below has then no way to get past it.
             ProtocolError: If an option that begins with octets present reads
-                past the end of the data.
+                past the end of the data, unless :meth:`_accepts_short_read`
+                accepts it.
 
         .. versionchanged:: 1.5.0
 
@@ -532,7 +554,7 @@ class OptionField(ListField, Generic[_TS]):
 
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
-            if tracker.short and consumed > 0:
+            if tracker.short and consumed > 0 and not self._accepts_short_read(data):
                 raise ProtocolError(
                     f'Field {self.name} has an option that runs past the end of '
                     f'the data: {code!r} at offset {offset - start} of '
@@ -577,3 +599,21 @@ class OptionField(ListField, Generic[_TS]):
 
         self._option_padding = length
         return temp
+
+    def _accepts_short_read(self, option: '_TS') -> 'bool':  # pylint: disable=unused-argument
+        """Whether an option that read past the end of the data may stand.
+
+        Args:
+            option: Option just unpacked, which read short.
+
+        Returns:
+            :data:`False`, so that :meth:`unpack` refuses the option
+            (:issue:`1325`): padding cut short may be content the option's own
+            length declares, as a ``PadN`` option's is. A list whose items'
+            lengths leave out their trailing padding may override this, as
+            :class:`~pcapkit.protocols.schema.transport.sctp.PaddedOptionField`
+            does; :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+            then writes back only the octets read.
+
+        """
+        return False

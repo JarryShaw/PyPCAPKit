@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """PyPCAP Support
-===================
+====================
 
 .. module:: pcapkit.foundation.engines.pypcap
 

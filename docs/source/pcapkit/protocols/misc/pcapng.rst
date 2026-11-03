@@ -577,9 +577,9 @@ Auxiliary Functions
 -------------------
 
 The byte order of every block but the Section Header Block is read by
-:func:`~pcapkit.corekit.fields.byteorder.byteorder_callback`, which is
+:func:`~pcapkit.corekit.schema.byteorder.byteorder_callback`, which is
 shared with the PCAP frame header and documented in
-:mod:`pcapkit.corekit.fields.byteorder`.
+:mod:`pcapkit.corekit.schema.byteorder`.
 
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector

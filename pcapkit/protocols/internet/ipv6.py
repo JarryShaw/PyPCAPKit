@@ -35,21 +35,20 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
-from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
+from pcapkit.protocols.schema.internet.ipv6 import jumbogram_error
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import frame_depth
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
     from typing import IO, Any, ContextManager, Mapping, Optional, Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -93,16 +92,27 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     .. versionchanged:: 1.6.0
 
-       An extension header whose dedicated parser raises is the upper layer,
-       parsed once as :class:`~pcapkit.protocols.misc.raw.Raw`, and the chain
-       walk stops there, as :rfc:`8200#section-4` has a node discard such a
-       packet (:issue:`2477`).
+       * An extension header whose dedicated parser raises is the upper
+         layer, parsed once as :class:`~pcapkit.protocols.misc.raw.Raw`, and
+         the chain walk stops there, as :rfc:`8200#section-4` has a node
+         discard such a packet (:issue:`2477`).
+       * ``next`` of :meth:`make` takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+         code that does not fit in one octet raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame or
+         writing a different value (:issue:`2594`).
 
     .. versionremoved:: 1.6.0
 
-       ``__generic_ext_codes__``, the extension headers whose dedicated parser
-       raising fell back to
-       :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` (:issue:`2477`).
+       * ``__generic_ext_codes__``, the extension headers whose dedicated
+         parser raising fell back to
+         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+         (:issue:`2477`).
+       * The ``next_default``, ``next_namespace`` and ``next_reversed``
+         arguments of :meth:`make`; resolve a name with
+         :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+         (:issue:`2594`).
 
     """
 
@@ -254,10 +264,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     def make(self,
              traffic_class: 'int' = 0,
              flow_label: 'int' = 0,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
              hop_limit: 'int' = 64,  # reasonable default
              src: 'IPv6Address | str | bytes | int' = '::1',
              dst: 'IPv6Address | str | bytes | int' = '::',
@@ -271,9 +278,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             traffic_class: Traffic class.
             flow_label: Flow label.
             next: Next header.
-            next_default: Default value of next header.
-            next_namespace: Namespace of next header.
-            next_reversed: Whether to reverse the namespace of next header.
             hop_limit: Hop limit.
             src: Source IP address.
             dst: Destination IP address.
@@ -289,14 +293,17 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet.
+
         .. versionchanged:: 1.5.0
 
            Takes ``payload_length`` ahead of ``payload`` (:issue:`1155`), which
            shifts a positional ``payload``.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,
-                                    reversed=next_reversed, pack=False)
+        next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
         # NOTE: An explicit ``payload_length`` is written as given, so that a
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
@@ -319,7 +326,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 'label': flow_label,
             },
             length=payload_length,
-            next=next_val,  # type: ignore[arg-type]
+            next=next_val,
             limit=hop_limit,
             src=src,
             dst=dst,

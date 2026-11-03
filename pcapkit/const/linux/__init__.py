@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:mod:`pcapkit.const.linux` Constant Enumerations
-=====================================================
+======================================================
 
 This module contains the constant enumerations of the Linux-specific
 encapsulations, e.g. :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`.

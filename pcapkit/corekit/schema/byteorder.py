@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
-"""byte-order field helpers
+"""Byte-Order Helpers
+========================
 
-:mod:`pcapkit.corekit.fields.byteorder` holds the field callback that reads a
-capture file's byte order out of the packet data. The record header of a
+.. module:: pcapkit.corekit.schema.byteorder
+
+:mod:`pcapkit.corekit.schema.byteorder` reads the byte order a capture file or
+section declares out of the packet data: :func:`byteorder_callback` sets it on a
+:class:`~pcapkit.corekit.fields.numbers.NumberField` for the record header of a
 classic PCAP file (:mod:`~pcapkit.protocols.schema.misc.pcap.frame`) and the
-blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.schema.misc.pcapng`) both use
-it. It acts on a :class:`~pcapkit.corekit.fields.numbers.NumberField` and on the
-``__packet__`` key :class:`~pcapkit.corekit.fields.misc.SchemaField` hands a
-nested schema, so it lives with the fields rather than with either schema
-(:issue:`1711`).
+blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.schema.misc.pcapng`), and
+:func:`packet_byteorder` is what the callback and the PCAP-NG makers
+(:mod:`pcapkit.protocols.misc.pcapng`) read it with. It is one of the
+:mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not part of
+the header schema framework in :mod:`pcapkit.protocols.schema`; see
+:ref:`utilities-or-corekit`.
 
-.. versionadded:: 1.5.0
+.. versionadded:: 1.6.0
 
-   :func:`byteorder_callback` moves here from
-   :mod:`pcapkit.protocols.schema.misc.pcap.frame` (:issue:`1711`).
+   Moved here from ``pcapkit.corekit.fields.byteorder``, with both its helpers
+   (:issue:`2674`).
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.corekit.fields.byteorder``, with no alias (:issue:`2674`).
 
 """
 

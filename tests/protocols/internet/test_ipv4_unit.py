@@ -761,7 +761,7 @@ class IPv4UnitTests(unittest.TestCase):
         <pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process>` is never
         reached. It is the same defect as #481, #500, #539 and #540, with the
         same fix #539 used: route the conversion through
-        :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.
+        :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`.
 
         Both halves are asserted, because a guard that rejects everything is not a
         fix: a real address still has to pack, and still has to come back out of

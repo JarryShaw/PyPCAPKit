@@ -105,13 +105,17 @@ class ProtocolsImportBoundaryTests(unittest.TestCase):
         ])
         self.assertEqual(violations(source, 'pcapkit.protocols.application.dtls'), [
             (2, 'pcapkit.foundation.analysis.dtls'),
+            (2, 'pcapkit.foundation.analysis.dtls.dtls_handshake'),
             (3, 'pcapkit.foundation.reassembly'),
+            (3, 'pcapkit.foundation.reassembly.dtls'),
             (4, 'pcapkit.foundation'),
             (9, 'pcapkit.foundation.extraction'),
             (12, 'pcapkit.foundation.traceflow'),
             (14, 'pcapkit.foundation.registry.foundation'),
+            (14, 'pcapkit.foundation.registry.foundation.e'),
             (15, 'pcapkit.foundation.registry'),
             (16, 'pcapkit.foundation.registry.protocolsx'),
+            (16, 'pcapkit.foundation.registry.protocolsx.x'),
         ])
 
 

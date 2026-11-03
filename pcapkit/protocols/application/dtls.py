@@ -122,10 +122,8 @@ from pcapkit.protocols.schema.application.dtls import DTLSCiphertext as Schema_D
 from pcapkit.utilities.exceptions import CaughtByCaller, ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Iterable, Optional, Type
+    from typing import Any, Iterable, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
@@ -501,10 +499,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         return self._read_dtls_record(length, **kwargs)
 
     def make(self,
-             content_type: 'Enum_ContentType | StdlibEnum | AenumEnum | str | int' = Enum_ContentType.application_data,  # pylint: disable=line-too-long
-             content_type_default: 'Optional[int]' = None,
-             content_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             content_type_reversed: 'bool' = False,
+             content_type: 'Enum_ContentType | int' = Enum_ContentType.application_data,
              version: 'int' = 0xFEFD,
              epoch: 'int' = 0,
              sequence_number: 'int' = 0,
@@ -520,9 +515,6 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         Args:
             content_type: Record content type.
-            content_type_default: Default value for ``content_type``.
-            content_type_namespace: Namespace for ``content_type``.
-            content_type_reversed: Reverse namespace for ``content_type``.
             version: Legacy record version (``major << 8 | minor``), e.g.
                 ``0xFEFD`` for DTLS 1.2 and (the legacy value DTLS 1.3 keeps
                 here) DTLS 1.3.
@@ -563,9 +555,13 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
 
         Raises:
             ProtocolError: If ``cid`` is invalid, missing for a ``tls12_cid``
-                record, or given for a legacy-format one of another type.
-            StructError: If a record-header field, or a field of ``content``,
-                does not fit its width.
+                record, or given for a legacy-format one of another type; if a
+                legacy-format record's ``content_type`` is a name, a
+                :obj:`bool`, or a member or code the 8-bit content type field
+                cannot carry; or if an extension of ``content`` given as a
+                ``(type, kwargs)`` pair has such a type for its 16-bit field.
+            StructError: If another record-header field, or a field of
+                ``content``, does not fit its width.
             FieldValueError: If a unified-header record's ``epoch`` does not
                 fit its two bits.
 
@@ -594,17 +590,15 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 payload=payload,
             )
 
-        content_type_ = cast('Enum_ContentType', self._make_index(
-            content_type, content_type_default, namespace=content_type_namespace,
-            reversed=content_type_reversed, pack=False))
+        content_type_ = self._make_index(content_type, Enum_ContentType, bits=8, name='content type')
 
         fragment = data if data is not None else self._make_tls_content(content_type_, content, dtls=True)
         # NOTE: the schema masks a field to its width, so each is packed here first, to
         # refuse a wider value with the StructError the content makers raise.
-        for value, size in ((int(content_type_), 1), (version, 2), (epoch, 2), (len(fragment), 2)):
+        for value, size in ((version, 2), (epoch, 2), (len(fragment), 2)):
             self._make_pack(value, size=size)
         self._make_pack(sequence_number, size=6)
-        if int(content_type_) == Enum_ContentType.tls12_cid:
+        if content_type_ == Enum_ContentType.tls12_cid:
             if cid is None or not _is_cid(cid):
                 raise ProtocolError(f'{self.alias}: invalid connection ID: {cid!r} '
                                     '(a tls12_cid record carries 1 to 255 octets)')

@@ -126,9 +126,9 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.radiotap.field_type import FieldType as Enum_FieldType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.fields.collections import ListField
-from pcapkit.corekit.fields.strings import pad_length
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.protocols.data.link.radiotap import EHT as Data_EHT
 from pcapkit.protocols.data.link.radiotap import FHSS as Data_FHSS
 from pcapkit.protocols.data.link.radiotap import HE as Data_HE

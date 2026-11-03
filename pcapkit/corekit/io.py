@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """I/O Objects
-===============
+=================
 
 .. module:: pcapkit.corekit.io
 

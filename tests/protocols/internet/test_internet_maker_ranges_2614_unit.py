@@ -26,9 +26,14 @@ classes are imported inside each test, after
 
 """
 
+import enum
 import inspect
 import io
+import re
+import sys
 import unittest
+
+import aenum
 
 from tests._support import reimport_once_per_class
 
@@ -37,13 +42,26 @@ from tests._support import reimport_once_per_class
 NOT_AN_INTEGER = ('Enum', 'Address', 'bytes', 'str')
 
 
+def _takes_enumeration(func: 'object', param: 'inspect.Parameter') -> 'bool':
+    """Whether ``param`` of ``func`` takes a registry code.
+
+    Its annotation's head, past an ``Optional[``, names an enumeration in the module
+    defining ``func``, as ``Enum_ToSPrecedence | int`` does (#2594).
+
+    """
+    head = re.match(r'(?:Optional\[)?(\w+)', str(param.annotation))
+    module = vars(sys.modules[func.__module__])  # type: ignore[attr-defined]
+    kind = module.get(head.group(1)) if head is not None else None
+    return isinstance(kind, type) and issubclass(kind, (enum.Enum, aenum.Enum))
+
+
 def integer_arguments(func: 'object') -> 'list[str]':
     """Keyword arguments of ``func`` that take a plain integer."""
     names = []
     for param in inspect.signature(func).parameters.values():  # type: ignore[arg-type]
         if param.kind not in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY):
             continue
-        if param.name.endswith(('_default', '_reversed', '_namespace')):
+        if _takes_enumeration(func, param):
             continue
         ann = str(param.annotation)
         default = param.default
@@ -57,9 +75,9 @@ def integer_arguments(func: 'object') -> 'list[str]':
 
 
 def registry_arguments(func: 'object') -> 'list[str]':
-    """Keyword arguments of ``func`` that take a registry code: those with a ``_namespace``."""
-    params = inspect.signature(func).parameters  # type: ignore[arg-type]
-    return [name for name in params if f'{name}_namespace' in params]
+    """Keyword-only arguments of ``func`` that take a registry code."""
+    return [param.name for param in inspect.signature(func).parameters.values()  # type: ignore[arg-type]
+            if param.kind is param.KEYWORD_ONLY and _takes_enumeration(func, param)]
 
 
 def octet_arguments(func: 'object') -> 'list[str]':
@@ -447,6 +465,7 @@ class MHMakerTests(_Case):
         'bra': ('Binding_Refresh_Advice', {}, {'interval': (0xFFFF, 'refresh interval')}),
         'ni': ('Nonce_Indices', {}, {'home': (0xFFFF, 'home nonce index'),
                                      'careof': (0xFFFF, 'care-of nonce index')}),
+        'mnp': ('Mobile_Network_Prefix_Option', {}, {'prefix_length': (0xFF, 'prefix length')}),
         'auth': ('AUTH_OPTION_TYPE', {'data': b'\x00\x00'}, {'spi': (0xFFFFFFFF, 'SPI')}),
         'badf': ('Binding_Authorization_Data_for_FMIPv6', {'data': b'\x00'},
                  {'spi': (0xFFFFFFFF, 'SPI')}),
@@ -454,7 +473,7 @@ class MHMakerTests(_Case):
         'dns': ('DNS_UPDATE_TYPE', {}, {'reserved': (0x7F, 'reserved bits')}),
         'vendor': ('Vendor_Specific_Mobility_Option', {}, {'vendor': (0xFFFFFFFF, 'vendor ID'),
                                                            'subtype': (0xFF, 'vendor subtype')}),
-        'hnp': ('Home_Network_Prefix_Option', {}, {'prefix_length': (128, 'prefix length')}),
+        'hnp': ('Home_Network_Prefix_Option', {}, {'prefix_length': (0xFF, 'prefix length')}),
         'hi': ('Handoff_Indicator_Option', {}, {'reserved': (0xFF, 'reserved octet')}),
         'timestamp': ('Timestamp_Option', {}, {'seconds': ((1 << 48) - 1, 'timestamp seconds'),
                                                'fraction': (0xFFFF, 'timestamp fraction')}),
@@ -561,11 +580,6 @@ class MHMakerTests(_Case):
          ('suboptions', 'Heartbeat_Control', 'max_retransmissions'), 0xFFFF,
          'maximum retransmissions'),
     )
-
-    UNPARSED_MAXIMA = {
-        '_make_opt_timestamp.seconds': 'MH._read_opt_timestamp turns the seconds into a '
-                                       'datetime, which cannot hold the 48-bit maximum',
-    }
 
     #: Integer arguments outside the sweep, and why.
     EXEMPT = {
@@ -972,7 +986,8 @@ class OptionCodeTests(_Case):
     """The option makers refuse a registry code their field cannot carry."""
 
     #: One-bit codes, which take a :obj:`bool` as ``_make_uint`` lets one-bit fields.
-    ONE_BIT = {'MH._make_opt_ipv4_dhcp.mode'}
+    ONE_BIT = {'HOPOPT._make_opt_smf_dpd.mode', 'IPv6_Opts._make_opt_smf_dpd.mode',
+               'MH._make_opt_ipv4_dhcp.mode'}
 
     def _builders(self) -> 'list[tuple[type, object]]':
         from pcapkit.const.mh.packet import Packet

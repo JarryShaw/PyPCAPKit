@@ -54,6 +54,46 @@ checks that. What needs IPv4 and IPv6 stays beside
 module per checksum family, so a new family sits beside
 :mod:`~pcapkit.corekit.checksum.internet`.
 
+Shared Schema Helpers
+~~~~~~~~~~~~~~~~~~~~~
+
+**A helper that code outside the schema layer calls lives in**
+:mod:`pcapkit.corekit.schema`, one module per group, rather than in the module that
+first needed it; the schema layer is :mod:`pcapkit.corekit.fields` and
+:mod:`pcapkit.protocols.schema`. It keeps no re-export at its old path. Ruled by the
+owner in session, on :issue:`2674`, who grouped these helpers in one package instead
+of placing each by the questions above. So
+:func:`~pcapkit.corekit.schema.padding.pad_length` is in
+:mod:`pcapkit.corekit.schema.padding`, and
+:func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
+:func:`~pcapkit.corekit.schema.shortread.replay_short_read` in
+:mod:`pcapkit.corekit.schema.shortread`. :mod:`pcapkit.corekit.schema` is not the
+header schema framework, which stays :mod:`pcapkit.protocols.schema` and its
+:class:`~pcapkit.protocols.schema.schema.Schema`; it holds only the helpers shared
+across the layer.
+
+**A helper in one protocol's own schema module moves there too once code outside that
+protocol uses it and it is generic enough to reuse**, so that another implementor can
+find it; a helper only its own protocol calls stays beside the schema. Ruled on
+:issue:`2674`. A protocol's own modules are its protocol, data and schema modules. So
+:func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length`, which the IPv6
+pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
+:mod:`pcapkit.corekit.schema.jumbogram`, while
+:func:`~pcapkit.protocols.schema.internet.ipv6.jumbogram_error`, which only IPv6
+calls, stays in :mod:`pcapkit.protocols.schema.internet.ipv6`. The IPv6 option
+helpers in :mod:`pcapkit.protocols.schema.internet.ipv6_option` belong to the HOPOPT
+and IPv6-Opts headers that share them, and stay there too.
+
+The field modules and the protocols import these helpers, so a helper module imports
+neither of them, nor :mod:`pcapkit.foundation`, outside an ``if TYPE_CHECKING:``
+block; the package's ``__init__.py`` imports none of its modules, so a field module
+loads only the group it asks for.
+:file:`tests/project/test_schema_helpers_boundary_2674_unit.py` fails on a helper
+module that does, on a module outside the layer that refers to a function defined in
+a field module or in :mod:`pcapkit.protocols.schema.schema`, and on a module outside
+a protocol that refers to a function defined in that protocol's schema module, by
+import or as an attribute of the module.
+
 Context Variables
 ~~~~~~~~~~~~~~~~~
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.transport.sctp.SCTP` Constant Enumerations
-==========================================================================
+===========================================================================
 
 .. module:: pcapkit.const.sctp
 

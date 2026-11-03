@@ -389,12 +389,11 @@ class ExtensionConstructionTests(unittest.TestCase):
                 self._content(alias, content_type, content)
 
         # The record header, which the schema would otherwise mask to its width.
+        # NOTE: Not its content type, an enumeration field refused with ProtocolError (#2594).
         for name, alias, kwargs in (
-                ('record content_type', 'TLS', {'content_type': 0x100}),
                 ('record version', 'TLS', {'version': 0x10000}),
                 ('record negative version', 'TLS', {'version': -1}),
                 ('record length', 'TLS', {'data': bytes(0x10000)}),
-                ('DTLS record content_type', 'DTLS', {'content_type': 0x100}),
                 ('DTLS record version', 'DTLS', {'version': 0x10000}),
                 ('DTLS record epoch', 'DTLS', {'epoch': 0x10000}),
                 ('DTLS record sequence_number', 'DTLS', {'sequence_number': 1 << 48}),

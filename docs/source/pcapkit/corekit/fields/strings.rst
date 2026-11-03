@@ -14,8 +14,6 @@ Bytes-based Fields
    :members:
    :show-inheritance:
 
-.. autofunction:: pcapkit.corekit.fields.strings.pad_length
-
 String-based Fields
 -------------------
 

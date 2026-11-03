@@ -11,11 +11,6 @@ crashed the same way on its default ``data=b'\\x00\\x00'``. A made schema
 holding raw octets where parsing its packed form yields a schema is replaced by
 the parsed one.
 
-It also guards against GitHub issue #1308, where a :obj:`str` member name given
-to two enum arguments of one ``make()`` raised ``ambiguous member name`` when
-only one of the enumerations had it. Each ``_make_index`` call resolves against
-the argument it was passed.
-
 Every case builds its own packet in memory and reads no capture. Classes are
 imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, so they belong to the live
@@ -25,7 +20,6 @@ imported inside each test, after
 
 import importlib
 import unittest
-import unittest.mock
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
@@ -168,86 +162,6 @@ class TestMakeRawItems(unittest.TestCase):
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
         with self.assertRaisesRegex(exc, r'runs past the end of the data'):
             hip(extension=True, parameters=[b'\x00\x41\x00\x08' + bytes(8)])
-
-
-class TestMakeIndexPerArgument(unittest.TestCase):
-    """A member name resolves against its own ``make()`` argument (#1308)."""
-
-    def setUp(self) -> None:
-        reimport_once_per_class(self)
-
-    def _pair(self) -> 'tuple[Any, Any, Any]':
-        enum = importlib.import_module('enum')
-        protocol = _attr('pcapkit.protocols.protocol.ProtocolBase')
-
-        left = enum.IntEnum('Left', {'Shared': 1})
-        right = enum.IntEnum('Right', {'Shared': 2, 'Only': 3})
-
-        class Pair(protocol):  # type: ignore[misc,valid-type]
-            def make_pair(self, a: 'Any' = left.Shared, a_namespace: 'Any' = None,
-                          b: 'Any' = right.Shared, b_namespace: 'Any' = None) -> 'tuple[int, int]':
-                return (self._make_index(a, namespace=a_namespace),
-                        self._make_index(b, 0, namespace=b_namespace))
-
-        return Pair, left, right
-
-    def test_shared_name_resolves_per_argument(self) -> None:
-        pair, _, _ = self._pair()
-        self.assertEqual(pair.make_pair(pair, a='Shared', b='Shared'), (1, 2))
-        # and a name only one argument holds resolves normally
-        self.assertEqual(pair.make_pair(pair, a='Shared', b='Only'), (1, 3))
-
-    def test_ipv4_shared_name_falls_back_per_argument(self) -> None:
-        ipv4 = _attr('pcapkit.protocols.internet.ipv4.IPv4')
-        tos_del = _attr('pcapkit.const.ipv4.tos_del.ToSDelay')
-
-        expected = ipv4(tos_del=tos_del.LOW, tos_thr=1).data
-        # ``LOW`` is a ToSDelay member but not a ToSThroughput one
-        self.assertEqual(ipv4(tos_del='LOW', tos_thr='LOW', tos_thr_default=1).data, expected)
-        self.assertEqual(ipv4(tos_thr='LOW', tos_thr_default=1).data,
-                         ipv4(tos_thr=1).data)
-
-    def test_non_parameter_first_argument_matches_every_argument(self) -> None:
-        enum = importlib.import_module('enum')
-        protocol = _attr('pcapkit.protocols.protocol.ProtocolBase')
-        level = enum.IntEnum('Level', {'HIGH': 7})
-
-        class Alias(protocol):  # type: ignore[misc,valid-type]
-            def make_alias(self, b: 'Any' = level.HIGH, b_namespace: 'Any' = None) -> 'int':
-                value = b
-                return self._make_index(value)
-
-        # ``value`` is a local, so ``b`` is found by its value
-        self.assertEqual(Alias.make_alias(Alias, b='HIGH'), 7)
-
-    def test_unlocated_call_matches_every_argument(self) -> None:
-        # without the caller's source the call cannot be located, so every
-        # argument holding the name is a candidate and they must agree
-        module = importlib.import_module('pcapkit.protocols.protocol')
-        exc = _attr('pcapkit.utilities.exceptions.ProtocolNotImplemented')
-        pair, _, right = self._pair()
-
-        with unittest.mock.patch.object(module, '_make_index_calls', lambda func: ()):
-            with self.assertRaisesRegex(exc, r"ambiguous member name 'Shared'.*"
-                                             r"pass a_namespace= or b_namespace= explicitly"):
-                pair.make_pair(pair, a='Shared', b='Shared')
-            self.assertEqual(pair.make_pair(pair, a='Shared', b='Shared', b_namespace=right), (1, 2))
-
-    def test_source_unavailable_locates_nothing(self) -> None:
-        module = importlib.import_module('pcapkit.protocols.protocol')
-        # a builtin has no Python source
-        self.assertEqual(module._make_index_calls(len), ())
-
-    def test_call_spans_to_its_last_line(self) -> None:
-        """A call split over lines ends on its last one, from Python 3.8 (#1709)."""
-        module = importlib.import_module('pcapkit.protocols.protocol')
-
-        def make_split(self: 'Any', a: 'Any', a_namespace: 'Any' = None) -> 'Any':
-            return self._make_index(a,
-                                    namespace=a_namespace)
-
-        first = make_split.__code__.co_firstlineno + 1
-        self.assertEqual(module._make_index_calls(make_split), ((first, first + 1, 'a'),))
 
 
 if __name__ == '__main__':

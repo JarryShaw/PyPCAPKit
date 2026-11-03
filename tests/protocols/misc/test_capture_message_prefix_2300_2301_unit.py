@@ -24,15 +24,14 @@ with a bare ``{}``. That attribute is an :class:`~enum.IntEnum`, which a bare
 ``must be in Interface Description Block, but found in 6 block.`` rather than
 ``not Enhanced_Packet_Block``.
 
-The placement guard is reached on both passes, and ``_type`` is not the same
-kind of object on each: the parse pass assigns the
-:class:`~pcapkit.const.pcapng.block_type.BlockType` off the schema, while the
-make pass assigns what :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
-returns, a plain :obj:`int` that is only :func:`~typing.cast` to the
-enumeration. Reading ``.name`` off it directly therefore raises
-:exc:`AttributeError` on the make pass, which is what
-:func:`~pcapkit.protocols.misc.pcapng._block_type_name` exists to avoid; the
-make-pass cases below are what pin that.
+The placement guard is reached on both passes. The parse pass assigns ``_type``
+the :class:`~pcapkit.const.pcapng.block_type.BlockType` off the schema. The make
+pass assigns what :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
+resolves the code to: the member for a code a member holds, which the make-pass
+cases below pin, and the plain :obj:`int` for an in-range code no member holds.
+That int has no ``.name``, so
+:func:`~pcapkit.protocols.misc.pcapng._block_type_name` looks the code up and
+names either.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after
@@ -154,13 +153,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         return context
 
     def test_placement_guard_names_the_block_type(self) -> None:
-        """The block type is named, not numbered, and the message has no full stop.
-
-        This runs through :meth:`PCAPNG.make`, where ``_type`` is a plain
-        :obj:`int`, so it is also what pins the guard against the
-        :exc:`AttributeError` a direct ``.name`` would raise there.
-
-        """
+        """The block type is named, not numbered, and the message has no full stop."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -176,7 +169,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
                          'Block, not Interface_Statistics_Block')
 
     def test_placement_guard_does_not_raise_attribute_error(self) -> None:
-        """The make pass's plain-``int`` ``_type`` reaches the guard, not an AttributeError."""
+        """The make pass's ``_type`` reaches the guard as the member, not an AttributeError (#2594)."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -199,18 +192,18 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         finally:
             PCAPNG._make_option_if_name = original  # type: ignore[method-assign]
 
-        # The guard ran with a plain ``int``, which has no ``.name``.
-        self.assertEqual(seen['class'], 'int')
+        # The guard ran with the member ``_make_index`` resolved, as on the parse pass.
+        self.assertEqual(seen['class'], 'BlockType')
 
     def test_block_type_name_takes_both_an_enum_and_a_plain_int(self) -> None:
-        """The helper covers both passes' idea of ``_type``.
+        """The helper names a member and its plain :obj:`int` code alike.
 
-        The parse pass assigns the enumeration member off the schema and the
-        make pass a plain :obj:`int`, and the guard is shared, so the helper
-        has to name either. Reaching a placement guard through a *parse* is
-        not possible -- an option code is resolved in the namespace of the
-        block being parsed, so code 2 in an Interface Statistics Block is
-        ``isb_starttime`` and never ``if_name`` -- which is why this is
+        The make pass keeps an in-range code no member holds as a plain
+        :obj:`int`, and the guard is shared with the parse pass, so the helper
+        names a member and a code alike. Reaching a placement guard through a
+        *parse* is not possible -- an option code is resolved in the namespace
+        of the block being parsed, so code 2 in an Interface Statistics Block
+        is ``isb_starttime`` and never ``if_name`` -- which is why this is
         checked on the helper rather than through a capture.
 
         """
@@ -219,10 +212,24 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
 
         self.assertEqual(_block_type_name(BlockType.Enhanced_Packet_Block),
                          'Enhanced_Packet_Block')
-        self.assertEqual(_block_type_name(6), 'Enhanced_Packet_Block')  # type: ignore[arg-type]
+        self.assertEqual(_block_type_name(6), 'Enhanced_Packet_Block')
         self.assertEqual(_block_type_name(BlockType.Interface_Description_Block),
                          'Interface_Description_Block')
-        self.assertEqual(_block_type_name(1), 'Interface_Description_Block')  # type: ignore[arg-type]
+        self.assertEqual(_block_type_name(1), 'Interface_Description_Block')
+
+    def test_block_type_name_names_a_code_no_member_holds(self) -> None:
+        """#2594: ``make`` keeps an in-range code no member holds as a plain :obj:`int`.
+
+        ``0x100`` sits below every range ``BlockType``'s ``_missing_`` resolves,
+        so the lookup has no member to name and the helper names the code.
+
+        """
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.protocols.misc.pcapng import _block_type_name
+
+        with self.assertRaises(ValueError):
+            BlockType(0x100)
+        self.assertEqual(_block_type_name(0x100), 'Block 256')
 
     def test_only_one_guard_has_no_full_stop(self) -> None:
         """A repeated "only one" option reports the count in the house form."""

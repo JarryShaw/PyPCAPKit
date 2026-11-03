@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """IGMP - Internet Group Management Protocol
-================================================
+===============================================
 
 .. module:: pcapkit.protocols.internet.igmp
 
@@ -39,11 +39,9 @@ from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
     from typing import IO, Any, Literal, Optional, Type
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Self
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -159,10 +157,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         return self._decode_next_layer(igmp, None, length - self.length)
 
     def make(self,
-             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.IGMP_Membership_Query,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Type | int' = Enum_Type.IGMP_Membership_Query,
              max_resp_time: 'int' = 0,
              checksum: 'Optional[bytes]' = None,
              group: 'IPv4Address | str | bytes | int' = '0.0.0.0',  # nosec: B104
@@ -176,9 +171,6 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         Args:
             type: Message type.
-            type_default: Default value of message type.
-            type_namespace: Namespace of message type.
-            type_reversed: If the namespace is reversed.
             max_resp_time: Max response time, in tenths of a second; zero for
                 an IGMPv1 message.
             checksum: Checksum over the message with this field zeroed, no
@@ -194,18 +186,16 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``type`` is outside 0 to 255, or ``max_resp_time``
-                is not a non-:obj:`bool` integer from 0 to 255.
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code outside 0 to 255, or ``max_resp_time`` is not a
+                non-:obj:`bool` integer from 0 to 255.
 
         """
-        type_value = self._make_index(type, type_default, namespace=type_namespace,
-                                      reversed=type_reversed, pack=False)
-        for name, value in (('type', type_value), ('max_resp_time', max_resp_time)):
-            if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 255:
-                raise ProtocolError(f'{self.alias}: invalid {name}: {value!r}')
+        type_value = self._make_index(type, Enum_Type, bits=8, name='type')
+        max_resp_time = self._make_uint(max_resp_time, bits=8, name='max_resp_time')
 
         schema = Schema_IGMP(
-            type=type_value,  # type: ignore[arg-type]
+            type=type_value,
             max_resp_time=max_resp_time,
             checksum=b'\x00\x00' if checksum is None else checksum,
             group=group,
