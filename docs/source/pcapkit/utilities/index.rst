@@ -7,9 +7,10 @@ Module Utilities
 :mod:`pcapkit.utilities` holds the cross-cutting services :mod:`pcapkit` is
 built with: user-refined exceptions and warnings, logging, the tunable limits
 of :mod:`~pcapkit.utilities.config`, a compatibility layer, timestamp
-conversion, the :mod:`context variables <pcapkit.utilities.contextvars>` its
-modules share, and wrappers around third-party libraries. It imports nothing from
-:mod:`pcapkit` outside itself; see :ref:`utilities-or-corekit`.
+conversion, pickle reductions, the
+:mod:`context variables <pcapkit.utilities.contextvars>` its modules share, and
+wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
+outside itself; see :ref:`utilities-or-corekit`.
 
 .. toctree::
    :maxdepth: 2
@@ -20,6 +21,7 @@ modules share, and wrappers around third-party libraries. It imports nothing fro
    config
    chardet
    datetime
+   pickle
    contextvars
 
 Version Compatibility

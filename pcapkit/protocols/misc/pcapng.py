@@ -6941,7 +6941,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_secrets_zigbee_nwk(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeNWKKey]' = None, *,
-                                 nwk_key: 'bytes' = b'',
+                                 nwk_key: 'bytes' = bytes(16),
                                  pan_id: 'int' = 0,
                                  data: 'Optional[bytes]' = None,
                                  **kwargs: 'Any') -> 'Schema_ZigBeeNWKKey':
@@ -6955,7 +6955,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 (:issue:`1986`); otherwise its fields are. On a parsed model
                 the octets win, so an edit to its fields alone is silently
                 ignored.
-            nwk_key: NWK key.
+            nwk_key: NWK key, 16 octets.
             pan_id: PAN ID.
             data: Secrets Data octets, written back verbatim in place of
                 ``nwk_key`` and ``pan_id``, as the octets of ``secrets`` are.
@@ -6964,11 +6964,18 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed secrets schema.
 
+        Raises:
+            ProtocolError: If ``nwk_key`` is not 16 octets.
+
         .. versionchanged:: 1.6.0
 
-           Takes the Secrets Data octets as ``data``, so that the :obj:`dict`
-           of a parsed model rebuilds the key as captured, as the model itself
-           does, rather than as its zero-filled fields (:issue:`2698`).
+           * Takes the Secrets Data octets as ``data``, so that the :obj:`dict`
+             of a parsed model rebuilds the key as captured, as the model itself
+             does, rather than as its zero-filled fields (:issue:`2698`).
+           * ``nwk_key`` of any other width, empty included, raises
+             :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than
+             being padded or cut to the 16-octet key, and defaults to 16 zero
+             octets where it defaulted to empty (:issue:`2676`).
 
         """
         if secrets is not None:
@@ -6980,12 +6987,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             pan_id = secrets.pan_id
 
         return Schema_ZigBeeNWKKey(
-            key=nwk_key,
+            key=self._make_octets(nwk_key, size=16, name='[ZigBee NWK Key] key', alias='PCAP-NG'),
             panid=pan_id,
         )
 
     def _make_secrets_zigbee_aps(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeAPSKey]' = None, *,
-                                 aps_key: 'bytes' = b'',
+                                 aps_key: 'bytes' = bytes(16),
                                  pan_id: 'int' = 0,
                                  short_address: 'int' = 0,
                                  data: 'Optional[bytes]' = None,
@@ -6997,7 +7004,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             secrets: Secrets data model. The Secrets Data octets it was parsed
                 from, if any, are written back verbatim, as for
                 :meth:`_make_secrets_zigbee_nwk`; otherwise its fields are.
-            aps_key: APS key.
+            aps_key: APS key, 16 octets.
             pan_id: PAN ID.
             short_address: Short address.
             data: Secrets Data octets, written back verbatim in place of the
@@ -7007,10 +7014,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed secrets schema.
 
+        Raises:
+            ProtocolError: If ``aps_key`` is not 16 octets.
+
         .. versionchanged:: 1.6.0
 
-           Takes the Secrets Data octets as ``data``, as
-           :meth:`_make_secrets_zigbee_nwk` does (:issue:`2698`).
+           * Takes the Secrets Data octets as ``data``, as
+             :meth:`_make_secrets_zigbee_nwk` does (:issue:`2698`).
+           * ``aps_key`` of any other width, empty included, raises
+             :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than
+             being padded or cut to the 16-octet key, and defaults to 16 zero
+             octets where it defaulted to empty (:issue:`2676`).
 
         """
         if secrets is not None:
@@ -7023,7 +7037,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             short_address = secrets.short_address
 
         return Schema_ZigBeeAPSKey(
-            key=aps_key,
+            key=self._make_octets(aps_key, size=16, name='[ZigBee APS Key] key', alias='PCAP-NG'),
             panid=pan_id,
             addr_high=short_address >> 16,
             addr_low=short_address & 0xFFFF,

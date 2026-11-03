@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
-"""numerical field class"""
+"""numerical field class
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.corekit.fields.numbers._reduce_unregistered_member``, with no
+   alias; :func:`pcapkit.utilities.pickle.reduce_to` installs the reduction it
+   built (:issue:`2714`).
+
+"""
 
 import enum
-import functools
 import math
 from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 
@@ -11,6 +18,7 @@ import aenum
 from pcapkit.corekit.fields.field import Field
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError, ProtocolError
+from pcapkit.utilities.pickle import reduce_to
 
 __all__ = [
     'NumberField',
@@ -958,14 +966,9 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         # NOTE: ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``,
         # i.e. to the one lookup this member is deliberately absent from, so
         # pickle and copy would both raise on it without this. Overriding it
-        # per instance -- which pickle and copy both honour, since both fetch
-        # it with getattr on the object rather than on its type -- rebuilds an
-        # equivalent unregistered member instead. functools.partial rather
-        # than a closure keeps this off obj itself, so the member does not
-        # become part of a reference cycle merely by being reducible.
-        obj.__reduce_ex__ = functools.partial(
-            _reduce_unregistered_member, namespace, value, name, attrs)
-        return obj
+        # per instance, which pickle and copy both honour, rebuilds an
+        # equivalent unregistered member instead.
+        return reduce_to(obj, _rebuild_unregistered_member, namespace, value, name, attrs)
 
 
 def _rebuild_unregistered_member(namespace: 'Type[StdlibEnum] | Type[AenumEnum]',
@@ -994,31 +997,6 @@ def _rebuild_unregistered_member(namespace: 'Type[StdlibEnum] | Type[AenumEnum]'
     """
     return EnumField._unregistered_member(  # pylint: disable=protected-access
         namespace, value, name, **attrs)
-
-
-def _reduce_unregistered_member(  # pylint: disable=unused-argument
-        namespace: 'Type[StdlibEnum] | Type[AenumEnum]',
-        value: 'Any', name: 'str', attrs: 'dict[str, Any]',
-        protocol: 'int') -> 'tuple[Callable[..., Any], tuple[Any, ...]]':
-    """The ``__reduce_ex__`` :meth:`EnumField._unregistered_member` installs.
-
-    Bound to its first four arguments with :func:`functools.partial`, so that
-    the reducer holds the ingredients of the member rather than the member
-    itself.
-
-    Args:
-        namespace: The registry class the member is an instance of.
-        value: The member's ``_value_``.
-        name: The member's ``_name_``.
-        attrs: The extra attributes the member carries.
-        protocol: The :mod:`pickle` protocol version, ignored -- the reduction
-            is the same for all of them, and :mod:`copy` passes 4 here.
-
-    Returns:
-        A two-tuple of :func:`_rebuild_unregistered_member` and its arguments.
-
-    """
-    return (_rebuild_unregistered_member, (namespace, value, name, attrs))
 
 
 class PortEnumField(EnumField):

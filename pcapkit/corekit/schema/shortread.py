@@ -5,9 +5,9 @@
 .. module:: pcapkit.corekit.schema.shortread
 
 :mod:`pcapkit.corekit.schema.shortread` carries a header cut short by the end of the
-capture through to the protocol's info, and cuts a protocol rebuilt from that info
-back to the octets its header had (:issue:`1458`), for the layer base classes and
-the PCAP global header alike. It names the protocol and schema classes for type
+capture through to the protocol's info, by which a protocol rebuilt from that info
+is cut back to the octets its header had (:issue:`1458`), for the layer base classes
+and the PCAP global header alike. It names the protocol and schema classes for type
 checking only, since those import it. It is one of the :mod:`pcapkit.corekit.schema`
 helpers shared across the schema layer, not part of the header schema framework in
 :mod:`pcapkit.protocols.schema`; see :ref:`utilities-or-corekit`.
@@ -43,12 +43,15 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.
     When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``
     record :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
-    made, so that :func:`replay_short_read` can
-    cut the rebuild back to what was captured (:issue:`1458`). The key is listed
+    made, so that :meth:`Protocol.from_data
+    <pcapkit.protocols.protocol.Protocol.from_data>` hands it to the rebuild,
+    whose :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>` cuts
+    the header back to what was captured before it is read (:issue:`1458`,
+    :issue:`2703`). The key is listed
     in :attr:`Data.__included__ <pcapkit.protocols.data.data.Data.__included__>`,
     so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries it
-    and ``from_data(info.to_dict())`` replays it too; it is absent for a header
-    that was captured whole.
+    and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for
+    a header that was captured whole.
 
     """
     header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
@@ -60,7 +63,7 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
 
 
 def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
-    """Cut a protocol rebuilt by ``from_data`` back to the octets its header had.
+    """Hold a protocol rebuilt by ``from_data`` to the octets its header had.
 
     Args:
         protocol: Protocol instance, just built by ``from_data``.
@@ -69,15 +72,30 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
     Returns:
         ``protocol`` itself.
 
-    The rebuild packs every field at full width, the missing octets as the
-    zeros they were read as. The ``__short_read__`` record that
-    :func:`keep_short_read` left in ``data`` names the field the capture ended
-    inside and how much of it there was, so everything from that point on is
-    dropped (:issue:`1458`). A header cut short has no payload past it, so it
-    ends the rebuilt data, and what the protocol writes ahead of it is kept:
-    the HTTP/2 connection preface ``HTTP.pack`` writes (:issue:`2665`). This
-    holds while ``pack`` writes nothing after the header schema, as no protocol
-    rebuilt here does; a trailer would keep as many of the cut octets.
+    The layer base classes and the PCAP global
+    :class:`~pcapkit.protocols.misc.pcap.header.Header` call it on what
+    :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
+    returns, which is cut back before it gets here: ``from_data`` hands the
+    construction the ``__short_read__`` record that :func:`keep_short_read`
+    left in ``data``, :meth:`Protocol.pack
+    <pcapkit.protocols.protocol.Protocol.pack>` cuts the header it makes back
+    to the octets captured through :meth:`Schema._cut_short_read
+    <pcapkit.protocols.schema.schema.Schema._cut_short_read>`, and
+    :meth:`Protocol.__post_init__
+    <pcapkit.protocols.protocol.Protocol.__post_init__>` has
+    :meth:`~pcapkit.protocols.protocol.Protocol.read` parse those octets at the
+    width the header declares, so the rebuild is read and verified as its
+    capture was (:issue:`2703`).
+
+    The record names the field the capture ended inside and how much of it
+    there was. Everything in the rebuild from that point on is dropped, which
+    on a rebuild cut back as above is nothing, and the header and the info
+    keep the record (:issue:`1458`). A header cut short has no payload past
+    it, so that point ends the rebuilt data, and what the protocol writes
+    ahead of the header is kept: the HTTP/2 connection preface ``HTTP.pack``
+    writes (:issue:`2665`). This holds while ``pack`` writes nothing after the
+    header schema, as no protocol rebuilt here does; a trailer would keep as
+    many of the cut octets.
 
     """
     record = data.get('__short_read__') if isinstance(data, collections.abc.Mapping) else None

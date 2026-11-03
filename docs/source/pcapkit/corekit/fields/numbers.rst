@@ -65,7 +65,11 @@ Internal Definitions
 
 .. autofunction:: pcapkit.corekit.fields.numbers._rebuild_unregistered_member
 
-.. autofunction:: pcapkit.corekit.fields.numbers._reduce_unregistered_member
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.corekit.fields.numbers._reduce_unregistered_member``, with no
+   alias; :func:`pcapkit.utilities.pickle.reduce_to` installs the reduction it
+   built (:issue:`2714`).
 
 .. autoclass:: pcapkit.corekit.fields.numbers._CapturedInt
    :no-members:

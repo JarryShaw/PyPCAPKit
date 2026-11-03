@@ -360,6 +360,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          resolving against an enumeration inferred from the caller's frame,
          writing a different value or raising another exception
          (:issue:`2594`).
+       * An option given to :meth:`make` as raw octets, of a kind no member of
+         :class:`~pcapkit.const.tcp.option.Option` holds, such as 255, which
+         parses as an unassigned option, builds as its ``(code, arguments)``
+         pair does, rather than raising
+         :exc:`~pcapkit.utilities.exceptions.EnumValueError`; and empty raw
+         octets, which hold no kind, raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than an
+         :exc:`IndexError` (:issue:`2708`).
 
     .. versionremoved:: 1.6.0
 
@@ -952,7 +960,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Raises:
             ProtocolError: If an option's kind is a name, a :obj:`bool`, or a
-                code the 8-bit kind octet cannot carry (:issue:`2594`), or if
+                code the 8-bit kind octet cannot carry (:issue:`2594`), if an
+                option given as raw octets is empty (:issue:`2708`), or if
                 an option maker rejects its option, e.g. a user timeout too
                 large for 15 bits of minutes, an MPTCP ``subtype`` or an
                 alternate checksum ``algorithm`` given by name, or an MPTCP
@@ -976,7 +985,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if isinstance(options, list):
             for schema in options:
                 if isinstance(schema, bytes):
-                    code = Enum_Option.get(schema[0])
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no kind octet')
+                    # NOTE: Resolved as the kind of a ``(code, arguments)`` pair
+                    # is, so a kind no ``Option`` member holds, such as 255,
+                    # comes back as its code rather than raising (#2708).
+                    code = self._make_index(schema[0], Enum_Option, bits=8, name='option kind')
                     data = schema  # type: Schema_Option | bytes
                     data_len = len(data)
                 elif isinstance(schema, Schema):

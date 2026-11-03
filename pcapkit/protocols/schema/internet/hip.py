@@ -2,7 +2,7 @@
 # mypy: disable-error-code=assignment
 """header schema for Host Identity Protocol"""
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
@@ -64,8 +64,6 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
-    from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
     from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
@@ -845,6 +843,28 @@ class HIPCipherParameter(Parameter, code=Enum_Parameter.HIP_CIPHER):
     #: Padding.
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        Note:
+            The cipher IDs are added to the ``__hip_ciphers__`` key of
+            ``packet``, the one context every parameter of the area is
+            unpacked with, for an ``ENCRYPTED`` parameter after this one to
+            read its cipher from (see :meth:`EncryptedParameter.pre_unpack`).
+            The parameters already parsed reach neither that context nor the
+            reader's ``options`` before the whole area is read
+            (:issue:`2708`).
+
+        """
+        packet['__hip_ciphers__'] = (*packet.get('__hip_ciphers__', ()), *self.ciphers)
+        return self
+
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', ciphers: 'list[Enum_Cipher]') -> 'None': ...
 
@@ -910,40 +930,34 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
             <pcapkit.protocols.internet.hip.HIP._make_param_encrypted>`, which
             sets it as a plain attribute so ``pack()``'s own
             ``packet.update(self.__dict__)`` carries it in here -- that value
-            is trusted over the ``HIP_CIPHER`` sibling lookup below, which a
-            parameter packed on its own has no ``options`` list for.
+            is trusted over the ``HIP_CIPHER`` lookup below.
+
+            Otherwise the cipher comes from the cipher IDs that the
+            ``HIP_CIPHER`` parameters before this one in the area carry, in
+            order, under ``__hip_ciphers__`` (see
+            :meth:`HIPCipherParameter.post_process`): the first ``ENCRYPTED``
+            parameter takes the first cipher ID, the next one the next, as
+            ``__hip_encrypted__`` counts them (:issue:`2708`).
 
         """
+        index = packet.get('__hip_encrypted__', 0)
+        packet['__hip_encrypted__'] = index + 1
+
         if 'cipher' in packet:
             packet['__cipher__'] = packet.pop('cipher')
             return
 
-        if 'options' in packet:
-            cipher_list = cast('list[Data_HIPCipherParameter]',
-                            packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
-            if not cipher_list:
-                warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
-                    'missing HIP_CIPHER parameter', ProtocolWarning)
-                cipher_id = Enum_Cipher(0xffff)
-            else:
-                cipher_ids = []  # type: list[Enum_Cipher]
-                for cipher in cipher_list:
-                    cipher_ids.extend(cipher.cipher_id)
-
-                encrypted_list = cast('list[Data_EncryptedParameter]',
-                                    packet['options'].getlist(Enum_Parameter.ENCRYPTED))
-                encrypted_index = len(encrypted_list)
-
-                if encrypted_index >= len(cipher_ids):
-                    warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
-                        'too many ENCRYPTED parameters', ProtocolWarning)
-                    cipher_id = Enum_Cipher(0xfffe)
-                else:
-                    cipher_id = cipher_ids[encrypted_index]
-        else:
+        cipher_ids = packet.get('__hip_ciphers__', ())  # type: tuple[Enum_Cipher, ...]
+        if not cipher_ids:
             warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                  'missing HIP_CIPHER parameter', ProtocolWarning)
             cipher_id = Enum_Cipher(0xffff)
+        elif index >= len(cipher_ids):
+            warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                 'too many ENCRYPTED parameters', ProtocolWarning)
+            cipher_id = Enum_Cipher(0xfffe)
+        else:
+            cipher_id = cipher_ids[index]
 
         packet['__cipher__'] = cipher_id
 

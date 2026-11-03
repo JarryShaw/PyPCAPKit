@@ -376,17 +376,25 @@ class IPPseudoBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'length -20 out of range'):
             IP_Pseudo(ip=tcp)
 
-    def test_zero_is_kept_at_the_layout_width(self) -> None:
+    def test_zero_is_the_layout_width(self) -> None:
+        # One zero octet for IPv4 (RFC 793 section 3.1), three for IPv6 (RFC
+        # 8200 section 8.1); empty is zeros, and any other width is refused (#2676).
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.utilities.exceptions import ProtocolError
 
-        ipv4 = IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20, zero=b'\xaa\xbb')
-        self.assertEqual(ipv4.data, bytes.fromhex('0a000001' '0a000002' 'aa' '06' '0014'))
-        self.assertEqual(ipv4.info.zero, b'\xaa')
-        for zero, kept in ((b'\xaa\xbb\xcc\xdd', 'aabbcc'), (b'\xaa', 'aa0000')):
-            with self.subTest(zero=zero):
-                ipv6 = IP_Pseudo(src='::1', dst='::2', protocol=6, upper_length=20, zero=zero)
-                self.assertEqual(ipv6.data[32:], bytes.fromhex('00000014') + bytes.fromhex(kept) + b'\x06')
-                self.assertEqual(ipv6.info.zero, bytes.fromhex(kept))
+        ipv4 = IP_Pseudo(src='10.0.0.1', dst='10.0.0.2', protocol=6, upper_length=20, zero=b'\xff')
+        self.assertEqual(ipv4.data, bytes.fromhex('0a000001' '0a000002' 'ff' '06' '0014'))
+        self.assertEqual(ipv4.info.zero, b'\xff')
+        ipv6 = IP_Pseudo(src='::1', dst='::2', protocol=6, upper_length=20, zero=b'\xff' * 3)
+        self.assertEqual(ipv6.data[32:], bytes.fromhex('00000014' 'ffffff' '06'))
+        self.assertEqual(ipv6.info.zero, b'\xff' * 3)
+        self.assertEqual(IP_Pseudo(src='::1', dst='::2', protocol=6, upper_length=20).info.zero, bytes(3))
+
+        for src, dst, zero in (('10.0.0.1', '10.0.0.2', b'\xaa\xbb'), ('::1', '::2', b'\xaa\xbb\xcc\xdd'),
+                               ('::1', '::2', b'\xaa'), ('10.0.0.1', '10.0.0.2', 1)):
+            with self.subTest(src=src, zero=zero):
+                with self.assertRaisesRegex(ProtocolError, r'^IP_Pseudo: invalid zero octets: must be \d octets?'):
+                    IP_Pseudo(src=src, dst=dst, protocol=6, upper_length=20, zero=zero)
 
     def test_each_value_is_required_without_ip(self) -> None:
         from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo

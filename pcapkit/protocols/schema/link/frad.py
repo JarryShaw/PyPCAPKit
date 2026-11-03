@@ -51,7 +51,7 @@ def _effective_nlpid(packet: 'dict[str, Any]') -> 'int':
 
     Returns:
         :attr:`~FRAD.ext_nlpid` when :attr:`~FRAD.nlpid` is the ``0x00`` pad
-        marker :rfc:`2427#section-3` writes ahead of a SNAP header; otherwise
+        :rfc:`2427#section-3` allows ahead of any NLPID; otherwise
         :attr:`~FRAD.nlpid` itself.
 
     """
@@ -92,9 +92,9 @@ class FRAD(Schema):
     })
     #: Control field; ``0x03`` (UI) for ordinary data traffic.
     control: 'int' = UInt8Field()
-    #: NLPID, or the ``0x00`` pad marker ahead of a SNAP header.
+    #: NLPID, or the ``0x00`` pad octet ahead of one.
     nlpid: 'int' = UInt8Field()
-    #: NLPID proper, present only when :attr:`nlpid` is the pad marker.
+    #: NLPID proper, present only when :attr:`nlpid` is the pad.
     ext_nlpid: 'Optional[int]' = ConditionalField(
         UInt8Field(),
         lambda packet: not packet['nlpid'],

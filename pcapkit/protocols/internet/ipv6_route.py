@@ -138,6 +138,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
 
+       The Source Route and Type 2 makers raise it for ``reserved`` octets that
+       are not four, rather than padding or cutting them (:issue:`2676`).
+
     """
 
     ##########################################################################
@@ -790,22 +793,25 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             route: route data
             dst: destination IPv6 address
             ip: list of IPv6 addresses
-            reserved: the four reserved octets, truncated or zero-filled to
-                four octets
+            reserved: the four reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed route data schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` is not four octets.
+
         """
         if route is not None:
             ip = cast('list[IPv6Address | str | bytes | int]', route.ip)
-            reserved = getattr(route, 'reserved', b'\x00\x00\x00\x00')
+            reserved = self._fill_short_read(getattr(route, 'reserved', b'\x00\x00\x00\x00'),
+                                             size=4, model=route, field='data')
         else:
             ip = [] if ip is None else ip
 
         return Schema_SourceRoute(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=4, name='reserved octets'),
             ip=ip,
         )
 
@@ -821,20 +827,23 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             route: route data
             dst: destination IPv6 address
             ip: home address
-            reserved: the four reserved octets, truncated or zero-filled to
-                four octets
+            reserved: the four reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed route data schema.
 
+        Raises:
+            ProtocolError: If ``reserved`` is not four octets.
+
         """
         if route is not None:
             ip = cast('IPv6Address | str | bytes | int', route.ip)
-            reserved = getattr(route, 'reserved', b'\x00\x00\x00\x00')
+            reserved = self._fill_short_read(getattr(route, 'reserved', b'\x00\x00\x00\x00'),
+                                             size=4, model=route, field='data')
 
         return Schema_Type2(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=4, name='reserved octets'),
             ip=ip,
         )
 

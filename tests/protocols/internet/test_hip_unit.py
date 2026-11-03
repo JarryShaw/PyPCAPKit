@@ -1208,7 +1208,7 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.PAYLOAD_MIC,
             version=2,
             next=TransType.TCP,
-            payload=b'payload',
+            payload=b'payl',
             mic=b'mic',
         ).next, TransType.TCP)
         self.assertEqual(proto._make_param_transaction_id(
@@ -1534,7 +1534,7 @@ class HIPUnitTests(unittest.TestCase):
             hip_data.EncryptedParameter(type=Parameter.ENCRYPTED,
                                         critical=False, reserved=bytes(4), length=8,
                                         cipher=Cipher.NULL_ENCRYPT,
-                                        iv=b'iv', data=b'data'),
+                                        iv=None, data=b'data'),
             version=2,
         ).data, b'data')
 
@@ -1701,9 +1701,9 @@ class HIPUnitTests(unittest.TestCase):
             hip_data.PayloadMICParameter(type=Parameter.PAYLOAD_MIC,
                                          critical=False, reserved=bytes(3), length=16,
                                          next=TransType.TCP,
-                                         payload=b'payload', mic=b'mic'),
+                                         payload=b'payl', mic=b'mic'),
             version=2,
-        ).payload, b'payload')
+        ).payload, b'payl')
         self.assertEqual(proto._make_param_transaction_id(
             Parameter.TRANSACTION_ID,
             hip_data.TransactionIDParameter(type=Parameter.TRANSACTION_ID,
@@ -2427,7 +2427,6 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.schema.internet import hip as hip_schema
         from pcapkit.utilities.exceptions import FieldValueError
 
@@ -2478,33 +2477,28 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(missing_packet['__cipher__'], Cipher.get(0xffff))
         warn.assert_called_once()
 
-        empty_options = OrderedMultiDict()
-        no_cipher_packet = {'options': empty_options}
+        # #2708: the cipher comes from the ``HIP_CIPHER`` parameters unpacked
+        # before it into the same context, as the parameters of one area are.
+        no_cipher_packet: dict[str, object] = {}
+        hip_schema.HIPCipherParameter.unpack(b'\x02\x43\x00\x00' + bytes(4), packet=no_cipher_packet)
         with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(no_cipher_packet)
         self.assertEqual(no_cipher_packet['__cipher__'], Cipher.get(0xffff))
         warn.assert_called_once()
 
-        cipher_options = OrderedMultiDict()
-        cipher_options.add(Parameter.HIP_CIPHER, types.SimpleNamespace(
-            cipher_id=(Cipher.AES_128_CBC, Cipher.NULL_ENCRYPT),
-        ))
-        cipher_packet = {'options': cipher_options}
+        cipher_packet: dict[str, object] = {}
+        hip_schema.HIPCipherParameter.unpack(b'\x02\x43\x00\x04\x00\x02\x00\x01', packet=cipher_packet)
         with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
         self.assertIs(cipher_packet['__cipher__'], Cipher.AES_128_CBC)
         warn.assert_not_called()
 
-        cipher_options.add(Parameter.ENCRYPTED, object())
-        next_cipher_packet = {'options': cipher_options}
-        hip_schema.EncryptedParameter.pre_unpack(next_cipher_packet)
-        self.assertIs(next_cipher_packet['__cipher__'], Cipher.NULL_ENCRYPT)
+        hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
+        self.assertIs(cipher_packet['__cipher__'], Cipher.NULL_ENCRYPT)
 
-        cipher_options.add(Parameter.ENCRYPTED, object())
-        too_many_packet = {'options': cipher_options}
         with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
-            hip_schema.EncryptedParameter.pre_unpack(too_many_packet)
-        self.assertEqual(too_many_packet['__cipher__'], Cipher.get(0xfffe))
+            hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
+        self.assertEqual(cipher_packet['__cipher__'], Cipher.get(0xfffe))
         warn.assert_called_once()
 
         encrypted = hip_schema.EncryptedParameter(

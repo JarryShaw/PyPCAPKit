@@ -234,6 +234,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
          resolving against an enumeration inferred from the caller's frame,
          writing a different value or raising another exception
          (:issue:`2594`).
+       * The CALIPSO option's checksum and the "Not Used" octet of a
+         Quick-Start report, given the wrong number of octets, raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than being
+         padded or cut to their field (:issue:`2676`).
 
     .. versionremoved:: 1.6.0
 
@@ -1671,7 +1675,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Raises:
             ProtocolError: If ``domain`` or ``level`` does not fit its field,
-                if the bitmap is not bytes-like or an iterable of octets, or is
+                if ``checksum`` is not two octets, if the bitmap is not
+                bytes-like or an iterable of octets, or is
                 not a whole number of 32-bit words, if ``pad`` is not
                 :obj:`bytes`, or if the option data would exceed the 255 octets
                 ``Opt Data Len`` can count.
@@ -1721,7 +1726,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             domain=domain,
             cmpt_len=len(bitmap_bytes) // 4,
             level=level,
-            checksum=checksum,
+            checksum=self._make_octets(checksum, size=2, name='CALIPSO checksum'),
             bitmap=bitmap_bytes if bitmap_bytes else None,
             pad=pad,
         )
@@ -1927,8 +1932,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Raises:
             ProtocolError: If ``func`` is a name, a :obj:`bool`, or a member or
                 code that does not fit in four bits, the rate code cannot carry
-                ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does not fit its
-                field.
+                ``rate``, ``ttl``, ``nonce`` or ``reserved`` does not fit its
+                field, or ``unused`` is not one octet.
 
         """
         if isinstance(opt, Data_UnassignedOption):
@@ -1969,7 +1974,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                reserved=unused,
+                reserved=self._make_octets(unused, size=1, name='Quick-Start not-used octet'),
                 nonce={
                     'nonce': nonce,
                     'reserved': reserved,

@@ -431,6 +431,17 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
          resolving against an enumeration inferred from the caller's frame or
          writing a different value (:issue:`2594`).
+       * A header constructed without ``version`` is HIP version 2, as
+         :meth:`make` writes, rather than 6, the default IP version
+         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` hands on under
+         that name; and the ``ENCRYPTED`` maker, given an IV with a cipher
+         other than ``AES-128-CBC`` and ``AES-256-CBC``, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         counting an IV in the Length that the parameter does not carry. A
+         parsed ``ENCRYPTED`` parameter takes its cipher from the
+         ``HIP_CIPHER`` parameters before it, so an AES cipher's IV is read
+         as the IV, rather than warning of a missing ``HIP_CIPHER`` and
+         reading the IV as encrypted data (:issue:`2708`).
 
     .. versionremoved:: 1.6.0
 
@@ -440,6 +451,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
        the items of ``groups``; resolve a name with
        :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
        (:issue:`2594`).
+
+       The same makers raise it for a fixed-size octet argument of the wrong
+       width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
+       ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
+       or cutting it to the field. The opaque and payload data default to
+       zeros of that width (:issue:`2676`).
 
     """
 
@@ -699,8 +716,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reserved bit, ``shit`` or ``rhit`` does not fit its field,
                 ``next`` or ``packet`` is a name, the code of a parameter in
                 ``parameters`` is a name, a :obj:`bool` or a code its field
-                cannot carry, or the parameters make a header too long for its
-                one-octet Header Length.
+                cannot carry, ``checksum`` is not two octets, or the parameters
+                make a header too long for its one-octet Header Length.
 
         .. versionchanged:: 1.5.0
 
@@ -741,7 +758,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 'reserved': self._make_uint(version_reserved, bits=3, name='version reserved bits',
                                             alias=f'HIPv{version}'),
             },
-            checksum=checksum,
+            checksum=self._make_octets(checksum, size=2, name='checksum', alias=f'HIPv{version}'),
             control = {
                 'reserved': self._make_uint(controls_reserved, bits=15,
                                             name='controls reserved bits', alias=f'HIPv{version}'),
@@ -794,30 +811,44 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
-                      extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+                      version: 'int' = ..., extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
 
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
     def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
+                      version: 'int' = 2, extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
+            version: When constructing, the HIP version :meth:`make` writes,
+                with :meth:`make`'s default, the :rfc:`7401` version; when
+                parsing, the version of the enclosing IP layer, which is not
+                read.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
             For construction arguments, please refer to :meth:`self.make <HIP.make>`.
 
+        Note:
+            ``version`` is declared here because :meth:`IPv6_Ext.__post_init__
+            <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__post_init__>`
+            defaults it to ``6``, the IP version, and hands it on to
+            :meth:`make`, which writes it as the HIP version. Left to that
+            default, a header constructed without one would be HIP version 6,
+            which no RFC defines, rather than the version 2 :meth:`make`
+            called directly writes (:issue:`2708`).
+
         """
         #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
+        super().__post_init__(file, length, version=version,  # type: ignore[call-overload]
+                              extension=extension, **kwargs)
 
     def __length_hint__(self) -> 'Literal[40]':
         """Return an estimated length for the object."""
@@ -3418,8 +3449,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             counter: R1 generation counter
-            reserved: the four reserved octets, truncated or
-                zero-filled to 4 octets
+            reserved: the four reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -3428,6 +3458,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If ``code`` is the HIPv1-only ``128`` and ``version``
                 is **NOT** ``1``, or ``counter`` does not fit in eight octets.
+                Also if ``reserved`` is not four octets.
 
         """
         if code == Enum_Parameter.R1_Counter and version != 1:
@@ -3438,7 +3469,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             counter = param.counter
 
         return Schema_R1CounterParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=4, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=12,
             counter=self._make_uint(counter, bits=64, name='R1 generation counter',
@@ -3736,7 +3767,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                            index: 'int' = 0,
                            lifetime: 'timedelta | int' = 0,
                            lifetime_exponent: 'Optional[int]' = None,
-                           opaque: 'bytes' = b'',
+                           opaque: 'bytes' = b'\x00\x00',
                            random: 'int' = 0,
                            rhash_len: 'Optional[int]' = None,
                            **kwargs: 'Any') -> 'Schema_PuzzleParameter':
@@ -3767,6 +3798,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 invalid; see ``_make_puzzle_lifetime`` and
                 ``_make_puzzle_field_width``. Also if ``index`` does not fit
                 one octet, or ``random`` is negative or a :obj:`bool`.
+                Also if ``opaque`` is not two octets.
 
         """
         if param is not None:
@@ -3793,7 +3825,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             len=4 + width,
             index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
             lifetime=lifetime_exponent,
-            opaque=opaque,
+            opaque=self._make_octets(opaque, size=2, name='puzzle opaque', alias=f'HIPv{version}'),
             random=self._make_uint(random, bits=8 * width, name='puzzle random',
                                    alias=f'HIPv{version}'),
         )
@@ -3802,7 +3834,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                              version: 'int',
                              index: 'int' = 0,
                              reserved: 'Optional[int]' = None,
-                             opaque: 'bytes' = b'',
+                             opaque: 'bytes' = b'\x00\x00',
                              random: 'int' = 0,
                              solution: 'int' = 0,
                              rhash_len: 'Optional[int]' = None,
@@ -3838,7 +3870,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             ProtocolError: If the width of the two fields is invalid; see
                 ``_make_puzzle_field_width``. Also if ``index`` or ``reserved``
                 does not fit one octet, or ``random`` or ``solution`` is
-                negative or a :obj:`bool`.
+                negative or a :obj:`bool`. Also if ``opaque`` is not two octets.
 
         """
         if param is not None:
@@ -3875,7 +3907,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
             reserved=self._make_uint(reserved, bits=8, name='reserved octet',
                                      alias=f'HIPv{version}'),
-            opaque=opaque,
+            opaque=self._make_octets(opaque, size=2, name='solution opaque', alias=f'HIPv{version}'),
             random=self._make_uint(random, bits=8 * width, name='puzzle random',
                                    alias=f'HIPv{version}'),
             solution=self._make_uint(solution, bits=8 * width, name='puzzle solution',
@@ -4117,8 +4149,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             modes: list of mode ID
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4126,7 +4157,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If an entry of ``modes`` is a name or does not fit
-                its field.
+                its field, or ``reserved`` is not two octets.
 
         """
         if param is not None:
@@ -4138,7 +4169,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                        for mode in modes or []]
 
         return Schema_NATTraversalModeParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=2 + 2 * len(mode_id),
             modes=mode_id,
@@ -4187,10 +4218,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             cipher: cipher ID, of the width ``HIP_CIPHER`` carries it in
-            iv: initialization vector (optional depending on cipher ID)
+            iv: initialization vector, given for the AES ciphers and only
+                for them
             data: encrypted data
-            reserved: the four reserved octets, truncated or
-                zero-filled to 4 octets
+            reserved: the four reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4198,8 +4229,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If ``cipher`` is a name or does not fit its field,
-                or the cipher is ``AES-128-CBC`` or ``AES-256-CBC`` and ``iv``
-                is missing or **NOT** 16 octets.
+                the cipher is ``AES-128-CBC`` or ``AES-256-CBC`` and ``iv``
+                is missing or **NOT** 16 octets, or ``iv`` is given with any
+                other cipher, which takes none.
+                Also if ``reserved`` is not four octets.
 
         """
         if param is not None:
@@ -4216,9 +4249,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV is required for AES cipher')
             if len(iv) != 16:
                 raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV length must be 16 bytes for AES cipher')
+        elif iv is not None:
+            # NOTE: The schema writes an IV for the AES ciphers alone, so one
+            # given here would count in Length and be dropped (#2708).
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV is not used by cipher {cipher_id!r}')
 
         schema = Schema_EncryptedParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=4, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=4 + len(iv or b'') + len(data),
             iv=iv,
@@ -4229,7 +4266,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         # parameter does. Passed as a constructor keyword it draws an
         # ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall
         # back to its sibling lookup, which a standalone ``make`` call gives no
-        # ``options`` to search; the parameter would then be treated as
+        # ``HIP_CIPHER`` parameter to search; the parameter would then be treated as
         # cipher-less and silently packed without its IV. Setting the
         # already-resolved ``cipher_id`` as a plain attribute instead reaches
         # ``pack()``'s packet context via ``packet.update(self.__dict__)``,
@@ -4465,15 +4502,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             version: HIP protocol version
             msg_type: notification message type
             msg: notification message
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``msg_type`` is a name or does not fit its field.
+            ProtocolError: If ``msg_type`` is a name or does not fit its field,
+                or ``reserved`` is not two octets.
 
         """
         if param is not None:
@@ -4485,7 +4522,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                     name='notify message type', alias=f'HIPv{version}')
 
         return Schema_NotificationParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=4 + len(msg),
             msg_type=type,
@@ -4752,8 +4789,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             port: port number
             protocol: transport protocol
             address: IPv6 address
-            reserved: the reserved octet, truncated or
-                zero-filled to 1 octet
+            reserved: the reserved octet
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4762,6 +4798,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If ``port`` or ``protocol`` does not fit its field,
                 or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
 
         """
         if param is not None:
@@ -4774,7 +4811,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      alias=f'HIPv{version}')
 
         return Schema_RegFromParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=20,
             port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
@@ -4857,8 +4894,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             suites: ESP transform suite list
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -4866,7 +4902,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If an entry of ``suites`` is a name or does not fit
-                its field.
+                its field, or ``reserved`` is not two octets.
 
         """
         if param is not None:
@@ -4878,7 +4914,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                         for suite in suites or []]
 
         return Schema_ESPTransformParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=2 + 2 * len(suite_id),
             suites=suite_id,
@@ -4951,7 +4987,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     def _make_param_payload_mic(self, code: 'Enum_Parameter', param: 'Optional[Data_PayloadMICParameter]' = None, *,  # pylint: disable=unused-argument
                                 version: 'int',
                                 next: 'Enum_TransType | int' = Enum_TransType.UDP,
-                                payload: 'bytes' = b'',
+                                payload: 'bytes' = b'\x00\x00\x00\x00',
                                 mic: 'bytes' = b'',
                                 reserved: 'bytes' = b'\x00\x00\x00',
                                 **kwargs: 'Any') -> 'Schema_PayloadMICParameter':
@@ -4964,15 +5000,15 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             next: next protocol
             payload: payload data
             mic: message integrity code
-            reserved: the three reserved octets, truncated or
-                zero-filled to 3 octets
+            reserved: the three reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``next`` is a name or does not fit its field.
+            ProtocolError: If ``next`` is a name or does not fit its field,
+                ``payload`` is not four octets, or ``reserved`` is not three.
 
         """
         if param is not None:
@@ -4985,11 +5021,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                         alias=f'HIPv{version}')
 
         return Schema_PayloadMICParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=3, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=8 + len(mic),
             next=protocol,
-            payload=payload,
+            payload=self._make_octets(payload, size=4, name='payload data', alias=f'HIPv{version}'),
             mic=mic,
         )
 
@@ -5146,8 +5182,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             must_follow: must-follow flag
             flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5155,6 +5190,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If ``flags_reserved`` does not fit its field.
+                Also if ``reserved`` is not two octets.
 
         """
         if param is not None:
@@ -5167,7 +5203,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit_list = hit if hit is not None else []
 
         return Schema_RouteDstParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=4 + 16 * len(hit_list),
             flags={
@@ -5410,8 +5446,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol: transport protocol
             address: the address the relay server received the relayed
                 packet from (:rfc:`5770`)
-            reserved: the reserved octet, truncated or
-                zero-filled to 1 octet
+            reserved: the reserved octet
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5420,6 +5455,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If ``port`` or ``protocol`` does not fit its field,
                 or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
 
         """
         if param is not None:
@@ -5432,7 +5468,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      alias=f'HIPv{version}')
 
         return Schema_RelayFromParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=20,
             port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
@@ -5457,8 +5493,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol: transport protocol
             address: the address the relay server forwards the packet to
                 (:rfc:`5770`)
-            reserved: the reserved octet, truncated or
-                zero-filled to 1 octet
+            reserved: the reserved octet
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5467,6 +5502,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             ProtocolError: If ``port`` or ``protocol`` does not fit its field,
                 or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
 
         """
         if param is not None:
@@ -5479,7 +5515,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                      alias=f'HIPv{version}')
 
         return Schema_RelayToParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=20,
             port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
@@ -5502,8 +5538,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 hops rather than a duration -- see
                 :attr:`OverlayTTLParameter.ttl
                 <pcapkit.protocols.data.internet.hip.OverlayTTLParameter.ttl>`
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5511,6 +5546,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If ``ttl`` does not fit its field.
+                Also if ``reserved`` is not two octets.
 
         .. versionchanged:: 1.5.0
 
@@ -5525,7 +5561,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             ttl_val = ttl
 
         return Schema_OverlayTTLParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=4,
             ttl=self._make_uint(ttl_val, bits=16, name='TTL', alias=f'HIPv{version}'),
@@ -5549,8 +5585,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             must_follow: must-follow flag
             flags_reserved: the 14 reserved low-order bits of ``Flags``
             hit: list of HITs
-            reserved: the two reserved octets, truncated or
-                zero-filled to 2 octets
+            reserved: the two reserved octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -5558,6 +5593,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If ``flags_reserved`` does not fit its field.
+                Also if ``reserved`` is not two octets.
 
         """
         if param is not None:
@@ -5570,7 +5606,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit_list = hit if hit is not None else []
 
         return Schema_RouteViaParameter(
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
             type=code,
             len=4 + 16 * len(hit_list),
             flags={

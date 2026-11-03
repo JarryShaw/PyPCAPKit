@@ -876,13 +876,19 @@ class FixtureTierSelectionTests(unittest.TestCase):
         This check shares nothing with them: it is a plain substring scan of the
         file text, no :mod:`ast` involved.
 
-        Two files are excluded on purpose, not overlooked: :file:`tests/_tiers.py`
-        itself and :file:`tests/test_tier_guard.py`, this module. Both mention
+        :file:`tests/_tiers.py` itself and :file:`tests/test_tier_guard.py`, this
+        module, are excluded on purpose, not overlooked. Both mention
         ``sample_path(`` and ``except FileNotFoundError`` freely -- in docstrings,
         in error messages, and in source strings ``write_module()`` writes out for
         other tests to audit -- without containing a single real call to either.
         Including them fails at once for exactly that reason (measured), which is
         the point: a check that cannot fail is not a check.
+
+        The :func:`xdist probe <tests._tiers.is_probe_module>` is left out too, as
+        :func:`on_disk_test_modules` leaves it out (#2341): off POSIX no lock holds
+        it still, so the walk can list it and the read then find it gone. Its
+        source handles no capture's absence, so neither side of the comparison
+        could ever hold it.
 
         Restricted to ``test_*.py`` for the same reason :mod:`pytest` itself
         is (see ``python_files`` in :file:`pyproject.toml`): a module outside
@@ -893,7 +899,7 @@ class FixtureTierSelectionTests(unittest.TestCase):
         """
         grep_matches = set()
         for path in sorted(_tiers.TESTS_ROOT.rglob('test_*.py')):
-            if path == _tiers.TESTS_ROOT / 'test_tier_guard.py':
+            if path == _tiers.TESTS_ROOT / 'test_tier_guard.py' or _tiers.is_probe_module(path):
                 continue
             if not _tiers.is_unit_tier(path):
                 continue
@@ -1596,6 +1602,27 @@ class ProbeModuleTests(unittest.TestCase):
         with unittest.mock.patch.object(_tiers, '_test_module', side_effect=removed_first):
             self.assertEqual(_tiers.latest_tier_paths.__wrapped__(), ('tests/test_kept.py',))
             self.assertEqual(_tiers.all_tier_paths.__wrapped__(), ())
+        self.assertFalse(self.probe.exists())
+
+    def test_a_probe_removed_mid_walk_is_never_read_by_the_grep_scan(self) -> None:
+        """As on the Windows leg: the probe is removed between the grep scan's walk and its read.
+
+        Fails without the fix with the Windows leg's ``FileNotFoundError`` naming
+        the probe.
+
+        """
+        case = FixtureTierSelectionTests('test_skip_idiom_modules_matches_a_grep_based_scan')
+        real = _tiers.is_unit_tier
+
+        def removed_after_the_walk(path: 'pathlib.Path | str') -> 'bool':
+            self.probe.unlink(missing_ok=True)
+            return real(path)
+
+        # Uncached, as the cached one may hold the real tree's answer.
+        with unittest.mock.patch.object(_tiers, 'skip_idiom_modules', _tiers.skip_idiom_modules.__wrapped__), \
+                unittest.mock.patch.object(_tiers, 'committed_captures', return_value=frozenset()), \
+                unittest.mock.patch.object(_tiers, 'is_unit_tier', side_effect=removed_after_the_walk):
+            case.test_skip_idiom_modules_matches_a_grep_based_scan()
         self.assertFalse(self.probe.exists())
 
     def test_the_whole_suite_scan_skips_the_probe_only_where_unlocked(self) -> None:

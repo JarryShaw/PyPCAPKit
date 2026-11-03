@@ -65,7 +65,13 @@ as below:
    verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
    (:issue:`2475`).
 
+   :meth:`~pcapkit.protocols.application.ospf.OSPF.make` raises
+   :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a checksum, or the
+   reserved octets of cryptographic authentication data, that is not two
+   octets, rather than padding or cutting it (:issue:`2676`).
+
 """
+import collections.abc
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
@@ -301,11 +307,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         Raises:
             ProtocolError: If ``auth_data`` is of an invalid type, is
-                :obj:`bytes` that are not exactly 8 octets long, or is a
-                :obj:`dict` missing a required key; if ``packet_length``
-                is not an :obj:`int` in ``0..65535``; or if ``type`` (8 bits)
-                or ``auth_type`` (16 bits) is a name, a :obj:`bool`, or a
-                member or code its field cannot carry.
+                :obj:`bytes` that are not exactly 8 octets long, is a
+                :obj:`dict` missing a required key, or carries ``reserved``
+                octets that are not two; if ``packet_length`` is not an
+                :obj:`int` in ``0..65535``; if ``checksum`` is not two octets;
+                or if ``type`` (8 bits) or ``auth_type`` (16 bits) is a name, a
+                :obj:`bool`, or a member or code its field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -341,7 +348,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             length=packet_length,
             router_id=router_id,
             area_id=area_id,
-            checksum=b'\x00\x00' if checksum is None else checksum,
+            checksum=(b'\x00\x00' if checksum is None
+                      else self._make_octets(checksum, size=2, name='checksum', alias='OSPF')),
             auth_type=auth_type_,
             auth_data=data,
             payload=payload,
@@ -391,6 +399,14 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Key-value pairs for protocol construction.
 
         """
+        auth = data.auth  # type: Any
+        # NOTE: Reserved octets a capture cut inside are zero-filled (#1458), in
+        # the data model or the dict form ``to_dict()`` gives of it.
+        if isinstance(auth, collections.abc.Mapping):
+            reserved = auth.get('reserved', b'\x00\x00')
+            filled = cls._fill_short_read(reserved, size=2, model=data, field='auth_data')
+            if filled is not reserved:
+                auth = {**auth, 'reserved': filled}
         return {
             'version': data.version,
             'type': data.type,
@@ -399,7 +415,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             'area_id': data.area_id,
             'checksum': data.chksum,
             'auth_type': data.autype,
-            'auth_data': data.auth,
+            'auth_data': auth,
             'payload': cls._make_payload(data),
             # NOTE: And the octets captured past the Packet Length (#1455).
             'trailer': data.get('trailer', b''),
@@ -497,8 +513,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         Raises:
             ProtocolError: If ``auth_data`` is of an invalid type, is
-                :obj:`bytes` that are not exactly 8 octets long, or is a
-                :obj:`dict` missing a required key.
+                :obj:`bytes` that are not exactly 8 octets long, is a
+                :obj:`dict` missing a required key, or carries ``reserved``
+                octets that are not two.
 
         """
         if isinstance(auth_data, Schema_CryptographicAuthentication):
@@ -509,7 +526,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             return Schema_CryptographicAuthentication.unpack(auth_data)  # type: ignore[call-arg,misc]
         if isinstance(auth_data, Data_CryptographicAuthentication):
             return Schema_CryptographicAuthentication(
-                reserved=getattr(auth_data, 'reserved', b'\x00\x00'),
+                reserved=self._make_octets(getattr(auth_data, 'reserved', b'\x00\x00'), size=2,
+                                           name='reserved octets', alias='OSPF'),
                 key_id=auth_data.key_id,
                 len=auth_data.len,
                 seq=auth_data.seq,
@@ -519,7 +537,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         if isinstance(auth_data, dict):
             try:
                 return Schema_CryptographicAuthentication(
-                    reserved=auth_data.get('reserved', b'\x00\x00'),
+                    reserved=self._make_octets(auth_data.get('reserved', b'\x00\x00'), size=2,
+                                               name='reserved octets', alias='OSPF'),
                     key_id=auth_data['key_id'],
                     len=auth_data['len'],
                     seq=auth_data['seq'],

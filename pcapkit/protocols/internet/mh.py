@@ -1161,6 +1161,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          its schema holds, rather than with
          :class:`~pcapkit.const.mh.status_code.StatusCode` (:issue:`2594`).
 
+       The same makers raise it for a fixed-size octet argument of the wrong
+       width -- the checksum, a cookie or keygen token, or reserved octets --
+       rather than padding or cutting it to the field. The checksum defaults
+       to two zero octets (:issue:`2676`).
+
     .. versionremoved:: 1.6.0
 
        * ``_decode_signed``, the two's-complement decoder of the geo-location
@@ -1451,7 +1456,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
              next: 'Enum_TransType | int' = Enum_TransType.UDP,
              type: 'Enum_Packet | int' = Enum_Packet.Binding_Refresh_Request,
              reserved: 'int' = 0,
-             chksum: 'bytes' = b'',
+             chksum: 'bytes' = b'\x00\x00',
              data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
              payload: 'ProtocolBase | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_MH':
@@ -1461,7 +1466,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next: Next header type.
             type: Mobility Header type.
             reserved: Reserved octet after the MH type.
-            chksum: Checksum.
+            chksum: Checksum, two octets.
             data: Message data.
             payload: Payload of next layer protocol.
             **kwargs: Arbitrary keyword arguments.
@@ -1475,8 +1480,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :class:`~pcapkit.protocols.data.internet.mh.MH` data model or a
                 :class:`~pcapkit.protocols.schema.internet.mh.Packet` schema;
                 or if ``reserved``, or the header length of the message, does
-                not fit in one octet; or if ``next`` or ``type`` is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                not fit in one octet; if ``chksum`` is not two octets; or if
+                ``next`` or ``type`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -1526,7 +1532,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._make_uint(header_len, bits=8, name='header length'),
             type=type_val,
             reserved=self._make_uint(reserved, bits=8, name='reserved octet'),
-            chksum=chksum,
+            chksum=self._make_octets(chksum, size=2, name='checksum'),
             data=data_val,
             payload=payload,
         )
@@ -6830,24 +6836,28 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             cookie: Home test cookie.
             options: Mobility options.
-            msg_reserved: The two reserved octets of the message body as captured,
-                truncated or zero-filled to 2 octets.
+            msg_reserved: The two reserved octets of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``cookie`` is not eight octets, or ``msg_reserved``
+                is not two.
+
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00\x00'),
+                                                 size=2, model=message, field='data')
             cookie = message.cookie
             options = message.options
         else:
             options = options or []
 
         return Schema_HomeTestInitMessage(
-            reserved=msg_reserved,
-            cookie=cookie,
+            reserved=self._make_octets(msg_reserved, size=2, name='reserved octets'),
+            cookie=self._make_octets(cookie, size=8, name='cookie'),
             options=self._make_mh_options(options),
         )
 
@@ -6862,24 +6872,28 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             cookie: Care-of test cookie.
             options: Mobility options.
-            msg_reserved: The two reserved octets of the message body as captured,
-                truncated or zero-filled to 2 octets.
+            msg_reserved: The two reserved octets of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``cookie`` is not eight octets, or ``msg_reserved``
+                is not two.
+
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00\x00'),
+                                                 size=2, model=message, field='data')
             cookie = message.cookie
             options = message.options
         else:
             options = options or []
 
         return Schema_CareofTestInitMessage(
-            reserved=msg_reserved,
-            cookie=cookie,
+            reserved=self._make_octets(msg_reserved, size=2, name='reserved octets'),
+            cookie=self._make_octets(cookie, size=8, name='cookie'),
             options=self._make_mh_options(options),
         )
 
@@ -6904,6 +6918,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``nonce_index`` does not fit its field.
+                Also if ``cookie`` or ``token`` is not eight octets.
 
         """
         if message is not None:
@@ -6916,8 +6931,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_HomeTestMessage(
             nonce_index=self._make_uint(nonce_index, bits=16, name='nonce index'),
-            cookie=cookie,
-            token=token,
+            cookie=self._make_octets(cookie, size=8, name='cookie'),
+            token=self._make_octets(token, size=8, name='token'),
             options=self._make_mh_options(options),
         )
 
@@ -6942,6 +6957,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``nonce_index`` does not fit its field.
+                Also if ``cookie`` or ``token`` is not eight octets.
 
         """
         if message is not None:
@@ -6954,8 +6970,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_CareofTestMessage(
             nonce_index=self._make_uint(nonce_index, bits=16, name='nonce index'),
-            cookie=cookie,
-            token=token,
+            cookie=self._make_octets(cookie, size=8, name='cookie'),
+            token=self._make_octets(token, size=8, name='token'),
             options=self._make_mh_options(options),
         )
 
@@ -7151,8 +7167,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 code no status is assigned.
             home: Home address.
             options: Mobility options.
-            msg_reserved: The reserved octet of the message body as captured,
-                truncated or zero-filled to 1 octet.
+            msg_reserved: The reserved octet of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7160,11 +7175,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``status`` is a name, a :obj:`bool` or a code its
-                field cannot carry.
+                field cannot carry, or ``msg_reserved`` is not one octet.
 
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00'),
+                                                 size=1, model=message, field='data', offset=1)
             status_val = message.status
             home = message.home
             options = message.options
@@ -7174,7 +7190,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_BindingErrorMessage(
             status=status_val,
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=1, name='reserved octets'),
             home=home,
             options=self._make_mh_options(options),
         )
@@ -7306,22 +7322,25 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             message: Message data model.
             options: Mobility options.
-            msg_reserved: The two reserved octets of the message body as captured,
-                truncated or zero-filled to 2 octets.
+            msg_reserved: The two reserved octets of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``msg_reserved`` is not two octets.
+
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00\x00'),
+                                                 size=2, model=message, field='data')
             options = message.options
         else:
             options = options or []
 
         return Schema_FastNeighborAdvertisementMessage(
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=2, name='reserved octets'),
             options=self._make_mh_options(options),
         )
 
@@ -7472,16 +7491,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             addresses: Alternate home agent addresses. An empty list is valid and
                 asks the mobile node to run home agent discovery.
             options: Mobility options.
-            msg_reserved: The reserved octet of the message body as captured,
-                truncated or zero-filled to 1 octet.
+            msg_reserved: The reserved octet of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed message type.
 
+        Raises:
+            ProtocolError: If ``msg_reserved`` is not one octet.
+
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00'),
+                                                 size=1, model=message, field='data', offset=1)
             addresses = cast('list[IPv6Address | bytes | str | int]', list(message.addresses))
             options = message.options
         else:
@@ -7490,7 +7512,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_HomeAgentSwitchMessage(
             count=len(addresses),
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=1, name='reserved octets'),
             addresses=addresses,
             options=self._make_mh_options(options),
         )
@@ -7624,8 +7646,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 one counts seconds rather than units of 4 seconds, so the value is
                 not scaled.
             options: Mobility options.
-            msg_reserved: The two reserved octets of the message body as captured,
-                truncated or zero-filled to 2 octets.
+            msg_reserved: The two reserved octets of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7633,10 +7654,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``seq`` or the lifetime does not fit its field.
+                Also if ``msg_reserved`` is not two octets.
 
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00\x00'),
+                                                 size=2, model=message, field='data', offset=2)
             seq = message.seq
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
@@ -7646,7 +7669,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_LocalizedRoutingInitiationMessage(
             seq=self._make_uint(seq, bits=16, name='sequence number'),
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=2, name='reserved octets'),
             lifetime=self._make_uint(lifetime_val, bits=16, name='lifetime'),
             options=self._make_mh_options(options),
         )
@@ -7770,8 +7793,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             seq: Sequence number.
             status: Status.
             options: Mobility options.
-            msg_reserved: The three reserved octets of the message body as captured,
-                truncated or zero-filled to 3 octets.
+            msg_reserved: The three reserved octets of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7780,10 +7802,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``seq`` does not fit its field, or ``status`` is a
                 name, a :obj:`bool` or a code its field cannot carry.
+                Also if ``msg_reserved`` is not three octets.
 
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00\x00\x00'),
+                                                 size=3, model=message, field='data', offset=3)
             seq = message.seq
             status_val = message.status  # type: Enum_UpdateNotificationACKStatus
             options = message.options
@@ -7795,7 +7819,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_UpdateNotificationAcknowledgementMessage(
             seq=self._make_uint(seq, bits=16, name='sequence number'),
             status=status_val,
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=3, name='reserved octets'),
             options=self._make_mh_options(options),
         )
 
@@ -7871,8 +7895,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             seq: Sequence number, counted modulo 256.
             options: Mobility options.
-            msg_reserved: The reserved octet of the message body as captured,
-                truncated or zero-filled to 1 octet.
+            msg_reserved: The reserved octet of the message body as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7880,10 +7903,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``seq`` does not fit its field.
+                Also if ``msg_reserved`` is not one octet.
 
         """
         if message is not None:
-            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00'),
+                                                 size=1, model=message, field='data', offset=1)
             seq = message.seq
             options = message.options
         else:
@@ -7891,7 +7916,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_SubscriptionQueryMessage(
             seq=self._make_uint(seq, bits=8, name='sequence number'),
-            reserved=msg_reserved,
+            reserved=self._make_octets(msg_reserved, size=1, name='reserved octets'),
             options=self._make_mh_options(options),
         )
 
@@ -8245,8 +8270,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 bits past ``prefix_length`` are written as given.
             prefix_length: Prefix length; defaults to that of a network or of
                 text ending in ``/<length>``, and to 128 for an address.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8256,6 +8280,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``prefix`` is not an IPv6 address or network, or
                 ``prefix_length`` is negative, a :obj:`bool`, or does not fit in
                 one octet.
+                Also if ``reserved`` is not one octet.
 
         Note:
             The prefix length is checked against its 8-bit field alone, as
@@ -8292,7 +8317,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MobileNetworkPrefixOption(
             type=type,
             length=18,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             prefix_length=prefix_length,
             prefix=prefix_addr,
         )
@@ -8636,14 +8661,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_cga_param(self, type: 'Enum_Option', option: 'Optional[Data_CGAParametersOption]' = None, *,
-                            parameters: 'Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]' = None,
+                            parameters: 'Optional[list[Schema_CGAParameter | Data_CGAParameter | bytes]]' = None,
                             **kwargs: 'Any') -> 'Schema_CGAParametersOption':
         """Make MH CGA parameters option.
 
         Args:
             type: Option type.
             option: Option data model.
-            parameters: CGA parameters.
+            parameters: CGA parameters, each as octets, a schema or a data
+                model. A :obj:`dict` is refused: a mapping stands for a
+                maker's keyword arguments, and no maker takes a CGA
+                parameter's fields, so build the data model from them.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8651,7 +8679,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
+                ``Option Length``, or an item of ``parameters`` is not octets,
+                a schema or a data model, such as a :obj:`dict`.
 
         """
         if option is not None:
@@ -8686,7 +8715,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 length += 25 + len(data.public_key) + ext_len
                 param.append(schema)
             else:
-                raise ProtocolError(f'{self.alias}: [OptNo {type}] unknown CGA parameter format: {data}')
+                raise ProtocolError(f'{self.alias}: [OptNo {type}] unknown CGA parameter format: must be bytes, '
+                                    f'a CGA parameter schema or data model, not {data!r}')
 
         return Schema_CGAParametersOption(
             type=type,
@@ -8782,6 +8812,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``token`` is not eight octets.
+
         """
         if option is not None:
             token = option.token
@@ -8789,7 +8822,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_CareofTestOption(
             type=type,
             length=8,
-            token=token,
+            token=self._make_octets(token, size=8, name='token'),
         )
 
     def _make_opt_exp(self, type: 'Enum_Option', option: 'Optional[Data_ExperimentalMobilityOption]' = None, *,
@@ -9040,8 +9073,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Home network prefix.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9049,7 +9081,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or does not fit in one octet.
+                or does not fit in one octet. Also if ``reserved`` is not one octet.
 
         Note:
             The prefix length is checked against its 8-bit field alone, as
@@ -9073,7 +9105,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_HomeNetworkPrefixOption(
             type=type,
             length=18,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -9124,8 +9156,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             att: Access technology type.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9134,6 +9165,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``att`` is a name, a :obj:`bool` or a code its
                 field cannot carry.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -9146,7 +9178,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_AccessTechnologyTypeOption(
             type=type,
             length=2,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             att=att_val,
         )
 
@@ -9160,8 +9192,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             lli: Link-layer identifier.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9169,7 +9200,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
+                ``Option Length``. Also if ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -9179,7 +9210,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MNLLIdentifierOption(
             type=type,
             length=self._make_uint(2 + len(lli), bits=8, name='Option Length'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             lli=lli,
         )
 
@@ -9432,12 +9463,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             address: IPv4 care-of address.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -9447,7 +9480,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_IPv4CareofAddressOption(
             type=type,
             length=6,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             address=address,
         )
 
@@ -9462,8 +9495,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             key: GRE key identifier, or :obj:`None` to omit it -- which is what an
                 option length of 2 means on the wire.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9471,6 +9503,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``key`` does not fit its field.
+                Also if ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -9480,7 +9513,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_GREKeyOption(
             type=type,
             length=2 if key is None else 6,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             key=None if key is None else self._make_uint(key, bits=32, name='GRE key'),
         )
 
@@ -9675,12 +9708,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             address: IPv4 default-router address.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -9690,7 +9725,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_IPv4DefaultRouterAddressOption(
             type=type,
             length=6,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             address=address,
         )
 
@@ -9740,8 +9775,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             requests: Requested contexts, each either a data model or a
                 ``(mobility option type, extra data)`` pair.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9751,6 +9785,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If the option is too long for its one-octet
                 ``Option Length``, or the mobility option type of a pair is a
                 name, a :obj:`bool` or a code its field cannot carry.
+                Also if ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -9779,7 +9814,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_ContextRequestOption(
             type=type,
             length=self._make_uint(2 + len(buffer), bits=8, name='Option Length'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             requests=bytes(buffer),
         )
 
@@ -9797,8 +9832,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`. If not
                 given, the code of the address family of ``address``.
             address: Local mobility anchor address.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9809,6 +9843,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :rfc:`5949#section-6.2.2` gives the address family of
                 ``address`` (:issue:`2280`), or is a name, a :obj:`bool` or a
                 code its field cannot carry.
+                Also if ``reserved`` is not one octet.
 
         Note:
             The option length is derived from the address family rather than from
@@ -9855,7 +9890,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6 if addr.version == 4 else 18,
             code=code_val,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             address=addr,
         )
 
@@ -9869,12 +9904,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             iid: Interface identifier; exactly 8 octets.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``iid`` is not eight octets, or ``reserved`` is not
+                two.
 
         """
         if option is not None:
@@ -9887,7 +9925,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MNLLAIIDOption(
             type=type,
             length=10,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             iid=iid,
         )
 
@@ -10015,8 +10053,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If an entry of a ``BID_Reference`` sub-option's ``bid`` does
-                not fit its field, or a ``ts_format`` or ``action`` is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                not fit its field, a ``ts_format`` or ``action`` is a name, a
+                :obj:`bool` or a code its field cannot carry, or a sub-option's
+                ``reserved`` is not as many octets as its field.
 
         Note:
             The data model parameter is named ``option`` rather than ``data``
@@ -10069,7 +10108,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_TrafficSelectorSuboption(
                 type=code, length=2 + len(selector),
-                ts_format=cast('Enum_TrafficSelector', ts_format), reserved=reserved,
+                ts_format=cast('Enum_TrafficSelector', ts_format),
+                reserved=self._make_octets(reserved, size=1, name='reserved octets'),
                 selector=selector)
 
         if code == Enum_FlowIDSuboption.Flow_Binding_Action:
@@ -10082,7 +10122,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                           Enum_FlowBindingAction, bits=8, name='action')
                 reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_FlowBindingActionSuboption(
-                type=code, length=2, reserved=reserved,
+                type=code, length=2, reserved=self._make_octets(reserved, size=1, name='reserved octets'),
                 action=cast('Enum_FlowBindingAction', action))
 
         if code == Enum_FlowIDSuboption.Target_Care_of_Address:
@@ -10099,7 +10139,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
             return Schema_TargetCareofAddressSuboption(
-                type=code, length=6 if addr.version == 4 else 18, reserved=reserved,
+                type=code, length=6 if addr.version == 4 else 18,
+                reserved=self._make_octets(reserved, size=2, name='reserved octets'),
                 address=addr)
 
         if option is not None:
@@ -10125,8 +10166,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             fid_pri: Flow priority.
             status: Status.
             suboptions: Sub-options.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10137,6 +10177,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 Also if ``status`` is a name, a :obj:`bool` or a code its field
                 cannot carry, or the option is too long for its one-octet
                 ``Option Length``.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -10159,7 +10200,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._make_uint(length, bits=8, name='Option Length'),
             fid=self._make_uint(fid, bits=16, name='flow identifier'),
             fid_pri=self._make_uint(fid_pri, bits=16, name='flow identifier priority'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             status=status_val,
             suboptions=entries,
         )
@@ -10172,12 +10213,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -10186,7 +10229,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_RedirectCapabilityOption(
             type=type,
             length=2,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
         )
 
     def _make_opt_redirect(self, type: 'Enum_Option', option: 'Optional[Data_RedirectOption]' = None, *,
@@ -10315,8 +10358,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             subtype: Sub-type.
             group_id: Mobile node group identifier.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10326,6 +10368,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``group_id`` does not fit its field.
                 Also if ``subtype`` is a name, a :obj:`bool` or a code its field
                 cannot carry.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -10341,7 +10384,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6,
             subtype=subtype_val,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             group_id=self._make_uint(group_id, bits=32, name='group identifier'),
         )
 
@@ -10358,8 +10401,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address_length: Address length, in bits; :rfc:`6705#section-11.1`
                 requires 128.
             address: MAG IPv6 address.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10367,6 +10409,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``address_length`` does not fit its field.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -10377,7 +10420,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MAGIPv6AddressOption(
             type=type,
             length=18,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             address_length=self._make_uint(address_length, bits=8, name='address length'),
             address=address,
         )
@@ -10504,7 +10547,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_ANICivicLocationSuboption(
                 type=code, length=2 + len(location),
-                format=self._make_uint(fmt, bits=8, name='civic location format'), reserved=octets,
+                format=self._make_uint(fmt, bits=8, name='civic location format'),
+                reserved=self._make_octets(octets, size=1, name='reserved octets'),
                 location=location)
 
         if code == Enum_ANISuboption.MAG_Group_Identifier:
@@ -10881,7 +10925,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 rate = cast('int', kwargs.get('rate', 0))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            return Schema_BitRateAttribute(type=code, length=6, reserved=octets,
+            return Schema_BitRateAttribute(type=code, length=6,
+                                           reserved=self._make_octets(octets, size=2, name='reserved octets'),
                                            rate=self._make_uint(rate, bits=32, name='bit rate'))
 
         if code == Enum_QoSAttribute.Allocation_Retention_Priority:
@@ -10897,7 +10942,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 vulnerability = cast('int', kwargs.get('preemption_vulnerability', 0))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_AllocationRetentionPriorityAttribute(
-                type=code, length=2, reserved=octets,
+                type=code, length=2, reserved=self._make_octets(octets, size=1, name='reserved octets'),
                 priority={
                     'PL': self._make_uint(level, bits=4, name='priority level'),
                     'PC': self._make_uint(capability, bits=2, name='preemption capability'),
@@ -10917,7 +10962,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 selector = cast('bytes', kwargs.get('selector', b''))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_QoSTrafficSelectorAttribute(
-                type=code, length=2 + len(selector), reserved=octets,
+                type=code, length=2 + len(selector),
+                reserved=self._make_octets(octets, size=1, name='reserved octets'),
                 ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
 
         if code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
@@ -10932,7 +10978,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 payload = cast('bytes', kwargs.get('data', b''))
                 octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
             return Schema_QoSVendorSpecificAttribute(
-                type=code, length=7 + len(payload), reserved=octets,
+                type=code, length=7 + len(payload),
+                reserved=self._make_octets(octets, size=2, name='reserved octets'),
                 vendor=self._make_uint(vendor, bits=32, name='vendor ID'),
                 subtype=self._make_uint(subtype, bits=8, name='vendor subtype'), data=payload)
 
@@ -10959,8 +11006,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             dscp: Differentiated services code point, 6 bits.
             oc: Operational code.
             attributes: Quality-of-service attributes.
-            reserved: The three reserved octets as captured, truncated or zero-
-                filled to 3 octets.
+            reserved: The three reserved octets as captured.
             tc_reserved: The 2 reserved bits of the traffic class, after ``dscp``.
             **kwargs: Arbitrary keyword arguments.
 
@@ -10971,6 +11017,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``sr_id``, ``dscp``, ``tc_reserved`` or ``oc`` does
                 not fit its field.
                 Also if the option is too long for its one-octet ``Option Length``.
+                Also if ``reserved`` is not three octets.
 
         .. versionchanged:: 1.6.0
 
@@ -11001,7 +11048,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             sr_id=self._make_uint(sr_id, bits=8, name='service request identifier'),
             tc=dscp << 2 | tc_reserved,
             oc=self._make_uint(oc, bits=8, name='operational code'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=3, name='reserved octets'),
             attributes=entries,
         )
 
@@ -11017,18 +11064,21 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address: LMA user-plane address, or :obj:`None` to omit it -- which is
                 how a mobile access gateway asks for a transport without naming an
                 address.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not two octets.
 
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00\x00')
             address = option.address
 
+        reserved = self._make_octets(reserved, size=2, name='reserved octets')
         if address is None:
             return Schema_LMAUserPlaneAddressOption(type=type, length=2, reserved=reserved, address=b'')
 
@@ -11060,8 +11110,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             code: Option code.
             data: MLD or IGMP report payload, opaque to this module.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11073,6 +11122,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 a payload that is not a multiple of 4 octets cannot be described by
                 it at all. Also if ``code`` does not fit in one octet, or the option is
                 too long for its one-octet ``Option Length``.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -11088,7 +11138,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=self._make_uint(len(data) // 4, bits=8, name='Option Length'),
             code=self._make_uint(code, bits=8, name='code'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             data=data,
         )
 
@@ -11362,8 +11412,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             subtype: Sub-type, from the mobile node identifier subtype registry.
             identifier: Identifier.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11373,6 +11422,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ProtocolError: If ``subtype`` is a name, a :obj:`bool` or a code its
                 field cannot carry, or the option is too long for its one-octet
                 ``Option Length``.
+                Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -11388,7 +11438,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=self._make_uint(2 + len(identifier), bits=8, name='Option Length'),
             subtype=subtype_val,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             identifier=identifier,
         )
 
@@ -11404,8 +11454,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Anchored prefix.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11413,7 +11462,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address.
+                or longer than the address. Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -11428,7 +11477,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_AnchoredPrefixOption(
             type=type,
             length=18,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -11445,8 +11494,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Local prefix.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11454,7 +11502,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address.
+                or longer than the address. Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -11469,7 +11517,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LocalPrefixOption(
             type=type,
             length=18,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -11488,8 +11536,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length: Prefix length of ``prefix``.
             maar: Previous MAAR's global address.
             prefix: Mobile node's home network prefix.
-            reserved: The reserved octet as captured, truncated or zero-filled to 1
-                octet.
+            reserved: The reserved octet as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11497,7 +11544,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address.
+                or longer than the address. Also if ``reserved`` is not one octet.
 
         """
         if option is not None:
@@ -11513,7 +11560,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_PreviousMAAROption(
             type=type,
             length=34,
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=1, name='reserved octets'),
             prefix_length=prefix_length,
             maar=maar,
             prefix=prefix,
@@ -11577,8 +11624,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             lla: Distributed logical interface's link-layer address.
-            reserved: The two reserved octets as captured, truncated or zero-filled
-                to 2 octets.
+            reserved: The two reserved octets as captured.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -11586,7 +11632,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
+                ``Option Length``. Also if ``reserved`` is not two octets.
 
         """
         if option is not None:
@@ -11596,7 +11642,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_DLIFLinkLayerAddressOption(
             type=type,
             length=self._make_uint(2 + len(lla), bits=8, name='Option Length'),
-            reserved=reserved,
+            reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             lla=lla,
         )
 
