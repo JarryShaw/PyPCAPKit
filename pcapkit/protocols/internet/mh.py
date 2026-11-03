@@ -1154,6 +1154,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than being
          dropped beside another item or, for most, raising an
          :exc:`AttributeError` alone (:issue:`2723`).
+       * A CGA parameter builds from a data model holding raw extensions, where
+         it raised an :exc:`AttributeError`, and from a schema without
+         ``public_key_test``, where it raised a :exc:`KeyError`
+         (:issue:`2725`).
        * Each enumeration field of :meth:`make` and of the message, option and
          sub-option makers, and the type of each option, sub-option, QoS
          attribute and CGA extension given to them, takes a member or an
@@ -8705,7 +8709,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             parameters: CGA parameters, each as octets, a schema or a data
                 model. A :obj:`dict` is refused: a mapping stands for a
                 maker's keyword arguments, and no maker takes a CGA
-                parameter's fields, so build the data model from them.
+                parameter's fields, so build the data model from them. A
+                schema without ``public_key_test`` is built from a copy that
+                takes one from its key, and is left as given.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8730,11 +8736,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 length += len(data)
                 param.append(data)
             elif isinstance(data, Schema_CGAParameter):
-                if not hasattr(data, 'public_key_test'):
-                    data.public_key_test = {'len': max(len(data.public_key) - 2, 0)}
-                _, ext_len = self._make_cga_extensions(data.extensions)
-                length += 25 + len(data.public_key) + ext_len
-                param.append(data)
+                schema = data
+                # NOTE: Test the schema, not ``hasattr``: an unset field is not
+                # stored, so ``hasattr`` finds the class's field object (#2725).
+                if 'public_key_test' not in data:
+                    # A copy takes the key test, leaving the caller's schema as given.
+                    schema = Schema_CGAParameter.from_dict(
+                        data.to_dict(), public_key_test={'len': max(len(data.public_key) - 2, 0)})
+                _, ext_len = self._make_cga_extensions(schema.extensions)
+                length += 25 + len(schema.public_key) + ext_len
+                param.append(schema)
             elif isinstance(data, Data_CGAParameter):
                 ext, ext_len = self._make_cga_extensions(data.extensions)
                 schema = Schema_CGAParameter(

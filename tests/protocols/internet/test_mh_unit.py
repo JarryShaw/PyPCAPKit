@@ -750,15 +750,12 @@ class MHUnitTests(unittest.TestCase):
                 Option.CGA_Parameters,
                 parameters=[cga_schema],
             ).length, 0)
-            public_key_test = schema.CGAParameter.public_key_test
-            try:
-                delattr(schema.CGAParameter, 'public_key_test')
-                self.assertGreater(proto._make_opt_cga_param(
-                    Option.CGA_Parameters,
-                    parameters=[cga_schema_missing_test],
-                ).length, 0)
-            finally:
-                schema.CGAParameter.public_key_test = public_key_test
+            given = dict(cga_schema_missing_test)
+            made = proto._make_opt_cga_param(Option.CGA_Parameters, parameters=[cga_schema_missing_test])
+            self.assertEqual(made.parameters[0].public_key_test, {'len': 1})
+            self.assertEqual(made.length, 25 + 3)
+            self.assertNotIn('public_key_test', cga_schema_missing_test)
+            self.assertEqual(dict(cga_schema_missing_test), given)
 
             # NOTE: The data model's ``length`` is the whole option, the schema's is
             # its ``Option Length`` field. A 4-octet ``PadN`` spends 2 octets on its
