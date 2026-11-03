@@ -42,13 +42,13 @@ RECORD = bytes.fromhex('01000001ef0101010a000001')
 #: that leave a short read on its header. Shorter than eight octets, an IGMPv2 or
 #: IGMPv3 Query is refused by its class, which classifies a Query by its length.
 #: Eight octets of the Report are a whole header whose record count no octet
-#: backs, which records no short read.
+#: backs, which reads short as well (#2711).
 MESSAGES = {
     'v1-report': ('IGMPv1', message(b'\x12\x00', bytes([224, 0, 0, 1])), range(1, 8)),
     'v2-report': ('IGMPv2', message(b'\x16\x00', bytes([239, 1, 2, 3])), range(1, 8)),
     'v2-leave': ('IGMPv2', message(b'\x17\x00', bytes([239, 1, 2, 3])), range(1, 8)),
     'v3-report': ('IGMPv3', message(b'\x22\x00', bytes.fromhex('00000001') + RECORD),
-                  [*range(1, 8), *range(9, 20)]),
+                  range(1, 20)),
     # A General Query with QRV 2, QQIC 125 and one source, 10.0.0.1.
     'v3-query': ('IGMPv3', message(b'\x11\x64', bytes(4) + bytes.fromhex('027d00010a000001')),
                  range(12, 16)),

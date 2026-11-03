@@ -51,6 +51,7 @@ frame_length = contextvars.ContextVar(
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
 #: :meth:`Protocol._make_payload
 #: <pcapkit.protocols.protocol.Protocol._make_payload>`, so that the layer
-#: it is rebuilt for parses the same octets again; see
+#: it is rebuilt for parses the same octets again and reports what they carry,
+#: which the payload's own parse then does not (:issue:`2711`); see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 rebuilding = contextvars.ContextVar('pcapkit.utilities.contextvars.rebuilding', default=False)

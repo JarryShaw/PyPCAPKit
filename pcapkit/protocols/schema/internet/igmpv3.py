@@ -11,7 +11,9 @@ from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField, BytesField
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.utilities.contextvars import frame_depth
 from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['IGMPv3', 'Query', 'QueryExtension', 'Report', 'GroupRecord']
@@ -88,6 +90,43 @@ def query_extension_present(pkt: 'dict[str, Any]') -> 'bool':
     if 'ext' in pkt:
         return pkt['ext'] is not None
     return pkt['__length__'] >= 4
+
+
+def report_record_count(pkt: 'dict[str, Any]') -> 'int':
+    """Count callback for :attr:`Report.records`.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        :attr:`Report.num_group_records`, for a message parsed on its own;
+        otherwise ``-1``, counting none: inside a frame, the layer before the
+        message or the frame's own lengths say where it ends, and on the
+        packing path ``'records'`` is already in ``pkt``, as no count is
+        without :attr:`Report.num_group_records`.
+
+    No layer before a message parsed on its own gives its length, and none
+    tells a cut from the end of the message, so the count does: records it
+    counts past the data are a cut, however the cut falls, on a field boundary
+    too, and :meth:`Schema.unpack
+    <pcapkit.protocols.schema.schema.Schema.unpack>` records it, the records
+    present alone being read (:issue:`2711`).
+
+    Raises:
+        ProtocolError: If the records counted, at the 8 fixed octets of each,
+            behind the 8 octets ahead of them, reach past the
+            :data:`~pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH` octets
+            an IP payload can hold, so the count is no cut but one the message
+            cannot carry (:issue:`2711`).
+
+    """
+    count = pkt.get('num_group_records')  # type: Optional[int]
+    if count is None or 'records' in pkt or frame_depth.get():
+        return -1
+    # NOTE: The 8 octets ahead of the records count against the IP payload too.
+    if 8 + 8 * count > IP_MAX_LENGTH:
+        raise ProtocolError(f'IGMPv3: {count} group records cannot fit in one IP payload')
+    return count
 
 
 @schema_final
@@ -230,7 +269,8 @@ class Report(Schema):
         :class:`~pcapkit.protocols.schema.internet.hip.LocatorSetParameter`).
         :meth:`post_process` keeps only the first :attr:`num_group_records`
         records and gives the rest to :attr:`payload`, which is
-        :rfc:`3376#section-4.2.11`'s "Additional Data".
+        :rfc:`3376#section-4.2.11`'s "Additional Data". Where the data ends
+        before the records counted, see :func:`report_record_count`.
 
     """
 
@@ -247,6 +287,7 @@ class Report(Schema):
     records: 'list[GroupRecord]' = ListField(
         length=lambda pkt: pkt['__length__'],
         item_type=SchemaField(schema=GroupRecord),
+        count=report_record_count,
     )
     #: Payload; empty for a standards-conformant message with
     #: :attr:`num_group_records` matching the octets actually present.

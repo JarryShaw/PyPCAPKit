@@ -1296,7 +1296,8 @@ class IGMPv3DirectCutTests(unittest.TestCase):
     """A message cut short and parsed on its own, as ``IGMPv3(raw, len(raw))``,
     rebuilds as captured, as it does inside IPv4 (#2660). IGMP has no length
     field, so the body's own read is never short there: the cut is recorded on
-    the body, after the octets it holds, wherever the data ends inside a field."""
+    the body, after the octets it holds, wherever the data ends inside a field
+    or before the records a Report counts (#2711)."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -1355,8 +1356,9 @@ class IGMPv3DirectCutTests(unittest.TestCase):
                 self.assert_rebuilds(raw, igmp, ('body', keep - 1))
 
     def test_a_report_cut_at_every_offset(self) -> None:
-        """A cut at the end of the header or of the first record ends inside no
-        field, so it is not marked, and the count as parsed rebuilds it (#2650)."""
+        """Every cut is marked: one at the end of the header or of the first
+        record ends inside no field, but before the records the count declares
+        (#2711), and the count as parsed rebuilds it (#2650)."""
         packet = IGMPV3_TWO_RECORD_REPORT
         for keep in range(1, len(packet)):
             raw = packet[:keep]
@@ -1364,8 +1366,7 @@ class IGMPv3DirectCutTests(unittest.TestCase):
                 igmp = self.parse(raw)
                 if keep >= 8:
                     self.assertEqual(igmp.info.num_group_records, 2)
-                record = None if keep in (8, 24) else ('body', keep - 1)
-                self.assert_rebuilds(raw, igmp, record)
+                self.assert_rebuilds(raw, igmp, ('body', keep - 1))
 
     def test_a_cut_is_recorded_as_inside_ipv4(self) -> None:
         """The record a direct parse makes is the one the enclosing IPv4 layer's

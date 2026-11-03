@@ -43,8 +43,10 @@ class IGMP(Schema):
     #: Group address.
     group: 'IPv4Address' = IPv4AddressField()
     #: Payload, empty for a standards-conformant IGMPv1/v2 message, since the
-    #: 8-octet header is the whole message.
-    payload: 'bytes' = PayloadField()
+    #: 8-octet header is the whole message. It is the rest of the IP payload,
+    #: which the checksum covers too, so a cut inside it is recorded
+    #: (:issue:`2711`).
+    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['__length__'])
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Type', max_resp_time: 'int', checksum: 'bytes',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
