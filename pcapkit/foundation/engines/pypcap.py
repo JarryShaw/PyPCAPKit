@@ -40,7 +40,7 @@ if TYPE_CHECKING:
         @property
         def pcap(self) -> 'Type[Handle]': ...
 
-    #: A PyPCAP "frame": the ``(timestamp, bytes)`` pair that ``pcap.pcap``
+    #: A PyPCAP "frame" -- the ``(timestamp, bytes)`` pair that ``pcap.pcap``
     #: iteration yields. Deliberately *not* named ``Frame``, so that it is not
     #: mistaken for :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is
     #: what the built-in engines return.

@@ -58,7 +58,7 @@ class GRE(Schema):
         'reserved_2': (4, 9),
         'version': (13, 3),
     })
-    #: Protocol Type: the EtherType of the encapsulated payload.
+    #: Protocol Type -- the EtherType of the encapsulated payload.
     protocol_type: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
     #: Checksum, present only when ``flags.checksum_present`` is set.
     checksum: 'Optional[int]' = ConditionalField(

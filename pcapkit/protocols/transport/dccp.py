@@ -113,7 +113,7 @@ if TYPE_CHECKING:
 
 __all__ = ['DCCP']
 
-#: Longest a DCCP header can be: a Data Offset of 255 words, :rfc:`4340#section-5`.
+#: Longest a DCCP header can be -- a Data Offset of 255 words, :rfc:`4340#section-5`.
 DCCP_MAX_HEADER_LEN = 1020
 
 
@@ -208,7 +208,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key there too, as for
     #: :attr:`TCP.__proto_key__ <pcapkit.protocols.transport.tcp.TCP.__proto_key__>`.
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)

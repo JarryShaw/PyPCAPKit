@@ -108,7 +108,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         #: across the whole file rather than per section.
         _block_count: 'collections.Counter[str]'
 
-    #: The PCAP-NG magic number this engine claims: the Block Type of a Section
+    #: The PCAP-NG magic number this engine claims -- the Block Type of a Section
     #: Header Block, read from its one home,
     #: :class:`~pcapkit.const.pcapng.block_type.BlockType` (:issue:`1739`). It
     #: reads the same in either byte order.

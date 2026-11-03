@@ -137,7 +137,7 @@ class CALIPSOOption(Option):
 
     #: CALIPSO domain of interpretation.
     domain: 'int'
-    #: Compartment bitmap length, in octets: four times the ``Cmpt Length``
+    #: Compartment bitmap length, in octets -- four times the ``Cmpt Length``
     #: field, which counts 32-bit words.
     cmpt_len: 'int'
     #: Sensitivity level.
@@ -167,7 +167,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
 
     #: TaggerID type.
     tid_type: 'TaggerID'
-    #: ``TidLen`` field as on the wire: the TaggerID length in octets minus
+    #: ``TidLen`` field as on the wire -- the TaggerID length in octets minus
     #: one, or ``0`` when there is no TaggerID [:rfc:`6621#section-6.1.1`].
     tid_len: 'int'
     #: TaggerID.
@@ -222,7 +222,7 @@ class QuickStartOption(Option):
 
     #: QS function.
     func: 'QSFunction'
-    #: Rate request/report, in kbps: ``40 * 2 ** N`` for the Rate Request or
+    #: Rate request/report, in kbps -- ``40 * 2 ** N`` for the Rate Request or
     #: Rate Report field ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782`
     #: Section 3.1).
     rate: 'int'

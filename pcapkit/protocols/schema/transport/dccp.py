@@ -41,7 +41,7 @@ DCCP_MIN_HEADER_LEN = 12
 #: :rfc:`4340#section-5.8`.
 DCCP_SINGLE_OCTET_OPTION_MAX = 31
 
-#: Packet types carrying an Acknowledgement Number Subheader: every one
+#: Packet types carrying an Acknowledgement Number Subheader -- every one
 #: :rfc:`4340#section-5` defines but DCCP-Request and DCCP-Data. DCCP-Listen
 #: (:rfc:`5596#section-2.2.1`) carries none either.
 ACK_TYPES = frozenset({
@@ -50,7 +50,7 @@ ACK_TYPES = frozenset({
     Enum_PacketType.DCCP_Sync, Enum_PacketType.DCCP_SyncAck,
 })
 
-#: Packet types carrying a Service Code: DCCP-Request, DCCP-Response and
+#: Packet types carrying a Service Code -- DCCP-Request, DCCP-Response and
 #: DCCP-Listen (:rfc:`4340#section-5.2`, :rfc:`5596#section-2.2.1`).
 SERVICE_TYPES = frozenset({
     Enum_PacketType.DCCP_Request, Enum_PacketType.DCCP_Response, Enum_PacketType.DCCP_Listen,
@@ -360,8 +360,8 @@ class DCCP(Schema):
         BytesField(length=3),
         lambda pkt: pkt['type']['type'] == RESET_TYPE,
     )
-    #: Options, cut short where the data is; :meth:`DCCP.read
-    #: <pcapkit.protocols.transport.dccp.DCCP.read>` refuses such a header.
+    #: Options, cut short where the data is;
+    #: :meth:`DCCP.read <pcapkit.protocols.transport.dccp.DCCP.read>` refuses such a header.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: max(min(pkt['offset'] * 4 - header_length(pkt['type']), pkt['__length__']), 0),
         base_schema=Option,

@@ -77,7 +77,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    #: A warning held back by :class:`hold_warnings`: its message, its category,
+    #: A warning held back by :class:`hold_warnings` -- its message, its category,
     #: and the frame it is attributed to, if that frame could be found.
     HeldWarning = Tuple[Union[str, Warning], Type[Warning], Optional[FrameType]]
 

@@ -116,7 +116,7 @@ class QueryExtension(Schema):
         length=lambda pkt: pkt['num_sources'] * 4,
         item_type=IPv4AddressField(),
     )
-    #: Additional data (:rfc:`3376#section-4.1.10`): octets past the source
+    #: Additional data (:rfc:`3376#section-4.1.10`) -- octets past the source
     #: list that a received Query may carry and that must be kept (to verify
     #: the checksum) but not otherwise acted on. Empty for a
     #: standards-conformant Query, since :meth:`IGMPv3.make
@@ -143,8 +143,8 @@ class Query(Schema):
 
     """
 
-    #: Max response code; the raw octet :meth:`IGMPv3.read
-    #: <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` decodes per
+    #: Max response code; the raw octet
+    #: :meth:`IGMPv3.read <pcapkit.protocols.internet.igmpv3.IGMPv3.read>` decodes per
     #: :rfc:`3376#section-4.1.1`.
     max_resp_code: 'int' = UInt8Field()
     #: Checksum. The 16-bit one's complement of the one's complement sum of

@@ -30,7 +30,7 @@ class IGMP(Protocol):
 
     """
 
-    #: Version of IGMP the message was read as, ``1`` or ``2``: the
+    #: Version of IGMP the message was read as, ``1`` or ``2`` -- the
     #: :attr:`~pcapkit.protocols.internet.igmp.IGMP.version` of the class that
     #: read or built it. It is on no octet, since the versions share this
     #: layout, and :meth:`IGMP.from_data
@@ -46,7 +46,7 @@ class IGMP(Protocol):
     max_resp_time: 'int'
     #: Checksum.
     checksum: 'bytes'
-    #: Group address: the IPv4 multicast group being queried, reported or
+    #: Group address -- the IPv4 multicast group being queried, reported or
     #: left, or ``0.0.0.0`` on a General Query.
     group: 'IPv4Address'
 

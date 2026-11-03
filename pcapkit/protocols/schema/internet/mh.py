@@ -150,7 +150,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         """
 
-        #: First length octet: the length itself, or ``0x80`` plus the number of
+        #: First length octet -- the length itself, or ``0x80`` plus the number of
         #: length octets that follow.
         len: int
         #: The two octets after it, which hold a long-form length; absent from a
