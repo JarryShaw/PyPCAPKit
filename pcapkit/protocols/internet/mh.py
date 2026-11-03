@@ -1148,6 +1148,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          degree that does not fit 24 bits as two's complement, where it masked
          it. The option makers check their registry codes and their one-octet
          ``Option Length`` too (:issue:`2614`).
+       * An option, sub-option, QoS attribute or CGA extension given to a
+         maker as empty raw octets, which hold no type, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than being
+         dropped beside another item or, for most, raising an
+         :exc:`AttributeError` alone (:issue:`2723`).
        * Each enumeration field of :meth:`make` and of the message, option and
          sub-option makers, and the type of each option, sub-option, QoS
          attribute and CGA extension given to them, takes a member or an
@@ -8011,13 +8016,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of an option, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if an option
+                given as raw octets is empty (:issue:`2723`).
 
         """
         if isinstance(options, list):
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no type octet')
                     code = Enum_Option.get(int.from_bytes(schema[0:1], 'big', signed=False))
 
                     data = schema  # type: Schema_Option | bytes
@@ -10020,12 +10028,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of a sub-option, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
 
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_FlowIdentificationSuboption | bytes]
             for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_FlowIdentificationSuboption | bytes', item))
                 else:
@@ -10441,12 +10452,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of a sub-option, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
 
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_ANISuboption | bytes]
             for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_ANISuboption | bytes', item))
                 else:
@@ -10846,12 +10860,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of an attribute, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if an
+                attribute given as raw octets is empty (:issue:`2723`).
 
         """
         if isinstance(attributes, list):
             entries = []  # type: list[Schema_QoSAttribute | bytes]
             for item in attributes:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid attribute: {item!r} holds no type octet')
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_QoSAttribute | bytes', item))
                 else:
@@ -11200,12 +11217,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of a sub-option, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
 
         """
         if isinstance(suboptions, list):
             entries = []  # type: list[Schema_LMAControlledMAGSuboption | bytes]
             for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
                 if isinstance(item, (bytes, Schema)):
                     entries.append(cast('Schema_LMAControlledMAGSuboption | bytes', item))
                 else:
@@ -11658,7 +11678,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If the type of an extension, given in a ``(type,
                 kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry.
+                :obj:`bool` or a code its field cannot carry, or if an
+                extension given as raw octets is empty (:issue:`2723`).
 
         """
         total_length = 0
@@ -11666,6 +11687,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             extensions_list = []  # type: list[Schema_CGAExtension | bytes]
             for schema in extensions:
                 if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid CGA extension: {schema!r} holds no type field')
                     code = Enum_CGAExtension.get(int.from_bytes(schema[0:2], 'big', signed=False))
 
                     data = schema  # type: Schema_CGAExtension | bytes
