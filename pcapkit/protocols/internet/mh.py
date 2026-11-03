@@ -3350,14 +3350,16 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
-        prefix = cast('IPv6Network',
-                      ipaddress.ip_network((schema.prefix, schema.prefix_length)))
-
+        # NOTE: The prefix and its length stay apart, as captured: an IPv6Network
+        # holds neither bits set past the length nor a length past 128. RFC 3963
+        # section 6.2 reads both fields as given, and answers a prefix the home
+        # agent cannot use with a status rather than discarding the option (#2702).
         data = Data_MobileNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
             reserved=schema.reserved,
-            prefix=prefix,
+            prefix_length=schema.prefix_length,
+            prefix=schema.prefix,
         )
         return data
 
@@ -4020,9 +4022,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         """
         if schema.length != 18:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
-        if schema.prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
+        # NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213
+        # section 5.3.2 answers a prefix the local mobility anchor cannot
+        # authorise with a status rather than discarding the option (#2702).
         data = Data_HomeNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
@@ -4237,12 +4240,23 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         seconds = schema.timestamp['seconds']
         fraction = schema.timestamp['fraction']
 
+        try:
+            # NOTE: Not the stdlib's ``fromtimestamp``, which takes no time
+            # after 3000 on Windows (#2099). The whole seconds go in as an int
+            # and the fraction as a timedelta, which rounds it to microseconds
+            # half to even as one float did, but loses no precision to the
+            # seconds, so the last second of 9999 is not carried past it.
+            timestamp = (fromtimestamp(seconds, datetime.timezone.utc)
+                         + datetime.timedelta(seconds=fraction / 65536))  # type: Optional[dt_type]
+        except ValueError:
+            # past the year 9999, which the 48-bit count reaches and datetime
+            # cannot hold, so pmip_timestamp alone keeps it (#2702)
+            timestamp = None
+
         data = Data_TimestampOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
-            # not the stdlib's ``fromtimestamp``, which takes no time after 3000
-            # on Windows (#2099)
-            timestamp=fromtimestamp(seconds + fraction / 65536, datetime.timezone.utc),
+            timestamp=timestamp,
             pmip_timestamp=Data_PMIPv6Timestamp(seconds=seconds, fraction=fraction),
         )
         return data
@@ -8258,7 +8272,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mnp(self, type: 'Enum_Option', option: 'Optional[Data_MobileNetworkPrefixOption]' = None, *,
-                      prefix: 'bytes | str | IPv6Network' = '::/0',
+                      prefix: 'bytes | str | int | IPv6Address | IPv6Network' = '::/0',
+                      prefix_length: 'Optional[int]' = None,
                       reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_MobileNetworkPrefixOption':
         """Make MH mobile network prefix option.
@@ -8266,7 +8281,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            prefix: Mobile network prefix.
+            prefix: Mobile network prefix, an IPv6 address or network, whose
+                bits past ``prefix_length`` are written as given.
+            prefix_length: Prefix length; defaults to that of a network or of
+                text ending in ``/<length>``, and to 128 for an address.
             reserved: The reserved octet as captured, truncated or zero-filled to 1
                 octet.
             **kwargs: Arbitrary keyword arguments.
@@ -8274,16 +8292,42 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Returns:
             Constructed option schema.
 
+        Raises:
+            ProtocolError: If ``prefix`` is not an IPv6 address or network, or
+                ``prefix_length`` is negative, a :obj:`bool`, or does not fit in
+                one octet.
+
+        Note:
+            The prefix length is checked against its 8-bit field alone, as
+            :rfc:`3963#section-6.2` has a home agent answer a prefix it cannot
+            use with a status rather than discard the option, so whatever the
+            reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           New argument ``prefix_length``. ``prefix`` keeps the bits set past
+           its length, rather than raising :exc:`ValueError`, and a prefix
+           length past 128 is written (:issue:`2702`).
+
         """
         if option is not None:
             reserved = getattr(option, 'reserved', b'\x00')
-            prefix = option.prefix
-
-        prefix_val = ipaddress.ip_network(prefix)
-        if prefix_val.version != 6:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid mobile network prefix: {prefix!r}')
-        prefix_length = prefix_val.prefixlen
-        prefix_addr = prefix_val.network_address
+            prefix_length = option.prefix_length
+            prefix_addr = option.prefix
+        else:
+            try:
+                # NOTE: An interface, unlike a network, keeps the bits past its
+                # length, and takes an address, a network or text alike. A bool
+                # is refused first, as it would pass for the address ``::1``.
+                prefix_val = None if isinstance(prefix, bool) else ipaddress.IPv6Interface(prefix)
+            except ValueError:
+                prefix_val = None
+            if prefix_val is None:
+                raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid mobile network prefix: {prefix!r}')
+            if prefix_length is None:
+                prefix_length = prefix_val.network.prefixlen
+            prefix_addr = prefix_val.ip
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
 
         return Schema_MobileNetworkPrefixOption(
             type=type,
@@ -9088,7 +9132,18 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address.
+                or does not fit in one octet.
+
+        Note:
+            The prefix length is checked against its 8-bit field alone, as
+            :rfc:`5213#section-5.3.2` has a local mobility anchor answer a
+            prefix it cannot authorise with a status rather than discard the
+            option, so whatever the reader keeps is written back.
+
+        .. versionchanged:: 1.6.0
+
+           A prefix length longer than the address is written, rather than
+           refused, as the reader keeps one (:issue:`2702`).
 
         """
         if option is not None:
@@ -9097,8 +9152,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix = option.prefix
 
         prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
-        if prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
 
         return Schema_HomeNetworkPrefixOption(
             type=type,

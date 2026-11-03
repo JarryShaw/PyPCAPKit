@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import io
-from ipaddress import ip_address, ip_network
+from ipaddress import ip_address
 import importlib.util
 from types import SimpleNamespace
 import unittest
@@ -353,12 +353,13 @@ class MHUnitTests(unittest.TestCase):
             schema.AuthorizationDataOption(type=Option.Authorization_Data, length=8, data=b'12345678'),
             options=options,
         ).data, b'12345678')
-        self.assertEqual(str(proto._read_opt_mnp(
+        mnp = proto._read_opt_mnp(
             schema.MobileNetworkPrefixOption(type=Option.Mobile_Network_Prefix_Option,
                                              length=18, prefix_length=64,
                                              prefix='2001:db8::'),
             options=options,
-        ).prefix), '2001:db8::/64')
+        )
+        self.assertEqual((mnp.prefix_length, str(mnp.prefix)), (64, '2001:db8::'))
         self.assertEqual(proto._read_opt_lla(
             schema.LinkLayerAddressOption(type=Option.Mobility_Header_Link_Layer_Address_option,
                                           length=7, code=LLACode.MN, lla=b'abcdef'),
@@ -789,8 +790,8 @@ class MHUnitTests(unittest.TestCase):
             self.assertEqual(proto._make_opt_mnp(
                 Option.Mobile_Network_Prefix_Option,
                 data.MobileNetworkPrefixOption(type=Option.Mobile_Network_Prefix_Option,
-                                               length=18, reserved=b'\x00',
-                                               prefix=ip_network('2001:db8:1::/64')),
+                                               length=18, reserved=b'\x00', prefix_length=64,
+                                               prefix=ip_address('2001:db8:1::')),
             ).prefix_length, 64)
             self.assertEqual(proto._make_opt_lla(
                 Option.Mobility_Header_Link_Layer_Address_option,

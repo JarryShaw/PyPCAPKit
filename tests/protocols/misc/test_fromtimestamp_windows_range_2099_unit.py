@@ -250,10 +250,16 @@ class TestMHOnWindows(unittest.TestCase):
                 rebuilt = proto._make_opt_timestamp(Option.Timestamp_Option, data)
                 self.assertEqual(rebuilt.pack(), schema.pack())
 
-        # past year 9999 it raises what it raises on Linux
+        # past year 9999 it reads as it reads on Linux: no datetime, and the
+        # count kept in pmip_timestamp, which rebuilds it (#2702)
         schema = proto._make_opt_timestamp(Option.Timestamp_Option, seconds=2**48 - 1, fraction=0)
-        with windows_gmtime(), self.assertRaises(ValueError):
-            proto._read_opt_timestamp(schema, options=None)  # type: ignore[arg-type]
+        linux = proto._read_opt_timestamp(schema, options=None)  # type: ignore[arg-type]
+        with windows_gmtime():
+            data = proto._read_opt_timestamp(schema, options=None)  # type: ignore[arg-type]
+        self.assertEqual(data.to_dict(), linux.to_dict())
+        self.assertIsNone(data.timestamp)
+        self.assertEqual((data.pmip_timestamp.seconds, data.pmip_timestamp.fraction), (2**48 - 1, 0))
+        self.assertEqual(proto._make_opt_timestamp(Option.Timestamp_Option, data).pack(), schema.pack())
 
 
 if __name__ == '__main__':

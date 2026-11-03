@@ -447,6 +447,7 @@ class MHMakerTests(_Case):
         'bra': ('Binding_Refresh_Advice', {}, {'interval': (0xFFFF, 'refresh interval')}),
         'ni': ('Nonce_Indices', {}, {'home': (0xFFFF, 'home nonce index'),
                                      'careof': (0xFFFF, 'care-of nonce index')}),
+        'mnp': ('Mobile_Network_Prefix_Option', {}, {'prefix_length': (0xFF, 'prefix length')}),
         'auth': ('AUTH_OPTION_TYPE', {'data': b'\x00\x00'}, {'spi': (0xFFFFFFFF, 'SPI')}),
         'badf': ('Binding_Authorization_Data_for_FMIPv6', {'data': b'\x00'},
                  {'spi': (0xFFFFFFFF, 'SPI')}),
@@ -454,7 +455,7 @@ class MHMakerTests(_Case):
         'dns': ('DNS_UPDATE_TYPE', {}, {'reserved': (0x7F, 'reserved bits')}),
         'vendor': ('Vendor_Specific_Mobility_Option', {}, {'vendor': (0xFFFFFFFF, 'vendor ID'),
                                                            'subtype': (0xFF, 'vendor subtype')}),
-        'hnp': ('Home_Network_Prefix_Option', {}, {'prefix_length': (128, 'prefix length')}),
+        'hnp': ('Home_Network_Prefix_Option', {}, {'prefix_length': (0xFF, 'prefix length')}),
         'hi': ('Handoff_Indicator_Option', {}, {'reserved': (0xFF, 'reserved octet')}),
         'timestamp': ('Timestamp_Option', {}, {'seconds': ((1 << 48) - 1, 'timestamp seconds'),
                                                'fraction': (0xFFFF, 'timestamp fraction')}),
@@ -561,11 +562,6 @@ class MHMakerTests(_Case):
          ('suboptions', 'Heartbeat_Control', 'max_retransmissions'), 0xFFFF,
          'maximum retransmissions'),
     )
-
-    UNPARSED_MAXIMA = {
-        '_make_opt_timestamp.seconds': 'MH._read_opt_timestamp turns the seconds into a '
-                                       'datetime, which cannot hold the 48-bit maximum',
-    }
 
     #: Integer arguments outside the sweep, and why.
     EXEMPT = {
