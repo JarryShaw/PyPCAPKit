@@ -459,6 +459,20 @@ class OptionAreaField(OptionField):
             self._option_padding = 0
             return [raw]
 
+    def _accepts_cut(self, option: 'Schema') -> 'bool':  # pylint: disable=unused-argument
+        """Whether an option the data ends inside, inside its area, may stand.
+
+        Args:
+            option: Option just unpacked, which read short.
+
+        Returns:
+            :data:`False`: a block keeps an area the data ends inside as the
+            octets captured, as it keeps one an option runs past
+            (:issue:`1325`), rather than read its missing octets as zeros.
+
+        """
+        return False
+
 
 def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
     """Clamp a packet block's option area to the octets the block itself holds.

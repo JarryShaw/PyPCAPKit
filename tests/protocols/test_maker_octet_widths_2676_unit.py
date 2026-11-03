@@ -539,12 +539,6 @@ class CapturedOctetTests(_Case):
     #: past them records a short read: the options area after them records none.
     NOTHING_AFTER = {'_make_msg_fna', '_make_msg_has', '_make_msg_sq'}
 
-    #: MH messages whose cut inside the reserved octets does not parse, and why.
-    UNPARSED = {
-        '_make_msg_lri': 'a cut message reads its options area as zeros, which raises a FieldValueError',
-        '_make_msg_upa': 'a cut message reads its options area as zeros, which raises a FieldValueError',
-    }
-
     def _mh_messages(self) -> 'list[tuple[str, object, int]]':
         from pcapkit.protocols.internet.mh import MH
 
@@ -606,30 +600,18 @@ class CapturedOctetTests(_Case):
         return True
 
     def test_mh_message_cut_inside_reserved_octets(self) -> None:
+        # the LRI and UPA cuts parse as the short read their options area records
+        # where the data ends inside it (#2694)
         from pcapkit.protocols.internet.mh import MH
-        from pcapkit.utilities.exceptions import FieldValueError
 
         swept = []
         for name, code, size in self._mh_messages():
             swept.append(name)
             mark = bytes(range(0xA1, 0xA1 + size))
             data = bytes(MH(next=59, type=code, data={'msg_reserved': mark}))
-            if name in self.UNPARSED:
-                # So the short read is recorded on a model parsed whole, as a
-                # cut there would record it: the field ``data`` follows the
-                # six octets of the MH header.
-                start = data.index(mark)
-                for count in range(size):
-                    with self.subTest(maker=name, cut=start + count):
-                        with self.assertRaises(FieldValueError):
-                            MH(io.BytesIO(data[:start + count]), start + count, extension=True)
-                        info = MH(io.BytesIO(data), len(data), extension=True).info
-                        info.__update__({'msg_reserved': mark[:count], '__short_read__': ('data', start - 6 + count)})
-                        self.assertEqual(MH.from_data(info).data, data[:start + count])
-                continue
             with self.subTest(maker=name):
                 self.assertCutRebuilds(MH, data, mark, extension=True)
-        for name in ('_make_msg_fna', '_make_msg_has', '_make_msg_sq', *self.UNPARSED):
+        for name in ('_make_msg_fna', '_make_msg_has', '_make_msg_sq', '_make_msg_lri', '_make_msg_upa'):
             self.assertIn(name, swept)
 
     def test_ipv6_frag_and_route_cut_inside_reserved_octets(self) -> None:
@@ -676,8 +658,6 @@ class CapturedOctetTests(_Case):
             return lambda info, value: info.__update__({key: value})
 
         for name, code, size in self._mh_messages():
-            if name in self.UNPARSED:
-                continue
             mark = bytes(range(0xA1, 0xA1 + size))
             unit = 'octet' if size == 1 else 'octets'
             with self.subTest(maker=name):
