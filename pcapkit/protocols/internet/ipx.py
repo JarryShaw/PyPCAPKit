@@ -76,6 +76,10 @@ class IPX(Internet[Data_IPX, Schema_IPX],
        resolving against an enumeration inferred from the caller's frame or
        writing a different value (:issue:`2594`).
 
+       :meth:`make` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+       for a checksum that is not two octets, or an address that is not
+       twelve, rather than padding or cutting it (:issue:`2676`).
+
     .. versionremoved:: 1.6.0
 
        The ``type_default``, ``type_namespace`` and ``type_reversed``
@@ -194,13 +198,13 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         """Make (construct) packet data.
 
         Args:
-            chksum: Checksum.
+            chksum: Checksum, two octets.
             count: Transport Control (hop count).
             type: Packet Type.
             total_length: Packet length (header included); computed as ``30`` plus
                 the payload length when not given.
-            dst: Destination Address.
-            src: Source Address.
+            dst: Destination Address, twelve octets.
+            src: Source Address, twelve octets.
             payload: Payload data.
             trailer: Octets after the packet, outside the Packet Length, such as
                 link-layer padding; written as is.
@@ -211,7 +215,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
 
         Raises:
             ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in one octet.
+                or code that does not fit in one octet, ``chksum`` is not two
+                octets, or ``dst`` or ``src`` is not twelve.
 
         .. versionchanged:: 1.5.0
 
@@ -224,12 +229,12 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             total_length = 30 + len(payload)
 
         return Schema_IPX(
-            chksum=chksum,
+            chksum=self._make_octets(chksum, size=2, name='checksum'),
             len=total_length,
             count=count,
             type=type_val,
-            dst=dst,
-            src=src,
+            dst=self._make_octets(dst, size=12, name='destination address'),
+            src=self._make_octets(src, size=12, name='source address'),
             payload=payload,
             trailer=trailer,
         )

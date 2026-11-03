@@ -388,8 +388,9 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 or code outside 0 to 255, or is neither a Query nor a Report;
                 if ``max_resp_time`` is not an :obj:`int` from 0 to 255; if
                 ``num_group_records`` is not an :obj:`int` from the length of
-                ``records`` to 65535; or if a record's ``record_type`` is
-                refused, see :meth:`_make_group_record`.
+                ``records`` to 65535; if ``checksum`` or ``reserved_2`` is not
+                two octets; or if a record's ``record_type`` is refused, see
+                :meth:`_make_group_record`.
 
         """
         type_value = self._make_index(type, Enum_Type, bits=8, name='type')
@@ -397,7 +398,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 or not 0 <= max_resp_time <= 255:
             raise ProtocolError(f'{self.alias}: invalid max_resp_time: {max_resp_time!r}')
 
-        field = b'\x00\x00' if checksum is None else checksum
+        field = b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum')
         if type_value == Enum_Type.IGMPv3_Membership_Report:
             record_list = [] if records is None else [
                 self._make_group_record(record) if not isinstance(record, dict) else
@@ -414,7 +415,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 body=Schema_Report(
                     reserved_1=reserved_1,
                     checksum=field,
-                    reserved_2=reserved_2,
+                    reserved_2=self._make_octets(reserved_2, size=2, name='reserved_2'),
                     num_group_records=num_group_records,
                     records=record_list,
                     payload=payload,

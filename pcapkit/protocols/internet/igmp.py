@@ -187,8 +187,9 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
 
         Raises:
             ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
-                or code outside 0 to 255, or ``max_resp_time`` is not a
-                non-:obj:`bool` integer from 0 to 255.
+                or code outside 0 to 255, ``max_resp_time`` is not a
+                non-:obj:`bool` integer from 0 to 255, or ``checksum`` is not
+                two octets.
 
         """
         type_value = self._make_index(type, Enum_Type, bits=8, name='type')
@@ -197,7 +198,7 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
         schema = Schema_IGMP(
             type=type_value,
             max_resp_time=max_resp_time,
-            checksum=b'\x00\x00' if checksum is None else checksum,
+            checksum=b'\x00\x00' if checksum is None else self._make_octets(checksum, size=2, name='checksum'),
             group=group,
             payload=payload,
         )
