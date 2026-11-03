@@ -21,7 +21,17 @@ enumerations include:
 
 """
 
-from pcapkit.const.ospf.authentication import Authentication as OSPF_Authentication
-from pcapkit.const.ospf.packet import Packet as OSPF_Packet
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ospf.authentication import Authentication as OSPF_Authentication
+    from pcapkit.const.ospf.packet import Packet as OSPF_Packet
 
 __all__ = ['OSPF_Authentication', 'OSPF_Packet']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'OSPF_Authentication': ('authentication', 'Authentication'),
+    'OSPF_Packet': ('packet', 'Packet'),
+})

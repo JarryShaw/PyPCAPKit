@@ -76,10 +76,16 @@ if TYPE_CHECKING:
 #: win.
 _pinned_snapshot = None  # type: Optional[dict[str, types.ModuleType]]
 
-#: What :func:`pytest_sessionstart` imports before the pin: the package, plus the
-#: app-type registries it loads on first use rather than with itself (GitHub
-#: issue #1538). See that hook for why the registries cannot be left out.
-WARM_MODULES = ('pcapkit', 'pcapkit.const.reg.apptype.tcp', 'pcapkit.const.reg.apptype.udp')
+#: What :func:`pytest_sessionstart` imports before the pin: the package, plus every
+#: module of :mod:`pcapkit.const`, whose packages import their enumerations on first
+#: use rather than with themselves -- the app-type registries for GitHub issue
+#: #1538, and every enumeration for #2729. Read off the tree rather than listed,
+#: so a module the crawlers add is warmed the day it lands. See that hook for why
+#: they cannot be left out.
+WARM_MODULES = ('pcapkit', *sorted(
+    '.'.join(path.relative_to(ROOT).with_suffix('').parts[:-1] if path.name == '__init__.py'
+             else path.relative_to(ROOT).with_suffix('').parts)
+    for path in (ROOT / 'pcapkit' / 'const').rglob('*.py')))
 
 
 def _pin_module_snapshot() -> None:
@@ -163,15 +169,17 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     that imports the library and nothing else leaves the region exactly as it
     found it, so there is nothing to put back.
 
-    The lazily loaded app-type registries in :data:`WARM_MODULES` are
+    The lazily loaded :mod:`pcapkit.const` modules in :data:`WARM_MODULES` are
     imported here too, and that is for correctness rather than speed. Left out
-    of the pin, they were dropped from :data:`sys.modules` after whichever test
-    first loaded them, while the package kept the classes it had already bound
-    in ``TCP``/``UDP`` and :attr:`AppType.__registries__
+    of the pin, the app-type registries were dropped from :data:`sys.modules`
+    after whichever test first loaded them, while the package kept the classes it
+    had already bound in ``TCP``/``UDP`` and :attr:`AppType.__registries__
     <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`. The next direct
     import of the submodule then built a second ``TCP`` and ``UDP``, and
     :mod:`tests.project.test_conventions_doc_claims` counted both generations, and
     its registry count came out wrong on the 3.10-3.13 unit legs of PR #1560.
+    Every :mod:`pcapkit.const` package binds what it imports on first use the same
+    way (#2729), so every module of it is warmed.
 
     Failure here is not an error. A checkout without the runtime dependencies
     installed cannot import the package at all -- which is a supported way to run

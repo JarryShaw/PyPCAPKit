@@ -39,15 +39,32 @@ enumerations include:
 
 """
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as IPv6_ExtensionHeader
-from pcapkit.const.ipv6.option import Option as IPv6_Option
-from pcapkit.const.ipv6.option_action import OptionAction as IPv6_OptionAction
-from pcapkit.const.ipv6.qs_function import QSFunction as IPv6_QSFunction
-from pcapkit.const.ipv6.router_alert import RouterAlert as IPv6_RouterAlert
-from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
-from pcapkit.const.ipv6.seed_id import SeedID as IPv6_SeedID
-from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as IPv6_SMFDPDMode
-from pcapkit.const.ipv6.tagger_id import TaggerID as IPv6_TaggerID
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ipv6.extension_header import ExtensionHeader as IPv6_ExtensionHeader
+    from pcapkit.const.ipv6.option import Option as IPv6_Option
+    from pcapkit.const.ipv6.option_action import OptionAction as IPv6_OptionAction
+    from pcapkit.const.ipv6.qs_function import QSFunction as IPv6_QSFunction
+    from pcapkit.const.ipv6.router_alert import RouterAlert as IPv6_RouterAlert
+    from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
+    from pcapkit.const.ipv6.seed_id import SeedID as IPv6_SeedID
+    from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as IPv6_SMFDPDMode
+    from pcapkit.const.ipv6.tagger_id import TaggerID as IPv6_TaggerID
 
 __all__ = ['IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QSFunction', 'IPv6_RouterAlert', 'IPv6_Routing',
            'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID', 'IPv6_OptionAction']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'IPv6_ExtensionHeader': ('extension_header', 'ExtensionHeader'),
+    'IPv6_Option': ('option', 'Option'),
+    'IPv6_QSFunction': ('qs_function', 'QSFunction'),
+    'IPv6_RouterAlert': ('router_alert', 'RouterAlert'),
+    'IPv6_Routing': ('routing', 'Routing'),
+    'IPv6_SeedID': ('seed_id', 'SeedID'),
+    'IPv6_SMFDPDMode': ('smf_dpd_mode', 'SMFDPDMode'),
+    'IPv6_TaggerID': ('tagger_id', 'TaggerID'),
+    'IPv6_OptionAction': ('option_action', 'OptionAction'),
+})

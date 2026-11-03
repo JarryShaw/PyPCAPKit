@@ -19,7 +19,17 @@ enumerations include:
 
 """
 
-from pcapkit.const.ftp.command import Command as FTP_Command
-from pcapkit.const.ftp.return_code import ReturnCode as FTP_ReturnCode
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.ftp.command import Command as FTP_Command
+    from pcapkit.const.ftp.return_code import ReturnCode as FTP_ReturnCode
 
 __all__ = ['FTP_Command', 'FTP_ReturnCode']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'FTP_Command': ('command', 'Command'),
+    'FTP_ReturnCode': ('return_code', 'ReturnCode'),
+})

@@ -39,17 +39,33 @@ enumerations include:
 
 """
 
-from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
-from pcapkit.const.pcapng.filter_type import FilterType as PCAPNG_FilterType
-from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
-from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
-from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
-from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
-from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as PCAPNG_TLSKeyLabel
-from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
+    from pcapkit.const.pcapng.filter_type import FilterType as PCAPNG_FilterType
+    from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
+    from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
+    from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
+    from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
+    from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as PCAPNG_TLSKeyLabel
+    from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
 
 __all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
     'PCAPNG_FilterType', 'PCAPNG_TLSKeyLabel',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'PCAPNG_BlockType': ('block_type', 'BlockType'),
+    'PCAPNG_OptionType': ('option_type', 'OptionType'),
+    'PCAPNG_HashAlgorithm': ('hash_algorithm', 'HashAlgorithm'),
+    'PCAPNG_VerdictType': ('verdict_type', 'VerdictType'),
+    'PCAPNG_RecordType': ('record_type', 'RecordType'),
+    'PCAPNG_SecretsType': ('secrets_type', 'SecretsType'),
+    'PCAPNG_FilterType': ('filter_type', 'FilterType'),
+    'PCAPNG_TLSKeyLabel': ('tls_key_label', 'TLSKeyLabel'),
+})

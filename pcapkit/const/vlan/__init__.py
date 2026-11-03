@@ -18,6 +18,15 @@ enumerations include:
 
 """
 
-from pcapkit.const.vlan.priority_level import PriorityLevel as VLAN_PriorityLevel
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.lazy import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.const.vlan.priority_level import PriorityLevel as VLAN_PriorityLevel
 
 __all__ = ['VLAN_PriorityLevel']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'VLAN_PriorityLevel': ('priority_level', 'PriorityLevel'),
+})
