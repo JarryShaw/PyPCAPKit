@@ -80,6 +80,7 @@ Internal Definitions below.
    .. automethod:: _get_payload
 
    .. automethod:: _make_data
+   .. automethod:: _make_uint
    .. automethod:: _make_index
    .. automethod:: _make_payload
    .. automethod:: _packing_target
@@ -200,6 +201,7 @@ Internal Definitions
                   _read_packet
                   _get_payload
                   _make_data
+                  _make_uint
                   _make_index
                   _make_payload
                   _packing_target
@@ -229,7 +231,7 @@ Internal Definitions
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
       :meth:`~Protocol.resolve_index`, :meth:`~Protocol.expand_comp`,
       :meth:`~Protocol._read_packet`, :meth:`~Protocol._get_payload`,
-      :meth:`~Protocol._make_data`,
+      :meth:`~Protocol._make_data`, :meth:`~Protocol._make_uint`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
       :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_mac_addr`,
       :meth:`~Protocol._make_mac_addr`,
