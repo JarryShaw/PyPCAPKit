@@ -150,6 +150,12 @@ WIDEST_EXTRA = {
     '_make_param_encrypted.cipher': {'iv': None},
 }
 
+#: Other arguments a row needs to build without its own: the default cipher,
+#: ``NULL_ENCRYPT``, refuses an IV (#2708).
+BARE_EXTRA = {
+    '_make_param_encrypted.cipher': {'iv': None},
+}
+
 #: ``maker.argument`` to the attribute its parameter's data model keeps the
 #: parsed values in, for the rows whose enumeration is narrower than the field.
 PARSED = {
@@ -277,13 +283,19 @@ class HIPMakeCodeTests(unittest.TestCase):
 
     def test_the_member_and_its_code_build_the_same_octets(self) -> None:
         """#2594: the member and ``int(member)`` resolve with ``get`` to one field value."""
+        rows = {f'{maker}.{argument}': (argument, code, extra, listed)
+                for maker, argument, _, _, _, _, code, extra, listed in ROWS}
         for label, member, _, _, _, build in self._rows():
             with self.subTest(row=label):
                 expected = build(member)
                 self.assertEqual(build(int(member)).hex(), expected.hex())
                 # the member is not what the maker builds without it, so a
                 # value that never reached the packet cannot pass
-                self.assertNotEqual(build().hex(), expected.hex())
+                bare = build
+                if label in BARE_EXTRA:
+                    argument, code, extra, listed = rows[label]
+                    _, bare = self._builder(argument, code, {**extra, **BARE_EXTRA[label]}, listed)
+                self.assertNotEqual(bare().hex(), expected.hex())
 
     def test_the_widest_code_builds_parses_back_and_rebuilds(self) -> None:
         """#2594: the field width decides what is refused, so ``(1 << bits) - 1`` builds."""

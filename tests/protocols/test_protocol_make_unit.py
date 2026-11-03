@@ -41,7 +41,7 @@ def _attr(path: 'str') -> 'Any':
 RAW_ITEMS = {
     'HIP parameters': ('pcapkit.protocols.internet.hip.HIP',
                        {'extension': True, 'parameters': [b'\x00\x41\x00\x0c' + bytes(12)]},
-                       '1106206100000000' + '00' * 32 + '0041000c' + '00' * 12),
+                       '1106202100000000' + '00' * 32 + '0041000c' + '00' * 12),
     'IPv4 options': ('pcapkit.protocols.internet.ipv4.IPv4',
                      {'options': [b'\x94\x04\x00\x00'], 'protocol': 253},
                      '460000180000000000fda5e47f0000010000000094040000'),
