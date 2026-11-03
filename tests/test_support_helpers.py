@@ -56,6 +56,7 @@ extractors, so it reads no sample capture and needs no engine installed.
 from __future__ import annotations
 
 import contextlib
+import gc
 import hashlib
 import importlib
 import importlib.util
@@ -70,8 +71,10 @@ import tempfile
 import threading
 import time
 import types
+import typing
 import unittest
 import urllib.error
+import weakref
 from typing import TYPE_CHECKING
 from unittest import mock
 
@@ -804,6 +807,48 @@ class ParentAttributeRestoreTests(unittest.TestCase):
         restore_modules(snapshot, [self.CHILD])
 
         self.assertIs(self.parent.child, own)
+
+
+@unittest.skipUnless(hasattr(typing, '_cleanups'), 'this typing lists no cache clears')
+class TypingCachesReleasedTests(unittest.TestCase):
+    """A purge and a restore let go of the classes :mod:`typing` has subscribed.
+
+    :mod:`typing` caches an alias such as ``Optional[C]``, so without a clear a
+    purged generation of :mod:`pcapkit` stays reachable through any cached alias
+    naming one of its classes, and the live generations grow from module to module
+    of a plain-unittest leg (#2750). A throwaway class stands in for one, and the
+    prefix matches nothing, so no real module is purged.
+
+    """
+
+    PREFIX = 'pcapkit.__support_probe_typing'
+
+    def _subscribe(self) -> 'weakref.ref[type]':
+        """A weak reference to a class that only :mod:`typing`'s cache holds."""
+        probe = type('Probe', (), {})
+        alias = typing.Optional[probe]
+        del alias
+        ref = weakref.ref(probe)
+        del probe
+        gc.collect()
+        self.assertIsNotNone(ref(), 'typing did not cache the alias, so this case proves nothing')
+        return ref
+
+    def test_a_purge_releases_a_subscribed_class(self) -> None:
+        ref = self._subscribe()
+
+        purge_modules([self.PREFIX])
+        gc.collect()
+
+        self.assertIsNone(ref())
+
+    def test_a_restore_releases_a_subscribed_class(self) -> None:
+        ref = self._subscribe()
+
+        restore_modules(snapshot_modules([self.PREFIX]), [self.PREFIX])
+        gc.collect()
+
+        self.assertIsNone(ref())
 
 
 class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):

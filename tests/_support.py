@@ -17,6 +17,7 @@ import signal
 import sys
 import time
 import types
+import typing
 import unittest
 import warnings
 from typing import Callable, Iterable, Iterator, Optional, TypeVar
@@ -601,6 +602,29 @@ def _reset_abc_caches() -> None:
             reset(obj)
 
 
+def _clear_typing_caches() -> None:
+    """Empty the :mod:`typing` subscription caches.
+
+    Each import of :mod:`pcapkit` subscribes generics with its own classes --
+    ``Protocol[...]`` at class creation, ``Optional[...]`` when
+    :func:`typing.get_type_hints` resolves an ``Info`` annotation -- and
+    :mod:`typing` caches those aliases where no purge reaches. An entry naming a
+    purged class keeps its generation reachable, and through that generation's
+    ``_previous_excepthook`` the generation whose hook it saved. So in one
+    plain-unittest process the live generations grow from module to module, and
+    with them the heap and the cost of every negative
+    :class:`collections.abc.Mapping` subclass check, which walks the subclasses of
+    them all (#2750).
+
+    ``typing._cleanups`` holds each cache's ``cache_clear``, which CPython's own
+    test runner calls before each test module. A runtime without it skips the
+    clear rather than erroring, as :func:`_reset_abc_caches` does.
+
+    """
+    for clear in getattr(typing, '_cleanups', ()):
+        clear()
+
+
 #: Default :data:`sys.modules` prefixes the isolation helpers below cover, and
 #: the ones :func:`tests.conftest.restore_module_table` puts back after every
 #: test. Only the package under test: a test that imports a third-party module
@@ -689,6 +713,7 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
     # subclasses and churned the shared ABC caches, and those stale answers
     # outlive the modules that caused them.
     _reset_abc_caches()
+    _clear_typing_caches()
 
 
 def _rebind_parent_attributes(prefixes: 'tuple[str, ...]') -> None:
@@ -1066,6 +1091,7 @@ def purge_modules(prefixes: Iterable[str]) -> None:
         if _under_prefix(name, tuple(prefixes)):
             sys.modules.pop(name, None)
     _reset_abc_caches()
+    _clear_typing_caches()
 
 
 #: Class attribute :func:`reimport_once_per_class` keeps a class's own import in.
