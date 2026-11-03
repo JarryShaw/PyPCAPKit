@@ -1293,6 +1293,13 @@ with warnings.catch_warnings(record=True) as caught:
     print(retry_reaped_tshark(attempt), [str(item.message) for item in caught])
 '''
 
+#: Why the :data:`LOST_STATUS_CHILD` case skips GraalPy (#2715): GraalPy 25.4's
+#: :func:`signal.set_wakeup_fd` is a stub that writes nothing, so asyncio's loop never
+#: wakes for ``SIGCHLD`` and the child waits on ``child.wait()`` until it is killed.
+#: The record that case matches is CPython's, which the CPython legs cover.
+SKIP_LOST_STATUS_ON_GRAALPY = ("GraalPy's signal.set_wakeup_fd is a stub, so asyncio never "
+                               'dispatches SIGCHLD to its child watcher (#2715)')
+
 
 class RetryReapedTsharkTests(unittest.TestCase):
     """:func:`~tests._support.retry_reaped_tshark` reruns a lost exit status, once (#2620).
@@ -1384,6 +1391,7 @@ class RetryReapedTsharkTests(unittest.TestCase):
     @unittest.skipUnless(os.name == 'posix' and sys.version_info < (3, 14),
                          "asyncio's SafeChildWatcher, which pyshark 0.6 installs, is POSIX-only "
                          'and removed in Python 3.14')
+    @unittest.skipIf(sys.implementation.name == 'graalpy', SKIP_LOST_STATUS_ON_GRAALPY)
     def test_cpython_reporting_a_lost_exit_status_is_recognised(self) -> None:
         """The record CPython itself logs is the one matched, under a real reaper."""
         child = subprocess.run([sys.executable, '-c', LOST_STATUS_CHILD, str(ROOT)],
