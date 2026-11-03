@@ -8636,14 +8636,17 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_cga_param(self, type: 'Enum_Option', option: 'Optional[Data_CGAParametersOption]' = None, *,
-                            parameters: 'Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]' = None,
+                            parameters: 'Optional[list[Schema_CGAParameter | Data_CGAParameter | bytes]]' = None,
                             **kwargs: 'Any') -> 'Schema_CGAParametersOption':
         """Make MH CGA parameters option.
 
         Args:
             type: Option type.
             option: Option data model.
-            parameters: CGA parameters.
+            parameters: CGA parameters, each as octets, a schema or a data
+                model. A :obj:`dict` is refused: a mapping stands for a
+                maker's keyword arguments, and no maker takes a CGA
+                parameter's fields, so build the data model from them.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8651,7 +8654,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
+                ``Option Length``, or an item of ``parameters`` is not octets,
+                a schema or a data model, such as a :obj:`dict`.
 
         """
         if option is not None:
@@ -8686,7 +8690,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 length += 25 + len(data.public_key) + ext_len
                 param.append(schema)
             else:
-                raise ProtocolError(f'{self.alias}: [OptNo {type}] unknown CGA parameter format: {data}')
+                raise ProtocolError(f'{self.alias}: [OptNo {type}] unknown CGA parameter format: must be bytes, '
+                                    f'a CGA parameter schema or data model, not {data!r}')
 
         return Schema_CGAParametersOption(
             type=type,
