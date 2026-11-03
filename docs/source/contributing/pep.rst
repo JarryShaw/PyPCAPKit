@@ -991,70 +991,59 @@ since ESP has already laid the groundwork.
 Deterministic Construction Arguments
 ------------------------------------
 
-This is meant to open a broader run of proposals for the construction
-(``make()``) workflow in general rather than stand alone -- more will be added
-under that heading as they get scoped, and the concrete item ready to write
-down now is making a ``make()`` call's own argument list deterministic.
+This opens a broader run of proposals for the construction (``make()``)
+workflow in general -- more go under this heading as they get scoped -- and
+its first item, making a ``make()`` call's own argument list deterministic, is
+**done for 1.6.0** (:issue:`2594`).
 
-:meth:`~pcapkit.protocols.protocol.Protocol._make_index` is where that is not
-currently true. A number of ``make()`` methods accept a plain ``str``
-enum-member name for a field and resolve it by frame-introspecting the
-caller's locals for a conventional four-argument group -- ``X``,
-``X_default``, ``X_namespace`` and ``X_reversed`` -- looking for the one
-argument whose own default is an enum member, and taking that member's class
-as the namespace to search. The actual contract of a ``make()`` call is
-therefore not fully visible from its own signature: knowing what a bare
-string resolves against means knowing the convention and trusting that every
-call site followed it exactly, rather than reading it off the call itself.
-That gap is exactly how this round's bug family happened. :issue:`2356` is
-the walk coming up empty because the relevant argument's own default is
-``None``, leaving nothing to anchor a namespace to; :issue:`2394` is the same
-inference failing by a different route -- the name is a loop variable over a
-*list* parameter rather than a scalar argument, so the walk's
-``isinstance(value, str)`` check can never see it. Both were fixed narrowly,
-by naming the correct enum explicitly at each affected call site rather than
-touching the inference, so the mechanism is exactly as fragile as it was
-before and just as liable to the same shape of defect at the next call site
-that does not fit its assumptions precisely.
+Inferring a namespace from the caller's frame, for a conventional
+four-argument group -- ``X``, ``X_default``, ``X_namespace`` and
+``X_reversed`` -- leaves a call's contract invisible from its signature:
+knowing what a bare string resolves against means knowing the convention and
+trusting that every call site follows it exactly. :issue:`2356` and
+:issue:`2394` are that inference failing, the first because an argument's own
+default is ``None``, leaving nothing to anchor a namespace to, the second
+because the name is a loop variable over a *list* parameter, which an
+``isinstance(value, str)`` check on the arguments cannot see. Naming the enum
+at each affected call site fixes an instance and leaves the mechanism as
+fragile as it is.
 
-The owner's proposed direction -- recorded here, and explicitly **not**
-scheduled for 1.5.0 -- removes the inference rather than patching it again.
-``make()`` would require an actual enum value, or an ``int`` where one is
-already accepted, for these fields, with no implicit string-to-enum
-resolution performed inside ``make()`` itself. In its place, a small public
-wrapper would take the same four-argument group explicitly -- name, default,
-namespace, reversed -- and *resolve* a string name to its enum member on
-request, so a caller holding a bare string calls that helper first and passes
-the resolved value into ``make()``. That mirrors how a finalised
-:class:`~pcapkit.corekit.infoclass.Info` or
-:class:`~pcapkit.protocols.schema.schema.Schema` already settles its
-constructor's keyword set once, when
-:func:`~pcapkit.corekit.infoclass.info_final` or
-:func:`~pcapkit.protocols.schema.schema.schema_final` is applied at
-class-definition time, rather than inferring it afresh at every call --
+So no ``make()`` infers a member from a string, ruled in review of :pr:`2593`
+(:issue:`2489`): a field holding an enumeration takes the member or an
+``int``, resolved with the enumeration's
+:meth:`~pcapkit.corekit.enum.EnumLookup.get`. That settles a call's contract
+at the signature, the way :func:`~pcapkit.corekit.infoclass.info_final` and
+:func:`~pcapkit.protocols.schema.schema.schema_final` settle a constructor's
+keyword set once at class-definition time, and
 :attr:`~pcapkit.protocols.protocol.Protocol.__own_make_keywords__`
-(:issue:`2286`) settles the same kind of question explicitly rather than
-inferring it, though for a different question: which keywords a ``make()``
-override owns, not what the names passed to it resolve against.
+(:issue:`2286`) which keywords a ``make()`` override owns. The pieces:
 
-The trade-off is real and worth stating rather than glossed over. Accepting a
-bare string for these fields is a pattern used throughout the docs and the
-examples, so dropping the inference is a likely-breaking change at every
-``make()`` call site that currently relies on it -- not a one-line fix.
-Deciding that scope -- which call sites change, whether string acceptance is
-dropped outright or only the silent-inference path behind it, and what the
-wrapper is named and where it lives -- is itself design work, which is
-exactly why this belongs on this page rather than as a quick issue. Done, it
-removes the root cause of the :issue:`2356`/:issue:`2394` family rather than
-leaving its next instance to be found and patched the same way.
+* :meth:`~pcapkit.protocols.protocol.Protocol._make_index` takes the value, the
+  enumeration and the field's width, and returns what ``get`` resolves. A
+  name, a :obj:`bool` for a field wider than one bit, and a code the field
+  cannot carry raise :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so
+  every caller gets the range check :issue:`2617` asks for, with no masking.
+  An option, a sub-option or a chunk given as a ``(code, arguments)`` pair
+  resolves its code the same way.
+* The ``X_default``, ``X_namespace`` and ``X_reversed`` keywords are removed
+  in 1.6.0 with no deprecation period and no shim, ruled on :issue:`2594`;
+  each class that shipped them records them under ``versionremoved``.
+* The public wrapper is :meth:`Protocol.resolve_index
+  <pcapkit.protocols.protocol.Protocol.resolve_index>`, which takes the group
+  explicitly -- name, default, namespace, reversed -- so a caller holding a
+  bare string resolves it first and passes the result to ``make()``. It is a
+  static method every protocol inherits, beside
+  :meth:`~pcapkit.protocols.protocol.Protocol.decode` and
+  :meth:`~pcapkit.protocols.protocol.Protocol.unquote`, rather than a module of
+  its own, since it serves ``make()`` alone.
 
-**Scoped for 1.6.0.** The owner took this direction for every ``make()``, ruled
-in review of :pr:`2593` (:issue:`2489`): a field holding an enum takes the member
-or an ``int``, resolved with the enumeration's ``get`` rather than inferred from
-the caller's frame. The shipped ``X_default``, ``X_namespace`` and ``X_reversed``
-keywords go in 1.6.0 with no deprecation period, ruled on :issue:`2594`, which
-carries the change across :file:`pcapkit/protocols/` in one pass and leaves the
-helper's name and module to it.
+The trade-off: a bare string for these fields is a pattern the docs and the
+examples relied on, so the change breaks every ``make()`` call site that
+relies on the inference. That is why it is one change across
+:file:`pcapkit/protocols/` rather than folded into the next defect fix on this
+family, and it removes the root cause of the :issue:`2356`/:issue:`2394`
+family rather than leaving its next instance to be found and patched the same
+way.
 
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
@@ -1387,10 +1376,9 @@ as are IGMP's and GRE's (:issue:`2618`).
 the parsing and the constructing path, rather than a back-reference from a
 parsed protocol to its parent.
 
-**Scoped for 1.6.0 — deterministic construction arguments** (:issue:`2594`). See
+**Deterministic construction arguments — done** (:issue:`2594`). See
 `Deterministic Construction Arguments`_ above: every ``make()`` takes an enum
-field as the member or an ``int``, dropping the implicit string-to-enum inference
-and the ``X_default``, ``X_namespace`` and ``X_reversed`` keywords behind it, and
-an explicit helper resolves a bare string. That breaks every call site relying on
-the inference, so it lands as one change rather than folded into the next defect
-fix on this family.
+field as the member or an ``int``, with no string-to-enum inference and no
+``X_default``, ``X_namespace`` and ``X_reversed`` keywords behind it, and
+:meth:`Protocol.resolve_index <pcapkit.protocols.protocol.Protocol.resolve_index>`
+resolves a bare string first.

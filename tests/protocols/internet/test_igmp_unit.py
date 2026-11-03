@@ -743,7 +743,7 @@ class IGMPUnitTests(unittest.TestCase):
 
 class IGMPv3MaxRespCodeTests(unittest.TestCase):
     """The floating-point Max Resp Code/QQIC decode (:rfc:`3376#section-4.1.1`,
-    :rfc:`3376#section-4.1.7`), now module-level helpers on
+    :rfc:`3376#section-4.1.7`), module-level helpers on
     :mod:`pcapkit.protocols.internet.igmpv3`.
 
     :rfc:`3376#section-4.1.1` gives the formula as::
@@ -1513,7 +1513,8 @@ class IGMPDispatchTests(unittest.TestCase):
             'v1 defaults': ({}, 'IGMPv1'),
             'v1 report': ({'type': Type.IGMPv1_Membership_Report, 'group': '224.0.0.1'}, 'IGMPv1'),
             'v2 query': ({'type': Type.IGMP_Membership_Query, 'max_resp_time': 100}, 'IGMPv2'),
-            'v2 leave by name': ({'type': 'IGMPv2_Leave_Group', 'group': '239.1.2.3'}, 'IGMPv2'),
+            'v2 leave by name': ({'type': IGMP.resolve_index('IGMPv2_Leave_Group', namespace=Type),
+                                  'group': '239.1.2.3'}, 'IGMPv2'),
             'v3 report by type': ({'type': Type.IGMPv3_Membership_Report}, 'IGMPv3'),
             'v3 query by field': ({'type': Type.IGMP_Membership_Query, 'qrv': 2, 'qqic': 125}, 'IGMPv3'),
         }

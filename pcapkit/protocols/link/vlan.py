@@ -59,10 +59,8 @@ from pcapkit.protocols.schema.link.vlan import VLAN as Schema_VLAN
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -95,6 +93,23 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
        Became an abstract base. The 802.1Q customer tag it implemented, with its
        ``name``, ``alias`` and ``info_name``, moved to
        :class:`~pcapkit.protocols.link.c_tag.C_Tag`.
+
+    .. versionchanged:: 1.6.0
+
+       ``pcp`` and ``type`` of :meth:`make` each take a member or an
+       :class:`int` code, resolved with the enumeration's ``get``, and so does
+       the ``pcp`` of its ``tci``; a name, a :obj:`bool`, or a code the field
+       cannot carry raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+       rather than resolving against an enumeration inferred from the caller's
+       frame or writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``pcp_default``, ``pcp_namespace``, ``pcp_reversed``,
+       ``type_default``, ``type_namespace`` and ``type_reversed`` arguments of
+       :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -172,49 +187,39 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
 
     def make(self,
              tci: 'Optional[Schema_TCI | TCIType]' = None,
-             pcp: 'Enum_PriorityLevel | StdlibEnum | AenumEnum | str | int' = Enum_PriorityLevel.BE,
-             pcp_default: 'Optional[int]' = None,
-             pcp_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             pcp_reversed: 'bool' = False,
+             pcp: 'Enum_PriorityLevel | int' = Enum_PriorityLevel.BE,
              dei: 'bool' = False,
              vid: 'int' = 0,
-             type: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_VLAN':
         """Make (construct) packet data.
 
         Args:
-            tci: TCI field.
+            tci: TCI field; its ``pcp``, ``dei`` and ``vid`` take the place of
+                the arguments of those names when given.
             pcp: Priority Code Point (PCP) field.
-            pcp_default: Default value of PCP field.
-            pcp_namespace: Namespace of PCP field.
-            pcp_reversed: Reversed flag of PCP field.
             dei: Drop Eligible Indicator (DEI) field.
             vid: VLAN Identifier (VID) field.
             type: EtherType field.
-            type_default: Default value of EtherType field.
-            type_namespace: Namespace of EtherType field.
-            type_reversed: Reversed flag of EtherType field.
             payload: Payload field.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``pcp``, the ``pcp`` of ``tci``, or ``type`` is
+                a name, a :obj:`bool`, or a member or code its field cannot
+                carry.
+
         """
         if tci is not None:
-            pcp_value = tci['pcp']
+            pcp = tci['pcp']
             dei = tci['dei']  # type: ignore[assignment]
             vid = tci['vid']
-        else:
-            pcp_value = self._make_index(pcp, pcp_default, namespace=pcp_namespace,
-                                         reversed=pcp_reversed, pack=False)
-
-        type_value = self._make_index(type, type_default, namespace=type_namespace,
-                                      reversed=type_reversed, pack=False)
+        pcp_value = self._make_index(pcp, Enum_PriorityLevel, bits=3, name='PCP')
+        type_value = self._make_index(type, Enum_EtherType, bits=16, name='EtherType')
 
         return Schema_VLAN(
             tci={
@@ -222,7 +227,7 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
                 'dei': dei,
                 'vid': vid,
             },
-            type=type_value,  # type: ignore[arg-type]
+            type=type_value,
             payload=payload,
         )
 

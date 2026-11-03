@@ -114,11 +114,12 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
     def test_issue_repro_later_fragment_in_a_frame(self) -> None:
         # the issue's reproduction, carried in an Ethernet frame as a capture
         # would carry it: ``'UDP' in frame`` does not hold
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
 
-        made = IPv4(protocol='UDP', offset=185, payload=Raw(bytes(range(40))),
+        made = IPv4(protocol=TransType.UDP, offset=185, payload=Raw(bytes(range(40))),
                     src='1.1.1.1', dst='2.2.2.2')
         ipv4 = self._parse(made.data)
         self.assertEqual(ipv4.info.offset, 1480)
@@ -137,6 +138,7 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         # make -> parse: a later fragment built with a UDP object as its payload
         # writes the UDP octets, reads back as raw (as IPv6 does, #1545),
         # and rebuilds to the octets made
+        from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.transport.udp import UDP
@@ -145,7 +147,7 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         for options in (None, [bytes((1, 1, 1, 0))]):
             with self.subTest(options=options):
                 kwargs = {} if options is None else {'options': options}
-                made = IPv4(protocol='UDP', offset=185, mf=True, payload=upper,
+                made = IPv4(protocol=TransType.UDP, offset=185, mf=True, payload=upper,
                             src='1.1.1.1', dst='2.2.2.2', **kwargs)
                 self.assertEqual(made.data[made.info.hdr_len:], upper.data)
                 self.assertNotIn('UDP', made)

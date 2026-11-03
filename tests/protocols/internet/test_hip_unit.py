@@ -1349,7 +1349,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertIn(iv, packed)
         self.assertEqual(schema.cipher, Cipher.AES_128_CBC)
 
-        # a cipher that needs no IV (e.g. ``NULL_ENCRYPT``) still packs
+        # a cipher that needs no IV (e.g. ``NULL_ENCRYPT``) packs
         # cleanly, with no IV octets and no "missing HIP_CIPHER" warning
         # (the resolved cipher is known directly; there is nothing to
         # infer from a sibling parameter this schema was never given).
@@ -1971,7 +1971,7 @@ class HIPUnitTests(unittest.TestCase):
 
         Two copies -- a lone one is representable (#651) -- because two
         consecutive parameters are what prove the reader's *stride*. A parser
-        that pads by the wrong amount still reads a lone parameter correctly
+        that pads by the wrong amount reads a lone parameter correctly
         and only lands in the wrong place at the start of the next one, so a
         single-parameter fixture cannot tell a correct padding rule from any
         other.
@@ -2334,7 +2334,7 @@ class HIPUnitTests(unittest.TestCase):
         128 and 129 to ``_read_param_r1_counter``, and
         ``_make_param_r1_counter`` builds a real ``R1CounterParameter`` for 128
         -- so construction works either way and only parsing can break. The
-        *schema* used to unpack a parameter off the wire is chosen by a
+        *schema* that unpacks a parameter off the wire is chosen by a
         different mapping, :attr:`~pcapkit.protocols.schema.schema.EnumSchema.
         registry`, wired into :class:`HIP`'s ``param`` field as
         ``OptionField(..., registry=Parameter.registry)``, and that one is
@@ -2467,7 +2467,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(hip_schema.transport_format_list_len({'len': 0}), 0)
         self.assertEqual(hip_schema.transport_format_list_len({'len': 4}), 4)
         # unreachable from real wire bytes (``len`` is unsigned on the wire),
-        # but a direct, bypassing construction call could still pass a
+        # but a direct, bypassing construction call could pass a
         # negative ``len``; keep it to the same floor-and-raise discipline.
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.transport_format_list_len({'len': -1})
@@ -2606,7 +2606,7 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(reparsed.solution, solution)
 
     def test_hip_solution_parameter_at_57_bits_stays_legal_for_hipv1(self) -> None:
-        """#608: a 57-bit puzzle value must still build the 20-octet
+        """#608: a 57-bit puzzle value must build the 20-octet
         ``SOLUTION`` parameter that HIPv1 requires.
 
         :rfc:`5201#section-5.2.5` fixes ``Random #I`` and ``Puzzle solution #J``
@@ -2771,7 +2771,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertNotIn('lifetime', hip_data.SolutionParameter.__annotations__)
         self.assertIn('reserved', hip_schema.SolutionParameter.__annotations__)
         self.assertNotIn('lifetime', hip_schema.SolutionParameter.__annotations__)
-        # ... while PUZZLE, where the RFC does put one, still does.
+        # ... while PUZZLE, where the RFC does put one, has it.
         self.assertIn('lifetime', hip_data.PuzzleParameter.__annotations__)
 
         # Zero when sent, for a from-scratch build, at the default and explicitly.
@@ -2819,7 +2819,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], received[:4 + rebuilt.len])
         self.assertEqual(bytes(rebuilt), bytes(received_schema))
 
-        # ... but an explicit `reserved` still overrides it, which is the only way to
+        # ... but an explicit `reserved` overrides it, which is the only way to
         # write the conformant zero over a peer's non-conformant octet: the data
         # model is immutable, so the parsed object cannot be corrected in place.
         with self.assertRaises(UnsupportedCall):
@@ -3369,7 +3369,7 @@ class HIPUnitTests(unittest.TestCase):
         is not a corner of the parameter space.
 
         The last assertion is the stride check: two consecutive parameters
-        through the full parser. A wrong padding rule still reads a *lone*
+        through the full parser. A wrong padding rule reads a *lone*
         parameter correctly -- it only lands in the wrong place at the start of
         the next one -- so one record cannot distinguish any padding rule from
         any other.

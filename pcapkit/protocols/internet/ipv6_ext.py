@@ -231,11 +231,16 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
     .. versionchanged:: 1.6.0
 
-       The library no longer passes ``error`` to :meth:`read`, so
-       :attr:`Data_IPv6_Ext.error <pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.error>`
-       is :data:`None` unless a caller passes one. A header whose dedicated
-       parser raises is :class:`~pcapkit.protocols.misc.raw.Raw`, whose
-       ``info.error`` holds the error (:issue:`2477`).
+       * The library does not pass ``error`` to :meth:`read`, so
+         :attr:`Data_IPv6_Ext.error <pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext.error>`
+         is :data:`None` unless a caller passes one. A header whose dedicated
+         parser raises is :class:`~pcapkit.protocols.misc.raw.Raw`, whose
+         ``info.error`` holds the error (:issue:`2477`).
+       * ``next`` of :meth:`make` takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+         code that does not fit in one octet raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         being handed to the schema unchecked (:issue:`2594`).
 
     """
 
@@ -514,6 +519,10 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``next`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet.
+
         Note:
             **Declared, and keyword-only**, each for its own reason.
 
@@ -561,7 +570,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             payload = data + payload
 
         return cast('_ST', Schema_IPv6_Ext(
-            next=next,
+            next=self._make_index(next, Enum_TransType, bits=8, name='next header'),
             len=len,
             payload=payload,
         ))

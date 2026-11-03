@@ -112,11 +112,9 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -229,9 +227,27 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
          writing a different value or raising another exception; so do the
          route and timestamp makers for a slot count that is a :obj:`bool`,
-         and :meth:`make` for options too long for the IHL. The registry
-         codes :meth:`make` takes, such as ``protocol``, are not
-         range-checked (:issue:`2614`).
+         and :meth:`make` for options too long for the IHL (:issue:`2614`).
+       * Each enumeration field of :meth:`make` and of the security, router
+         alert and Quick-Start option makers, and the type of each option
+         given to :meth:`make`, takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool` for a
+         field wider than one bit, or a code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame,
+         writing a different value or raising a bare
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+         (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``<field>_default``, ``<field>_namespace`` and
+       ``<field>_reversed`` arguments that went with each enumeration field
+       of :meth:`make` (``tos_pre``, ``tos_del``, ``tos_thr``, ``tos_rel``,
+       ``tos_ecn`` and ``protocol``) and of the security, router alert and
+       Quick-Start option makers (``level``, ``alert`` and ``func``); resolve
+       a name with :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index`
+       first (:issue:`2594`).
 
     """
 
@@ -454,40 +470,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return self._decode_next_layer(ipv4, proto, _plen, packet=__packet__, declared=declared)
 
     def make(self,
-             tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,
-             tos_pre_default: 'Optional[int]' = None,
-             tos_pre_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             tos_pre_reversed: 'bool' = False,
-             tos_del: 'Enum_ToSDelay | StdlibEnum | AenumEnum | int | str' = Enum_ToSDelay.NORMAL,
-             tos_del_default: 'Optional[int]' = None,
-             tos_del_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             tos_del_reversed: 'bool' = False,
-             tos_thr: 'Enum_ToSThroughput | StdlibEnum | AenumEnum | int | str' = Enum_ToSThroughput.NORMAL,
-             tos_thr_default: 'Optional[int]' = None,
-             tos_thr_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             tos_thr_reversed: 'bool' = False,
-             tos_rel: 'Enum_ToSReliability | StdlibEnum | AenumEnum | int | str' = Enum_ToSReliability.NORMAL,
-             tos_rel_default: 'Optional[int]' = None,
-             tos_rel_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             tos_rel_reversed: 'bool' = False,
-             tos_ecn: 'Enum_ToSECN | StdlibEnum | AenumEnum | int | str' = Enum_ToSECN.Not_ECT,
-             tos_ecn_default: 'Optional[int]' = None,
-             tos_ecn_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             tos_ecn_reversed: 'bool' = False,
+             tos_pre: 'Enum_ToSPrecedence | int' = Enum_ToSPrecedence.Routine,
+             tos_del: 'Enum_ToSDelay | int' = Enum_ToSDelay.NORMAL,
+             tos_thr: 'Enum_ToSThroughput | int' = Enum_ToSThroughput.NORMAL,
+             tos_rel: 'Enum_ToSReliability | int' = Enum_ToSReliability.NORMAL,
+             tos_ecn: 'Enum_ToSECN | int' = Enum_ToSECN.Not_ECT,
              id: 'int' = 0,
              reserved: 'int' = 0,
              df: 'bool' = False,
              mf: 'bool' = False,
              offset: 'int' = 0,
              ttl: 'timedelta | int' = 0,
-             protocol: 'Enum_TransType | StdlibEnum | AenumEnum | int | str' = Enum_TransType.UDP,
-             protocol_default: 'Optional[int]' = None,
-             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             protocol_reversed: 'bool' = False,
+             protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
              checksum: 'Optional[bytes]' = None,
              src: 'IPv4Address | str | int | bytes' = '127.0.0.1',
              dst: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
-             options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              total_length: 'Optional[int]' = None,
              padding: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
@@ -497,25 +495,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Args:
             tos_pre: Precedence of the packet.
-            tos_pre_default: Default value of ``tos_pre``.
-            tos_pre_namespace: Namespace of ``tos_pre``.
-            tos_pre_reversed: If the namespace of ``tos_pre`` is reversed.
             tos_del: Delay of the packet.
-            tos_del_default: Default value of ``tos_del``.
-            tos_del_namespace: Namespace of ``tos_del``.
-            tos_del_reversed: If the namespace of ``tos_del`` is reversed.
             tos_thr: Throughput of the packet.
-            tos_thr_default: Default value of ``tos_thr``.
-            tos_thr_namespace: Namespace of ``tos_thr``.
-            tos_thr_reversed: If the namespace of ``tos_thr`` is reversed.
             tos_rel: Reliability of the packet.
-            tos_rel_default: Default value of ``tos_rel``.
-            tos_rel_namespace: Namespace of ``tos_rel``.
-            tos_rel_reversed: If the namespace of ``tos_rel`` is reversed.
             tos_ecn: ECN of the packet.
-            tos_ecn_default: Default value of ``tos_ecn``.
-            tos_ecn_namespace: Namespace of ``tos_ecn``.
-            tos_ecn_reversed: If the namespace of ``tos_ecn`` is reversed.
             id: Identification of the packet.
             reserved: Reserved flag bit, i.e. the high-order bit of the flags.
             df: Don't fragment flag.
@@ -524,9 +507,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 the parsed ``offset`` is in octets, see :meth:`_make_data`.
             ttl: Time to live of the packet.
             protocol: Payload protocol of the packet.
-            protocol_default: Default value of ``protocol``.
-            protocol_namespace: Namespace of ``protocol``.
-            protocol_reversed: If the namespace of ``protocol`` is reversed.
             checksum: Header checksum; computed over the header (:rfc:`791`)
                 if :data:`None` and
                 :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, zero
@@ -549,8 +529,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Raises:
             ProtocolError: If ``id``, ``reserved``, ``offset``, ``ttl`` or the
-                total length does not fit its field, or the options make a
-                header too long for its four-bit IHL.
+                total length does not fit its field; if a ToS field,
+                ``protocol`` or the type of an option is a name, a :obj:`bool`
+                for a field wider than one bit, or a member or code its field
+                cannot carry; or if the options make a header too long for its
+                four-bit IHL.
 
         .. versionchanged:: 1.5.0
 
@@ -559,19 +542,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            ahead of ``payload``, which shifts every later positional argument.
 
         """
-        tos_pre_val = self._make_index(tos_pre, tos_pre_default, namespace=tos_pre_namespace,
-                                       reversed=tos_pre_reversed, pack=False)
-        tos_del_val = self._make_index(tos_del, tos_del_default, namespace=tos_del_namespace,
-                                       reversed=tos_del_reversed, pack=False)
-        tos_thr_val = self._make_index(tos_thr, tos_thr_default, namespace=tos_thr_namespace,
-                                       reversed=tos_thr_reversed, pack=False)
-        tos_rel_val = self._make_index(tos_rel, tos_rel_default, namespace=tos_rel_namespace,
-                                       reversed=tos_rel_reversed, pack=False)
-        tos_ecn_val = self._make_index(tos_ecn, tos_ecn_default, namespace=tos_ecn_namespace,
-                                       reversed=tos_ecn_reversed, pack=False)
+        tos_pre_val = self._make_index(tos_pre, Enum_ToSPrecedence, bits=3, name='precedence')
+        tos_del_val = self._make_index(tos_del, Enum_ToSDelay, bits=1, name='delay')
+        tos_thr_val = self._make_index(tos_thr, Enum_ToSThroughput, bits=1, name='throughput')
+        tos_rel_val = self._make_index(tos_rel, Enum_ToSReliability, bits=1, name='reliability')
+        tos_ecn_val = self._make_index(tos_ecn, Enum_ToSECN, bits=2, name='ECN')
 
-        proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,
-                                 reversed=protocol_reversed, pack=False)
+        proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol')
         ttl_val = self._make_uint(ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds()),
                                   bits=8, name='TTL')
         id = self._make_uint(id, bits=16, name='identification')
@@ -615,7 +592,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'offset': offset,
             },
             ttl=ttl_val,
-            proto=proto,  # type: ignore[arg-type]
+            proto=proto,
             chksum=b'\x00\x00' if checksum is None else checksum,
             src=src,
             dst=dst,
@@ -874,7 +851,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             raise ProtocolError(f'IPv4: invalid format')
         return options
 
-    def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option',
+    def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber | int, dict[str, Any]] | bytes] | Option',  # pylint: disable=line-too-long
                            padding: 'Optional[bytes]' = None) -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for IPv4.
 
@@ -897,6 +874,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Tuple of options and total length of options.
 
+        Raises:
+            ProtocolError: If the type of an option, given in a ``(type,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
         """
         total_length = 0
         terminated = False
@@ -918,7 +900,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     data = schema
                     data_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_OptionNumber, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_OptionNumber | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_OptionNumber, bits=8, name='option type')
                     if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
                         continue
 
@@ -936,7 +919,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 options_list.append(data)
                 total_length += data_len
         else:
-            for code, option in options.items(multi=True):
+            for key, option in options.items(multi=True):
+                code = self._make_index(key, Enum_OptionNumber, bits=8, name='option type')
                 name = self._lookup_registry(self.__option__, code)
                 if isinstance(name, str):
                     meth_name = f'_make_opt_{name}'
@@ -1659,10 +1643,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
 
     def _make_opt_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_SECOption]' = None, *,
-                      level: 'Enum_ClassificationLevel | StdlibEnum | AenumEnum | int | str' = Enum_ClassificationLevel.Unclassified,
-                      level_default: 'Optional[int]' = None,
-                      level_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      level_reversed: 'bool' = False,
+                      level: 'Enum_ClassificationLevel | int' = Enum_ClassificationLevel.Unclassified,
                       authorities: 'Optional[list[Enum_ProtectionAuthority]]' = None,
                       **kwargs: 'Any') -> 'Schema_SECOption':
         """Make IPv4 Security (``SEC``) option.
@@ -1671,9 +1652,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             level: classification level
-            level_default: default value for classification level
-            level_namespace: namespace for classification level
-            level_reversed: whether classification level is reversed
             authorities: list of protection authority flags
             **kwargs: arbitrary keyword arguments
 
@@ -1681,11 +1659,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``level`` does not fit in one octet, or
-                ``authorities`` names a bit position that is not a protection
-                authority -- a negative one, one that :rfc:`1108` reserves as a
-                field termination indicator, or one past what the one-octet
-                option length can count.
+            ProtocolError: If ``level`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in one octet, or ``authorities``
+                names a bit position that is not a protection authority -- a
+                negative one, one that :rfc:`1108` reserves as a field
+                termination indicator, or one past what the one-octet option
+                length can count.
 
         Notes:
             :rfc:`1108#section-2.4` lays each protection authority octet out as
@@ -1706,13 +1685,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         """
         termination = ()  # type: tuple[bool, ...]
         if option is not None:
-            level_val = option.level
+            level = option.level
             authorities = cast('list[Enum_ProtectionAuthority]', option.flags)
             termination = tuple(getattr(option, 'termination', ()))
         else:
-            level_val = self._make_index(level, level_default, namespace=level_namespace,  # type: ignore[assignment]
-                                         reversed=level_reversed, pack=False)
             authorities = [] if authorities is None else authorities
+        level_val = self._make_index(level, Enum_ClassificationLevel, bits=8,
+                                     name='classification level')
 
         if authorities:
             for auth in authorities:
@@ -1768,7 +1747,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_SECOption(
             type=kind,
             length=self._make_uint(3 + len(data), bits=8, name='option length'),
-            level=self._make_uint(level_val, bits=8, name='classification level'),
+            level=level_val,
             data=data,
         )
 
@@ -2213,10 +2192,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
 
     def _make_opt_rtralt(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_RTRALTOption]' = None, *,
-                         alert: 'Enum_RouterAlert | StdlibEnum | AenumEnum | int | str' = Enum_RouterAlert.Aggregated_Reservation_Nesting_Level_0,
-                         alert_default: 'Optional[int]' = None,
-                         alert_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                         alert_reversed: 'bool' = False,
+                         alert: 'Enum_RouterAlert | int' = Enum_RouterAlert.Aggregated_Reservation_Nesting_Level_0,
                          **kwargs: 'Any') -> 'Schema_RTRALTOption':
         """Make IPv4 Router Alert (``RTRALT``) option.
 
@@ -2224,26 +2200,19 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             alert: router alert type
-            alert_default: default value for router alert type
-            alert_namespace: namespace for router alert type
-            alert_reversed: whether router alert type is reversed
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the router alert value does not fit in two
+            ProtocolError: If the router alert value is a name, a
+                :obj:`bool`, or a member or code that does not fit in two
                 octets.
 
         """
-        if option is not None:
-            alert_val = option.alert
-        else:
-            alert_val = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
-                                         reversed=alert_reversed, pack=False)
-
-        self._make_uint(alert_val, bits=16, name='router alert value')
+        alert_val = self._make_index(alert if option is None else option.alert, Enum_RouterAlert,
+                                     bits=16, name='router alert value')
         return Schema_RTRALTOption(
             type=kind,
             length=4,
@@ -2251,10 +2220,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
 
     def _make_opt_qs(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption | Data_UnassignedOption]' = None, *,
-                     func: 'Enum_QSFunction | StdlibEnum | AenumEnum | str | int' = Enum_QSFunction.Quick_Start_Request,
-                     func_default: 'Optional[int]' = None,
-                     func_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,   # pylint: disable=line-too-long
-                     func_reversed: 'bool' = False,
+                     func: 'Enum_QSFunction | int' = Enum_QSFunction.Quick_Start_Request,
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
                      unused: 'int' = 0,
@@ -2267,9 +2233,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             func: QS function type
-            func_default: default value for QS function type
-            func_namespace: namespace for QS function type
-            func_reversed: reversed flag for QS function type
             rate: rate (in kbps), rounded down to the nearest rate the
                 four-bit rate code carries (:rfc:`4782#section-3.1`)
             ttl: time to live (in seconds)
@@ -2285,23 +2248,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             the option takes the eight-octet layout of a Quick-Start Request.
 
         Raises:
-            ProtocolError: If ``func`` does not fit in four bits, the rate code
-                cannot carry ``rate``, or ``ttl``, ``unused``, ``nonce`` or
+            ProtocolError: If ``func`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in four bits, the rate code cannot
+                carry ``rate``, or ``ttl``, ``unused``, ``nonce`` or
                 ``reserved`` does not fit its field.
 
         """
         if isinstance(option, Data_UnassignedOption):
             return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, option))
         if option is not None:
-            func_enum = option.func
+            func = option.func
             rate = option.rate
             ttl = getattr(option, 'ttl', 0)
             unused = getattr(option, 'unused', 0)
             nonce = option.nonce
             reserved = getattr(option, 'reserved', 0)
-        else:
-            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
-                                         reversed=func_reversed, pack=False)
+        func_enum = self._make_index(func, Enum_QSFunction, bits=4, name='QS function')
         rate_val = self._make_qs_rate(rate)
         ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
         nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
@@ -2335,7 +2297,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     'reserved': reserved,
                 },
             )
-        func_val = self._make_uint(func_enum, bits=4, name='QS function')
+        func_val = int(func_enum)
         ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
         data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
         return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, data=data))

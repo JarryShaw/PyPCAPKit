@@ -366,7 +366,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
              service_code: 'int' = 0,
              reset_code: 'Enum_ResetCode | int' = Enum_ResetCode.Unspecified,
              reset_data: 'bytes' = bytes(3),
-             options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             options: 'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              pseudo: 'Optional[IP_Pseudo]' = None,
              **kwargs: 'Any') -> 'Schema_DCCP':
@@ -408,15 +408,17 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`, the
-                header with its options runs past the 1020 octets a Data Offset
-                can give, an option maker rejects its option, a numeric field
-                does not fit its width, ``checksum`` is not two octets, or
-                ``reset_data`` is not three.
-            EnumValueError: If ``type`` is out of its 4-bit range.
+            ProtocolError: If ``srcport`` or ``dstport`` is a :obj:`bool`,
+                ``type`` (4 bits), ``reset_code`` (8 bits) or the type of an
+                option in ``options`` (8 bits) is a name, a :obj:`bool`, or a
+                member or code that does not fit its field,
+                the header with its options runs past the 1020 octets a Data
+                Offset can give, an option maker rejects its option, a numeric
+                field does not fit its width, ``checksum`` is not two octets,
+                or ``reset_data`` is not three.
 
         """
-        code = Enum_PacketType.get(type)
+        code = self._make_index(type, Enum_PacketType, bits=4, name='type')
         type_field = {
             'reserved': self._make_uint(reserved, bits=3, name='reserved'),
             'type': int(code),
@@ -451,7 +453,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             ack_reserved=self._make_uint(ack_reserved, bits=(2 if x else 1) * 8, name='ack_reserved'),
             ack=self._make_uint(ack, bits=seq_bits, name='acknowledgement number'),
             service_code=self._make_uint(service_code, bits=32, name='service code'),
-            reset_code=reset_code,
+            reset_code=self._make_index(reset_code, Enum_ResetCode, bits=8, name='reset code'),
             reset_data=self._make_octets(reset_data, size=3, name='reset data'),
             options=options_value,
             payload=payload,
@@ -574,7 +576,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             options.add(code, meth(schema, options=options))
         return options
 
-    def _make_dccp_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':  # pylint: disable=line-too-long
+    def _make_dccp_options(self, options: 'list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':  # pylint: disable=line-too-long
         """Make options for DCCP.
 
         Args:
@@ -596,10 +598,12 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
                 if isinstance(item, (bytes, Schema)):
                     options_list.append(item)
                 else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', item)
+                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_Option, bits=8, name='option type')
                     options_list.append(self._option_maker(code)(code, **args))
         else:
-            for code, option in options.items(multi=True):
+            for key, option in options.items(multi=True):
+                code = self._make_index(key, Enum_Option, bits=8, name='option type')
                 options_list.append(self._option_maker(code)(code, option))
 
         total_length = sum(len(item) if isinstance(item, bytes) else len(item.pack())
@@ -1112,7 +1116,9 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``value`` is given without a ``feature``.
+            ProtocolError: If ``value`` is given without a ``feature``, or
+                ``feature`` is a name, a :obj:`bool`, or a member or code that
+                does not fit 8 bits.
 
         """
         if opt is not None:
@@ -1129,7 +1135,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         return Schema_Change(
             type=code,
             length=self._option_length(code, len(value) + 3),
-            feature=feature,
+            feature=self._make_index(feature, Enum_Feature, bits=8, name=f'[Opt {code}] feature'),
             value=value,
         )
 
@@ -1151,7 +1157,9 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``value`` is given without a ``feature``.
+            ProtocolError: If ``value`` is given without a ``feature``, or
+                ``feature`` is a name, a :obj:`bool`, or a member or code that
+                does not fit 8 bits.
 
         """
         if opt is not None:
@@ -1168,7 +1176,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         return Schema_Confirm(
             type=code,
             length=self._option_length(code, len(value) + 3),
-            feature=feature,
+            feature=self._make_index(feature, Enum_Feature, bits=8, name=f'[Opt {code}] feature'),
             value=value,
         )
 
@@ -1245,8 +1253,9 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If a state does not fit 2 bits or a run length
-                6 bits.
+            ProtocolError: If a state is a name, a :obj:`bool`, or a member or
+                code that does not fit 2 bits, or a run length does not fit 6
+                bits.
 
         """
         if opt is not None:
@@ -1255,7 +1264,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         octets = bytearray()
         for run in vector:
             state, run_length = (run.state, run.run_length) if isinstance(run, Data_AckVectorRun) else run
-            if not (0 <= state <= 0x03 and 0 <= run_length <= 0x3F):
+            state = self._make_index(state, Enum_AckVectorState, bits=2, name=f'[Opt {code}] Ack Vector state')
+            if not 0 <= run_length <= 0x3F:
                 raise ProtocolError(f'{self.alias}: [Opt {code}] invalid Ack Vector run '
                                     f'({state}, {run_length})')
             octets.append((state << 6) | run_length)
@@ -1285,8 +1295,9 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
 
         Raises:
             ProtocolError: If a run length does not fit 7 bits in a normal
-                block, or a drop code 3 bits or a run length 4 bits in a drop
-                block.
+                block, or in a drop block a run length does not fit 4 bits or
+                the drop code is a name, a :obj:`bool`, or a member or code that
+                does not fit 3 bits.
 
         """
         if opt is not None:
@@ -1295,9 +1306,11 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         octets = bytearray()
         for block in vector:
             drop, run_length = (block.code, block.run_length) if isinstance(block, Data_DataDroppedBlock) else block
+            if drop is not None:
+                drop = self._make_index(drop, Enum_DropCode, bits=3, name=f'[Opt {code}] drop code')
             if drop is None and 0 <= run_length <= 0x7F:
                 octets.append(run_length)
-            elif drop is not None and 0 <= drop <= 0x07 and 0 <= run_length <= 0x0F:
+            elif drop is not None and 0 <= run_length <= 0x0F:
                 octets.append(0x80 | (drop << 4) | run_length)
             else:
                 raise ProtocolError(f'{self.alias}: [Opt {code}] invalid Data Dropped block '

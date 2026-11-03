@@ -113,10 +113,8 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Callable, DefaultDict, Optional, Tuple, Type
+    from typing import Any, Callable, DefaultDict, Optional, Tuple
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -212,6 +210,22 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
          settings past the data read as zeros, as a cut ``DATA`` frame's data is,
          where it was :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2659`,
          :issue:`2686`).
+       * Each enumeration field of :meth:`make` and of the frame makers takes
+         a member or an :class:`int` code, resolved with the enumeration's
+         ``get``; a name, a :obj:`bool` for a field wider than one bit, or a
+         code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame or
+         writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace`` and ``type_reversed``
+       arguments of :meth:`make`, and the ``error_default``,
+       ``error_namespace`` and ``error_reversed`` arguments of the
+       ``RST_STREAM`` and ``GOAWAY`` frame makers; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -412,10 +426,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         return self._decode_next_layer(http, -1, length - 9 - schema.length)
 
     def make(self,  # type: ignore[override]
-             type: 'Enum_Frame | StdlibEnum | AenumEnum | str | int' = Enum_Frame.DATA,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Frame | int' = Enum_Frame.DATA,
              flags: 'Flags' = 0,  # type: ignore[assignment]
              reserved: 'int' = 0,
              sid: 'int' = 0,
@@ -427,9 +438,6 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Args:
             type: Type of HTTP/2 frame.
-            type_default: Default frame type.
-            type_namespace: Namespace of frame type.
-            type_reversed: Whether to reverse the namespace.
             flags: Flags of HTTP/2 frame, combined with those the frame
                 constructor derives from ``frame``.
             reserved: Reserved bit of the frame header.
@@ -447,8 +455,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``frame`` is none of the forms this maker reads --
-                raw :obj:`bytes`, a :obj:`dict` of frame arguments, an
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code the 8-bit Type field cannot carry; or if ``frame`` is
+                none of the forms this maker reads -- raw :obj:`bytes`, a
+                :obj:`dict` of frame arguments, an
                 :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2` data
                 model or a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
@@ -463,9 +473,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
              such a frame could not be built at all (:issue:`2274`).
 
         """
-        type_val = cast('Enum_Frame',
-                        self._make_index(type, type_default, namespace=type_namespace,
-                                         reversed=type_reversed, pack=False))
+        type_val = self._make_index(type, Enum_Frame, bits=8, name='type')
 
         if frame is None:
             # A frame type whose payload is of fixed or minimum size cannot be
@@ -1364,23 +1372,21 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         ), cast('Flags', 0)
 
     def _make_http_rst_stream(self, frame: 'Optional[Data_RSTStreamFrame]' = None, *,
-                              error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.NO_ERROR,
-                              error_default: 'Optional[int]' = None,
-                              error_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                              error_reversed: 'bool' = False,
+                              error: 'Enum_ErrorCode | int' = Enum_ErrorCode.NO_ERROR,
                               **kwargs: 'Any') -> 'tuple[Schema_RSTStreamFrame, Flags]':
         """Make HTTP/2 ``RST_STREAM`` frame.
 
         Args:
             frame: Frame data model.
             error: Error code, ``NO_ERROR`` unless given.
-            error_default: Default value of error code.
-            error_namespace: Namespace of error code.
-            error_reversed: Reversed namespace of error code.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
+
+        Raises:
+            ProtocolError: If ``error`` is a name, a :obj:`bool`, or a member
+                or code the 32-bit Error Code field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -1393,8 +1399,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         if frame is not None:
             error_val = frame.error
         else:
-            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[assignment]
-                                         reversed=error_reversed, pack=False)
+            error_val = self._make_index(error, Enum_ErrorCode, bits=32, name='error code')
 
         return Schema_RSTStreamFrame(
             error=error_val,
@@ -1402,7 +1407,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
     def _make_http_settings(self, frame: 'Optional[Data_SettingsFrame]' = None, *,
                             ack: 'bool' = False,
-                            settings: 'Optional[OrderedMultiDict[Enum_Setting, int] | dict[Enum_Setting | int, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]' = None,  # pylint: disable=line-too-long
+                            settings: 'Optional[OrderedMultiDict[Enum_Setting | int, int] | dict[Enum_Setting | int, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting | int, int]]]' = None,  # pylint: disable=line-too-long
                             **kwargs: 'Any') -> 'tuple[Schema_SettingsFrame, Flags]':
         """Make HTTP/2 ``SETTINGS`` frame.
 
@@ -1421,7 +1426,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Raises:
             ProtocolError: If ``settings`` is not :obj:`bytes`, a :obj:`dict`,
-                a :obj:`list` or :data:`None`.
+                a :obj:`list` or :data:`None`, or if an identifier other than
+                a :class:`~pcapkit.protocols.schema.application.httpv2.SettingPair`'s
+                is a name, a :obj:`bool`, or a member or code the 16-bit
+                Identifier field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -1451,7 +1459,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             items = settings.items(multi=True) if isinstance(settings, MultiDict) else settings.items()
             for key, val in items:
                 settings_val.append(Schema_SettingPair(
-                    id=key,
+                    id=self._make_index(key, Enum_Setting, bits=16, name='setting identifier'),
                     value=val,
                 ))
         elif isinstance(settings, list):
@@ -1462,7 +1470,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
                 else:
                     id, value = item
                     temp = Schema_SettingPair(
-                        id=id,
+                        id=self._make_index(id, Enum_Setting, bits=16, name='setting identifier'),
                         value=value,
                     )
                 settings_val.append(temp)
@@ -1563,10 +1571,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
     def _make_http_goaway(self, frame: 'Optional[Data_GoawayFrame]' = None, *,
                           last_reserved: 'int' = 0,
                           last_sid: 'int' = 0,
-                          error: 'Enum_ErrorCode | str | int | StdlibEnum | AenumEnum' = Enum_ErrorCode.NO_ERROR,
-                          error_default: 'Optional[int]' = None,
-                          error_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                          error_reversed: 'bool' = False,
+                          error: 'Enum_ErrorCode | int' = Enum_ErrorCode.NO_ERROR,
                           debug_data: 'bytes' = b'',
                           **kwargs: 'Any') -> 'tuple[Schema_GoawayFrame, Flags]':
         """Make HTTP/2 ``GOAWAY`` frame.
@@ -1576,14 +1581,15 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             last_reserved: Reserved bit of the last stream identifier.
             last_sid: Last stream identifier.
             error: Error code, ``NO_ERROR`` unless given.
-            error_default: Default value of error code.
-            error_namespace: Namespace of error code.
-            error_reversed: Reversed namespace of error code.
             debug_data: Additional debug data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
+
+        Raises:
+            ProtocolError: If ``error`` is a name, a :obj:`bool`, or a member
+                or code the 32-bit Error Code field cannot carry.
 
         .. versionchanged:: 1.5.0
 
@@ -1599,8 +1605,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             error_val = frame.error
             debug = frame.debug_data
         else:
-            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[assignment]
-                                         reversed=error_reversed, pack=False)
+            error_val = self._make_index(error, Enum_ErrorCode, bits=32, name='error code')
             debug = debug_data
 
         return Schema_GoawayFrame(

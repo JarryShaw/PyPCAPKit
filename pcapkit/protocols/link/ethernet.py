@@ -34,10 +34,8 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ethernet import Ethernet as Schema_Ethernet
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -48,7 +46,25 @@ __all__ = ['Ethernet']
 
 class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
                schema=Schema_Ethernet, data=Data_Ethernet):
-    """This class implements Ethernet Protocol."""
+    """This class implements Ethernet Protocol.
+
+    .. versionchanged:: 1.6.0
+
+       ``type`` of :meth:`make` takes a member or an :class:`int` code,
+       resolved with the enumeration's ``get``; a name, a :obj:`bool`, or a
+       code the field cannot carry raises
+       :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+       resolving against an enumeration inferred from the caller's frame or
+       writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace`` and ``type_reversed``
+       arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
 
     ##########################################################################
     # Properties.
@@ -130,10 +146,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
     def make(self,
              dst: 'str | bytes | bytearray' = '00:00:00:00:00:00',
              src: 'str | bytes | bytearray' = '00:00:00:00:00:00',
-             type: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_EtherType | int' = Enum_EtherType.Internet_Protocol_version_4,
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_Ethernet':
         """Make (construct) packet data.
@@ -142,9 +155,6 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             dst: Destination MAC address.
             src: Source MAC address.
             type: EtherType.
-            type_default: Default EtherType.
-            type_namespace: EtherType namespace.
-            type_reversed: Whether EtherType is reversed.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -153,16 +163,17 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
 
         Raises:
             ProtocolError: If ``dst`` or ``src`` is rejected by
-                :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr`.
+                :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr`,
+                or ``type`` is a name, a :obj:`bool`, or a member or code its
+                field cannot carry.
 
         """
-        _type = self._make_index(type, type_default, namespace=type_namespace,
-                                 reversed=type_reversed, pack=False)
+        _type = self._make_index(type, Enum_EtherType, bits=16, name='EtherType')
 
         return Schema_Ethernet(
             dst=self._make_mac_addr(dst),
             src=self._make_mac_addr(src),
-            type=_type,  # type: ignore[arg-type]
+            type=_type,
             payload=payload,
         )
 

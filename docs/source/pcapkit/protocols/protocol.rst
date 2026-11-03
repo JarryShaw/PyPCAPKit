@@ -58,6 +58,7 @@ Internal Definitions below.
 
    .. automethod:: decode
    .. automethod:: unquote
+   .. automethod:: resolve_index
 
    .. automethod:: expand_comp
 
@@ -194,6 +195,7 @@ Internal Definitions
                   pack
                   decode
                   unquote
+                  resolve_index
                   expand_comp
                   _read_packet
                   _get_payload
@@ -225,8 +227,9 @@ Internal Definitions
       :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
       :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
       :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
-      :meth:`~Protocol.expand_comp`, :meth:`~Protocol._read_packet`,
-      :meth:`~Protocol._get_payload`, :meth:`~Protocol._make_data`,
+      :meth:`~Protocol.resolve_index`, :meth:`~Protocol.expand_comp`,
+      :meth:`~Protocol._read_packet`, :meth:`~Protocol._get_payload`,
+      :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
       :meth:`~Protocol._packing_target`, :meth:`~Protocol._read_mac_addr`,
       :meth:`~Protocol._make_mac_addr`,

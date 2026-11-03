@@ -218,8 +218,10 @@ class IGMPChecksumMakeTests(IGMPChecksumTestCase):
                 self.assertEqual(made, message(packet[:2], packet[4:] + b'XY'))
 
     def test_the_ipv4_payload_verifies(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
         igmp = self.classes['IGMPv2'](**self.FIELDS['v2-report'])
-        made = self.IPv4(src='10.0.0.1', dst='239.1.2.3', protocol='IGMP', payload=igmp).data
+        made = self.IPv4(src='10.0.0.1', dst='239.1.2.3', protocol=TransType.IGMP, payload=igmp).data
         self.assertEqual(made[20:], MESSAGES['v2-report'][0])
         self.assertEqual(self.status(made), (self.Status.VALID, []))
 

@@ -75,10 +75,8 @@ from pcapkit.protocols.schema.link.ieee802_11 import Layout, layout
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from typing import Any, Mapping, Optional, Type, Union
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -196,14 +194,8 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
         return self._decode_next_layer(ieee802_11, -1, max(0, length - hdr_len))
 
     def make(self,
-             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.Data,  # pylint: disable=redefined-builtin
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
-             subtype: 'Subtype | StdlibEnum | AenumEnum | str | int' = 0,
-             subtype_default: 'Optional[int]' = None,
-             subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             subtype_reversed: 'bool' = False,
+             type: 'Enum_Type | int' = Enum_Type.Data,  # pylint: disable=redefined-builtin
+             subtype: 'Subtype | int' = 0,
              version: 'Literal[0]' = 0,
              to_ds: 'Optional[bool]' = None,
              from_ds: 'Optional[bool]' = None,
@@ -234,14 +226,8 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
 
         Args:
             type: Type.
-            type_default: Default value of ``type``.
-            type_namespace: Namespace of ``type``.
-            type_reversed: Reversed namespace of ``type``.
-            subtype: Subtype; a name resolves against the registry ``type``
-                selects unless ``subtype_namespace`` is given.
-            subtype_default: Default value of ``subtype``.
-            subtype_namespace: Namespace of ``subtype``.
-            subtype_reversed: Reversed namespace of ``subtype``.
+            subtype: Subtype, a member or code of the registry ``type``
+                selects.
             version: Protocol Version; only ``0`` is built.
             to_ds: To DS.
             from_ds: From DS.
@@ -274,18 +260,14 @@ class IEEE802_11(Link[Data_IEEE802_11, Schema_IEEE802_11],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If a value does not fit its field, if ``version``
-                is not ``0``, or if a field is given that the header does not
-                carry.
+            ProtocolError: If a value does not fit its field, if ``type`` or
+                ``subtype`` is a name or a member or code its field cannot
+                carry, if ``version`` is not ``0``, or if a field is given that
+                the header does not carry.
 
         """
-        type_ = self._make_index(type, type_default, namespace=type_namespace,
-                                 reversed=type_reversed, pack=False)
-        type_ = self._make_uint(type_, bits=2, name='type')
-        subtype_ = self._make_index(subtype, subtype_default,
-                                    namespace=subtype_namespace or SUBTYPE[Enum_Type(type_)],
-                                    reversed=subtype_reversed, pack=False)
-        subtype_ = self._make_uint(subtype_, bits=4, name='subtype')
+        type_ = self._make_index(type, Enum_Type, bits=2, name='type')
+        subtype_ = self._make_index(subtype, SUBTYPE[type_], bits=4, name='subtype')
 
         frame_control = self._make_frame_control(
             version=version, type=type_, subtype=subtype_,

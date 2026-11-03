@@ -76,10 +76,8 @@ from pcapkit.protocols.schema.application.sslv2 import sslv2_record_length
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -245,10 +243,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         return self._decode_next_layer(sslv2, -1, length - header_len - record_length)
 
     def make(self,
-             msg_type: 'Enum_HandshakeType | StdlibEnum | AenumEnum | str | int' = Enum_HandshakeType.CLIENT_HELLO,
-             msg_type_default: 'Optional[int]' = None,
-             msg_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             msg_type_reversed: 'bool' = False,
+             msg_type: 'Enum_HandshakeType | int' = Enum_HandshakeType.CLIENT_HELLO,
              two_byte_header: 'bool' = True,
              is_escape: 'bool' = False,
              padding: 'int' = 0,
@@ -259,9 +254,6 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
 
         Args:
             msg_type: Handshake message type.
-            msg_type_default: Default value for ``msg_type``.
-            msg_type_namespace: Namespace for ``msg_type``.
-            msg_type_reversed: Reverse namespace for ``msg_type``.
             two_byte_header: Whether to emit the 2-octet header form (the
                 more common of the two on real traffic) rather than the
                 3-octet form.
@@ -287,7 +279,11 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``body`` is a :obj:`dict` and ``msg_type`` is
+            ProtocolError: If ``msg_type`` is a name, a :obj:`bool`, or a
+                member or code the 8-bit ``MSG-TYPE`` field cannot carry, or
+                a hello body's ``client_version`` or ``server_version`` is
+                such a value for its 16-bit field; if ``body`` is a
+                :obj:`dict` and ``msg_type`` is
                 not ``CLIENT_HELLO``/``SERVER_HELLO``; if ``body`` is a
                 :class:`~pcapkit.protocols.data.application.sslv2.ClientHello`/
                 :class:`~pcapkit.protocols.data.application.sslv2.ServerHello`
@@ -300,9 +296,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
                 single padding octet (``0``-``255``).
 
         """
-        msg_type_val = cast('Enum_HandshakeType',
-                            self._make_index(msg_type, msg_type_default, namespace=msg_type_namespace,
-                                             reversed=msg_type_reversed, pack=False))
+        msg_type_val = self._make_index(msg_type, Enum_HandshakeType, bits=8, name='msg_type')
 
         if body is None:
             body = {}
@@ -406,10 +400,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         }
 
     def _make_sslv2_client_hello(self,
-                                client_version: 'Enum_Version | StdlibEnum | AenumEnum | str | int' = Enum_Version.SSLv2,  # pylint: disable=line-too-long
-                                client_version_default: 'Optional[int]' = None,
-                                client_version_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                client_version_reversed: 'bool' = False,
+                                client_version: 'Enum_Version | int' = Enum_Version.SSLv2,
                                 cipher_specs: 'bytes' = b'',
                                 session_id: 'bytes' = b'',
                                 challenge: 'bytes' = b'\x00' * 16) -> 'Schema_ClientHello':
@@ -417,9 +408,6 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
 
         Args:
             client_version: Client's maximum supported version.
-            client_version_default: Default value for ``client_version``.
-            client_version_namespace: Namespace for ``client_version``.
-            client_version_reversed: Reverse namespace for ``client_version``.
             cipher_specs: Cipher kinds the client supports, as a
                 concatenation of 3-octet ``CIPHER-KIND`` entries. The draft
                 (§5.5.1) requires ``CIPHER-SPECS-LENGTH`` to be greater than
@@ -432,11 +420,12 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         Returns:
             ``CLIENT-HELLO`` message body schema.
 
+        Raises:
+            ProtocolError: If ``client_version`` is a name, a :obj:`bool`, or
+                a member or code its 16-bit field cannot carry.
+
         """
-        client_version_val = cast('Enum_Version',
-                                  self._make_index(client_version, client_version_default,
-                                                   namespace=client_version_namespace,
-                                                   reversed=client_version_reversed, pack=False))
+        client_version_val = self._make_index(client_version, Enum_Version, bits=16, name='client_version')
         return Schema_ClientHello(
             client_version=client_version_val,
             cipher_specs_length=len(cipher_specs),
@@ -450,10 +439,7 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
     def _make_sslv2_server_hello(self,
                                 session_id_hit: 'int | bool' = 0,
                                 certificate_type: 'int' = 0,
-                                server_version: 'Enum_Version | StdlibEnum | AenumEnum | str | int' = Enum_Version.SSLv2,  # pylint: disable=line-too-long
-                                server_version_default: 'Optional[int]' = None,
-                                server_version_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                                server_version_reversed: 'bool' = False,
+                                server_version: 'Enum_Version | int' = Enum_Version.SSLv2,
                                 certificate: 'bytes' = b'',
                                 cipher_specs: 'bytes' = b'',
                                 connection_id: 'bytes' = b'\x00' * 16) -> 'Schema_ServerHello':
@@ -472,9 +458,6 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
                 rather than wrapping mod 256.
             certificate_type: Certificate type.
             server_version: Server's selected version.
-            server_version_default: Default value for ``server_version``.
-            server_version_namespace: Namespace for ``server_version``.
-            server_version_reversed: Reverse namespace for ``server_version``.
             certificate: Server's certificate.
             cipher_specs: Cipher kinds the server supports, as a
                 concatenation of 3-octet ``CIPHER-KIND`` entries -- empty
@@ -489,11 +472,13 @@ class SSLv2(SSL[Data_SSLv2, Schema_SSLv2],
         Returns:
             ``SERVER-HELLO`` message body schema.
 
+        Raises:
+            ProtocolError: If ``server_version`` is a name, a :obj:`bool`, or
+                a member or code its 16-bit field cannot carry, or if
+                ``session_id_hit`` does not fit its octet.
+
         """
-        server_version_val = cast('Enum_Version',
-                                  self._make_index(server_version, server_version_default,
-                                                   namespace=server_version_namespace,
-                                                   reversed=server_version_reversed, pack=False))
+        server_version_val = self._make_index(server_version, Enum_Version, bits=16, name='server_version')
         # NOTE: ``int()`` first, so the documented ``True``/``False`` pass;
         # ``UInt8Field`` packs mod 256, so ``256`` would turn a hit into a miss.
         session_id_hit_val = self._make_uint(int(session_id_hit), bits=8, name='session_id_hit')

@@ -1009,9 +1009,10 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_msg_fback(
             None, status=FastBindingAcknowledgmentStatus.Insufficient_resources, options=[],
         ).status, 130)
+        # A name is resolved by the caller first, the maker refusing one (#2594).
         self.assertEqual(proto._make_msg_fback(
-            None, status='Administratively_prohibited', options=[],
-            status_namespace=FastBindingAcknowledgmentStatus,
+            None, options=[], status=MH.resolve_index('Administratively_prohibited',
+                                                      namespace=FastBindingAcknowledgmentStatus),
         ).status, 129)
         self.assertEqual(proto._make_msg_fback(SimpleNamespace(
             status=FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
@@ -1087,7 +1088,7 @@ class MHUnitTests(unittest.TestCase):
         ), header=header(Packet.Fast_Binding_Acknowledgment))
         self.assertEqual(fback.lifetime, datetime.timedelta(seconds=100))
 
-        # control: BU/BA still scale by 4 on read.
+        # control: BU/BA scale by 4 on read.
         bu = proto._read_msg_bu(SimpleNamespace(
             seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0, 'M': 0, 'R': 0, 'P': 0, 'F': 0,
                           'T': 0, 'B': 0, 'S': 0, 'D': 0, 'reserved': 0},
@@ -1113,7 +1114,7 @@ class MHUnitTests(unittest.TestCase):
                                            options=[])
         self.assertEqual(made_fback.lifetime, 100)
 
-        # control: BU/BA still divide by 4 on make.
+        # control: BU/BA divide by 4 on make.
         made_bu = proto._make_msg_bu(None, seq=1, lifetime=datetime.timedelta(seconds=400),
                                      options=[])
         self.assertEqual(made_bu.lifetime, 100)
@@ -1212,8 +1213,8 @@ class MHUnitTests(unittest.TestCase):
             code=IPv6AddressPrefixCode.NAR_IP_address,
         ).code, 3)
         self.assertEqual(proto._make_opt_ipv6_ap(
-            Option.Mobility_Header_IPv6_Address_Prefix, code='Old_Care_of_Address',
-            code_namespace=IPv6AddressPrefixCode,
+            Option.Mobility_Header_IPv6_Address_Prefix,
+            code=MH.resolve_index('Old_Care_of_Address', namespace=IPv6AddressPrefixCode),
         ).code, 1)
         self.assertEqual(proto._make_opt_ipv6_ap(
             Option.Mobility_Header_IPv6_Address_Prefix,
@@ -1561,7 +1562,7 @@ class MHUnitTests(unittest.TestCase):
                 with self.assertRaises(EnumValueError):
                     handover_initiate(wire)
 
-        with self.subTest('out-of-octet values are still rejected'):
+        with self.subTest('out-of-octet values are rejected'):
             for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
                 for value in (-1, 256):
                     with self.assertRaises(EnumValueError):
@@ -1664,7 +1665,7 @@ class MHUnitTests(unittest.TestCase):
                 try:
                     cls.get('bogus', member)
                 except TypeError as error:
-                    self.fail(f'{cls.__name__}.get() still rejects a default argument: {error}')
+                    self.fail(f'{cls.__name__}.get() rejects a default argument: {error}')
 
         with self.subTest('a name miss falls back to a default naming a real member'):
             for cls in classes:
@@ -1679,7 +1680,7 @@ class MHUnitTests(unittest.TestCase):
                     member = next(iter(cls))
                     self.assertIs(cls.get(9999, member), member)
 
-        with self.subTest('a default naming no registered member still raises, not TypeError'):
+        with self.subTest('a default naming no registered member raises, not TypeError'):
             # The issue's own repro: a default that does not itself resolve
             # does not silently swallow the miss -- it falls through to the
             # same EnumKeyError ``key`` alone raises, uniformly on every class
@@ -1690,7 +1691,7 @@ class MHUnitTests(unittest.TestCase):
                         cls.get('bogus', 'also-bogus')
                     self.assertIn('bogus', str(caught.exception))
 
-        with self.subTest('an unusable default on an int value miss still raises EnumValueError'):
+        with self.subTest('an unusable default on an int value miss raises EnumValueError'):
             for cls in classes:
                 with self.subTest(cls=cls.__name__):
                     with self.assertRaises(EnumValueError):
@@ -1748,7 +1749,7 @@ class MHUnitTests(unittest.TestCase):
                 with self.assertRaises(EnumKeyError):
                     enum_cls.get('NOT_A_REAL_MEMBER')
 
-        with self.subTest('the shared -1 aliasing defect is gone'):
+        with self.subTest('no name miss mints a member at the shared -1'):
             # This guards against ``get('bogus_one')`` minting a member at the
             # shared sentinel -1, and ``get('bogus_two')`` then resolving to
             # that same member -- a name that lies about itself. Both calls
@@ -1952,7 +1953,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(bytes(pad1), b'\x00')
         self.assertEqual(stream.tell(), 1)
 
-        # a PadN option still spans its length octet plus that many data octets
+        # a PadN option spans its length octet plus that many data octets
         stream = io.BytesIO(b'\x01\x02\xaa\xbb\xcc')
         padn = schema.PadOption.unpack(stream, 5, {})
         self.assertEqual(padn.type, Option.PadN)
@@ -2065,7 +2066,7 @@ class MHUnitTests(unittest.TestCase):
                     self.assertIs(proto._pad_mh_message(body), body)
                 warned.assert_not_called()
 
-        # and the whole header still comes out 8-octet aligned when it can be padded
+        # and the whole header comes out 8-octet aligned when it can be padded
         raw = bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
                        chksum=b'\x00\x00', data={'options': []}))
         self.assertEqual(len(raw) % 8, 0)
@@ -2360,7 +2361,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(
                     MH._mh_extension_length(stored) - MH._mh_option_length(stored), 2)
 
-        # a real mobility option still round-trips through the 2-octet helper
+        # a real mobility option round-trips through the 2-octet helper
         from pcapkit.protocols.schema.internet import mh as schema
         option = schema.BindingRefreshAdviceOption.unpack(bytes.fromhex('02020064'))
         self.assertEqual(MH._mh_option_length(option.length), 4)
@@ -2882,7 +2883,7 @@ class MHUnitTests(unittest.TestCase):
                     self.assertIn(f'int({value!r})', str(context.exception))
 
         # the escape hatch the message points at: int(True) is 1, which is a
-        # legitimate -- if unusual -- IPv4 address, and still sizes as one
+        # legitimate -- if unusual -- IPv4 address, and sizes as one
         schema = proto._make_opt_lmaa(  # type: ignore[arg-type]
             Option.Local_Mobility_Anchor_Address_Option, address=int(True))
         self.assertEqual(schema.length, 6)
@@ -2897,15 +2898,15 @@ class MHUnitTests(unittest.TestCase):
         self.assertIn('does not appear to be an IPv4 or IPv6 address',
                       str(context.exception))
 
-    def test_mh_bool_is_still_a_valid_value_for_a_code_field(self) -> None:
-        """#508 must not spread to a code field, where a :obj:`bool` means 0/1.
+    def test_mh_bool_is_refused_for_a_code_field_wider_than_one_bit(self) -> None:
+        """A :obj:`bool` is refused for a code field as for a number field.
 
-        ``BindingRevocationMessage.code`` is a
+        A number field wider than one bit, such as ``NonceIndicesOption.home``,
+        refuses a :obj:`bool` through ``Protocol._make_uint`` (#2614). A code
+        field does too, through ``Protocol._make_index``, rather than packing
+        ``True`` as ``1``: ``BindingRevocationMessage.code`` is a
         :class:`~pcapkit.corekit.fields.misc.SwitchField` whose branches are
-        EnumFields, so ``code=True`` packs as ``1``, and the guard for #508 is not
-        a blanket rejection there. A number field wider than one bit, such as
-        ``NonceIndicesOption.home``, refuses a :obj:`bool` through
-        ``Protocol._make_uint`` instead (#2614).
+        one-octet EnumFields (#2594, #2617).
         """
         from pcapkit.const.mh.binding_revocation import BindingRevocation
         from pcapkit.const.mh.option import Option
@@ -2922,17 +2923,15 @@ class MHUnitTests(unittest.TestCase):
             bytes.fromhex('040400010000'))
 
         # a code field, through a SwitchField whose branches are EnumFields
+        for br_type in (BindingRevocation.Binding_Revocation_Indication,
+                        BindingRevocation.Binding_Revocation_Acknowledgement):
+            for flag in (True, False):
+                with self.subTest(br_type=br_type, code=flag), self.assertRaises(ProtocolError):
+                    proto._make_msg_brm(br_type=br_type, code=flag, seq=1)  # type: ignore[arg-type]
         self.assertEqual(
             proto._make_msg_brm(  # type: ignore[arg-type]
                 br_type=BindingRevocation.Binding_Revocation_Indication,
-                code=True, seq=1).pack(),
-            proto._make_msg_brm(  # type: ignore[arg-type]
-                br_type=BindingRevocation.Binding_Revocation_Indication,
-                code=1, seq=1).pack())
-        self.assertEqual(
-            proto._make_msg_brm(  # type: ignore[arg-type]
-                br_type=BindingRevocation.Binding_Revocation_Indication,
-                code=True, seq=1).pack(),
+                code=1, seq=1).pack(),
             bytes.fromhex('010100010000'))
 
     def test_mh_dmnp_prefix_length_is_checked_against_its_field(self) -> None:
@@ -2988,7 +2987,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertIsInstance(context.exception, BaseError)
         self.assertIn('invalid binding priority: 128', str(context.exception))
 
-        # 0x7F is the largest value that fits, and it still takes an address
+        # 0x7F is the largest value that fits, and it takes an address
         schema = proto._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
                                      bid=1, bid_pri=0x7F, address='198.51.100.7')
         self.assertEqual(schema.flags['BID_PRI'], 0x7F)
@@ -3056,11 +3055,11 @@ class MHUnitTests(unittest.TestCase):
                 schema = proto._make_opt_lmaa(lmaa, address=address, code=code)  # type: ignore[arg-type]
                 self.assertEqual(schema.pack().hex(), octets)
             with self.subTest(address=address, code='explicit, matching, by name'):
-                # #2280: a str code name has to resolve against LMAAddressCode even
-                # when code_namespace is not given, as every sibling _make_opt_*
-                # does -- _make_index's str resolution needs an enum default.
+                # #2280: a code name resolves against LMAAddressCode, through
+                # resolve_index since the maker refuses a name (#2594).
                 name = 'IPv4_LMAA' if '.' in address else 'IPv6_LMAA'
-                schema = proto._make_opt_lmaa(lmaa, address=address, code=name)  # type: ignore[arg-type]
+                code = MH.resolve_index(name, namespace=LMAAddressCode)
+                schema = proto._make_opt_lmaa(lmaa, address=address, code=code)  # type: ignore[arg-type]
                 self.assertEqual(schema.pack().hex(), octets)
 
         for address, code in (('10.0.0.1', LMAAddressCode.IPv6_LMAA),
@@ -3075,13 +3074,14 @@ class MHUnitTests(unittest.TestCase):
 
         for address, name in (('10.0.0.1', 'IPv6_LMAA'), ('2001:db8::1', 'IPv4_LMAA')):
             with self.subTest(address=address, code=name):
+                code = MH.resolve_index(name, namespace=LMAAddressCode)
                 with self.assertRaises(ProtocolError) as context:
-                    proto._make_opt_lmaa(lmaa, address=address, code=name)  # type: ignore[arg-type]
+                    proto._make_opt_lmaa(lmaa, address=address, code=code)  # type: ignore[arg-type]
                 self.assertIsInstance(context.exception, BaseError)
                 self.assertIn('invalid code: code does not match address family:',
                               str(context.exception))
 
-        # a captured mismatch is data, not a request, so it still rebuilds as read
+        # a captured mismatch is data, not a request, so it rebuilds as read
         captured = bytes.fromhex('290601000a000001')
         data = proto._read_opt_lmaa(  # type: ignore[arg-type]
             LMAAddressOption.unpack(captured), options=None)
@@ -3244,7 +3244,7 @@ class MHUnitTests(unittest.TestCase):
 
         # ``NAI`` is the one subtype with no non-arbitrary int-to-wire mapping
         # -- its field is text (RFC 4283's ``user@realm``), not a number -- so
-        # an ``int`` is still rejected there, with a message naming the
+        # an ``int`` is rejected there, with a message naming the
         # decimal-string alternative, which is itself checked to actually work.
         with self.assertRaises(ProtocolError) as ctx:
             proto._make_opt_mn_id(  # type: ignore[arg-type]
@@ -3312,12 +3312,10 @@ class MHUnitTests(unittest.TestCase):
                     self.assertEqual(schema.length, 1 + id_len)
                     self.assertEqual(len(schema.pack()), schema.length + 2)
 
-        # 0, a negative value, and anything above 255 are all outside what
-        # ``MNIDSubtype._missing_`` extends. Naming the subtype in a rejection
-        # message must not let that enum round-trip's own bare ``ValueError``
-        # escape in its place. 0 fits the one-octet Subtype and falls back to
-        # the generic ``BytesField``; the rest do not fit it, and are refused
-        # rather than written wrapped (#2614).
+        # 0 fits the one-octet Subtype but no ``MNIDSubtype`` member holds it, so
+        # it is written as given and falls back to the generic ``BytesField``
+        # (#2594); a negative value and anything above 255 do not fit it, and
+        # are refused rather than written wrapped (#2614).
         schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
             Option.MN_ID_OPTION_TYPE, subtype=0, identifier=0x1234)
         self.assertEqual(schema.length, 3)
@@ -3476,7 +3474,7 @@ class MHUnitTests(unittest.TestCase):
                             identifier=identifier)
                     self.assertIn('must not be a bool', str(ctx.exception))
 
-        # ``int(flag)`` is the documented escape hatch and still converts.
+        # ``int(flag)`` is the documented escape hatch and converts.
         schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
             Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IMSI,
             identifier=int(True))

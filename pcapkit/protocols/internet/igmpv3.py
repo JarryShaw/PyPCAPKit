@@ -68,11 +68,9 @@ from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, Iterable, Optional, Type
+    from typing import Any, Iterable, Optional
 
-    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import ProtocolBase
@@ -309,10 +307,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         return self._decode_next_layer(igmp, None, len(trailing))
 
     def make(self,
-             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.IGMP_Membership_Query,  # pylint: disable=redefined-builtin
-             type_default: 'Optional[int]' = None,
-             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             type_reversed: 'bool' = False,
+             type: 'Enum_Type | int' = Enum_Type.IGMP_Membership_Query,  # pylint: disable=redefined-builtin
              max_resp_code: 'Optional[int]' = None,
              max_resp_time: 'int' = 0,
              checksum: 'Optional[bytes]' = None,
@@ -339,9 +334,6 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
 
         Args:
             type: Message type.
-            type_default: Default value of message type.
-            type_namespace: Namespace of message type.
-            type_reversed: If the namespace is reversed.
             max_resp_code: Max response code, as transmitted on the wire. When
                 not given, derived from ``max_resp_time`` via
                 :func:`_encode_resp_code`; only meaningful for a Query.
@@ -392,14 +384,15 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``max_resp_time`` is not an :obj:`int` from 0
-                to 255, ``num_group_records`` is not an :obj:`int` from the
-                length of ``records`` to 65535, or ``type`` is neither a Query
-                nor a Report.
+            ProtocolError: If ``type`` is a name, a :obj:`bool`, or a member
+                or code outside 0 to 255, or is neither a Query nor a Report;
+                if ``max_resp_time`` is not an :obj:`int` from 0 to 255; if
+                ``num_group_records`` is not an :obj:`int` from the length of
+                ``records`` to 65535; or if a record's ``record_type`` is
+                refused, see :meth:`_make_group_record`.
 
         """
-        type_value = self._make_index(type, type_default, namespace=type_namespace,
-                                      reversed=type_reversed, pack=False)
+        type_value = self._make_index(type, Enum_Type, bits=8, name='type')
         if isinstance(max_resp_time, bool) or not isinstance(max_resp_time, int) \
                 or not 0 <= max_resp_time <= 255:
             raise ProtocolError(f'{self.alias}: invalid max_resp_time: {max_resp_time!r}')
@@ -513,8 +506,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             'payload': cls._make_payload(data),
         }
 
-    @staticmethod
-    def _make_group_record(record: 'Optional[Data_GroupRecord]' = None, *,
+    def _make_group_record(self, record: 'Optional[Data_GroupRecord]' = None, *,
                            record_type: 'Enum_RecordType | int' = Enum_RecordType.MODE_IS_INCLUDE,
                            aux_data_len: 'Optional[int]' = None,
                            num_sources: 'Optional[int]' = None,
@@ -544,6 +536,10 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
         Returns:
             Group record schema.
 
+        Raises:
+            ProtocolError: If ``record_type`` is a name, a :obj:`bool`, or a
+                member or code outside 0 to 255.
+
         """
         if record is not None:
             return Schema_GroupRecord(
@@ -557,7 +553,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
 
         source_list = [] if sources is None else list(sources)
         return Schema_GroupRecord(
-            record_type=record_type,
+            record_type=self._make_index(record_type, Enum_RecordType, bits=8, name='record type'),
             aux_data_len=len(aux_data) // 4 if aux_data_len is None else aux_data_len,
             num_sources=len(source_list) if num_sources is None else num_sources,
             multicast_address=multicast_address,

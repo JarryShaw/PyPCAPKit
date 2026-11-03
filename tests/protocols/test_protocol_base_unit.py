@@ -224,15 +224,22 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         with self.assertRaises(StructError):
             DummyProtocol._make_pack(256, size=1)
 
-        self.assertEqual(DummyProtocol._make_index(Number.one), 1)
-        self.assertEqual(DummyProtocol._make_index(7), 7)
-        self.assertEqual(DummyProtocol._make_index('one', namespace=Number), 1)
-        self.assertEqual(DummyProtocol._make_index('tcp', namespace={6: 'tcp'}), 6)
-        self.assertEqual(DummyProtocol._make_index('tcp', namespace={'tcp': 6}, reversed=True), 6)
-        self.assertEqual(DummyProtocol._make_index('missing', default=99), 99)
-        self.assertEqual(DummyProtocol._make_index('one', namespace=Number, pack=True, size=1), b'\x01')
+        # #2594: _make_index resolves a member or a code and refuses a name,
+        # which resolve_index looks up from a namespace given explicitly
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.utilities.exceptions import ProtocolError
+        self.assertIs(proto._make_index(TransType.TCP, TransType, bits=8, name='protocol'), TransType.TCP)
+        self.assertIs(proto._make_index(6, TransType, bits=8, name='protocol'), TransType.TCP)
+        with self.assertRaises(ProtocolError):
+            proto._make_index('TCP', TransType, bits=8, name='protocol')
+        self.assertIs(DummyProtocol.resolve_index(Number.one, namespace=Number), Number.one)
+        self.assertEqual(DummyProtocol.resolve_index(7, namespace=Number), 7)
+        self.assertIs(DummyProtocol.resolve_index('one', namespace=Number), Number.one)
+        self.assertEqual(DummyProtocol.resolve_index('tcp', namespace={6: 'tcp'}), 6)
+        self.assertEqual(DummyProtocol.resolve_index('tcp', namespace={'tcp': 6}, reversed=True), 6)
+        self.assertEqual(DummyProtocol.resolve_index('missing', 99, namespace=Number), 99)
         with self.assertRaises(ProtocolNotImplemented):
-            DummyProtocol._make_index('missing')
+            DummyProtocol.resolve_index('missing', namespace=Number)
 
     def test_read_unpack_short_read_fails_for_every_size(self) -> None:
         # #2279: a size with no struct format code read a short buffer as a
@@ -521,8 +528,6 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             with self.subTest(integer=integer, **kwargs):
                 with self.assertRaises(StructError):
                     DummyProtocol._make_pack(integer, **kwargs)
-        with self.assertRaises(StructError):
-            DummyProtocol._make_index(2 ** 24, pack=True, size=3)
         self.assertEqual(DummyProtocol._make_pack(-2, size=3, signed=True), b'\xff\xff\xfe')
 
     def test_make_payload_branches(self) -> None:

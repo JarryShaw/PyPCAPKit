@@ -100,11 +100,9 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
 
-    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
@@ -227,6 +225,24 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
        * A PDM scale, given or derived from its delta, that does not fit its
          octet raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
          where it warned and was written wrapped (:issue:`2614`).
+       * Each enumeration field of :meth:`make` and of the option makers,
+         including the type of each option given to :meth:`make`, takes a
+         member or an :class:`int` code, resolved with the enumeration's
+         ``get``; a name, a :obj:`bool` for a field wider than one bit, or a
+         code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame,
+         writing a different value or raising another exception
+         (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``*_default``, ``*_namespace`` and ``*_reversed`` arguments that
+       went with each enumeration field of :meth:`make` and of the option
+       makers -- ``next``, ``alert``, ``mode``, ``tid_type``, ``func`` and
+       ``seed_type``; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
 
     """
 
@@ -365,20 +381,14 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         return self._decode_next_layer(ipv6_opts, schema.next, length - ipv6_opts.length)
 
     def make(self,
-             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
-             next_default: 'Optional[int]' = None,
-             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-             next_reversed: 'bool' = False,
-             options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             options: 'Optional[list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Opts':
         """Make (construct) packet data.
 
         Args:
             next: Next header type.
-            next_default: Default value of next header type.
-            next_namespace: Namespace of next header type.
-            next_reversed: If the namespace of next header type is reversed.
             options: Destination Options.
             payload: Payload of current protocol.
             **kwargs: Arbitrary keyword arguments.
@@ -387,12 +397,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If the options make a header too long for its
+            ProtocolError: If ``next``, or the type of an option, is a name, a
+                :obj:`bool`, or a member or code that does not fit in one
+                octet; or if the options make a header too long for its
                 one-octet ``Hdr Ext Len``.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,
-                                      reversed=next_reversed, pack=False)
+        next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
         # NOTE: No options is not the same as no options area. The header is at
         # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
@@ -407,7 +418,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         length = self._make_uint((total_length - 6) // 8, bits=8, name='Hdr Ext Len')
 
         return Schema_IPv6_Opts(
-            next=next_value,  # type: ignore[arg-type]
+            next=next_value,
             len=length,
             options=options_value,
             payload=payload,
@@ -609,7 +620,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             raise ProtocolError('IPv6-Opts: invalid format')
         return options
 
-    def _make_ipv6_opts(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
+    def _make_ipv6_opts(self, options: 'list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':  # pylint: disable=line-too-long
         """Make options for IPv6-Opts.
 
         Args:
@@ -653,7 +664,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                     opt = schema
                     opt_len = len(schema.pack())
                 else:
-                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Option, bits=8, name='option type')
                     if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
                         continue
 
@@ -686,7 +698,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         # included and in place, so that a parsed header rebuilds byte for
         # byte; only a header left short of alignment gets trailing padding.
         options_list = []
-        for code, option in options.items(multi=True):
+        for key, option in options.items(multi=True):
+            code = self._make_index(key, Enum_Option, bits=8, name='option type')
             name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
@@ -1606,10 +1619,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
 
     def _make_opt_ra(self, code: 'Enum_Option', opt: 'Optional[Data_RouterAlertOption]' = None, *,
-                     alert: 'Enum_RouterAlert | StdlibEnum | AenumEnum | str | int' = Enum_RouterAlert.Datagram_contains_a_Multicast_Listener_Discovery_message,  # pylint: disable=line-too-long
-                     alert_default: 'Optional[int]' = None,
-                     alert_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                     alert_reversed: 'bool' = False,
+                     alert: 'Enum_RouterAlert | int' = Enum_RouterAlert.Datagram_contains_a_Multicast_Listener_Discovery_message,  # pylint: disable=line-too-long
                      **kwargs: 'Any') -> 'Schema_RouterAlertOption':
         """Make IPv6-Opts router alert option.
 
@@ -1617,26 +1627,18 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             code: option type value
             opt: option data
             alert: router alert value
-            alert_default: default value of router alert
-            alert_namespace: namespace of router alert
-            alert_reversed: reversed flag of router alert
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the router alert value does not fit in two
-                octets.
+            ProtocolError: If the router alert value is a name, a :obj:`bool`,
+                or a member or code that does not fit in two octets.
 
         """
-        if opt is not None:
-            value = opt.value
-        else:
-            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
-                                     reversed=alert_reversed, pack=False)
-
-        self._make_uint(value, bits=16, name='router alert value')
+        value = self._make_index(opt.value if opt is not None else alert, Enum_RouterAlert,
+                                 bits=16, name='router alert value')
         return Schema_RouterAlertOption(
             type=code,
             len=2,
@@ -1725,14 +1727,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
 
     def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption]' = None, *,
-                          mode: 'Enum_SMFDPDMode | StdlibEnum | AenumEnum | str | int' = Enum_SMFDPDMode.I_DPD,
-                          mode_default: 'Optional[int]' = None,
-                          mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                          mode_reversed: 'bool' = False,
-                          tid_type: 'Optional[Enum_TaggerID | StdlibEnum | AenumEnum | str | int]' = None,
-                          tid_type_default: 'Optional[int]' = None,
-                          tid_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                          tid_type_reversed: 'bool' = False,
+                          mode: 'Enum_SMFDPDMode | int' = Enum_SMFDPDMode.I_DPD,
+                          tid_type: 'Optional[Enum_TaggerID | int]' = None,
                           tid: 'Optional[bytes | IPv4Address | IPv6Address]' = None,
                           id: 'bytes' = b'',
                           hav: 'bytes' = b'',
@@ -1743,14 +1739,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             code: option type value
             opt: option data
             mode: DPD mode
-            mode_default: default value of DPD mode
-            mode_namespace: namespace of DPD mode
-            mode_reversed: reversed flag of DPD mode
             tid_type: TaggerID type (``TidTy`` field); inferred from the
                 length of ``tid`` if not given
-            tid_type_default: default value of TaggerID type
-            tid_type_namespace: namespace of TaggerID type
-            tid_type_reversed: reversed flag of TaggerID type
             tid: Tagger ID
             id: identifier
             hav: hash assist value (HAV)
@@ -1760,10 +1750,12 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the DPD mode is invalid, the Tagger ID does
-                not fit the TaggerID type, the H-DPD Hash Assist Value is
-                empty, or the option data is too long for its one-octet
-                ``Opt Data Len``.
+            ProtocolError: If the DPD mode is a name, or a member or code
+                that does not fit in one bit; if the TaggerID type is a name,
+                a :obj:`bool`, or a member or code that does not fit in three
+                bits; if the Tagger ID does not fit the TaggerID type, the
+                H-DPD Hash Assist Value is empty, or the option data is too
+                long for its one-octet ``Opt Data Len``.
 
         """
         if opt is not None:
@@ -1773,8 +1765,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             id = getattr(opt, 'id', b'')
             hav = getattr(opt, 'hav', b'')
 
-        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,
-                                    reversed=mode_reversed, pack=False)
+        dpd_type = self._make_index(mode, Enum_SMFDPDMode, bits=1, name='DPD mode')
 
         if dpd_type == Enum_SMFDPDMode.I_DPD:
             if tid is None:
@@ -1788,13 +1779,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             tid_len = len(tid_bytes)
 
             if tid_type is not None:
-                # NOTE: ``tid_type`` defaults to :data:`None`, so ``_make_index`` has no
-                # enum default to infer the namespace of a :obj:`str` member name from;
-                # name it here rather than leave the name unresolvable (#2356).
-                tid_kind = self._make_index(
-                    tid_type, tid_type_default,
-                    namespace=tid_type_namespace if tid_type_namespace is not None else Enum_TaggerID,
-                    reversed=tid_type_reversed, pack=False)
+                tid_kind = self._make_index(tid_type, Enum_TaggerID, bits=3,
+                                            name='TaggerID type')  # type: Enum_TaggerID | int
             elif tid_len == 0:
                 tid_kind = Enum_TaggerID.NULL
             elif tid_len == 4:
@@ -1828,8 +1814,9 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 tid=tid_bytes if tid_len else None,
                 id=id,
             )  # type: Schema_SMFDPDOption
-        elif dpd_type == Enum_SMFDPDMode.H_DPD:
-            # The first octet of the HAV carries the H-DPD mode bit.
+        else:
+            # H-DPD, the other value of the one-bit mode. The first octet of
+            # the HAV carries the H-DPD mode bit.
             if not hav:
                 raise ProtocolError(f'{self.alias}: [OptNo {code}] empty Hash Assist Value (HAV)')
             hav_ba = bytearray(hav)
@@ -1840,8 +1827,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 len=self._make_uint(len(hav), bits=8, name='Opt Data Len'),
                 hav=bytes(hav_ba),
             )
-        else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid DPD type: {dpd_type}')
         return schema
 
     def _make_opt_pdm(self, code: 'Enum_Option', opt: 'Optional[Data_PDMOption]' = None, *,
@@ -1912,10 +1897,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
 
     def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption | Data_UnassignedOption]' = None, *,  # pylint: disable=line-too-long
-                     func: 'Enum_QSFunction | StdlibEnum | AenumEnum | str | int' = Enum_QSFunction.Quick_Start_Request,
-                     func_default: 'Optional[int]' = None,
-                     func_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,   # pylint: disable=line-too-long
-                     func_reversed: 'bool' = False,
+                     func: 'Enum_QSFunction | int' = Enum_QSFunction.Quick_Start_Request,
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
                      nonce: 'int' = 0,
@@ -1928,9 +1910,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             code: option type value
             opt: option data
             func: QS function type
-            func_default: default value for QS function type
-            func_namespace: namespace for QS function type
-            func_reversed: reversed flag for QS function type
             rate: rate (in kbps), rounded down to the nearest rate the
                 four-bit rate code carries (:rfc:`4782#section-3.1`)
             ttl: time to live (in seconds)
@@ -1946,9 +1925,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             the option data takes the layout of a Quick-Start Request.
 
         Raises:
-            ProtocolError: If ``func`` does not fit in four bits, the rate code
-                cannot carry ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does
-                not fit its field.
+            ProtocolError: If ``func`` is a name, a :obj:`bool`, or a member or
+                code that does not fit in four bits, the rate code cannot carry
+                ``rate``, or ``ttl``, ``nonce`` or ``reserved`` does not fit its
+                field.
 
         """
         if isinstance(opt, Data_UnassignedOption):
@@ -1961,8 +1941,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             reserved = getattr(opt, 'reserved', 0)
             unused = getattr(opt, 'unused', b'\x00')
         else:
-            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
-                                         reversed=func_reversed, pack=False)
+            func_enum = self._make_index(func, Enum_QSFunction, bits=4, name='QS function')
         rate_val = self._make_qs_rate(rate)
         ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
         nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
@@ -2062,10 +2041,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
 
     def _make_opt_mpl(self, code: 'Enum_Option', opt: 'Optional[Data_MPLOption]' = None, *,
-                      seed_type: 'Optional[Enum_SeedID | StdlibEnum | AenumEnum | str | int]' = None,
-                      seed_type_default: 'Optional[int]' = None,
-                      seed_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
-                      seed_type_reversed: 'bool' = False,
+                      seed_type: 'Optional[Enum_SeedID | int]' = None,
                       max: 'bool' = False,
                       drop: 'bool' = False,
                       reserved: 'int' = 0,
@@ -2078,9 +2054,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             code: option type value
             opt: option data
             seed_type: seed-id type (``S`` field); inferred from ``seed`` if not given
-            seed_type_default: default value of seed-id type
-            seed_type_namespace: namespace of seed-id type
-            seed_type_reversed: reversed flag of seed-id type
             max: maximum sequence number flag
             drop: drop packet flag
             reserved: reserved bits (``rsv``), i.e. the low four bits of the
@@ -2095,8 +2068,10 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If the seed ID is missing or does not fit the seed-id
-                type, or ``reserved`` or ``seq`` does not fit its field.
+            ProtocolError: If the seed-id type is a name, a :obj:`bool`, or a
+                member or code that does not fit in two bits; if the seed ID is
+                missing or does not fit the seed-id type, or ``reserved`` or
+                ``seq`` does not fit its field.
 
         """
         if opt is not None:
@@ -2111,13 +2086,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         seq = self._make_uint(seq, bits=8, name='MPL sequence number')
 
         if seed_type is not None:
-            # NOTE: ``seed_type`` defaults to :data:`None`, so ``_make_index`` has no
-            # enum default to infer the namespace of a :obj:`str` member name from;
-            # name it here rather than leave the name unresolvable (#2356).
-            kind = self._make_index(
-                seed_type, seed_type_default,
-                namespace=seed_type_namespace if seed_type_namespace is not None else Enum_SeedID,
-                reversed=seed_type_reversed, pack=False)
+            kind = self._make_index(seed_type, Enum_SeedID, bits=2,
+                                    name='MPL seed-id type')  # type: Enum_SeedID | int
         elif seed is None or isinstance(seed, ipaddress.IPv6Address):
             kind = Enum_SeedID.IPV6_SOURCE_ADDRESS
         else:
@@ -2138,10 +2108,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 clen = 4
             elif kind == Enum_SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER:
                 clen = 10
-            elif kind == Enum_SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER:
+            else:  # the 128-bit seed, the last value of the two-bit type
                 clen = 18
-            else:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid MPL seed-id type: {kind}')
 
             if seed is None:
                 raise ProtocolError(f'{self.alias}: [OptNo {code}] missing MPL seed ID for type {kind}')
