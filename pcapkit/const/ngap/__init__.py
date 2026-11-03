@@ -30,7 +30,7 @@ issue :issue:`880` for the ruling.
 
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     from pcapkit.const.ngap.procedure_code import ProcedureCode as NGAP_ProcedureCode

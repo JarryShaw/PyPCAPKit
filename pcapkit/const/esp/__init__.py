@@ -35,7 +35,7 @@ separate question, answered by
 
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     from pcapkit.const.esp.cipher import Cipher as ESP_Cipher

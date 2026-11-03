@@ -10,7 +10,7 @@ from a :pep:`562` ``__getattr__`` and from
 :attr:`AppType.__registries__ <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`
 the first time either is read. GitHub issue #2729 extended that to SCTP and
 DCCP, and to every package under :mod:`pcapkit.const`, through
-:func:`pcapkit.utilities.lazy.lazy_exports`; #2726 made the registries an
+:func:`pcapkit.utilities.importlib.lazy_exports`; #2726 made the registries an
 :class:`~pcapkit.corekit.infoclass.Info` rather than a :obj:`dict` subclass.
 
 The subprocess checks run in a fresh interpreter, since the question is what a

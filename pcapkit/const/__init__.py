@@ -8,14 +8,14 @@ automatically generated from the :mod:`pcapkit.vendor` module.
 
 Each enumeration is imported the first time it is reached -- as an attribute
 of this package or of the subpackage holding it -- rather than with the
-package, through :func:`~pcapkit.utilities.lazy.lazy_exports`
+package, through :func:`~pcapkit.utilities.importlib.lazy_exports`
 (:issue:`2729`). The subpackages themselves are imported with it, and import
 none of their enumerations.
 
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     # IANA registration

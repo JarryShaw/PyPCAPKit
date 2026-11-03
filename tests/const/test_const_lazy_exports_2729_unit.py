@@ -2,7 +2,7 @@
 """Every :mod:`pcapkit.const` package exports what it did eagerly (GitHub issue #2729).
 
 Each package under :mod:`pcapkit.const` imports its enumerations on first use,
-through :func:`pcapkit.utilities.lazy.lazy_exports`, and names them only under
+through :func:`pcapkit.utilities.importlib.lazy_exports`, and names them only under
 :data:`~typing.TYPE_CHECKING`, for the type checkers. These sweeps read the
 packages off the tree, so a package the crawlers add is held to them the day it
 lands, and hold every one to the eager behaviour that statement describes:

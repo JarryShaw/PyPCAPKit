@@ -27,7 +27,7 @@ Available enumerations include:
 
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.lazy import lazy_exports
+from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
     from pcapkit.const.ieee802_11.control_subtype import ControlSubtype as IEEE802_11_ControlSubtype
