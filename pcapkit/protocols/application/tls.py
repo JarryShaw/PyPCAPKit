@@ -90,7 +90,7 @@ if TYPE_CHECKING:
 
 __all__ = ['TLS']
 
-#: Length of the record header: content type, legacy version and length
+#: Length of the record header -- content type, legacy version and length
 #: (:rfc:`9846#section-5.1`).
 _RECORD_HEADER_LENGTH = 5
 
@@ -106,7 +106,7 @@ _TLS_VERSION_ALIASES = {
     0x0303: 'TLS 1.2',
 }  # type: dict[int, Literal["SSLv3", "TLS 1.0", "TLS 1.1", "TLS 1.2"]]
 
-#: Legacy record versions a TLS 1.3 record may carry: ``0x0303`` always, and
+#: Legacy record versions a TLS 1.3 record may carry -- ``0x0303`` always, and
 #: ``0x0301`` on an initial ``ClientHello`` (:rfc:`9846#section-5.1`).
 _TLS13_LEGACY_VERSIONS = frozenset({0x0301, 0x0303})
 

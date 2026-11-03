@@ -27,7 +27,7 @@ class Raw(Protocol):
 
     #: Original enumeration of this protocol.
     protocol: 'Optional[int]'
-    #: Message saying why the packet data is kept raw, if any: that of the error its
+    #: Message saying why the packet data is kept raw, if any -- that of the error its
     #: parse raised, or the dissection limit it is past.
     error: 'Optional[str]'
 

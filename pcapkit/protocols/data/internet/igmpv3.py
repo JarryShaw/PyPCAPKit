@@ -30,7 +30,7 @@ class IGMPv3(Protocol):
 
     """
 
-    #: Version of IGMP, always ``3``. It is on no octet: it names the class
+    #: Version of IGMP, always ``3``. It is on no octet; it names the class
     #: that read or built the message, as on the IGMPv1/v2 data model, and
     #: :meth:`IGMP.from_data <pcapkit.protocols.internet.igmp.IGMP.from_data>`
     #: dispatches on it (:issue:`2574`).
@@ -71,7 +71,7 @@ class Query(IGMPv3):
     max_resp_time: 'int'
     #: Checksum.
     checksum: 'bytes'
-    #: Group address: the IPv4 multicast group being queried, or ``0.0.0.0``
+    #: Group address -- the IPv4 multicast group being queried, or ``0.0.0.0``
     #: on a General Query.
     group: 'IPv4Address'
     #: Resv, the 4 reserved high-order bits of the flags octet

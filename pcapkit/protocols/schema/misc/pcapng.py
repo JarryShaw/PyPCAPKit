@@ -1503,7 +1503,7 @@ class IF_SpeedOption(_IF_Option, code=Enum_OptionType.if_speed):
 class IF_TSResolOption(_IF_Option, code=Enum_OptionType.if_tsresol):
     """Header schema for PCAP-NG file ``if_tsresol`` options."""
 
-    #: Interface timestamp resolution, as the option encodes it: the base flag
+    #: Interface timestamp resolution, as the option encodes it -- the base flag
     #: and the exponent, from which :attr:`resolution` is computed.
     tsresol: 'ResolutionData' = BitField(length=1, namespace={
         'flag': (0, 1),

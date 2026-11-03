@@ -71,7 +71,7 @@ class DTLSCiphertext(Schema):
 
     """
 
-    #: Unified-header first octet: fixed prefix, ``C``, ``S``, ``L`` and ``EE``.
+    #: Unified-header first octet -- fixed prefix, ``C``, ``S``, ``L`` and ``EE``.
     flags: 'dict[str, int]' = BitField(length=1, namespace={
         'fixed': (0, 3),
         'connection_id': (3, 1),

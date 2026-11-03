@@ -33,7 +33,7 @@ class GRE(Protocol):
     reserved: 'int'
     #: Version Number; :rfc:`2784` requires this to be ``0``.
     version: 'int'
-    #: Protocol Type: the EtherType of the encapsulated payload.
+    #: Protocol Type -- the EtherType of the encapsulated payload.
     protocol_type: 'EtherType'
     #: Checksum, present only when :attr:`checksum_present` is set.
     checksum: 'Optional[int]'

@@ -355,7 +355,7 @@ class QuickStartResponse(Option):
 
     """
 
-    #: Rate request, in kbps: ``40 * 2 ** N`` for the Rate Request field
+    #: Rate request, in kbps -- ``40 * 2 ** N`` for the Rate Request field
     #: ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782` Section 3.1).
     req_rate: 'int'
     #: TTL difference.

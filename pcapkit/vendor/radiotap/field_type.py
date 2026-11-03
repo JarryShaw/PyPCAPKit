@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 __all__ = ['FieldType']
 
-#: Link to radiotap.org's *Unofficially Used Fields* table: the bit number,
+#: Link to radiotap.org's *Unofficially Used Fields* table -- the bit number,
 #: the field, the systems that generate it and those that parse it.
 UNOFFICIAL_LINK = 'https://www.radiotap.org/fields/unofficial'
 

@@ -53,7 +53,7 @@ class Extension(Data):
 
     #: Extension type.
     type: 'Enum_ExtensionType'
-    #: Extension data: decoded, or the raw octets.
+    #: Extension data -- decoded, or the raw octets.
     data: 'Union[ExtensionData, bytes]'
 
     if TYPE_CHECKING:

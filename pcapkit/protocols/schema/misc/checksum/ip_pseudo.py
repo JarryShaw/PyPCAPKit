@@ -20,13 +20,13 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
 
-#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1`: source, destination,
+#: Length of the IPv4 pseudo-header, :rfc:`793#section-3.1` -- source, destination,
 #: zero, protocol and length.
 #:
 #: .. versionadded:: 1.6.0
 IPV4_PSEUDO_LEN = 2 * (ipaddress.IPV4LENGTH // 8) + 1 + 1 + 2
 
-#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1`: source, destination,
+#: Length of the IPv6 pseudo-header, :rfc:`8200#section-8.1` -- source, destination,
 #: length, zero and next header.
 #:
 #: .. versionadded:: 1.6.0

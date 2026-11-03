@@ -836,7 +836,7 @@ class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
 
     __ne__ = _ne
 
-    #: Names of the keys the dumpers leave out: the :attr:`Info.__excluded__`
+    #: Names of the keys the dumpers leave out -- the :attr:`Info.__excluded__`
     #: of the info exported, less the fields it renamed for clashing with a
     #: builtin name (:issue:`2733`), kept by copies, deep copies and pickles;
     #: none for an export of a multi-mapping (:issue:`2003`).

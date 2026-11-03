@@ -40,7 +40,7 @@ class IGMPv2(IGMPBase[Data_IGMP, Schema_IGMP],
 
     @property
     def version(self) -> 'Literal[2]':
-        """IGMP version this class reads: ``2``."""
+        """IGMP version this class reads, ``2``."""
         return 2
 
     @property
