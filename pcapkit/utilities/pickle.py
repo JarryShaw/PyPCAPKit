@@ -54,7 +54,7 @@ class ReduceAsProtocol2:
 
     It goes before :class:`~typing.Generic` among the bases, as on
     :class:`~pcapkit.corekit.infoclass.Info`,
-    :class:`~pcapkit.protocols.schema.schema.Schema`,
+    :class:`~pcapkit.protocols.schema.Schema`,
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and
     :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
 

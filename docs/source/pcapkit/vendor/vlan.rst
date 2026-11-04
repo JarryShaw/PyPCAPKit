@@ -1,11 +1,11 @@
-================================================================
-:class:`~pcapkit.protocols.link.vlan.VLAN` Vendor Crawlers
-================================================================
+=========================================================================
+:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` Vendor Crawlers
+=========================================================================
 
 .. module:: pcapkit.vendor.vlan
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.vlan.VLAN` implementations. Available
+:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` implementations. Available
 vendor crawlers include:
 
 .. list-table::

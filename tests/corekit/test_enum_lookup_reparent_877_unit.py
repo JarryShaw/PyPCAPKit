@@ -12,15 +12,15 @@ from the base -- :class:`TransportProtocol
 <pcapkit.const.reg.apptype.apptype.TransportProtocol>`,
 :class:`FinalisedState <pcapkit.corekit.infoclass.FinalisedState>`,
 :class:`Completion <pcapkit.foundation.reassembly.data.data.Completion>`,
-:class:`ftp.Type <pcapkit.protocols.application.ftp.Type>`,
-:class:`httpv1.Type <pcapkit.protocols.application.httpv1.Type>`,
-:class:`Criticality <pcapkit.protocols.application.ngap.Criticality>`,
-:class:`PDUKind <pcapkit.protocols.application.ngap.PDUKind>`,
-:class:`PacketDirection <pcapkit.protocols.misc.pcapng.PacketDirection>`,
-:class:`PacketReception <pcapkit.protocols.misc.pcapng.PacketReception>`,
-:class:`WireGuardKeyLabel <pcapkit.protocols.misc.pcapng.WireGuardKeyLabel>`,
+:class:`ftp.Type <pcapkit.protocols.application.ftp.protocol.Type>`,
+:class:`httpv1.Type <pcapkit.protocols.application.httpv1.protocol.Type>`,
+:class:`Criticality <pcapkit.protocols.application.ngap.protocol.Criticality>`,
+:class:`PDUKind <pcapkit.protocols.application.ngap.protocol.PDUKind>`,
+:class:`PacketDirection <pcapkit.protocols.misc.pcapng.protocol.PacketDirection>`,
+:class:`PacketReception <pcapkit.protocols.misc.pcapng.protocol.PacketReception>`,
+:class:`WireGuardKeyLabel <pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel>`,
 and :class:`FrameType.Flags
-<pcapkit.protocols.schema.application.httpv2.FrameType.Flags>` plus its
+<pcapkit.protocols.application.httpv2.schema.FrameType.Flags>` plus its
 concrete per-frame subclasses.
 
 :class:`TransportProtocol` defines its own ``get``, as a :class:`classmethod`
@@ -99,7 +99,7 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_ftp_type(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.application.ftp import Type as FTPType
+        from pcapkit.protocols.application.ftp.protocol import Type as FTPType
         from pcapkit.utilities.compat import StrEnum
 
         self.assertEqual(FTPType.__bases__, (EnumLookup, StrEnum))
@@ -107,7 +107,7 @@ class ReparentedBasesTests(unittest.TestCase):
 
     def test_httpv1_type(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.application.httpv1 import Type as HTTPv1Type
+        from pcapkit.protocols.application.httpv1.protocol import Type as HTTPv1Type
         from pcapkit.utilities.compat import StrEnum
 
         self.assertEqual(HTTPv1Type.__bases__, (EnumLookup, StrEnum))
@@ -117,14 +117,14 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertEqual(Criticality.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, Criticality.__mro__)
 
     def test_pdu_kind(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.application.ngap import PDUKind
+        from pcapkit.protocols.application.ngap.protocol import PDUKind
         from pcapkit.utilities.compat import StrEnum
 
         self.assertEqual(PDUKind.__bases__, (EnumLookup, StrEnum))
@@ -134,7 +134,7 @@ class ReparentedBasesTests(unittest.TestCase):
         import enum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.misc.pcapng import PacketDirection
+        from pcapkit.protocols.misc.pcapng.protocol import PacketDirection
 
         self.assertEqual(PacketDirection.__bases__, (EnumLookup, enum.IntEnum))
         self.assertIn(EnumLookup, PacketDirection.__mro__)
@@ -143,14 +143,14 @@ class ReparentedBasesTests(unittest.TestCase):
         import enum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.misc.pcapng import PacketReception
+        from pcapkit.protocols.misc.pcapng.protocol import PacketReception
 
         self.assertEqual(PacketReception.__bases__, (EnumLookup, enum.IntEnum))
         self.assertIn(EnumLookup, PacketReception.__mro__)
 
     def test_wireguard_key_label(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.protocol import WireGuardKeyLabel
         from pcapkit.utilities.compat import StrEnum
 
         self.assertEqual(WireGuardKeyLabel.__bases__, (EnumLookup, StrEnum))
@@ -162,8 +162,8 @@ class HttpV2FlagsHierarchyTests(unittest.TestCase):
     hierarchy, re-parented at the root only.
 
     Each concrete subclass declares ``class Flags(FrameType.Flags):`` with no
-    base list of its own (see :mod:`pcapkit.protocols.schema.application.
-    httpv2`), so the root's base carries to every subclass without each being
+    base list of its own (see
+    :mod:`pcapkit.protocols.application.httpv2.schema`), so the root's base carries to every subclass without each being
     re-parented individually. Verified here at runtime rather than assumed
     from Python's MRO rules.
     """
@@ -172,14 +172,14 @@ class HttpV2FlagsHierarchyTests(unittest.TestCase):
         import enum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.schema.application.httpv2 import FrameType
+        from pcapkit.protocols.application.httpv2.schema import FrameType
 
         self.assertEqual(FrameType.Flags.__bases__, (EnumLookup, enum.IntFlag))
         self.assertIn(EnumLookup, FrameType.Flags.__mro__)
 
     def test_every_concrete_subclass_carries_it_transitively(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.schema.application.httpv2 import (ContinuationFrame, DataFrame,
+        from pcapkit.protocols.application.httpv2.schema import (ContinuationFrame, DataFrame,
                                                                    FrameType, HeadersFrame,
                                                                    PingFrame, PushPromiseFrame,
                                                                    SettingsFrame)
@@ -221,35 +221,35 @@ class PureReparentGetTests(unittest.TestCase):
         self.assertIs(Completion.get('timeout'), Completion.TIMEOUT)
 
     def test_ftp_type_get(self) -> None:
-        from pcapkit.protocols.application.ftp import Type as FTPType
+        from pcapkit.protocols.application.ftp.protocol import Type as FTPType
 
         self.assertIs(FTPType.get('request'), FTPType.REQUEST)
         self.assertIs(FTPType.get('response'), FTPType.RESPONSE)
 
     def test_httpv1_type_get(self) -> None:
-        from pcapkit.protocols.application.httpv1 import Type as HTTPv1Type
+        from pcapkit.protocols.application.httpv1.protocol import Type as HTTPv1Type
 
         self.assertIs(HTTPv1Type.get('request'), HTTPv1Type.REQUEST)
         self.assertIs(HTTPv1Type.get('response'), HTTPv1Type.RESPONSE)
 
     def test_pdu_kind_get(self) -> None:
-        from pcapkit.protocols.application.ngap import PDUKind
+        from pcapkit.protocols.application.ngap.protocol import PDUKind
 
         self.assertIs(PDUKind.get('initiatingMessage'), PDUKind.INITIATING_MESSAGE)
 
     def test_packet_direction_get(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PacketDirection
+        from pcapkit.protocols.misc.pcapng.protocol import PacketDirection
 
         self.assertIs(PacketDirection.get('INBOUND'), PacketDirection.INBOUND)
         self.assertIs(PacketDirection.get(0b10), PacketDirection.OUTBOUND)
 
     def test_packet_reception_get(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PacketReception
+        from pcapkit.protocols.misc.pcapng.protocol import PacketReception
 
         self.assertIs(PacketReception.get('PROMISCUOUS'), PacketReception.PROMISCUOUS)
 
     def test_wireguard_key_label_get(self) -> None:
-        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.protocol import WireGuardKeyLabel
 
         self.assertIs(WireGuardKeyLabel.get('PRESHARED_KEY'), WireGuardKeyLabel.PRESHARED_KEY)
 
@@ -331,7 +331,7 @@ class TransportProtocolGetTests(unittest.TestCase):
 
 
 class CriticalityGetTests(unittest.TestCase):
-    """:class:`~pcapkit.protocols.application.ngap.Criticality` has no ``get``
+    """:class:`~pcapkit.protocols.application.ngap.protocol.Criticality` has no ``get``
     of its own (GitHub issue #923): an override would only convert the base's
     name-miss :exc:`KeyError` into a :exc:`ValueError`, a conversion #923's
     ruling retired. Every behaviour below is therefore the *inherited*
@@ -345,7 +345,7 @@ class CriticalityGetTests(unittest.TestCase):
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` itself, which is what
         the rest of this class exercises."""
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertNotIn('get', Criticality.__dict__)
         self.assertIsInstance(inspect.getattr_static(Criticality, 'get'), classmethod)
@@ -353,14 +353,14 @@ class CriticalityGetTests(unittest.TestCase):
                       inspect.getattr_static(EnumLookup, 'get'))
 
     def test_name_lookup(self) -> None:
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get('reject'), Criticality.reject)
         self.assertIs(Criticality.get('ignore'), Criticality.ignore)
         self.assertIs(Criticality.get('notify'), Criticality.notify)
 
     def test_value_lookup(self) -> None:
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get(2), Criticality.notify)
 
@@ -369,7 +369,7 @@ class CriticalityGetTests(unittest.TestCase):
         needed: the base's own ``cls(key)`` call covers it -- a ``Criticality``
         is also an :class:`int` (it is an :class:`~aenum.IntEnum`), so the
         non-``str`` path hands back the identical canonical member."""
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get(Criticality.reject), Criticality.reject)
 
@@ -377,7 +377,7 @@ class CriticalityGetTests(unittest.TestCase):
         """Deliberately the opposite of ``TransportProtocol.get`` -- nothing
         here lower-cases, so an upper-cased spelling must be refused rather
         than folded. :exc:`KeyError`-shaped, per GitHub issue #923."""
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         with self.assertRaises(KeyError) as caught:
             Criticality.get('REJECT')
@@ -395,7 +395,7 @@ class CriticalityGetTests(unittest.TestCase):
         :mod:`pcapkit.utilities.exceptions`."""
         from pcapkit.utilities.exceptions import EnumKeyError
 
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         with self.assertRaises(EnumKeyError) as caught:
             Criticality.get('NoSuchMember')
@@ -410,7 +410,7 @@ class CriticalityGetTests(unittest.TestCase):
         issue #923's "no builtin exceptions" half."""
         from pcapkit.utilities.exceptions import EnumValueError
 
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         with self.assertRaises(EnumValueError) as caught:
             Criticality.get(3)
@@ -423,7 +423,7 @@ class CriticalityGetTests(unittest.TestCase):
         ``default`` verbatim, so the base has to answer identically: a
         member-valued default
         resolves, and one naming no registered value is not honoured."""
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get('NoSuchMember', default=Criticality.ignore),
                       Criticality.ignore)
@@ -476,7 +476,7 @@ class NoMintingTests(unittest.TestCase):
 
     def test_criticality_does_not_grow(self) -> None:
         before_names, before_values, after_names, after_values = self._sizes_before_and_after(
-            'from pcapkit.protocols.application.ngap import Criticality',
+            'from pcapkit.protocols.application.ngap.protocol import Criticality',
             'Criticality',
             "cls.get('reject')",
         )

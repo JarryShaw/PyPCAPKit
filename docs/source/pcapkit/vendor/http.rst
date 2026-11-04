@@ -1,12 +1,12 @@
-================================================================
-:class:`~pcapkit.protocols.application.http.HTTP` Vendor Crawler
-================================================================
+=========================================================================
+:class:`~pcapkit.protocols.application.http.protocol.HTTP` Vendor Crawler
+=========================================================================
 
 .. module:: pcapkit.vendor.http
 
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.http.HTTP` implementations. Available
+:class:`~pcapkit.protocols.application.http.protocol.HTTP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

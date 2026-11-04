@@ -6,7 +6,7 @@ GitHub issue #566.
 The construction path
 ---------------------
 
-:class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base class every Multipath TCP
+:class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`, the base class every Multipath TCP
 subtype schema inherits, declares ``subtype`` only under :data:`~typing.TYPE_CHECKING`:
 
 .. code-block:: python
@@ -16,15 +16,15 @@ subtype schema inherits, declares ``subtype`` only under :data:`~typing.TYPE_CHE
         subtype: 'Enum_MPTCPOption'
 
 so it is an annotation for a type checker, not a field any schema packs.
-:meth:`_MPTCP.post_process <pcapkit.protocols.schema.transport.tcp._MPTCP.post_process>`
+:meth:`_MPTCP.post_process <pcapkit.protocols.transport.tcp.schema._MPTCP.post_process>`
 assigns ``schema.subtype`` once per option while parsing real bytes off the wire. Building
-an option through :class:`~pcapkit.protocols.transport.tcp.TCP`'s convenience constructor --
+an option through :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`'s convenience constructor --
 ``TCP(options=[(Enum_Option.Multipath_TCP, {'subtype': ..., **kwargs})], ...)`` -- never
 unpacks anything: the dispatcher (``TCP._make_mode_mp``) calls the matching ``_make_mptcp_*``
 maker to build the schema in memory and then hands that same schema straight to the matching
-``_read_mptcp_*`` to build the :class:`~pcapkit.protocols.data.transport.tcp.MPTCP` data
+``_read_mptcp_*`` to build the :class:`~pcapkit.protocols.transport.tcp.data.MPTCP` data
 model -- and every ``_read_mptcp_*`` method reads ``schema.subtype``. So
-:meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.TCP._make_mode_mp>`, the single
+:meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp>`, the single
 dispatcher every ``_make_mptcp_*`` maker returns through, sets ``schema.subtype =
 subtype_val`` right after building the schema -- the same assignment
 :meth:`_MPTCP.post_process` makes for a real unpack, made unconditionally. Without it,
@@ -54,7 +54,7 @@ That leaves no other ``TYPE_CHECKING``-only *data* attribute on ``MPTCP`` itself
 body has ``kind`` and ``length`` (real fields) and ``subtype`` (set by the construction
 path). The ``if TYPE_CHECKING: def __init__(...): ...`` blocks inside the concrete subclasses
 below it are ordinary typed-signature stubs for the ``__init__`` that
-:class:`~pcapkit.protocols.schema.schema.Schema` synthesises at runtime, not latent fields, so
+:class:`~pcapkit.protocols.schema.Schema` synthesises at runtime, not latent fields, so
 they are not instances of this pattern.
 
 Coverage
@@ -109,10 +109,10 @@ def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]
             arguments.
 
     Returns:
-        The constructed :class:`~pcapkit.protocols.transport.tcp.TCP` protocol instance.
+        The constructed :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` protocol instance.
 
     Note:
-        ``pcapkit.protocols.transport.tcp`` and ``pcapkit.const.tcp.option`` are imported
+        ``pcapkit.protocols.transport.tcp.protocol`` and ``pcapkit.const.tcp.option`` are imported
         here, inside the function, rather than at module level. Several test modules
         elsewhere in this suite (see e.g.
         :func:`tests._support.purge_modules`) pop ``pcapkit``'s submodules out of
@@ -120,7 +120,7 @@ def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]
         ``Schema`` class object -- so a name bound at collection time (module level) can
         end up pointing at a schema class built from a stale ``Schema`` base, while
         :meth:`~pcapkit.corekit.fields.collections.OptionField.pack`'s own delayed
-        ``from pcapkit.protocols.schema.schema import Schema`` resolves fresh against
+        ``from pcapkit.protocols.schema import Schema`` resolves fresh against
         whatever is current when it actually runs. The two then fail
         ``isinstance(item, Schema)`` against each other despite both being named
         ``Schema``. Importing here instead, at call time, keeps this function on
@@ -130,7 +130,7 @@ def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]
 
     """
     from pcapkit.const.tcp.option import Option as Enum_Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     args = dict(kwargs)
     args['subtype'] = subtype
@@ -144,7 +144,7 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
 
     Without the construction path setting ``subtype``, every one of these raises
     ``AttributeError: '<schema class>' object has no attribute 'subtype'`` -- construction
-    never gets as far as returning a :class:`~pcapkit.protocols.transport.tcp.TCP` instance
+    never gets as far as returning a :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` instance
     at all, leaving no data model to assert on.
 
     """

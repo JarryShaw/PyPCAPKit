@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.arp.ARP` Vendor Crawlers
-==============================================================
+""":class:`~pcapkit.protocols.link.arp.protocol.ARP` Vendor Crawlers
+=======================================================================
 
 .. module:: pcapkit.vendor.arp
 
-This module contains all vendor crawlers of :class:`~pcapkit.protocols.link.arp.ARP`
-and :class:`~pcapkit.protocols.application.rarp.RARP` implementations. Available
+This module contains all vendor crawlers of :class:`~pcapkit.protocols.link.arp.protocol.ARP`
+and :class:`~pcapkit.protocols.application.rarp.protocol.RARP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

@@ -2,13 +2,14 @@ Raw Packet Data
 ===============
 
 .. module:: pcapkit.protocols.misc.raw
+.. module:: pcapkit.protocols.misc.raw.protocol
 
-:mod:`pcapkit.protocols.misc.raw` contains
-:class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
+:mod:`pcapkit.protocols.misc.raw.protocol` contains
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` only, which implements
 an extractor for unknown protocols, and constructs a
 :class:`~pcapkit.protocols.protocol.Protocol` like object.
 
-.. autoclass:: pcapkit.protocols.misc.raw.Raw
+.. autoclass:: pcapkit.protocols.misc.raw.protocol.Raw
    :no-members:
    :show-inheritance:
 
@@ -27,17 +28,27 @@ an extractor for unknown protocols, and constructs a
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.misc.raw
+.. module:: pcapkit.protocols.misc.raw.schema
 
-.. autoclass:: pcapkit.protocols.schema.misc.raw.Raw
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.misc.raw``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.misc.raw.schema.Raw
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.misc.raw
+.. module:: pcapkit.protocols.misc.raw.data
 
-.. autoclass:: pcapkit.protocols.data.misc.raw.Raw
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.misc.raw``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.misc.raw.data.Raw
    :members:
    :show-inheritance:

@@ -2,12 +2,12 @@
 """GitHub issue #2510: LinuxSLL dispatches its non-EtherType ``arphrd_type`` values
 through a registry of its own.
 
-Covers :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+Covers :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`
 as shipped, dispatch through it and through the EtherType path from both versions,
 a parse stopping at either version on either path (#2532),
 the keys of the classes it reaches, and the registrars of it and of
-:class:`~pcapkit.protocols.link.frad.FRAD`'s and
-:class:`~pcapkit.protocols.link.netlink.Netlink`'s registries.
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD`'s and
+:class:`~pcapkit.protocols.link.netlink.protocol.Netlink`'s registries.
 
 Each test imports :mod:`pcapkit` itself, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -53,8 +53,8 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _versions(self):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         return ((LinuxSLL1, _sll1, 'LINUX_SLL1'), (LinuxSLL2, _sll2, 'LINUX_SLL2'))
 
@@ -62,9 +62,9 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         """Every registry the registrars here write, to put back after a test."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols import __proto__ as names
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         tables = (LinuxSLL.__proto__, FRAD.__proto__, Netlink.__proto__, names,
                   reg_protocol._CODE_LEASES, reg_protocol._NAME_LEASES)
@@ -82,14 +82,14 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         self.assertEqual(dict(LinuxSLL.__proto__), {
-            ARPHRD.FRAD: ModuleDescriptor('pcapkit.protocols.link.frad', 'FRAD'),
-            ARPHRD.IPGRE: ModuleDescriptor('pcapkit.protocols.link.gre', 'GRE'),
-            ARPHRD.IEEE80211_RADIOTAP: ModuleDescriptor('pcapkit.protocols.link.radiotap', 'Radiotap'),
-            ARPHRD.IP6GRE: ModuleDescriptor('pcapkit.protocols.link.gre', 'GRE'),
-            ARPHRD.NETLINK: ModuleDescriptor('pcapkit.protocols.link.netlink', 'Netlink'),
+            ARPHRD.FRAD: ModuleDescriptor('pcapkit.protocols.link.frad.protocol', 'FRAD'),
+            ARPHRD.IPGRE: ModuleDescriptor('pcapkit.protocols.link.gre.protocol', 'GRE'),
+            ARPHRD.IEEE80211_RADIOTAP: ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+            ARPHRD.IP6GRE: ModuleDescriptor('pcapkit.protocols.link.gre.protocol', 'GRE'),
+            ARPHRD.NETLINK: ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
         })
         self.assertIn('__proto__', vars(LinuxSLL))
         self.assertIsNot(LinuxSLL.__proto__, Link.__proto__)
@@ -115,7 +115,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
     def test_every_other_arphrd_type_dispatches_by_ethertype(self) -> None:
         """Ethernet and an ``arphrd_type`` ARPHRD names no member for, alike."""
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for version, header, alias in self._versions():
             for arphrd in (1, 0xFFFE):
@@ -132,7 +132,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
 
     def test_an_empty_payload_is_no_payload_on_either_path(self) -> None:
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for version, header, _ in self._versions():
             for arphrd in (ARPHRD.FRAD, 1):
@@ -142,7 +142,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
 
     def _stops(self, version):  # type: ignore[no-untyped-def]
         """Each spelling of a stop at ``version``: its layer, family and own name or class."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         return ({'layer': 'Link'}, {'layer': 'link'}, {'protocol': 'LinuxSLL'},
                 {'protocol': version.__name__}, {'protocol': LinuxSLL}, {'protocol': version})
@@ -150,7 +150,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
     def test_a_stop_at_this_layer_keeps_a_registered_arphrd_type_raw(self) -> None:
         """The registry path stops as the EtherType path does (#2532)."""
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for version, header, alias in self._versions():
             for name, (payload, _) in CASES.items():
@@ -173,7 +173,7 @@ class LinuxSLLRegistryTests(unittest.TestCase):
     def test_a_stop_at_this_layer_keeps_an_ethertype_raw(self) -> None:
         """The Raw is named after the EtherType it would have dispatched on."""
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for version, header, alias in self._versions():
             for stop in self._stops(version):
@@ -214,11 +214,11 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         is ``ARPHRD_NETLINK``.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for klass, member in ((FRAD, ARPHRD.FRAD), (GRE, ARPHRD.IPGRE), (GRE, ARPHRD.IP6GRE),
                               (Radiotap, ARPHRD.IEEE80211_RADIOTAP)):
@@ -236,8 +236,8 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         """A registered ``arphrd_type`` stops its ``protocol_type`` being an EtherType."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.foundation.registry import register_arphrd
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         self._snapshot()
         loopback = ARPHRD(772)
@@ -257,14 +257,14 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.foundation.registry import register_arphrd
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.warnings import RegistryWarning
 
         self._snapshot()
         shipped = LinuxSLL.__proto__[ARPHRD.FRAD]
         with self.assertWarnsRegex(RegistryWarning, r'^ARP hardware type '):
-            register_arphrd(ARPHRD.FRAD, 'pcapkit.protocols.misc.raw', 'Raw')
+            register_arphrd(ARPHRD.FRAD, 'pcapkit.protocols.misc.raw.protocol', 'Raw')
         self.assertIs(LinuxSLL.__proto__[ARPHRD.FRAD], Raw)
 
         for version, header, alias in self._versions():
@@ -274,18 +274,18 @@ class LinuxSLLRegistryTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            register_arphrd(ARPHRD.FRAD, ModuleDescriptor('pcapkit.protocols.link.frad', 'FRAD'))
+            register_arphrd(ARPHRD.FRAD, ModuleDescriptor('pcapkit.protocols.link.frad.protocol', 'FRAD'))
         self.assertIs(LinuxSLL.__proto__[ARPHRD.FRAD], shipped)
         with warnings.catch_warnings():
             warnings.simplefilter('error')
-            register_arphrd(ARPHRD.FRAD, ModuleDescriptor('pcapkit.protocols.link.frad', 'FRAD'))
+            register_arphrd(ARPHRD.FRAD, ModuleDescriptor('pcapkit.protocols.link.frad.protocol', 'FRAD'))
 
     def test_register_frad_reaches_dispatch(self) -> None:
         """A registered NLPID dispatches, from FRAD alone and from a LinuxSLL frame."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.foundation.registry import register_frad
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.warnings import RegistryWarning
 
         self._snapshot()
@@ -305,14 +305,14 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                                  f'{alias}:FRAD:IPv4:UDP')
 
         with self.assertWarnsRegex(RegistryWarning, r'^NLPID 129 already registered'):
-            register_frad(0x81, 'pcapkit.protocols.internet.ipv6', 'IPv6')
+            register_frad(0x81, 'pcapkit.protocols.internet.ipv6.protocol', 'IPv6')
 
     def test_register_netlink_reaches_dispatch(self) -> None:
         """Netlink ships an empty registry; a registered message type dispatches."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.foundation.registry import register_netlink
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.netlink.protocol import Netlink
         from pcapkit.utilities.warnings import RegistryWarning
 
         self._snapshot()
@@ -332,17 +332,17 @@ class LinuxSLLRegistryTests(unittest.TestCase):
                                  f'{alias}:Netlink:IPv4:UDP')
 
         with self.assertWarnsRegex(RegistryWarning, r'^message type 3 already registered'):
-            register_netlink(3, 'pcapkit.protocols.internet.ipv6', 'IPv6')
+            register_netlink(3, 'pcapkit.protocols.internet.ipv6.protocol', 'IPv6')
 
     def test_the_registrars_reject_a_code_of_the_wrong_kind(self) -> None:
         """Each refuses before writing anything, naming the registry that refused."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.foundation.registry import register_arphrd, register_frad, register_netlink
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         cases = (
@@ -366,10 +366,10 @@ class LinuxSLLRegistryTests(unittest.TestCase):
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.foundation.registry import register_protocol_code
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         self._snapshot()

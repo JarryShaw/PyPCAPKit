@@ -35,8 +35,8 @@ class LinkType(EnumRegistry, IntEnum):
     #: references rather than imported, because :mod:`pcapkit.const` sits below
     #: :mod:`pcapkit.protocols` and importing one from here would be circular.
     __proto_dest__ = (
-        ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-        ModuleDescriptor('pcapkit.protocols.misc.pcapng', 'PCAPNG'),
+        ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+        ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
     )
 
     #: [``DLT_NULL``] BSD loopback encapsulation.

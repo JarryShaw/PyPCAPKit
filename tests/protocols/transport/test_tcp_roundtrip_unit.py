@@ -76,7 +76,7 @@ class TestTCPRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, name: str) -> 'tuple[bytes, object]':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = segment(*SEGMENTS[name])
         return raw, TCP(raw, len(raw))
@@ -88,7 +88,7 @@ class TestTCPRoundTrip(unittest.TestCase):
         return tcp.info.options[getattr(Option, kind)]
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name in SEGMENTS:
             with self.subTest(segment=name):
@@ -104,7 +104,7 @@ class TestTCPRoundTrip(unittest.TestCase):
         self.assertTrue(tcp.info.flags.ns)
 
     def test_make_writes_the_header_reserved_bits(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         data = object.__new__(TCP).make(reserved=0b101, ns=True).pack()
         self.assertEqual(data[12], 0x5b)
@@ -133,7 +133,7 @@ class TestTCPRoundTrip(unittest.TestCase):
                 self.assertEqual(tcp.info.hdr_len, raw[12] >> 4 << 2)
 
     def test_header_keeps_its_length_after_eool(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw, tcp = self.parse('eool-then-options')
         rebuilt = TCP.from_data(tcp.info).data
@@ -143,7 +143,7 @@ class TestTCPRoundTrip(unittest.TestCase):
     def test_padding_is_dropped_once_the_eool_is_edited_out(self) -> None:
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         _, tcp = self.parse('mss-nop-eool-padded')
         self.assertEqual(tcp.info.padding, bytes(6))
@@ -177,7 +177,7 @@ class TestTCPRoundTrip(unittest.TestCase):
 
     def test_make_drops_padding_without_eool(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         proto = object.__new__(TCP)
         self.assertEqual(proto.make(padding=b'\x01').pack()[12] >> 4, 5)
@@ -197,7 +197,7 @@ class TestTCPRoundTrip(unittest.TestCase):
 
     def test_make_honours_an_explicit_granularity(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         proto = object.__new__(TCP)
         code = Option.User_Timeout_Option
@@ -212,8 +212,8 @@ class TestTCPRoundTrip(unittest.TestCase):
         self.assertEqual(large.pack().hex(), '1c04829a')
 
     def test_edited_user_timeout_switches_unit_when_it_does_not_fit(self) -> None:
-        from pcapkit.protocols.data.transport.tcp import UserTimeout
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.data import UserTimeout
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)

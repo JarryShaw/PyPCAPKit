@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2576: radiotap's optional fields, decoded.
 
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` decodes the field-data
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` decodes the field-data
 region into ``decoded`` per the radiotap.org field pages: each field's
 alignment, size and subfields, the namespace fields, extended presence words
 and the TLV list. Unknown and vendor fields stay raw, ``fields`` keeps the
@@ -168,7 +168,7 @@ class TestRadiotapFields(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, raw: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         parsed = Radiotap(raw, len(raw))
         self.assertEqual(parsed.data, raw)
@@ -182,7 +182,7 @@ class TestRadiotapFields(unittest.TestCase):
     def _assert_round_trips(self, parsed, raw: bytes, *, reencodes: bool = True) -> None:  # type: ignore[no-untyped-def]
         """Rebuild ``raw`` from the info, its dict, and, unless ``reencodes`` is
         false, from ``present`` and ``decoded`` through ``make()``."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for data in (parsed.info, parsed.info.to_dict()):
             with self.subTest(data=type(data).__name__):
@@ -486,7 +486,7 @@ class TestRadiotapFields(unittest.TestCase):
     def test_make_takes_flag_members_or_ints(self) -> None:
         """The enum-or-int rule: a member, a composite or an ``int`` writes the same octets."""
         from pcapkit.const.radiotap.flags import Flags
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         expected = _radiotap([1 << 1], b'\x50')
@@ -500,7 +500,7 @@ class TestRadiotapFields(unittest.TestCase):
     def test_make_from_type_and_mapping_pairs(self) -> None:
         """``make()`` takes a type as a member or an ``int``, and writes the padding."""
         from pcapkit.const.radiotap.field_type import FieldType
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         # a vendor namespace in the second word, then the radiotap one again
         present = (1 << 1 | 1 << 3 | 1 << 5 | 1 << 30 | 1 << 31, 1 << 29 | 1 << 31, 1)
@@ -528,14 +528,14 @@ class TestRadiotapFields(unittest.TestCase):
 
     def test_make_with_raw_fields_is_unchanged(self) -> None:
         """Raw octets are written as given, whatever ``present`` says."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         made = Radiotap(present=(1 << 31, 7), fields=b'\x01\x02\x03')
         self.assertEqual(made.data, _radiotap([1 << 31, 7], b'\x01\x02\x03'))
 
     def test_make_rejects_fields_that_do_not_fit(self) -> None:
         from pcapkit.const.radiotap.field_type import FieldType
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         flags = (FieldType.Flags, {'flags': 0})
@@ -567,8 +567,8 @@ class TestRadiotapFields(unittest.TestCase):
     def test_unknown_entries_are_written_raw(self) -> None:
         """An ``Unknown`` entry, or one for a bit no field is defined for, ends the region."""
         from pcapkit.const.radiotap.field_type import FieldType
-        from pcapkit.protocols.data.link.radiotap import Unknown
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.data import Unknown
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         unknown = Unknown(type=FieldType.TSFT, data=b'\x01\x02', reason='any')
         self.assertEqual(Radiotap(present=(1,), fields=[unknown]).data, _radiotap([1], b'\x01\x02'))
@@ -577,7 +577,7 @@ class TestRadiotapFields(unittest.TestCase):
 
     def test_the_layouts_match_three_parsers(self) -> None:
         """Alignment and size of each field's schema, as the Linux kernel, Wireshark and radiotap-library give them."""
-        from pcapkit.protocols.schema.link.radiotap import RadiotapField
+        from pcapkit.protocols.link.radiotap.schema import RadiotapField
 
         for parser, table in REFERENCE.items():
             for bit, (align, size) in table.items():
@@ -588,8 +588,8 @@ class TestRadiotapFields(unittest.TestCase):
 
     def test_each_field_type_pairs_a_schema_with_its_methods(self) -> None:
         """``__field__`` and the schema registry name the same types, and each name has its two methods."""
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.schema.link.radiotap import RadiotapField
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.link.radiotap.schema import RadiotapField
 
         self.assertEqual(sorted(map(int, Radiotap.__field__)), sorted(map(int, RadiotapField.registry)))
         for code, name in Radiotap.__field__.items():
@@ -623,12 +623,12 @@ class TestRadiotapFields(unittest.TestCase):
         from unittest import mock
 
         from pcapkit.const.radiotap.field_type import FieldType
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.warnings import RegistryWarning
 
         registry = Radiotap.__dict__['__field__']
         try:
-            with mock.patch('pcapkit.protocols.link.radiotap.warn') as warn:
+            with mock.patch('pcapkit.protocols.link.radiotap.protocol.warn') as warn:
                 Radiotap.register_field(FieldType.Channel, 'fhss')
             warn.assert_called_once()
             self.assertIs(warn.call_args.args[1], RegistryWarning)
@@ -643,14 +643,14 @@ class TestRadiotapFields(unittest.TestCase):
         self.assertNotIn(custom, registry)
         pair = (lambda *_: None, lambda *_: None)
         try:
-            with mock.patch('pcapkit.protocols.link.radiotap.warn') as warn:
+            with mock.patch('pcapkit.protocols.link.radiotap.protocol.warn') as warn:
                 Radiotap.register_field(custom, pair)
                 Radiotap.register_field(custom, pair)
                 Radiotap.register_field(custom, (pair[0], pair[1]))
             warn.assert_not_called()
             self.assertIs(registry[custom], pair)
 
-            with mock.patch('pcapkit.protocols.link.radiotap.warn') as warn:
+            with mock.patch('pcapkit.protocols.link.radiotap.protocol.warn') as warn:
                 Radiotap.register_field(custom, 'tsft')
             warn.assert_called_once()
             self.assertEqual(registry[custom], 'tsft')
@@ -665,10 +665,10 @@ class TestRadiotapFields(unittest.TestCase):
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field, UInt32Field
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.foundation.registry import register_radiotap_field
-        from pcapkit.protocols.data.link.radiotap import RadiotapField as DataField
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.schema.link.radiotap import RadiotapField
-        from pcapkit.protocols.schema.schema import schema_final
+        from pcapkit.protocols.link.radiotap.data import RadiotapField as DataField
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.link.radiotap.schema import RadiotapField
+        from pcapkit.protocols.schema import schema_final
 
         @schema_final
         class XChannelSchema(RadiotapField):
@@ -714,7 +714,7 @@ class TestRadiotapFields(unittest.TestCase):
     def test_linux_sll_hands_on_the_decoded_header(self) -> None:
         """The capture path of #2502: ``LINUX_SLL`` with ``ARPHRD_IEEE80211_RADIOTAP``."""
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
         radiotap = bytes.fromhex(TCPDUMP['rx-stbc#1'])
         raw = (struct.pack('>HHH', 0, ARPHRD.IEEE80211_RADIOTAP, 0) + bytes(8) + struct.pack('>H', 0)

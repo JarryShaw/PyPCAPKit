@@ -25,7 +25,7 @@ IPV4_BASE = {'protocol': 6, 'src': '192.0.2.1', 'dst': '198.51.100.1', 'payload'
 
 def _ipv4_registry() -> 'Any':
     from pcapkit.const.ipv4.option_number import OptionNumber
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
     return generator._named_registry(IPv4, OptionNumber, '_make_opt_', '__option__')
 
 
@@ -53,12 +53,12 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _ipv4_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
     return IPv4(options=[(code, kwargs)], **IPV4_BASE)
 
 
 def _ipv4_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
     return IPv4(octets, len(octets))
 
 
@@ -73,7 +73,7 @@ def _ipv4_extract(parsed: 'Any') -> 'Any':
 
 
 def _ipv4_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
     return IPv4(options=options, **IPV4_BASE)
 
 

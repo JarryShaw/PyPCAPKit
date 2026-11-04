@@ -50,7 +50,7 @@ class TestPCAPNGRegistrarIdentity(unittest.TestCase):
         the option registry is keyed by :func:`_option_key`, not by the code.
 
         """
-        module = importlib.import_module('pcapkit.protocols.misc.pcapng')
+        module = importlib.import_module('pcapkit.protocols.misc.pcapng.protocol')
         option_type = importlib.import_module('pcapkit.const.pcapng.option_type').OptionType
         option_codes = {module._option_key(member): member for member in option_type}
         for meth, attr in SITES:

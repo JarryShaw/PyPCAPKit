@@ -2,7 +2,7 @@
 """The LinuxSLL family base dispatches where the version is known. C.f. #2574.
 
 A versioned family's base never yields an instance of itself. The ``version``
-keyword names the member :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`
+keyword names the member :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`
 gives, from octets or from fields, and nothing else does: neither header has a
 version field -- the link type names it, ``LINUX_SLL`` (113) or ``LINUX_SLL2``
 (276), per tcpdump.org's pages for the two -- and no field picks a member, so
@@ -54,13 +54,13 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     @staticmethod
     def member(version: 'int') -> 'type':
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         return {1: LinuxSLL1, 2: LinuxSLL2}[version]
 
     def test_octets_without_version_raise(self) -> None:
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version, octets in OCTETS.items():
@@ -74,7 +74,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_octets(self) -> None:
         """Even octets of the other version: the format carries none to object."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         for version in (1, 2):
             for octets_of, octets in OCTETS.items():
@@ -89,7 +89,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_fields(self) -> None:
         """Each build is byte-exact against the member's own and parses back unchanged."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         cases = {
             'LinuxSLL1 defaults': ({}, 1),
@@ -110,7 +110,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_fields_without_version_raise(self) -> None:
         """Even ``reserved`` or ``interface_index``, which only LinuxSLL2 takes, pick nothing."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, fields in (('no fields', {}), ('shared fields', SHARED),
@@ -122,7 +122,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         for version in (0, 3, True, '2', 1.0, 2.0):
@@ -134,8 +134,8 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must name the member; parsing, it is handed on unread."""
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertEqual(LinuxSLL1(version=1).data, LinuxSLL1().data)
@@ -148,7 +148,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import ProtocolError
 
         class Outside(LinuxSLL):  # type: ignore[type-arg]
@@ -167,7 +167,7 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
         """By the data model's class; a ``dict`` carries none, and is refused."""
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version, octets in OCTETS.items():
@@ -183,10 +183,10 @@ class LinuxSLLBaseDispatchTests(unittest.TestCase):
 
     def test_only_the_base_dispatches(self) -> None:
         """A subclass of the base is constructed as itself, abstract or not."""
-        from pcapkit.protocols.data.link.linux_sll2 import LinuxSLL2 as Data_LinuxSLL2
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.schema.link.linux_sll2 import LinuxSLL2 as Schema_LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.data import LinuxSLL2 as Data_LinuxSLL2
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.schema import LinuxSLL2 as Schema_LinuxSLL2
 
         class Abstract(LinuxSLL):  # type: ignore[type-arg] # pylint: disable=abstract-method
             """A direct subclass of the base, still abstract."""

@@ -57,7 +57,7 @@ class TestPCAPNGShortRawItem(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
                          block={'byteorder': order})

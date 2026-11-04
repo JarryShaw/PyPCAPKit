@@ -46,7 +46,7 @@ class TestIPv4TimestampSlots(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, data: 'bytes') -> 'object':
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return IPv4(io.BytesIO(data), len(data))
 
@@ -56,7 +56,7 @@ class TestIPv4TimestampSlots(unittest.TestCase):
         return self.parse(data).info.options[OptionNumber.TS]  # type: ignore[attr-defined]
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for name, data in HEADERS.items():
             with self.subTest(header=name):
@@ -88,7 +88,7 @@ class TestIPv4TimestampSlots(unittest.TestCase):
 
     def test_make_writes_remaining_after_the_timestamps(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         datagram = IPv4(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
                         options=[(OptionNumber.TS, {'counts': 3, 'timestamp': [1],

@@ -26,13 +26,13 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
-from pcapkit.protocols.misc.pcap.frame import Frame
-from pcapkit.protocols.misc.pcapng import PCAPNG
-from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
-from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
-from pcapkit.protocols.schema.misc.pcapng import \
+from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+from pcapkit.protocols.misc.pcapng.schema import BlockType as Schema_PCAPNG_BlockType
+from pcapkit.protocols.misc.pcapng.schema import DSBSecrets as Schema_PCAPNG_DSBSecrets
+from pcapkit.protocols.misc.pcapng.schema import \
     NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
-from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
+from pcapkit.protocols.misc.pcapng.schema import Option as Schema_PCAPNG_Option
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
@@ -41,14 +41,15 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.corekit.sentinels import NullType
-    from pcapkit.protocols.misc.pcapng import BlockConstructor as PCAPNG_BlockConstructor
-    from pcapkit.protocols.misc.pcapng import BlockParser as PCAPNG_BlockParser
-    from pcapkit.protocols.misc.pcapng import OptionConstructor as PCAPNG_OptionConstructor
-    from pcapkit.protocols.misc.pcapng import OptionParser as PCAPNG_OptionParser
-    from pcapkit.protocols.misc.pcapng import RecordConstructor as PCAPNG_RecordConstructor
-    from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
-    from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
-    from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
+    from pcapkit.protocols.misc.pcapng.protocol import BlockConstructor as PCAPNG_BlockConstructor
+    from pcapkit.protocols.misc.pcapng.protocol import BlockParser as PCAPNG_BlockParser
+    from pcapkit.protocols.misc.pcapng.protocol import OptionConstructor as PCAPNG_OptionConstructor
+    from pcapkit.protocols.misc.pcapng.protocol import OptionParser as PCAPNG_OptionParser
+    from pcapkit.protocols.misc.pcapng.protocol import RecordConstructor as PCAPNG_RecordConstructor
+    from pcapkit.protocols.misc.pcapng.protocol import RecordParser as PCAPNG_RecordParser
+    from pcapkit.protocols.misc.pcapng.protocol import \
+        SecretsConstructor as PCAPNG_SecretsConstructor
+    from pcapkit.protocols.misc.pcapng.protocol import SecretsParser as PCAPNG_SecretsParser
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
@@ -86,8 +87,8 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
     The function will register the given protocol class to the
     following registries:
 
-    - :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__`
-    - :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__`
+    - :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__`
+    - :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__`
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -129,7 +130,7 @@ def register_pcap(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Ty
 def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__
+# NOTE: pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__
 def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -139,7 +140,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.
+    :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -173,7 +174,7 @@ def register_pcapng(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | 
 def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__
+# NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__
 def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                     class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -183,7 +184,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__` registry.
+    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__` registry.
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -216,23 +217,23 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
 ###############################################################################
 
 
-# NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__
+# NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__block__
 def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]', *,
                           schema: 'Optional[Type[Schema_PCAPNG_BlockType]]' = None) -> 'None':
     """Register a block parser.
 
     The function will register the given block parser to the
-    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__block__` registry.
+    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__block__` registry.
 
     Args:
-        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.protocol.PCAPNG>` block type
             code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the block. A name names the
             ``_read_block_*`` and ``_make_block_*`` methods, and has to name
             an existing ``_read_block_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
-            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the block.
+            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.BlockType`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.block_type.BlockType`
@@ -250,23 +251,23 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
     logger.debug('registered PCAP-NG block parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__
+# NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__
 def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]', *,
                            schema: 'Optional[Type[Schema_PCAPNG_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
-    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__option__` registry.
+    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__` registry.
 
     Args:
-        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` option type
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.protocol.PCAPNG>` option type
             code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the option. A name names the
             ``_read_option_*`` and ``_make_option_*`` methods, and has to name
             an existing ``_read_option_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.Option`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.option_type.OptionType`
@@ -284,23 +285,23 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
     logger.debug('registered PCAP-NG option parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__
+# NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__record__
 def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]', *,
                            schema: 'Optional[Type[Schema_PCAPNG_NameResolutionRecord]]' = None) -> 'None':
     """Register a name resolution record parser.
 
     The function will register the given name resolution record parser to the
-    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__record__` registry.
+    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__record__` registry.
 
     Args:
-        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` name
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.protocol.PCAPNG>` name
             resolution record type code as in :class:`~pcapkit.const.pcapng.record_type.RecordType`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the name resolution record. A name names the
             ``_read_record_*`` and ``_make_record_*`` methods, and has to name
             an existing ``_read_record_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.
-            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the name resolution record.
+            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.NameResolutionRecord`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.record_type.RecordType`
@@ -318,23 +319,23 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
     logger.debug('registered PCAP-NG name resolution record parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__
+# NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__secrets__
 def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]', *,
                             schema: 'Optional[Type[Schema_PCAPNG_DSBSecrets]]' = None) -> 'None':
     """Register a decryption secrets parser.
 
     The function will register the given decryption secrets parser to the
-    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__` registry.
+    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__secrets__` registry.
 
     Args:
-        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` decryption
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.protocol.PCAPNG>` decryption
             secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the decryption secrets. A name names the
             ``_read_secrets_*`` and ``_make_secrets_*`` methods, and has to name
             an existing ``_read_secrets_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.
-            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the decryption secrets.
+            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.DSBSecrets`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`

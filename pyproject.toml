@@ -96,7 +96,7 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 [project.optional-dependencies]
 # for CLI display
 cli = [ "emoji" ]
-# for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
+# for ESP payload decryption, c.f. pcapkit.protocols.internet.esp.protocol
 #
 # Capped below 46 on PyPy older than 3.11 (#2040), and nowhere else, which the
 # complementary marker on the first line keeps. 45.0.7 is the newest release
@@ -109,7 +109,7 @@ crypto = [
     "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
     "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
 ]
-# for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Counted among
+# for NGAP decoding, c.f. pcapkit.protocols.application.ngap.protocol. Counted among
 # ``all``'s *core addons* by the owner's ruling on #910 -- everything needed for
 # the library itself to work at full functionality -- even though the
 # ``pycrate`` this needs is not a free addition:
@@ -438,3 +438,11 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.isort]
+# The protocol package __init__ files keep their imports in role blocks under
+# headings, which isort would merge (#2534). make isort passes its own flags.
+extend_skip_glob = [
+    "pcapkit/protocols/*/*/__init__.py",
+]
+filter_files = true

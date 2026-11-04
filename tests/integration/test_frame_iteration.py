@@ -89,14 +89,14 @@ def stack(frame: 'Any') -> 'list[Any]':
 
     Walks ``payload`` rather than reading ``protochain``, because the chain is a
     string of *names* and a name does not say what the object is: a
-    :class:`~pcapkit.protocols.misc.raw.Raw` standing in for a payload the parse
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` standing in for a payload the parse
     declined to enter is labelled with the enumeration it was handed, so
     ``Ethernet:IPv6:TCP`` is what both a fully parsed TCP header and a stopped
     parse holding TCP's octets verbatim look like. Only the objects tell them
     apart, which is what :class:`ExtractionLimitTests` has to assert on.
 
     """
-    from pcapkit.protocols.misc.no_payload import NoPayload
+    from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
     walked = []  # type: list[Any]
     current = frame.payload
@@ -128,7 +128,7 @@ class ExtractionLimitTests(EndToEndTestCase):
     #: Frame 4 of :file:`http6.cap`, whose unlimited chain is the full four
     #: layers, and what each limit should leave of it. The last entry of each
     #: tuple is the class the parse is expected to stop *at*; everything beyond
-    #: it should be one :class:`~pcapkit.protocols.misc.raw.Raw`.
+    #: it should be one :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
     STOPS = {
         'link': ('Ethernet',),
         'internet': ('Ethernet', 'IPv6'),
@@ -179,13 +179,13 @@ class ExtractionLimitTests(EndToEndTestCase):
     def test_layer_limit_stops_at_the_named_layer_and_leaves_raw_above_it(self) -> None:
         """Each ``layer`` value stops the walk at the protocol of that layer.
 
-        What is above the stop is a single :class:`~pcapkit.protocols.misc.raw.Raw`
+        What is above the stop is a single :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
         holding the octets the parse declined to enter, and its ``error`` is
         :data:`None` -- the stop is deliberate, not a parse failure that happens
         to look like one.
 
         """
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for layer, expected in self.STOPS.items():
             with self.subTest(layer=layer):
@@ -225,7 +225,7 @@ class ExtractionLimitTests(EndToEndTestCase):
 
         """
         import pcapkit
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for protocol in ('TCP', 'tcp', pcapkit.TCP):
             with self.subTest(protocol=protocol):
@@ -241,7 +241,7 @@ class ExtractionLimitTests(EndToEndTestCase):
     def test_protocol_limit_stops_below_the_transport_layer(self) -> None:
         """``protocol='IPv6'`` stops at IPv6, i.e. TCP is never parsed either."""
         import pcapkit
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         extractor = self.extract(fin=sample_path('http6.cap'), nofile=True, store=True,
                                  protocol='IPv6')

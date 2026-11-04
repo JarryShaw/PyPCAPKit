@@ -24,17 +24,17 @@ from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 #: cases for the internet layer, each written out by hand.
 __tier__ = 'ALL'
 
-IPV4 = 'pcapkit.protocols.internet.ipv4:IPv4'
-IPX = 'pcapkit.protocols.internet.ipx:IPX'
-IPV6 = 'pcapkit.protocols.internet.ipv6:IPv6'
-HOPOPT = 'pcapkit.protocols.internet.hopopt:HOPOPT'
-IPV6_OPTS = 'pcapkit.protocols.internet.ipv6_opts:IPv6_Opts'
-IPV6_ROUTE = 'pcapkit.protocols.internet.ipv6_route:IPv6_Route'
-IPV6_FRAG = 'pcapkit.protocols.internet.ipv6_frag:IPv6_Frag'
-AH = 'pcapkit.protocols.internet.ah:AH'
-ESP = 'pcapkit.protocols.internet.esp:ESP'
-MH = 'pcapkit.protocols.internet.mh:MH'
-HIP = 'pcapkit.protocols.internet.hip:HIP'
+IPV4 = 'pcapkit.protocols.internet.ipv4.protocol:IPv4'
+IPX = 'pcapkit.protocols.internet.ipx.protocol:IPX'
+IPV6 = 'pcapkit.protocols.internet.ipv6.protocol:IPv6'
+HOPOPT = 'pcapkit.protocols.internet.hopopt.protocol:HOPOPT'
+IPV6_OPTS = 'pcapkit.protocols.internet.ipv6_opts.protocol:IPv6_Opts'
+IPV6_ROUTE = 'pcapkit.protocols.internet.ipv6_route.protocol:IPv6_Route'
+IPV6_FRAG = 'pcapkit.protocols.internet.ipv6_frag.protocol:IPv6_Frag'
+AH = 'pcapkit.protocols.internet.ah.protocol:AH'
+ESP = 'pcapkit.protocols.internet.esp.protocol:ESP'
+MH = 'pcapkit.protocols.internet.mh.protocol:MH'
+HIP = 'pcapkit.protocols.internet.hip.protocol:HIP'
 
 EXT = {'extension': True}
 

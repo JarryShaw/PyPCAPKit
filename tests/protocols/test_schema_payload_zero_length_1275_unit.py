@@ -2,7 +2,7 @@
 """A computed ``PayloadField`` length of zero reads an empty payload.
 
 GitHub issue #1275: :meth:`Schema.unpack
-<pcapkit.protocols.schema.schema.Schema.unpack>` sized the payload as
+<pcapkit.protocols.schema.Schema.unpack>` sized the payload as
 ``length or packet['__length__']``, so a length that evaluated to zero was
 taken as "unset" and the payload swallowed every octet after it, leaving the
 following fields to be zero-filled.
@@ -28,7 +28,7 @@ class TestPayloadFieldZeroLength(unittest.TestCase):
         from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         class S(Schema):
             n: 'int' = UInt8Field()
@@ -49,7 +49,7 @@ class TestPayloadFieldZeroLength(unittest.TestCase):
     def _unset_schema(self) -> 'type':
         from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         class R(Schema):
             n: 'int' = UInt8Field()

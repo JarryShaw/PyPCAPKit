@@ -58,7 +58,7 @@ ROWS = (
      8, 'status', {}),
     # RFC 5568 section 6.2.3, 6.2.1.1 and 6.2.1.2.
     ('_make_msg_fback.status', 'message', 'Fast_Binding_Acknowledgment', 'status',
-     'pcapkit.protocols.internet.mh:FastBindingAcknowledgmentStatus', 'Reason_unspecified',
+     'pcapkit.protocols.internet.mh.protocol:FastBindingAcknowledgmentStatus', 'Reason_unspecified',
      8, 'status', {}),
     ('_make_msg_hi.code', 'message', 'Handover_Initiate_Message', 'code',
      'pcapkit.const.mh.handover_initiate_status:HandoverInitiateStatus',
@@ -79,7 +79,7 @@ ROWS = (
      8, 'status', {'br_type': 2}),
     # RFC 6705 section 10.2.
     ('_make_msg_lra.status', 'message', 'Localized_Routing_Acknowledgment', 'status',
-     'pcapkit.protocols.internet.mh:LocalizedRoutingStatus', 'MN_Not_Attached',
+     'pcapkit.protocols.internet.mh.protocol:LocalizedRoutingStatus', 'MN_Not_Attached',
      8, 'status', {}),
     # RFC 7077 section 4.1 and 4.2; the notification reason is 16 bits.
     ('_make_msg_upn.reason', 'message', 'Update_Notification', 'reason',
@@ -105,7 +105,7 @@ ROWS = (
      'pcapkit.const.mh.auth_subtype:AuthSubtype', 'MN_AAA', 8, 'subtype',
      {'data': b'\xa5\xa5'}),
     ('_make_opt_ipv6_ap.code', 'option', 'Mobility_Header_IPv6_Address_Prefix', 'code',
-     'pcapkit.protocols.internet.mh:IPv6AddressPrefixCode', 'NAR_Prefix', 8, 'code', {}),
+     'pcapkit.protocols.internet.mh.protocol:IPv6AddressPrefixCode', 'NAR_Prefix', 8, 'code', {}),
     ('_make_opt_dns.status', 'option', 'DNS_UPDATE_TYPE', 'status',
      'pcapkit.const.mh.dns_status_code:DNSStatusCode', 'Reason_unspecified', 8, 'status', {}),
     ('_make_opt_hi.hi', 'option', 'Handoff_Indicator_Option', 'hi',
@@ -126,7 +126,7 @@ ROWS = (
     ('_make_opt_ipv4_dhcp.mode', 'option', 'IPv4_DHCP_Support_Mode', 'mode',
      'pcapkit.const.mh.dhcp_support_mode:DHCPSupportMode', 'S_flag', 1, 'DHCP support mode', {}),
     ('_make_opt_lmaa.code', 'option', 'Local_Mobility_Anchor_Address_Option', 'code',
-     'pcapkit.protocols.internet.mh:LMAAddressCode', 'IPv4_LMAA', 8, 'code',
+     'pcapkit.protocols.internet.mh.protocol:LMAAddressCode', 'IPv4_LMAA', 8, 'code',
      {'address': '10.0.0.1'}),
     ('_make_opt_fid.status', 'option', 'Flow_Identification_Mobility_Option', 'status',
      'pcapkit.const.mh.flow_id_status:FlowIDStatus', 'Administratively_prohibited',
@@ -225,7 +225,7 @@ class MHMakeCodeTests(unittest.TestCase):
         """The octets of an MH header whose ``row`` field is ``value``."""
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         _, kind, target, field, *_, base = row
         header = {'next': 59, 'type': Packet.Binding_Refresh_Request,
@@ -247,7 +247,7 @@ class MHMakeCodeTests(unittest.TestCase):
     def _read(self, row: 'tuple', octets: 'bytes') -> 'object':
         """The ``row`` field as ``octets`` parse it back."""
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         _, kind, target, field, *_ = row
         info = MH(io.BytesIO(octets), len(octets), extension=True).info
@@ -296,7 +296,7 @@ class MHMakeCodeTests(unittest.TestCase):
 
     def test_a_name_resolved_first_builds_the_members_octets(self) -> None:
         # The path the docstrings give a caller holding the name.
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for row in ROWS:
             namespace = load(row[4])
@@ -307,7 +307,7 @@ class MHMakeCodeTests(unittest.TestCase):
     def test_the_widest_code_builds_parses_back_and_rebuilds(self) -> None:
         # #2594: the field width decides what is refused, so the widest code
         # builds, even where no member holds it.
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for row in (widest(row) for row in ROWS if row[0] not in WIDEST_EXEMPT):
             code = (1 << row[6]) - 1
@@ -333,7 +333,7 @@ class MHMakeCodeTests(unittest.TestCase):
         # registry its schema and data model hold, not from StatusCode.
         from pcapkit.const.mh.binding_error import BindingError
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for value in (2, BindingError.Unrecognized_MH_Type_value):
             with self.subTest(value=value):
@@ -345,7 +345,7 @@ class MHMakeCodeTests(unittest.TestCase):
 
     def test_no_maker_takes_a_removed_keyword(self) -> None:
         """#2594: no maker's signature declares a ``*_default``, ``*_namespace`` or ``*_reversed`` keyword."""
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for name in sorted(vars(MH)):
             if name != 'make' and not name.startswith('_make_'):
@@ -369,8 +369,8 @@ class MHListTypeTests(unittest.TestCase):
         from pcapkit.const.mh.cga_type import CGAType
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         carrier = row[1]
         if carrier is None:
@@ -388,7 +388,7 @@ class MHListTypeTests(unittest.TestCase):
     def _parsed(self, row: 'tuple', octets: 'bytes') -> 'Any':
         """The ``row`` list as ``octets`` parse it back."""
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         info = MH(io.BytesIO(octets), len(octets), extension=True).info  # type: Any
         options = info.options
@@ -434,7 +434,7 @@ class MHListTypeTests(unittest.TestCase):
                         self.assertRefused(row, build, value)
 
     def test_the_widest_type_builds_parses_back_and_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for row in LIST_ROWS:
             code = (1 << row[4]) - 1

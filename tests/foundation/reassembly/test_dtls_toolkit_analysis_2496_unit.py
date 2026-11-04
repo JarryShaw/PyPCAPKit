@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """DTLS reassembly is fed by the toolkit and parsed by the analysis (#2496).
 
-:class:`~pcapkit.protocols.application.dtls.DTLS` stays a parser: the default
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` stays a parser: the default
 engine reads each frame's fragmented handshake messages with
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (or its PCAP-NG twin),
 :class:`~pcapkit.foundation.reassembly.dtls.DTLS` reassembles them, and
@@ -152,7 +152,7 @@ class DTLSAnalysisTests(unittest.TestCase):
 
     def test_a_hello_decodes_as_the_unfragmented_message_does(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for msg_type, body in ((1, BODY), (11, b'C' * 40)):
             with self.subTest(msg_type=msg_type):
@@ -173,7 +173,7 @@ class DTLSAnalysisTests(unittest.TestCase):
         """A genuine ``ClientHello`` whose extensions take it past what a
         record's 16-bit length holds decodes all the same."""
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.data.application.tls import ClientHello, Extension
+        from pcapkit.protocols.application.ssl.data import ClientHello, Extension
 
         body = _client_hello_body(extensions=b'\x00\x15' + (65500).to_bytes(2, 'big') + bytes(65500))
         self.assertGreater(len(body) + 12, 0xFFFF)
@@ -211,7 +211,7 @@ class DTLSProtocolStaysAParserTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_the_dtls_module_imports_nothing_from_foundation(self) -> None:
-        import pcapkit.protocols.application.dtls as module
+        import pcapkit.protocols.application.dtls.protocol as module
 
         tree = ast.parse(inspect.getsource(module))
         imported = [node.module for node in ast.walk(tree)
@@ -221,7 +221,7 @@ class DTLSProtocolStaysAParserTests(unittest.TestCase):
         self.assertEqual([name for name in imported if name.startswith('pcapkit.foundation')], [])
 
     def test_read_takes_no_reassembly_arguments(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         self.assertEqual(list(inspect.signature(DTLS.read).parameters), ['self', 'length', 'kwargs'])
 

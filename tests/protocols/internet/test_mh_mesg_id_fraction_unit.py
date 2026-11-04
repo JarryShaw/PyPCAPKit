@@ -17,8 +17,8 @@ class MHMesgIDFractionUnitTests(unittest.TestCase):
 
     def roundtrip(self, interval: 'datetime.datetime') -> 'tuple[int, datetime.datetime]':
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import MesgIDOption
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import MesgIDOption
 
         proto = object.__new__(MH)
         made = proto._make_opt_mesg_id(Option.MESG_ID_OPTION_TYPE, interval=interval)
@@ -44,7 +44,7 @@ class MHMesgIDFractionUnitTests(unittest.TestCase):
 
     def test_fraction_clamped_to_field_width(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         interval = mock.Mock(timestamp=lambda: 1 - 2**-40)  # rounds up to 2**32
@@ -54,7 +54,7 @@ class MHMesgIDFractionUnitTests(unittest.TestCase):
 
     def test_read_fraction_is_seconds(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.schema.internet.mh import MesgIDOption
+        from pcapkit.protocols.internet.mh.schema import MesgIDOption
 
         raw = MesgIDOption(type=Option.MESG_ID_OPTION_TYPE, length=8,
                            seconds=EPOCH + 2_208_988_800, fraction=2**30).pack()

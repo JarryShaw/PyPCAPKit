@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """HIP builds version 2 by default, and ``ENCRYPTED`` carries an IV with an AES cipher alone.
 
-GitHub issue #2708, three defects of :class:`~pcapkit.protocols.internet.hip.HIP`:
+GitHub issue #2708, three defects of :class:`~pcapkit.protocols.internet.hip.protocol.HIP`:
 
-* **Version.** :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s
+* **Version.** :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`'s
   ``__post_init__`` defaults ``version`` to 6, the IP version, and hands it on
-  to :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`, which writes it
+  to :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`, which writes it
   as the HIP version. HIP's own ``__post_init__`` takes ``version`` with
   ``make``'s default, so ``HIP(next=59, parameters=[])`` writes version 2, as
   ``make`` called directly does. Version 6 is no HIP version:
@@ -52,7 +52,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_constructor_writes_make_default(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         default = inspect.signature(HIP.make).parameters['version'].default
         self.assertEqual(default, 2)
@@ -67,7 +67,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
                 self.assertEqual(proto.data, proto.make(**kwargs).pack())
 
     def test_explicit_version_is_written(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
@@ -76,7 +76,7 @@ class TestHIPDefaultVersion(unittest.TestCase):
                 self.assertEqual(proto.data[3], version << 4 | 0x01)
 
     def test_parse_reads_version_from_octets(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             data = HIP(next=59, version=version).data
@@ -96,7 +96,7 @@ class TestHIPEncryptedIV(unittest.TestCase):
     @staticmethod
     def _build(cipher: 'object', iv: 'bytes | None') -> 'bytes':
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(next=59, parameters=[
             (Parameter.HIP_CIPHER, {'ciphers': [cipher]}),
@@ -125,8 +125,8 @@ class TestHIPEncryptedIV(unittest.TestCase):
 
     def test_data_model_with_other_cipher_refuses_an_iv(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet.hip import EncryptedParameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.data import EncryptedParameter
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         _, others = self._ciphers()
@@ -143,7 +143,7 @@ class TestHIPEncryptedIV(unittest.TestCase):
                             HIP()._make_param_encrypted(Parameter.ENCRYPTED, param, version=2)
 
     def test_other_cipher_without_iv_round_trips(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         _, others = self._ciphers()
         for cipher in others:
@@ -177,7 +177,7 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
 
     def _parse(self, data: 'bytes') -> 'tuple[object, list[str]]':
         """Parse ``data`` as HIP, returning the layer and the warnings it drew."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -187,7 +187,7 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
     def test_each_cipher_reads_its_own_layout(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         aes, others = TestHIPEncryptedIV._ciphers()  # pylint: disable=protected-access
         for cipher in [*aes, *others]:
@@ -206,7 +206,7 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
     def test_each_encrypted_takes_the_next_cipher(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         ciphers = [Cipher.AES_256_CBC, Cipher.NULL_ENCRYPT, Cipher.AES_128_CBC]
         ivs = [bytes(16), None, bytes(range(16))]
@@ -226,7 +226,7 @@ class TestHIPEncryptedCipherOnParse(unittest.TestCase):
     def test_without_a_cipher_for_it_still_warns(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         lone = HIP(next=59, parameters=[
             (Parameter.ENCRYPTED, {'cipher': Cipher.NULL_ENCRYPT, 'data': b'abcd'}),

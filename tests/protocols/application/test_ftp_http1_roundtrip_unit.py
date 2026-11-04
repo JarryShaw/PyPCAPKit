@@ -57,14 +57,14 @@ class FTPRoundTripTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         for name, raw in FTP_LINES:
             with self.subTest(name=name):
                 self.assertEqual(FTP.from_data(FTP(raw, len(raw)).info).data, raw)
 
     def test_make_terminates_with_crlf(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         self.assertEqual(bytes(FTP(cmmd='USER', args='x')), b'USER x\r\n')
         self.assertEqual(object.__new__(FTP).make(cmmd='USER', args='anonymous').data,
@@ -72,7 +72,7 @@ class FTPRoundTripTests(unittest.TestCase):
 
     def test_no_arguments(self) -> None:
         from pcapkit.const.ftp.command import Command
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         request = FTP(b'QUIT\r\n', 6).info
         self.assertIs(request.cmmd, Command.QUIT)
@@ -81,7 +81,7 @@ class FTPRoundTripTests(unittest.TestCase):
         self.assertEqual(object.__new__(FTP).make(cmmd='QUIT').data, b'QUIT\r\n')
 
     def test_multi_line_reply(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         reply = FTP(b'220-Welcome\r\n', 13).info
         self.assertTrue(reply.more)
@@ -90,7 +90,7 @@ class FTPRoundTripTests(unittest.TestCase):
                          b'220-Welcome\r\n')
 
     def test_non_utf8_arguments_keep_their_charset(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         raw = b'USER caf\xe9\r\n'
         request = FTP(raw, len(raw)).info
@@ -108,7 +108,7 @@ class FTPRoundTripTests(unittest.TestCase):
                          b'USER caf\xc3\xa9\r\n')
 
     def test_trailing_newline_is_not_dropped(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -126,14 +126,14 @@ class HTTP1RoundTripTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         for name, raw in HTTP1_MESSAGES:
             with self.subTest(name=name):
                 self.assertEqual(HTTPv1.from_data(HTTPv1(raw, len(raw)).info).data, raw)
 
     def test_non_utf8_start_line_keeps_its_charset(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         raw = b'GET /caf\xe9 HTTP/1.1\r\n\r\n'
         receipt = HTTPv1(raw, len(raw)).info.receipt

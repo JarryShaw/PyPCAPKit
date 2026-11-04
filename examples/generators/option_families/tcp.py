@@ -24,7 +24,7 @@ generator = globals()['generator']  # type: Any
 #: option and nothing else.
 #:
 #: Every key here has to be spelled the way :meth:`TCP.make
-#: <pcapkit.protocols.transport.tcp.TCP.make>` declares it: an undeclared
+#: <pcapkit.protocols.transport.tcp.protocol.TCP.make>` declares it: an undeclared
 #: keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (#617).
 #: Without that check, ``make``'s ``**kwargs`` drops it silently, so a key
 #: spelled wrong in this table is ignored (GitHub issue #602):
@@ -51,7 +51,7 @@ TCP_BASE = {
 
 
 def _tcp_registry() -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP.__option__
 
 
@@ -68,12 +68,12 @@ def _tcp_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _tcp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP(options=[(code, kwargs)], **TCP_BASE)
 
 
 def _tcp_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP(octets, len(octets))
 
 
@@ -82,12 +82,12 @@ def _tcp_extract(parsed: 'Any') -> 'Any':
 
 
 def _tcp_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP(options=options, **TCP_BASE)
 
 
 def _mptcp_registry() -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP.__mp_option__
 
 
@@ -107,7 +107,7 @@ def _mptcp_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _mptcp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.const.tcp.option import Option as Enum_Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     # The subtype travels as an argument of the enclosing Multipath TCP option
     # rather than as a registry key of its own, so it is spliced in here rather

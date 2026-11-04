@@ -16,7 +16,7 @@ import math
 from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
 
 from pcapkit.protocols import __proto__ as protocol_registry
-from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.utilities.exceptions import FieldValueError, UnsupportedCall
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.pickle import ReduceAsProtocol2
@@ -87,7 +87,7 @@ class ReassemblyMeta(abc.ABCMeta):
 
         Note:
             Unlike :attr:`EnumSchema.registry
-            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            <pcapkit.protocols.schema.EnumSchema.registry>`, this is not
             a per-class mapping: every reassembly registration lands in the
             single :attr:`Extractor.__reassembly__
             <pcapkit.foundation.extraction.Extractor.__reassembly__>` table, so
@@ -582,7 +582,7 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         ``protocol`` is given. This is what lets a subclass decline registration
         rather than having to inherit :class:`ReassemblyBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`, which
         guards on its own ``code`` keyword the same way.
 
         Note:

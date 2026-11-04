@@ -72,7 +72,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         captured = {}
 
@@ -184,7 +184,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.fields.misc import nested_packet_context
-        from pcapkit.protocols.schema.misc.pcapng import packet_byteorder
+        from pcapkit.protocols.misc.pcapng.schema import packet_byteorder
 
         outer = {'byteorder': 'little'}
 
@@ -212,19 +212,19 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
         """
         from pcapkit.corekit.fields.misc import nested_packet_context
         from pcapkit.const.pcapng.block_type import BlockType
-        import pcapkit.protocols.schema.misc.pcapng as schema_pcapng
+        import pcapkit.protocols.misc.pcapng.schema as schema_pcapng
 
         mismatch = schema_pcapng.UnknownBlock(length=16, body=b'abcd', length2=20)
         outer = {'type': BlockType.Reserved_0x00000000}
 
         # A found outer 'type' renders its code into the message; the
         # fallback default, 'N/A', is what a lookup miss would show instead.
-        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.schema.warn') as warn:
             mismatch.post_process({'__packet__': outer})
         warn.assert_called_once()
         self.assertNotIn('N/A', warn.call_args.args[0])
 
-        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.schema.warn') as warn:
             mismatch.post_process(nested_packet_context(outer))
         warn.assert_called_once()
         self.assertNotIn('N/A', warn.call_args.args[0])
@@ -234,7 +234,7 @@ class CGAParametersRegressionTests(unittest.TestCase):
     """The measured casualty from issue #445, end to end.
 
     A CGA Parameters option could not be parsed at all: sizing
-    ``CGAParameter.extensions`` (``pcapkit/protocols/schema/internet/mh.py``,
+    ``CGAParameter.extensions`` (``pcapkit/protocols/internet/mh/schema.py``,
     ``CGAParameter.extensions``) reads ``pkt['length']``, a name only the
     enclosing ``CGAParametersOption`` declares. ``mh.py`` needs nothing of
     its own: the fallback in ``nested_packet_context`` resolves it.
@@ -246,7 +246,7 @@ class CGAParametersRegressionTests(unittest.TestCase):
 
     def test_cga_parameters_option_parses_end_to_end(self) -> None:
         from pcapkit.const.mh.option import Option as Enum_Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # The exact 40-octet reproduction from issue #445.
         raw = bytes.fromhex(

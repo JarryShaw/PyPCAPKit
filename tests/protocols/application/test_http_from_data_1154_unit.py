@@ -2,15 +2,15 @@
 """``HTTP.from_data`` rebuilds the message it was parsed from. C.f. #1154.
 
 Guards against :meth:`HTTP._make_data
-<pcapkit.protocols.application.http.HTTP._make_data>` choosing the versioned
+<pcapkit.protocols.application.http.protocol.HTTP._make_data>` choosing the versioned
 class from a ``version`` key that neither HTTP/1.* nor HTTP/2 data carries,
 which made every ``HTTP.from_data(http.info)`` raise ``ProtocolError: invalid
 HTTP version: 0``. It dispatches on the class of the data, and passes the
-``version`` that :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>`
+``version`` that :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>`
 dispatches on.
 
 Behind that, :meth:`httpv2.HTTPv2._make_data
-<pcapkit.protocols.application.httpv2.HTTPv2._make_data>` must not return the
+<pcapkit.protocols.application.httpv2.protocol.HTTPv2._make_data>` must not return the
 frame's ``length``, which ``ProtocolBase.__init__`` takes as the number of
 octets to parse back -- the payload alone, nine short of the frame -- so every
 HTTP/2 ``from_data`` would raise as well. ``make`` computes the Length itself,
@@ -79,7 +79,7 @@ class HTTPFromDataTests(unittest.TestCase):
 
     def test_dispatcher_rebuilds_http1_messages(self) -> None:
         """The #1154 reproduction: ``invalid HTTP version: 0`` on HTTP/1.*."""
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         for name, wire in HTTP1_MESSAGES:
             with self.subTest(message=name):
@@ -87,7 +87,7 @@ class HTTPFromDataTests(unittest.TestCase):
 
     def test_dispatcher_rebuilds_http2_frames(self) -> None:
         """The same, for every HTTP/2 frame type."""
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         for name, octets in HTTP2_FRAMES:
             with self.subTest(frame=name):
@@ -95,7 +95,7 @@ class HTTPFromDataTests(unittest.TestCase):
 
     def test_httpv2_rebuilds_its_own_frames(self) -> None:
         """``httpv2.HTTPv2.from_data`` parses back the whole frame, not only Length octets."""
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for name, octets in HTTP2_FRAMES:
             with self.subTest(frame=name):
@@ -103,7 +103,7 @@ class HTTPFromDataTests(unittest.TestCase):
 
     def test_dispatcher_rejects_data_of_no_http_version(self) -> None:
         """Data that is neither HTTP/1.* nor HTTP/2 is a protocol error."""
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, '^HTTP: invalid data: '):

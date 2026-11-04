@@ -2,7 +2,7 @@
 """The MH CGA Parameters option maker neither takes nor advertises a mapping.
 
 GitHub issue #2708: the annotation of ``parameters`` on
-:meth:`MH._make_opt_cga_param <pcapkit.protocols.internet.mh.MH._make_opt_cga_param>`
+:meth:`MH._make_opt_cga_param <pcapkit.protocols.internet.mh.protocol.MH._make_opt_cga_param>`
 names the forms the maker builds, octets, a schema and a data model, and no
 mapping, which raises ``ProtocolError``. A mapping given to a maker stands for
 some maker's keyword arguments, and no maker takes a CGA parameter's fields. A
@@ -45,7 +45,7 @@ class TestMHCGAParamDict(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_annotation_names_no_mapping(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         annotation = inspect.signature(MH._make_opt_cga_param).parameters['parameters'].annotation
         self.assertIsInstance(annotation, str)
@@ -56,7 +56,7 @@ class TestMHCGAParamDict(unittest.TestCase):
 
     def test_mapping_is_refused(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, 'unknown CGA parameter format'):
@@ -65,8 +65,8 @@ class TestMHCGAParamDict(unittest.TestCase):
     def test_data_model_of_the_same_fields_round_trips(self) -> None:
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         built = MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00', data={
             'options': [(Option.CGA_Parameters, {'parameters': [CGAParameter(**_fields())]})],

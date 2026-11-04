@@ -222,16 +222,16 @@ above:
        needs its ``PINNED_TARGETS`` entry in its family's module under
        :file:`examples/generators/dispatch_families/`, which
        ``test_every_case_has_a_pinned_target`` enforces. A protocol with a dispatch
-       registry of its own, as :class:`~pcapkit.protocols.link.frad.FRAD`,
-       :class:`~pcapkit.protocols.link.loopback.Loopback` and
-       :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` have, also needs a
+       registry of its own, as :class:`~pcapkit.protocols.link.frad.protocol.FRAD`,
+       :class:`~pcapkit.protocols.link.loopback.protocol.Loopback` and
+       :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` have, also needs a
        ``Family`` probing that ``__proto__`` table once it holds an entry, in a module
        of its own there, which ``test_every_dispatch_table_has_a_family`` enforces;
        another family whose probe passes through the table does not count
        (:issue:`2592`). Where a versioned family base owns the table, each member
        takes a family of its own, as
-       :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
-       :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` do, which
+       :class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1` and
+       :class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2` do, which
        ``test_a_versioned_base_table_has_a_family_per_member`` enforces. A
        :mod:`pcapkit.const` registry it adds is a line in its package's module under
        :file:`tests/const/census/`, in sorted order, or a module of its own there for a

@@ -44,7 +44,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         for name, packet in ICMP_PACKETS.items():
             with self.subTest(packet=name), warnings.catch_warnings():
@@ -54,7 +54,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
                                  f'{name} did not rebuild byte for byte')
 
     def test_echo_request_fields_are_parsed(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         packet = ICMP_PACKETS['echo-request']
         with warnings.catch_warnings():
@@ -68,7 +68,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_destination_unreachable_fields_are_parsed(self) -> None:
         from pcapkit.const.icmp.destination_unreachable_code import DestinationUnreachableCode
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         packet = ICMP_PACKETS['destination-unreachable']
         with warnings.catch_warnings():
@@ -80,7 +80,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         self.assertEqual(parsed.info.data, QUOTED)
 
     def test_parameter_problem_pointer_is_parsed(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         packet = ICMP_PACKETS['parameter-problem']
         with warnings.catch_warnings():
@@ -92,8 +92,8 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         self.assertEqual(parsed.info.data, QUOTED)
 
     def test_unknown_type_keeps_raw_body(self) -> None:
-        from pcapkit.protocols.data.internet.icmpv4 import Unknown
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.data import Unknown
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         packet = ICMP_PACKETS['unknown-type']
         with warnings.catch_warnings():
@@ -104,7 +104,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         self.assertEqual(parsed.info.data, b'extended-echo-body')
 
     def test_make_builds_echo_from_scratch(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         proto = object.__new__(ICMPv4)
         schema = proto.make(type=8, code=0, checksum=b'\x124',
@@ -112,7 +112,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
         self.assertEqual(schema.pack(), ICMP_PACKETS['echo-request'])
 
     def test_make_accepts_raw_bytes_body(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         proto = object.__new__(ICMPv4)
         body = struct.pack('>HH', 1, 2) + b'abcd'
@@ -121,7 +121,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_construct_with_no_arguments(self) -> None:
         """``ICMPv4()`` builds a default Echo Request rather than raising."""
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         proto = ICMPv4()
         # Type 8 (Echo), code 0, the RFC 792 checksum computed over an all-zero
@@ -130,8 +130,8 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_dispatches_from_ipv4(self) -> None:
         """IPv4's protocol-number dispatch reaches :class:`ICMPv4`."""
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         icmp_body = ICMP_PACKETS['echo-request']
         header = bytearray(bytes.fromhex(
@@ -150,7 +150,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_id_index_and_length_hint(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         self.assertEqual(ICMPv4.id(), ('ICMP',))
         self.assertEqual(ICMPv4.__index__(), TransType.ICMP)
@@ -158,7 +158,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_register_type_warns_on_override(self) -> None:
         from pcapkit.const.icmp.type import Type
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.utilities.warnings import RegistryWarning
 
         original = ICMPv4.__type__[Type.Echo]
@@ -175,13 +175,13 @@ class ICMPv4RoundTripTests(unittest.TestCase):
             ICMPv4.__type__[Type.Echo] = original
 
     def test_name_property(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         self.assertEqual(object.__new__(ICMPv4).name, 'Internet Control Message Protocol')
 
     def test_make_rejects_bytes_body_that_fails_to_parse(self) -> None:
         """Parameter Problem's body needs at least four octets."""
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(ICMPv4)
@@ -189,7 +189,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
             proto.make(type=12, code=0, checksum=b'\x00\x00', body=b'\x01')
 
     def test_make_rejects_an_unsupported_body_type(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(ICMPv4)
@@ -197,8 +197,8 @@ class ICMPv4RoundTripTests(unittest.TestCase):
             proto.make(type=8, code=0, checksum=b'\x00\x00', body=12345)  # type: ignore[arg-type]
 
     def test_make_accepts_a_pre_built_schema_body(self) -> None:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.schema.internet.icmpv4 import Echo as Schema_Echo
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.schema import Echo as Schema_Echo
 
         proto = object.__new__(ICMPv4)
         pre_built = Schema_Echo(id=1, seq=2, data=b'abcd')
@@ -208,15 +208,15 @@ class ICMPv4RoundTripTests(unittest.TestCase):
     def test_register_type_accepts_a_callable_pair(self) -> None:
         """A ``(parser, constructor)`` pair bypasses the ``_read/_make_data_type_*`` lookup."""
         from pcapkit.const.icmp.type import Type
-        from pcapkit.protocols.data.internet.icmpv4 import Unknown as Data_Unknown
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.data import Unknown as Data_Unknown
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         def custom_parser(schema, *, header, length):  # pylint: disable=unused-argument
             return Data_Unknown(type=header.type, code=header.code, checksum=header.checksum,
                                length=length, data=b'custom-parsed')
 
         def custom_constructor(type, message=None, **kwargs):  # pylint: disable=redefined-builtin,unused-argument
-            from pcapkit.protocols.schema.internet.icmpv4 import Unknown as Schema_Unknown
+            from pcapkit.protocols.internet.icmpv4.schema import Unknown as Schema_Unknown
             return Schema_Unknown(data=b'custom-made')
 
         # ``.get`` rather than ``[...]``: a defaultdict lookup by subscript
@@ -248,7 +248,7 @@ class ICMPv4RoundTripTests(unittest.TestCase):
 
     def test_make_error_messages_use_the_shared_alias(self) -> None:
         """The shared make path words its errors with ``alias``, which is ``ICMP`` here."""
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(ICMPv4)

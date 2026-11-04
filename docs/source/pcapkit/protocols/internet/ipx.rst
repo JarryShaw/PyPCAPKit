@@ -2,9 +2,10 @@ IPX - Internetwork Packet Exchange
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipx
+.. module:: pcapkit.protocols.internet.ipx.protocol
 
-:mod:`pcapkit.protocols.internet.ipx` contains
-:class:`~pcapkit.protocols.internet.ipx.IPX` only,
+:mod:`pcapkit.protocols.internet.ipx.protocol` contains
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` only,
 which implements the extractor for Internetwork Packet
 Exchange (IPX) [*]_, whose structure is described
 as below:
@@ -20,7 +21,7 @@ Octets      Bits        Name                    Description
   18        144   ``ipx.src``               Source Address
 ======= ========= ====================== =====================================
 
-.. autoclass:: pcapkit.protocols.internet.ipx.IPX
+.. autoclass:: pcapkit.protocols.internet.ipx.protocol.IPX
    :no-members:
    :show-inheritance:
 
@@ -47,22 +48,32 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipx
+.. module:: pcapkit.protocols.internet.ipx.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipx.IPX
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipx``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipx.schema.IPX
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipx
+.. module:: pcapkit.protocols.internet.ipx.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipx.IPX
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ipx``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipx.data.IPX
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipx.Address
+.. autoclass:: pcapkit.protocols.internet.ipx.data.Address
    :members:
    :show-inheritance:
 

@@ -3,7 +3,7 @@
 
 GitHub issue #1456: inside IPv6, the parser restores the ``dst`` prefix of each
 compressed address, and :meth:`IPv6_Route._make_data_type_rpl
-<pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl>` wrote
+<pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data_type_rpl>` wrote
 the decoded address back at its full 16 octets, so a header with ``CmprI`` or
 ``CmprE`` above zero grew on rebuild.
 
@@ -72,14 +72,14 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
         return cls.from_data(cls(raw, len(raw)).info).data
 
     def test_issue_1456_compressed_header_inside_ipv6(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         raw = ipv6(bytes([59, 2, 3, 1, 0x88, 0, 0, 0]) + bytes(range(1, 17)))
         self.assertEqual(len(raw), 64)
         self.assertEqual(self.rebuild(IPv6, raw), raw)
 
     def test_issue_1457_cut_address_is_kept_as_read(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         route = bytes([59, 2, 3, 1, 0, 0, 0, 0]) + bytes(range(1, 17))
         for cut in (12, 23):
@@ -89,14 +89,14 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
                 self.assertEqual(self.rebuild(IPv6_Route, route[:cut]), route[:cut])
 
     def test_issue_1457_cut_keeps_hdr_ext_len(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         route = bytes([59, 2, 3, 1, 0x88, 0, 0, 0]) + bytes(range(1, 17))
         self.assertEqual(self.rebuild(IPv6_Route, route[:12]), route[:12])
 
     def test_every_compression_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         for label, route in headers():
             with self.subTest(case=label):
@@ -104,8 +104,8 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
                 self.assertEqual(self.rebuild(IPv6, ipv6(route)), ipv6(route))
 
     def test_every_cut_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         # Two addresses put a cut in both ``Addresses[1..n-1]`` and ``Addresses[n]``.
         for label, route in headers():
@@ -125,8 +125,8 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
                         self.assertEqual(alone[1], route[1])
 
     def test_make_parse_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         dst = ipaddress.IPv6Address(DST)
         for shared in (0, 4, 8, 15, 16):
@@ -143,7 +143,7 @@ class TestIPv6RouteRPLRoundTrip(unittest.TestCase):
                     self.assertLessEqual(route.cmpr_e, 15)
 
     def test_make_without_addresses_is_rejected(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         from pcapkit.utilities.exceptions import ProtocolError
 
         for dst in (None, ipaddress.IPv6Address(DST)):

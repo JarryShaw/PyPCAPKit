@@ -99,8 +99,8 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
 
     def frame(self, name: str):  # type: ignore[no-untyped-def]
         """Parse ``CHAINS[name]`` over Ethernet as the first record of a PCAP file."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         packet = MAC + b'\x86\xdd' + ipv6(CHAINS[name])
         record = struct.pack('<IIII', 1, 2, len(packet), len(packet)) + packet
@@ -108,9 +108,9 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
         return Frame(io.BytesIO(record), num=1, header=self.header)
 
     def test_every_layer_rebuilds_from_its_dict(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         for name in CHAINS:
             frame = self.frame(name)
@@ -126,7 +126,7 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 self.assertEqual(rebuilt.data, frame.data)
 
     def test_rebuilt_chain_has_the_parsed_headers(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name in CHAINS:
             with self.subTest(chain=name):
@@ -137,7 +137,7 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
 
     def test_to_dict_keeps_every_header_of_a_type_in_wire_order(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name in CHAINS:
             with self.subTest(chain=name):
@@ -158,8 +158,8 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 self.assertEqual({key: dict_[key] for key in dict_}, first)
 
     def test_info_from_dict_keeps_the_repeats(self) -> None:
-        from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name in CHAINS:
             with self.subTest(chain=name):
@@ -192,7 +192,7 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
 
     def test_info_copy_keeps_its_own_repeats(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         info = self.frame('dst-dst')[IPv6].info
         before = list(info.items(multi=True))

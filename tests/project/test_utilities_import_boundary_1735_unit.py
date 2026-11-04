@@ -145,7 +145,7 @@ class UtilitiesImportBoundaryTests(unittest.TestCase):
             'if TYPE_CHECKING:',                              # 6
             '    from pcapkit.protocols.protocol import P',   # 7
             'def f():',                                       # 8
-            '    from pcapkit.protocols.misc.raw import Raw', # 9
+            '    from pcapkit.protocols.misc.raw.protocol import Raw', # 9
             '    import pcapkit.const',                       # 10
             '    from ..corekit import fields',               # 11
             '    from .. import protocols',                   # 12
@@ -160,8 +160,8 @@ class UtilitiesImportBoundaryTests(unittest.TestCase):
         self.assertEqual(crossing, [
             (7, 'pcapkit.protocols.protocol'),
             (7, 'pcapkit.protocols.protocol.P'),
-            (9, 'pcapkit.protocols.misc.raw'),
-            (9, 'pcapkit.protocols.misc.raw.Raw'),
+            (9, 'pcapkit.protocols.misc.raw.protocol'),
+            (9, 'pcapkit.protocols.misc.raw.protocol.Raw'),
             (10, 'pcapkit.const'),
             (11, 'pcapkit.corekit'),
             (11, 'pcapkit.corekit.fields'),

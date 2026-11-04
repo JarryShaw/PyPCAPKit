@@ -254,7 +254,7 @@ class hold_warnings:  # pylint: disable=invalid-name
 
     :meth:`Protocol._parse_next_layer
     <pcapkit.protocols.protocol.Protocol._parse_next_layer>` uses this for the
-    trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.Raw` when the
+    trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.protocol.Raw` when the
     header was not captured, or that :func:`~pcapkit.corekit.decorators.beholder`
     replaces when it raises: the warnings describe a layer the result does not
     have (:issue:`1580`, :issue:`2308`).

@@ -2,12 +2,13 @@ IEEE 802.11 - Wireless LAN MAC Header
 =====================================
 
 .. module:: pcapkit.protocols.link.ieee802_11
+.. module:: pcapkit.protocols.link.ieee802_11.protocol
 
-:mod:`pcapkit.protocols.link.ieee802_11` contains
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` only, which implements
+:mod:`pcapkit.protocols.link.ieee802_11.protocol` contains
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` only, which implements
 the extractor for the IEEE 802.11 MAC header [*]_ of a protocol version 0
 frame, as a ``LINKTYPE_IEEE802_11`` capture carries it or
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` hands it on. Its fields, in
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` hands it on. Its fields, in
 the order they appear, numeric ones little-endian:
 
 .. table::
@@ -29,22 +30,22 @@ the order they appear, numeric ones little-endian:
                                    with +HTC/Order set (§9.2.4.6)
    ======================= ======= ============================================
 
-:func:`~pcapkit.protocols.schema.link.ieee802_11.layout` gives the rule per
+:func:`~pcapkit.protocols.link.ieee802_11.schema.layout` gives the rule per
 frame type. A Control frame of a subtype whose layout this class does not
 model, and an Extension frame, are read as the minimal frame format of
 §9.2.3: the first three fields only. A Control Frame Extension frame and an
 S1G Beacon lay out B8-B15 of Frame Control differently; see
-:class:`~pcapkit.protocols.data.link.ieee802_11.FrameControl`.
+:class:`~pcapkit.protocols.link.ieee802_11.data.FrameControl`.
 
 Scope
 -----
 
 * **The frame body** (§9.2.4.7) is kept as
-  :class:`~pcapkit.protocols.misc.raw.Raw`, protected or not.
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, protected or not.
 * **The FCS** (§9.2.4.8), where one was captured, stays at the end of the
   body: this class does not decide whether a capture carries one, which
   behind radiotap is a Flags bit
-  :class:`~pcapkit.protocols.link.radiotap.Radiotap` decodes but does not
+  :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` decodes but does not
   pass on.
 * **Pad octets** that radiotap's data-pad flag says follow the header stay
   at the start of the body, for the same reason.
@@ -52,7 +53,7 @@ Scope
   frame format of §9.8, whose Frame Control field is laid out differently,
   and versions 2 and 3 are reserved.
 
-.. autoclass:: pcapkit.protocols.link.ieee802_11.IEEE802_11
+.. autoclass:: pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11
    :no-members:
    :show-inheritance:
 
@@ -79,49 +80,49 @@ Scope
    .. automethod:: _make_ht_control
    .. automethod:: _make_mac_addr
 
-.. autodata:: pcapkit.protocols.link.ieee802_11.SUBTYPE
+.. autodata:: pcapkit.protocols.link.ieee802_11.protocol.SUBTYPE
    :no-value:
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.ieee802_11
+.. module:: pcapkit.protocols.link.ieee802_11.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.ieee802_11.IEEE802_11
+.. autoclass:: pcapkit.protocols.link.ieee802_11.schema.IEEE802_11
    :members:
    :show-inheritance:
 
-.. autofunction:: pcapkit.protocols.schema.link.ieee802_11.layout
+.. autofunction:: pcapkit.protocols.link.ieee802_11.schema.layout
 
-.. autoclass:: pcapkit.protocols.schema.link.ieee802_11.Layout
+.. autoclass:: pcapkit.protocols.link.ieee802_11.schema.Layout
    :members:
    :show-inheritance:
 
-.. autodata:: pcapkit.protocols.schema.link.ieee802_11.CONTROL_WITH_ADDR2
+.. autodata:: pcapkit.protocols.link.ieee802_11.schema.CONTROL_WITH_ADDR2
    :no-value:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.ieee802_11
+.. module:: pcapkit.protocols.link.ieee802_11.data
 
-.. autoclass:: pcapkit.protocols.data.link.ieee802_11.IEEE802_11
+.. autoclass:: pcapkit.protocols.link.ieee802_11.data.IEEE802_11
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.ieee802_11.FrameControl
+.. autoclass:: pcapkit.protocols.link.ieee802_11.data.FrameControl
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.ieee802_11.SequenceControl
+.. autoclass:: pcapkit.protocols.link.ieee802_11.data.SequenceControl
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.ieee802_11.QoSControl
+.. autoclass:: pcapkit.protocols.link.ieee802_11.data.QoSControl
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.ieee802_11.HTControl
+.. autoclass:: pcapkit.protocols.link.ieee802_11.data.HTControl
    :members:
    :show-inheritance:
 

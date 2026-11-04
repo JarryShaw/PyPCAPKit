@@ -10,7 +10,7 @@ among them. :func:`~pcapkit.corekit.schema.padding.pad_length` states it once, a
 The expected values here never call ``pad_length``: :func:`spec_pad` counts the
 octets up to the boundary one at a time, as the specifications word it. The
 PCAP-NG cases check every schema in
-:mod:`pcapkit.protocols.schema.misc.pcapng` that sizes its padding with
+:mod:`pcapkit.protocols.misc.pcapng.schema` that sizes its padding with
 ``align``, so a site sized against the wrong field or boundary fails by name.
 
 :mod:`pcapkit` is imported inside each test, after
@@ -135,7 +135,7 @@ class PaddingFieldAlignTests(unittest.TestCase):
     def test_pack_and_unpack_in_a_schema(self) -> None:
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class TLV(Schema):
@@ -190,7 +190,7 @@ class PCAPNGAlignedPaddingTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-        from pcapkit.protocols.schema.misc import pcapng
+        from pcapkit.protocols.misc.pcapng import schema as pcapng
 
         self.pcapng = pcapng
 
@@ -228,7 +228,7 @@ class PCAPNGAlignedPaddingTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any

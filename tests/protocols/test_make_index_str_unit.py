@@ -41,7 +41,7 @@ def _attr(path: 'str') -> 'Any':
 
 def _tcp_alternate_checksum(**kwargs: 'Any') -> 'Any':
     option = _attr('pcapkit.const.tcp.option.Option')
-    return _attr('pcapkit.protocols.transport.tcp.TCP')(
+    return _attr('pcapkit.protocols.transport.tcp.protocol.TCP')(
         options=[(option.TCP_Alternate_Checksum_Request, kwargs)],
     )
 
@@ -71,30 +71,30 @@ def _ipv6_option(protocol: 'str', option: 'str') -> 'Any':
 #: (protocol class or builder, argument, enum class, non-default member, the
 #: other keywords the maker needs).
 CASES = {
-    'link/ethernet': ('pcapkit.protocols.link.ethernet.Ethernet', 'type',
+    'link/ethernet': ('pcapkit.protocols.link.ethernet.protocol.Ethernet', 'type',
                       'pcapkit.const.reg.ethertype.EtherType', 'Internet_Protocol_version_6', {}),
-    'link/l2tpv2': ('pcapkit.protocols.link.l2tpv2.L2TPv2', 'type',
+    'link/l2tpv2': ('pcapkit.protocols.link.l2tpv2.protocol.L2TPv2', 'type',
                     'pcapkit.const.l2tp.type.Type', 'Control', {}),
-    'internet/ipv4': ('pcapkit.protocols.internet.ipv4.IPv4', 'protocol',
+    'internet/ipv4': ('pcapkit.protocols.internet.ipv4.protocol.IPv4', 'protocol',
                       'pcapkit.const.reg.transtype.TransType', 'TCP', {}),
     'transport/tcp': (_tcp_alternate_checksum, 'algorithm',
                       'pcapkit.const.tcp.checksum.Checksum', 'Checksum_16_bit_Fletcher_s_algorithm', {}),
-    'application/ospf': ('pcapkit.protocols.application.ospf.OSPF', 'type',
+    'application/ospf': ('pcapkit.protocols.application.ospf.protocol.OSPF', 'type',
                          'pcapkit.const.ospf.packet.Packet', 'Database_Description', {}),
-    'misc/pcap': ('pcapkit.protocols.misc.pcap.header.Header', 'network',
+    'misc/pcap': ('pcapkit.protocols.misc.pcap.header.protocol.Header', 'network',
                   'pcapkit.const.reg.linktype.LinkType', 'RAW', {}),
     # arguments defaulting to None, whose maker named the enumeration at the call
     # for a name to resolve against (#2356)
-    'internet/hopopt MPL': (_ipv6_option('pcapkit.protocols.internet.hopopt.HOPOPT', 'MPL_Option'),
+    'internet/hopopt MPL': (_ipv6_option('pcapkit.protocols.internet.hopopt.protocol.HOPOPT', 'MPL_Option'),
                             'seed_type', 'pcapkit.const.ipv6.seed_id.SeedID',
                             'SEEDID_64_BIT_UNSIGNED_INTEGER', {'seed': 5, 'seq': 7}),
-    'internet/ipv6_opts MPL': (_ipv6_option('pcapkit.protocols.internet.ipv6_opts.IPv6_Opts', 'MPL_Option'),
+    'internet/ipv6_opts MPL': (_ipv6_option('pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts', 'MPL_Option'),
                                'seed_type', 'pcapkit.const.ipv6.seed_id.SeedID',
                                'SEEDID_64_BIT_UNSIGNED_INTEGER', {'seed': 5, 'seq': 7}),
-    'internet/hopopt SMF_DPD': (_ipv6_option('pcapkit.protocols.internet.hopopt.HOPOPT', 'SMF_DPD'),
+    'internet/hopopt SMF_DPD': (_ipv6_option('pcapkit.protocols.internet.hopopt.protocol.HOPOPT', 'SMF_DPD'),
                                 'tid_type', 'pcapkit.const.ipv6.tagger_id.TaggerID',
                                 'DEFAULT', {'tid': b'\x0a\x0b\x0c\x0d', 'id': b'\xaa\xbb'}),
-    'internet/ipv6_opts SMF_DPD': (_ipv6_option('pcapkit.protocols.internet.ipv6_opts.IPv6_Opts', 'SMF_DPD'),
+    'internet/ipv6_opts SMF_DPD': (_ipv6_option('pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts', 'SMF_DPD'),
                                    'tid_type', 'pcapkit.const.ipv6.tagger_id.TaggerID',
                                    'DEFAULT', {'tid': b'\x0a\x0b\x0c\x0d', 'id': b'\xaa\xbb'}),
 }
@@ -133,7 +133,7 @@ class TestMakeRefusesNames(unittest.TestCase):
     def test_http_status_name_is_refused(self) -> None:
         """``status`` defaults to :data:`None`, as a request carries none (#2356)."""
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
-        http = _attr('pcapkit.protocols.application.httpv1.HTTPv1')
+        http = _attr('pcapkit.protocols.application.httpv1.protocol.HTTPv1')
         status_code = _attr('pcapkit.const.http.status_code.StatusCode')
         protocol = _attr('pcapkit.protocols.protocol.Protocol')
 
@@ -144,7 +144,7 @@ class TestMakeRefusesNames(unittest.TestCase):
 
     def test_removed_keywords_are_refused(self) -> None:
         exc = _attr('pcapkit.utilities.exceptions.UnsupportedCall')
-        ethernet = _attr('pcapkit.protocols.link.ethernet.Ethernet')
+        ethernet = _attr('pcapkit.protocols.link.ethernet.protocol.Ethernet')
         for keyword, value in (('type_default', 0x1234), ('type_namespace', {0x1234: 'X'}),
                                ('type_reversed', True)):
             with self.subTest(keyword=keyword):
@@ -159,7 +159,7 @@ class TestMakeIndex(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _raw(self) -> 'Any':
-        return _attr('pcapkit.protocols.misc.raw.Raw')(b'')
+        return _attr('pcapkit.protocols.misc.raw.protocol.Raw')(b'')
 
     def test_member_and_code_resolve_to_the_member(self) -> None:
         transtype = _attr('pcapkit.const.reg.transtype.TransType')
@@ -240,7 +240,7 @@ class TestMakePort(unittest.TestCase):
 
     def test_port_refusals(self) -> None:
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')
-        for path in ('pcapkit.protocols.transport.tcp.TCP', 'pcapkit.protocols.transport.udp.UDP'):
+        for path in ('pcapkit.protocols.transport.tcp.protocol.TCP', 'pcapkit.protocols.transport.udp.protocol.UDP'):
             protocol = _attr(path)
             for keyword in ('srcport', 'dstport'):
                 for value in (1 << 16, -1, 'http', True):
@@ -249,7 +249,7 @@ class TestMakePort(unittest.TestCase):
                             protocol(**{keyword: value})
 
     def test_widest_port_builds(self) -> None:
-        tcp = _attr('pcapkit.protocols.transport.tcp.TCP')
+        tcp = _attr('pcapkit.protocols.transport.tcp.protocol.TCP')
         self.assertEqual(tcp(srcport=0xFFFF).data[:2], b'\xff\xff')
 
 
@@ -293,7 +293,7 @@ class TestResolveIndex(unittest.TestCase):
                     protocol.resolve_index('eggs', namespace=namespace)
 
     def test_inherited_by_every_protocol(self) -> None:
-        ethernet = _attr('pcapkit.protocols.link.ethernet.Ethernet')
+        ethernet = _attr('pcapkit.protocols.link.ethernet.protocol.Ethernet')
         ethertype = _attr('pcapkit.const.reg.ethertype.EtherType')
         code = ethernet.resolve_index('Address_Resolution_Protocol', namespace=ethertype)
         self.assertEqual(ethernet(type=code).data[12:14], b'\x08\x06')

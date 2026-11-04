@@ -1,0 +1,548 @@
+# -*- coding: utf-8 -*-
+"""OSPF - Open Shortest Path First
+=====================================
+
+.. module:: pcapkit.protocols.application.ospf.protocol
+
+:mod:`pcapkit.protocols.application.ospf.protocol` contains
+:class:`~pcapkit.protocols.application.ospf.protocol.OSPF` only,
+which implements an extractor for Open Shortest Path
+First (OSPF) [*]_, whose structure is described
+as below:
+
+.. table::
+
+   ====== ===== ================== ===============================
+   Octets Bits  Name               Description
+   ====== ===== ================== ===============================
+   0          0 ``ospf.version``   Version Number
+   ------ ----- ------------------ -------------------------------
+   1          8 ``ospf.type``      Type
+   ------ ----- ------------------ -------------------------------
+   2         16 ``ospf.len``       Packet Length (header included)
+   ------ ----- ------------------ -------------------------------
+   4         32 ``ospf.router_id`` Router ID
+   ------ ----- ------------------ -------------------------------
+   8         64 ``ospf.area_id``   Area ID
+   ------ ----- ------------------ -------------------------------
+   12        96 ``ospf.chksum``    Checksum
+   ------ ----- ------------------ -------------------------------
+   14       112 ``ospf.autype``    Authentication Type
+   ------ ----- ------------------ -------------------------------
+   16       128 ``ospf.auth``      Authentication
+   ====== ===== ================== ===============================
+
+.. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First
+
+.. versionadded:: 1.5.0
+
+   Moved here from ``pcapkit.protocols.link.ospf``, with its data model and
+   header schema. :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` derives
+   from :class:`~pcapkit.protocols.application.application.Application`, so
+   its layer is ``'Application'`` (:issue:`719`).
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
+   ``pcapkit.protocols.schema.link.ospf``, the ``OSPF`` name that
+   :mod:`pcapkit.protocols.link`, ``pcapkit.protocols.data.link`` and
+   ``pcapkit.protocols.schema.link`` each exported, and the
+   ``OSPF_CrytographicAuthentication`` name that
+   ``pcapkit.protocols.data.link`` and ``pcapkit.protocols.schema.link``
+   exported, with no alias (:issue:`719`, :issue:`1090`).
+
+.. versionchanged:: 1.5.0
+
+   A rebuild keeps the parsed Packet Length and the octets past it, where
+   :meth:`~pcapkit.protocols.application.ospf.protocol.OSPF.make` recomputed the
+   length from the payload and dropped those octets; it takes them as
+   ``packet_length`` and ``trailer`` (:issue:`1249`, :issue:`1455`).
+
+.. versionchanged:: 1.6.0
+
+   The OSPFv2 checksum is computed when
+   :meth:`~pcapkit.protocols.application.ospf.protocol.OSPF.make` is given none, and
+   verified on read under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
+   (:issue:`2475`).
+
+   :meth:`~pcapkit.protocols.application.ospf.protocol.OSPF.make` raises
+   :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a checksum, or the
+   reserved octets of cryptographic authentication data, that is not two
+   octets, rather than padding or cutting it (:issue:`2676`).
+
+"""
+import collections.abc
+import ipaddress
+from typing import TYPE_CHECKING, cast
+
+from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
+from pcapkit.const.ospf.packet import Packet as Enum_Packet
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.application.ospf.data import OSPF as Data_OSPF
+from pcapkit.protocols.application.ospf.data import \
+    CryptographicAuthentication as Data_CryptographicAuthentication
+from pcapkit.protocols.application.ospf.schema import OSPF as Schema_OSPF
+from pcapkit.protocols.application.ospf.schema import \
+    CryptographicAuthentication as Schema_CryptographicAuthentication
+from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.utilities import config
+from pcapkit.utilities.exceptions import ProtocolError
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address
+    from typing import Any, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.schema import Schema
+
+__all__ = ['OSPF']
+
+
+class OSPF(Application[Data_OSPF, Schema_OSPF],
+           schema=Schema_OSPF, data=Data_OSPF):
+    """This class implements Open Shortest Path First.
+
+    A routing protocol computes the forwarding table rather than forwarding
+    packets, so it is a *user* of the stack rather than part of its forwarding
+    path. :rfc:`1812#section-7` places it accordingly, titling that chapter
+    "APPLICATION LAYER - ROUTING PROTOCOLS" with OSPF at §7.2.2, while the
+    Internet Layer protocols :rfc:`1812#section-4.1` names are IP, ICMP and IGMP.
+    Hence :class:`~pcapkit.protocols.application.application.Application` as the
+    base, and ``layer == 'Application'``. See
+    :doc:`/contributing/conventions/protocol-layer-placement`.
+
+    Note:
+        The subpackage does not track the dispatch tier. OSPF is dispatched
+        from :attr:`Internet.__proto__
+        <pcapkit.protocols.internet.internet.Internet.__proto__>` at
+        :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP` (IANA protocol
+        number 89), since IP is what carries it.
+
+    .. versionchanged:: 1.6.0
+
+       Each enumeration field of :meth:`make` takes a member or an
+       :class:`int` code, resolved with the enumeration's ``get``; a name, a
+       :obj:`bool` for a field wider than one bit, or a code the field cannot
+       carry raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather
+       than resolving against an enumeration inferred from the caller's frame
+       or writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``type_default``, ``type_namespace``, ``type_reversed``,
+       ``auth_type_default``, ``auth_type_namespace`` and
+       ``auth_type_reversed`` arguments of :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
+    #: Version number of corresponding protocol, as read off the header. Held on
+    #: the instance rather than read back out of :attr:`self._info
+    #: <pcapkit.protocols.protocol.Protocol._info>` because :attr:`name` and
+    #: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` builds the
+    #: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until
+    #: :meth:`read` has returned. See ``ARP._acnm`` on
+    #: :class:`~pcapkit.protocols.link.arp.protocol.ARP`, which has the same constraint.
+    _version: 'int'
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'str':
+        """Name of current protocol."""
+        return f'Open Shortest Path First version {self._version}'
+
+    @property
+    def alias(self) -> 'str':
+        """Acronym of current protocol."""
+        return f'OSPFv{self._version}'
+
+    @property
+    def length(self) -> 'Literal[24]':
+        """Header length of current protocol."""
+        return 24
+
+    @property
+    def type(self) -> 'Enum_Packet':
+        """OSPF packet type."""
+        return self._info.type
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_OSPF':
+        """Read Open Shortest Path First.
+
+        Structure of OSPF header [:rfc:`2328`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Version #   |     Type      |         Packet length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                          Router ID                            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                           Area ID                             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Checksum            |             AuType            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Authentication                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Authentication                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        schema = self.__header__
+
+        # Set before _decode_next_layer below, which reads self.alias.
+        self._version = schema.version
+
+        ospf = Data_OSPF(
+            version=schema.version,
+            type=schema.type,
+            len=schema.length,
+            router_id=schema.router_id,
+            area_id=schema.area_id,
+            chksum=schema.checksum,
+            autype=schema.auth_type,
+        )
+        length = schema.length if schema.length else (length or len(self))
+
+        if ospf.autype == Enum_Authentication.Cryptographic_authentication:
+            ospf.__update__([
+                ('auth', self._read_encrypt_auth(
+                    cast('Schema_CryptographicAuthentication', schema.auth_data),
+                )),
+            ])
+        else:
+            ospf.__update__([
+                ('auth', cast('bytes', schema.auth_data)),
+            ])
+
+        # NOTE: Octets captured past the Packet Length belong to this layer,
+        # since its own length field is what leaves them out of the payload --
+        # the message digest of cryptographic authentication among them -- and
+        # the rebuild keeps them as captured (#1455).
+        if schema.trailer:
+            ospf.__update__([
+                ('trailer', schema.trailer),
+            ])
+
+        # NOTE: The checksum leaves out the 8-octet Authentication field at
+        # octet 16, and is unused under cryptographic authentication (RFC 2328).
+        if config.CHECKSUM_VERIFY and ospf.version == 2:
+            from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            if ospf.autype == Enum_Authentication.Cryptographic_authentication:
+                status = ChecksumStatus.NOT_COMPUTED
+            else:
+                end = max(ospf.len, self.length)
+                status = verify_checksum(self.alias, self._data[:16] + self._data[self.length:end],
+                                         ospf.chksum, length=end - 8)
+            ospf.__update__([
+                ('checksum_status', status),
+            ])
+
+        # OSPF carries no next-protocol field -- the body is LSAs and packet-type
+        # specific fields, which pcapkit does not dissect -- so dispatch on the
+        # -1 sentinel, as ARP does, rather than on a code read off the wire;
+        # ``Application._decode_next_layer`` refuses any other value.
+        return self._decode_next_layer(ospf, -1, length - self.length)
+
+    def make(self,
+             version: 'int' = 2,
+             type: 'Enum_Packet | int' = Enum_Packet.Hello,
+             packet_length: 'Optional[int]' = None,
+             router_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             area_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             checksum: 'Optional[bytes]' = None,
+             auth_type: 'Enum_Authentication | int' = Enum_Authentication.No_Authentication,
+             auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]' = b'\x00\x00\x00\x00\x00\x00\x00\x00',  # pylint: disable=line-too-long
+             payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
+             **kwargs: 'Any') -> 'Schema_OSPF':
+        """Make (construct) packet data.
+
+        Args:
+            version: OSPF version number.
+            type: OSPF packet type.
+            packet_length: Packet length (header included). If not given, it is
+                computed as 24 plus the length of ``payload``. Give it
+                explicitly when ``payload`` carries octets outside the OSPF
+                packet, or pass those as ``trailer`` instead.
+            router_id: Router ID.
+            area_id: Area ID.
+            checksum: Checksum; if :data:`None` and
+                :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE` is on, computed
+                for OSPFv2 over the packet but its authentication field
+                (:rfc:`2328#appendix-A.3.1`); zero otherwise, as cryptographic
+                authentication leaves it (:rfc:`2328#appendix-D.4.3`).
+            auth_type: Authentication type.
+            auth_data: Authentication data: 8 octets, or, under cryptographic
+                authentication, also a schema, a data model, or the
+                :obj:`dict` form of a data model.
+            payload: Payload data.
+            trailer: Octets after the packet, outside the Packet Length, such
+                as the message digest appended under cryptographic
+                authentication (:rfc:`2328#appendix-D.4.3`); written as is.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Raises:
+            ProtocolError: If ``auth_data`` is of an invalid type, is
+                :obj:`bytes` that are not exactly 8 octets long, is a
+                :obj:`dict` missing a required key, or carries ``reserved``
+                octets that are not two; if ``packet_length`` is not an
+                :obj:`int` in ``0..65535``; if ``checksum`` is not two octets;
+                or if ``type`` (8 bits) or ``auth_type`` (16 bits) is a name, a
+                :obj:`bool`, or a member or code its field cannot carry.
+
+        .. versionchanged:: 1.5.0
+
+           ``packet_length`` is a new parameter before ``router_id``, so a
+           1.4.x positional argument meant for ``router_id`` or a later
+           parameter lands one parameter early (:issue:`1249`).
+
+        """
+        # NOTE: ``alias`` reads ``_version``, which only ``read()`` sets.
+        type_ = self._make_index(type, Enum_Packet, bits=8, name='type', alias='OSPF')
+        auth_type_ = self._make_index(auth_type, Enum_Authentication, bits=16,
+                                      name='authentication type', alias='OSPF')
+
+        data: 'bytes | Schema_CryptographicAuthentication'
+        if auth_type_ == Enum_Authentication.Cryptographic_authentication:
+            data = self._make_encrypt_auth(auth_data)
+        else:
+            if not isinstance(auth_data, bytes):
+                raise ProtocolError(f'OSPF: invalid type for authentication data: {auth_data!r}')
+            if len(auth_data) != 8:
+                raise ProtocolError(f'OSPF: authentication data must be 8 octets: {auth_data!r}')
+            data = auth_data
+
+        if packet_length is None:
+            packet_length = 24 + len(payload)
+        else:
+            # NOTE: ``alias`` reads ``_version``, which only ``read()`` sets.
+            packet_length = self._make_uint(packet_length, bits=16, name='packet length', alias='OSPF')
+
+        schema = Schema_OSPF(
+            version=version,
+            type=type_,
+            length=packet_length,
+            router_id=router_id,
+            area_id=area_id,
+            checksum=(b'\x00\x00' if checksum is None
+                      else self._make_octets(checksum, size=2, name='checksum', alias='OSPF')),
+            auth_type=auth_type_,
+            auth_data=data,
+            payload=payload,
+            trailer=trailer,
+        )
+
+        if (checksum is None and config.CHECKSUM_COMPUTE and version == 2
+                and auth_type_ != Enum_Authentication.Cryptographic_authentication):
+            from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+            # NOTE: Over the packet but the Authentication field, as read() checks it (#2475).
+            octets = schema.pack()
+            schema.checksum = compute_checksum(octets[:16] + octets[self.length:max(packet_length, self.length)])
+        return schema
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __length_hint__(self) -> 'Literal[24]':
+        """Return an estimated length for the object."""
+        return 24
+
+    @classmethod
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return Enum_TransType.OSPFIGP  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_OSPF') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        auth = data.auth  # type: Any
+        # NOTE: Reserved octets a capture cut inside are zero-filled (#1458), in
+        # the data model or the dict form ``to_dict()`` gives of it.
+        if isinstance(auth, collections.abc.Mapping):
+            reserved = auth.get('reserved', b'\x00\x00')
+            filled = cls._fill_short_read(reserved, size=2, model=data, field='auth_data')
+            if filled is not reserved:
+                auth = {**auth, 'reserved': filled}
+        return {
+            'version': data.version,
+            'type': data.type,
+            'packet_length': data.get('len'),
+            'router_id': data.router_id,
+            'area_id': data.area_id,
+            'checksum': data.chksum,
+            'auth_type': data.autype,
+            'auth_data': auth,
+            'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Packet Length (#1455).
+            'trailer': data.get('trailer', b''),
+        }
+
+    def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':
+        """Read router and area IDs.
+
+        Args:
+            id: ID bytes.
+
+        Returns:
+            Parsed IDs as an IPv4 address.
+
+        """
+        #_byte = self._read_fileng(4)
+        #_addr = '.'.join(str(_) for _ in _byte)
+        return ipaddress.ip_address(id)  # type: ignore[return-value]
+
+    def _make_id_numbers(self, id: 'IPv4Address | str | bytes | bytearray') -> 'bytes':
+        """Make router and area IDs.
+
+        Args:
+            id: ID.
+
+        Returns:
+            ID bytes.
+
+        Raises:
+            FieldValueError: If ``id`` is a :obj:`bool` (see
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
+
+        Notes:
+            Latent rather than live: nothing in this module calls this method
+            (:meth:`make` builds ``router_id``/``area_id`` straight from its
+            own arguments), so the only caller is a unit test. It is routed
+            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
+            anyway, so that a future caller passing a :obj:`bool` gets
+            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a
+            silent ``0.0.0.1``.
+
+            The description below uses :attr:`self.__class__.__name__
+            <type.__name__>` rather than :attr:`self.alias
+            <pcapkit.protocols.protocol.Protocol.alias>`, because ``alias``
+            here reads ``self._version``, which :meth:`read` only assigns
+            from the wire -- unavailable to a construction-only instance that
+            never went through :meth:`read`.
+
+        """
+        return cast('IPv4Address', parse_ip_address(
+            id, f'{self.__class__.__name__}: invalid ID', version=4)).packed
+
+    def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
+        """Read Authentication field when Cryptographic Authentication is employed,
+        i.e. :attr:`~pcapkit.protocols.application.ospf.data.OSPF.autype` is ``2``.
+
+        Structure of Cryptographic Authentication [:rfc:`2328`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |              0                |    Key ID     | Auth Data Len |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Cryptographic sequence number                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed authentication data
+
+        Returns:
+            Parsed packet data.
+
+        """
+        auth = Data_CryptographicAuthentication(
+            reserved=schema.reserved,
+            key_id=schema.key_id,
+            len=schema.len,
+            seq=schema.seq,
+        )
+        return auth
+
+    def _make_encrypt_auth(self,
+                           auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]'  # pylint: disable=line-too-long
+                           ) -> 'Schema_CryptographicAuthentication':
+        """Make Authentication field when Cryptographic Authentication is employed.
+
+        Args:
+            auth_data: Authentication data, as raw octets, a schema, a data
+                model, or the :obj:`dict` form of a data model.
+
+        Returns:
+            Authentication schema.
+
+        Raises:
+            ProtocolError: If ``auth_data`` is of an invalid type, is
+                :obj:`bytes` that are not exactly 8 octets long, is a
+                :obj:`dict` missing a required key, or carries ``reserved``
+                octets that are not two.
+
+        """
+        if isinstance(auth_data, Schema_CryptographicAuthentication):
+            return auth_data
+        if isinstance(auth_data, bytes):
+            if len(auth_data) != 8:
+                raise ProtocolError(f'OSPF: authentication data must be 8 octets: {auth_data!r}')
+            return Schema_CryptographicAuthentication.unpack(auth_data)  # type: ignore[call-arg,misc]
+        if isinstance(auth_data, Data_CryptographicAuthentication):
+            return Schema_CryptographicAuthentication(
+                reserved=self._make_octets(getattr(auth_data, 'reserved', b'\x00\x00'), size=2,
+                                           name='reserved octets', alias='OSPF'),
+                key_id=auth_data.key_id,
+                len=auth_data.len,
+                seq=auth_data.seq,
+            )
+        # NOTE: The ``to_dict()`` form of the info above, which ``from_data``
+        # passes through as is (#1464).
+        if isinstance(auth_data, dict):
+            try:
+                return Schema_CryptographicAuthentication(
+                    reserved=self._make_octets(auth_data.get('reserved', b'\x00\x00'), size=2,
+                                               name='reserved octets', alias='OSPF'),
+                    key_id=auth_data['key_id'],
+                    len=auth_data['len'],
+                    seq=auth_data['seq'],
+                )
+            except KeyError as exc:
+                raise ProtocolError(f'OSPF: missing {exc} in auth_data: {auth_data!r}') from None
+        raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')

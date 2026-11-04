@@ -139,7 +139,7 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         """:meth:`SchemaField.__call__`."""
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class OneField(Schema):

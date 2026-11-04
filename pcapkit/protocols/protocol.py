@@ -16,7 +16,7 @@ from which the built-in protocol families derive, with its metaclass
    Constructing a protocol with a keyword that none of its signatures
    declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`,
    where it was discarded (:issue:`617`). A next layer captured shorter than
-   its header is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, where it
+   its header is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, where it
    was parsed with zero-filled fields (:issue:`1170`).
 
 """
@@ -28,6 +28,7 @@ import copy
 import difflib
 import enum
 import functools
+import importlib
 import inspect
 import io
 import os
@@ -49,13 +50,9 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import MultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.sentinels import ABSENT
-from pcapkit.protocols import data as data_module
-from pcapkit.protocols import schema as schema_module
-from pcapkit.protocols.data.data import Data
-from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
-from pcapkit.protocols.data.protocol import Packet as Data_Packet
-from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.data import Data
+from pcapkit.protocols.data import Packet as Data_Packet
+from pcapkit.protocols.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
@@ -99,7 +96,7 @@ def _passes_raw(value: 'Any', nested: 'bool' = False) -> 'bool':
     Returns:
         :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,
         :obj:`tuple`, :obj:`dict` or data model among ``value``, or a
-        :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A
+        :class:`~pcapkit.protocols.schema.Schema` does anywhere. A
         top-level :obj:`bytes` keyword (e.g. a payload) does not count. A data
         model is looked into as a :obj:`dict` is, since a maker builds from its
         fields as given, and a multi-mapping through every value of each key
@@ -177,7 +174,7 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 
     Returns:
         :data:`True` if, at some position both share, ``made`` holds
-        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.schema.Schema`.
+        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.Schema`.
 
     """
     if isinstance(made, bytes):
@@ -205,9 +202,9 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 #: <pcapkit.protocols.protocol.Protocol.from_data>` reconstructs from.
 #: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does
 #: not declare a ``packet``, starting with
-#: :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the innermost layer of every
+#: :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, the innermost layer of every
 #: packet. It is also a real field name for some protocols --
-#: :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>` takes the HIP
+#: :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>` takes the HIP
 #: packet *type* under it -- and listing it here does not change how it binds,
 #: only that it is never refused.
 OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
@@ -252,11 +249,11 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
     <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one
     ``**kwargs`` to both the construction and the parse of the packet it has just
     constructed, so a keyword declared by ``read`` travels through ``make`` too.
-    :class:`~pcapkit.protocols.internet.hip.HIP` is the live example:
-    :meth:`HIP.read <pcapkit.protocols.internet.hip.HIP.read>` declares
-    ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`
+    :class:`~pcapkit.protocols.internet.hip.protocol.HIP` is the live example:
+    :meth:`HIP.read <pcapkit.protocols.internet.hip.protocol.HIP.read>` declares
+    ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`
     does not, and :meth:`HIP.__post_init__
-    <pcapkit.protocols.internet.hip.HIP.__post_init__>` forwards it to both.
+    <pcapkit.protocols.internet.hip.protocol.HIP.__post_init__>` forwards it to both.
 
     The walk covers the whole MRO rather than the most derived override of each
     method, so that a subclass declaring its own keyword and forwarding the rest
@@ -287,10 +284,10 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             # NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,
             # which is unioned down the MRO. It describes how the class that
             # declares it dispatches, not a property its subclasses share:
-            # :class:`~pcapkit.protocols.application.http.HTTP` cannot enumerate
+            # :class:`~pcapkit.protocols.application.http.protocol.HTTP` cannot enumerate
             # its keywords because it forwards them to whichever of
-            # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` and
-            # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>` the
+            # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` and
+            # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>` the
             # ``version`` names, but each of those declares its own in full, and
             # inheriting the opt-out would exempt the very classes that can be
             # checked. A subclass that dispatches in turn says so itself.
@@ -397,7 +394,7 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     # :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be
     # pointed at, and it stays right if the frames between change, where a
     # hardcoded count would not. It is also what :meth:`Schema.__update__
-    # <pcapkit.protocols.schema.schema.Schema.__update__>` passes for the
+    # <pcapkit.protocols.schema.Schema.__update__>` passes for the
     # warning this one is the counterpart of.
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
@@ -413,7 +410,7 @@ def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
 
     Returns:
         Whether a next layer of ``klass`` parsed from ``captured`` octets may be
-        replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by
+        replaced with :class:`~pcapkit.protocols.misc.raw.protocol.Raw` by
         :meth:`Protocol._parse_next_layer
         <pcapkit.protocols.protocol.Protocol._parse_next_layer>`, and so has
         its warnings held.
@@ -429,6 +426,43 @@ def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
     except Exception:  # pylint: disable=broad-except
         return True
     return hint is not None and captured < hint
+
+
+def _sibling_model(cls: 'Type[ProtocolBase]', role: 'str') -> 'Any':
+    """The ``role`` class for a protocol class defined without one (:issue:`2534`).
+
+    Args:
+        cls: The protocol class being defined.
+        role: ``'schema'`` or ``'data'``, the module to look in.
+
+    Returns:
+        The class named after ``cls`` in the ``role`` module of the package whose
+        ``protocol`` module defines ``cls``, if there is one; otherwise
+        :class:`~pcapkit.protocols.misc.raw.schema.Raw` or
+        :class:`~pcapkit.protocols.misc.raw.data.Raw`.
+
+    """
+    package, _, name = cls.__module__.rpartition('.')
+    if name == 'protocol' and package != __name__.rpartition('.')[0]:
+        sibling = f'{package}.{role}'
+        try:
+            module = importlib.import_module(sibling)
+        except ModuleNotFoundError as exc:
+            if exc.name != sibling:
+                raise
+        else:
+            found = getattr(module, cls.__name__, None)
+            if isinstance(found, type):
+                return found
+    # NOTE: imported here rather than at the top: Raw's package is under
+    # pcapkit.protocols.misc, whose modules import this one (#2534).
+    if role == 'schema':
+        from pcapkit.protocols.misc.raw.schema import \
+            Raw as Schema_Raw  # pylint: disable=import-outside-toplevel
+        return Schema_Raw
+    from pcapkit.protocols.misc.raw.data import \
+        Raw as Data_Raw  # pylint: disable=import-outside-toplevel
+    return Data_Raw
 
 
 class ProtocolMeta(abc.ABCMeta):
@@ -487,9 +521,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     #: Layer of protocol, can be one of ``Link``, ``Internet``, ``Transport``
     #: and ``Application``. For example, the layer of
-    #: :class:`~pcapkit.protocols.link.ethernet.Ethernet` is ``Link``. However,
+    #: :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet` is ``Link``. However,
     #: certain protocols are not in any layer, such as
-    #: :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.
+    #: :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and thus its layer is :obj:`None`.
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
     #: Protocol index mapping for decoding the next layer; see
@@ -498,7 +532,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`ProtocolBase` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
     )
 
     #: Read-only copy of :attr:`__proto__` as the class defining it shipped it,
@@ -510,7 +544,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     #: Construction keywords this protocol consumes out of ``**kwargs`` instead
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
-    #: :meth:`read` -- as :meth:`ESP.read <pcapkit.protocols.internet.esp.ESP.read>`
+    #: :meth:`read` -- as :meth:`ESP.read <pcapkit.protocols.internet.esp.protocol.ESP.read>`
     #: does with ``packet``.
     #: :func:`_declared_keywords` finds keywords by
     #: reading signatures, which cannot see such a name, so a protocol that
@@ -527,10 +561,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :obj:`None` means the keywords cannot be enumerated and the check is
     #: skipped for this protocol. That is for a *dispatcher*, whose real signature
     #: belongs to a class chosen at call time:
-    #: :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` declares
+    #: :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` declares
     #: only ``version`` and forwards everything else to
-    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTPv1.make>` or
-    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>`
+    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.protocol.HTTPv1.make>` or
+    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.protocol.HTTPv2.make>`
     #: depending on that value, so no set of names is right for it. Use it only
     #: for that shape, since a protocol that skips the check silently discards an
     #: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a
@@ -546,7 +580,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: that overrides ``make`` and forwards the rest to its parent keeps the
     #: parent's keywords. A base whose subclasses override ``make`` *without*
     #: forwarding sets this, so that its keywords are refused for them rather than
-    #: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
     #: does, for ``len`` and ``data`` (:issue:`2286`). Read from the defining
     #: class alone, so it is not inherited, and it leaves :attr:`__keywords__`
     #: and the other construction methods unaffected.
@@ -582,7 +616,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     _exctx: 'Optional[ContextRegistry]' = None
 
     #: Whether this layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and so was kept as
-    #: :class:`~pcapkit.protocols.misc.raw.Raw` by :meth:`_parse_next_layer`
+    #: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` by :meth:`_parse_next_layer`
     #: without being parsed. Such a layer carries an ``error`` as one that
     #: failed to parse does, so this is what tells the two apart: what follows
     #: the limit is not to be read on (:issue:`1610`).
@@ -648,7 +682,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Protocol chain of current instance.
 
         Note:
-            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` has no chain and
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` has no chain and
             narrows this to :obj:`None`; :meth:`_decode_next_layer` passes it
             on as ``basis``, which
             :class:`~pcapkit.corekit.protochain.ProtoChain` accepts.
@@ -670,8 +704,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             A protocol laid out otherwise has to override this: one whose
             :attr:`~length` counts something else, or one carrying a *trailer*
             after the payload, gets a header that eats the payload and a payload
-            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` is the
-            example -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length`
+            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` is the
+            example -- its :attr:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length`
             is the wire's Block Total Length and the captured octets sit ahead of
             the option list and the trailing length field. The payload matters
             because :meth:`Protocol.__init__` injects it into every parsed
@@ -768,7 +802,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             ``SomeProtocol.make(...)`` on an instance obtained some other way --
             ``object.__new__(cls).make(**kwargs)`` is the idiom, used by this
             package's own tests and by :meth:`HTTP.make
-            <pcapkit.protocols.application.http.HTTP.make>` to reach its versioned
+            <pcapkit.protocols.application.http.protocol.HTTP.make>` to reach its versioned
             implementation. Covering it would mean interposing on every ``make``
             in the tree rather than on the one place their keywords converge, so
             it is deliberately not done. Construct through the constructor to get
@@ -799,7 +833,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             constructed, the header is made on a shallow copy of it (see
             :meth:`_packing_target`), so :attr:`schema`, :attr:`info` and
             anything :meth:`make` sets along the way, such as
-            :attr:`TCP.connection <pcapkit.protocols.transport.tcp.TCP.connection>`,
+            :attr:`TCP.connection <pcapkit.protocols.transport.tcp.protocol.TCP.connection>`,
             still describe that packet. Only the call that
             :meth:`__post_init__` makes to construct the instance keeps the
             header made here, as the one :meth:`unpack` reads back.
@@ -807,7 +841,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             That call, when :meth:`from_data` rebuilds a header the capture cut
             short, cuts the header back to the octets captured, through its own
             ``__short_read__`` and :meth:`Schema._cut_short_read
-            <pcapkit.protocols.schema.schema.Schema._cut_short_read>`, and
+            <pcapkit.protocols.schema.Schema._cut_short_read>`, and
             returns only those (:issue:`2703`).
 
         .. versionchanged:: 1.5.0
@@ -956,7 +990,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         be passed on::
 
            >>> from pcapkit.const.reg.ethertype import EtherType
-           >>> from pcapkit.protocols.link.ethernet import Ethernet
+           >>> from pcapkit.protocols.link.ethernet.protocol import Ethernet
            >>> code = Ethernet.resolve_index('Address_Resolution_Protocol',
            ...                               namespace=EtherType)
            >>> Ethernet(type=code).info.type
@@ -1056,9 +1090,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
+                from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # pylint: disable=import-outside-toplevel # isort: skip
+                from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
@@ -1151,7 +1185,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         <pcapkit.corekit.infoclass.Info.to_dict>` returns, which carries the
         metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
         which the payload is dispatched on, ``__short_read__``, and, for
-        :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the extension header
+        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header
         chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
         too, or no payload (nor IPv6 extension header) is rebuilt and no short
         read is cut back, see :meth:`_make_payload`; nothing is guessed from
@@ -1166,9 +1200,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             data: Protocol data.
             **kwargs: Construction keywords that ``data`` does not carry, such as
                 the ``num`` and ``header`` of
-                :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, or the
+                :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, or the
                 ``num``, ``sct`` and ``ctx`` of
-                :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`. They take
+                :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`. They take
                 precedence over the keywords :meth:`_make_data` returns.
 
         Returns:
@@ -1385,7 +1419,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # keep its default -- ``TCP_BASE`` asking for ``seq=1``, which
         # ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning
         # (#617). The schema layer is not that permissive: :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.schema.Schema.__update__>` warns
+        # <pcapkit.protocols.schema.Schema.__update__>` warns
         # :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it
         # does not know, and this closes the asymmetry from the other end.
         #
@@ -1447,7 +1481,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         if not rebuilding.get():
-            #: pcapkit.protocols.data.data.Data: Parsed packet data.
+            #: pcapkit.protocols.data.Data: Parsed packet data.
             self._info = self.unpack(length, **kwargs)
             return
 
@@ -1487,12 +1521,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         <pcapkit.protocols.link.link.Link.__proto__>`.
 
         Notes:
-            When ``schema`` and/or ``data`` is not specified, the method will first
-            try to find the corresponding class in the
-            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
-            modules respectively. If the class is not found, the default
-            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and
-            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
+            When ``schema`` and/or ``data`` is not specified, the method looks
+            for the class of the subclass's own name in the ``schema`` and
+            ``data`` modules beside the ``protocol`` module that defines it, as
+            :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds
+            :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`
+            (:issue:`2534`). If there is none, the default
+            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and
+            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.
+            An explicit ``schema`` or ``data`` keyword is used as given.
 
         Dispatch registration is **opt-in**, like the ``engine=``/``protocol=``/
         ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,
@@ -1513,17 +1550,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
           :class:`~pcapkit.const.reg.ethertype.EtherType` member always means
           :class:`~pcapkit.protocols.link.link.Link`, and any
           :class:`~pcapkit.const.reg.linktype.LinkType` member means *both*
-          :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
-          :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`;
+          :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` **and**
+          :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`;
         * a :class:`dict` mapping a destination class to a key, for a key
           that cannot name its own destination -- a raw :class:`int` port,
           for instance, is ambiguous between
-          :class:`~pcapkit.protocols.transport.tcp.TCP` and
-          :class:`~pcapkit.protocols.transport.udp.UDP`, and *must* use this
+          :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+          :class:`~pcapkit.protocols.transport.udp.protocol.UDP`, and *must* use this
           form;
         * an iterable mixing either of the above, to register the same class
           into several registries from a single declaration -- e.g. a
-          :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both
+          :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable both
           by its IP protocol number and by a UDP port.
 
         The explicit mapping form is accepted even for a key whose type could
@@ -1546,9 +1583,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         super().__init_subclass__()
 
         if schema is None:
-            schema = cast('Type[_ST]', getattr(schema_module, cls.__name__, Schema_Raw))
+            schema = cast('Type[_ST]', _sibling_model(cls, 'schema'))
         if data is None:
-            data = cast('Type[_PT]', getattr(data_module, cls.__name__, Data_Raw))
+            data = cast('Type[_PT]', _sibling_model(cls, 'data'))
 
         cls.__schema__ = schema
         cls.__data__ = data
@@ -1671,7 +1708,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 return self
 
         # then check recursively
-        from pcapkit.protocols.misc.no_payload import \
+        from pcapkit.protocols.misc.no_payload.protocol import \
             NoPayload  # pylint: disable=import-outside-toplevel
 
         payload = self._next
@@ -1704,7 +1741,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 return True
 
         # then check recursively
-        from pcapkit.protocols.misc.no_payload import \
+        from pcapkit.protocols.misc.no_payload.protocol import \
             NoPayload  # pylint: disable=import-outside-toplevel
 
         payload = self._next
@@ -1773,8 +1810,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Note:
             A :meth:`pack` override that does not call this one has to build
             on this target too, as :meth:`Frame.pack
-            <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and
-            :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` do.
+            <pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>` and
+            :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.pack>` do.
             The copy is shallow, so a :meth:`make` that mutates a container
             in place still reaches the instance's.
 
@@ -1868,7 +1905,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
 
         See Also:
-            This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
 
         """
         return self.__header__.get_payload()
@@ -2192,7 +2229,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         * If ``discard`` is set as :data:`True`, returns the packet body (in
           :obj:`bytes`) only.
         * Otherwise, returns the header and payload data as
-          :class:`~pcapkit.protocols.data.protocol.Packet` object.
+          :class:`~pcapkit.protocols.data.Packet` object.
 
         """
         if header is not None:
@@ -2564,7 +2601,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         This method uses ``__next_type__`` and ``__next_name__`` to
         determine the payload type and name. If either of them is missing or
         :data:`None`, or ``data`` holds nothing under ``__next_name__``, a
-        :class:`~pcapkit.protocols.misc.no_payload.NoPayload` instance will be
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` instance will be
         returned, exactly as for a protocol with no next layer. Otherwise, the
         payload will be constructed by :meth:`Protocol.from_data
         <pcapkit.protocols.protocol.Protocol.from_data>`.
@@ -2596,7 +2633,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         name = cast('Optional[str]', data.get('__next_name__'))
         if (proto is None or not (isinstance(proto, type) and issubclass(proto, ProtocolBase))
                 or name is None or name not in data):
-            from pcapkit.protocols.misc.no_payload import \
+            from pcapkit.protocols.misc.no_payload.protocol import \
                 NoPayload  # pylint: disable=import-outside-toplevel
             return NoPayload()
 
@@ -2657,7 +2694,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Returns:
             The class registered for ``proto``, or the fallback ``registry``
-            declares -- normally :class:`~pcapkit.protocols.misc.raw.Raw` -- when
+            declares -- normally :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- when
             ``proto`` is not registered.
 
         Important:
@@ -2752,9 +2789,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             length = len(file_)
 
         if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
@@ -2774,16 +2811,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             **kwargs: keyword arguments for the next layer's constructor
 
         Returns:
-            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`
+            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
             when fewer octets were captured than its header needs, or when it is
             past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 
         Note:
-            :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+            :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
             zero-fills a field the stream ends inside, so a header parsed from
             too few octets is filled with values that were never on the wire, and
             :meth:`from_data <Protocol.from_data>` rebuilds them (:issue:`1170`).
-            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`
+            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
             instead, as an unparseable one is.
 
             The captured octets are the first ``length`` of ``file_``, or all of
@@ -2794,7 +2831,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             header it parsed, :attr:`length
             <pcapkit.protocols.protocol.Protocol.length>` octets long, fits
             in them anyway: for a variable-length header such as
-            :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` the hint is the longest
+            :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` the hint is the longest
             form rather than the shortest. A next layer that reports no hint is
             kept as parsed.
 
@@ -2818,7 +2855,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
             A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
             it and the rest of the frame are kept as
-            :class:`~pcapkit.protocols.misc.raw.Raw`, marked
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, marked
             :attr:`_past_layer_limit`, with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`).
 
@@ -2829,8 +2866,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         depth = frame_depth.get() + 1
         limit = config.FRAME_LAYER_LIMIT
         if limit != -1 and depth > limit:
-            from pcapkit.protocols.misc.no_payload import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
-            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
             # NOTE: Nothing is lost if the next layer is raw already, or empty.
             if klass is not Raw and klass is not NoPayload:
@@ -2865,7 +2902,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         finally:
             frame_depth.reset(token)
         if held.discard:
-            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             next_ = Raw(file_, length, **kwargs)
         return next_
 
@@ -2977,12 +3014,15 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         attributes of the subclass.
 
         Notes:
-            When ``schema`` and/or ``data`` is not specified, the method will first
-            try to find the corresponding class in the
-            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
-            modules respectively. If the class is not found, the default
-            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and
-            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
+            When ``schema`` and/or ``data`` is not specified, the method looks
+            for the class of the subclass's own name in the ``schema`` and
+            ``data`` modules beside the ``protocol`` module that defines it, as
+            :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds
+            :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`
+            (:issue:`2534`). If there is none, the default
+            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and
+            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.
+            An explicit ``schema`` or ``data`` keyword is used as given.
 
         This method also registers the subclass to the protocol registry,
         i.e., :attr:`pcapkit.protocols.__proto__`. That registration is

@@ -2,10 +2,10 @@
 """ARP packs non-IP protocol addresses as octets and checks ``hlen``/``plen``.
 
 GitHub issue #1139: :meth:`ARP._make_proto_resolve
-<pcapkit.protocols.link.arp.ARP._make_proto_resolve>` encoded a :data:`str`
+<pcapkit.protocols.link.arp.protocol.ARP._make_proto_resolve>` encoded a :data:`str`
 protocol address as its ASCII text when ``ptype`` was neither IPv4 nor IPv6,
-while :meth:`~pcapkit.protocols.link.arp.ARP._read_proto_resolve` returns hex;
-and :meth:`~pcapkit.protocols.link.arp.ARP.make` let the schema silently
+while :meth:`~pcapkit.protocols.link.arp.protocol.ARP._read_proto_resolve` returns hex;
+and :meth:`~pcapkit.protocols.link.arp.protocol.ARP.make` let the schema silently
 truncate an address that disagreed with ``hlen``/``plen``.
 
 Every case builds its own octets in memory and reads no capture.
@@ -16,7 +16,7 @@ import unittest
 
 from pcapkit.const.arp.hardware import Hardware
 from pcapkit.const.reg.ethertype import EtherType
-from pcapkit.protocols.link.arp import ARP
+from pcapkit.protocols.link.arp.protocol import ARP
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 #: A protocol type that is neither IPv4 nor IPv6.
@@ -57,7 +57,7 @@ class TestARPNonIPAddressType(unittest.TestCase):
 
     Only the IPv4 and IPv6 branches went through ``parse_ip_address``, so any
     other ``ptype`` returned a :obj:`bool` or :class:`int` unchanged, and
-    :meth:`~pcapkit.protocols.link.arp.ARP.make` then failed with ``TypeError:
+    :meth:`~pcapkit.protocols.link.arp.protocol.ARP.make` then failed with ``TypeError:
     object of type 'bool' has no len()``.
     """
 

@@ -1,0 +1,396 @@
+# -*- coding: utf-8 -*-
+"""Netlink - Linux Netlink Socket Framing
+============================================
+
+.. module:: pcapkit.protocols.link.netlink.protocol
+
+:mod:`pcapkit.protocols.link.netlink.protocol` contains
+:class:`~pcapkit.protocols.link.netlink.protocol.Netlink` only, which implements the
+extractor for the ``struct nlmsghdr`` framing [*]_ of Linux's own kernel/user
+IPC transport, as seen on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2``
+capture whose ``arphrd_type`` is ``ARPHRD_NETLINK`` (an ``nlmon`` interface)
+-- :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` dispatches here
+instead of falling back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` for that
+one case; see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`.
+Netlink is the kernel's own IPC mechanism (routing table dumps, interface
+notifications and the like), not a "next protocol over this link" the way
+every other ``arphrd_type`` exception is -- its next-layer registry ships
+empty, so every message's payload is kept as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless its ``nlmsg_type`` is registered.
+
+.. table::
+
+   ====== ==== ======================= ================================
+   Octets Bits Name                    Description
+   ====== ==== ======================= ================================
+   0      0    ``netlink.nlmsg_len``   Message Length (header included)
+   4      32   ``netlink.nlmsg_type``  Message Type
+   6      48   ``netlink.nlmsg_flags`` Message Flags
+   8      64   ``netlink.nlmsg_seq``   Sequence Number
+   12     96   ``netlink.nlmsg_pid``   Sender Port ID
+   ====== ==== ======================= ================================
+
+Scope
+-----
+
+Only the fixed 16-octet ``nlmsghdr`` framing is dissected -- ``nlmsg_len``,
+``nlmsg_type``, ``nlmsg_flags``, ``nlmsg_seq`` and ``nlmsg_pid``. Two things a
+complete Netlink dissector would eventually need are deliberately left out of
+this first cut:
+
+* **Per-family message payloads.** What a given ``nlmsg_type`` means, and how
+  its payload is laid out, is defined independently by each Netlink family
+  (``NETLINK_ROUTE``, ``NETLINK_GENERIC``, ...) and is a large surface of its
+  own -- routing table entries, link attributes (``rtattr``/``nlattr`` TLV
+  chains), and so on. The payload is kept as
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless its ``nlmsg_type`` is registered.
+* **Multiple messages packed into one read.** The kernel's own netlink(7)
+  page documents that a single read from a netlink socket, and so a single
+  captured frame, commonly carries more than one ``nlmsghdr`` message back to
+  back (:rfc:`3549#section-2.3.2` numbers the header fields; it does not
+  itself restate the "one read, several messages" framing convention, which
+  is :manpage:`netlink(7)`'s). This class dissects only the *first* message's
+  header; everything after it -- that message's own payload, and any sibling
+  messages the frame may carry -- is kept together as the undissected
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload, exactly as if it were one
+  larger opaque blob. Splitting the frame on every ``nlmsg_len`` boundary is
+  future work, tracked on :issue:`2460`.
+
+Byte Order
+----------
+
+Netlink is a kernel/userspace IPC mechanism, not a protocol with octets
+specified for the wire -- its messages are written in the *capturing host's*
+native byte order, and neither :manpage:`netlink(7)`, :rfc:`3549` nor
+tcpdump.org's `LINKTYPE_NETLINK`_ page record a marker for which order that
+was. :func:`nlmsg_byteorder` resolves it with the same heuristic Wireshark's
+own netlink dissector uses (``packet-netlink.c``, ``dissect_netlink()``,
+comment: *"We do not know the endianness of the capture host, we have to
+guess."*): decode ``nlmsg_len`` both ways and keep whichever reading comes
+closer to the number of octets actually available, since a genuine message
+length is normally well under the size either misreading would imply. See
+:func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` for the same
+problem solved the same way for ``LINKTYPE_NULL``.
+
+.. [*] :manpage:`netlink(7)`; :rfc:`3549#section-2.3.2`
+
+.. _LINKTYPE_NETLINK: https://www.tcpdump.org/linktypes/LINKTYPE_NETLINK.html
+
+.. versionadded:: 1.6.0
+
+"""
+import collections
+import sys
+from typing import TYPE_CHECKING
+
+from pcapkit.const.linux.arphrd import ARPHRD as Enum_ARPHRD
+from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.link.netlink.data import Netlink as Data_Netlink
+from pcapkit.protocols.link.netlink.schema import Netlink as Schema_Netlink
+from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
+
+if TYPE_CHECKING:
+    from typing import Any, DefaultDict, Optional, Type
+
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import ProtocolBase
+    from pcapkit.protocols.schema import Schema
+
+__all__ = ['Netlink', 'nlmsg_byteorder']
+
+
+def nlmsg_byteorder(nlmsg_len: 'bytes', length: 'int') -> "Literal['big', 'little']":
+    """Guess the byte order a Netlink message header was written in.
+
+    Args:
+        nlmsg_len: The 4 raw octets of ``nlmsg_len``.
+        length: Octets available from the start of this header to the end of
+            the frame -- ``nlmsg_len`` counts the header itself
+            (:rfc:`3549#section-2.3.2`: *"the length of the message in
+            bytes, including the header"*), so this is the quantity to
+            compare against, not the payload alone.
+
+    Returns:
+        ``'big'`` or ``'little'``, whichever reading of ``nlmsg_len`` comes
+        closer to ``length``; ties favour ``'little'``, the overwhelmingly
+        common case (x86/ARM hosts).
+
+    Note:
+        This is the heuristic Wireshark's own netlink dissector uses
+        (``packet-netlink.c``, ``dissect_netlink()``): a genuine message
+        length is normally well under the size either misreading of 4
+        arbitrary octets would imply, so the reading closer to the octets
+        actually on hand is overwhelmingly likely to be the real one.
+
+    """
+    len_be = int.from_bytes(nlmsg_len, 'big')
+    len_le = int.from_bytes(nlmsg_len, 'little')
+    if abs(len_be - length) < abs(len_le - length):
+        return 'big'
+    return 'little'
+
+
+class Netlink(Link[Data_Netlink, Schema_Netlink],
+              schema=Schema_Netlink, data=Data_Netlink):
+    """This class implements Linux Netlink socket framing.
+
+    Every message's payload is kept as
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless its ``nlmsg_type`` is
+    registered -- see the module docstring's *Scope* section for why.
+    :attr:`self.__proto__ <pcapkit.protocols.link.netlink.protocol.Netlink.__proto__>`
+    ships empty, so that :meth:`register` works the same way every other
+    :class:`~pcapkit.protocols.link.link.Link` subclass's does.
+
+    """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Protocol index mapping for decoding next layer, keyed by ``nlmsg_type``.
+    #: Deliberately empty -- see the class docstring -- so every unregistered
+    #: key resolves through the :class:`~collections.defaultdict` fallback to
+    #: :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+    __proto__ = collections.defaultdict(
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+    )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'Literal["Netlink"]':
+        """Name of current protocol."""
+        return 'Netlink'
+
+    @property
+    def alias(self) -> 'Literal["Netlink"]':
+        """Acronym of corresponding protocol."""
+        return 'Netlink'
+
+    @property
+    def length(self) -> 'Literal[16]':
+        """Header length of current protocol."""
+        return 16
+
+    @property
+    def protocol(self) -> 'int':  # type: ignore[override]
+        """Message type of the dissected ``nlmsghdr``."""
+        return self._info.nlmsg_type
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["Netlink"]]':
+        """Index ID of the protocol."""
+        return ('Netlink',)
+
+    def read(self, length: 'Optional[int]' = None, *,
+             byteorder: "Optional[Literal['big', 'little']]" = None,
+             **kwargs: 'Any') -> 'Data_Netlink':  # pylint: disable=unused-argument
+        """Read Linux Netlink socket framing.
+
+        Structure of the ``nlmsghdr`` this class dissects, the first message
+        in the frame:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            nlmsg_len                         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |            nlmsg_type         |          nlmsg_flags          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            nlmsg_seq                         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            nlmsg_pid                         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            length: Length of packet data.
+            byteorder: Byte order to read the header in, ahead of guessing it
+                from :func:`nlmsg_byteorder`. :meth:`make` is handed the one
+                :attr:`~pcapkit.protocols.protocol.Protocol.info` holds by
+                :meth:`from_data <pcapkit.protocols.link.link.Link.from_data>`,
+                and it reaches here too, so a rebuild reads the header as it
+                was parsed rather than guessing again.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If ``byteorder`` is neither ``'big'`` nor
+                ``'little'``.
+
+        """
+        if length is None:
+            length = len(self)
+        schema = self.__header__
+
+        if byteorder is None:
+            _byte = nlmsg_byteorder(schema.nlmsg_len, length)
+        elif byteorder in ('big', 'little'):
+            _byte = byteorder
+        else:
+            raise ProtocolError(f'{self.alias}: invalid byte order: {byteorder!r}')
+
+        netlink = Data_Netlink(
+            nlmsg_len=int.from_bytes(schema.nlmsg_len, _byte),
+            nlmsg_type=int.from_bytes(schema.nlmsg_type, _byte),
+            nlmsg_flags=int.from_bytes(schema.nlmsg_flags, _byte),
+            nlmsg_seq=int.from_bytes(schema.nlmsg_seq, _byte),
+            nlmsg_pid=int.from_bytes(schema.nlmsg_pid, _byte),
+            byteorder=_byte,
+        )
+        return self._decode_next_layer(netlink, netlink.nlmsg_type, length - self.length)
+
+    def make(self,
+             nlmsg_type: 'int' = 0,
+             nlmsg_flags: 'int' = 0,
+             nlmsg_seq: 'int' = 0,
+             nlmsg_pid: 'int' = 0,
+             nlmsg_len: 'Optional[int]' = None,
+             byteorder: "Literal['big', 'little']" = sys.byteorder,
+             payload: 'bytes | ProtocolBase | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_Netlink':
+        """Make (construct) packet data.
+
+        Args:
+            nlmsg_type: Message type.
+            nlmsg_flags: Message flags.
+            nlmsg_seq: Sequence number.
+            nlmsg_pid: Sender port ID.
+            nlmsg_len: Message length, header included; computed from the
+                header and ``payload`` when omitted.
+            byteorder: Byte order to write the header in, by default this
+                host's, as a genuine capture is written in the capturing
+                host's own order.
+            payload: Payload data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Raises:
+            ProtocolError: If ``byteorder`` is neither ``'big'`` nor
+                ``'little'``; if ``nlmsg_type`` or ``nlmsg_flags`` is not an
+                :class:`int` (a :class:`bool` included) or does not fit in 16
+                bits; if ``nlmsg_seq`` or ``nlmsg_pid`` is not an :class:`int`
+                (a :class:`bool` included) or does not fit in 32 bits; or if
+                ``nlmsg_len`` is given and does not fit in 32 bits.
+
+        """
+        if byteorder not in ('big', 'little'):
+            raise ProtocolError(f'{self.alias}: invalid byte order: {byteorder!r}')
+        nlmsg_type = self._make_uint(nlmsg_type, bits=16, name='nlmsg_type')
+        nlmsg_flags = self._make_uint(nlmsg_flags, bits=16, name='nlmsg_flags')
+        nlmsg_seq = self._make_uint(nlmsg_seq, bits=32, name='nlmsg_seq')
+        nlmsg_pid = self._make_uint(nlmsg_pid, bits=32, name='nlmsg_pid')
+
+        if nlmsg_len is None:
+            nlmsg_len = 16 + len(payload)
+        else:
+            nlmsg_len = self._make_uint(nlmsg_len, bits=32, name='nlmsg_len')
+
+        lilendian = byteorder == 'little'
+        return Schema_Netlink(
+            nlmsg_len=self._make_pack(nlmsg_len, size=4, lilendian=lilendian),
+            nlmsg_type=self._make_pack(nlmsg_type, size=2, lilendian=lilendian),
+            nlmsg_flags=self._make_pack(nlmsg_flags, size=2, lilendian=lilendian),
+            nlmsg_seq=self._make_pack(nlmsg_seq, size=4, lilendian=lilendian),
+            nlmsg_pid=self._make_pack(nlmsg_pid, size=4, lilendian=lilendian),
+            payload=payload,
+        )
+
+    @classmethod
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
+        r"""Register a new protocol class for a message type.
+
+        Notes:
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
+
+        Arguments:
+            code: ``nlmsg_type`` of the dissected message
+            protocol: module descriptor or a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Important:
+            This overrides :meth:`Link.register
+            <pcapkit.protocols.link.link.Link.register>` because
+            :attr:`self.__proto__ <Netlink.__proto__>` is keyed by
+            ``nlmsg_type`` rather than by EtherType.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this message type is
+                already registered and the incumbent differs from the
+                replacement; see :meth:`Protocol.register
+                <pcapkit.protocols.protocol.Protocol.register>` for the guard.
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'message type {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __length_hint__(self) -> 'Literal[16]':
+        """Return an estimated length for the object."""
+        return 16
+
+    @classmethod
+    def __index__(cls) -> 'Enum_ARPHRD':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in Linux ARP hardware
+            types, the ``arphrd_type`` that
+            :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`
+            dispatches here.
+
+        """
+        return Enum_ARPHRD.NETLINK  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Netlink') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'nlmsg_type': data.nlmsg_type,
+            'nlmsg_flags': data.nlmsg_flags,
+            'nlmsg_seq': data.nlmsg_seq,
+            'nlmsg_pid': data.nlmsg_pid,
+            'nlmsg_len': data.nlmsg_len,
+            'byteorder': data.byteorder,
+            'payload': cls._make_payload(data),
+        }

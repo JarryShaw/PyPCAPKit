@@ -2,7 +2,7 @@
 """The TCP SACK option's length constraint, documented and checked.
 
 GitHub issue #519 counted :meth:`TCP._read_mode_sack
-<pcapkit.protocols.transport.tcp.TCP._read_mode_sack>` among its phantom
+<pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack>` among its phantom
 ``Raises:`` clauses: the docstring promised ``ProtocolError: If length is
 **NOT** multiply of 8 plus 2`` and the body contained no such check. The
 tempting reading is that the clause was stale and should be deleted, which is
@@ -15,9 +15,9 @@ three pieces of evidence settle it:
   left/right edge pairs, so a well-formed option's length really is ``8n + 2``.
 * The sibling readers validate their own lengths rather than delegating it.
   :meth:`TCP._read_mode_sackpmt
-  <pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt>` -- the method
+  <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sackpmt>` -- the method
   immediately above this one -- raises on ``schema.length != 2``, and
-  :meth:`TCP._read_mode_echo <pcapkit.protocols.transport.tcp.TCP._read_mode_echo>`
+  :meth:`TCP._read_mode_echo <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_echo>`
   on ``schema.length != 6``, both with the same message.
 * Nothing upstream enforces it either. The schema field is
   ``ListField(length=lambda pkt: pkt['length'] - 2,
@@ -71,7 +71,7 @@ import io
 import sys
 import unittest
 
-from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.tcp.protocol import TCP
 from pcapkit.utilities.exceptions import ProtocolError
 
 #: TCP option kind for SACK, per :rfc:`2018`.
@@ -148,7 +148,7 @@ class SACKLengthTests(unittest.TestCase):
         :meth:`test_sack_exception_type_survives_a_sys_modules_purge` below:
         :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
         :meth:`TCP._read_mode_sack
-        <pcapkit.protocols.transport.tcp.TCP._read_mode_sack>`, which is the
+        <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack>`, which is the
         check this module exists for.
 
         """

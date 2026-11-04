@@ -6,8 +6,8 @@ construct -> parse -> construct over cases built from the dispatch registries.
 This module runs the other direction, over real octets: for every layer of every
 frame in :file:`examples/captures/`, ``Cls.from_data(layer.info).data`` must equal
 ``layer.data``. A *layer* is each protocol on the payload chain, from the
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` or
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` record down, plus every IPv6
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` or
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` record down, plus every IPv6
 extension header, which IPv6 keeps off that chain.
 
 The same layers are also rebuilt from ``layer.info.to_dict()``, which
@@ -117,7 +117,7 @@ def outcome(layer: 'Any', as_dict: 'bool' = False) -> 'str':
 
 def walk(frame: 'Any') -> 'Iterator[tuple[str, Any]]':
     """Yield ``(path, layer)`` for the payload chain and every IPv6 extension header."""
-    from pcapkit.protocols.misc.no_payload import NoPayload
+    from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
     path = ''
     layer = frame
@@ -131,8 +131,8 @@ def walk(frame: 'Any') -> 'Iterator[tuple[str, Any]]':
 
 def keywords(layer: 'Any') -> 'dict[str, Any]':
     """Construction keywords ``layer.info`` does not carry, as the engines pass them."""
-    from pcapkit.protocols.misc.pcap.frame import Frame
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
     if isinstance(layer, Frame):
         return {'num': layer._fnum, 'header': layer._ghdr}  # pylint: disable=protected-access
@@ -193,7 +193,7 @@ class CaptureRoundTripTests(unittest.TestCase):
         self.assertEqual(set(LAYER_GAPS) - seen, set(), 'LAYER_GAPS names cases that no longer exist')
 
     def test_every_layer_rebuilds_from_its_info_as_a_dict(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         hit = set()
         with time_limit(SWEEP_TIMEOUT):
@@ -223,8 +223,8 @@ class CaptureRoundTripTests(unittest.TestCase):
         from pcapkit import extract
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with time_limit(SWEEP_TIMEOUT):
             for name in captures():

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2614: ARP's Ethernet hardware address goes through the base MAC pair.
 
-:meth:`ARP._read_addr_resolve <pcapkit.protocols.link.arp.ARP._read_addr_resolve>`
-and :meth:`ARP._make_addr_resolve <pcapkit.protocols.link.arp.ARP._make_addr_resolve>`
+:meth:`ARP._read_addr_resolve <pcapkit.protocols.link.arp.protocol.ARP._read_addr_resolve>`
+and :meth:`ARP._make_addr_resolve <pcapkit.protocols.link.arp.protocol.ARP._make_addr_resolve>`
 read and make an Ethernet address with
 :meth:`~pcapkit.protocols.protocol.Protocol._read_mac_addr` and
 :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr`, of any number of
 octets since ``hlen`` is not fixed at 6, rather than with a pattern of the
 module's own. The messages keep the class name as their prefix, which
 :attr:`~pcapkit.protocols.protocol.Protocol.alias` cannot give before
-:meth:`~pcapkit.protocols.link.arp.ARP.read` has run.
+:meth:`~pcapkit.protocols.link.arp.protocol.ARP.read` has run.
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -26,10 +26,10 @@ from tests._support import reimport_once_per_class
 
 #: ``(module, class)`` for every ARP-family class.
 CLASSES = (
-    ('pcapkit.protocols.link.arp', 'ARP'),
-    ('pcapkit.protocols.link.inarp', 'InARP'),
-    ('pcapkit.protocols.application.rarp', 'RARP'),
-    ('pcapkit.protocols.application.drarp', 'DRARP'),
+    ('pcapkit.protocols.link.arp.protocol', 'ARP'),
+    ('pcapkit.protocols.link.inarp.protocol', 'InARP'),
+    ('pcapkit.protocols.application.rarp.protocol', 'RARP'),
+    ('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
 )
 
 
@@ -40,8 +40,8 @@ class TestARPMacHelpers(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_the_module_keeps_no_address_pattern(self) -> None:
-        import pcapkit.protocols.link.arp as module
-        from pcapkit.protocols.link.arp import ARP
+        import pcapkit.protocols.link.arp.protocol as module
+        from pcapkit.protocols.link.arp.protocol import ARP
         from pcapkit.protocols.protocol import ProtocolBase
 
         self.assertFalse(hasattr(module, 'PAT_MAC_ADDR'))
@@ -50,7 +50,7 @@ class TestARPMacHelpers(unittest.TestCase):
 
     def test_the_ethernet_branch_calls_the_base_pair(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
         from pcapkit.protocols.protocol import ProtocolBase
 
         arp = object.__new__(ARP)
@@ -66,7 +66,7 @@ class TestARPMacHelpers(unittest.TestCase):
 
     def test_any_number_of_octets_packs_and_reads_back(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         arp = object.__new__(ARP)
         for addr, octets in (('', b''), (b'', b''), ('ab', b'\xab'), ('01-02-03', b'\x01\x02\x03'),

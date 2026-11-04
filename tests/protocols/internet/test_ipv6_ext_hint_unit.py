@@ -2,9 +2,9 @@
 """A tail shorter than 8 octets is not an ``IPv6_Ext`` header.
 
 GitHub issue #1178. :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer`
-keeps a next layer as :class:`~pcapkit.protocols.misc.raw.Raw` when fewer octets
+keeps a next layer as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` when fewer octets
 were captured than its ``__length_hint__`` (#1170).
-:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` hinted 2, though
+:class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` hinted 2, though
 :rfc:`6564#section-4` and :rfc:`8200#section-4` make every extension header at
 least 8 octets, so a 2--7 octet tail of a longer declared payload was parsed as
 an 8-octet header built partly from octets that were never captured.
@@ -42,15 +42,15 @@ class IPv6ExtLengthHintTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, data: bytes, **kwargs: int) -> object:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         outer = bytes([0x60]) + bytes(5) + bytes([59, 64]) + bytes(32)
         return IPv6(outer, len(outer))._parse_next_layer(
             IPv6_Ext, data, DECLARED, version=6, extension=True, **kwargs)
 
     def test_short_tail_is_raw_and_rebuilds_exactly(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for label, kwargs in ALIASES.items():
             for size in range(2, 8):
@@ -60,7 +60,7 @@ class IPv6ExtLengthHintTests(unittest.TestCase):
                     self.assertEqual(bytes(Raw.from_data(parsed.info)), tail(size))
 
     def test_complete_header_still_parses(self) -> None:
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         for label, kwargs in ALIASES.items():
             for size in (8, 16):

@@ -48,7 +48,7 @@ class TestHIPReservedBits(unittest.TestCase):
 
     def _frame(self, code=None, *, ver=None, flags=None):  # type: ignore[no-untyped-def]
         """Build a HIP packet, then overwrite its ``Version`` or route ``Flags``."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         params = None if code is None else [(code, {'hit': ['2001:db8::1']})]
         octets = bytearray(HIP(parameters=params, extension=True, **HIP_BASE).data)
@@ -61,7 +61,7 @@ class TestHIPReservedBits(unittest.TestCase):
         return bytes(octets)
 
     def test_from_data_rebuilds_version_reserved(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for ver in (0x21, 0x23, 0x2f, 0x2b, 0xff):
             with self.subTest(ver=hex(ver)):
@@ -72,7 +72,7 @@ class TestHIPReservedBits(unittest.TestCase):
                 self.assertEqual(HIP.from_data(parsed.info).data, frame)
 
     def test_make_writes_version_reserved(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(version_reserved=0b101, extension=True, **HIP_BASE).data
         self.assertEqual(built[VER_OFFSET], 0x2b)
@@ -84,7 +84,7 @@ class TestHIPReservedBits(unittest.TestCase):
         self.assertEqual(default[VER_OFFSET], 0x21)
 
     def test_from_data_rebuilds_route_flags_reserved(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for code in self._route_codes():
             for flags in (0x0000, 0x3fff, 0x8001, 0x4000, 0xffff, 0x2aaa):
@@ -98,7 +98,7 @@ class TestHIPReservedBits(unittest.TestCase):
                     self.assertEqual(HIP.from_data(parsed.info).data, frame)
 
     def test_make_writes_route_flags_reserved(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for code in self._route_codes():
             with self.subTest(code=code.name):

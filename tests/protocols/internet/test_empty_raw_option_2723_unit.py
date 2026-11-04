@@ -30,9 +30,9 @@ from tests._support import reimport_once_per_class
 
 #: Module and class name of each protocol whose option maker is covered.
 PROTOCOLS = (
-    ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
+    ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
 )
 
 #: A whole raw option for each protocol: Router Alert for IPv4 and HOPOPT,
@@ -62,15 +62,15 @@ class TestEmptyRawOption(unittest.TestCase):
                         protocol(options=options)
 
     def test_ipv4_raw_option_builds_as_given(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         built = IPv4(options=[RAW['IPv4']]).data
         self.assertEqual(built[0] & 0x0F, 6)  # IHL: the 20-octet header and the option
         self.assertEqual(built[20:24], RAW['IPv4'])
 
     def test_ipv6_extension_raw_option_builds_as_given(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         built = HOPOPT(options=[RAW['HOPOPT']]).data
         self.assertEqual(built[1:], b'\x00' + RAW['HOPOPT'] + b'\x01\x00')

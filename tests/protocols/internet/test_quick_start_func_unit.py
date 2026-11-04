@@ -36,9 +36,9 @@ def _families() -> 'list[tuple]':
     from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
     from pcapkit.const.ipv6.option import Option as Enum_IPv6Option
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.protocols.internet.hopopt import HOPOPT
-    from pcapkit.protocols.internet.ipv4 import IPv4
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
     return [
         ('IPv4', IPv4, dict(src='192.0.2.1', dst='192.0.2.2', protocol=TransType.UDP),
@@ -102,8 +102,8 @@ class QuickStartWireTests(unittest.TestCase):
 
     def test_wire_option_decodes_the_full_nonce(self) -> None:
         from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         # next=UDP, len=1 (16 octets); Quick-Start Request type 0x26 len 6,
         # func 0 rate 1, ttl 5, nonce; then PadN of four octets.

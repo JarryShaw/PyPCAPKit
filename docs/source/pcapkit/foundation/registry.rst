@@ -88,8 +88,8 @@ Top-Level Registries
 .. module:: pcapkit.foundation.registry.protocols.misc
 
 These are in :mod:`~pcapkit.foundation.registry.protocols.misc` with the
-PCAP-NG registries below, as :class:`~pcapkit.protocols.misc.pcap.frame.Frame`
-and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` are in
+PCAP-NG registries below, as :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`
+and :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` are in
 :mod:`pcapkit.protocols.misc`.
 
 .. autofunction:: pcapkit.foundation.registry.protocols.misc.register_linktype

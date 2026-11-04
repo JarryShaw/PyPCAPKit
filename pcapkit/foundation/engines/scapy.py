@@ -41,9 +41,9 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
-from pcapkit.protocols.schema.misc.pcapng import DEFAULT_RESOLUTION
+from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
+from pcapkit.protocols.misc.pcapng.schema import DEFAULT_RESOLUTION
 from pcapkit.utilities.exceptions import VersionError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn

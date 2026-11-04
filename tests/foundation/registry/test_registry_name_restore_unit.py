@@ -42,10 +42,10 @@ class TestRegistryNameRestore(unittest.TestCase):
         reimport_once_per_class(self)
 
         from pcapkit.protocols import __proto__ as names
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.tables = (names, TCP.__proto__, UDP.__proto__, Frame.__proto__, PCAPNG.__proto__)
         self.saved = [dict(table) for table in self.tables]
@@ -76,7 +76,7 @@ class TestRegistryNameRestore(unittest.TestCase):
     def test_restoring_a_code_removes_the_name_it_added(self) -> None:
         """The issue's reproduction: the custom name goes when port 80 is restored."""
         from pcapkit.foundation.registry import register_tcp
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         shipped = TCP.__proto__[80]
         custom = self._custom('Custom')
@@ -93,7 +93,7 @@ class TestRegistryNameRestore(unittest.TestCase):
         from pcapkit.corekit.sentinels import MISSING
         from pcapkit.foundation.registry import register_tcp
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         shipped = TCP.__proto__[80]
         self._call(register_tcp, 80, self._custom('Custom'))
@@ -104,8 +104,8 @@ class TestRegistryNameRestore(unittest.TestCase):
     def test_restoring_a_code_puts_back_the_name_it_displaced(self) -> None:
         """A custom class named like a built-in hands the built-in its name back."""
         from pcapkit.foundation.registry import register_tcp
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         shipped = TCP.__proto__[80]
         custom = self._custom('IPv4')
@@ -119,8 +119,8 @@ class TestRegistryNameRestore(unittest.TestCase):
     def test_a_name_stays_while_another_code_still_holds_it(self) -> None:
         """The name goes with the last code dispatching to the class, not the first."""
         from pcapkit.foundation.registry import register_tcp, register_udp
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         tcp, udp = TCP.__proto__[80], UDP.__proto__[80]
         custom = self._custom('Custom')
@@ -138,8 +138,8 @@ class TestRegistryNameRestore(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.registry import register_linktype, register_pcap, register_pcapng
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         frame, pcapng = Frame.__proto__[LinkType.ETHERNET], PCAPNG.__proto__[LinkType.ETHERNET]
         custom = type('Custom', (Link,), {'__module__': __name__})
@@ -154,7 +154,7 @@ class TestRegistryNameRestore(unittest.TestCase):
         """A class named before it took a code keeps its name once the code goes back."""
         from pcapkit.foundation.registry import register_protocol, register_tcp
         from pcapkit.protocols.protocol import Protocol
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         shipped = TCP.__proto__[80]
         defined = type('Defined', (Protocol,), {'__module__': __name__})  # named by definition
@@ -172,8 +172,8 @@ class TestRegistryNameRestore(unittest.TestCase):
     def test_re_registering_the_same_override_stays_quiet(self) -> None:
         """A repeated override neither warns nor loses the name it displaced."""
         from pcapkit.foundation.registry import register_tcp
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.warnings import RegistryWarning
 
         shipped = TCP.__proto__[80]
@@ -201,8 +201,8 @@ class TestRegistryNameRestore(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import register_tcp
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         s80, s8080 = TCP.__proto__[80], TCP.__proto__[8080]
         custom = self._custom('IPv4')
@@ -233,10 +233,12 @@ class TestRegistryNameRestore(unittest.TestCase):
         import random
 
         from pcapkit.foundation.registry import register_apptype, register_tcp, register_udp
-        from pcapkit.protocols.application import http, httpv1, httpv2
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.http import protocol as http
+        from pcapkit.protocols.application.httpv1 import protocol as httpv1
+        from pcapkit.protocols.application.httpv2 import protocol as httpv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         registrars = {'tcp': register_tcp, 'udp': register_udp}
         shipped = {('tcp', code): TCP.__proto__[code] for code in (21, 80, 8080)}

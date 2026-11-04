@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-r""":class:`~pcapkit.protocols.application.http.HTTP` Vendor Crawlers
-=======================================================================
+r""":class:`~pcapkit.protocols.application.http.protocol.HTTP` Vendor Crawlers
+================================================================================
 
 .. module:: pcapkit.vendor.http
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.http.HTTP` implementations. Available
+:class:`~pcapkit.protocols.application.http.protocol.HTTP` implementations. Available
 crawlers include:
 
 .. list-table::

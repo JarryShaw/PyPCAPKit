@@ -17,7 +17,7 @@ The subprocess checks run in a fresh interpreter, since the question is what a
 cold import leaves in :data:`sys.modules` and this process has long since
 imported everything. :data:`PRELUDE` imports :mod:`pcapkit`, whose protocol
 modules import the const modules they name at module level --
-:mod:`pcapkit.protocols.application.ngap` imports SCTP's registry, for one, which
+:mod:`pcapkit.protocols.application.ngap.protocol` imports SCTP's registry, for one, which
 #2730 is to move -- so a check of the const packages themselves runs on :data:`BARE`, which
 binds :mod:`pcapkit` as a bare package and so runs none of
 :file:`pcapkit/__init__.py`. Each check fails on an eager tree at its first
@@ -154,7 +154,7 @@ class LazyAppTypeImportTests(unittest.TestCase):
     """What a cold import loads, and what loads each registry afterwards."""
 
     def test_import_pcapkit_leaves_the_registries_unimported(self) -> 'None':
-        # NOTE: SCTP's is left out: pcapkit.protocols.application.ngap imports it
+        # NOTE: SCTP's is left out: pcapkit.protocols.application.ngap.protocol imports it
         # at module level, which LazyConstImportTests accounts for (#2730).
         out = run_child('''
             emit(loaded=loaded('tcp', 'udp', 'dccp'),
@@ -316,12 +316,12 @@ class LazyAppTypeContractTests(unittest.TestCase):
     def test_port_registered_before_first_use_dispatches_the_same(self) -> 'None':
         code = '''
             from pcapkit.foundation.registry import register_tcp
-            from pcapkit.protocols.transport.tcp import TCP
+            from pcapkit.protocols.transport.tcp.protocol import TCP
             if {lookup_first}:
                 import pcapkit.const.reg.apptype
                 pcapkit.const.reg.apptype.TCP
             at_register = loaded('tcp', 'udp')
-            register_tcp(54321, 'pcapkit.protocols.application.ftp', 'FTP')
+            register_tcp(54321, 'pcapkit.protocols.application.ftp.protocol', 'FTP')
             raw = TCP(srcport=40000, dstport=54321, payload=b'USER anonymous\\r\\n').data
             parsed = TCP(raw, len(raw))
             emit(at_register=at_register, raw=raw.hex(), chain=str(parsed.protochain),
@@ -583,7 +583,7 @@ class PackageGetattrTests(unittest.TestCase):
     def test_hooks(self) -> 'None':
         import pcapkit.const.reg.apptype as pkg
 
-        # NOTE: TCP, UDP and DCCP, since pcapkit.protocols.application.ngap
+        # NOTE: TCP, UDP and DCCP, since pcapkit.protocols.application.ngap.protocol
         # imports SCTP's submodule at module level (#2730).
         for name in ('TCP', 'UDP', 'DCCP'):
             self.assertNotIn(name, vars(pkg))

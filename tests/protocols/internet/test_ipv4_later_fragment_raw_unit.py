@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A later IPv4 fragment's data is raw, not an upper-layer header.
 
-GitHub issue #1553: :class:`~pcapkit.protocols.internet.ipv4.IPv4` handed the
+GitHub issue #1553: :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` handed the
 payload of a datagram with a non-zero Fragment Offset to the upper-layer
 dispatch on its Protocol field, so a slice from the middle of a UDP or TCP
 datagram read as a UDP or TCP header of its own -- ports and lengths taken from
@@ -10,7 +10,7 @@ payload octets. It is the IPv4 counterpart of #1545.
 :rfc:`791#section-3.2` puts the upper-layer header in the first fragment only.
 A later one carries a slice of the datagram's data from its offset on, and that
 slice starts with no header, so it is a
-:class:`~pcapkit.protocols.misc.raw.Raw` leaf, as Wireshark shows it (``data``,
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` leaf, as Wireshark shows it (``data``,
 under ``-o ip.defragment:FALSE``). A first fragment (offset zero, MF set) and
 an unfragmented datagram are dissected on their Protocol field.
 
@@ -57,7 +57,7 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, data: bytes) -> 'object':
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         ipv4 = IPv4(data)
         self.assertEqual(ipv4.data, data)
@@ -65,14 +65,14 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
 
     def assert_rebuilds(self, ipv4: 'object') -> None:
         """``ipv4`` rebuilds byte for byte from its info and its info as a dict."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         self.assertEqual(IPv4.from_data(ipv4.info).data, ipv4.data)
         self.assertEqual(IPv4.from_data(ipv4.info.to_dict()).data, ipv4.data)
 
     def test_later_fragment_data_is_raw(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, (code, alias, upper) in UPPER.items():
             for options in OPTIONS:
@@ -115,9 +115,9 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         # the issue's reproduction, carried in an Ethernet frame as a capture
         # would carry it: ``'UDP' in frame`` does not hold
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         made = IPv4(protocol=TransType.UDP, offset=185, payload=Raw(bytes(range(40))),
                     src='1.1.1.1', dst='2.2.2.2')
@@ -139,9 +139,9 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
         # writes the UDP octets, reads back as raw (as IPv6 does, #1545),
         # and rebuilds to the octets made
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         upper = UDP(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60)))
         for options in (None, [bytes((1, 1, 1, 0))]):

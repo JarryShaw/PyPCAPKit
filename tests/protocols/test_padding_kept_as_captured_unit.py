@@ -25,37 +25,37 @@ ADDR = '20010db8000000000000000000000001'
 
 #: ``(module, class, extension)`` -> wire octets that must rebuild unchanged.
 FRAMES = {
-    'HOPOPT PadN data': ('internet.hopopt', 'HOPOPT', True, '3b000104aabbccdd'),
-    'IPv6-Opts PadN data': ('internet.ipv6_opts', 'IPv6_Opts', True, '3b000104aabbccdd'),
-    'HOPOPT QS report Not Used octet': ('internet.hopopt', 'HOPOPT', True,
+    'HOPOPT PadN data': ('internet.hopopt.protocol', 'HOPOPT', True, '3b000104aabbccdd'),
+    'IPv6-Opts PadN data': ('internet.ipv6_opts.protocol', 'IPv6_Opts', True, '3b000104aabbccdd'),
+    'HOPOPT QS report Not Used octet': ('internet.hopopt.protocol', 'HOPOPT', True,
                                         '3b01' '260680aa00000000' '010400000000'),
-    'IPv6-Opts QS report Not Used octet': ('internet.ipv6_opts', 'IPv6_Opts', True,
+    'IPv6-Opts QS report Not Used octet': ('internet.ipv6_opts.protocol', 'IPv6_Opts', True,
                                            '3b01' '260680aa00000000' '010400000000'),
-    'IPv6-Frag reserved octet': ('internet.ipv6_frag', 'IPv6_Frag', True, '3baa000000000001'),
-    'IPv6-Route Source Route reserved': ('internet.ipv6_route', 'IPv6_Route', True,
+    'IPv6-Frag reserved octet': ('internet.ipv6_frag.protocol', 'IPv6_Frag', True, '3baa000000000001'),
+    'IPv6-Route Source Route reserved': ('internet.ipv6_route.protocol', 'IPv6_Route', True,
                                          '3b020001aabbccdd' + ADDR),
-    'IPv6-Route Type 2 reserved': ('internet.ipv6_route', 'IPv6_Route', True,
+    'IPv6-Route Type 2 reserved': ('internet.ipv6_route.protocol', 'IPv6_Route', True,
                                    '3b020201aabbccdd' + ADDR),
     # CmprI 15, CmprE 15, Pad 7: one 1-octet address then 7 pad octets
-    'IPv6-Route RPL padding': ('internet.ipv6_route', 'IPv6_Route', True,
+    'IPv6-Route RPL padding': ('internet.ipv6_route.protocol', 'IPv6_Route', True,
                                '3b010301ff700000' '01eeeeeeeeeeeeee'),
-    'HTTP/2 DATA padding': ('application.httpv2', 'HTTPv2', False, '00000600080000000102616263eeff'),
-    'HTTP/2 HEADERS padding': ('application.httpv2', 'HTTPv2', False, '0000040108000000010282eeff'),
-    'HTTP/2 PUSH_PROMISE padding': ('application.httpv2', 'HTTPv2', False,
+    'HTTP/2 DATA padding': ('application.httpv2.protocol', 'HTTPv2', False, '00000600080000000102616263eeff'),
+    'HTTP/2 HEADERS padding': ('application.httpv2.protocol', 'HTTPv2', False, '0000040108000000010282eeff'),
+    'HTTP/2 PUSH_PROMISE padding': ('application.httpv2.protocol', 'HTTPv2', False,
                                     '000008050800000001020000000282eeff'),
     'OSPF cryptographic authentication reserved': (
-        'application.ospf', 'OSPF', False,
+        'application.ospf.protocol', 'OSPF', False,
         '0201002c' 'c0a8000100000000' '0000' '0002' 'aabb011000000007'
         'ffffff00000a020100000028c0a8000100000000' + '00' * 16),
-    'TCP octets after EOOL': ('transport.tcp', 'TCP', False,
+    'TCP octets after EOOL': ('transport.tcp.protocol', 'TCP', False,
                               '0050005000000001000000007002ffff00000000' '020405b400aabbcc'),
-    'SCTP DATA chunk padding': ('transport.sctp', 'SCTP', False,
+    'SCTP DATA chunk padding': ('transport.sctp.protocol', 'SCTP', False,
                                 '138813891122334400000000' '00030011' '00000001' '0000' '0000'
                                 '00000000' '61ffffff'),
-    'SCTP parameter padding': ('transport.sctp', 'SCTP', False,
+    'SCTP parameter padding': ('transport.sctp.protocol', 'SCTP', False,
                                '138813891122334400000000' '0100001b' '00000001' '0000ffff'
                                '00010001' '00000001' '80010007616263ee'),
-    'SCTP error cause padding': ('transport.sctp', 'SCTP', False,
+    'SCTP error cause padding': ('transport.sctp.protocol', 'SCTP', False,
                                  '138813891122334400000000' '06000009' '00ff0005aaeeeeee'),
 }
 
@@ -93,7 +93,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
 
     def test_padding_field_packs_what_it_was_given(self) -> None:
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class Padded(Schema):
@@ -112,8 +112,8 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
     def test_wrong_width_padding_is_zero_filled_or_truncated(self) -> None:
         """A ``ConditionalField``-wrapped padding zero-fills or truncates as ``struct`` does."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         # the L2TPv2 ``padding`` contract: zero-filled or truncated to ``offset``
         # octets (bytes measured)
@@ -135,7 +135,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
         from types import SimpleNamespace
 
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         proto = object.__new__(HOPOPT)
         opt = SimpleNamespace(type=Option.PadN, length=6)
@@ -153,7 +153,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
                 self.assertEqual(bytes(cls.from_data(parsed.info).data).hex(), raw.hex())
 
     def test_hip_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for name, param in HIP_PARAMS.items():
             with self.subTest(name):
@@ -163,8 +163,8 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
 
     def test_zero_padding_is_not_recorded(self) -> None:
         """HIP and SCTP alignment padding stays off the data model while zero."""
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = hip_packet('03400005000040006100000000000000')
         param = next(iter(HIP(io.BytesIO(raw), len(raw), extension=True).info.parameters.values()))
@@ -181,8 +181,8 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
 
     def test_make_writes_zeros_by_default(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         proto = object.__new__(HOPOPT)
         self.assertEqual(bytes(proto._make_opt_pad(Option.PadN, length=4)).hex(), '010400000000')
@@ -194,7 +194,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
 
     def test_make_takes_the_hip_reserved_octets(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         base = {'next': 59, 'packet': 1, 'version': 2, 'checksum': b'\x00\x00',
                 'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b''}

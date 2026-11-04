@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.foundation.traceflow.data.tcp import Index as TCP_Index
-    from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+    from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 
 
 class Deferred:
@@ -37,7 +37,7 @@ class Deferred:
         reassembly and flow tracing subpackages are siblings, and the flow tracer
         reaches the reassembler only lazily, when ``analyse`` asks for one, so the
         few lines are written in each rather than one importing the other -- the
-        same reason their ``data/data.py`` modules mirror each other instead of
+        same reason their ``data.py`` modules mirror each other instead of
         merging.
 
     Args:

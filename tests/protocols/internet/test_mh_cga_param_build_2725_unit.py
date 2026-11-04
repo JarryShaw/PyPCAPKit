@@ -59,7 +59,7 @@ FIXED = 25
 def _build(options: 'list[Any]') -> 'Any':
     """A Binding Refresh Request carrying ``options``."""
     from pcapkit.const.mh.packet import Packet
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
 
     return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
               data={'options': options})
@@ -88,7 +88,7 @@ def _with_raw(info: 'Any') -> 'Any':
     """``info`` with each CGA parameter's extensions given as the raw :data:`EXTENSION`."""
     from pcapkit.const.mh.option import Option
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.data.internet.mh import CGAParameter, CGAParametersOption
+    from pcapkit.protocols.internet.mh.data import CGAParameter, CGAParametersOption
 
     dict_ = info.to_dict()
     options = OrderedMultiDict()  # type: OrderedMultiDict[Any, Any]
@@ -124,7 +124,7 @@ class TestMHCGARawExtensionInDataModel(_Case):
     """A CGA parameter's data model holding a raw extension builds as its pair does."""
 
     def test_data_model_builds_as_its_pair(self) -> None:
-        from pcapkit.protocols.data.internet.mh import CGAParameter
+        from pcapkit.protocols.internet.mh.data import CGAParameter
 
         for key in (SHORT_KEY, LONG_KEY):
             with self.subTest(key=len(key)):
@@ -136,8 +136,8 @@ class TestMHCGARawExtensionInDataModel(_Case):
     def test_from_data_rebuilds_a_raw_extension(self) -> None:
         from pcapkit.const.mh.cga_extension import CGAExtension
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         cases = {
             'one option': [_option([CGAParameter(extensions=[PAIR], **_fields(SHORT_KEY))])],
@@ -166,8 +166,8 @@ class TestMHCGASchemaWithoutKeyTest(_Case):
     """A CGA parameter schema without ``public_key_test`` builds as its data model does."""
 
     def test_schema_builds_as_its_data_model(self) -> None:
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_CGAParameter
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.schema import CGAParameter as Schema_CGAParameter
 
         for key in (SHORT_KEY, LONG_KEY):
             for extensions, pairs in (([], []), ([EXTENSION], [PAIR])):
@@ -181,8 +181,8 @@ class TestMHCGASchemaWithoutKeyTest(_Case):
 
     def test_schema_without_key_test_round_trips(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import CGAParameter as Schema_CGAParameter
 
         for key in (SHORT_KEY, LONG_KEY):
             with self.subTest(key=len(key)):

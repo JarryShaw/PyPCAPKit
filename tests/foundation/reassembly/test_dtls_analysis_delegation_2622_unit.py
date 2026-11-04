@@ -4,10 +4,10 @@
 The owner ruled on #2622 that the protocol class owns the parse of a reassembled
 outcome, and that :mod:`pcapkit.foundation.analysis` and the reassembly's deferred
 ``packet`` only call it. For DTLS that method is
-:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`:
+:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`:
 
 * :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` returns what the method
-  returns, called on :class:`~pcapkit.protocols.application.dtls.DTLS` itself;
+  returns, called on :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` itself;
 * a datagram's ``packet`` is the method bound to the reassembly's own
   ``__protocol_type__``, so a DTLS subclass overriding it decodes the ``packet``, a
   protocol without it raises :exc:`AttributeError` once a message completes, and the
@@ -89,7 +89,7 @@ class DelegationTests(_Reassembled):
 
     def test_dtls_handshake_returns_the_protocol_methods_result(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         result = object()
         for container, write in CONTAINERS:
@@ -102,10 +102,10 @@ class DelegationTests(_Reassembled):
     def test_a_dtls_subclass_overriding_the_method_decodes_the_packet(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
         from pcapkit.foundation.reassembly.dtls import DTLS as DTLS_Reassembly
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
-        from pcapkit.protocols.data.application.tls import ClientHello
-        from pcapkit.protocols.schema.application.dtls import DTLS as Schema_DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
+        from pcapkit.protocols.application.ssl.data import ClientHello
+        from pcapkit.protocols.application.dtls.schema import DTLS as Schema_DTLS
 
         class TaggedDTLS(DTLS, schema=Schema_DTLS, data=Data_DTLS):
             """A DTLS protocol whose handshake analysis is tagged as its own."""
@@ -148,7 +148,7 @@ class DelegationTests(_Reassembled):
 
     def test_the_packet_is_the_bound_method_across_pickling(self) -> None:
         from pcapkit.foundation.reassembly.data.data import Deferred
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for container, write in CONTAINERS:
             for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
@@ -198,7 +198,7 @@ class QuietRefusalTests(_Reassembled):
 
     def test_an_undecodable_body_stays_raw_quietly(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.logging import logger
 

@@ -72,7 +72,7 @@ Changed
   ``aenum.IntFlag`` to ``aenum.IntEnum``, so ``|`` between two members gives a plain
   ``int`` rather than a composite member (:issue:`808`, :pr:`836`).
 * **a breaking change to** :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`: the
-  hand-written class in :mod:`pcapkit.protocols.misc.pcapng` becomes the generated
+  hand-written class in :mod:`pcapkit.protocols.misc.pcapng.protocol` becomes the generated
   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (``PCAPNG_TLSKeyLabel`` in
   :mod:`pcapkit.const.pcapng`), crawled from the IANA registry :rfc:`9850` creates
   (:issue:`886`, :pr:`890`), and the old path is removed (:issue:`1744`,
@@ -113,7 +113,7 @@ Fixed
   :mod:`pcapkit.const.http.method` tested membership with the raw key but
   registered ``key.upper()``, so the *first* lowercase or mixed-case token
   raised ``TypeError: 'RETR' already in use``. Reachable from wire data:
-  :mod:`pcapkit.protocols.application.ftp` matches with ``re.I`` and passes the
+  :mod:`pcapkit.protocols.application.ftp.protocol` matches with ``re.I`` and passes the
   match verbatim, and :rfc:`959#section-5` makes FTP commands case-insensitive,
   so ``retr file.txt`` was a valid request the library could not parse. ``get()``
   and ``_missing_`` now look the key up under the canonical upper-case name, so
@@ -727,7 +727,7 @@ Fixed
   Fixed-length items are unchanged; the HTTP/2 ``SETTINGS`` pair, whose size is fixed,
   is given it in its own schema instead (:issue:`1140`, below) (:issue:`1148`).
 * a signed :class:`.NumberField` decoded as unsigned, a zero-length
-  :class:`.PayloadField` misread, and an empty :class:`~pcapkit.protocols.misc.raw.Raw`
+  :class:`.PayloadField` misread, and an empty :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
   did not rebuild (:pr:`1331`).
 * ``from_dict(to_dict())`` lost nested values, and ``len()`` of an :class:`.Info`
   counted its hidden keys (:pr:`1334`).
@@ -1003,7 +1003,7 @@ Changed
   rather than eagerly, cutting IP reassembly's own cost by 90.7% and TCP's by 23.7%
   (IP reassembly submits a datagram for every frame, fragmented or not) (:pr:`424`).
   Flow tracing over the same capture went from 1416.6 ms to 744.0 ms, because the flow
-  dumper handed each record to a :class:`~pcapkit.protocols.misc.pcap.frame.Frame`
+  dumper handed each record to a :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`
   constructor that re-dissected the whole stack to return the bytes it had just been
   given; options are no longer parsed twice either (:pr:`427`).
 * **a breaking change to** :attr:`.Extractor.engine` and
@@ -1085,7 +1085,7 @@ Fixed
 * ``register_protocol`` displaced one protocol class with another and said nothing.
   The registry behind :data:`pcapkit.protocols.__proto__` is keyed on
   ``cls.__name__.upper()``, and several dispatchable classes are named ``HTTP``
-  (the base :class:`pcapkit.protocols.application.http.HTTP` and the ``httpv1`` and
+  (the base :class:`pcapkit.protocols.application.http.protocol.HTTP` and the ``httpv1`` and
   ``httpv2`` implementations), so a bare assignment decided the winner:
   ``register_protocol(httpv2.HTTP)`` moved ``__proto__['HTTP']`` to the ``httpv2``
   class with no exception, log line or :exc:`.RegistryWarning`, and
@@ -1104,7 +1104,7 @@ Fixed
   (``register_tcp`` then ``register_udp``, a documented path) reaches it twice with
   nothing displaced. The collision is reported, not resolved: re-keying is a
   registry-format change that none of the bare-name readers can absorb (each degrades
-  *silently* to a string or :class:`~pcapkit.protocols.misc.raw.Raw` on a miss), so it
+  *silently* to a string or :class:`~pcapkit.protocols.misc.raw.protocol.Raw` on a miss), so it
   belongs to the registry redesign in :issue:`514`. The issue called this the one
   registrar with no warning; in fact none warned by itself, the siblings only by
   delegating to a guarded classmethod (:issue:`675`).
@@ -1320,7 +1320,7 @@ Added
   verification through ``cryptography`` (``pip install pypcapkit[crypto]``)
   (:pr:`378`). Keys reach the dissector through a new caller-state channel,
   :mod:`pcapkit.corekit.context`, surfaced as the ``context=`` keyword on ``extract()``
-  and :class:`.Extractor`, carrying an :class:`.esp.SecurityAssociation`. Nothing here
+  and :class:`.Extractor`, carrying an :class:`.esp.protocol.SecurityAssociation`. Nothing here
   raises: with no association the SPI and sequence number are still reported and the
   ciphertext is left opaque with ``status=NO_SA``, and a failed decryption or ICV
   check is recorded on the parsed result the same way. Extended Sequence Numbers, TFC
@@ -1352,10 +1352,10 @@ Added
   (:pr:`436`): FTP-DATA on TCP 20, HTTP/1 on TCP 8080, HTTP on UDP 8080,
   :class:`.L2TPv2` on UDP 1701 and OSPF at
   :class:`~pcapkit.const.reg.transtype.TransType` 89.
-  :class:`~pcapkit.protocols.link.vlan.VLAN` became an abstract base with
+  :class:`~pcapkit.protocols.link.vlan.protocol.VLAN` became an abstract base with
   :class:`.C_Tag` (802.1Q) and :class:`.S_Tag` (802.1ad) as concrete subclasses, so a
   Q-in-Q frame no longer collapses into one opaque
-  :class:`~pcapkit.protocols.misc.raw.Raw`; :class:`~pcapkit.protocols.link.l2tp.L2TP`
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`
   likewise became a base, with :class:`.L2TPv2` carrying the :rfc:`2661` implementation.
 * :class:`~pcapkit.protocols.protocol.Protocol`/:class:`.ProtocolBase` gain a ``code=``
   class keyword for the next-layer dispatch registries (:attr:`.Link.__proto__`,
@@ -1370,14 +1370,14 @@ Added
   :class:`.Link`, :class:`~pcapkit.const.reg.transtype.TransType` means
   :class:`.Internet`,
   :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-  means :class:`~pcapkit.protocols.transport.sctp.SCTP`, and
+  means :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`, and
   :class:`~pcapkit.const.reg.linktype.LinkType` means *both*
-  :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, mirroring ``register_linktype``), or a
+  :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` **and**
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, mirroring ``register_linktype``), or a
   ``{destination: key}`` mapping, required for a raw ``int`` such as a port number,
   which cannot say which transport it belongs to. Either form may appear in an iterable,
   so one declaration can register a class into several registries (e.g. a
-  :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable by IP protocol number
+  :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable by IP protocol number
   and by a UDP port), and the mapping form is accepted even where inference would work.
   Inference refuses rather than guesses: an enum member whose type names no known
   destination raises :exc:`.RegistryError`, and an unrecognised class keyword raises
@@ -1393,7 +1393,7 @@ Added
   designates, read from the same ``__proto_dest__`` declaration backing ``code=`` so
   the two cannot drift. It walks the classes rather than the registry entries, so it
   catches a class nothing registered, the shape in which
-  :class:`~pcapkit.protocols.application.ospf.OSPF` once shipped (:issue:`548`).
+  :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` once shipped (:issue:`548`).
 * ``tests/protocols/transport/test_tcp_mptcp_join_flag_ordering_unit.py``, covering
   all three MP_JOIN layouts through the *public* constructor, the construct-pack-parse
   cycle for each, the stale-flags case that rules out a zero-valued default, the
@@ -1426,7 +1426,7 @@ Added
 Changed
 ~~~~~~~
 
-* **a breaking change to** :class:`~pcapkit.protocols.application.ospf.OSPF`,
+* **a breaking change to** :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`,
   :class:`.RARP` and :class:`.DRARP`: they move from :mod:`pcapkit.protocols.link` to
   :mod:`pcapkit.protocols.application`, with no deprecated re-export at the old path
   (:issue:`719`). Layer is decided by designed function, with the IETF as the single
@@ -1436,12 +1436,12 @@ Changed
 
   Import paths, before to after:
 
-  * ``pcapkit.protocols.link.ospf`` to :mod:`pcapkit.protocols.application.ospf`
+  * ``pcapkit.protocols.link.ospf`` to :mod:`pcapkit.protocols.application.ospf.protocol`
   * ``pcapkit.protocols.data.link.ospf`` to
-    :mod:`pcapkit.protocols.data.application.ospf`
+    :mod:`pcapkit.protocols.application.ospf.data`
   * ``pcapkit.protocols.schema.link.ospf`` to
-    :mod:`pcapkit.protocols.schema.application.ospf`
-  * ``pcapkit.protocols.link.rarp`` to :mod:`pcapkit.protocols.application.rarp`
+    :mod:`pcapkit.protocols.application.ospf.schema`
+  * ``pcapkit.protocols.link.rarp`` to :mod:`pcapkit.protocols.application.rarp.protocol`
 
   ``from pcapkit import OSPF`` and ``from pcapkit.protocols import OSPF`` (likewise
   :class:`.RARP` and :class:`.DRARP`) are unaffected;
@@ -1449,19 +1449,19 @@ Changed
   no ``data`` or ``schema`` module of its own, as it reuses ARP's.
 
   ``layer`` changes from ``'Link'`` to ``'Application'`` for OSPF, RARP and DRARP.
-  :class:`~pcapkit.protocols.application.ospf.OSPF` now takes :class:`.Application` as
+  :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` now takes :class:`.Application` as
   its only base, and :class:`.RARP` becomes ``class RARP(Application, ARP)`` -- layer
-  base first, because :class:`~pcapkit.protocols.link.arp.ARP`'s chain reaches
-  :class:`.Link`, which owns ``__layer__``. :class:`~pcapkit.protocols.link.arp.ARP` and
+  base first, because :class:`~pcapkit.protocols.link.arp.protocol.ARP`'s chain reaches
+  :class:`.Link`, which owns ``__layer__``. :class:`~pcapkit.protocols.link.arp.protocol.ARP` and
   :class:`.InARP` stay ``'Link'``. Dispatch keys are unchanged: OSPF is still reached
   from :attr:`.Internet.__proto__` at :attr:`.TransType.OSPFIGP` and RARP from
   :attr:`.Link.__proto__` by EtherType. Leaving :class:`.Link` repoints
   ``OSPF.__proto__`` at :attr:`.ProtocolBase.__proto__`, so OSPF no longer sees Link's
   EtherType entries -- which nothing used, since it is reached by protocol number, and a
-  ``-1`` lookup falls back to :class:`~pcapkit.protocols.misc.raw.Raw` in either
+  ``-1`` lookup falls back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` in either
   registry without inserting. ``register`` and ``_read_protos`` still resolve, on
   :class:`.ProtocolBase` rather than :class:`.Link`. :class:`.RARP` keeps Link's through
-  :class:`~pcapkit.protocols.link.arp.ARP`.
+  :class:`~pcapkit.protocols.link.arp.protocol.ARP`.
 
   Layer-limited extraction: ``layer='link'`` no longer sets the termination flag on OSPF
   and ``layer='application'`` now does -- the same inversion applies to RARP -- but the
@@ -1469,10 +1469,10 @@ Changed
   ``layer=`` value, including ``'internet'`` (``IPv4:OSPFIGP`` before and after, as IPv4
   ends the chain itself).
 * renames with no compatibility alias left behind: PCAP-NG
-  :class:`~pcapkit.protocols.schema.misc.pcapng.Option` subclasses spell the namespace
+  :class:`~pcapkit.protocols.misc.pcapng.schema.Option` subclasses spell the namespace
   class keyword ``ns=`` instead of ``namespace=`` (:issue:`439`).
 * ``tests/protocols/transport/test_tcp_udp_unit.py`` now reaches the MP_JOIN
-  dispatchers through :class:`TCP() <pcapkit.protocols.transport.tcp.TCP>` itself,
+  dispatchers through :class:`TCP() <pcapkit.protocols.transport.tcp.protocol.TCP>` itself,
   instead of assigning a Python ``set`` to ``_flags`` on a bare ``TCP.__new__(TCP)``. A
   ``set`` answers the same membership tests, so every branch ran while the attribute had
   neither the type production assigns nor the ordering that governs when it exists --
@@ -1493,7 +1493,7 @@ Changed
   parent passed on. A new ``__keywords__`` opts a class out: a set, for a keyword read
   out of ``**kwargs`` by name (:meth:`.ESP.read` with ``packet``); and ``None``, for a
   dispatcher whose real signature belongs to a class chosen at call time (only
-  :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>`). The message names
+  :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>`). The message names
   the near neighbour (``seq`` reports *did you mean 'seq_no'?*). ``from_data`` warns
   :exc:`.UnknownFieldWarning` rather than raising for a key its own ``_make_data``
   returned, which the caller cannot fix; a keyword passed to ``from_data`` itself
@@ -1509,7 +1509,7 @@ Changed
   outright. It encodes "no further protocol layer above this one", which undissected
   trailer bytes are not, so ``_decode_next_layer`` and ``_import_next_layer`` accept
   the ``-1`` sentinel -- the rest of the packet, resolving to
-  :class:`~pcapkit.protocols.misc.raw.Raw`, or to
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, or to
   :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains -- and
   ``__post_init__`` keeps a payload that ``read`` set instead of overwriting it with
   :class:`~pcapkit.protocols.misc.null.NoPayload`. A real protocol number (any ``proto``
@@ -1525,8 +1525,8 @@ Changed
   (:issue:`1101`).
 * **a breaking change to** ``OSPF_CrytographicAuthentication``: the misspelling is
   corrected to ``OSPF_CryptographicAuthentication``, and ``CrytographicAuthentication``
-  in :mod:`pcapkit.protocols.schema.application.ospf` and
-  :mod:`pcapkit.protocols.data.application.ospf` to ``CryptographicAuthentication``,
+  in :mod:`pcapkit.protocols.application.ospf.schema` and
+  :mod:`pcapkit.protocols.application.ospf.data` to ``CryptographicAuthentication``,
   with no alias left for the old spelling. Both OSPF names also move to the application
   group of ``schema.__all__`` and ``data.__all__``, after :issue:`719`'s move
   (:issue:`1090`).
@@ -1540,8 +1540,8 @@ Changed
   frame cut at the chain bound warns once (:issue:`1619`, :pr:`1630`).
 * **a breaking change to** IPv6 extension headers: an unrecognised or unparsable one
   is parsed generically, per :rfc:`6564`, rather than collapsing the packet to
-  :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`891`, :pr:`904`).
-  :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` does it, and is also the shared
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`891`, :pr:`904`).
+  :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` does it, and is also the shared
   base of every extension header (:issue:`917`, :pr:`924`).
 * **a breaking change to** ``pack()``: it no longer keeps the header it builds on the
   instance it is called on, which in 1.4.1 too left ``schema`` disagreeing with
@@ -1549,8 +1549,8 @@ Changed
   ``info.srcport`` kept 1234. Once an instance has been parsed or constructed,
   ``pack()`` builds on a shallow copy, so ``schema``, ``info`` and what ``make()``
   sets, such as TCP's ``connection``, stay as they were. The
-  :class:`~pcapkit.protocols.misc.pcap.frame.Frame`,
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` and ``HTTPv2`` overrides do the same,
+  :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`,
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` and ``HTTPv2`` overrides do the same,
   and re-packing a PCAP-NG block that carries an option allowed only once no longer
   raises. Code that relied on ``pack()`` to re-sync ``schema`` calls ``make()`` or
   constructs a new instance (:issue:`1769`, :pr:`1791`).
@@ -1560,9 +1560,9 @@ Changed
   header with exactly two octets of padding changes; a parsed one that carried two
   ``Pad1`` options still rebuilds byte for byte (:issue:`1793`, :pr:`1812`).
 * **a breaking change to** :class:`.NTPTimestamp`: it and :class:`.PMIPv6Timestamp` are
-  :class:`.Info` classes in :mod:`pcapkit.protocols.data.internet.mh` rather than
+  :class:`.Info` classes in :mod:`pcapkit.protocols.internet.mh.data` rather than
   tuples, and :class:`.NTPTimestamp` keeps no alias at its 1.4.x home in
-  :mod:`pcapkit.protocols.internet.mh`. As Mappings they no longer index, unpack,
+  :mod:`pcapkit.protocols.internet.mh.protocol`. As Mappings they no longer index, unpack,
   compare or hash as a tuple does; ``.seconds`` and ``.fraction`` still work, and the
   dumpers write both as keys (:issue:`1886`, :pr:`1887`).
 * **a breaking change to** rebuilding from ``to_dict()``: the payload is dispatched only
@@ -1585,18 +1585,18 @@ Changed
   it opens. Code reading ``block.context`` for the section reads
   ``block.section_context`` (:issue:`2172`, :pr:`2205`).
 * **a breaking change to** ``FTP_DATA``: it derives from ``Application`` as well as
-  :class:`~pcapkit.protocols.misc.raw.Raw`, so its ``__layer__`` names the
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, so its ``__layer__`` names the
   application layer where it was ``None`` -- a ``layer='application'`` extraction
   stops at it, and ``extract(layer=FTP_DATA)`` resolves to that layer rather than to
   ``'none'``. Raw still does the parsing and the rebuild, and ``__index__`` is the
   application layer's, raising ``IntError`` where it raised
   :exc:`.UnsupportedCall`. The class moves to
-  :mod:`pcapkit.protocols.application.ftp_data` with nothing left behind on the old
-  path in :mod:`pcapkit.protocols.application.ftp`, where it shipped from 1.0.0
+  :mod:`pcapkit.protocols.application.ftp_data.protocol` with nothing left behind on the old
+  path in :mod:`pcapkit.protocols.application.ftp.protocol`, where it shipped from 1.0.0
   through 1.4.1 (:issue:`2285`, :pr:`2357`).
 * **a breaking change to** HIP's ``REG_FAILED`` parameter: its first octet is the
   Failure Type, and it carries no lifetime (:rfc:`8003#section-4.5`), so
-  :class:`pcapkit.protocols.data.internet.hip.RegFailedParameter` replaces ``lifetime``
+  :class:`pcapkit.protocols.internet.hip.data.RegFailedParameter` replaces ``lifetime``
   with ``failure_type``, a :class:`~pcapkit.const.hip.registration_failure.RegistrationFailure`,
   with no alias, and its ``reg_type`` holds
   :class:`~pcapkit.const.hip.registration.Registration` values rather than failure
@@ -1636,14 +1636,14 @@ Fixed
   fell through to ``collections.abc.Mapping``'s, so a single ``isinstance`` or
   ``issubclass`` answer poisoned every later question about that class for the
   rest of the process. A terminating PCAP-NG
-  :class:`~pcapkit.protocols.schema.misc.pcapng.EndRecord` tested ``True`` as an
-  :class:`~pcapkit.protocols.schema.misc.pcapng.IPv4Record` (:issue:`439`).
+  :class:`~pcapkit.protocols.misc.pcapng.schema.EndRecord` tested ``True`` as an
+  :class:`~pcapkit.protocols.misc.pcapng.schema.IPv4Record` (:issue:`439`).
 * construction, broken in several places at once: the generated typed ``__init__``
   was never installed, so ``__post_init__`` did not run and a schema built from a
   subset of its fields could not be packed -- ``UDP(srcport=53, dstport=5353)`` now
   packs (:pr:`430`); IPv6 and Mobility Header option padding was wrong, leaving
   construction wholly broken (:pr:`398`);
-  :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` called the versioned
+  :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` called the versioned
   ``make`` unbound, so every real call raised ``TypeError`` (:issue:`452`, :pr:`462`);
   and :meth:`.IPv4._make_data` returned the fragment offset in octets where the wire
   wants 8-octet units, and read ``data.options`` on a packet that has none
@@ -1676,7 +1676,7 @@ Fixed
   now goes through ``parse_ip_address``, the helper :pr:`539` and :issue:`552`
   route their own sites through, completing the programme :pr:`481` and
   :issue:`508` started. Pinning ``version=6`` on the
-  :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` sites is a further, smaller
+  :class:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route` sites is a further, smaller
   behaviour change: both converted a plain integer through the family-inferring
   ``ipaddress.ip_address``, so ``ip=[258]`` packed a 4-octet IPv4 address (``0.0.1.2``)
   inside an IPv6-only header; it now packs the 16-octet ``::102`` (:issue:`540`).
@@ -1694,12 +1694,12 @@ Fixed
   its ``kind=``/``length=`` arguments were rejected with :exc:`.UnknownFieldWarning` and
   dropped, and ``.pack()`` then raised ``KeyError: 'length'`` from ``port``'s own
   condition, ``pkt['length'] in (10, 22)``. The cause was one layer up:
-  :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base of every Multipath
+  :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`, the base of every Multipath
   TCP subtype schema, declared ``kind`` and ``length`` only under
   ``typing.TYPE_CHECKING`` rather than as real fields, unlike
-  :class:`~pcapkit.protocols.schema.transport.tcp.Option`. That dropped
+  :class:`~pcapkit.protocols.transport.tcp.schema.Option`. That dropped
   ``kind=``/``length=`` for every ``_make_mptcp_*`` constructor, so
-  :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` now declares both for real
+  :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` now declares both for real
   (:issue:`541`). The missing fields broke parsing too: a subtype schema's leading field
   read the ``kind`` octet itself, an off-by-two in field alignment rather than a
   wire-format change (a correct sender's octets were always right). Spec-correct
@@ -1715,7 +1715,7 @@ Fixed
   multi-address header holds (:issue:`556`).
 * further defects :issue:`541` exposed by letting construction reach code that had
   never run.
-  :attr:`MPTCP.subtype <pcapkit.protocols.schema.transport.tcp.MPTCP.subtype>` was still
+  :attr:`MPTCP.subtype <pcapkit.protocols.transport.tcp.schema.MPTCP.subtype>` was still
   ``typing.TYPE_CHECKING``-only, so ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])``
   raised ``AttributeError: ... has no attribute 'subtype'`` for every subtype but
   ``MP_JOIN``: the convenience constructor reads the schema straight back through
@@ -1728,7 +1728,7 @@ Fixed
   (:issue:`566`). Separately, ``_make_mptcp_capable`` wrote
   ``length=20 if rkey is None else 32`` where :rfc:`8684` section 3.1 gives 12 and 20,
   and
-  :attr:`MPTCPCapable.rkey <pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey>`'s
+  :attr:`MPTCPCapable.rkey <pcapkit.protocols.transport.tcp.schema.MPTCPCapable.rkey>`'s
   condition (``pkt['length'] != 32``) dropped the receiver's key for exactly the length
   the maker used for "key present": a key-absent MP_CAPABLE could not be built, and a
   key-present one lost its key on the wire. Both, and the guard in
@@ -1746,7 +1746,7 @@ Fixed
   ``checksum`` too, where it used to drop them silently through ``**kwargs``, and picks
   the length from how many of ``skey``, ``rkey``, ``dl_len`` and ``checksum`` are not
   ``None``. A field given without the one before it raises :exc:`.ProtocolError`. The
-  data model :class:`~pcapkit.protocols.data.transport.tcp.MPTCPCapable` gains
+  data model :class:`~pcapkit.protocols.transport.tcp.data.MPTCPCapable` gains
   ``dl_len`` and ``checksum``, and ``skey`` becomes ``Optional[int]``: code that
   constructs it directly must now pass both new fields, and ``to_dict()`` carries the
   new keys (:issue:`1042`).
@@ -1783,7 +1783,7 @@ Fixed
   but nothing enforced it, so the hard-coded ``Literal[2]`` property and
   ``info.version`` answered 2 and 3 on the same octets. ``read`` now raises
   :exc:`.ProtocolError`, degrading the payload to
-  :class:`~pcapkit.protocols.misc.raw.Raw` through the existing ``beholder`` path with
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` through the existing ``beholder`` path with
   the reason recorded. **This affects real captures**: :rfc:`3931` §4.1.2 puts L2TPv3 on
   port 1701 too, the port :attr:`.UDP.__proto__` binds, so
   ``Ethernet:IPv4:UDP:L2TPv2:Raw`` with invented field values becomes
@@ -1795,7 +1795,7 @@ Fixed
   carries **no version nibble at all**, so a v2 parser cannot detect that the
   datagram is not its own. 115 is a missing *class*, not a missing registration, and stays
   unbound until an ``L2TPv3`` class exists; no dissector was invented to fill it.
-  The reasoning is recorded in :mod:`pcapkit.protocols.link.l2tp`, and
+  The reasoning is recorded in :mod:`pcapkit.protocols.link.l2tp.protocol`, and
   ``register_protocol_code``'s worked example, which named :class:`.L2TPv2` at 115,
   names ``L2TPv3`` instead (:issue:`548`).
 * building any ``MP_JOIN`` option raised
@@ -1820,8 +1820,8 @@ Fixed
   that equals ``0`` and ORs identically. The read path's seed is unchanged: a flagless
   MP_JOIN is rejected by ``mptcp_data_selector`` before ``_read_mptcp_join`` runs
   (:issue:`587`).
-* the ILNP Nonce option builders in :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
-  and :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` sized the option with
+* the ILNP Nonce option builders in :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT`
+  and :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` sized the option with
   ``math.ceil(nonce.bit_length() // 8)``, floor division dressed as a ceiling (``//``
   floors and ``math.ceil`` of an ``int`` is a no-op). The nonce is packed by a
   :class:`.NumberField` whose width *is* the declared ``len``, so an under-declared
@@ -1889,10 +1889,10 @@ Fixed
   :mod:`pcapkit.corekit.fields.numbers`, which is where :pr:`598` then fixed it; the
   same paragraph sat in ``test_tcp_mptcp_length_arithmetic_unit.py``'s docstring,
   whose other stale claim was that MP_JOIN "cannot be built through the public
-  :class:`TCP() <pcapkit.protocols.transport.tcp.TCP>` constructor at all", true only
+  :class:`TCP() <pcapkit.protocols.transport.tcp.protocol.TCP>` constructor at all", true only
   until :issue:`587`. A callable-length :class:`.NumberField` packs and unpacks both DSS
   widths now, and wire *absence* was never the obstacle:
-  :attr:`MPTCPDSS.ssn <pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn>`, ``dl_len``
+  :attr:`MPTCPDSS.ssn <pcapkit.protocols.transport.tcp.schema.MPTCPDSS.ssn>`, ``dl_len``
   and ``checksum`` have always been :class:`.ConditionalField` on the sibling ``M``
   flag. The :class:`.SwitchField` form is kept for the narrower reason the note now
   gives: :class:`.ConditionalField`'s ``length`` forwards to the wrapped field without
@@ -1916,7 +1916,7 @@ Fixed
   ``RHASH_len`` is a whole number of octets. For an arbitrary ``bit_length()`` the
   builder emitted an *odd* contents width, which its own reader refused:
   ``_read_param_solution``'s ``(schema.len - 4) % 2`` guard exists because
-  :class:`~pcapkit.protocols.schema.internet.hip.SolutionParameter` splits that width
+  :class:`~pcapkit.protocols.internet.hip.schema.SolutionParameter` splits that width
   into two equal halves. ``random=0x1`` with ``solution=0xfff`` declared ``len=7`` and
   raised ``ProtocolError: HIPv2: [ParamNo 321] invalid format`` on input the library had
   produced. The undersized length was worse: both fields take their width from that
@@ -1933,7 +1933,7 @@ Fixed
   all-zero flags octet (an nmap NULL scan) left ``self._flags`` an ``int``, so a
   membership test raised
   ``TypeError: argument of type 'int' is not a container or iterable``, and
-  :attr:`TCP.connection <pcapkit.protocols.transport.tcp.TCP.connection>` returned an
+  :attr:`TCP.connection <pcapkit.protocols.transport.tcp.protocol.TCP.connection>` returned an
   ``int`` where it annotates :class:`~pcapkit.const.tcp.flags.Flags`. Any flag masked
   it, which is how it survived 100% statement and branch coverage. The seed is
   ``Flags(0)``, as :pr:`597` already did for the sibling accumulator in ``make``;
@@ -1967,8 +1967,8 @@ Fixed
   existed until :pr:`614` (:issue:`618`).
 * the HIP ``PUZZLE`` and ``SOLUTION`` builders derived wire-format values from the
   payload value instead of the data model, and each was wrong. **This changes the**
-  :class:`~pcapkit.protocols.data.internet.hip.PuzzleParameter` **and**
-  :class:`~pcapkit.protocols.data.internet.hip.SolutionParameter` **data models and the
+  :class:`~pcapkit.protocols.internet.hip.data.PuzzleParameter` **and**
+  :class:`~pcapkit.protocols.internet.hip.data.SolutionParameter` **data models and the
   octets both parameters emit.** The width of ``Random #I`` and ``Puzzle solution #J``
   came from ``int.bit_length()`` alone, so every leading zero octet was dropped on
   re-serialisation: a ``SOLUTION`` read with ``Length = 20`` rebuilt as ``Length = 6``,
@@ -1999,8 +1999,8 @@ Fixed
   raise :exc:`.ProtocolError` (``(BaseError, ValueError)``, so a caller written around
   the bare exception still catches it). Migration: ``SolutionParameter.lifetime`` is
   now ``reserved`` and an ``int`` rather than a ``timedelta``;
-  :class:`~pcapkit.protocols.data.internet.hip.PuzzleParameter` and
-  :class:`~pcapkit.protocols.data.internet.hip.SolutionParameter` gained a required
+  :class:`~pcapkit.protocols.internet.hip.data.PuzzleParameter` and
+  :class:`~pcapkit.protocols.internet.hip.data.SolutionParameter` gained a required
   ``rhash_len``; and ``_make_param_solution`` no longer takes ``lifetime=``. Each was
   reachable end to end only once :issue:`608` was fixed in :pr:`629`, which removed the
   parity guard that had failed these rebuilds loudly; the round trip then stopped
@@ -2027,11 +2027,11 @@ Fixed
   and one ``parameter_padding_len`` (:issue:`651`). ``LOCATOR_SET`` kept the old
   expression because defects there cancelled exactly: its padding callback never
   received the parameter's ``len`` (the nested
-  :class:`~pcapkit.protocols.schema.internet.hip.Locator` schemas share a packet context
+  :class:`~pcapkit.protocols.internet.hip.schema.Locator` schemas share a packet context
   whose own ``len`` shadowed it, so it saw 4 for an IPv6 locator), and the parameter's
   ``len`` was written in 4-octet units where the RFC's ``Length`` is a byte count; the
   result, ``4 + 24n + 4``, equalled the RFC total ``24n + 8``. :issue:`679` later fixed
-  both sites. :class:`~pcapkit.protocols.schema.internet.hip.EncryptedParameter`'s
+  both sites. :class:`~pcapkit.protocols.internet.hip.schema.EncryptedParameter`'s
   ``data`` length callback is fixed in the same change: it subtracted the sixteen ``iv``
   octets but not the four ``reserved`` ones, which cancelled the padding's four at
   ``Length % 8`` in ``{0, 5, 6, 7}``, so correcting the padding alone would have made
@@ -2070,11 +2070,11 @@ Fixed
   ``connection``. The seed is guarded because :class:`.FrameType.Flags` declares
   no members and, from Python 3.11, a memberless ``enum.Flag`` subclass refuses
   ``Flags(0)``, so the frame schemas that inherit it
-  (:class:`~pcapkit.protocols.schema.application.httpv2.UnassignedFrame`,
-  :class:`~pcapkit.protocols.schema.application.httpv2.PriorityFrame`,
-  :class:`~pcapkit.protocols.schema.application.httpv2.RSTStreamFrame`,
-  :class:`~pcapkit.protocols.schema.application.httpv2.GoawayFrame`,
-  :class:`~pcapkit.protocols.schema.application.httpv2.WindowUpdateFrame`) keep the
+  (:class:`~pcapkit.protocols.application.httpv2.schema.UnassignedFrame`,
+  :class:`~pcapkit.protocols.application.httpv2.schema.PriorityFrame`,
+  :class:`~pcapkit.protocols.application.httpv2.schema.RSTStreamFrame`,
+  :class:`~pcapkit.protocols.application.httpv2.schema.GoawayFrame`,
+  :class:`~pcapkit.protocols.application.httpv2.schema.WindowUpdateFrame`) keep the
   plain ``int``, which nothing observes since each passes ``flags=None``. A DATA round
   trip is **still** lossy for an unrelated reason found while measuring: payload length
   callbacks are mis-parenthesised, so an unpadded ``DATA``, ``HEADERS`` or
@@ -2119,7 +2119,7 @@ Fixed
   ``self.packet.payload``. The inherited ``packet`` splits a protocol at
   ``self.length`` octets of header and takes the rest as payload, which holds only for
   a header followed by its payload;
-  :attr:`PCAPNG.length <pcapkit.protocols.misc.pcapng.PCAPNG.length>` is the *Block
+  :attr:`PCAPNG.length <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length>` is the *Block
   Total Length*, so the split consumed the whole block as header
   (``len(frame.packet.header) == 348`` on a 348-octet block), and a block's trailer
   (option list, repeated total length) means no ``length`` could make it right. The fix
@@ -2161,7 +2161,7 @@ Fixed
   absent, so pcapkit was *emitting* malformed HTTP/2; a ``make`` -> parse -> ``make``
   cycle of a non-empty unpadded payload now closes byte-for-byte. The only other
   conditional of this shape,
-  :attr:`TSOption.remainder <pcapkit.protocols.schema.internet.ipv4.TSOption.remainder>`
+  :attr:`TSOption.remainder <pcapkit.protocols.internet.ipv4.schema.TSOption.remainder>`
   in ``pcapkit/protocols/schema/internet/ipv4.py``, is correct: its ``else 0`` is
   intentional because ``ts_data`` consumes the whole option data area in that arm. The
   new tests use non-zero padding rather than the zeros :rfc:`9113#section-6.1` tells a
@@ -2180,10 +2180,10 @@ Fixed
   faithful test only because :meth:`._EnumRegistry.__missing__` returns a miss without
   recording it, so parsing an unknown code cannot make the next legitimate
   registration warn. The code-keyed parser registrars (on :class:`.ProtocolBase`,
-  :class:`.Link`, :class:`.Internet`, :class:`~pcapkit.protocols.misc.pcap.frame.Frame`,
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
+  :class:`.Link`, :class:`.Internet`, :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`,
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`,
   :class:`~pcapkit.protocols.transport.transport.Transport` and
-  :class:`~pcapkit.protocols.transport.sctp.SCTP`) now name the displaced entry and its
+  :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`) now name the displaced entry and its
   replacement, where they reported only that something was overwritten. Their firing
   condition is harmonised onto the narrower guard :pr:`681` gave ``register_protocol``
   (:issue:`718`, :pr:`726`) rather than presence alone: that key is derived from the
@@ -2196,7 +2196,7 @@ Fixed
   duplicate, and the reassembly and ESP registrars append to lists with no key, so none
   of them takes a guard. ``import pcapkit`` emits no :exc:`.RegistryWarning`: none of
   its registry writes
-  (:class:`~pcapkit.protocols.schema.internet.hip.R1CounterParameter`'s second code,
+  (:class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter`'s second code,
   from :issue:`690`, among them) lands on a key already present (:issue:`692`).
 * every EOF-truncated PCAP-NG file raised a bare ``ValueError`` out of
   :class:`.Extractor`, losing the whole extraction rather than the one truncated block.
@@ -2228,7 +2228,7 @@ Fixed
   reports a displaced option schema as a :exc:`.RegistryWarning` naming every namespace
   the ``ns='opt'`` fan-out displaced something in, tested by membership (subscripting
   the per-namespace ``defaultdict`` would insert
-  :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownOption` for a code nobody
+  :class:`~pcapkit.protocols.misc.pcapng.schema.UnknownOption` for a code nobody
   registered). The condition is identity-based like the parser registrars and
   :pr:`681`'s guard for ``register_protocol`` (:issue:`718`, :pr:`726`); a namespace the
   call itself creates is exempt. Flooring the decryption-secrets payloads that read
@@ -2243,13 +2243,13 @@ Fixed
   :rfc:`7401#section-5.2.3` requires 16, and ``LOCATOR_SET`` declared its ``Length``
   in 4-octet units where :rfc:`7401#section-5.2.1`'s ``Length`` is a byte count --
   independent defects, fixed together because the evidence for either needed the other
-  out of the way. :class:`~pcapkit.protocols.schema.internet.hip.R1CounterParameter`'s
+  out of the way. :class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter`'s
   ``counter`` was a :class:`.UInt32Field` where the RFC states the width twice, "8
   bytes" in the diagram and "a 64-bit unsigned integer" in prose; both versions whose
   *packing* reaches the class, ``R1_Counter`` (128) and ``R1_COUNTER`` (129), packed a
   12-octet record at ``4 (mod 8)``. It is a :class:`.UInt64Field` now and the record is
   16 octets (:issue:`672`).
-  :class:`~pcapkit.protocols.schema.internet.hip.LocatorSetParameter`'s ``Length`` was
+  :class:`~pcapkit.protocols.internet.hip.schema.LocatorSetParameter`'s ``Length`` was
   ``sum(Locator.len)``, in the 4-octet units :rfc:`8046#section-4` gives
   ``Locator Length``; a set of *n* plain IPv6 locators declared ``4n`` octets against
   ``24n`` present, and :meth:`.Schema.unpack` handed the nested :class:`.ListField` only
@@ -2257,7 +2257,7 @@ Fixed
   the rest unconsumed. :meth:`.HIP._make_param_locator_set` now sums
   ``8 + Locator.len * 4`` per locator (:issue:`679`). Another defect in the same
   parameter's padding, which :issue:`651` left alone because it cancelled this one, is
-  fixed alongside: the nested :class:`~pcapkit.protocols.schema.internet.hip.Locator`
+  fixed alongside: the nested :class:`~pcapkit.protocols.internet.hip.schema.Locator`
   schemas share the parameter's packet context and pack their own ``len`` over it, so
   ``padding``, evaluated after the list, saw 4 rather than the real length. A new
   ``locator_set_len_callback`` snapshots ``Length`` under a private key before any
@@ -2267,11 +2267,11 @@ Fixed
   are ``test_hip_r1_counter_width_unit.py`` and ``test_hip_locator_set_length_unit.py``.
   The ``hip-parameter/R1_Counter`` ``EXPECTED_FAILURES`` entry (code 128 registered no
   schema of its own, since
-  :class:`~pcapkit.protocols.schema.internet.hip.R1CounterParameter` declared only
+  :class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter` declared only
   ``code=129``) was deleted once that registry defect was fixed as :issue:`690`.
   ``HIP_COPIES`` dropped to one as :issue:`689`, once :issue:`672` and :issue:`679` left
   it routing around nothing.
-* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` raised a bare
+* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.protocol.HTTP>` raised a bare
   exception for any payload that is not an HTTP/1 message, at these sites: the
   header/body split in ``read``, the header's CRLF split and the start-line split in
   ``_read_http_header``, and ``item[1]`` on a field line with no colon.
@@ -2279,20 +2279,20 @@ Fixed
   HTTP/1 attempt aborted the guess and the HTTP/2 arm below was dead code for each of
   those inputs. Each site now raises :exc:`.ProtocolError`, which each method's
   ``Raises:`` section documented, and a test pins the invariant (nothing escapes
-  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` that is not a
+  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.protocol.HTTP>` that is not a
   :exc:`.ProtocolError`), so any further bare-raising site would fail there. An obs-fold
   continuation line [:rfc:`9112#section-5.2`] is legal HTTP/1 and is now unfolded, the
   RFC's remedy, rather than read as a field of its own (with no colon it raised that
   ``IndexError``; with one it parsed into a spurious extra field). Reaching the HTTP/2
   arm exposed a payload under nine octets to
-  :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>`, where it usually
+  :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.protocol.HTTP>`, where it usually
   fails inside the schema with a bare ``struct.error`` (not a ``ValueError``,
   :exc:`.ProtocolError` or pcapkit :exc:`.StructError`, so uncatchable); ``read``
   converts it and ``_guess_version`` suppresses it on the last arm only, since an arm
   that is not last hands the payload onward when it swallows. Separately,
   :attr:`.PayloadField.protocol` looked a ``str`` up in ``__proto__`` as given while the
   registry is keyed on the upper-cased class name, so a name not already upper-case
-  resolved to ``None`` and yielded :class:`~pcapkit.protocols.misc.raw.Raw`; it now
+  resolved to ``None`` and yielded :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; it now
   folds case and warns with :exc:`.RegistryWarning` for a genuinely unregistered name,
   and ``__init__`` assigns through that property instead of writing ``_protocol`` past
   it (:issue:`787`, :pr:`789`).
@@ -2310,7 +2310,7 @@ Fixed
   ``examples/generators/pcapng.py``'s ``_journal_entry`` cited a bare line number for
   the defect its alignment workaround avoids and mis-attributed the fix; it now names
   :issue:`678`'s ``not line.strip(b'\x00')`` guard and the mechanism (:issue:`791`).
-* :meth:`.httpv2.HTTP.read` tested only the 24-bit declared length off the wire
+* :meth:`.httpv2.protocol.HTTP.read` tested only the 24-bit declared length off the wire
   (``schema.length < 9``), never how many octets the buffer held, so a frame backed by
   far fewer real octets than declared parsed and reported the declared,
   attacker-controlled length. Sweeping the declared length against a four-octet buffer
@@ -2374,10 +2374,10 @@ Fixed
   safe heuristic, since a ``type <= 9`` guess misfires on binary HTTP/1 bodies).
   Protochain over the sample captures is unchanged (:issue:`800`).
 * :attr:`.TCP.__proto__` bound
-  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` directly for ports 80
+  :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.protocol.HTTP>` directly for ports 80
   and 8080, so a segment on either port was HTTP/1 by assertion of the port alone; both
   versions share those ports, so the payload has to decide. Repointed to the generic
-  :class:`pcapkit.protocols.application.http.HTTP` proxy, whose identification became
+  :class:`pcapkit.protocols.application.http.protocol.HTTP` proxy, whose identification became
   positive only once :issue:`800` and :pr:`814` landed, which is why this waited.
   ``udp.py`` already bound the proxy for both ports; this removes the asymmetry its
   docstring and ``docs/source/contributing/pep.rst`` documented as an open request. Over
@@ -2386,7 +2386,7 @@ Fixed
   ``Ethernet:IPv4:TCP:HTTP/2``. Not labelled breaking, but not free: ``TCP:80/8080``
   traffic that is neither valid HTTP/1 nor preface-carrying is now exposed to the
   fall-through arm, where the direct ``httpv1`` binding left it
-  :class:`~pcapkit.protocols.misc.raw.Raw` regardless; a caller depending on that is the
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` regardless; a caller depending on that is the
   one who would notice (:issue:`682`).
 * **a breaking change to** more bespoke registries: step 2 of :issue:`860`,
   ahead of :class:`~pcapkit.const.reg.apptype.apptype.AppType` (:pr:`874`, above),
@@ -2435,12 +2435,12 @@ Fixed
   the reason), since neither of :class:`~pcapkit.const.pcapng.option_type.OptionType`'s
   paths gets both pickling and correct rendering right at once (:pr:`869`).
 * ``register`` on :class:`.ProtocolBase`,
-  :class:`~pcapkit.protocols.misc.pcap.frame.Frame`,
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
-  :class:`~pcapkit.protocols.transport.sctp.SCTP`, :class:`.Link`, :class:`.Internet`
+  :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`,
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`,
+  :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`, :class:`.Link`, :class:`.Internet`
   and the concrete :class:`~pcapkit.protocols.transport.transport.Transport` subclasses
-  (:class:`~pcapkit.protocols.transport.tcp.TCP`,
-  :class:`~pcapkit.protocols.transport.udp.UDP`) now raises :exc:`.RegistryError` for a
+  (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
+  :class:`~pcapkit.protocols.transport.udp.protocol.UDP`) now raises :exc:`.RegistryError` for a
   non-class argument, where it raised a bare ``TypeError`` ("issubclass() arg 1 must be
   a class") from inside ``abc``. Each guard gains an explicit
   ``isinstance(protocol, type)`` test ahead of its ``issubclass``, after the
@@ -2461,7 +2461,7 @@ Fixed
   ``TypeError`` from ``abc`` did. That is the wrong-class path's existing behaviour, so
   the fix makes the two consistent rather than introducing something new. Follows the
   same fix for the foundation registrars (:issue:`1021`) (:issue:`1026`).
-* :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`'s ``ns_dnsname``, ``ns_dnsIP4addr`` and
+* :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`'s ``ns_dnsname``, ``ns_dnsIP4addr`` and
   ``ns_dnsIP6addr`` scope guards, on both the read and the make side, now say the option
   "must be in Name Resolution Block", which is the block they check; they used to name
   the systemd(1) Journal Export Block, with a literal ``:manpage:`` role in the text.
@@ -2473,7 +2473,7 @@ Fixed
   ``[if_rxspeed]`` rather than ``[if_txspeed]``, and ``_read_option_epb_queue``'s length
   guard says ``[epb_queue]`` rather than ``[epb_packetid]``. Only message text changes;
   the exception and warning types are unchanged (:issue:`1038`).
-* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.HTTP>` refused every HTTP/1
+* :class:`httpv1.HTTP <pcapkit.protocols.application.httpv1.protocol.HTTP>` refused every HTTP/1
   message with no header fields, which [:rfc:`9112#section-2.1`] allows
   (``*( field-line CRLF )``): ``b'GET / HTTP/1.0\r\n\r\n'`` raised
   ``ProtocolError: HTTP: invalid format``, because ``_read_http_header`` treated a
@@ -2511,7 +2511,7 @@ Fixed
   ``TRANSPORT_FORMAT_LIST`` were built and parsed in a HIPv1 packet; at version 1 the
   reader and the maker now raise :exc:`.ProtocolError`, as ``R1_Counter`` and
   ``HIP_TRANSFORM`` already do on a version mismatch (:issue:`1133`).
-* the PCAP :class:`~pcapkit.protocols.misc.pcap.header.Header` could not rebuild itself.
+* the PCAP :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` could not rebuild itself.
   ``_make_magic``'s explicit-endian branch ignored ``nanosecond`` (:issue:`1096`), and
   ``_make_data`` returned a ``magic_number`` that ``make()`` does not take -- one of the
   keys the :issue:`617` entry above reports -- so ``from_data`` dropped it with an
@@ -2526,7 +2526,7 @@ Fixed
   and overrides ``byteorder``, and equal flags still raise :exc:`.EndianError`
   (:issue:`1144`).
 * TCP's NS flag was written by ``make()`` but never parsed: it had been commented out
-  of :class:`~pcapkit.protocols.data.transport.tcp.Flags`, the reader and
+  of :class:`~pcapkit.protocols.transport.tcp.data.Flags`, the reader and
   ``_make_data``, with no reason recorded. Per the owner's ruling it is exposed rather
   than removed, so ``info.flags.ns`` exists and ``from_data`` keeps the bit
   (:issue:`1098`).
@@ -2552,12 +2552,12 @@ Fixed
   TCP's Quick-Start Response reader read one octet past the option, and its maker
   produced a negative rate code below 40 kbps; such a rate now rounds down to zero,
   which :rfc:`4782` permits (:issue:`1119`).
-* :class:`~pcapkit.protocols.link.ethernet.Ethernet`,
-  :class:`~pcapkit.protocols.link.arp.ARP` and
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` packed MAC addresses as ASCII hex text.
+* :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`,
+  :class:`~pcapkit.protocols.link.arp.protocol.ARP` and
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` packed MAC addresses as ASCII hex text.
   ``Ethernet._make_mac_addr`` returned the separator-stripped hex string and
   ``BytesField(length=6)`` truncated it, so
-  :class:`Ethernet() <pcapkit.protocols.link.ethernet.Ethernet>` put ``303030303030`` on
+  :class:`Ethernet() <pcapkit.protocols.link.ethernet.protocol.Ethernet>` put ``303030303030`` on
   the wire for an all-zero address (:issue:`1123`). ``ARP._make_addr_resolve``,
   ``PCAPNG._make_mac_addr`` and ``_make_eui_addr`` did the same; all now decode the hex
   to octets, and ``from_data`` rebuilds each byte for byte (:issue:`1134`).
@@ -2597,9 +2597,9 @@ Fixed
   measured sample captures rebuilds its header octets, and ``options-*.pcap``
   regenerate unchanged (:issue:`1151`).
 * **a breaking change to** ``from_data`` on a capture truncated by snaplen:
-  :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-  :class:`~pcapkit.protocols.internet.ipv6.IPv6` and
-  :class:`~pcapkit.protocols.transport.udp.UDP` rebuilt their length field from the
+  :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+  :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` and
+  :class:`~pcapkit.protocols.transport.udp.protocol.UDP` rebuilt their length field from the
   payload at hand, writing the recorded length, so ``big_endian.pcap`` frame 3 came back
   as ``45000052`` where ``450004a2`` was on the wire. ``_make_data`` now passes the
   parsed length through to ``make()``'s new ``total_length`` (IPv4, UDP) or
@@ -2612,16 +2612,16 @@ Fixed
   8 invented UDP octets (:issue:`1167`). Every ``_import_next_layer`` now goes through
   one guard: no captured octets gives :class:`~pcapkit.protocols.misc.null.NoPayload`,
   and fewer than the next layer's ``__length_hint__`` gives
-  :class:`~pcapkit.protocols.misc.raw.Raw` unless the parsed header fits anyway, as a
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless the parsed header fits anyway, as a
   12-octet L2TPv2 ZLB does. A header-only IPv6 packet is ``IPv6`` rather than
   ``IPv6:UDP:Raw``, and frame 3 is ``Ethernet:Raw``, rebuilt byte for byte
   (:issue:`1170`). The guard needed honest hints, so
-  :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` (4),
-  :class:`~pcapkit.protocols.internet.mh.MH` (6),
-  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
-  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` (2) now hint their 8-octet
+  :class:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route` (4),
+  :class:`~pcapkit.protocols.internet.mh.protocol.MH` (6),
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` and
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` (2) now hint their 8-octet
   minimum header (:issue:`1173`), and so does the
-  :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` fallback, which hinted 2
+  :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` fallback, which hinted 2
   (:issue:`1178`).
 * **a breaking change to** :class:`.L2TPv2`, against :rfc:`2661` section 3.1.
   :class:`~pcapkit.const.l2tp.type.Type` was inverted; it is now ``Data = 0`` and
@@ -2646,14 +2646,14 @@ Fixed
   :attr:`.HIP.alias` read ``_info`` before ``read`` had set it, which also broke a
   standalone HIP parse and ``HIP.from_data`` (:issue:`1184`), and the MPL option's
   maker called ``bit_length()`` on the ``IPv6Address`` seed of an S=0 option. MPL in
-  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
-  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` now takes ``S`` from the
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` and
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` now takes ``S`` from the
   parsed option or a new ``seed_type`` keyword, and a missing or oversized seed raises
   :exc:`.ProtocolError` (:issue:`1185`). With both fixed, every IPv6 frame of the
   ``options-*.pcap`` captures rebuilds byte for byte.
 * **a breaking change to** the SMF_DPD option's maker in
-  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
-  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`: it overwrote the parsed DPD
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` and
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`: it overwrote the parsed DPD
   mode, so H-DPD rebuilt as I-DPD, and inferred the TaggerID type from the Tagger ID's
   length, so a 4-octet ``DEFAULT`` Tagger ID rebuilt as IPv4. Both now come from the
   parsed option, or from ``mode`` and a new ``tid_type`` keyword. A Tagger ID that does
@@ -2664,18 +2664,18 @@ Fixed
 * a :class:`.ForwardMatchField` that read short at the end of the stream rewound by its
   declared width, not by the octets it read, so the fields after it re-read the
   preceding octet. An SMF_DPD option in the last two octets of a
-  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` or
-  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` header was re-read from the
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` or
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` header was re-read from the
   padding and raised a bare ``TypeError``; it now raises :exc:`.FieldValueError`, as
   CALIPSO and MPL do. A full read rewinds as before (:issue:`1195`).
-* :class:`HIP() <pcapkit.protocols.internet.hip.HIP>` with no parameters wrote Header
+* :class:`HIP() <pcapkit.protocols.internet.hip.protocol.HIP>` with no parameters wrote Header
   Length 0, below :rfc:`7401` section 5.1's minimum of 4 for the two HITs, so it failed
   to read back with :exc:`.ProtocolError`; it now writes 4. ``read`` names a Header
   Length below 4 in a new ``invalid header length`` message. Lengths 0 to 3 already
   raised :exc:`.ProtocolError`, so only the message changes (:issue:`1189`).
 * the RPL option, type ``0x23``, raised ``AttributeError`` in
-  :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
-  :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` (:issue:`1196`, :pr:`1198`).
+  :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT` and
+  :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` (:issue:`1196`, :pr:`1198`).
   The test that an option of any type in the last two octets of the header fails
   in-library no longer skips it; test-only (:issue:`1771`, :pr:`1776`).
 * **a breaking change to** the RPL option: it keeps its reserved flag bits on rebuild
@@ -2709,8 +2709,8 @@ Fixed
   * IPv4 option areas, route slots, timestamps and reserved bits (:pr:`1344`); the TS
     option's slots beyond the pointer (:issue:`1349`, :pr:`1390`); TS and SEC options
     byte for byte (:pr:`1399`).
-  * IPv6 core headers (:pr:`1307`); :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
-    and :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts` option areas
+  * IPv6 core headers (:pr:`1307`); :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT`
+    and :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts` option areas
     (:pr:`1310`); a CALIPSO option's trailing pad (:issue:`1403`, :pr:`1407`), and its
     ``make()`` writing a corrupt length on overflow (:issue:`1408`, :pr:`1409`); an
     extension header parsed with ``extension=True`` (:issue:`1446`, :pr:`1449`); RPL
@@ -2759,7 +2759,7 @@ Fixed
   (:issue:`1434`, :pr:`1440`), a jumbogram :rfc:`2675` calls an error is rejected
   (:issue:`1687`, :pr:`1713`), and so is a header whose Version is not 6
   (:issue:`1680`, :pr:`1723`).
-* the warnings of a next layer replaced by :class:`~pcapkit.protocols.misc.raw.Raw` are
+* the warnings of a next layer replaced by :class:`~pcapkit.protocols.misc.raw.protocol.Raw` are
   dropped (:issue:`1580`, :pr:`1588`).
 * IPv6-Route's data-type readers name the routing type in their
   :exc:`.ProtocolError`, where each message read ``[TypeNo <class 'type'>]``
@@ -2791,8 +2791,8 @@ Fixed
   ``from pcapkit.protocols.protocol import *`` binds the module's public class
   (:issue:`1770`, :pr:`1778`).
 * the data and schema packages re-export what their submodules list in ``__all__``,
-  under the prefixes their siblings use: :mod:`pcapkit.protocols.data.link` exports the
-  L2TP data model as :class:`~pcapkit.protocols.data.link.l2tp.L2TP` and ``L2TP_Flags``
+  under the prefixes their siblings use: ``pcapkit.protocols.data.link`` exports the
+  L2TP data model as :class:`~pcapkit.protocols.link.l2tp.data.L2TP` and ``L2TP_Flags``
   (:issue:`1797`, :pr:`1806`), and the Mobility Header models, the HOPOPT and IPv6-Opts
   ``SMFDPDOption`` and ``QuickStartOption``, PCAP-NG's ``PacketBlock`` and ``PACK_*``
   options and HTTP/2's ``Settings`` reach their packages and the aggregators
@@ -2848,7 +2848,7 @@ Fixed
 * IPX dissects its payload from a registry of its own, :attr:`.IPX.__proto__`, keyed by
   IPX Packet Type, where it looked the Packet Type up as an IP protocol number, so a
   type 17 (NCP) payload parsed as ``IPX:UDP`` and type 4 as ``IPX:IPv4``. No IPX-native
-  protocol ships, so the payload is :class:`~pcapkit.protocols.misc.raw.Raw` unless one
+  protocol ships, so the payload is :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless one
   is registered (:issue:`2169`, :pr:`2187`).
 * HIP's ``ECHO_RESPONSE_UNSIGNED`` maker builds an ``EchoResponseUnsignedParameter``
   schema, where it built the request's; the octets were already right (:issue:`2170`,
@@ -2912,7 +2912,7 @@ Fixed
   ignores them. A new ``ProtocolBase.__own_make_keywords__`` marker, read per class
   like the ``__keywords__`` opt-out, keeps a base's parameters out of the allowlist
   once a subclass overrides ``make``, and
-  :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` sets it, so
+  :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` sets it, so
   ``IPv6_Route(len=99)`` is refused where it built the same octets as
   ``IPv6_Route()`` and a misspelling was steered to the dead keyword
   (:issue:`2286`, :pr:`2358`).
@@ -2956,7 +2956,7 @@ Fixed
   what a parse found.
 * ESP's errors read in the house ``ESP: <description>: ... {value!r}`` form: the
   messages raised by the cipher and integrity lookups, by
-  :class:`.esp.SecurityAssociation`'s SPI, destination, AEAD, ICV, key-splitting,
+  :class:`.esp.protocol.SecurityAssociation`'s SPI, destination, AEAD, ICV, key-splitting,
   decryption and encryption checks, by the context registrar and by ``make`` all
   carry the prefix and quote the offending value, where none carried an ``ESP:``
   prefix and most printed the value bare (:issue:`2297`, :pr:`2366`).
@@ -2971,12 +2971,12 @@ Fixed
   drop their trailing full stop, with the block-placement guard naming the block
   type through the ``BlockType`` registry rather than printing the raw number
   ``_type`` holds while a block is being made (:issue:`2301`, :pr:`2398`).
-* :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate reads
+* :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`'s version gate reads
   ``invalid version: must be 6, not {version!r}``, in the house form and quoting the
   rejected value, where its bespoke tail read ``only valid for IPv6, got version=4``
   -- naming the version it requires in prose rather than as the number it compares
   against (:issue:`2302`, :pr:`2397`).
-* a trial parse kept as :class:`~pcapkit.protocols.misc.raw.Raw` because it raised
+* a trial parse kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` because it raised
   no longer replays its warnings: the holding context honours its ``discard`` on an
   exception exit too, and the next-layer reader discards a raising trial's warnings
   under ``beholder``, so an Ethernet frame cut inside its IPv4 header stops warning
@@ -3823,11 +3823,11 @@ Fixed
   trusts ``committed_captures()`` for the tracked set. A hardcoded literal that happens
   to match the tracked names still passes; the test catches a set that is wrong when it
   runs (:issue:`708`).
-* ``pcapkit.all.__all__`` listed :class:`~pcapkit.protocols.application.ospf.OSPF`,
+* ``pcapkit.all.__all__`` listed :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`,
   :class:`.RARP` and :class:`.DRARP` on its Link Layer line after :issue:`719` moved
   them (:issue:`1124`), and omitted names its packages export, among them
-  :class:`~pcapkit.protocols.internet.esp.ESP`, ``HTTPv1``, ``HTTPv2``,
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` and :class:`.EnumRegistry`, so
+  :class:`~pcapkit.protocols.internet.esp.protocol.ESP`, ``HTTPv1``, ``HTTPv2``,
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` and :class:`.EnumRegistry`, so
   ``from pcapkit.all import *`` did not bind them. :mod:`pcapkit.utilities` stays
   unlisted deliberately, so generic helpers such as ``warn`` do not arrive through
   ``import *`` (:issue:`1136`).
@@ -3886,7 +3886,7 @@ Fixed
   classes link as ``Raises:`` entries do (:issue:`2094`, :pr:`2096`). ``conf.py``
   resolves a decorated function's overloads and qualifies a third-party class whose
   bare name collides (:issue:`1917`, :issue:`1918`, :pr:`1929`). The ``versionchanged``
-  directives on :class:`.Info` iteration and :class:`~pcapkit.protocols.misc.raw.Raw`
+  directives on :class:`.Info` iteration and :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
   name ``1.3.1.post8``, the release that shipped their change (:issue:`1933`,
   :pr:`1934`).
 * the Conda release legs: Create Release's Anaconda completeness check counts

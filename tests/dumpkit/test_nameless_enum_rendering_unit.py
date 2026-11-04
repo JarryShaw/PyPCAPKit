@@ -483,7 +483,7 @@ def _field_mask(registry: 'FlagRegistry') -> int:
     """
     wider = WIDER_FIELDS.get(f'{registry.__module__}.{registry.__name__}')
     if wider is not None:
-        from pcapkit.protocols.schema.link import radiotap  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.link.radiotap import schema as radiotap  # pylint: disable=import-outside-toplevel
 
         schema, name = wider
         return (1 << 8 * getattr(radiotap, schema).__fields__[name].length) - 1

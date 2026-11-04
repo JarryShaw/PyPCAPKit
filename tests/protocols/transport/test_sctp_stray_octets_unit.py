@@ -4,7 +4,7 @@
 GitHub issue #1468: SCTP has no packet length field, so octets left after the
 last whole chunk -- fewer than a chunk header, or a chunk whose declared length
 runs past the data -- cannot be told apart from a chunk cut short. Guards
-against them making :class:`~pcapkit.protocols.transport.sctp.SCTP` raise
+against them making :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` raise
 ``ProtocolError: Field chunks has an option that runs past the end of the
 data``, which leaves the packet no round trip at all.
 
@@ -67,7 +67,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_packet_parses_and_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (raw, count, trailer) in STRAY.items():
             with self.subTest(packet=name):
@@ -78,7 +78,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
                 self.assertEqual(SCTP.from_data(parsed.info.to_dict()).data, raw)
 
     def test_schema_keeps_the_trailer(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP as Schema_SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP as Schema_SCTP
 
         for name, (raw, count, trailer) in STRAY.items():
             with self.subTest(packet=name):
@@ -88,7 +88,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
                 self.assertEqual(schema.pack(), raw)
 
     def test_no_trailer_key_on_a_chunk_boundary(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in NO_STRAY.items():
             with self.subTest(packet=name):
@@ -97,7 +97,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
                 self.assertEqual(SCTP.from_data(parsed.info).data, raw)
 
     def test_data_chunk_still_dispatches(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = COMMON + DATA + b'x'
         parsed = SCTP(raw, len(raw))
@@ -105,8 +105,8 @@ class TestSCTPStrayOctets(unittest.TestCase):
         self.assertEqual(bytes(parsed.payload.data), b'hi')
 
     def test_parent_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (raw, _, trailer) in STRAY.items():
             with self.subTest(packet=name):
@@ -120,7 +120,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
                 self.assertEqual(IPv4.from_data(parsed.info).data, frame)
 
     def test_raw_chunk_that_is_not_whole_is_rejected(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with warnings.catch_warnings():
@@ -130,7 +130,7 @@ class TestSCTPStrayOctets(unittest.TestCase):
 
     def test_make_writes_the_trailer_under_the_checksum(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

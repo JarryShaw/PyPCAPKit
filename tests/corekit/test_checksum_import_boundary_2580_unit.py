@@ -71,9 +71,9 @@ class ChecksumImportBoundaryTests(unittest.TestCase):
             'from pcapkit.utilities.warnings import ChecksumWarning, warn',      # 3
             'from pcapkit.protocols.protocol import _rebuilding',                # 4
             'if TYPE_CHECKING:',                                                 # 5
-            '    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo',  # 6
+            '    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo',  # 6
             'def verify_upper(ip):',                                             # 7
-            '    from pcapkit.protocols.internet.ah import AH',                  # 8
+            '    from pcapkit.protocols.internet.ah.protocol import AH',                  # 8
             '    from pcapkit import foundation',                                # 9
         ])
         crossing = [(line, name)
@@ -82,10 +82,10 @@ class ChecksumImportBoundaryTests(unittest.TestCase):
         self.assertEqual(crossing, [
             (4, 'pcapkit.protocols.protocol'),
             (4, 'pcapkit.protocols.protocol._rebuilding'),
-            (6, 'pcapkit.protocols.misc.checksum.ip_pseudo'),
-            (6, 'pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo'),
-            (8, 'pcapkit.protocols.internet.ah'),
-            (8, 'pcapkit.protocols.internet.ah.AH'),
+            (6, 'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'),
+            (6, 'pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo'),
+            (8, 'pcapkit.protocols.internet.ah.protocol'),
+            (8, 'pcapkit.protocols.internet.ah.protocol.AH'),
             (9, 'pcapkit.foundation'),
         ])
 

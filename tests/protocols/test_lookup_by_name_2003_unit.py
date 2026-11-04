@@ -87,9 +87,9 @@ class LookupByNameTests(unittest.TestCase):
         warnings.simplefilter('ignore')
 
     def test_extension_headers_follow_exthdr_whatever_the_key_order(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         ip6 = IPv6(HOP_DST_DST)
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
@@ -107,8 +107,8 @@ class LookupByNameTests(unittest.TestCase):
                 self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
 
     def test_payload_follows_the_metadata_whatever_the_key_order(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.udp import UDP as UDP_
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.udp.protocol import UDP as UDP_
 
         ip6 = IPv6(ATOMIC)
         self.assertIn('fragment', ip6.info)
@@ -125,8 +125,8 @@ class LookupByNameTests(unittest.TestCase):
         self.assertEqual(rebuilt.data, ATOMIC)
 
     def test_cut_upper_layer_is_found_ahead_of_the_headers(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities import config
 
         limit = config.EXTENSION_HEADER_LIMIT
@@ -147,8 +147,8 @@ class LookupByNameTests(unittest.TestCase):
         self.assertEqual(rebuilt.data, HOP_DST_DST)
 
     def test_dict_without_the_dispatch_keys_is_not_guessed_at(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         ip6 = IPv6(HOP_DST_DST)
         exported = ip6.info.to_dict()
@@ -163,7 +163,7 @@ class LookupByNameTests(unittest.TestCase):
         self.assertEqual(rebuilt.data, HOP_DST_DST[:40 + 3 * 8])
 
     def test_dict_without_exthdr_rebuilds_no_extension_header(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ip6 = IPv6(HOP_DST_DST)
         exported = ip6.info.to_dict()

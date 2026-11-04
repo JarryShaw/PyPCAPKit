@@ -37,7 +37,7 @@ so ``TCP.submit`` resolves each port through :meth:`Transport._make_port
 is ``tuple[AppType_TCP, AppType_TCP]`` -- the *per-transport* registry, which
 is what the resolution really answers with -- rather than ``tuple[int, int]``.
 A deferred analysis now dispatches on a member of the registry
-:attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` reads from: the very
+:attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads from: the very
 same member for a registered port, an equal one reached by a different route
 for an unassigned one (see :meth:`ResolvedPortTests.test_an_unassigned_port_is_equal_to_the_parse_paths_own`),
 and :meth:`Transport.analyze
@@ -440,7 +440,7 @@ class ResolvedPortTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.apptype import TransportProtocol
-        from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 
         field = Schema_TCP.__fields__['srcport']
 
@@ -494,7 +494,7 @@ class ResolvedPortTests(unittest.TestCase):
     def test_resolving_grows_no_registry(self) -> None:
         """Neither the application-type registry nor the next-layer one."""
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
-        from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+        from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 
         before_apptype = len(AppType_TCP.__registry__)
         before_proto = sorted(TCP_Protocol.__proto__)
@@ -508,15 +508,15 @@ class ResolvedPortTests(unittest.TestCase):
         """End to end: the resolved pair still selects the registered next layer.
 
         ``Transport.analyze`` keys :attr:`TCP.__proto__
-        <pcapkit.protocols.transport.tcp.TCP.__proto__>` on the port, and that
+        <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>` on the port, and that
         mapping is keyed by number, so the members have to reach it as the
         numbers they carry. Port 80 is bound to the version-dispatching HTTP
         class; the unassigned pair falls through to the registry's own fallback.
 
         """
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 
         http_bufid = (ip_address('192.0.2.1'), 54321, ip_address('198.51.100.2'), 80)
         self.assertIsInstance(
@@ -531,7 +531,7 @@ class ResolvedPortTests(unittest.TestCase):
         is all :attr:`ReassemblyBase.protocol
         <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`
         promises. Resolving the ports through it instead of through
-        :class:`~pcapkit.protocols.transport.tcp.TCP` would raise
+        :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` would raise
         :exc:`AttributeError` here, and it is the reassembly tests' own idiom.
 
         """

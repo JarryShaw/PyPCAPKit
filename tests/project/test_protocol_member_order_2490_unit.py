@@ -314,11 +314,11 @@ class TestMemberOrder(unittest.TestCase):
         self.assertLess(len(KNOWN_EXCEPTIONS) * 2, len(self.findings))
 
     def test_the_reference_is_in_order(self) -> 'None':
-        name = 'pcapkit.protocols.link.arp.ARP'
+        name = 'pcapkit.protocols.link.arp.protocol.ARP'
         self.assertEqual(self.findings[name], {})
         self.assertNotIn(name, KNOWN_EXCEPTIONS)
         # The page's example: its utilities are _make_data() and the helper pairs rule b finds.
-        node = dict(classes(PROTOCOLS / 'link' / 'arp.py'))[name]
+        node = dict(classes(PROTOCOLS / 'link' / 'arp' / 'protocol.py'))[name]
         utilities = [member for member, group in members(node) if group == 3]
         pairs = ['_read_addr_resolve', '_make_addr_resolve', '_read_proto_resolve', '_make_proto_resolve']
         self.assertEqual(helpers(node, utilities), pairs)

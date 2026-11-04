@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.application.ftp.FTP` Constant Enumerations
-===========================================================================
+""":class:`~pcapkit.protocols.application.ftp.protocol.FTP` Constant Enumerations
+====================================================================================
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ftp.FTP` implementations. Available
+:class:`~pcapkit.protocols.application.ftp.protocol.FTP` implementations. Available
 enumerations include:
 
 .. list-table::

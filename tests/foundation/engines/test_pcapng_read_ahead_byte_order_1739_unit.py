@@ -4,7 +4,7 @@
 :meth:`PCAPNG._bound_read_ahead <pcapkit.foundation.engines.pcapng.PCAPNG._bound_read_ahead>`
 reads a Section Header Block's Block Total Length in the byte order its
 Byte-Order Magic declares, mapped by ``_BYTE_ORDER_OCTETS`` from the magic's one
-home, :data:`pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC`. Read in
+home, :data:`pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC`. Read in
 the wrong order, the length of a 28-octet section header is ``0x1C000000``, so
 the reader would read ahead hundreds of megabytes instead of to the block's end.
 

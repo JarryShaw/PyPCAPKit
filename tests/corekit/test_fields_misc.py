@@ -21,57 +21,57 @@ __tier__ = 'ALL'
 #: it is listed here -- which is the point, since #491 and #508 were both the same
 #: defect surviving at a site nobody had thought of.
 ADDRESS_TYPED_SWITCH_BRANCHES = [
-    ('pcapkit.protocols.schema.internet.hip', 'Locator', 'value',
+    ('pcapkit.protocols.internet.hip.schema', 'Locator', 'value',
      'hip locator IPv6', {'type': 0, 'len': 4}),
 
     # ``tid_type`` 2 is ``TaggerID.IPv4`` and 3 is ``TaggerID.IPv6``; the
     # selector also demands the matching ``len``, 3 and 15 respectively.
-    ('pcapkit.protocols.schema.internet.hopopt', 'SMFIdentificationBasedDPDOption', 'tid',
+    ('pcapkit.protocols.internet.hopopt.schema', 'SMFIdentificationBasedDPDOption', 'tid',
      'hopopt smf tid IPv4', {'info': {'type': 2, 'len': 3}}),
-    ('pcapkit.protocols.schema.internet.hopopt', 'SMFIdentificationBasedDPDOption', 'tid',
+    ('pcapkit.protocols.internet.hopopt.schema', 'SMFIdentificationBasedDPDOption', 'tid',
      'hopopt smf tid IPv6', {'info': {'type': 3, 'len': 15}}),
-    ('pcapkit.protocols.schema.internet.ipv6_opts', 'SMFIdentificationBasedDPDOption', 'tid',
+    ('pcapkit.protocols.internet.ipv6_opts.schema', 'SMFIdentificationBasedDPDOption', 'tid',
      'ipv6_opts smf tid IPv4', {'info': {'type': 2, 'len': 3}}),
-    ('pcapkit.protocols.schema.internet.ipv6_opts', 'SMFIdentificationBasedDPDOption', 'tid',
+    ('pcapkit.protocols.internet.ipv6_opts.schema', 'SMFIdentificationBasedDPDOption', 'tid',
      'ipv6_opts smf tid IPv6', {'info': {'type': 3, 'len': 15}}),
 
-    ('pcapkit.protocols.schema.internet.mh', 'BindingIdentifierOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'BindingIdentifierOption', 'address',
      'mh bid IPv4', {'length': 8}),
-    ('pcapkit.protocols.schema.internet.mh', 'BindingIdentifierOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'BindingIdentifierOption', 'address',
      'mh bid IPv6', {'length': 20}),
-    ('pcapkit.protocols.schema.internet.mh', 'DelegatedMNPOption', 'prefix',
+    ('pcapkit.protocols.internet.mh.schema', 'DelegatedMNPOption', 'prefix',
      'mh dmnp IPv4', {'flags': {'V': 1}}),
-    ('pcapkit.protocols.schema.internet.mh', 'DelegatedMNPOption', 'prefix',
+    ('pcapkit.protocols.internet.mh.schema', 'DelegatedMNPOption', 'prefix',
      'mh dmnp IPv6', {'flags': {'V': 0}}),
-    ('pcapkit.protocols.schema.internet.mh', 'LMAAddressOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'LMAAddressOption', 'address',
      'mh lmaa IPv4', {'length': 6}),
-    ('pcapkit.protocols.schema.internet.mh', 'LMAAddressOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'LMAAddressOption', 'address',
      'mh lmaa IPv6', {'length': 18}),
-    ('pcapkit.protocols.schema.internet.mh', 'LMAUserPlaneAddressOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'LMAUserPlaneAddressOption', 'address',
      'mh lma_up IPv4', {'length': 6}),
-    ('pcapkit.protocols.schema.internet.mh', 'LMAUserPlaneAddressOption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'LMAUserPlaneAddressOption', 'address',
      'mh lma_up IPv6', {'length': 18}),
-    ('pcapkit.protocols.schema.internet.mh', 'MNIDOption', 'identifier',
+    ('pcapkit.protocols.internet.mh.schema', 'MNIDOption', 'identifier',
      'mh mn_id IPv6', {'subtype': 2, 'length': 17}),
-    ('pcapkit.protocols.schema.internet.mh', 'TargetCareofAddressSuboption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'TargetCareofAddressSuboption', 'address',
      'mh tcoa IPv4', {'length': 6}),
-    ('pcapkit.protocols.schema.internet.mh', 'TargetCareofAddressSuboption', 'address',
+    ('pcapkit.protocols.internet.mh.schema', 'TargetCareofAddressSuboption', 'address',
      'mh tcoa IPv6', {'length': 18}),
 
-    ('pcapkit.protocols.schema.transport.tcp', 'MPTCPAddAddress', 'address',
+    ('pcapkit.protocols.transport.tcp.schema', 'MPTCPAddAddress', 'address',
      'tcp mptcp add_addr IPv4', {'length': 8}),
-    ('pcapkit.protocols.schema.transport.tcp', 'MPTCPAddAddress', 'address',
+    ('pcapkit.protocols.transport.tcp.schema', 'MPTCPAddAddress', 'address',
      'tcp mptcp add_addr IPv6', {'length': 20}),
 
     # The layout follows ``__length__`` when no address is given yet, 12 for IPv4
     # and 40 for IPv6.
-    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'src',
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IP_Pseudo', 'src',
      'ip_pseudo src IPv4', {'__length__': 12}),
-    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'src',
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IP_Pseudo', 'src',
      'ip_pseudo src IPv6', {'__length__': 40}),
-    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'dst',
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IP_Pseudo', 'dst',
      'ip_pseudo dst IPv4', {'__length__': 12}),
-    ('pcapkit.protocols.schema.misc.checksum.ip_pseudo', 'IP_Pseudo', 'dst',
+    ('pcapkit.protocols.misc.checksum.ip_pseudo.schema', 'IP_Pseudo', 'dst',
      'ip_pseudo dst IPv6', {'__length__': 40}),
 ]
 
@@ -97,13 +97,14 @@ def discover_address_typed_switches() -> 'set[tuple[str, str, str]]':
     import inspect
     import pkgutil
 
-    import pcapkit.protocols.schema as schema_pkg
+    import pcapkit.protocols as protocols_pkg
     from pcapkit.corekit.fields.misc import (ConditionalField,
                                              ForwardMatchField, SwitchField)
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
-    for module in pkgutil.walk_packages(schema_pkg.__path__, schema_pkg.__name__ + '.'):
-        importlib.import_module(module.name)
+    for module in pkgutil.walk_packages(protocols_pkg.__path__, protocols_pkg.__name__ + '.'):
+        if module.name.endswith('.schema'):
+            importlib.import_module(module.name)
 
     subclasses, stack = set(), [Schema]
     while stack:
@@ -164,7 +165,7 @@ class SchemaFieldDefaultTests(unittest.TestCase):
 
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class TwoField(Schema):
@@ -230,7 +231,7 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
         """Every address-typed branch of every address-typed switch already refuses a bool.
 
         Every such branch, across the protocol modules -- not just
-        :mod:`~pcapkit.protocols.schema.internet.mh`'s -- because the claim
+        :mod:`~pcapkit.protocols.internet.mh.schema`'s -- because the claim
         being pinned is about ``SwitchField`` in general, so a fix scoped to one
         module would not settle it. Without #508's fix, every probe (each
         branch, with ``True`` and with ``False``) raises, and none is
@@ -280,11 +281,11 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
                    for module, name, attr in discovered
                    if isinstance(self._resolve(module, name, attr)[0], ConditionalField)}
         self.assertEqual(wrapped, {
-            ('pcapkit.protocols.schema.internet.hopopt',
+            ('pcapkit.protocols.internet.hopopt.schema',
              'SMFIdentificationBasedDPDOption', 'tid'),
-            ('pcapkit.protocols.schema.internet.ipv6_opts',
+            ('pcapkit.protocols.internet.ipv6_opts.schema',
              'SMFIdentificationBasedDPDOption', 'tid'),
-            ('pcapkit.protocols.schema.internet.mh',
+            ('pcapkit.protocols.internet.mh.schema',
              'BindingIdentifierOption', 'address'),
         })
 
@@ -355,7 +356,7 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
             IPv6AddressField().pre_process(1, {})
 
     def test_integer_typed_switch_branch_still_coerces_a_bool_to_zero_or_one(self) -> None:
-        import pcapkit.protocols.schema.internet.mh as schema_mh
+        import pcapkit.protocols.internet.mh.schema as schema_mh
         from pcapkit.const.mh.binding_revocation import BindingRevocation
         from pcapkit.corekit.fields.misc import SwitchField
 
@@ -384,7 +385,7 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
         the owner's on ``NonceIndicesOption.home``: a :obj:`bool` in an integer field
         means ``0``/``1`` and that is correct.
         """
-        import pcapkit.protocols.schema.internet.mh as schema_mh
+        import pcapkit.protocols.internet.mh.schema as schema_mh
         from pcapkit.const.mh.binding_revocation import BindingRevocation
         from pcapkit.const.mh.fb_type import FlowBindingType
         from pcapkit.corekit.fields.misc import SwitchField
@@ -427,7 +428,7 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
     looked the name up as given, so anything not already upper-cased missed --
     and a miss is indistinguishable from an unparsed payload, because
     :obj:`None` is what the getter turns into
-    :class:`~pcapkit.protocols.misc.raw.Raw`.
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
     The constructor was worse, and is the path the issue's own reproduction
     takes: it assigned ``_protocol`` directly, bypassing the setter, so the
@@ -443,7 +444,7 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
 
     def test_a_protocol_name_resolves_whatever_its_case(self) -> None:
         from pcapkit.corekit.fields.misc import PayloadField
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         for name in ('HTTP', 'http', 'Http', 'hTTp'):
             with self.subTest(name=name, path='constructor'):
@@ -459,13 +460,13 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
 
         The fallback itself stays: refusing the assignment would reject a
         lenient spelling the field accepts, and :obj:`None` -- hence
-        :class:`~pcapkit.protocols.misc.raw.Raw` -- remains a legitimate state
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- remains a legitimate state
         for a payload whose protocol is genuinely not known. The warning is what
         tells the caller.
 
         """
         from pcapkit.corekit.fields.misc import PayloadField
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.warnings import RegistryWarning
 
         for path, build in (('constructor', lambda: PayloadField(protocol='NoSuchProtocol')),
@@ -485,7 +486,7 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
         """Neither of the two shapes the library itself uses may warn.
 
         Every in-library ``PayloadField`` either names no protocol at all or is
-        assigned one by a callback -- ``schema/link/ethernet.py``'s, which hands
+        assigned one by a callback -- ``link/ethernet/schema.py``'s, which hands
         over whatever ``_lookup_next_layer`` returned, a class or a
         :class:`~pcapkit.corekit.module.ModuleDescriptor`, never a :obj:`str`.
         So routing the constructor through the setter must leave both untouched,
@@ -496,10 +497,10 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
 
         from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
-        descriptor = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
+        descriptor = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
         cases = (
             ('class, constructor', lambda: PayloadField(protocol=HTTP), HTTP),
             ('absent', PayloadField, Raw),

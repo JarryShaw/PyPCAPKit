@@ -7,9 +7,9 @@ recorded nothing, so ``from_data(info)`` wrote the field -- and every field
 after it -- at full width. ``Ethernet(bytes(12) + b'\\x08')`` rebuilt as 14
 octets.
 
-:meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+:meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
 records the field the data ends inside and how much of it was read, as
-``__short_read__``; :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+``__short_read__``; :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
 writes back only those octets, and the layer base classes carry the record
 through ``info``. Each packet below is cut at every offset and must either be
 refused with an in-library exception or meet ``Cls(raw).data == raw`` and
@@ -30,8 +30,8 @@ from tests._support import reimport_once_per_class
 #: Test tier (#1958): a sweep that cuts every protocol family at every offset.
 __tier__ = 'LATEST'
 
-ETHERNET = 'link.ethernet:Ethernet'
-IPV6 = 'internet.ipv6:IPv6'
+ETHERNET = 'link.ethernet.protocol:Ethernet'
+IPV6 = 'internet.ipv6.protocol:IPv6'
 
 
 def _ipv6(code: int, body: bytes) -> bytes:
@@ -45,43 +45,43 @@ HIT = bytes(range(32))
 #: one whole packet.
 CASES = (
     ('ethernet', ETHERNET, {}, bytes.fromhex('0123456789abfedcba98765488b5')),
-    ('c-tag', 'link.c_tag:C_Tag', {}, bytes.fromhex('ffff88b5706c')),
-    ('s-tag', 'link.s_tag:S_Tag', {}, bytes.fromhex('1fff8100000188b5')),
-    ('arp', 'link.arp:ARP', {}, bytes.fromhex('000186dd06100001') + bytes(range(44))),
-    ('rarp', 'application.rarp:RARP', {}, bytes.fromhex('0001080006040003') + bytes(range(20))),
-    ('l2tpv2', 'link.l2tpv2:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
-    ('gre', 'link.gre:GRE', {}, struct.pack('>HH', 0xB000, 0x0800) + struct.pack('>HH', 0, 0)
+    ('c-tag', 'link.c_tag.protocol:C_Tag', {}, bytes.fromhex('ffff88b5706c')),
+    ('s-tag', 'link.s_tag.protocol:S_Tag', {}, bytes.fromhex('1fff8100000188b5')),
+    ('arp', 'link.arp.protocol:ARP', {}, bytes.fromhex('000186dd06100001') + bytes(range(44))),
+    ('rarp', 'application.rarp.protocol:RARP', {}, bytes.fromhex('0001080006040003') + bytes(range(20))),
+    ('l2tpv2', 'link.l2tpv2.protocol:L2TPv2', {}, bytes.fromhex('fff2000e00000000000000000000')),
+    ('gre', 'link.gre.protocol:GRE', {}, struct.pack('>HH', 0xB000, 0x0800) + struct.pack('>HH', 0, 0)
      + struct.pack('>I', 0x11223344) + struct.pack('>I', 99)
      + bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
-    ('loopback-null', 'link.loopback:Loopback', {}, bytes.fromhex('020000004500')),
-    ('loopback-loop', 'link.loopback:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
-    ('netlink', 'link.netlink:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
-    ('radiotap', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
+    ('loopback-null', 'link.loopback.protocol:Loopback', {}, bytes.fromhex('020000004500')),
+    ('loopback-loop', 'link.loopback.protocol:Loopback', {'alias': 108}, bytes.fromhex('000000024500')),
+    ('netlink', 'link.netlink.protocol:Netlink', {}, struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'),
+    ('radiotap', 'link.radiotap.protocol:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
      + bytes.fromhex('aabbccddeeff')),
-    ('radiotap-ieee802_11', 'link.radiotap:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
+    ('radiotap-ieee802_11', 'link.radiotap.protocol:Radiotap', {}, bytes.fromhex('0000' '0c00' '01000000' '11223344')
      + bytes.fromhex('d4000000' '010203040506' 'aabbccdd')),
-    ('ieee802_11-qos', 'link.ieee802_11:IEEE802_11', {}, bytes.fromhex(
+    ('ieee802_11-qos', 'link.ieee802_11.protocol:IEEE802_11', {}, bytes.fromhex(
         '8883' '2c00' '010101010101' '020202020202' '030303030303' '5134' '040404040404' 'b57e'
         '01000080') + b'body'),
-    ('ieee802_11-rts', 'link.ieee802_11:IEEE802_11', {}, bytes.fromhex(
+    ('ieee802_11-rts', 'link.ieee802_11.protocol:IEEE802_11', {}, bytes.fromhex(
         'b4002c01' '010101010101' '020202020202' '11223344')),
-    ('frad', 'link.frad:FRAD', {}, bytes.fromhex(
+    ('frad', 'link.frad.protocol:FRAD', {}, bytes.fromhex(
         '0c21' '03cc' '450000141234000040fd7b83c0000201c6336401')),
-    ('frad-snap', 'link.frad:FRAD', {}, bytes.fromhex(
+    ('frad-snap', 'link.frad.protocol:FRAD', {}, bytes.fromhex(
         '0c21' '0300' '80' '000000' '0806'
         '00010800060400010011223344550a0000010000000000000a000002')),
-    ('ospf', 'application.ospf:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
-    ('ipx', 'internet.ipx:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
-    ('ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
-    ('igmpv3-report', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+    ('ospf', 'application.ospf.protocol:OSPF', {}, bytes.fromhex('020100180102030400000000abcd0000') + bytes(8)),
+    ('ipx', 'internet.ipx.protocol:IPX', {}, bytes.fromhex('ffff001e0000000000000101010101010451000000000202020202020452')),
+    ('ipv4', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex('450000141234000040fd7b83c0000201c6336401')),
+    ('igmpv3-report', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex(
         '45000040123400000102bd710a000001e0000016' '2200c7e100000002'
         '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
-    ('igmpv3-query', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+    ('igmpv3-query', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex(
         '45000028123400000102bd9e0a000001e0000001' '1164df14ef0102030a7d0002' '0a0000010a000002')),
     # #2660: parsed on its own, with no IPv4 length to run past
-    ('igmpv3-report-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+    ('igmpv3-report-direct', 'internet.igmpv3.protocol:IGMPv3', {}, bytes.fromhex(
         '2200c7e100000002' '01000002ef0101010a0000010a000002' '02000003ef0202020a0000030a0000040a000005')),
-    ('igmpv3-query-direct', 'internet.igmpv3:IGMPv3', {}, bytes.fromhex(
+    ('igmpv3-query-direct', 'internet.igmpv3.protocol:IGMPv3', {}, bytes.fromhex(
         '1164df14ef0102030a7d0002' '0a0000010a000002')),
     ('ipv6', IPV6, {}, _ipv6(59, b'')),
     ('ipv6-chain', IPV6, {}, bytes.fromhex(
@@ -94,32 +94,32 @@ CASES = (
     ('ipv6-route-unknown', IPV6, {}, _ipv6(43, bytes([17, 1, 9, 1]) + b'\x44' * 12)),
     ('ipv6-frag', IPV6, {}, _ipv6(44, bytes([17, 0, 0, 8, 0x12, 0x34, 0x56, 0x78]))),
     ('ah', IPV6, {}, _ipv6(51, bytes([17, 4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 7]) + b'\xaa' * 12)),
-    ('ah-ipv4', 'internet.ah:AH', {}, bytes([17, 4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 7]) + b'\xaa' * 12),
+    ('ah-ipv4', 'internet.ah.protocol:AH', {}, bytes([17, 4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 7]) + b'\xaa' * 12),
     ('mh', IPV6, {}, _ipv6(135, bytes([59, 1, 5, 0, 0, 0, 0, 1, 0x80, 0, 0, 0x10, 1, 2, 0, 0]))),
-    ('hip', 'internet.hip:HIP', {'extension': True}, bytes.fromhex('3b04102100000000') + HIT),
+    ('hip', 'internet.hip.protocol:HIP', {'extension': True}, bytes.fromhex('3b04102100000000') + HIT),
     ('hip-param', IPV6, {}, _ipv6(139, bytes([59, 5, 1, 0x21, 0, 0, 0, 0]) + HIT
                                   + struct.pack('!HH', 63661, 4) + b'\x55' * 4)),
     ('shim6', IPV6, {}, _ipv6(140, bytes([59, 1, 0x80, 0, 0, 0, 0, 0]) + b'\x66' * 8)),
-    ('esp', 'internet.esp:ESP', {}, bytes.fromhex('0000000100000002') + b'\x77' * 16),
-    ('tcp', 'transport.tcp:TCP', {}, bytes.fromhex('9c409c41000000010000000060020000ffff0000020405b4')),
-    ('udp', 'transport.udp:UDP', {}, bytes.fromhex('9c409c41000c000061626364')),
-    ('dccp', 'transport.dccp:DCCP', {}, bytes.fromhex(
+    ('esp', 'internet.esp.protocol:ESP', {}, bytes.fromhex('0000000100000002') + b'\x77' * 16),
+    ('tcp', 'transport.tcp.protocol:TCP', {}, bytes.fromhex('9c409c41000000010000000060020000ffff0000020405b4')),
+    ('udp', 'transport.udp.protocol:UDP', {}, bytes.fromhex('9c409c41000c000061626364')),
+    ('dccp', 'transport.dccp.protocol:DCCP', {}, bytes.fromhex(
         '9c40138906008f3a0100000000000001123456782004010268656c6c6f')),
-    ('sctp', 'transport.sctp:SCTP', {}, bytes.fromhex(
+    ('sctp', 'transport.sctp.protocol:SCTP', {}, bytes.fromhex(
         '13881389deadbeef000000000003001400000001000100020000000061626364')),
     # #2673: a COOKIE ACK, then an INIT with an IPv4 Address parameter, in an IPv4
     # datagram declaring all of it, so a cut leaves its length past the data
-    ('sctp-ipv4', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+    ('sctp-ipv4', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex(
         '450000401234000040847bcfc0000201c6336402' '13881389deadbeef00000000' '0b000004'
         '0100001c000000010000ffff0001000100000001' '00050008c0000202')),
-    ('ftp', 'application.ftp:FTP', {}, b'XYZW arg\r\n'),
-    ('http1', 'application.httpv1:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
+    ('ftp', 'application.ftp.protocol:FTP', {}, b'XYZW arg\r\n'),
+    ('http1', 'application.httpv1.protocol:HTTPv1', {}, b'GET / HTTP/1.1\r\n\r\n'),
     # an HTTP/2 SETTINGS frame of three settings, to TCP port 80 (#2659)
-    ('httpv2-settings', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+    ('httpv2-settings', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex(
         '450000431234000040067c4ac0000201c6336402' '9c40005000000001000000015010ffff00000000'
         '000012040000000000' '000100001000' '000300000064' '000400010000')),
     # the same, after the connection preface (#2665)
-    ('httpv2-preface', 'internet.ipv4:IPv4', {}, bytes.fromhex(
+    ('httpv2-preface', 'internet.ipv4.protocol:IPv4', {}, bytes.fromhex(
         '4500005b1234000040067c32c0000201c6336402' '9c40005000000001000000015010ffff00000000'
         '505249202a20485454502f322e300d0a0d0a534d0d0a0d0a'
         '000012040000000000' '000100001000' '000300000064' '000400010000')),
@@ -181,7 +181,7 @@ class TestShortReadRoundTrip(unittest.TestCase):
                             self.assertEqual(type(ext).from_data(ext.info.to_dict()).data, ext.data)
 
     def test_issue_1458_repro(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         raw = bytes(12) + b'\x08'
         eth = Ethernet(raw, 13)
@@ -192,8 +192,8 @@ class TestShortReadRoundTrip(unittest.TestCase):
 
     def test_issue_1451_repro(self) -> None:
         # a Routing header declaring 24 octets, of which 23 are captured
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         raw = _ipv6(43, (bytes([17, 2, 0, 1]) + bytes(4) + b'\x11' * 16)[:23])
         with warnings.catch_warnings():
@@ -207,7 +207,7 @@ class TestShortReadRoundTrip(unittest.TestCase):
             self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, raw)
 
     def test_record_rides_in_to_dict_only_when_cut(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         whole = Ethernet(bytes(14), 14)
         self.assertNotIn('__short_read__', whole.info)
@@ -236,7 +236,7 @@ class TestShortReadRoundTrip(unittest.TestCase):
         import dictdumper.json
 
         from pcapkit.dumpkit.common import make_dumper
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         # GitHub issue #2003: metadata, which ``__excluded__`` names.
         info = Ethernet(bytes(13), 13).info
@@ -262,7 +262,7 @@ class TestSchemaShortRead(unittest.TestCase):
         _quiet(self)
 
     def test_unpack_records_and_pack_cuts(self) -> None:
-        from pcapkit.protocols.schema.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.schema import Ethernet
 
         raw = bytes(range(1, 11))
         with warnings.catch_warnings():
@@ -275,14 +275,14 @@ class TestSchemaShortRead(unittest.TestCase):
         self.assertEqual(schema.pack(), raw)
 
     def test_whole_schema_has_no_record(self) -> None:
-        from pcapkit.protocols.schema.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.schema import Ethernet
 
         schema = Ethernet.unpack(bytes(14))
         self.assertNotIn('__short_read__', schema.__dict__)
         self.assertNotIn('__short_read__', schema.to_dict())
 
     def test_record_survives_to_dict_and_from_dict(self) -> None:
-        from pcapkit.protocols.schema.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.schema import Ethernet
 
         raw = bytes(range(1, 11))
         with warnings.catch_warnings():

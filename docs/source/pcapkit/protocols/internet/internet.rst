@@ -4,9 +4,9 @@ Internet Layer Base Protocol
 .. module:: pcapkit.protocols.internet.internet
 
 :mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
-which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.AH`,
-:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` and :class:`~pcapkit.protocols.internet.ipx.IPX`.
+which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.protocol.AH`,
+:class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` and :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`.
 
 .. autoclass:: pcapkit.protocols.internet.internet.Internet
    :no-members:
@@ -41,7 +41,7 @@ Extension Header Chains
 A chain of IPv6 extension headers is dissected to at most
 :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` headers in
 a row, whether it follows IPv6 or another layer such as IPv4. What follows is
-kept as :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The
 ``pyshark`` engine leaves the walk to its own parser, which does not stop there,
 so it may still find the upper layer past it (:issue:`1609`). So may the

@@ -58,13 +58,13 @@ def _member(path: str, name: str) -> 'Any':
     return getattr(_load(path), name)
 
 
-OSPF = 'pcapkit.protocols.application.ospf:OSPF'
-HTTPV1 = 'pcapkit.protocols.application.httpv1:HTTPv1'
-HTTPV2 = 'pcapkit.protocols.application.httpv2:HTTPv2'
-TLS = 'pcapkit.protocols.application.tls:TLS'
-DTLS = 'pcapkit.protocols.application.dtls:DTLS'
-SSLV2 = 'pcapkit.protocols.application.sslv2:SSLv2'
-NGAP = 'pcapkit.protocols.application.ngap:NGAP'
+OSPF = 'pcapkit.protocols.application.ospf.protocol:OSPF'
+HTTPV1 = 'pcapkit.protocols.application.httpv1.protocol:HTTPv1'
+HTTPV2 = 'pcapkit.protocols.application.httpv2.protocol:HTTPv2'
+TLS = 'pcapkit.protocols.application.tls.protocol:TLS'
+DTLS = 'pcapkit.protocols.application.dtls.protocol:DTLS'
+SSLV2 = 'pcapkit.protocols.application.sslv2.protocol:SSLv2'
+NGAP = 'pcapkit.protocols.application.ngap.protocol:NGAP'
 
 FRAME = 'pcapkit.const.http.frame:Frame'
 SSLV2_TYPE = 'pcapkit.const.sslv2.handshake_type:HandshakeType'
@@ -75,7 +75,7 @@ def _tls_extension(code: 'Any') -> bytes:
     """A TLS record carrying a ``ClientHello`` whose one extension is a ``(code, {})`` pair."""
     from pcapkit.const.tls.content_type import ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType
-    from pcapkit.protocols.data.application.tls import ClientHello, Handshake
+    from pcapkit.protocols.application.ssl.data import ClientHello, Handshake
 
     hello = ClientHello(version=0x0303, random=bytes(32), session_id=b'', cookie=None,
                         cipher_suites=(0x1301,), compression_methods=(0,), extensions=((code, {}),))
@@ -151,10 +151,10 @@ FIELDS = (
     Field('SSLv2._make_sslv2_server_hello', 'server_version', 'pcapkit.const.sslv2.version:Version', 16,
           'SSLv2', lambda value: _hello('SERVER_HELLO', server_version=value)),
     Field('NGAP.make', 'procedure', PROCEDURE, 8, 'NGSetup',
-          lambda value: _ngap(procedure=value), encoder='pcapkit.protocols.application.ngap'),
+          lambda value: _ngap(procedure=value), encoder='pcapkit.protocols.application.ngap.protocol'),
     # NOTE: Criticality is an ENUMERATED of three, two bits in aligned PER.
-    Field('NGAP.make', 'criticality', 'pcapkit.protocols.application.ngap:Criticality', 2, 'reject',
-          lambda value: _ngap(criticality=value), encoder='pcapkit.protocols.application.ngap'),
+    Field('NGAP.make', 'criticality', 'pcapkit.protocols.application.ngap.protocol:Criticality', 2, 'reject',
+          lambda value: _ngap(criticality=value), encoder='pcapkit.protocols.application.ngap.protocol'),
 )
 
 

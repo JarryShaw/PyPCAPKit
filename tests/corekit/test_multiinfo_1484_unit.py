@@ -162,7 +162,7 @@ class InfoSubclassTests(unittest.TestCase):
     def test_both_are_info_subclasses_with_the_multi_dict_protocol(self) -> None:
         from pcapkit.corekit.infoclass import Info, MultiInfo, OrderedMultiInfo
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-        from pcapkit.protocols.data.application.httpv2 import Settings
+        from pcapkit.protocols.application.httpv2.data import Settings
 
         for cls, base in ((MultiInfo, MultiDict), (OrderedMultiInfo, OrderedMultiDict), (Settings, OrderedMultiDict)):
             with self.subTest(cls=cls.__name__):
@@ -283,7 +283,7 @@ class ExportComparisonTests(unittest.TestCase):
     def test_an_option_list_is_unequal_exactly_when_it_is_not_equal(self) -> None:
         from pcapkit.corekit.infoclass import MultiInfo, OrderedMultiInfo
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-        from pcapkit.protocols.data.application.httpv2 import Settings
+        from pcapkit.protocols.application.httpv2.data import Settings
 
         swapped = [('b', 2), ('a', 1), ('a', 3)]
         for cls, plain in ((OrderedMultiInfo, OrderedMultiDict), (Settings, OrderedMultiDict), (MultiInfo, MultiDict)):
@@ -306,7 +306,7 @@ class ExportComparisonTests(unittest.TestCase):
         """``a == b`` is ``b == a``, and ``a != b`` is ``not a == b``, for every pair of kinds."""
         from pcapkit.corekit.infoclass import MultiInfo, OrderedMultiInfo
         from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-        from pcapkit.protocols.data.application.httpv2 import Settings
+        from pcapkit.protocols.application.httpv2.data import Settings
 
         reordered = [('b', 2), ('a', 1), ('a', 3)]
         kinds = {
@@ -451,7 +451,7 @@ class InfoFinalisationTests(unittest.TestCase):
         """HTTP/2 ``Settings`` comes back as itself, last value wins and all."""
         from pcapkit.const.http.setting import Setting
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.application.httpv2 import Settings, SettingsFrame
+        from pcapkit.protocols.application.httpv2.data import Settings, SettingsFrame
 
         pairs = [(Setting.ENABLE_PUSH, 1), (Setting.ENABLE_PUSH, 0)]
         frame = SettingsFrame.from_dict({'settings': OrderedMultiDict(pairs)})
@@ -468,7 +468,7 @@ class InfoFinalisationTests(unittest.TestCase):
     def test_parsed_options_are_frozen_and_rebuild_from_either_form(self) -> None:
         from pcapkit.corekit.infoclass import OrderedMultiInfo
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         # MSS 1460, NOP, NOP, SACK-permitted: a 28-octet header.
         options = bytes.fromhex('020405b4' '0101' '0402')

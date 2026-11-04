@@ -55,7 +55,7 @@ class WrappedOverloadTests(unittest.TestCase):
         from sphinx_autodoc_typehints._objects import callable_target
         from sphinx_autodoc_typehints._resolve.evaluate.expression import resolve_string_annotations
 
-        from pcapkit.protocols.data.protocol import Packet
+        from pcapkit.protocols.data import Packet
         from pcapkit.protocols.protocol import ProtocolBase
 
         wrapper = vars(ProtocolBase)['_read_packet']

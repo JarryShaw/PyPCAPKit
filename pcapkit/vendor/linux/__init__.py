@@ -6,7 +6,7 @@
 .. module:: pcapkit.vendor.linux
 
 This module contains all vendor crawlers of the Linux-specific encapsulations,
-e.g. :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`. Available crawlers
+e.g. :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`. Available crawlers
 include:
 
 .. list-table::

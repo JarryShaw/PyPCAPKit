@@ -32,7 +32,7 @@ from pcapkit.corekit.infoclass import Info, _dump_excluded
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.logging import get_logger
@@ -143,7 +143,7 @@ class Dumper(DumperBase):
         ``fmt`` is given. This is what lets a subclass decline registration
         rather than having to inherit :class:`DumperBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`, which
         guards on its own ``code`` keyword the same way.
 
         Note:

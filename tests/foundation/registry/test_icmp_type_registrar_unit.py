@@ -25,8 +25,8 @@ class RegisterICMPTypeTests(unittest.TestCase):
         """An ICMPv4 type lands in ``ICMPv4.__type__`` and nowhere else."""
         from pcapkit.const.icmp.type import Type
         from pcapkit.foundation.registry.protocols import register_icmp_type
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         code = Type.Timestamp
         original = ICMPv4.__type__.get(code)
@@ -44,8 +44,8 @@ class RegisterICMPTypeTests(unittest.TestCase):
         """An ICMPv6 type lands in ``ICMPv6.__type__`` and nowhere else."""
         from pcapkit.const.icmpv6.type import Type
         from pcapkit.foundation.registry.protocols import register_icmp_type
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         code = Type.Router_Renumbering
         original = ICMPv6.__type__.get(code)
@@ -63,8 +63,8 @@ class RegisterICMPTypeTests(unittest.TestCase):
         """A bare int, or a member of another enum, leaves both registries untouched."""
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_icmp_type
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
         from pcapkit.utilities.exceptions import RegistryError
 
         before = (dict(ICMPv4.__type__), dict(ICMPv6.__type__))
@@ -78,7 +78,7 @@ class RegisterICMPTypeTests(unittest.TestCase):
         """A name with no ``_read_data_type_*`` method is refused before any write."""
         from pcapkit.const.icmp.type import Type
         from pcapkit.foundation.registry.protocols import register_icmp_type
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
         from pcapkit.utilities.exceptions import RegistryError
 
         code = Type.Timestamp

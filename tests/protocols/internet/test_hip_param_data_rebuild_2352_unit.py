@@ -32,7 +32,7 @@ else is by name or by hand:
 * A *nested* collision is invisible to it. ``LOCATOR_SET``'s keyword and field
   are both spelled ``locator_set``, so the check passes it over, yet expanding
   the parsed parameter handed each nested
-  :class:`~pcapkit.protocols.data.internet.hip.Locator`'s own ``locator`` key
+  :class:`~pcapkit.protocols.internet.hip.data.Locator`'s own ``locator`` key
   to ``_make_locator``'s ``locator`` parameter and raised ``AttributeError:
   'IPv6Address' object has no attribute 'locator'``.
 * ``HOST_ID`` the check does find -- it renames ``algorithm`` to
@@ -174,7 +174,7 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
         return base
 
     def _build(self, code: 'object', value: 'object') -> 'bytes':
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         # ``extension=True`` keeps ``HIP.alias`` off ``self._info``, which
         # ``__post_init__`` assigns only once ``read`` has returned (#1184).
@@ -183,7 +183,7 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
 
     def test_a_parsed_parameter_rebuilds_byte_for_byte(self) -> None:
         """#2352: the pair form reproduces the octets it was parsed from."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for name, (code, kwargs) in self.cases().items():
             with self.subTest(case=name):
@@ -201,7 +201,7 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
         each other is what keeps them from drifting apart again.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for name, (code, kwargs) in self.cases().items():
             with self.subTest(case=name):
@@ -217,7 +217,7 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
     def test_hip_transform_keeps_its_suites(self) -> None:
         """#2352: the reported case, down to the octets it used to produce."""
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         octets = self._build(Parameter.HIP_TRANSFORM, {'suites': [1, 2]})
         self.assertEqual(octets[40:].hex(), '0241000400010002')
@@ -258,8 +258,8 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
         """
         import inspect
 
-        from pcapkit.protocols.internet import hip as hip_module
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip import protocol as hip_module
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.compat import get_annotations
 
         registry = HIP.__dict__['__parameter__']

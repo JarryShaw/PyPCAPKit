@@ -7,9 +7,9 @@ which is one octet short whenever ``data`` is empty, and only then.
 Where the octet goes missing
 ----------------------------
 
-:class:`~pcapkit.protocols.schema.transport.tcp.MPTCPUnknown` packs three octets of header
+:class:`~pcapkit.protocols.transport.tcp.schema.MPTCPUnknown` packs three octets of header
 unconditionally -- ``kind`` and ``length``, both declared on
-:class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` (#541), and its own ``test``
+:class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` (#541), and its own ``test``
 :class:`~pcapkit.corekit.fields.strings.BitField`, whose high nibble is the subtype and whose
 low nibble takes ``data[0]`` -- and then ``data[1:]`` as the body. So the first octet of
 ``data`` is folded into the header's low nibble rather than appended, and the option occupies
@@ -63,7 +63,7 @@ import warnings
 MINIMUM_UNKNOWN_OPTION = bytes([0x1E, 0x03, 0xF0])
 
 #: Payload widths and the octets the maker must produce for each, derived by adding up what
-#: :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPUnknown` packs: ``kind``, ``length``,
+#: :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPUnknown` packs: ``kind``, ``length``,
 #: the subtype/data octet, then ``data[1:]``. Only the first entry changed with #2272; the
 #: rest are pinned so the fix is shown to be confined to the empty case.
 UNKNOWN_PAYLOAD_CASES = (
@@ -89,7 +89,7 @@ def make_unknown(**kwargs: 'object') -> 'bytes':
 
     Args:
         **kwargs: forwarded to
-            :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_unknown` as the option's
+            :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_unknown` as the option's
             own arguments. Passing none exercises the maker's default payload.
 
     Returns:
@@ -105,7 +105,7 @@ def make_unknown(**kwargs: 'object') -> 'bytes':
 
     """
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     tcp = TCP.__new__(TCP)
     schema = tcp._make_mptcp_unknown(  # pylint: disable=protected-access
@@ -179,7 +179,7 @@ class TCPMPTCPUnknownLengthUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(options=[(Enum_Option.Multipath_TCP, {
             'subtype': Enum_MPTCPOption.Reserved_for_Private_Use,

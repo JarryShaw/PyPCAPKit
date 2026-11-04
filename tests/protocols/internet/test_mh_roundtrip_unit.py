@@ -56,12 +56,12 @@ class TestMHRoundTrip(unittest.TestCase):
     def _parse(octets: 'bytes') -> 'object':
         import io
 
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH(io.BytesIO(octets), len(octets), extension=True)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for name, frame in FRAMES.items():
             with self.subTest(frame=name):
@@ -80,7 +80,7 @@ class TestMHRoundTrip(unittest.TestCase):
         import warnings
 
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         with warnings.catch_warnings():
@@ -126,7 +126,7 @@ class TestMHRoundTrip(unittest.TestCase):
     def test_fresh_make_places_each_flag_on_its_iana_bit(self) -> None:
         from pcapkit.const.mh.binding_ack_flag import BindingACKFlag
         from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         bu_flags = {'map_reg': BindingUpdateFlag.M, 'mobile_router': BindingUpdateFlag.R,

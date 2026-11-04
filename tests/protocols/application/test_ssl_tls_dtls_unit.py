@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.ssl`,
-:mod:`pcapkit.protocols.application.tls` and
-:mod:`pcapkit.protocols.application.dtls`.
+"""Unit tests for :mod:`pcapkit.protocols.application.ssl.protocol`,
+:mod:`pcapkit.protocols.application.tls.protocol` and
+:mod:`pcapkit.protocols.application.dtls.protocol`.
 
 """
 from __future__ import annotations
@@ -12,7 +12,7 @@ import warnings
 from tests._support import reimport_once_per_class
 
 #: A 20-octet TCP header, data offset 5, ACK set, from port 50000 to port 443,
-#: i.e. the port :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+#: i.e. the port :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`
 #: binds TLS at. Shaped exactly as
 #: :mod:`tests.protocols.transport.test_tcp_http_dispatch_unit`'s port-80 header.
 _TCP_TO_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
@@ -33,16 +33,16 @@ class SSLFamilyUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ssl_id_names_the_direct_concrete_members(self) -> None:
-        from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         self.assertEqual(SSL.id(), ('SSLv2', 'TLS', 'DTLS'))
         self.assertTrue(issubclass(SSLv2, SSL))
 
     def test_tls_properties_and_make_data(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import TLS as Data_TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.tls.data import TLS as Data_TLS
 
         proto = object.__new__(TLS)
         self.assertEqual(proto.name, 'Transport Layer Security')
@@ -59,8 +59,8 @@ class SSLFamilyUnitTests(unittest.TestCase):
 
     def test_dtls_properties_and_make_data(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 
         proto = object.__new__(DTLS)
         self.assertEqual(proto.name, 'Datagram Transport Layer Security')
@@ -75,8 +75,8 @@ class SSLFamilyUnitTests(unittest.TestCase):
         self.assertEqual(values['content_type'], ContentType.change_cipher_spec)
 
     def test_tcp_and_udp_dispatch_tables_name_tls_and_dtls(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertEqual(TCP.__proto__[443].klass.__name__, 'TLS')
         self.assertEqual(UDP.__proto__[5684].klass.__name__, 'DTLS')
@@ -95,7 +95,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
         of degrading to :class:`Raw`.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = b'\x14\x03\x03\x00\x02\x01\x01'
         parsed = TLS(wire, len(wire))
@@ -103,7 +103,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
         self.assertEqual(bytes(TLS.from_data(parsed.info)), wire)
 
     def test_dtls_truncated_fragment_header_raises(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         # A handshake header claiming a body, but too few octets follow for
@@ -115,7 +115,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
             DTLS(wire, len(wire))
 
     def test_malformed_extension_list_raises(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         version = b'\x03\x03'
@@ -141,7 +141,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
         refusing to parse.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         version = b'\x03\x03'
@@ -157,7 +157,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
             TLS(wire, len(wire))
 
     def test_client_hello_with_excess_octets_raises(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         version = b'\x03\x03'
@@ -169,7 +169,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
             TLS(wire, len(wire))
 
     def test_server_hello_with_excess_octets_raises(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         version = b'\x03\x03'
@@ -183,7 +183,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
     def test_make_accepts_an_already_encoded_handshake_message(self) -> None:
         """A list of handshake messages may mix decoded and raw entries."""
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         raw_message = b'\x0e\x00\x00\x00'  # server_hello_done, zero-length
         maker = object.__new__(TLS)
@@ -192,7 +192,7 @@ class SSLFamilyUnitTests(unittest.TestCase):
 
     def test_make_content_accepts_a_bytearray_for_an_unknown_content_type(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         maker = object.__new__(TLS)
         schema = maker.make(content_type=ContentType.heartbeat, content=bytearray(b'\x01\x02'))
@@ -216,8 +216,8 @@ class RecordValidationTests(unittest.TestCase):
 
     def test_content_type_zero_is_rejected(self) -> None:
         """The exploit, verbatim, for both protocols."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         tls_wire = b'\x00\x03\x03\x00\x04\xde\xad\xbe\xef'
@@ -242,7 +242,7 @@ class RecordValidationTests(unittest.TestCase):
 
         """
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         for content_type in (19, 28, 32, 63, 64, 255):
@@ -270,8 +270,8 @@ class RecordValidationTests(unittest.TestCase):
         would otherwise pass with 25 silently dropped from the allowlist.
 
         """
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = b'\x19\x03\x03\x00\x08' + b'\xde\xad\xbe\xef\xde\xad\xbe\xef'
@@ -293,7 +293,7 @@ class RecordValidationTests(unittest.TestCase):
 
         """
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = b'\x1a\x03\x03\x00\x04\xde\xad\xbe\xef'
         parsed = TLS(wire, len(wire))
@@ -306,8 +306,8 @@ class RecordValidationTests(unittest.TestCase):
         value neither uses, so neither half can pass by accepting everything.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version in (b'\x02\x03', b'\xfe\xfd'):
@@ -332,8 +332,8 @@ class RecordValidationTests(unittest.TestCase):
         content was fabricated here rather than received.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         with warnings.catch_warnings():
@@ -362,14 +362,14 @@ class RecordValidationTests(unittest.TestCase):
 
         ``_validate_tls_record`` raises so that
         :func:`~pcapkit.corekit.decorators.beholder` replaces the layer with
-        :class:`~pcapkit.protocols.misc.raw.Raw`; asserting the exception alone
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; asserting the exception alone
         would not show that dispatch survives it. The good payload is asserted
         alongside, so the test cannot be satisfied by a binding that resolves
         to ``Raw`` unconditionally.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         tls_good = b'\x16\x03\x03\x00\x04\x0e\x00\x00\x00'
         tls_cases = (
@@ -415,7 +415,7 @@ class EncryptedHandshakeRecordTests(unittest.TestCase):
     flights used, with nothing in the cleartext header to say which it is.
     Decoding the second kind as the first either fabricates messages from
     pseudorandom octets or, as it did here, raises and drops the whole record
-    to :class:`~pcapkit.protocols.misc.raw.Raw`, discarding a record header
+    to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, discarding a record header
     that *was* in the clear.
 
     DTLS answers this exactly, from the epoch in its record header; TLS has no
@@ -429,7 +429,7 @@ class EncryptedHandshakeRecordTests(unittest.TestCase):
 
     def test_an_encrypted_tls_handshake_record_keeps_its_octets(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         # 40 octets, the size of a TLS 1.2 encrypted ``Finished``. Its first
         # octet would read as a ``msg_type`` and the next three as a length,
@@ -448,7 +448,7 @@ class EncryptedHandshakeRecordTests(unittest.TestCase):
         declared length that overshoots the end.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         # Two octets left over after one whole message: too few for a header.
         short_tail = b'\x0e\x00\x00\x00' + b'\xab\xcd'
@@ -465,7 +465,7 @@ class EncryptedHandshakeRecordTests(unittest.TestCase):
 
     def test_a_dtls_handshake_record_past_epoch_zero_keeps_its_octets(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         # 48 octets, the size of a DTLS encrypted ``Finished``.
         ciphertext = (b'\xa3\x5d\x12\xee' * 12)[:48]
@@ -487,8 +487,8 @@ class EncryptedHandshakeRecordTests(unittest.TestCase):
         make and this asserts it is actually consulted.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.dtls import DTLSHandshake
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.dtls.data import DTLSHandshake
 
         fragment = b'\x0e\x00\x00\x00' + bytes(8)  # server_hello_done, unfragmented
         wire = (b'\x16\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
@@ -508,7 +508,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
     after ``ChangeCipherSpec``, including the ``close_notify`` that ends
     nearly every TLS 1.2 connection. Before this fix, any alert fragment
     that was not exactly 2 octets raised and dropped the whole record --
-    cleartext header included -- to :class:`~pcapkit.protocols.misc.raw.Raw`.
+    cleartext header included -- to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
     """
 
@@ -518,7 +518,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
     def test_an_encrypted_tls12_close_notify_keeps_its_octets(self) -> None:
         """A 26-octet AES-GCM-shaped ``close_notify``, the common case."""
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         ciphertext = (b'\xaa\xbb\xcc\xdd' * 7)[:26]
         wire = b'\x15\x03\x03' + len(ciphertext).to_bytes(2, 'big') + ciphertext
@@ -530,7 +530,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
 
     def test_an_encrypted_cbc_alert_keeps_its_octets(self) -> None:
         """A 48-octet CBC-shaped alert -- a different cipher, same shape bug."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         ciphertext = (b'\x9a\x1b\x2c\x3d' * 12)[:48]
         wire = b'\x15\x03\x03' + len(ciphertext).to_bytes(2, 'big') + ciphertext
@@ -541,7 +541,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
 
     def test_a_dtls_alert_past_epoch_zero_keeps_its_octets(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         ciphertext = (b'\x11\x22\x33\x44' * 2)[:7]
         wire = (b'\x15\xfe\xfd' + (1).to_bytes(2, 'big') + (9).to_bytes(6, 'big')
@@ -555,8 +555,8 @@ class EncryptedAlertRecordTests(unittest.TestCase):
 
     def test_a_dtls_alert_at_epoch_zero_still_decodes(self) -> None:
         """The complement, so the epoch test cannot pass by refusing everything."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.tls import Alert
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.data import Alert
 
         fragment = b'\x01\x00'  # level=warning, description=close_notify
         wire = (b'\x15\xfe\xfd' + bytes(2) + (1).to_bytes(6, 'big')
@@ -577,7 +577,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
         has to raise.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         fragment = b'\x01\x00\xff'  # one octet too many for a cleartext alert
@@ -588,7 +588,7 @@ class EncryptedAlertRecordTests(unittest.TestCase):
 
     def test_a_dtls_change_cipher_spec_at_epoch_zero_with_the_wrong_length_raises(self) -> None:
         """The same malformed-length case, for ``change_cipher_spec``."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         fragment = b'\x01\x02'  # a genuine cleartext CCS is exactly 1 octet
@@ -644,13 +644,13 @@ def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None,
 class VersionDispatchTests(unittest.TestCase):
     """:meth:`TLS.read`/:meth:`DTLS.read` (:issue:`2437`): identifying the
     concrete tier and setting
-    :attr:`~pcapkit.protocols.application.tls.TLS.alias` dynamically,
-    mirroring :class:`~pcapkit.protocols.link.arp.ARP`'s own dynamic dispatch
+    :attr:`~pcapkit.protocols.application.tls.protocol.TLS.alias` dynamically,
+    mirroring :class:`~pcapkit.protocols.link.arp.protocol.ARP`'s own dynamic dispatch
     over RARP/DRARP/InARP by operation code, rather than
-    :class:`~pcapkit.protocols.application.http.HTTP`'s dispatch over
+    :class:`~pcapkit.protocols.application.http.protocol.HTTP`'s dispatch over
     distinct per-version classes: a record identified as, say, SSLv3 never
     becomes a different *class*, only a different :attr:`alias`, on the same
-    :class:`~pcapkit.protocols.application.tls.TLS` instance throughout.
+    :class:`~pcapkit.protocols.application.tls.protocol.TLS` instance throughout.
 
     """
 
@@ -658,7 +658,7 @@ class VersionDispatchTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_tls_dispatches_sslv3_tlsv1_0_and_tlsv1_1_by_legacy_version(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         cases = (
             (0x0300, 'SSLv3'),
@@ -673,14 +673,14 @@ class VersionDispatchTests(unittest.TestCase):
                 self.assertEqual(parsed.info.content, b'hello')
 
     def test_tls_0303_without_1_3_negotiation_dispatches_tls_1_2(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = _tls_client_hello_wire()
         parsed = TLS(wire, len(wire))
         self.assertEqual(parsed.alias, 'TLS 1.2')
 
     def test_tls_0303_negotiating_1_3_dispatches_tls_1_3(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
         wire = _tls_client_hello_wire(supported_versions=supported_versions)
@@ -689,7 +689,7 @@ class VersionDispatchTests(unittest.TestCase):
 
     def test_tls_supported_versions_naming_only_1_2_stays_tls_1_2(self) -> None:
         """The negotiation really is consulted, not just "an extension exists"."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         supported_versions = b'\x02' + (0x0303).to_bytes(2, 'big')
         wire = _tls_client_hello_wire(supported_versions=supported_versions)
@@ -697,7 +697,7 @@ class VersionDispatchTests(unittest.TestCase):
         self.assertEqual(parsed.alias, 'TLS 1.2')
 
     def test_dtls_dispatches_dtlsv1_0_by_legacy_version(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = (b'\x17\xfe\xff' + bytes(2) + (1).to_bytes(6, 'big')
                 + (5).to_bytes(2, 'big') + b'hello')
@@ -705,14 +705,14 @@ class VersionDispatchTests(unittest.TestCase):
         self.assertEqual(parsed.alias, 'DTLS 1.0')
 
     def test_dtls_0xfefd_without_1_3_negotiation_dispatches_dtls_1_2(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = _dtls_client_hello_wire()
         parsed = DTLS(wire, len(wire))
         self.assertEqual(parsed.alias, 'DTLS 1.2')
 
     def test_dtls_0xfefd_negotiating_1_3_dispatches_dtls_1_3(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         supported_versions = b'\x02' + (0xFEFC).to_bytes(2, 'big')
         wire = _dtls_client_hello_wire(supported_versions=supported_versions)
@@ -727,7 +727,7 @@ class VersionDispatchTests(unittest.TestCase):
         neither may be branded TLS 1.2 -- or any other specific version.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         for legacy_version in (0x0304, 0x0305, 0x03FF):
             with self.subTest(legacy_version=hex(legacy_version)):
@@ -740,7 +740,7 @@ class VersionDispatchTests(unittest.TestCase):
     def test_tls_unknown_record_version_stays_generic_even_offering_1_3(self) -> None:
         """The ``supported_versions`` peek only applies where TLS 1.3 may
         legitimately sit on the record layer, not to an unknown version."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
         wire = _tls_client_hello_wire(supported_versions=supported_versions,
@@ -751,7 +751,7 @@ class VersionDispatchTests(unittest.TestCase):
     def test_tls_0301_client_hello_negotiating_1_3_dispatches_tls_1_3(self) -> None:
         """An initial ``ClientHello`` may carry ``0x0301`` on the record layer
         "for compatibility purposes" (:rfc:`9846#section-5.1`)."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         supported_versions = b'\x02' + (0x0304).to_bytes(2, 'big')
         wire = _tls_client_hello_wire(supported_versions=supported_versions,
@@ -766,7 +766,7 @@ class VersionDispatchTests(unittest.TestCase):
         """A ``0xFExx`` legacy version naming no known tier claims none --
         DTLS 1.3's own ``0xFEFC`` included, which :rfc:`9147#section-4`
         never puts on the record layer."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for legacy_version in (0xFEFC, 0xFEFE, 0xFE00):
             with self.subTest(legacy_version=hex(legacy_version)):
@@ -779,7 +779,7 @@ class VersionDispatchTests(unittest.TestCase):
     def test_dtls_0xfeff_client_hello_negotiating_1_3_dispatches_dtls_1_3(self) -> None:
         """An initial ``ClientHello`` may carry DTLS 1.0's ``{254, 255}``
         on the record layer (:rfc:`9147#section-4`)."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         supported_versions = b'\x02' + (0xFEFC).to_bytes(2, 'big')
         wire = _dtls_client_hello_wire(supported_versions=supported_versions,
@@ -792,15 +792,15 @@ class VersionDispatchTests(unittest.TestCase):
 
     def test_sslv3_is_constructible_directly_and_narrows_id(self) -> None:
         """:class:`SSLv3` -- explicit/manual construction only, mirroring
-        :class:`~pcapkit.protocols.link.inarp.InARP`'s relationship to
-        :class:`~pcapkit.protocols.link.arp.ARP`: it narrows :meth:`id` only
-        and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read`
+        :class:`~pcapkit.protocols.link.inarp.protocol.InARP`'s relationship to
+        :class:`~pcapkit.protocols.link.arp.protocol.ARP`: it narrows :meth:`id` only
+        and inherits :meth:`~pcapkit.protocols.application.tls.protocol.TLS.read`
         unchanged, so parsing SSLv3-shaped data through it sets
         :attr:`alias` to ``'SSLv3'`` exactly as parsing it through
-        :class:`~pcapkit.protocols.application.tls.TLS` would.
+        :class:`~pcapkit.protocols.application.tls.protocol.TLS` would.
 
         """
-        from pcapkit.protocols.application.sslv3 import SSLv3
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
 
         tls_wire = b'\x17\x03\x00\x00\x05hello'
         parsed = SSLv3(tls_wire, len(tls_wire))
@@ -809,14 +809,14 @@ class VersionDispatchTests(unittest.TestCase):
         self.assertEqual(SSLv3.id(), ('SSLv3',))
 
     def test_sslv3_class_does_not_force_its_own_alias(self) -> None:
-        """The same nuance :class:`~pcapkit.protocols.link.inarp.InARP` has:
+        """The same nuance :class:`~pcapkit.protocols.link.inarp.protocol.InARP` has:
         constructing :class:`SSLv3` directly over data that is not actually
         SSLv3-shaped still reports the *real* tier, since :meth:`read` is
         inherited unmodified and dispatches off the wire, not off the class
         it happened to be instantiated as.
 
         """
-        from pcapkit.protocols.application.sslv3 import SSLv3
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
 
         tls_1_0_wire = b'\x17\x03\x01\x00\x05hello'
         parsed = SSLv3(tls_1_0_wire, len(tls_1_0_wire))
@@ -829,8 +829,8 @@ class VersionDispatchTests(unittest.TestCase):
         parse as SSLv3.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         self.assertEqual(TLS.id(), ('TLS',))
         self.assertEqual(DTLS.id(), ('DTLS',))
@@ -849,11 +849,11 @@ class VersionDispatchTests(unittest.TestCase):
     def test_sslv3_record_reports_its_own_name(self) -> None:
         """SSLv3 is the one tier in the family with a genuinely different
         full :attr:`name`, set dynamically the same way :attr:`alias` is --
-        mirroring :attr:`ARP._name <pcapkit.protocols.link.arp.ARP._name>`
-        tracking :attr:`ARP._acnm <pcapkit.protocols.link.arp.ARP._acnm>`.
+        mirroring :attr:`ARP._name <pcapkit.protocols.link.arp.protocol.ARP._name>`
+        tracking :attr:`ARP._acnm <pcapkit.protocols.link.arp.protocol.ARP._acnm>`.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         sslv3_wire = b'\x17\x03\x00\x00\x05hello'
         parsed = TLS(sslv3_wire, len(sslv3_wire))
@@ -873,7 +873,7 @@ class VersionDispatchTests(unittest.TestCase):
         ``RecordValidationTests`` et al. above).
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         version = b'\x03\x03'
@@ -890,14 +890,14 @@ class VersionDispatchTests(unittest.TestCase):
 
 class NonRecordPayloadTests(unittest.TestCase):
     """A port-443 payload that is not a TLS record degrades to
-    :class:`~pcapkit.protocols.misc.raw.Raw`."""
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
     def test_every_first_octet_parses_only_as_an_accepted_content_type(self) -> None:
-        from pcapkit.protocols.application.ssl import _WIRE_CONTENT_TYPES
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.ssl.protocol import _WIRE_CONTENT_TYPES
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         for content_type in range(0x100):
@@ -910,7 +910,7 @@ class NonRecordPayloadTests(unittest.TestCase):
                         TLS(wire, len(wire))
 
     def test_a_complete_sslv2_client_hello_on_443_is_sslv2(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
         raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body
@@ -920,7 +920,7 @@ class NonRecordPayloadTests(unittest.TestCase):
         self.assertEqual(str(proto.protochain), 'TCP:SSLv2')
 
     def test_bytes_after_an_sslv2_hello_on_443_stay_raw(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
         raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body + b'xyz'
@@ -930,7 +930,7 @@ class NonRecordPayloadTests(unittest.TestCase):
         self.assertEqual(str(proto.protochain), 'TCP:SSLv2:Raw')
 
     def test_a_truncated_sslv2_hello_on_443_is_raw(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         body = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
         raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body[:-4]
@@ -940,7 +940,7 @@ class NonRecordPayloadTests(unittest.TestCase):
         self.assertEqual(str(proto.protochain), 'TCP:Raw')
 
     def test_a_non_hello_sslv2_record_on_443_is_raw(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         body = b'\x05' + bytes(8)  # MSG-SERVER-VERIFY (5), not a hello
         raw = _TCP_TO_443 + (0x8000 | len(body)).to_bytes(2, 'big') + body
@@ -952,7 +952,7 @@ class NonRecordPayloadTests(unittest.TestCase):
     def test_random_segments_are_raw(self) -> None:
         import random
 
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         rng = random.Random(2441)
         for _ in range(200):
@@ -995,7 +995,7 @@ class SSLv2On443Tests(unittest.TestCase):
 
     @staticmethod
     def _tcp(payload: bytes):
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = _TCP_TO_443 + payload
         with warnings.catch_warnings():
@@ -1011,7 +1011,7 @@ class SSLv2On443Tests(unittest.TestCase):
 
     def test_a_genuine_tls_client_hello_that_is_also_sslv2_stays_tls(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         seg = _polyglot_segment()
         # Premise: the same octets are a complete SSLv2 CLIENT-HELLO.
@@ -1025,7 +1025,7 @@ class SSLv2On443Tests(unittest.TestCase):
         self.assertEqual(str(proto.protochain), 'TCP:TLS 1.0:Raw')
 
     def test_sslv2_on_443_reports_the_direct_parse_length_packet_and_name(self) -> None:
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         client_hello = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
         # A 3-octet header: indicator 0x00 (not escape), RECORD-LENGTH, padding 0.
@@ -1044,7 +1044,7 @@ class SSLv2On443Tests(unittest.TestCase):
                 self.assertEqual(on_443.packet.payload, direct.packet.payload)
 
     def test_sslv2_hellos_on_443_rebuild_byte_exact(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         client_hello = b'\x01\x00\x02\x00\x03\x00\x00\x00\x10' + b'\x01\x00\x80' + bytes(16)
         three_octet = bytes([0x00, len(client_hello), 0x00]) + client_hello
@@ -1076,7 +1076,7 @@ class SegmentRecordTests(unittest.TestCase):
 
     def test_frame_layer_limit_bounds_the_records(self) -> None:
         """Each record is a layer, so the limit stops the walk with one warning."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ProtocolWarning
 
@@ -1092,15 +1092,15 @@ class SegmentRecordTests(unittest.TestCase):
             self.assertEqual(bytes(TCP.from_data(proto.info)), raw)
 
     def test_a_parse_stopping_at_tls_keeps_the_rest_raw(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = self.CCS + self.APPLICATION_DATA
         self.assertEqual(str(TLS(wire, len(wire)).protochain), 'TLS 1.2:TLS 1.2')
         self.assertEqual(str(TLS(wire, len(wire), protocol='TLS').protochain), 'TLS 1.2:Raw')
 
     def test_octets_opening_no_record_stay_raw_without_an_error(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, tail in (('content type 0', b'\x00\x03\x03\x00\x01\x01'),
                            ('an SSLv2 record version', b'\x14\x00\x02\x00\x01\x01'),
@@ -1117,7 +1117,7 @@ class SegmentRecordTests(unittest.TestCase):
 
     def test_a_whole_record_that_fails_to_decode_is_raw(self) -> None:
         """A ClientHello too short for its fixed fields: ``beholder`` keeps it as ``Raw``."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = _TCP_TO_443 + self.CCS + self.MALFORMED_HELLO
         with warnings.catch_warnings(record=True) as caught:
@@ -1134,8 +1134,8 @@ class SegmentRecordTests(unittest.TestCase):
         the first keeps its trial (#2517)."""
         from unittest import mock
 
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, segment, chain, calls in (
                 ('after a record', self.CCS + self.MALFORMED_HELLO, 'TCP:TLS 1.2:Raw', 0),
@@ -1166,7 +1166,7 @@ class DatagramRecordTests(unittest.TestCase):
 
     def _udp(self, payload: bytes) -> 'tuple[object, list[warnings.WarningMessage]]':
         """Parse ``payload`` on UDP 5684 under ``always``, with the warnings it reports."""
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         raw = _udp_to_5684(payload)
         with warnings.catch_warnings(record=True) as caught:
@@ -1176,7 +1176,7 @@ class DatagramRecordTests(unittest.TestCase):
 
     def test_frame_layer_limit_bounds_the_records(self) -> None:
         """Each record is a layer, so the limit stops the walk with one warning."""
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ProtocolWarning
 
@@ -1190,8 +1190,8 @@ class DatagramRecordTests(unittest.TestCase):
             self.assertEqual(bytes(UDP.from_data(proto.info)), _udp_to_5684(payload))  # type: ignore[attr-defined]
 
     def test_a_parse_stopping_at_dtls_keeps_the_rest_raw(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         wire = self.CCS + self.ALERT
         raw = _udp_to_5684(wire)
@@ -1204,7 +1204,7 @@ class DatagramRecordTests(unittest.TestCase):
                 self.assertEqual(bytes(proto.payload.payload), self.ALERT)
 
     def test_octets_opening_no_whole_record_stay_raw_without_an_error(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, tail in (('content type 0', b'\x00' + self.CCS[1:]),
                            ('tls12_cid, whose connection ID has no fixed length', b'\x19' + self.CCS[1:]),
@@ -1224,7 +1224,7 @@ class DatagramRecordTests(unittest.TestCase):
 
     def test_a_later_whole_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
         """``beholder`` keeps the record, and everything after it, as ``Raw`` (ruling A on #2517)."""
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         too_short = b'\x25\x07\x00\x0f' + bytes(15)  # a ciphertext under the record-number sample
         for name, bad, error in (
@@ -1245,7 +1245,7 @@ class DatagramRecordTests(unittest.TestCase):
 
 class ExportTests(unittest.TestCase):
     """The family is exported, and registered, the way every sibling
-    application protocol is -- :class:`~pcapkit.protocols.application.ngap.NGAP`
+    application protocol is -- :class:`~pcapkit.protocols.application.ngap.protocol.NGAP`
     for one."""
 
     NAMES = ('SSL', 'SSLv3', 'TLS', 'DTLS')
@@ -1258,10 +1258,10 @@ class ExportTests(unittest.TestCase):
         import pcapkit.all
         import pcapkit.protocols
         import pcapkit.protocols.application
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.application.sslv3 import SSLv3
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         classes = {'SSL': SSL, 'SSLv3': SSLv3, 'TLS': TLS, 'DTLS': DTLS}
         for module in (pcapkit, pcapkit.all, pcapkit.protocols, pcapkit.protocols.application):
@@ -1280,8 +1280,8 @@ class ExportTests(unittest.TestCase):
 
     def test_string_lookup_matches_a_parsed_record(self) -> None:
         """``'SSL' in pkt`` agrees with ``SSL in pkt``, the name being registered."""
-        from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = _TCP_TO_443 + b'\x17\x03\x03\x00\x05hello'
         proto = TCP(raw, len(raw))

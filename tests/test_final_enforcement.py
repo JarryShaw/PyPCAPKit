@@ -4,7 +4,7 @@
 :func:`typing.final` records ``__final__ = True`` on the class it decorates and
 stops there -- the interpreter will still derive from it happily. Both
 :func:`~pcapkit.corekit.infoclass.info_final` and
-:func:`~pcapkit.protocols.schema.schema.schema_final` end by applying it, so
+:func:`~pcapkit.protocols.schema.schema_final` end by applying it, so
 every finalised class in the library already carried the marker and nothing read
 it. Issue #778 is the ruling that it should be read, and this module is what
 pins the reading.
@@ -34,12 +34,12 @@ is a defect, not a style choice: the class comes back with no generated
 ``__init__`` and construction fails with
 ``TypeError: 'int' object is not iterable`` on the :class:`Info` side, and
 *silently returns bookkeeping attributes* on the
-:class:`~pcapkit.protocols.schema.schema.Schema` side.
+:class:`~pcapkit.protocols.schema.Schema` side.
 
 What the rule costs is nothing up front and everything later, which is why it needs
 tests rather than a measurement. Measured at ``110381b63``: of :class:`Info`'s
 488 descendants 455 carry ``__final__`` in their own ``__dict__`` and **none is
-subclassed**; of :class:`~pcapkit.protocols.schema.schema.Schema`'s 445, 408 do
+subclassed**; of :class:`~pcapkit.protocols.schema.Schema`'s 445, 408 do
 and none is subclassed. So the raise cannot fire on any declaration in the tree
 as it stands, and the only way to know it fires at all is to make it.
 
@@ -192,7 +192,7 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.infoclass import Info
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import SchemaError
 
         self.assertFalse(issubclass(Schema, Info))
@@ -212,7 +212,7 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
 
     def test_re_finalising_the_same_schema_only_warns(self) -> None:
         """As for :func:`info_final`, and with the schema-side warning."""
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.warnings import SchemaWarning
 
         @schema_final
@@ -234,7 +234,7 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
     def test_a_base_state_schema_is_still_subclassable(self) -> None:
         """The schema-side half of the line the check must not cross."""
         from pcapkit.corekit.infoclass import FinalisedState
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         class Intermediate(Schema):
             pass
@@ -259,7 +259,7 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
         that failed would still have overwritten a built-in schema.
 
         """
-        from pcapkit.protocols.schema.schema import EnumSchema, schema_final
+        from pcapkit.protocols.schema import EnumSchema, schema_final
         from pcapkit.utilities.exceptions import SchemaError
 
         class Code(enum.IntEnum):
@@ -282,11 +282,11 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
     def test_a_refused_pcapng_option_declaration_leaves_the_registry_alone(self) -> None:
         """The same guarantee, on the in-tree hook that overrides it.
 
-        :meth:`~pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__`
+        :meth:`~pcapkit.protocols.misc.pcapng.schema.Option.__init_subclass__`
         overrides :class:`EnumSchema`'s hook and calls
-        :meth:`~pcapkit.protocols.schema.misc.pcapng.Option.register` -- which
+        :meth:`~pcapkit.protocols.misc.pcapng.schema.Option.register` -- which
         writes ``cls`` into
-        :attr:`~pcapkit.protocols.schema.misc.pcapng.Option.__enum__` -- before
+        :attr:`~pcapkit.protocols.misc.pcapng.schema.Option.__enum__` -- before
         calling ``super().__init_subclass__()``, which is where the guard that
         refuses to subclass a finalised schema actually lives. So without the
         fix a refused declaration displaces a built-in option schema first,
@@ -298,8 +298,8 @@ class SchemaFinalEnforcementTests(unittest.TestCase):
         """
         from pcapkit.const.pcapng.option_type import \
             OptionType as Enum_OptionType  # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.schema.misc.pcapng import Option
-        from pcapkit.protocols.schema.schema import schema_final
+        from pcapkit.protocols.misc.pcapng.schema import Option
+        from pcapkit.protocols.schema import schema_final
         from pcapkit.utilities.exceptions import SchemaError
 
         # ``opt_endofopt`` -- the enum's first member -- named explicitly rather
@@ -541,7 +541,7 @@ class VersionPortabilityTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.infoclass import Info, info_final
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @info_final
         class SealedInfo(Info):
@@ -565,7 +565,7 @@ class VersionPortabilityTests(unittest.TestCase):
 
         """
         from pcapkit.corekit import infoclass
-        from pcapkit.protocols.schema import schema
+        from pcapkit.protocols import schema
         from pcapkit.utilities import compat
 
         self.assertIs(infoclass.final, compat.final)
@@ -652,14 +652,14 @@ class DecoratorCombinationTests(unittest.TestCase):
 
         Fielded rather than field-less: a field-less schema's :meth:`to_dict`
         returns ``{}`` whether the generated constructor from
-        :attr:`~pcapkit.protocols.schema.schema.Schema.__fields__` ran or not, so
+        :attr:`~pcapkit.protocols.schema.Schema.__fields__` ran or not, so
         it cannot tell "finalised and usable" apart from "silently unfinalised" --
         which is exactly the gap #422 fell through. A real field is what makes
         the generated constructor observable.
 
         """
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -718,7 +718,7 @@ class DecoratorCombinationTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.compat import final
 
         with warnings.catch_warnings(record=True) as caught:
@@ -774,7 +774,7 @@ class DecoratorCombinationTests(unittest.TestCase):
 
     def test_a_bare_final_schema_is_refused_at_first_construction(self) -> None:
         """The schema-side half, which returns corrupt data without the guard."""
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
         from pcapkit.utilities.compat import final
         from pcapkit.utilities.exceptions import SchemaError
 
@@ -817,7 +817,7 @@ class DecoratorCombinationTests(unittest.TestCase):
     def test_schema_refusal_repeats_rather_than_firing_once(self) -> None:
         """The schema-side half of the test above."""
         from pcapkit.corekit.infoclass import FinalisedState
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
         from pcapkit.utilities.compat import final
         from pcapkit.utilities.exceptions import SchemaError
 
@@ -877,7 +877,7 @@ class DecoratorCombinationTests(unittest.TestCase):
     def test_a_prior_bare_schema_construction_does_not_defeat_the_guard(self) -> None:
         """The schema-side half of the test above."""
         from pcapkit.corekit.infoclass import FinalisedState
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
         from pcapkit.utilities.compat import final
         from pcapkit.utilities.exceptions import SchemaError
 
@@ -928,7 +928,7 @@ class DecoratorCombinationTests(unittest.TestCase):
 
     def test_repeated_bare_schema_construction_does_not_grow_excluded_without_bound(self) -> None:
         """The schema-side half of the test above."""
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         Schema()  # prime it -- the first call legitimately populates __excluded__
         before = len(Schema.__excluded__)
@@ -974,7 +974,7 @@ class DecoratorCombinationTests(unittest.TestCase):
 
     def test_repeated_bare_schema_construction_does_not_re_enter_the_base_setup(self) -> None:
         """The schema-side half of the test above."""
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         Schema()  # prime it
         marker = Schema.__builtin__  # a live reference, not id() -- see the docstring above

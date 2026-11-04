@@ -2,7 +2,7 @@
 """The HTTP family base dispatches on both paths. C.f. #2544.
 
 A versioned family's base never yields an instance of itself: parsing octets
-through :class:`~pcapkit.protocols.application.http.HTTP`, constructing it from
+through :class:`~pcapkit.protocols.application.http.protocol.HTTP`, constructing it from
 fields, and its ``from_data`` all give ``HTTPv1`` or ``HTTPv2``. On the read path
 the member is the one an explicit ``version`` names or ``_dispatch_version``
 identifies; on the make path the one ``version`` names, which #2628's module
@@ -58,9 +58,9 @@ class HTTPBaseDispatchTests(unittest.TestCase):
 
     @staticmethod
     def classes() -> 'tuple[Any, Any, Any]':
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTPv1
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         return HTTP, HTTPv1, HTTPv2
 

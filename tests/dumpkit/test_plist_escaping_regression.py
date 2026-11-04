@@ -8,7 +8,7 @@ disk parses -- against a fixture that, without the fix, proves it does not.
 
 :file:`examples/captures/test.pcapng` carries a decryption secrets block whose
 TLS key log entries are keyed by a raw :class:`bytes` client random
-(:meth:`~pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process`), so the
+(:meth:`~pcapkit.protocols.misc.pcapng.schema.TLSKeyLog.post_process`), so the
 report's key is a ``bytes`` repr holding ``&``, ``<`` and ``>``. GitHub issue
 #772 and JarryShaw/DictDumper#125 are the two halves of that: ``dictdumper``
 interpolates a mapping key into its markup without escaping it, and without the

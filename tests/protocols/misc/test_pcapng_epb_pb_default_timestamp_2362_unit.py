@@ -2,9 +2,9 @@
 """GitHub issue #2362: a made PCAP-NG block defaults its timestamp to the clock.
 
 Without the fix, :meth:`PCAPNG._make_timestamp
-<pcapkit.protocols.misc.pcapng.PCAPNG._make_timestamp>` picks the clock a
+<pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_timestamp>` picks the clock a
 defaulted timestamp is read to by reading :attr:`PCAPNG.nanosecond
-<pcapkit.protocols.misc.pcapng.PCAPNG.nanosecond>`, which resolves its
+<pcapkit.protocols.misc.pcapng.protocol.PCAPNG.nanosecond>`, which resolves its
 interface through the parsed data model a block being made has not got, so
 ``make()`` without a ``timestamp`` raises
 ``AttributeError: 'PCAPNG' object has no attribute '_info'`` for every block
@@ -79,7 +79,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -97,7 +97,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         options = []  # type: list[Any]
         if resolution is not None:
@@ -132,7 +132,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
     def _make(self, name: 'str', context: 'Any', **block: 'Any') -> 'Any':
         """Make the block named ``name`` over ``context``, with no ``timestamp``."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # the Packet Block is obsolete
@@ -150,7 +150,7 @@ class TestPCAPNGDefaultTimestamp(PCAPNGTestCase):
 
     def test_default_survives_a_round_trip(self) -> None:
         """A defaulted timestamp parses back to the value the maker reported."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._timed_context()
         for name in TIMESTAMPED:

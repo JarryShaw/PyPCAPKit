@@ -157,9 +157,9 @@ def read_flag(name: 'str', default: 'bool' = False) -> 'bool':
 #: layer the frame record carries, usually its link layer; a protocol
 #: constructed from its own octets is not counted itself, so the count starts at
 #: the first layer it dissects. IPv6 extension headers are layers like any
-#: other, whether :class:`~pcapkit.protocols.internet.ipv6.IPv6` walks them or
+#: other, whether :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` walks them or
 #: each dissects the next. What follows the last layer is kept as
-#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+#: :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 #: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, unless it would have been
 #: left raw anyway or there is nothing left.
 #:
@@ -180,11 +180,11 @@ FRAME_LAYER_LIMIT = read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
 #: :envvar:`PCAPKIT_EXTENSION_HEADER_LIMIT`.
 #:
 #: The walk stops there, and what follows the last of them is kept as
-#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+#: :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 #: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`. That holds whether the
 #: chain follows IPv6, which walks it in a loop
 #: (:meth:`IPv6._decode_next_layer
-#: <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`), or another
+#: <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`), or another
 #: layer such as IPv4, where each header dissects the next one itself
 #: (:meth:`Internet._import_next_layer
 #: <pcapkit.protocols.internet.internet.Internet._import_next_layer>`). Behind
@@ -295,7 +295,7 @@ READ_CHUNK = read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
 #: itself treats a capture's declared snapshot length as corrupt or
 #: byte-order-swapped rather than real -- and it is the same figure this
 #: package's own PCAP writer defaults ``snaplen`` to
-#: (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). No single field
+#: (:meth:`pcapkit.protocols.misc.pcap.header.protocol.Header.make`). No single field
 #: within one captured packet is legitimately larger than the largest packet
 #: libpcap itself is willing to believe, so nothing this library parses
 #: should ever declare a length past it.
@@ -336,8 +336,8 @@ MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
 #: ceiling is honoured however often it is declared. Measured for :issue:`573`, 200
 #: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block
 #: declaring ``secrets_length`` of 262,142 against two supplied octets through
-#: :attr:`UnknownSecrets.data <pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data>`
-#: (``pcapkit/protocols/schema/misc/pcapng.py``) -- retained 50.0 MiB, an amplification of 10,922x
+#: :attr:`UnknownSecrets.data <pcapkit.protocols.misc.pcapng.schema.UnknownSecrets.data>`
+#: (``pcapkit/protocols/misc/pcapng/schema.py``) -- retained 50.0 MiB, an amplification of 10,922x
 #: per block. Every individual field was under the ceiling, so nothing refused any of them.
 #:
 #: The sum therefore wants a budget, and this is the figure that makes one

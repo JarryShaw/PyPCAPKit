@@ -110,7 +110,7 @@ class TestPCAPNGPaddingKept(PCAPNGTestCase):
     def test_fresh_builds_write_zeros(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # one octet of Ethernet is too short

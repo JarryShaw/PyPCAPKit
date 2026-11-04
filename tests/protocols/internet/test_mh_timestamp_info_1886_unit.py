@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """``NTPTimestamp`` and ``PMIPv6Timestamp`` are ``Info`` data models (GitHub issue #1886).
 
-Both are :class:`~pcapkit.protocols.data.data.Data` models in
-:mod:`pcapkit.protocols.data.internet.mh`, beside the options that hold them, so
+Both are :class:`~pcapkit.protocols.data.Data` models in
+:mod:`pcapkit.protocols.internet.mh.data`, beside the options that hold them, so
 :meth:`~pcapkit.corekit.infoclass.Info.from_dict` can resolve the annotations of
 those options and rebuild them. These checks pin that:
 
@@ -95,7 +95,7 @@ class MHTimestampInfoTests(unittest.TestCase):
     def parse(self) -> 'tuple[object, object, object]':
         """The parsed header, and its replay protection and timestamp options."""
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         info = MH(MH_OCTETS, extension=True).info
         return (info, info.options[Option.MESG_ID_OPTION_TYPE],
@@ -103,8 +103,8 @@ class MHTimestampInfoTests(unittest.TestCase):
 
     def test_both_are_info_data_models_read_by_attribute(self) -> None:
         from pcapkit.corekit.infoclass import Info
-        from pcapkit.protocols.data.data import Data
-        from pcapkit.protocols.data.internet import mh as data
+        from pcapkit.protocols.data import Data
+        from pcapkit.protocols.internet.mh import data
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         _, mesg_id, timestamp = self.parse()
@@ -135,7 +135,7 @@ class MHTimestampInfoTests(unittest.TestCase):
                 self.assertEqual(rebuilt, option)
 
     def test_a_header_carrying_each_option_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         info, _, _ = self.parse()
         for label, source in (('info', info), ('info.to_dict()', info.to_dict())):

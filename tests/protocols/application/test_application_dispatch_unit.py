@@ -2,7 +2,7 @@
 
 :class:`Application` encodes "no further *protocol* layer above this one". That
 forbids dispatching on a protocol number, but not handing the undissected rest
-of the packet to :class:`~pcapkit.protocols.misc.raw.Raw`, which is what the
+of the packet to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, which is what the
 ``-1`` sentinel asks for. The tests pin both halves: the sentinel is accepted
 and resolves to ``Raw``, and a real protocol number is still refused.
 
@@ -31,8 +31,8 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.strings import BytesField
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.data.data import Data
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.data import Data
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @info_final
         class DummyData(Data):
@@ -65,7 +65,7 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
         return DummyApplication
 
     def test_sentinel_dispatches_remainder_to_raw(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         proto = self._protocol_class(-1)(packet=b'abtrailer')
 
@@ -78,14 +78,14 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
         self.assertIn('Raw', str(proto.protochain))
 
     def test_sentinel_with_nothing_left_is_no_payload(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         proto = self._protocol_class(-1)(packet=b'ab')
 
         self.assertIsInstance(proto.payload, NoPayload)
 
     def test_undispatched_application_still_has_no_payload(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         proto = self._protocol_class(None)(packet=b'abtrailer')
 
@@ -101,7 +101,7 @@ class ApplicationDispatchUnitTests(unittest.TestCase):
                     self._protocol_class(number)(packet=b'abtrailer')
 
     def test_import_next_layer_accepts_only_the_sentinel(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         proto = object.__new__(self._protocol_class(-1))

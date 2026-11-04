@@ -10,7 +10,7 @@ packet, but that is **not** carried on the wire.
 
 Most protocols are self describing -- every length, offset and type that
 :mod:`pcapkit` needs to walk a packet is present in the packet itself. A
-few are not. :class:`~pcapkit.protocols.internet.esp.ESP` is the
+few are not. :class:`~pcapkit.protocols.internet.esp.protocol.ESP` is the
 motivating example: :rfc:`4303` deliberately leaves the payload length,
 the position of the ``Pad Length`` / ``Next Header`` trailer and the
 length of the ``Integrity Check Value`` to be derived from the Security
@@ -32,7 +32,7 @@ Example:
     Decoding an ESP tunnel end to end::
 
         >>> import pcapkit
-        >>> from pcapkit.protocols.internet.esp import (Cipher, ESPContext,
+        >>> from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext,
         ...                                            Integrity, SecurityAssociation)
         >>> sa = SecurityAssociation(
         ...     spi=0x4321,

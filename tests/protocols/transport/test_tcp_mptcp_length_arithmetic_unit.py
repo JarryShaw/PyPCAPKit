@@ -6,7 +6,7 @@ GitHub issue #576: the check of the sibling ``_make_mptcp_*`` helpers' length ar
 
 An MPTCP option carries its own octet count in its ``Length`` field, and each of these
 places has to agree on it: the ``_make_mptcp_*`` maker that *writes* that octet, the schema
-in :mod:`pcapkit.protocols.schema.transport.tcp` whose fields actually *pack* the octets, and
+in :mod:`pcapkit.protocols.transport.tcp.schema` whose fields actually *pack* the octets, and
 the ``_read_mptcp_*`` reader whose guard *accepts* it coming back. These tests guard against
 any of them disagreeing with :rfc:`8684` at each site below; at MP_FASTCLOSE all of them can
 disagree with each other.
@@ -21,7 +21,7 @@ where they are followed by 12 reserved bits.
 
 * **MP_FASTCLOSE** -- :rfc:`8684` section 3.5, figure 14. Head 4 (``Kind`` 1 + ``Length`` 1 +
   subtype-and-12-reserved-bits 2) + the receiver's key 8 = **12**, which the maker,
-  :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPFastclose` and
+  :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPFastclose` and
   ``_read_mptcp_fastclose`` all have to agree on: a schema with no reserved field packs
   **11**, and a reader requiring **16** wants a number neither of the other two nor the RFC
   produces. Note section 3.5, not 3.7: 3.7 is Fallback (MP_FAIL), and #576's own text cites
@@ -45,7 +45,7 @@ where they are followed by 12 reserved bits.
   removal of the AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical attack
   in which a subflow could be forced into backup mode. So **3**, with :rfc:`6824`'s 4-octet
   Address ID form still accepted as legacy. Because
-  :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPPriority.addr_id` is conditional on
+  :attr:`~pcapkit.protocols.transport.tcp.schema.MPTCPPriority.addr_id` is conditional on
   ``pkt['length'] == 4``, a maker writing a constant **4** satisfies its own predicate: a
   caller who gives no Address ID gets a phantom all-zero one anyway.
 * **DSS** -- :rfc:`8684` section 3.3, figure 9. Head 4, then the Data ACK (4 octets, or 8 when
@@ -86,9 +86,9 @@ builds its template once at ``__init__`` with the placeholder length ``-1``, and
 integer``. The schema selects between :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
 and :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at
 class level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
-:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` uses in that
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector` uses in that
 module -- for the narrower reason recorded in
-:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector`'s own note, which is
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_dss_ack_selector`'s own note, which is
 about :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s condition-blind ``length`` and
 not about wire absence. Swapping the two would be a behaviour change.
 :class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms.
@@ -113,7 +113,7 @@ Each class asserts the **byte-exact** packed option from its maker rather than o
 defect, so both are checked, and the octets themselves pin that the payload really is where
 the figure puts it. Where the *reader* guard is also at stake (MP_FASTCLOSE, MP_JOIN-SYN/ACK) a
 second test splices hand-built, spec-correct octets into a real TCP segment and parses them
-back through :class:`~pcapkit.protocols.transport.tcp.TCP` proper, so a pack-side and a
+back through :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` proper, so a pack-side and a
 parse-side bug cannot cancel out behind a closed round trip -- the pattern
 :mod:`tests.protocols.transport.test_tcp_mptcp_capable_length_unit` uses for #567, and
 the blind spot :mod:`tests.protocols.test_option_roundtrip_unit`'s own docstring names ("a
@@ -163,7 +163,7 @@ def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool' = True,
                       ack_flag: 'bool' = False) -> 'bytes':
     """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
 
-    Goes through :class:`~pcapkit.protocols.schema.transport.tcp.TCP` (the schema, not the
+    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
     protocol) directly, so nothing here calls a ``_make_mptcp_*`` maker: the option bytes
     reach the wire exactly as given.
 
@@ -189,7 +189,7 @@ def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool' = True,
         another module in this suite pops ``pcapkit``'s submodules out of ``sys.modules``.
 
     """
-    from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 
     if len(option_octets) % 4:
         raise ValueError('option_octets must already be a multiple of 4 octets long')
@@ -220,7 +220,7 @@ def make(meth: 'str', subtype_name: 'str', **kwargs: 'object') -> 'bytes':
 
     """
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     tcp = TCP.__new__(TCP)
     schema = getattr(tcp, meth)(getattr(Enum_MPTCPOption, subtype_name), **kwargs)
@@ -272,7 +272,7 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_FASTCLOSE_SPEC_OCTETS)
         data = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
@@ -290,7 +290,7 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(
             options=[(Enum_Option.Multipath_TCP, {
@@ -339,7 +339,7 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack_flag=True)
         data = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
@@ -363,7 +363,7 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_JOIN_SYNACK_SPEC_OCTETS, syn=True, ack_flag=True)
         parsed = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
@@ -401,7 +401,7 @@ class TCPMPTCPJoinACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP.__new__(TCP)
         schema = tcp._make_join_ack(Enum_MPTCPOption.MP_JOIN, hmac=b'\xBB' * 20)  # pylint: disable=protected-access
@@ -452,14 +452,14 @@ class TCPMPTCPRemoveAddressLengthUnitTests(LengthInvariantMixin, unittest.TestCa
         """A multi-ID REMOVE_ADDR round-trips through ``TCP()`` with all IDs intact.
 
         The declared length is what
-        :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id` sizes its
+        :attr:`~pcapkit.protocols.transport.tcp.schema.MPTCPRemoveAddress.addr_id` sizes its
         list from, as ``pkt['length'] - 3``, so a constant 4 would truncate the parse to a
         single ID as well as mis-declaring the pack.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(
             options=[(Enum_Option.Multipath_TCP, {
@@ -523,7 +523,7 @@ class TCPMPTCPPriorityLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(bytes([0x1E, 0x03, 0x51, 0x00]))
         parsed = TCP(raw, len(raw)).info.options[Enum_Option.Multipath_TCP]
@@ -601,7 +601,7 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(
             options=[(Enum_Option.Multipath_TCP, {
@@ -705,7 +705,7 @@ class TCPMPTCPJoinSYNIsCorrectUnitTests(LengthInvariantMixin, unittest.TestCase)
         """Hand-built figure 5 octets parse, confirming the reader guard is right too."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(bytes([0x1E, 0x0C, 0x11, 0x02])
                                 + (3).to_bytes(4, 'big') + (4).to_bytes(4, 'big'))

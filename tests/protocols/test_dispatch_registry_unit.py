@@ -87,7 +87,7 @@ def _proto_owners() -> 'dict[str, type]':
 
 
 class Degrade(NamedTuple):
-    """One code known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`."""
+    """One code known to degrade to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`."""
 
     #: Substring the ``'error'`` value :func:`~examples.generators.dispatch.probe`
     #: found must contain, or ``''`` to assert only that dispatch is degraded.
@@ -230,8 +230,8 @@ class DispatchRegistryTests(unittest.TestCase):
         This is the check that actually catches a mis-pointed entry --
         registry size unchanged, code still present, class wrong. Measured:
         pointing ``Internet.__proto__[TransType.AH]`` at
-        :class:`~pcapkit.protocols.misc.raw.Raw` instead of
-        :class:`~pcapkit.protocols.internet.ah.AH` changes nothing
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` instead of
+        :class:`~pcapkit.protocols.internet.ah.protocol.AH` changes nothing
         :meth:`test_cases_match_the_pinned_targets` looks at, nor
         anything a registry-derived dispatch check would, and both pass. This
         test does not: it compares
@@ -318,9 +318,9 @@ class DispatchRegistryTests(unittest.TestCase):
     def test_a_versioned_base_table_has_a_family_per_member(self) -> None:
         """A table a versioned family base owns is probed through each of its members (#2592).
 
-        :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` owns the table that
-        :class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` and
-        :class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2` both dispatch through,
+        :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` owns the table that
+        :class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1` and
+        :class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2` both dispatch through,
         each reading the key from a header of its own, so one family probing it
         leaves the other member's dispatch unexercised. A base is versioned when it
         defines ``_member_of_version``, and its members are its direct subclasses

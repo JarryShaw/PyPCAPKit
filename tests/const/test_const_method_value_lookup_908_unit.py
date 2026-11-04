@@ -15,7 +15,7 @@ resolves correctly through the constructor
 (:meth:`~pcapkit.const.http.method.Method._missing_`, which the override does
 not touch).
 
-**Why a capture reaches it.** ``pcapkit/protocols/application/http.py``'s
+**Why a capture reaches it.** ``pcapkit/protocols/application/http/protocol.py``'s
 ``_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\\Z")``, which
 ``httpv1.py`` imports, admits a hyphen, so a request line carrying
 ``BASELINE-CONTROL`` matches, reaches ``Enum_Method.get(...)`` in
@@ -197,7 +197,7 @@ class HTTPv1EndToEndTests(unittest.TestCase):
         otherwise succeeds silently. Pins the whole path, not only the
         direct ``Method.get`` call above."""
         from pcapkit.const.http.method import Method
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         proto = object.__new__(HTTPv1)
         header, _ = proto._read_http_header(
@@ -212,7 +212,7 @@ class HTTPv1EndToEndTests(unittest.TestCase):
             self) -> None:
         """The issue's second repro, through the same end-to-end path."""
         from pcapkit.const.http.method import Method
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         proto = object.__new__(HTTPv1)
         header, _ = proto._read_http_header(
@@ -270,7 +270,7 @@ class NonStrKeyTests(unittest.TestCase):
 
         Without #908's fix this hands back a member whose ``name`` and
         ``value`` are both ``b'GET'``. ``bytes`` is the plausible mistake here, since
-        ``_RE_METHOD`` (in ``pcapkit/protocols/application/http.py``) is a
+        ``_RE_METHOD`` (in ``pcapkit/protocols/application/http/protocol.py``) is a
         bytes pattern and ``httpv1`` is bytes throughout -- the live call in
         ``httpv1.HTTPv1._read_start_line`` is safe only because it wraps the match in
         ``self.decode(...)``.

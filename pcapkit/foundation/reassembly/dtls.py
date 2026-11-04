@@ -20,7 +20,7 @@ from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.dtls import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                      Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
-from pcapkit.protocols.application.dtls import DTLS as DTLS_Protocol
+from pcapkit.protocols.application.dtls.protocol import DTLS as DTLS_Protocol
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -53,7 +53,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
         decodes what it reassembles. A complete message's
         :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.packet` holds
         the same decode, run on first read. Both call the protocol's
-        :meth:`~pcapkit.protocols.application.dtls.DTLS.analyze_handshake`; the
+        :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`; the
         ``packet`` calls that of :attr:`__protocol_type__` (:issue:`2622`).
 
     Example:
@@ -78,7 +78,7 @@ class DTLS(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer], Generic
     #: Protocol of current reassembly object. An extension point -- a protocol
     #: named here need only define ``analyze_handshake``, with the signature of
     #: :meth:`DTLS.analyze_handshake
-    #: <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`, and is read
+    #: <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`, and is read
     #: for it when a message completes, so one without it raises
     #: :exc:`AttributeError` there.
     __protocol_type__ = DTLS_Protocol

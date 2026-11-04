@@ -8,7 +8,7 @@ catches the next missing registration, not just one.
 :file:`test_dispatch_registry_unit.py` walks the problem from the other end: it
 takes each ``__proto__`` entry that *exists* and checks the class it
 names can parse a packet. That cannot see a class nobody registered at all
--- #436's :class:`~pcapkit.protocols.application.ospf.OSPF` case, a class
+-- #436's :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` case, a class
 reachable from no table. This module walks it from the class side instead -- every
 :class:`~pcapkit.protocols.protocol.ProtocolBase` descendant whose
 :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns an enum member
@@ -139,7 +139,7 @@ def audit() -> 'tuple[list[Gap], int]':
             # * the same *name*, because a built-in entry may name the package
             #   re-export rather than the defining module -- ``Frame.__proto__``
             #   holds ``pcapkit.protocols.link:Ethernet``, not
-            #   ``pcapkit.protocols.link.ethernet:Ethernet``;
+            #   ``pcapkit.protocols.link.ethernet.protocol:Ethernet``;
             # * a class this one inherits its ``__index__`` from, because a
             #   member sharing its family base's index is parsed by the base and
             #   reported through its alias -- ``InARP`` by ``ARP``, ``DRARP`` by
@@ -235,7 +235,7 @@ class DispatchReachabilityTests(unittest.TestCase):
         IANA-assigned IP protocol ID 115."* So 115 names the v3-over-IP header,
         which no class in this tree implements -- and this audit deliberately
         does **not** flag it, because nothing claims 115 in the first place.
-        :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`'s ``__index__`` returns
+        :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`'s ``__index__`` returns
         its UDP port rather than 115 (#2627), and the family base raises.
 
         """
@@ -243,8 +243,8 @@ class DispatchReachabilityTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import UDP
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertNotIn(TransType.L2TP, Internet.__proto__)

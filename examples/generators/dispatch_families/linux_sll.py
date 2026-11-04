@@ -20,14 +20,14 @@ generator = globals()['generator']  # type: Any
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.link.linux_sll import LinuxSLL
+    from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
     return LinuxSLL.__proto__
 
 
 def _build(arphrd_type: 'Any') -> 'Any':
     """A ``LINUX_SLL`` record on ``arphrd_type``, built through the family base."""
     from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.protocols.link.linux_sll import LinuxSLL
+    from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
     protocol_type, payload = generator._linux_sll_payload(arphrd_type)
     record = bytes(LinuxSLL(version=1, arphrd_type=arphrd_type, protocol_type=protocol_type,
@@ -44,9 +44,9 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
-    'linux_sll/FRAD': ('pcapkit.protocols.link.frad', 'FRAD'),
-    'linux_sll/IPGRE': ('pcapkit.protocols.link.gre', 'GRE'),
-    'linux_sll/IEEE80211_RADIOTAP': ('pcapkit.protocols.link.radiotap', 'Radiotap'),
-    'linux_sll/IP6GRE': ('pcapkit.protocols.link.gre', 'GRE'),
-    'linux_sll/NETLINK': ('pcapkit.protocols.link.netlink', 'Netlink'),
+    'linux_sll/FRAD': ('pcapkit.protocols.link.frad.protocol', 'FRAD'),
+    'linux_sll/IPGRE': ('pcapkit.protocols.link.gre.protocol', 'GRE'),
+    'linux_sll/IEEE80211_RADIOTAP': ('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+    'linux_sll/IP6GRE': ('pcapkit.protocols.link.gre.protocol', 'GRE'),
+    'linux_sll/NETLINK': ('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
 }

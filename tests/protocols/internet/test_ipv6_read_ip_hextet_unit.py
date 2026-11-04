@@ -18,7 +18,7 @@ class IPv6ReadIPHextetUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_read_ip_hextet_splits_version_class_and_label(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         proto = object.__new__(IPv6)
         proto._read_fileng = mock.Mock(return_value=bytes.fromhex('6abcdef0'))
@@ -28,7 +28,7 @@ class IPv6ReadIPHextetUnitTests(unittest.TestCase):
 
     def test_read_ip_hextet_agrees_with_schema_packing(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         proto = object.__new__(IPv6)
         header = proto.make(

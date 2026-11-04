@@ -21,7 +21,7 @@ Type Variables
 ~~~~~~~~~~~~~~
 
 .. data:: _TL
-   :type: pcapkit.protocols.schema.schema.Schema | pcapkit.corekit.fields.field.FieldBase | bytes
+   :type: pcapkit.protocols.schema.Schema | pcapkit.corekit.fields.field.FieldBase | bytes
 
 .. data:: _TS
-   :type: pcapkit.protocols.schema.schema.Schema
+   :type: pcapkit.protocols.schema.Schema

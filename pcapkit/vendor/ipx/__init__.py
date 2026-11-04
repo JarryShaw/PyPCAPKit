@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, wrong-import-position
-""":class:`~pcapkit.protocols.internet.ipx.IPX` Vendor Crawlers
-==================================================================
+""":class:`~pcapkit.protocols.internet.ipx.protocol.IPX` Vendor Crawlers
+===========================================================================
 
 .. module:: pcapkit.vendor.ipx
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipx.IPX` implementations. Available
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` implementations. Available
 crawlers include:
 
 .. list-table::

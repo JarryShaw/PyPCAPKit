@@ -52,28 +52,28 @@ PACKAGE = ROOT / 'pcapkit'
 
 #: Each consolidated constant: its home module, its name and its value.
 HOMES = (
-    ('pcapkit.protocols.schema.internet.ipv4', 'IPV4_HEADER_LEN', 20),
-    ('pcapkit.protocols.internet.ipv6', 'IPV6_HEADER_LEN', 40),
-    ('pcapkit.protocols.internet.ipv6', 'IPV6_NEXT_HEADER_OFFSET', 6),
-    ('pcapkit.protocols.schema.internet.ipv6', 'IP_MAX_LENGTH', 65535),
-    ('pcapkit.protocols.schema.internet.ah', 'AH_HEADER_LEN', 12),
-    ('pcapkit.protocols.schema.transport.tcp', 'TCP_MIN_HEADER_LEN', 20),
-    ('pcapkit.protocols.schema.transport.tcp', 'TCP_DATA_OFFSET_OCTET', 12),
-    ('pcapkit.protocols.schema.transport.dccp', 'DCCP_MIN_HEADER_LEN', 12),
-    ('pcapkit.protocols.schema.misc.pcap.header', 'GLOBAL_HEADER_LEN', 24),
-    ('pcapkit.protocols.schema.misc.pcap.frame', 'RECORD_HEADER_LEN', 16),
-    ('pcapkit.protocols.schema.misc.pcap.header', 'MAGIC_NUMBER', {
+    ('pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN', 20),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN', 40),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'IPV6_NEXT_HEADER_OFFSET', 6),
+    ('pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH', 65535),
+    ('pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN', 12),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN', 20),
+    ('pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET', 12),
+    ('pcapkit.protocols.transport.dccp.schema', 'DCCP_MIN_HEADER_LEN', 12),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'GLOBAL_HEADER_LEN', 24),
+    ('pcapkit.protocols.misc.pcap.frame.schema', 'RECORD_HEADER_LEN', 16),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'MAGIC_NUMBER', {
         b'\xa1\xb2\x3c\x4d': ('big', True),
         b'\xa1\xb2\xc3\xd4': ('big', False),
         b'\x4d\x3c\xb2\xa1': ('little', True),
         b'\xd4\xc3\xb2\xa1': ('little', False),
     }),
-    ('pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION', {False: 10 ** 6, True: 10 ** 9}),
-    ('pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION_PLACES', {False: 6, True: 9}),
-    ('pcapkit.protocols.schema.misc.pcapng', 'BYTE_ORDER_MAGIC', 0x1A2B3C4D),
-    ('pcapkit.protocols.schema.misc.pcapng', 'DEFAULT_RESOLUTION', 10 ** 6),
-    ('pcapkit.protocols.schema.misc.pcapng', 'GENERIC_BLOCK_MINIMUM', 12),
-    ('pcapkit.protocols.schema.misc.pcapng', 'BLOCK_MINIMUM', {
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION', {False: 10 ** 6, True: 10 ** 9}),
+    ('pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION_PLACES', {False: 6, True: 9}),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BYTE_ORDER_MAGIC', 0x1A2B3C4D),
+    ('pcapkit.protocols.misc.pcapng.schema', 'DEFAULT_RESOLUTION', 10 ** 6),
+    ('pcapkit.protocols.misc.pcapng.schema', 'GENERIC_BLOCK_MINIMUM', 12),
+    ('pcapkit.protocols.misc.pcapng.schema', 'BLOCK_MINIMUM', {
         0x0A0D0D0A: 28, 0x00000001: 20, 0x00000002: 32, 0x00000003: 16, 0x00000005: 24,
         0x00000006: 32, 0x0000000A: 20, 0x00000BAD: 16, 0x40000BAD: 16,
     }),
@@ -93,7 +93,7 @@ OLD_NAMES = (
     ('pcapkit/foundation/reassembly/ipv6.py', '_IPV6_HDR_LEN'),
     ('pcapkit/foundation/reassembly/ipv6.py', '_IPV6_NEXT_HEADER'),
     ('pcapkit/dumpkit/pcap.py', '_RESOLUTION'),
-    ('pcapkit/protocols/misc/pcap/header.py', '_MAGIC_NUM'),
+    ('pcapkit/protocols/misc/pcap/header/protocol.py', '_MAGIC_NUM'),
     ('pcapkit/foundation/engines/pcapng.py', 'BLOCK_MINIMUM'),
     ('pcapkit/foundation/engines/pcapng.py', 'BYTE_ORDER_MAGIC'),
 )
@@ -102,85 +102,85 @@ OLD_NAMES = (
 #: to spell them. ``1_000_000_000`` is also Python's nanoseconds per second, so a
 #: division of :func:`time.time_ns` by it is exempt (see :func:`_time_ns_divisor`).
 LITERALS = {
-    b'\xa1\xb2\x3c\x4d': 'pcapkit/protocols/schema/misc/pcap/header.py',
-    b'\xa1\xb2\xc3\xd4': 'pcapkit/protocols/schema/misc/pcap/header.py',
-    b'\x4d\x3c\xb2\xa1': 'pcapkit/protocols/schema/misc/pcap/header.py',
-    b'\xd4\xc3\xb2\xa1': 'pcapkit/protocols/schema/misc/pcap/header.py',
+    b'\xa1\xb2\x3c\x4d': 'pcapkit/protocols/misc/pcap/header/schema.py',
+    b'\xa1\xb2\xc3\xd4': 'pcapkit/protocols/misc/pcap/header/schema.py',
+    b'\x4d\x3c\xb2\xa1': 'pcapkit/protocols/misc/pcap/header/schema.py',
+    b'\xd4\xc3\xb2\xa1': 'pcapkit/protocols/misc/pcap/header/schema.py',
     b'\x0a\x0d\x0d\x0a': None,
     b'\x1a\x2b\x3c\x4d': None,
     b'\x4d\x3c\x2b\x1a': None,
-    0x1A2B3C4D: 'pcapkit/protocols/schema/misc/pcapng.py',
+    0x1A2B3C4D: 'pcapkit/protocols/misc/pcapng/schema.py',
     0x4D3C2B1A: None,
-    10 ** 9: 'pcapkit/protocols/schema/misc/pcap/header.py',
-    10 ** 6: ('pcapkit/protocols/schema/misc/pcap/header.py', 'pcapkit/protocols/schema/misc/pcapng.py'),
+    10 ** 9: 'pcapkit/protocols/misc/pcap/header/schema.py',
+    10 ** 6: ('pcapkit/protocols/misc/pcap/header/schema.py', 'pcapkit/protocols/misc/pcapng/schema.py'),
 }
 
 #: Each reader module, the home it imports from, and the names it imports.
 READERS = (
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.schema.internet.ipv4', 'IPV4_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.internet.ipv6', 'IPV6_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.schema.transport.tcp', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.schema.transport.tcp', 'TCP_DATA_OFFSET_OCTET'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION_PLACES'),
-    ('pcapkit/toolkit/pcap.py', 'pcapkit.protocols.schema.transport.tcp', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/pcap.py', 'pcapkit.protocols.schema.transport.tcp', 'TCP_DATA_OFFSET_OCTET'),
-    ('pcapkit/toolkit/pcapng.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/toolkit/dpkt.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/toolkit/dpkt.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION_PLACES'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/foundation/reassembly/ip.py', 'pcapkit.protocols.schema.internet.ipv6', 'IP_MAX_LENGTH'),
-    ('pcapkit/foundation/reassembly/ipv6.py', 'pcapkit.protocols.internet.ipv6', 'IPV6_HEADER_LEN'),
-    ('pcapkit/foundation/reassembly/ipv6.py', 'pcapkit.protocols.internet.ipv6',
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/toolkit/scapy.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION_PLACES'),
+    ('pcapkit/toolkit/pcap.py', 'pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/pcap.py', 'pcapkit.protocols.transport.tcp.schema', 'TCP_DATA_OFFSET_OCTET'),
+    ('pcapkit/toolkit/pcapng.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/toolkit/dpkt.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/toolkit/dpkt.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION_PLACES'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/foundation/reassembly/ip.py', 'pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH'),
+    ('pcapkit/foundation/reassembly/ipv6.py', 'pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN'),
+    ('pcapkit/foundation/reassembly/ipv6.py', 'pcapkit.protocols.internet.ipv6.protocol',
      'IPV6_NEXT_HEADER_OFFSET'),
-    ('pcapkit/protocols/internet/ipv6.py', 'pcapkit.protocols.schema.internet.ipv6', 'IP_MAX_LENGTH'),
-    ('pcapkit/dumpkit/pcap.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/protocols/misc/pcap/header.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/protocols/internet/ipv6/protocol.py', 'pcapkit.protocols.internet.ipv6.schema', 'IP_MAX_LENGTH'),
+    ('pcapkit/dumpkit/pcap.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'MAGIC_NUMBER'),
-    ('pcapkit/protocols/misc/pcap/frame.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/protocols/misc/pcap/frame/protocol.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'RESOLUTION'),
-    ('pcapkit/protocols/misc/pcapng.py', 'pcapkit.protocols.schema.misc.pcap.header', 'RESOLUTION'),
-    ('pcapkit/protocols/misc/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng', 'BLOCK_MINIMUM'),
-    ('pcapkit/protocols/misc/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng', 'BYTE_ORDER_MAGIC'),
-    ('pcapkit/protocols/misc/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit.protocols.misc.pcap.header.schema', 'RESOLUTION'),
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit.protocols.misc.pcapng.schema', 'BLOCK_MINIMUM'),
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit.protocols.misc.pcapng.schema', 'BYTE_ORDER_MAGIC'),
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit.protocols.misc.pcapng.schema',
      'DEFAULT_RESOLUTION'),
-    ('pcapkit/protocols/misc/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit.protocols.misc.pcapng.schema',
      'GENERIC_BLOCK_MINIMUM'),
-    ('pcapkit/foundation/engines/pcap.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/foundation/engines/pcap.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'MAGIC_NUMBER'),
-    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.misc.pcapng.schema',
      'BLOCK_MINIMUM'),
-    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.misc.pcapng.schema',
      'BYTE_ORDER_MAGIC'),
-    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/pcapng.py', 'pcapkit.protocols.misc.pcapng.schema',
      'GENERIC_BLOCK_MINIMUM'),
-    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'RESOLUTION'),
-    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.misc.pcapng.schema',
      'DEFAULT_RESOLUTION'),
-    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'RESOLUTION'),
-    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.misc.pcapng.schema',
      'BYTE_ORDER_MAGIC'),
-    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.misc.pcapng.schema',
      'DEFAULT_RESOLUTION'),
-    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.schema.misc.pcapng',
+    ('pcapkit/foundation/engines/dpkt.py', 'pcapkit.protocols.misc.pcapng.schema',
      'GENERIC_BLOCK_MINIMUM'),
-    ('pcapkit/foundation/engines/pcap.py', 'pcapkit.protocols.schema.misc.pcap.frame',
+    ('pcapkit/foundation/engines/pcap.py', 'pcapkit.protocols.misc.pcap.frame.schema',
      'RECORD_HEADER_LEN'),
-    ('pcapkit/foundation/engines/pypcapfile.py', 'pcapkit.protocols.schema.misc.pcap.frame',
+    ('pcapkit/foundation/engines/pypcapfile.py', 'pcapkit.protocols.misc.pcap.frame.schema',
      'RECORD_HEADER_LEN'),
-    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.schema.misc.pcap.frame',
+    ('pcapkit/foundation/engines/scapy.py', 'pcapkit.protocols.misc.pcap.frame.schema',
      'RECORD_HEADER_LEN'),
-    ('pcapkit/protocols/misc/pcap/frame.py', 'pcapkit.protocols.schema.misc.pcap.frame',
+    ('pcapkit/protocols/misc/pcap/frame/protocol.py', 'pcapkit.protocols.misc.pcap.frame.schema',
      'RECORD_HEADER_LEN'),
-    ('pcapkit/protocols/misc/pcap/header.py', 'pcapkit.protocols.schema.misc.pcap.header',
+    ('pcapkit/protocols/misc/pcap/header/protocol.py', 'pcapkit.protocols.misc.pcap.header.schema',
      'GLOBAL_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ipv4.py', 'pcapkit.protocols.schema.internet.ipv4', 'IPV4_HEADER_LEN'),
-    ('pcapkit/protocols/internet/ah.py', 'pcapkit.protocols.schema.internet.ah', 'AH_HEADER_LEN'),
-    ('pcapkit/protocols/transport/tcp.py', 'pcapkit.protocols.schema.transport.tcp',
+    ('pcapkit/protocols/internet/ipv4/protocol.py', 'pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN'),
+    ('pcapkit/protocols/internet/ah/protocol.py', 'pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN'),
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'pcapkit.protocols.transport.tcp.schema',
      'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/protocols/transport/dccp.py', 'pcapkit.protocols.schema.transport.dccp',
+    ('pcapkit/protocols/transport/dccp/protocol.py', 'pcapkit.protocols.transport.dccp.schema',
      'DCCP_MIN_HEADER_LEN'),
 )
 
@@ -189,12 +189,12 @@ READERS = (
 #: :mod:`pcapkit.toolkit.pypcapfile` does so because binding the homed names it
 #: reads would re-export them (see :meth:`TestReaders.test_pypcapfile_binds_none`).
 ATTRIBUTE_READERS = (
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.internet.ipv4', 'IPV4_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv6', 'IPV6_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv6', 'IPV6_NEXT_HEADER_OFFSET'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.internet.ah', 'AH_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.transport.tcp', 'TCP_MIN_HEADER_LEN'),
-    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.transport.tcp',
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv4.schema', 'IPV4_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv6.protocol', 'IPV6_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv6.protocol', 'IPV6_NEXT_HEADER_OFFSET'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ah.schema', 'AH_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.transport.tcp.schema', 'TCP_MIN_HEADER_LEN'),
+    ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.transport.tcp.schema',
      'TCP_DATA_OFFSET_OCTET'),
 )
 
@@ -237,71 +237,118 @@ NOT_A_COPY = {
         'an if_tsoffset option: 4 octets of header and 8 of value',
     ('pcapkit/foundation/engines/scapy.py', 'options[4:12]'):
         'the 8-octet value of an if_tsoffset option',
-    ('pcapkit/protocols/application/dtls.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
+    ('pcapkit/protocols/application/dtls/protocol.py', '_CIPHERTEXT_MIN_LENGTH = 16'):
         "the shortest DTLS 1.3 ciphertext, the record-number sample length "
         '(:rfc:`9147#section-4.2.3`), not a pcap record header',
-    ('pcapkit/protocols/application/ssl.py', 'self._read_octets(size=32)'):
+    ('pcapkit/protocols/application/dtls/schema.py', 'NumberField(length=6)'):
+        "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
+        'Header offset',
+    ('pcapkit/protocols/application/dtls/schema.py', "{'epoch': (6, 2)}"):
+        "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
+        '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/application/ssl/protocol.py', 'self._read_octets(size=32)'):
         "a TLS/DTLS ClientHello/ServerHello Random is 32 octets (:rfc:`9846#section-4.2.2`), "
         'not an Interface Description Block minimum',
-    ('pcapkit/protocols/application/sslv2.py', "b'\\x00' * 16"):
+    ('pcapkit/protocols/application/sslv2/protocol.py', "b'\\x00' * 16"):
         "the default length of an SSLv2 CLIENT-HELLO challenge or SERVER-HELLO "
         "connection ID (the draft's own 16-32 octet minimum), not the PCAP classic "
         'record header length',
-    ('pcapkit/protocols/internet/icmp.py', 'version == 6'):
+    ('pcapkit/protocols/internet/icmp/protocol.py', 'version == 6'):
         'ICMPv6, the ICMP of IP version 6 (:rfc:`4443`), not the Next Header offset',
-    ('pcapkit/protocols/internet/igmpv3.py', 'len(record_list) <= num_group_records <= 65535'):
+    ('pcapkit/protocols/internet/igmpv3/protocol.py', 'len(record_list) <= num_group_records <= 65535'):
         "the 16-bit Number of Group Records field's maximum (:rfc:`3376#section-4.2.1`), not an "
         'IP total length',
-    ('pcapkit/protocols/internet/ip.py', 'version == 6'):
+    ('pcapkit/protocols/internet/ip/protocol.py', 'version == 6'):
         'the IP version number, not the Next Header offset',
-    ('pcapkit/protocols/internet/ipv6.py', "schema.hextet['version'] != 6"):
+    ('pcapkit/protocols/internet/ipv6/protocol.py', "schema.hextet['version'] != 6"):
         'the IP version number, not the Next Header offset',
-    ('pcapkit/protocols/internet/ipv6.py', 'self._import_next_layer(version=6)'):
+    ('pcapkit/protocols/internet/ipv6/protocol.py', 'self._import_next_layer(version=6)'):
         'the IP version number, not the Next Header offset',
-    ('pcapkit/protocols/internet/ipv6.py', 'version != 6'):
+    ('pcapkit/protocols/internet/ipv6/protocol.py', 'version != 6'):
         'the IP version number, not the Next Header offset',
-    ('pcapkit/protocols/internet/ipv6.py', "{'version': 6}"):
+    ('pcapkit/protocols/internet/ipv6/protocol.py', "{'version': 6}"):
         'the IP version number, not the Next Header offset',
-    ('pcapkit/protocols/link/gre.py', 'return 16'):
+    ('pcapkit/protocols/link/frad/schema.py', "{'cr': (6, 1)}"):
+        'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the IPv6 Next Header offset',
+    ('pcapkit/protocols/link/frad/schema.py', "{'dlci_hi': (0, 6)}"):
+        "the 6-bit width of a Q.922 address field's high-order DLCI bits "
+        '(:rfc:`2427#section-3`), not the IPv6 Next Header offset',
+    ('pcapkit/protocols/link/frad/schema.py', "{'fecn': (12, 1)}"):
+        'the FECN bit at bit offset 12 of a Q.922 address field (:rfc:`2427#section-3`), '
+        'not the TCP Data Offset octet',
+    ('pcapkit/protocols/link/gre/protocol.py', 'return 16'):
         "GRE's own longest possible header -- the 4-octet base plus all three optional "
         'extensions at 4 octets each (:rfc:`2784`/:rfc:`2890`) -- not a PCAP record header',
-    ('pcapkit/protocols/link/linux_sll1.py', 'return 16'):
+    ('pcapkit/protocols/link/gre/schema.py', "{'reserved_2': (4, 9)}"):
+        "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
+        'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
+        'table',
+    ('pcapkit/protocols/link/linux_sll1/protocol.py', 'return 16'):
         'the fixed length of the LINUX_SLL (v1) header, not the PCAP record header',
-    ('pcapkit/protocols/link/linux_sll2.py', 'return 20'):
+    ('pcapkit/protocols/link/linux_sll2/protocol.py', 'return 20'):
         'the fixed length of the LINUX_SLL2 header, not the IPv4 or TCP minimum header',
-    ('pcapkit/protocols/misc/pcap/frame.py', 'version == 6'):
+    ('pcapkit/protocols/link/radiotap/schema.py', "{'bss_color': (19, 6)}"):
+        "the 6-bit BSS color at bit 19 of the U-SIG field's common word, not the IPv6 Next Header offset",
+    ('pcapkit/protocols/link/radiotap/schema.py', "{'phy_version': (12, 3)}"):
+        "the PHY version at bit 12 of the U-SIG field's common word, not the TCP Data Offset octet",
+    ('pcapkit/protocols/link/radiotap/schema.py', "{'ru_offset': (8, 6)}"):
+        "the 6-bit RU allocation offset of the HE field's data2, not the IPv6 Next Header offset",
+    ('pcapkit/protocols/misc/pcap/frame/protocol.py', 'version == 6'):
         'the IP version number, not the decimal places of a resolution',
-    ('pcapkit/protocols/misc/pcapng.py', '(body + bytes(16))[4:16]'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', '(body + bytes(16))[4:16]'):
         'an epb_hash option body padded to its 16-octet MD5 digest',
-    ('pcapkit/protocols/misc/pcapng.py', '(body + bytes(20))[:20]'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', '(body + bytes(20))[:20]'):
         'an epb_hash option body padded to its 20-octet SHA-1 digest',
-    ('pcapkit/protocols/misc/pcapng.py', '16 + _utf8_length(records)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', '16 + _utf8_length(records)'):
         'an IPv6 name record is 16 octets of address, not a block',
-    ('pcapkit/protocols/misc/pcapng.py', 'Schema_IF_MACAddrOption(length=6)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'Schema_IF_MACAddrOption(length=6)'):
         'a MAC address option is 6 octets',
-    ('pcapkit/protocols/misc/pcapng.py', 'Schema_NS_DNSIP6AddrOption(length=16)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'Schema_NS_DNSIP6AddrOption(length=16)'):
         'an IPv6 address option is 16 octets, not a Simple Packet Block',
-    ('pcapkit/protocols/misc/pcapng.py', 'bytes(16)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'bytes(16)'):
         'an epb_hash option body padded to its 16-octet MD5 digest',
-    ('pcapkit/protocols/misc/pcapng.py', 'bytes(20)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'bytes(20)'):
         'an epb_hash option body padded to its 20-octet SHA-1 digest',
-    ('pcapkit/protocols/misc/pcapng.py', 'def _make_mac_addr(size=6)'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'def _make_mac_addr(size=6)'):
         "the base MAC maker's 6-octet default, which the override repeats, not the IPv6 Next "
         'Header offset',
-    ('pcapkit/protocols/misc/pcapng.py', 'schema.addr_high << 16'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'schema.addr_high << 16'):
         'a bit width: the high half of a 32-bit address',
-    ('pcapkit/protocols/misc/pcapng.py', 'schema.length != 16'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'schema.length != 16'):
         'an IPv6 address option is 16 octets, not a Simple Packet Block',
-    ('pcapkit/protocols/misc/pcapng.py', 'schema.length != 6'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'schema.length != 6'):
         'a MAC address option is 6 octets',
-    ('pcapkit/protocols/misc/pcapng.py', 'short_address >> 16'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'short_address >> 16'):
         'a bit width: the high half of a 32-bit address',
-    ('pcapkit/protocols/misc/pcapng.py', 'timestamp_high << 32'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'timestamp_high << 32'):
         'a bit width: the high half of a 64-bit timestamp',
-    ('pcapkit/protocols/misc/pcapng.py', 'ts_info >> 32'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'ts_info >> 32'):
         'a bit width: the high half of a 64-bit timestamp',
-    ('pcapkit/protocols/misc/pcapng.py', 'version == 6'):
+    ('pcapkit/protocols/misc/pcapng/protocol.py', 'version == 6'):
         'the IP version number, not the decimal places of a resolution',
+    ('pcapkit/protocols/misc/pcapng/schema.py', 'BytesField(length=16)'):
+        'an IPv6 address is 16 octets',
+    ('pcapkit/protocols/misc/pcapng/schema.py', 'BytesField(length=6)'):
+        'a MAC address is 6 octets',
+    ('pcapkit/protocols/misc/pcapng/schema.py', 'magic == 12'):
+        'the Block Total Length of a 12-octet Section Header Block read where the '
+        'Byte-Order Magic belongs, spelled as the octets read to pair with the '
+        'byte-swapped 0x0C000000 beside it',
+    ('pcapkit/protocols/misc/pcapng/schema.py', 'magic in (BYTE_ORDER_MAGIC, 12)'):
+        'the same octets read where the Byte-Order Magic belongs, paired with the '
+        'byte-swapped 0x0C000000 beside it, as in the check above',
+    ('pcapkit/protocols/misc/pcapng/schema.py', "pkt['length'] - 16"):
+        'an IPv6 name record is 16 octets of address, not a block',
+    ('pcapkit/protocols/misc/pcapng/schema.py', "{'byteorder': (32, 32)}"):
+        "a bit-field: a Section Header Block's Byte-Order Magic, the 32 bits after "
+        'its Block Total Length, not a Packet Block',
+    ('pcapkit/protocols/misc/pcapng/schema.py', "{'crc_error': (24, 1)}"):
+        'an epb_flags bit offset, not an Interface Statistics Block',
+    ('pcapkit/protocols/misc/pcapng/schema.py', "{'reserved': (12, 12)}"):
+        'an epb_flags bit-field: 12 reserved bits from bit 12',
+    ('pcapkit/protocols/misc/pcapng/schema.py', "{'unaligned_error': (28, 1)}"):
+        'an epb_flags bit offset, not a Section Header Block',
     ('pcapkit/protocols/protocol.py', '2 ** 16'):
         "the exponent past the Quick-Start rate code's four bits, N = 16 "
         '(:rfc:`4782#section-3.1`), not a PCAP record header length',
@@ -316,87 +363,40 @@ NOT_A_COPY = {
     ('pcapkit/protocols/protocol.py', 'rate // 40'):
         "the Quick-Start rate unit, K = 40 kbps (:rfc:`4782#section-3.1`), not the IPv6 "
         'header length',
-    ('pcapkit/protocols/schema/application/dtls.py', 'NumberField(length=6)'):
-        "DTLS's 48-bit sequence_number (:rfc:`9147#section-4`), not the IPv6 Next "
-        'Header offset',
-    ('pcapkit/protocols/schema/application/dtls.py', "{'epoch': (6, 2)}"):
-        "the EE bits of a DTLS 1.3 unified header, at bit 6 of its first octet "
-        '(:rfc:`9147#section-4.1`), not the IPv6 Next Header offset',
-    ('pcapkit/protocols/schema/link/frad.py', "{'cr': (6, 1)}"):
-        'the C/R bit at bit offset 6 of a Q.922 address field (:rfc:`2427#section-3`), '
-        'not the IPv6 Next Header offset',
-    ('pcapkit/protocols/schema/link/frad.py', "{'dlci_hi': (0, 6)}"):
-        "the 6-bit width of a Q.922 address field's high-order DLCI bits "
-        '(:rfc:`2427#section-3`), not the IPv6 Next Header offset',
-    ('pcapkit/protocols/schema/link/frad.py', "{'fecn': (12, 1)}"):
-        'the FECN bit at bit offset 12 of a Q.922 address field (:rfc:`2427#section-3`), '
-        'not the TCP Data Offset octet',
-    ('pcapkit/protocols/schema/link/gre.py', "{'reserved_2': (4, 9)}"):
-        "the 9-bit span bits 4-12 leave of RFC 2784's 12-bit Reserved0 once RFC 2890 "
-        'carves ``K``/``S`` out of it (:rfc:`2890#section-2`), not a PCAP-NG resolution-places '
-        'table',
-    ('pcapkit/protocols/schema/link/radiotap.py', "{'bss_color': (19, 6)}"):
-        "the 6-bit BSS color at bit 19 of the U-SIG field's common word, not the IPv6 Next Header offset",
-    ('pcapkit/protocols/schema/link/radiotap.py', "{'phy_version': (12, 3)}"):
-        "the PHY version at bit 12 of the U-SIG field's common word, not the TCP Data Offset octet",
-    ('pcapkit/protocols/schema/link/radiotap.py', "{'ru_offset': (8, 6)}"):
-        "the 6-bit RU allocation offset of the HE field's data2, not the IPv6 Next Header offset",
-    ('pcapkit/protocols/schema/misc/pcapng.py', 'BytesField(length=16)'):
-        'an IPv6 address is 16 octets',
-    ('pcapkit/protocols/schema/misc/pcapng.py', 'BytesField(length=6)'):
-        'a MAC address is 6 octets',
-    ('pcapkit/protocols/schema/misc/pcapng.py', 'magic == 12'):
-        'the Block Total Length of a 12-octet Section Header Block read where the '
-        'Byte-Order Magic belongs, spelled as the octets read to pair with the '
-        'byte-swapped 0x0C000000 beside it',
-    ('pcapkit/protocols/schema/misc/pcapng.py', 'magic in (BYTE_ORDER_MAGIC, 12)'):
-        'the same octets read where the Byte-Order Magic belongs, paired with the '
-        'byte-swapped 0x0C000000 beside it, as in the check above',
-    ('pcapkit/protocols/schema/misc/pcapng.py', "pkt['length'] - 16"):
-        'an IPv6 name record is 16 octets of address, not a block',
-    ('pcapkit/protocols/schema/misc/pcapng.py', "{'byteorder': (32, 32)}"):
-        "a bit-field: a Section Header Block's Byte-Order Magic, the 32 bits after "
-        'its Block Total Length, not a Packet Block',
-    ('pcapkit/protocols/schema/misc/pcapng.py', "{'crc_error': (24, 1)}"):
-        'an epb_flags bit offset, not an Interface Statistics Block',
-    ('pcapkit/protocols/schema/misc/pcapng.py', "{'reserved': (12, 12)}"):
-        'an epb_flags bit-field: 12 reserved bits from bit 12',
-    ('pcapkit/protocols/schema/misc/pcapng.py', "{'unaligned_error': (28, 1)}"):
-        'an epb_flags bit offset, not a Section Header Block',
-    ('pcapkit/protocols/schema/transport/tcp.py', 'BytesField(length=20)'):
-        'an MPTCP MP_JOIN SYN/ACK truncated HMAC is 20 octets',
-    ('pcapkit/protocols/schema/transport/tcp.py', "pkt['length'] > 12"):
+    ('pcapkit/protocols/transport/tcp/protocol.py', '(4, 12, 20, 22, 24)[present]'):
+        'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'Schema_MPTCPFallback(length=12)'):
+        'an MP_FAIL option is 12 octets',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'Schema_MPTCPFastclose(length=12)'):
+        'an MP_FASTCLOSE option is 12 octets',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'Schema_MPTCPJoinSYN(length=12)'):
+        'an MP_JOIN SYN option is 12 octets',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'bytes(20)'):
+        'an MP_JOIN SYN/ACK HMAC default of 20 octets',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'schema.length != 12'):
+        'an MPTCP option length, not the Data Offset octet',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'schema.length > 12'):
         'an MP_CAPABLE option length, not the Data Offset octet',
-    ('pcapkit/protocols/schema/transport/tcp.py', "pkt['length'] > 20"):
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'schema.length > 20'):
+        'a field offset within the MP_CAPABLE option, not the minimum header length',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'schema.length not in (4, 12, 20, 22, 24)'):
+        'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',
+    ('pcapkit/protocols/transport/tcp/protocol.py', 'schema.length not in (8, 10, 16, 18, 20, 22, 28, 30)'):
+        'the MP_ADD_ADDR option lengths, :rfc:`8684#section-3.4.1`',
+    ('pcapkit/protocols/transport/tcp/protocol.py',
+     "{20: ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA')}"):
+        'the FTP data port, not the minimum header length',
+    ('pcapkit/protocols/transport/tcp/schema.py', 'BytesField(length=20)'):
+        'an MPTCP MP_JOIN SYN/ACK truncated HMAC is 20 octets',
+    ('pcapkit/protocols/transport/tcp/schema.py', "pkt['length'] > 12"):
+        'an MP_CAPABLE option length, not the Data Offset octet',
+    ('pcapkit/protocols/transport/tcp/schema.py', "pkt['length'] > 20"):
         'an MP_CAPABLE option length, not the minimum header length',
-    ('pcapkit/protocols/schema/transport/tcp.py', "pkt['length'] in (20, 22, 28, 30)"):
+    ('pcapkit/protocols/transport/tcp/schema.py', "pkt['length'] in (20, 22, 28, 30)"):
         'the MP_ADD_ADDR option lengths with an IPv6 address, not the minimum header length',
-    ('pcapkit/protocols/schema/transport/tcp.py', "{'reserved': (4, 12)}"):
+    ('pcapkit/protocols/transport/tcp/schema.py', "{'reserved': (4, 12)}"):
         'an MPTCP bit-field: 12 reserved bits after the 4-bit subtype, not the Data '
         'Offset octet',
-    ('pcapkit/protocols/transport/tcp.py', '(4, 12, 20, 22, 24)[present]'):
-        'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',
-    ('pcapkit/protocols/transport/tcp.py', 'Schema_MPTCPFallback(length=12)'):
-        'an MP_FAIL option is 12 octets',
-    ('pcapkit/protocols/transport/tcp.py', 'Schema_MPTCPFastclose(length=12)'):
-        'an MP_FASTCLOSE option is 12 octets',
-    ('pcapkit/protocols/transport/tcp.py', 'Schema_MPTCPJoinSYN(length=12)'):
-        'an MP_JOIN SYN option is 12 octets',
-    ('pcapkit/protocols/transport/tcp.py', 'bytes(20)'):
-        'an MP_JOIN SYN/ACK HMAC default of 20 octets',
-    ('pcapkit/protocols/transport/tcp.py', 'schema.length != 12'):
-        'an MPTCP option length, not the Data Offset octet',
-    ('pcapkit/protocols/transport/tcp.py', 'schema.length > 12'):
-        'an MP_CAPABLE option length, not the Data Offset octet',
-    ('pcapkit/protocols/transport/tcp.py', 'schema.length > 20'):
-        'a field offset within the MP_CAPABLE option, not the minimum header length',
-    ('pcapkit/protocols/transport/tcp.py', 'schema.length not in (4, 12, 20, 22, 24)'):
-        'the MP_CAPABLE option lengths, :rfc:`8684#section-3.1`',
-    ('pcapkit/protocols/transport/tcp.py', 'schema.length not in (8, 10, 16, 18, 20, 22, 28, 30)'):
-        'the MP_ADD_ADDR option lengths, :rfc:`8684#section-3.4.1`',
-    ('pcapkit/protocols/transport/tcp.py',
-     "{20: ModuleDescriptor('pcapkit.protocols.application.ftp_data', 'FTP_DATA')}"):
-        'the FTP data port, not the minimum header length',
     ('pcapkit/toolkit/dpkt.py', '_fragment(6)'):
         'the IP version number',
     ('pcapkit/toolkit/dpkt.py', 'version == 6'):
@@ -416,98 +416,98 @@ NOT_A_COPY = {
 UNRELATED = {
     'pcapkit/foundation/engines/pypcapfile.py': ((12,), 'the Python 3.12 version ceiling of '
                                                  'PyPCAPFile, not a length'),
-    'pcapkit/protocols/application/http.py': ((6, 9, 12), 'the length of an HTTP/1 version '
+    'pcapkit/protocols/application/http/protocol.py': ((6, 9, 12), 'the length of an HTTP/1 version '
                                               'token, and HTTP/2 frame types and flag masks'),
-    'pcapkit/protocols/application/httpv2.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),
-    'pcapkit/protocols/application/ospf.py': ((16, 24),
+    'pcapkit/protocols/application/httpv2/protocol.py': ((6, 9), 'HTTP/2 frame header and setting sizes'),
+    'pcapkit/protocols/application/httpv2/schema.py': ((6, 32),
+                                                       'an HTTP/2 setting size and a flag bit'),
+    'pcapkit/protocols/application/ospf/protocol.py': ((16, 24),
                                               'OSPF header length; 16 is the bit width of the '
                                               'packet length, and the offset of the '
                                               'Authentication field the checksum leaves out '
                                               '(RFC 2328 appendix A.3.1), not a PCAP record '
                                               'header'),
-    'pcapkit/protocols/internet/ah.py': ((20,), "AH's length estimate, its 12-octet fixed part "
+    'pcapkit/protocols/application/ospf/schema.py': ((24,), 'the OSPF header length'),
+    'pcapkit/protocols/internet/ah/protocol.py': ((20,), "AH's length estimate, its 12-octet fixed part "
                                          'plus a minimal ICV, not the fixed part itself'),
-    'pcapkit/protocols/internet/esp.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
-    'pcapkit/protocols/internet/hip.py': ((6, 12, 16, 20, 32, 40, 65535),
+    'pcapkit/protocols/internet/esp/protocol.py': ((12, 16, 20, 24, 32), 'ESP ICV and key sizes'),
+    'pcapkit/protocols/internet/hip/protocol.py': ((6, 12, 16, 20, 32, 40, 65535),
                                           'HIP parameter fields and sizes; 65535 bounds the '
                                           'two-octet TLV Length a TRANSACTION_ID or OVERLAY_ID '
                                           'may declare (#2271), as it does in the schema module, '
                                           'and is not an IP total length'),
-    'pcapkit/protocols/internet/hopopt.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),
-    'pcapkit/protocols/internet/igmp.py': ((12,), "the minimum overall length (RFC 3376 "
+    'pcapkit/protocols/internet/hip/schema.py': ((12, 16, 20, 65535),
+                                                'HIP parameter fields, sizes and bit-fields'),
+    'pcapkit/protocols/internet/hopopt/protocol.py': ((6, 16, 32), 'HOPOPT option fields, widths and sizes'),
+    'pcapkit/protocols/internet/hopopt/schema.py': ((6, 16), 'HOPOPT option field sizes '
+                                                   'and bit-fields'),
+    'pcapkit/protocols/internet/igmp/protocol.py': ((12,), "the minimum overall length (RFC 3376 "
                                            "section 7.1) at which a Membership Query carries "
                                            "IGMPv3's source-list extension rather than being "
                                            "IGMPv1/v2; unrelated to AH_HEADER_LEN, "
                                            "TCP_DATA_OFFSET_OCTET or GENERIC_BLOCK_MINIMUM, "
                                            "which happen to share the value"),
-    'pcapkit/protocols/internet/igmpv3.py': ((16,), "the floating-point Max Resp Code/QQIC "
+    'pcapkit/protocols/internet/igmpv3/protocol.py': ((16,), "the floating-point Max Resp Code/QQIC "
                                              "decode's mantissa mask (RFC 3376 section 4.1.1's "
                                              "own 0x10), not the PCAP record header length"),
-    'pcapkit/protocols/internet/ipv4.py': ((9, 12, 40), 'IPv4 option counts and sizes; '
+    'pcapkit/protocols/internet/ipv4/protocol.py': ((9, 12, 40), 'IPv4 option counts and sizes; '
                                            '40 is the option area maximum, not an IPv6 header'),
-    'pcapkit/protocols/internet/ipv6.py': ((16,), 'a hex base and an IPv6 address size'),
-    'pcapkit/protocols/internet/ipv6_ext.py': ((6,), 'the IP version number'),
-    'pcapkit/protocols/internet/ipv6_opts.py': ((6, 16, 32),
+    'pcapkit/protocols/internet/ipv4/schema.py': ((6, 16), 'the ECN and option-function '
+                                                'bit-field offsets'),
+    'pcapkit/protocols/internet/ipv6/protocol.py': ((16,), 'a hex base and an IPv6 address size'),
+    'pcapkit/protocols/internet/ipv6/schema.py': ((12, 20), 'the 20-bit Flow Label from bit 12 '
+                                                'of the first 32 bits'),
+    'pcapkit/protocols/internet/ipv6_ext/protocol.py': ((6,), 'the IP version number'),
+    'pcapkit/protocols/internet/ipv6_ext/schema.py': ((16,), 'an MPL Seed-ID of 16 octets'),
+    'pcapkit/protocols/internet/ipv6_opts/protocol.py': ((6, 16, 32),
                                                 'IPv6-Opts option fields, widths and sizes'),
-    'pcapkit/protocols/internet/ipv6_route.py': ((6, 16), 'Routing header address sizes'),
-    'pcapkit/protocols/internet/ipx.py': ((12,), 'an IPX address is 12 octets'),
-    'pcapkit/protocols/internet/mh.py': ((6, 16, 20, 24, 32),
+    'pcapkit/protocols/internet/ipv6_opts/schema.py': ((6, 16), 'IPv6-Opts option field sizes '
+                                                      'and bit-fields'),
+    'pcapkit/protocols/internet/ipv6_route/protocol.py': ((6, 16), 'Routing header address sizes'),
+    'pcapkit/protocols/internet/ipv6_route/schema.py': ((16, 20), 'an IPv6 address is 16 '
+                                                       'octets; a 20-bit reserved bit-field'),
+    'pcapkit/protocols/internet/ipx/protocol.py': ((12,), 'an IPX address is 12 octets'),
+    'pcapkit/protocols/internet/ipx/schema.py': ((12,), 'an IPX address is 12 octets'),
+    'pcapkit/protocols/internet/mh/protocol.py': ((6, 16, 20, 24, 32),
                                          'Mobility Header option fields and sizes'),
-    'pcapkit/protocols/link/arp.py': ((6, 9, 16, 28), 'address sizes, InARP operation codes, '
+    'pcapkit/protocols/internet/mh/schema.py': ((6, 9, 12, 16, 20, 24, 32),
+                                                'Mobility Header option fields, sizes and bit-fields'),
+    'pcapkit/protocols/link/arp/protocol.py': ((6, 9, 16, 28), 'address sizes, InARP operation codes, '
                                       'and the 28-octet IPv4 ARP length'),
-    'pcapkit/protocols/link/ieee802_11.py': ((6, 9, 12), 'a 6-octet MAC address, and '
+    'pcapkit/protocols/link/ethernet/schema.py': ((6,), 'a MAC address is 6 octets'),
+    'pcapkit/protocols/link/ieee802_11/protocol.py': ((6, 9, 12), 'a 6-octet MAC address, and '
                                              'Frame Control bit offsets'),
-    'pcapkit/protocols/link/l2tpv2.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
-    'pcapkit/protocols/link/linux_sll1.py': ((65535,), "the max value of LINUX_SLL's own "
+    'pcapkit/protocols/link/ieee802_11/schema.py': ((6, 9), 'a MAC address is 6 octets, and '
+                                                    'the From DS bit offset of Frame Control'),
+    'pcapkit/protocols/link/l2tp/schema.py': ((6, 12), 'an L2TP header field offset, and the '
+                                             'version bit-field'),
+    'pcapkit/protocols/link/l2tpv2/protocol.py': ((6, 12, 16), 'L2TPv2 header flags, widths and length'),
+    'pcapkit/protocols/link/linux_sll1/protocol.py': ((65535,), "the max value of LINUX_SLL's own "
                                             '2-octet link_addr_length field, not an IP total '
                                             'length'),
-    'pcapkit/protocols/link/loopback.py': ((24, 28), 'the BSD loopback address families of IPv6 '
+    'pcapkit/protocols/link/loopback/protocol.py': ((24, 28), 'the BSD loopback address families of IPv6 '
                                            '(NetBSD and OpenBSD 24, FreeBSD 28)'),
-    'pcapkit/protocols/link/netlink.py': ((16,), 'the nlmsghdr fixed header length (16 '
+    'pcapkit/protocols/link/netlink/protocol.py': ((16,), 'the nlmsghdr fixed header length (16 '
                                           'octets), not a PCAP record header'),
-    'pcapkit/protocols/link/radiotap.py': ((65535,), "the max value of radiotap's own "
+    'pcapkit/protocols/link/radiotap/protocol.py': ((65535,), "the max value of radiotap's own "
                                            '2-octet it_len field, not an IP total length'),
-    'pcapkit/protocols/misc/pcapng.py': ((65535,), 'a 16-bit mask'),
-    'pcapkit/protocols/schema/application/httpv2.py': ((6, 32),
-                                                       'an HTTP/2 setting size and a flag bit'),
-    'pcapkit/protocols/schema/application/ospf.py': ((24,), 'the OSPF header length'),
-    'pcapkit/protocols/schema/internet/hip.py': ((12, 16, 20, 65535),
-                                                'HIP parameter fields, sizes and bit-fields'),
-    'pcapkit/protocols/schema/internet/hopopt.py': ((6, 16), 'HOPOPT option field sizes '
-                                                   'and bit-fields'),
-    'pcapkit/protocols/schema/internet/ipv4.py': ((6, 16), 'the ECN and option-function '
-                                                'bit-field offsets'),
-    'pcapkit/protocols/schema/internet/ipv6.py': ((12, 20), 'the 20-bit Flow Label from bit 12 '
-                                                'of the first 32 bits'),
-    'pcapkit/protocols/schema/internet/ipv6_option.py': ((16,), 'an MPL Seed-ID of 16 octets'),
-    'pcapkit/protocols/schema/internet/ipv6_opts.py': ((6, 16), 'IPv6-Opts option field sizes '
-                                                      'and bit-fields'),
-    'pcapkit/protocols/schema/internet/ipv6_route.py': ((16, 20), 'an IPv6 address is 16 '
-                                                       'octets; a 20-bit reserved bit-field'),
-    'pcapkit/protocols/schema/internet/ipx.py': ((12,), 'an IPX address is 12 octets'),
-    'pcapkit/protocols/schema/internet/mh.py': ((6, 9, 12, 16, 20, 24, 32),
-                                                'Mobility Header option fields, sizes and bit-fields'),
-    'pcapkit/protocols/schema/link/ethernet.py': ((6,), 'a MAC address is 6 octets'),
-    'pcapkit/protocols/schema/link/ieee802_11.py': ((6, 9), 'a MAC address is 6 octets, and '
-                                                    'the From DS bit offset of Frame Control'),
-    'pcapkit/protocols/schema/link/l2tp.py': ((6, 12), 'an L2TP header field offset, and the '
-                                             'version bit-field'),
-    'pcapkit/protocols/schema/link/vlan.py': ((12,), 'the 12-bit VLAN identifier'),
-    'pcapkit/protocols/schema/misc/pcapng.py': ((9, 65535), 'an epb_flags bit offset, and a '
+    'pcapkit/protocols/link/vlan/schema.py': ((12,), 'the 12-bit VLAN identifier'),
+    'pcapkit/protocols/misc/pcapng/protocol.py': ((65535,), 'a 16-bit mask'),
+    'pcapkit/protocols/misc/pcapng/schema.py': ((9, 65535), 'an epb_flags bit offset, and a '
                                                '16-bit field default'),
-    'pcapkit/protocols/schema/transport/dccp.py': ((6,), 'a 48-bit DCCP sequence or '
-                                                   'acknowledgement number, and a Timestamp Echo '
-                                                   'option without its Elapsed Time'),
-    'pcapkit/protocols/schema/transport/sctp.py': ((6, 16, 20), 'SCTP chunk and parameter sizes, '
-                                                  'and a flag bit'),
-    'pcapkit/protocols/schema/transport/tcp.py': ((6, 16, 28), 'TCP and MPTCP option sizes, and '
-                                                 'the MP_ADD_ADDR lengths'),
-    'pcapkit/protocols/transport/dccp.py': ((6, 65535), 'DCCP option lengths, the 2-bit shift of '
+    'pcapkit/protocols/transport/dccp/protocol.py': ((6, 65535), 'DCCP option lengths, the 2-bit shift of '
                                             'an Ack Vector state, and the largest 2-octet '
                                             'Elapsed Time'),
-    'pcapkit/protocols/transport/sctp.py': ((12, 16, 20), 'SCTP chunk and parameter sizes'),
-    'pcapkit/protocols/transport/tcp.py': ((6, 16, 24, 32, 65535), 'TCP and MPTCP option sizes, '
+    'pcapkit/protocols/transport/dccp/schema.py': ((6,), 'a 48-bit DCCP sequence or '
+                                                   'acknowledgement number, and a Timestamp Echo '
+                                                   'option without its Elapsed Time'),
+    'pcapkit/protocols/transport/sctp/protocol.py': ((12, 16, 20), 'SCTP chunk and parameter sizes'),
+    'pcapkit/protocols/transport/sctp/schema.py': ((6, 16, 20), 'SCTP chunk and parameter sizes, '
+                                                  'and a flag bit'),
+    'pcapkit/protocols/transport/tcp/protocol.py': ((6, 16, 24, 32, 65535), 'TCP and MPTCP option sizes, '
                                            'and the 16-bit window and MSS defaults'),
+    'pcapkit/protocols/transport/tcp/schema.py': ((6, 16, 28), 'TCP and MPTCP option sizes, and '
+                                                 'the MP_ADD_ADDR lengths'),
     'pcapkit/toolkit/pyshark.py': ((6, 9, 20, 24, 28), 'Wireshark encapsulation numbers mapped '
                                    'to link types'),
 }
@@ -817,7 +817,7 @@ class TestReaders(unittest.TestCase):
     def test_engine_magic_from_home(self) -> 'None':
         pcap = importlib.import_module('pcapkit.foundation.engines.pcap').PCAP
         pcapng = importlib.import_module('pcapkit.foundation.engines.pcapng').PCAPNG
-        magic = importlib.import_module('pcapkit.protocols.schema.misc.pcap.header').MAGIC_NUMBER
+        magic = importlib.import_module('pcapkit.protocols.misc.pcap.header.schema').MAGIC_NUMBER
         self.assertEqual(pcap.MAGIC_NUMBER, tuple(magic))
         self.assertEqual(pcapng.MAGIC_NUMBER, (b'\x0a\x0d\x0d\x0a',))
 

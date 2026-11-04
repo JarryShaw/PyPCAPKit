@@ -3,11 +3,11 @@
 
 GitHub issue #1119 found two defects in this option:
 
-* :meth:`TCP._read_mode_qs <pcapkit.protocols.transport.tcp.TCP._read_mode_qs>`
+* :meth:`TCP._read_mode_qs <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_qs>`
   read one octet past the option before checking its length, so every Quick-Start
   Response failed with ``StructError: unpack: empty buffer``, whether or not a
   payload followed.
-* :meth:`TCP._make_mode_qs <pcapkit.protocols.transport.tcp.TCP._make_mode_qs>`
+* :meth:`TCP._make_mode_qs <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_qs>`
   computed the rate code as ``floor(log2(rate / 40))``. That is negative for
   ``0 < rate < 40`` kbps, and a negative code cannot pack into the 4-bit field.
 
@@ -37,7 +37,7 @@ from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from pcapkit.const.tcp.option import Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
 
 def qs() -> 'Option':
@@ -48,14 +48,14 @@ def qs() -> 'Option':
 
 def build(rate: 'int', payload: 'bytes' = b'') -> 'bytes':
     """Construct a segment that carries one Quick-Start Response option."""
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP(srcport=1, dstport=2, payload=payload,
                options=[(qs(), {'rate': rate, 'diff': 3, 'nonce': 0x1234})]).data
 
 
 def parse(raw: 'bytes') -> 'TCP':
     """Parse ``raw`` as a TCP segment."""
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP(raw, len(raw))
 
 
@@ -82,7 +82,7 @@ class QuickStartResponseTests(unittest.TestCase):
 
     def test_round_trip(self) -> 'None':
         """Construct, parse and construct again gives identical octets."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         QS = qs()
         for rate in (0, 80, 640, 1_310_720):
@@ -125,7 +125,7 @@ class QuickStartResponseTests(unittest.TestCase):
 
     def test_a_field_value_outside_its_bits_is_refused(self) -> 'None':
         """The nonce (30 bits), ``Resv.`` (4) and ``R`` (2): refused, not wrapped or leaked (#2617)."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for keyword, what, values in (('nonce', 'nonce', (-1, 1 << 30, True)),
@@ -138,7 +138,7 @@ class QuickStartResponseTests(unittest.TestCase):
 
     def test_ttl_diff_is_taken_modulo_256(self) -> 'None':
         """:rfc:`4782` Section 3.1 defines TTL Diff modulo 256, so its octet wraps."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for diff, octet in ((255, 0xff), (256, 0x00), (300, 0x2c), (-1, 0xff)):
             with self.subTest(diff=diff):

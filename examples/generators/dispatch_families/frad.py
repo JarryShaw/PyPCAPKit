@@ -18,7 +18,7 @@ generator = globals()['generator']  # type: Any
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.link.frad import FRAD
+    from pcapkit.protocols.link.frad.protocol import FRAD
     return FRAD.__proto__
 
 
@@ -34,8 +34,8 @@ def _payload(nlpid: 'int') -> 'bytes':
 def _build(nlpid: 'int') -> 'Any':
     """A direct-NLPID FRAD frame, reached as LinuxSLL dispatches it in a capture."""
     from pcapkit.const.linux.arphrd import ARPHRD
-    from pcapkit.protocols.link.frad import FRAD
-    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+    from pcapkit.protocols.link.frad.protocol import FRAD
+    from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
     frad = bytes(FRAD(nlpid=int(nlpid), payload=_payload(nlpid)))
     record = bytes(LinuxSLL1(arphrd_type=ARPHRD.FRAD, protocol_type=0, payload=frad))
@@ -51,6 +51,6 @@ FAMILIES = (
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes. Keyed in
 #: decimal: 0x8E, 0xCC.
 PINNED_TARGETS = {
-    'frad/142': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'frad/204': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+    'frad/142': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+    'frad/204': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
 }

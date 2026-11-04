@@ -7,7 +7,7 @@ sense applies where, and links to the page that explains it.
 .. glossary::
 
    data model
-       A :class:`~pcapkit.protocols.data.data.Data` subclass, or an instance of
+       A :class:`~pcapkit.protocols.data.Data` subclass, or an instance of
        one: a protocol's fields as parsed values, which :attr:`Protocol.info
        <pcapkit.protocols.protocol.Protocol.info>` returns, as against the raw
        octets of :attr:`Protocol.data <pcapkit.protocols.protocol.Protocol.data>`.
@@ -48,11 +48,11 @@ sense applies where, and links to the page that explains it.
          registration functions that write to one
          (:doc:`pcapkit/foundation/registry`);
        * :attr:`EnumMeta.registry
-         <pcapkit.protocols.schema.schema.EnumMeta.registry>`, the mapping from
+         <pcapkit.protocols.schema.EnumMeta.registry>`, the mapping from
          an enumeration member to the :term:`schema` that parses it.
 
    schema
-       A :class:`~pcapkit.protocols.schema.schema.Schema` subclass, which lays
+       A :class:`~pcapkit.protocols.schema.Schema` subclass, which lays
        out a protocol header's fields as they sit on the wire, or an instance of
        one: the header as read or built, which :attr:`Protocol.schema
        <pcapkit.protocols.protocol.Protocol.schema>` returns. It is not the

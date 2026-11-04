@@ -90,7 +90,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, name: str) -> 'tuple[bytes, object]':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = segment(*OPTIONS[name])
         return raw, TCP(raw, len(raw))
@@ -102,7 +102,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
         return tcp.info.options[Option.Multipath_TCP]
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name in OPTIONS:
             with self.subTest(option=name):
@@ -165,7 +165,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
         self.assertEqual((legacy.version, legacy.port, legacy.hmac), (4, 443, None))
 
     def test_add_addr_rejects_an_unknown_length(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import FieldError
 
         raw = segment(ACK, '1e093001 c0000201 01 010101')
@@ -181,7 +181,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
 
     def test_makers_build_the_new_forms(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP.__new__(TCP)
         self.assertEqual(tcp._make_mptcp_dss(  # pylint: disable=protected-access
@@ -201,7 +201,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
 
     def test_add_addr_maker_rejects_a_bad_hmac(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         tcp = TCP.__new__(TCP)
@@ -213,7 +213,7 @@ class TestMPTCPRoundTrip(unittest.TestCase):
 
     def test_dss_maker_rejects_a_wide_value_in_a_narrow_field(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         tcp = TCP.__new__(TCP)

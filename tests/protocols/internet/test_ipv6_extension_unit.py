@@ -37,32 +37,32 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             _ = inst.protochain
 
     def test_hopopt_extension_blocks_direct_accessors(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_extension_accessors_blocked(HOPOPT)
 
     def test_ipv6_opts_extension_blocks_direct_accessors(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_extension_accessors_blocked(IPv6_Opts)
 
     def test_ipv6_route_extension_blocks_direct_accessors(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         self._assert_extension_accessors_blocked(IPv6_Route)
 
     def test_ipv6_frag_extension_blocks_direct_accessors(self) -> None:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         self._assert_extension_accessors_blocked(IPv6_Frag)
 
     def test_hopopt_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         original = HOPOPT.__dict__['__option__'][Option.Pad1]
         try:
-            with mock.patch('pcapkit.protocols.internet.hopopt.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.hopopt.protocol.warn') as warn:
                 HOPOPT.register_option(Option.Pad1, 'tun')
             warn.assert_called_once()
             self.assertEqual(HOPOPT.__dict__['__option__'][Option.Pad1], 'tun')
@@ -71,11 +71,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
     def test_ipv6_opts_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         original = IPv6_Opts.__dict__['__option__'][Option.Pad1]
         try:
-            with mock.patch('pcapkit.protocols.internet.ipv6_opts.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv6_opts.protocol.warn') as warn:
                 IPv6_Opts.register_option(Option.Pad1, 'tun')
             warn.assert_called_once()
             self.assertEqual(IPv6_Opts.__dict__['__option__'][Option.Pad1], 'tun')
@@ -84,11 +84,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
     def test_ipv6_route_register_routing_warns_on_overwrite(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         original = IPv6_Route.__dict__['__routing__'][Routing.Source_Route]
         try:
-            with mock.patch('pcapkit.protocols.internet.ipv6_route.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv6_route.protocol.warn') as warn:
                 IPv6_Route.register_routing(Routing.Source_Route, 'rpl')
             warn.assert_called_once()
             self.assertEqual(IPv6_Route.__dict__['__routing__'][Routing.Source_Route], 'rpl')
@@ -104,7 +104,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         read inserts every unrecognised option type and routing type a capture
         carries -- and the value it inserts is ``'none'``, which the default
         factory returns anyway. That makes
-        :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT.register_option` and its
+        :meth:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT.register_option` and its
         siblings warn about overwriting something nobody registered.
 
         Option type ``0x1E`` is :rfc:`4727`'s experimentation code and routing
@@ -115,10 +115,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.option import Option
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         src = bytes.fromhex('fe80' + '0000' * 6 + '0001')
         dst = bytes.fromhex('fe80' + '0000' * 6 + '0002')
@@ -152,7 +152,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                     IPv6(io.BytesIO(packet), len(packet))
                     self.assertEqual(set(registry), before)
 
-                    with mock.patch(f'pcapkit.protocols.internet.{module}.warn') as warn:
+                    with mock.patch(f'pcapkit.protocols.internet.{module}.protocol.warn') as warn:
                         register(code, 'none')
                     self.assertEqual(warn.call_count, 0)
                 finally:
@@ -160,7 +160,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
     def test_ipv6_frag_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         data = DummyDict(
             next=TransType.TCP,
@@ -186,7 +186,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
     def test_hopopt_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         options = ['pad']
         data = DummyDict(next=TransType.UDP, options=options, __next_type__=None)
@@ -201,7 +201,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
     def test_ipv6_opts_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         options = ['pad']
         data = DummyDict(next=TransType.UDP, options=options, __next_type__=None)
@@ -217,7 +217,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_ipv6_route_index_length_and_make_data(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         data = DummyDict(
             next=TransType.UDP,
@@ -242,8 +242,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_ipv6_frag_read_make_and_properties(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.schema import IPv6_Frag as Schema_IPv6_Frag
 
         proto = object.__new__(IPv6_Frag)
         proto.__header__ = Schema_IPv6_Frag(
@@ -295,9 +295,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_ipv6_route_readers_and_constructors_cover_registered_types(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet import ipv6_route as route_data
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route import data as route_data
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv6_Route)
@@ -390,7 +390,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         #540 sites, being on the public ``make`` entry point rather than a private
         helper.
         """
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         proto = object.__new__(IPv6_Route)
@@ -427,7 +427,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         conversion.
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         proto = object.__new__(IPv6_Route)
@@ -473,8 +473,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv6_Route)
@@ -509,10 +509,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def test_ipv6_route_read_make_registry_and_property_edges(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet import ipv6_route as route_data
+        from pcapkit.protocols.internet.ipv6_route import data as route_data
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv6_Route)
@@ -631,8 +631,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         schema = hopopt_schema if protocol_cls.__name__ == 'HOPOPT' else opts_schema
@@ -749,12 +749,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         post_init.assert_called_once()
 
     def test_hopopt_read_make_registry_and_property_edges(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_option_header_read_make_and_registry_edges(HOPOPT)
 
     def test_ipv6_opts_read_make_registry_and_property_edges(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_option_header_read_make_and_registry_edges(IPv6_Opts)
 
@@ -765,8 +765,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.seed_id import SeedID
         from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
         from pcapkit.const.ipv6.tagger_id import TaggerID
-        from pcapkit.protocols.data.internet import hopopt as hopopt_data
-        from pcapkit.protocols.data.internet import ipv6_opts as opts_data
+        from pcapkit.protocols.internet.hopopt import data as hopopt_data
+        from pcapkit.protocols.internet.ipv6_opts import data as opts_data
         from pcapkit.utilities.exceptions import ProtocolError
 
         data = hopopt_data if protocol_cls.__name__ == 'HOPOPT' else opts_data
@@ -915,12 +915,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ).flags['dup'])
 
     def test_hopopt_data_model_constructors_cover_existing_options(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_option_data_model_constructor_edges(HOPOPT)
 
     def test_ipv6_opts_data_model_constructors_cover_existing_options(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_option_data_model_constructor_edges(IPv6_Opts)
 
@@ -931,10 +931,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
         from pcapkit.const.ipv6.tagger_id import TaggerID
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import hopopt as hopopt_data
-        from pcapkit.protocols.data.internet import ipv6_opts as opts_data
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import data as hopopt_data
+        from pcapkit.protocols.internet.ipv6_opts import data as opts_data
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         data = hopopt_data if protocol_cls.__name__ == 'HOPOPT' else opts_data
@@ -1135,12 +1135,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual((built_len + 2) % 8, 0)
 
     def test_hopopt_option_constructors_cover_branchy_values(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_option_constructors_cover_branchy_values(HOPOPT)
 
     def test_ipv6_opts_option_constructors_cover_branchy_values(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_option_constructors_cover_branchy_values(IPv6_Opts)
 
@@ -1153,8 +1153,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.tagger_id import TaggerID
         from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         schema = hopopt_schema if protocol_cls.__name__ == 'HOPOPT' else opts_schema
@@ -1404,12 +1404,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ))
 
     def test_hopopt_option_readers_cover_branchy_values(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_option_readers_cover_branchy_values(HOPOPT)
 
     def test_ipv6_opts_option_readers_cover_branchy_values(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_option_readers_cover_branchy_values(IPv6_Opts)
 
@@ -1535,19 +1535,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(integer_seed.post_process({}).seed, 5)
 
     def test_hopopt_schema_helpers_and_post_process_branches(self) -> None:
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
 
         self._assert_option_schema_helpers_and_post_process_branches(hopopt_schema)
 
     def test_ipv6_opts_schema_helpers_and_post_process_branches(self) -> None:
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
 
         self._assert_option_schema_helpers_and_post_process_branches(opts_schema)
 
     def test_ipv6_route_schema_selector_and_rpl_post_process_branches(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.corekit.fields.misc import SchemaField
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
 
         field = route_schema.ipv6_route_data_selector({'type': Routing.Source_Route, 'length': 3})
         self.assertIsInstance(field, SchemaField)
@@ -1586,8 +1586,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         reachable through an actual pack.
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
 
         first = ip_address('2001:db8::1')
         second = ip_address('2001:db8::2')
@@ -1642,8 +1642,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route import schema as route_schema
 
         # The fixed area alone, with no addresses and no padding.
         bare = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
@@ -1708,7 +1708,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         from pcapkit.utilities.exceptions import ProtocolError
 
         first = ip_address('2001:db8::1')
@@ -1786,7 +1786,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         proto = object.__new__(IPv6_Route)
 
@@ -1829,7 +1829,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         first = ip_address('2001:db8::1')
         second = ip_address('2001:db8::2')
@@ -1904,12 +1904,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(proto.__header__), raw)
 
     def test_hopopt_padding_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_padding_options_parse_from_the_wire(HOPOPT)
 
     def test_ipv6_opts_padding_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_padding_options_parse_from_the_wire(IPv6_Opts)
 
@@ -1977,12 +1977,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(proto.__header__), raw)
 
     def test_hopopt_smf_dpd_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_smf_dpd_options_parse_from_the_wire(HOPOPT)
 
     def test_ipv6_opts_smf_dpd_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_smf_dpd_options_parse_from_the_wire(IPv6_Opts)
 
@@ -2004,7 +2004,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         schema carries an extra forward-matched ``test`` field its HOPOPT twin
         does not: the field consumes no bytes but still occupies a
         :attr:`Schema.__buffer__
-        <pcapkit.protocols.schema.schema.Schema.__buffer__>` slot, so
+        <pcapkit.protocols.schema.Schema.__buffer__>` slot, so
         ``len(schema)`` over-reports the option by one octet under IPv6-Opts.
         That is its own ``len(data)``-is-not-consumed defect, distinct from the
         one #431 is about.
@@ -2041,12 +2041,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(proto.__header__), raw)
 
     def test_hopopt_identification_based_dpd_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_identification_based_dpd_options_parse_from_the_wire(HOPOPT)
 
     def test_ipv6_opts_identification_based_dpd_options_parse_from_the_wire(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_identification_based_dpd_options_parse_from_the_wire(IPv6_Opts)
 
@@ -2092,12 +2092,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(bytes(proto.__header__), raw)
 
     def test_hopopt_identification_based_dpd_null_tid_option_area_matches(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_identification_based_dpd_null_tid_option_area_matches(HOPOPT)
 
     def test_ipv6_opts_identification_based_dpd_null_tid_option_area_matches(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_identification_based_dpd_null_tid_option_area_matches(IPv6_Opts)
 
@@ -2124,12 +2124,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_identification_based_dpd_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_identification_based_dpd_option_rejects_underflowing_length(HOPOPT)
 
     def test_ipv6_opts_identification_based_dpd_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_identification_based_dpd_option_rejects_underflowing_length(IPv6_Opts)
 
@@ -2161,12 +2161,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_calipso_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_calipso_option_rejects_underflowing_length(HOPOPT)
 
     def test_ipv6_opts_calipso_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_calipso_option_rejects_underflowing_length(IPv6_Opts)
 
@@ -2197,12 +2197,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 protocol_cls(raw, extension=True)
 
     def test_hopopt_mpl_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_mpl_option_rejects_underflowing_length(HOPOPT)
 
     def test_ipv6_opts_mpl_option_rejects_underflowing_length(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_mpl_option_rejects_underflowing_length(IPv6_Opts)
 
@@ -2237,19 +2237,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(protocol_cls.from_data(header.info).data, raw)
 
     def test_hopopt_truncated_option_area_ends_with_the_data(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_a_truncated_option_area_ends_with_the_data(HOPOPT)
 
     def test_ipv6_opts_truncated_option_area_ends_with_the_data(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_a_truncated_option_area_ends_with_the_data(IPv6_Opts)
 
     def _assert_padding_option_schema_sizes_itself(self, protocol_cls: type) -> None:
         """The padding option schema, on its own.
 
-        :func:`~pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len` is
+        :func:`~pcapkit.protocols.internet.hopopt.schema.pad_opt_data_len` is
         the whole of the read-side fix, so it is tested directly as well as
         through a parse: it has to read a skipped conditional field -- which is
         recorded as :data:`~pcapkit.corekit.sentinels.NO_VALUE`, not omitted --
@@ -2259,8 +2259,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.option import Option
         from pcapkit.corekit.sentinels import NO_VALUE
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
 
         schema = hopopt_schema if protocol_cls.__name__ == 'HOPOPT' else opts_schema
 
@@ -2354,22 +2354,22 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(parsed.__header__), raw)
 
     def test_hopopt_padding_option_schema_sizes_itself(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_padding_option_schema_sizes_itself(HOPOPT)
 
     def test_ipv6_opts_padding_option_schema_sizes_itself(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_padding_option_schema_sizes_itself(IPv6_Opts)
 
     def test_hopopt_constructed_header_round_trips(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_constructed_header_round_trips(HOPOPT)
 
     def test_ipv6_opts_constructed_header_round_trips(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_constructed_header_round_trips(IPv6_Opts)
 
@@ -2379,7 +2379,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ``nonce`` is packed by a
         :class:`~pcapkit.corekit.fields.numbers.NumberField` whose width *is*
         the option's own declared ``len`` (c.f.
-        :class:`~pcapkit.protocols.schema.internet.hopopt.ILNPOption`), so an
+        :class:`~pcapkit.protocols.internet.hopopt.schema.ILNPOption`), so an
         under-declared ``len`` does not merely mis-state a length -- it
         silently truncates the nonce on the wire, with no exception raised.
 
@@ -2400,10 +2400,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.data.internet import hopopt as hopopt_data
-        from pcapkit.protocols.data.internet import ipv6_opts as opts_data
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import data as hopopt_data
+        from pcapkit.protocols.internet.ipv6_opts import data as opts_data
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
 
         is_hopopt = protocol_cls.__name__ == 'HOPOPT'
         data = hopopt_data if is_hopopt else opts_data
@@ -2460,19 +2460,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(bytes(from_data)[2:], b'\x00\x7f')
 
     def test_hopopt_ilnp_nonce_option_is_sized_by_the_ceiling(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         self._assert_ilnp_nonce_option_is_sized_by_the_ceiling(HOPOPT)
 
     def test_ipv6_opts_ilnp_nonce_option_is_sized_by_the_ceiling(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         self._assert_ilnp_nonce_option_is_sized_by_the_ceiling(IPv6_Opts)
 
     def test_option_registries_are_not_clobbered_by_a_nested_enum_registry(self) -> None:
         """Option type 0 must resolve to the padding option in every module.
 
-        An :class:`~pcapkit.protocols.schema.schema.EnumSchema` subclass that
+        An :class:`~pcapkit.protocols.schema.EnumSchema` subclass that
         does not declare its own ``__enum__`` shares its parent's registry, so
         registering *its* subclasses writes into the parent's key space. The
         quick-start options are keyed by
@@ -2488,8 +2488,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.option import Option as Enum_Option
         from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
 
         # the two enum values that collide with option types when unscoped
         self.assertEqual(Enum_QSFunction.Quick_Start_Request.value, 0)
@@ -2532,8 +2532,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from exactly one line present in one module and missing in the other.
 
         """
-        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
-        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+        from pcapkit.protocols.internet.hopopt import schema as hopopt_schema
+        from pcapkit.protocols.internet.ipv6_opts import schema as opts_schema
 
         hopopt_options = dict(hopopt_schema.Option.registry)
         opts_options = dict(opts_schema.Option.registry)
@@ -2548,10 +2548,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         as a list, pinned here for the consumer that declares a
         ``tuple[...]``-typed field against that branch:
         ``SourceRoute.ip`` on the data model (``tuple[IPv6Address, ...]`` in
-        pcapkit/protocols/data/internet/ipv6_route.py) backed by the
+        pcapkit/protocols/internet/ipv6_route/data.py) backed by the
         ``ListField`` in ``SourceRoute`` here in the schema module. Without
         #480, building a Type 0 (deprecated Source Route) routing header
-        through :meth:`IPv6_Route.make <pcapkit.protocols.internet.ipv6_route.
+        through :meth:`IPv6_Route.make <pcapkit.protocols.internet.ipv6_route.protocol.
         IPv6_Route.make>` with a tuple of source addresses raises
         ``ProtocolUnbound`` where the same call with a list succeeds; this
         pins the ``make`` -> ``pack`` path for both, through the public
@@ -2579,7 +2579,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         addr1 = ip_address('2001:db8::1')
         addr2 = ip_address('2001:db8::2')
@@ -2636,7 +2636,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from ipaddress import IPv6Address
 
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         # (n addresses, expected total octets, expected Hdr Ext Len)
         cases = [
@@ -2674,7 +2674,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """
         from ipaddress import IPv6Address
 
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         addr = IPv6Address('2001:db8::1')
         hand_built = bytes([0x00, 0x02, 0x00, 0x01]) + b'\x00' * 4 + addr.packed

@@ -1,11 +1,11 @@
-==========================================================================
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` Constant Enumerations
-==========================================================================
+===================================================================================
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` Constant Enumerations
+===================================================================================
 
 .. module:: pcapkit.const.radiotap
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` implementations, each scraped
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations, each scraped
 from radiotap.org [*]_. Available enumerations include:
 
 .. list-table::

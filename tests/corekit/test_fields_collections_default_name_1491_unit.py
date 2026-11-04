@@ -34,7 +34,7 @@ class TestListFieldDefaultName(unittest.TestCase):
 
     def test_option_field_subclasses(self) -> None:
         from pcapkit.corekit.fields.collections import OptionField
-        from pcapkit.protocols.schema.transport.sctp import ChunkListField, Parameter
+        from pcapkit.protocols.transport.sctp.schema import ChunkListField, Parameter
 
         for cls, name in ((OptionField, '<option>'), (ChunkListField, '<chunklist>')):
             with self.subTest(cls=cls.__name__):
@@ -48,7 +48,7 @@ class TestListFieldDefaultName(unittest.TestCase):
         self.assertEqual(ListField()({}).name, '<list>')
 
     def test_schema_name_wins(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import INITChunk
+        from pcapkit.protocols.transport.sctp.schema import INITChunk
 
         self.assertEqual(INITChunk.__fields__['parameters'].name, 'parameters')
 
@@ -67,7 +67,7 @@ class TestMiscFieldDefaultName(unittest.TestCase):
 
     def test_schema_field(self) -> None:
         from pcapkit.corekit.fields.misc import SchemaField
-        from pcapkit.protocols.schema.transport.sctp import Parameter
+        from pcapkit.protocols.transport.sctp.schema import Parameter
 
         self.assertEqual(SchemaField(schema=Parameter).name, '<schema>')
         self.assertEqual(SchemaField(schema=Parameter)({}).name, '<schema>')

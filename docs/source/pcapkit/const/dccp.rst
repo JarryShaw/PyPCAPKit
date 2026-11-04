@@ -1,11 +1,11 @@
-=====================================================================
-:class:`~pcapkit.protocols.transport.dccp.DCCP` Constant Enumerations
-=====================================================================
+==============================================================================
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` Constant Enumerations
+==============================================================================
 
 .. module:: pcapkit.const.dccp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.dccp.DCCP` implementations. Available
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` implementations. Available
 enumerations include:
 
 .. list-table::

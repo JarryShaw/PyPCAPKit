@@ -1,11 +1,11 @@
-===================================================================
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` Vendor Crawlers
-===================================================================
+============================================================================
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` Vendor Crawlers
+============================================================================
 
 .. module:: pcapkit.vendor.sslv2
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` implementations. Available
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` implementations. Available
 vendor crawlers include:
 
 .. list-table::

@@ -27,7 +27,7 @@ class PayloadProtocolIdentifier(Vendor):
 
     #: Destination of a bare ``PayloadProtocolIdentifier`` member; see
     #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
-    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.transport.sctp', 'SCTP'),)
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),)
 
 
 if __name__ == '__main__':

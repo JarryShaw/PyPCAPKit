@@ -5,7 +5,7 @@ and ``snaplen``.
 The PCAP engine passes all three from the input's global header to
 :meth:`~pcapkit.foundation.extraction.Extractor._open_output`, so
 :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes them back instead of the
-:class:`~pcapkit.protocols.misc.pcap.header.Header` defaults.
+:class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` defaults.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, not at module load. Under
@@ -26,7 +26,7 @@ import warnings
 
 from tests._support import purge_modules, reimport_once_per_class, sample_path
 
-#: Values that differ from every :class:`~pcapkit.protocols.misc.pcap.header.Header`
+#: Values that differ from every :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`
 #: default (``0``, ``0`` and ``262144``).
 THISZONE, SIGFIGS, SNAPLEN = -3600, 7, 1514
 

@@ -35,7 +35,7 @@ ICMP_ECHO = {'id': 0x1234, 'seq': 0x5678, 'data': b'ping'}
 
 
 def _icmpv4_registry() -> 'Any':
-    from pcapkit.protocols.internet.icmpv4 import ICMPv4
+    from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
     return ICMPv4.__type__
 
 
@@ -52,7 +52,7 @@ def _icmpv4_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _icmpv4_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.icmpv4 import ICMPv4
+    from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
     # ``body`` has to be a mapping for ``make`` to dispatch on ``__type__``;
     # a ``bytes`` body is parsed against the schema registry instead.
@@ -60,7 +60,7 @@ def _icmpv4_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _icmpv4_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.icmpv4 import ICMPv4
+    from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
     return ICMPv4(octets, len(octets))
 
 
@@ -69,13 +69,13 @@ def _icmp_extract(parsed: 'Any') -> 'Any':
 
 
 def _icmpv4_rebuild(message: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.icmpv4 import ICMPv4
+    from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
     return ICMPv4(type=message.type, code=message.code, checksum=message.checksum,
                   body=message)
 
 
 def _icmpv6_registry() -> 'Any':
-    from pcapkit.protocols.internet.icmpv6 import ICMPv6
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
     return ICMPv6.__type__
 
 
@@ -94,7 +94,7 @@ def _icmpv6_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _icmpv6_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.icmpv6 import ICMPv6
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
     # With no enclosing IPv6 layer to supply the pseudo-header, the checksum is
     # left zero, and the rebuild passes the parsed zero back.
@@ -102,12 +102,12 @@ def _icmpv6_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _icmpv6_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.icmpv6 import ICMPv6
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
     return ICMPv6(octets, len(octets))
 
 
 def _icmpv6_rebuild(message: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.icmpv6 import ICMPv6
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
     return ICMPv6(type=message.type, code=message.code, checksum=message.checksum,
                   body=message)
 

@@ -111,7 +111,7 @@ class TestPCAPNGKeptAsCaptured(PCAPNGTestCase):
     def test_extraction_continues_past_a_short_epb(self) -> None:
         """The block after a short EPB is read where it sits, and the EPB rebuilds."""
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from tests.protocols.misc.test_pcapng_unit import NamedBuffer
 
         shb = struct.pack('<IIIHHqI', 0x0A0D0D0A, 28, 0x1A2B3C4D, 1, 0, -1, 28)

@@ -902,7 +902,7 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
         """The failure mode itself, rather than the table it came from.
 
         The :class:`Frame` class statement in
-        :mod:`pcapkit.protocols.misc.pcap.frame` is what raised
+        :mod:`pcapkit.protocols.misc.pcap.frame.protocol` is what raised
         ``TypeError: type 'ProtocolBase' is not subscriptable``, so importing it
         after the polluting test case has run is the most direct statement of
         what #660 was.
@@ -913,7 +913,7 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
         case = ProtoChainTests(sorted(_method_names(ProtoChainTests))[0])
         case.run(unittest.TestResult())
 
-        frame = importlib.import_module('pcapkit.protocols.misc.pcap.frame')
+        frame = importlib.import_module('pcapkit.protocols.misc.pcap.frame.protocol')
         protocol = importlib.import_module('pcapkit.protocols.protocol')
 
         self.assertTrue(hasattr(frame, 'Frame'))

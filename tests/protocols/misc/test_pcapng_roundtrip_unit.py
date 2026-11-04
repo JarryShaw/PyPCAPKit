@@ -4,7 +4,7 @@
 Defects, each of which stopped a block from surviving
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`:
 
-* #1267 -- :meth:`PCAPNG.__post_init__ <pcapkit.protocols.misc.pcapng.PCAPNG.__post_init__>`
+* #1267 -- :meth:`PCAPNG.__post_init__ <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__post_init__>`
   packs a constructed block and then parses it on the same instance, and the
   make pass's option count carried into the parse pass, so every option with
   an "only one" guard tripped it on itself.
@@ -86,7 +86,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -99,7 +99,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         """Parse ``octets`` as one block and rebuild it from its data model."""
         import warnings
 
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings():
@@ -112,7 +112,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         """#1267: the make pass's option count does not reach the parse pass."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         block = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                        block={'linktype': 1, 'snaplen': 65535,
@@ -124,7 +124,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         """#1267: the guard itself still holds within one pass."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'\[if_name\] option must be only one, not 2'):
@@ -137,7 +137,7 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         """#1268: ``if_IPv6addr`` declares the 17 octets it carries."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         block = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                        block={'linktype': 1, 'snaplen': 65535,
@@ -188,8 +188,8 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, WireGuardKeyLabel
-        from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, WireGuardKeyLog
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.schema import TLSKeyLog, WireGuardKeyLog
 
         proto = PCAPNG.__new__(PCAPNG)
         tls = proto._make_secrets_tls(SecretsType.TLS_Key_Log, entries={

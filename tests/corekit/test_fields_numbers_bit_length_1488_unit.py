@@ -105,7 +105,7 @@ class TestBitLengthRoundTrip(unittest.TestCase):
 
     def test_schema_round_trips(self) -> None:
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         class T(Schema):
             a: 'int' = UInt16Field(bit_length=12)

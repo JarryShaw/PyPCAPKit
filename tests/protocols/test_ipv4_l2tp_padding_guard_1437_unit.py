@@ -47,7 +47,7 @@ class TestIPv4L2TPPaddingGuard(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipv4_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for name, options in IPV4.items():
             with self.subTest(name):
@@ -56,7 +56,7 @@ class TestIPv4L2TPPaddingGuard(unittest.TestCase):
                 self.assertEqual(bytes(IPv4.from_data(parsed.info).data).hex(), raw.hex())
 
     def test_l2tpv2_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for name, wire in L2TPV2.items():
             with self.subTest(name):

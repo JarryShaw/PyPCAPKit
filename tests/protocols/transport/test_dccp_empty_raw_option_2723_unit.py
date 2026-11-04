@@ -37,7 +37,7 @@ class TestDCCPEmptyRawOption(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_empty_octets_are_refused(self) -> None:
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for options in ([b''], [SLOW_RECEIVER, b''], [b'', SLOW_RECEIVER]):
@@ -46,7 +46,7 @@ class TestDCCPEmptyRawOption(unittest.TestCase):
                     DCCP(options=options)
 
     def test_raw_option_builds_as_given(self) -> None:
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
 
         built = DCCP(options=[SLOW_RECEIVER]).data
         self.assertEqual(built[4], 6)  # Data Offset: the 20-octet header and one word of options

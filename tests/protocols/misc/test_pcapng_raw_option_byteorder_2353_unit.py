@@ -66,7 +66,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
                          block={'byteorder': order})
@@ -80,7 +80,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
     def _reparse(self, octets: 'bytes', context: 'Any') -> 'Any':
         """Parse ``octets`` as one block, as a reader of the file would."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(octets, len(octets), num=2, sct=1, ctx=context)
 
@@ -90,7 +90,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         option = _raw(OptionType.if_name, IF_NAME, sys.byteorder)
         block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,
@@ -108,7 +108,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         record = _raw(RecordType.nrb_record_ipv4, NRB_RECORD, sys.byteorder)
         block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Name_Resolution_Block,
@@ -123,7 +123,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         """#2353: the option area is written, and reads back, in the section's order."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
             with self.subTest(order=order):
@@ -150,7 +150,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
             with self.subTest(order=order):
@@ -179,7 +179,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
@@ -196,14 +196,14 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
     def test_a_raw_option_code_is_read_in_the_packet_byte_order(self) -> None:
         """#2353: with no section, the byte order the packet data declares is used.
 
-        :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` writes
+        :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.pack>` writes
         the block in the order ``__packet__`` declares when there is no section
         to take one from, so that is the order the code has to be read in too.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
@@ -232,7 +232,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         other = 'big' if sys.byteorder == 'little' else 'little'  # type: Literal['little', 'big']
@@ -256,13 +256,13 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         A block of a section is written in that section's byte order whatever
         ``__packet__`` says -- :meth:`PCAPNG.pack
-        <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` overwrites the key from it
+        <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.pack>` overwrites the key from it
         -- so the section's is the order a raw option's code has to be read in.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
@@ -299,7 +299,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         for order in ('little', 'big'):  # type: Literal['little', 'big']
@@ -324,10 +324,10 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
     def test_packet_data_handed_over_as_none_resolves_the_host_byte_order(self) -> None:
         """A ``__packet__`` of :data:`None` means no packet data, not a type error.
 
-        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` takes
+        :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` takes
         :data:`None` for "no packet data", so a caller passing the key through
         with that value reaches :meth:`PCAPNG.make
-        <pcapkit.protocols.misc.pcapng.PCAPNG.make>` with it. Resolving the byte
+        <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make>` with it. Resolving the byte
         order out of it has to degrade to the host fallback; reading it as a
         mapping raises ``TypeError: argument of type 'NoneType' is not a
         container or iterable`` instead of building the block.
@@ -337,7 +337,7 @@ class TestPCAPNGRawOptionByteOrder(unittest.TestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         option = _raw(OptionType.if_name, IF_NAME, sys.byteorder)
         block = PCAPNG(num=2, sct=1, ctx=None, type=BlockType.Interface_Description_Block,

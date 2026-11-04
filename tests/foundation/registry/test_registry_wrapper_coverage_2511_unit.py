@@ -50,11 +50,11 @@ EXCUSED = {
 
 #: ``map path -> (the classmethod its owner inherits, why it fits the map's keys)``.
 INHERITED = {
-    'pcapkit.protocols.transport.dccp.DCCP.__proto__':
+    'pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__':
         ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
-    'pcapkit.protocols.transport.tcp.TCP.__proto__':
+    'pcapkit.protocols.transport.tcp.protocol.TCP.__proto__':
         ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
-    'pcapkit.protocols.transport.udp.UDP.__proto__':
+    'pcapkit.protocols.transport.udp.protocol.UDP.__proto__':
         ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
 }
 
@@ -151,7 +151,7 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
 
     def test_every_map_owner_has_its_classmethod_or_inherits_a_typed_one(self) -> None:
         maps = _maps()
-        self.assertIn('pcapkit.protocols.transport.tcp.TCP.__proto__', maps)  # the walk still finds them
+        self.assertIn('pcapkit.protocols.transport.tcp.protocol.TCP.__proto__', maps)  # the walk still finds them
         missing = []
         for path in sorted(set(maps) - set(EXCUSED)):
             owner, name = maps[path], _classmethod_name(path)
@@ -174,11 +174,11 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
         from pcapkit.const.sctp.parameter import Parameter
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.transport.sctp import SCTP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         # NCP is Packet Type 17, which is UDP's IP protocol number too.
         cases = ((registry.register_ipx, IPX, Internet, Packet.NCP),
@@ -208,10 +208,10 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
     def test_ipx_and_loopback_classmethods_warn_in_their_own_key_terms(self) -> None:
         """Each overrides its parent's, whose warning names an IP protocol or EtherType."""
         from pcapkit.const.ipx.packet import Packet
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
         for owner, code, term in ((IPX, Packet.NCP, 'packet type'), (Loopback, 2, 'address family')):
@@ -233,9 +233,9 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols import __proto__ as names
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         udp = bytes.fromhex('0035' '0035' '0008' '0000')
         ipx = b'\xff\xff' + (30 + len(udp)).to_bytes(2, 'big') + b'\x00\x11' + bytes(24) + udp
@@ -248,7 +248,7 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
                     mock.patch.dict(names), mock.patch.dict(reg_protocol._CODE_LEASES), \
                     mock.patch.dict(reg_protocol._NAME_LEASES), warnings.catch_warnings():
                 warnings.simplefilter('ignore')
-                func(code, 'pcapkit.protocols.transport.udp', 'UDP')
+                func(code, 'pcapkit.protocols.transport.udp.protocol', 'UDP')
                 parsed = owner(io.BytesIO(packet), len(packet))
             self.assertIs(type(parsed.payload), UDP)
 

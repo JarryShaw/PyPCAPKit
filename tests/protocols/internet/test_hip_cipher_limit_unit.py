@@ -43,7 +43,7 @@ class HIPCipherLimitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         # Distinct values, so a test can tell *which* IDs were kept.
         built = HIP(parameters=[(Parameter.HIP_CIPHER, {'ciphers': list(range(1, count + 1))})],

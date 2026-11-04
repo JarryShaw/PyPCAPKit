@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.application.ssl.SSL` Constant Enumerations
-===========================================================================
+""":class:`~pcapkit.protocols.application.ssl.protocol.SSL` Constant Enumerations
+====================================================================================
 
 .. module:: pcapkit.const.tls
 
 This module contains the constant enumerations shared by the record-layer
-implementations under the :class:`~pcapkit.protocols.application.ssl.SSL`
-umbrella -- :class:`~pcapkit.protocols.application.tls.TLS` (SSLv3 through
-TLS 1.3) and :class:`~pcapkit.protocols.application.dtls.DTLS`. Available
+implementations under the :class:`~pcapkit.protocols.application.ssl.protocol.SSL`
+umbrella -- :class:`~pcapkit.protocols.application.tls.protocol.TLS` (SSLv3 through
+TLS 1.3) and :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`. Available
 enumerations include:
 
 .. list-table::

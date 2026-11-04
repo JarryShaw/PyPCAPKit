@@ -123,7 +123,7 @@ class ExtensionHeader(Vendor):
     #:    intentional rather than an erratum. So
     #:    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` has no
     #:    ``BIT_EMU``, and the walk in :meth:`IPv6._decode_next_layer
-    #:    <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` does not
+    #:    <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>` does not
     #:    depend on ``ExtensionHeader(147)`` resolving: its test
     #:    (``tests.protocols.internet.test_ipv6_ext_unit.IPv6ExtUnitTests
     #:    .test_unimplemented_terminal_code_stops_the_walk_not_the_packet``)

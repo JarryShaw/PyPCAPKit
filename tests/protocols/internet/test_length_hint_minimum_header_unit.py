@@ -2,7 +2,7 @@
 """Every ``__length_hint__`` is its protocol's minimum header length.
 
 GitHub issue #1173. :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer`
-keeps a next layer as :class:`~pcapkit.protocols.misc.raw.Raw` when fewer octets
+keeps a next layer as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` when fewer octets
 were captured than its ``__length_hint__`` (#1170). ``IPv6_Route`` hinted
 4 octets and ``MH`` 6, though each header is at least 8, so a stream of 4--7 or
 6--7 octets was parsed and rebuilt as a full 8-octet header. ``HOPOPT`` and
@@ -40,18 +40,18 @@ class LengthHintMinimumHeaderTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_hints_are_the_eight_octet_minimum(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for klass in (IPv6_Route, MH, HOPOPT, IPv6_Opts):
             with self.subTest(klass=klass.__name__):
                 self.assertEqual(object.__new__(klass).__length_hint__(), 8)
 
     def test_short_routing_and_mobility_headers_are_raw(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for proto, sizes in ((43, range(4, 8)), (135, range(6, 8))):
             for size in sizes:
@@ -62,9 +62,9 @@ class LengthHintMinimumHeaderTests(unittest.TestCase):
                     self.assertEqual(IPv4.from_data(parsed.info).data, packet)
 
     def test_complete_headers_still_parse(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for proto, klass in ((43, IPv6_Route), (135, MH)):
             with self.subTest(klass=klass.__name__):
@@ -74,8 +74,8 @@ class LengthHintMinimumHeaderTests(unittest.TestCase):
                 self.assertEqual(parsed.payload.length, 8)
 
     def test_application_payload_goes_through_the_guard(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase
 
         packet = OSPF_HEADER + b'\xab\xcd\xef'

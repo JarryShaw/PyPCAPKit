@@ -4,7 +4,7 @@
 An HTTP/2 frame's Length counts the payload alone (:rfc:`9113#section-4.1`,
 #1138), so any nine octets whose Length fits the buffer are self-consistent.
 :meth:`HTTP._guess_version
-<pcapkit.protocols.application.http.HTTP._guess_version>` falls through to an
+<pcapkit.protocols.application.http.protocol.HTTP._guess_version>` falls through to an
 HTTP/2 trial parse when neither the preface nor an HTTP/1 start line matches. A
 trial that accepts any self-consistent header would take most zero-heavy binary:
 nine zero octets would come back as ``HTTP/2 type=0``, a ``DATA`` frame on stream
@@ -97,7 +97,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _guess(self, data: bytes) -> 'object':
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -113,7 +113,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
 
     def test_explicit_version_still_parses_nine_zero_octets(self) -> None:
         """Explicit HTTP/2 parsing is RFC-exact: the checks apply to the guess only."""
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         http = HTTP(bytes(9), 9, version=2)
         self.assertEqual(http.version, '2')

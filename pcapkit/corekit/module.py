@@ -64,7 +64,7 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
             deliberately writes no resolved class back, so every next layer
             lookup resolves its descriptor again -- the one registered for the
-            code, or the fallback for :class:`~pcapkit.protocols.misc.raw.Raw`
+            code, or the fallback for :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
             when nobody registered it. An extraction of
             :file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them
             fallbacks (:issue:`1559`).

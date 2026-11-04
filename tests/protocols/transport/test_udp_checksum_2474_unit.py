@@ -64,10 +64,10 @@ class UDPChecksumTests(unittest.TestCase):
         reimport_once_per_class(self)
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

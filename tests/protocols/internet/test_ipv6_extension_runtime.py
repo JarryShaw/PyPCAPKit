@@ -132,9 +132,9 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
     def test_ipv6_later_fragments_carry_raw_data(self) -> None:
         # frames 14 to 16 are the later fragments of frame 13's UDP datagram:
         # their data is a slice of it, with no UDP header (:rfc:`8200#section-4.5`)
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         extractor = self._extract('ipv6.pcap')
         self.assertIn('UDP', extractor.frame[12])
@@ -164,7 +164,7 @@ class IPv6ExtensionPayloadOffsetTests(unittest.TestCase):
     ``examples/captures/``: no committed capture carries more than one IPv6
     extension header, and the captures are pinned byte-for-byte by the rest of
     the suite, so a chain of several headers cannot be obtained from them.
-    Parsing goes through :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+    Parsing goes through :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`
     directly, which is the layer that walks the chain -- the link layer and the
     capture container play no part in it.
 
@@ -174,7 +174,7 @@ class IPv6ExtensionPayloadOffsetTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, next_header: int, extensions: bytes):
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         data = build_ipv6(next_header, extensions + UDP_HEADER + UDP_BODY)
         return IPv6(data, len(data))

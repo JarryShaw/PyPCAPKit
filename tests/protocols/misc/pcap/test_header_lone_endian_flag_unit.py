@@ -20,7 +20,7 @@ class PCAPHeaderLoneEndianFlagUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_lone_flag_overrides_byteorder(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         # ``byteorder`` is set to the opposite order, so a flag that is ignored
         # shows up regardless of the host's own byte order
@@ -37,7 +37,7 @@ class PCAPHeaderLoneEndianFlagUnitTests(unittest.TestCase):
                 self.assertEqual(header.info.magic_number.byteorder, byteorder)
 
     def test_conflicting_flags_are_rejected(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import EndianError
 
         for flag in (True, False):

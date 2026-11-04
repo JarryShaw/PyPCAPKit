@@ -86,7 +86,7 @@ class DeferredPacketTests(unittest.TestCase):
 
     def test_reading_packet_decodes_as_dtls_handshake_does(self) -> None:
         from pcapkit.foundation.analysis import dtls_handshake
-        from pcapkit.protocols.data.application.tls import ClientHello
+        from pcapkit.protocols.application.ssl.data import ClientHello
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):
@@ -101,7 +101,7 @@ class DeferredPacketTests(unittest.TestCase):
                 self.assertEqual(datagram.to_dict()['packet'], packet.to_dict())
 
     def test_the_decode_runs_on_first_read_and_only_once(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):
@@ -147,7 +147,7 @@ class ProtocolTypeTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_the_engine_declares_the_dtls_protocol(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):
@@ -160,7 +160,7 @@ class ProtocolTypeTests(unittest.TestCase):
     def test_the_protocol_survives_a_registry_without_it(self) -> None:
         """With no ``'DTLS'`` registered, a name lookup would answer ``Raw``."""
         import pcapkit.protocols
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):

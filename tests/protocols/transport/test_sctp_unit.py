@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`pcapkit.protocols.transport.sctp`.
+"""Unit tests for :mod:`pcapkit.protocols.transport.sctp.protocol`.
 
 Every chunk type is exercised three ways, because each catches a different class
 of mistake:
@@ -48,7 +48,7 @@ class SCTPUnitTests(unittest.TestCase):
         """Parse ``raw`` as a whole SCTP packet."""
         import io
 
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         return SCTP(io.BytesIO(raw), len(raw))
 
@@ -64,7 +64,7 @@ class SCTPUnitTests(unittest.TestCase):
         run second.
 
         """
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         saved = dict(SCTP.__proto__)
         try:
@@ -76,7 +76,7 @@ class SCTPUnitTests(unittest.TestCase):
     @staticmethod
     def _build(chunks, **kwargs) -> bytes:
         """Construct a whole SCTP packet from a list of chunk specifications."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         proto = SCTP.__new__(SCTP)
         params = {'srcport': 9899, 'dstport': 38412, 'vtag': 0x11223344}
@@ -88,7 +88,7 @@ class SCTPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_crc32c_matches_the_rfc9260_appendix_a_table(self) -> None:
-        from pcapkit.protocols.transport.sctp import CRC32C_TABLE, SCTP
+        from pcapkit.protocols.transport.sctp.protocol import CRC32C_TABLE, SCTP
 
         # Spot values quoted verbatim from the crc_c[] table in RFC 9260
         # Appendix A, which is what pins the polynomial and the reflection.
@@ -148,7 +148,7 @@ class SCTPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         proto = SCTP.__new__(SCTP)
         schema = SCTP.make(proto, srcport=9899, dstport=38412, vtag=0x11223344)
@@ -170,7 +170,7 @@ class SCTPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.sctp.cause_code import CauseCode
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SCTP.__new__(SCTP)
@@ -193,7 +193,7 @@ class SCTPUnitTests(unittest.TestCase):
     def test_checksum_is_the_little_endian_crc32c_of_the_zeroed_packet(self) -> None:
         import struct
 
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = self._build([])
         self.assertEqual(len(raw), 12)
@@ -217,7 +217,7 @@ class SCTPUnitTests(unittest.TestCase):
         self.assertTrue(self._packet(raw).checksum_valid)
 
     def test_checksum_helpers_reject_a_short_packet(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -227,7 +227,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_index_is_the_iana_protocol_number(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         self.assertEqual(SCTP.__index__(), TransType.SCTP)
         self.assertEqual(int(SCTP.__index__()), 132)
@@ -236,7 +236,7 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         entry = Internet.__proto__[TransType.SCTP]
         if isinstance(entry, ModuleDescriptor):
@@ -366,7 +366,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_make_data_reconstructs_the_packet(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = self._build([
             (Chunk.Payload_Data, dict(I=True, U=True, B=True, E=True, tsn=9,
@@ -654,7 +654,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_host_name_parameter_must_be_null_terminated(self) -> None:
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SCTP.__new__(SCTP)
@@ -825,7 +825,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_generic_chunk_constructor_rejects_a_bad_flags_width(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SCTP.__new__(SCTP)
@@ -872,7 +872,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_data_chunk_constructor_requires_user_data(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SCTP.__new__(SCTP)
@@ -887,7 +887,7 @@ class SCTPUnitTests(unittest.TestCase):
         """Both NGAP PPIDs dispatch, and a junk payload still degrades.
 
         Both PPIDs are registered as defaults on
-        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__>`
         rather than by a ``register_sctp`` call at import time, so the assertion
         is on the registry's declared contents.
 
@@ -908,10 +908,10 @@ class SCTPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
-        from pcapkit.protocols.application.ngap import NGAP
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         NGAP_PPID = PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol  # noqa: E501
         DTLS_PPID = PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP  # noqa: E501
@@ -926,7 +926,7 @@ class SCTPUnitTests(unittest.TestCase):
                 if module is None:      # already imported by an earlier test
                     self.assertIs(entry, NGAP)
                 else:
-                    self.assertEqual(module, 'pcapkit.protocols.application.ngap')
+                    self.assertEqual(module, 'pcapkit.protocols.application.ngap.protocol')
                     self.assertEqual(entry.name, 'NGAP')
 
         raw = self._build([(Chunk.Payload_Data,
@@ -957,12 +957,12 @@ class SCTPUnitTests(unittest.TestCase):
     def test_unregistered_ppid_does_not_mutate_the_class_registry(self) -> None:
         """An unregistered PPID reaches :class:`Raw` without touching ``__proto__``.
 
-        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+        :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__>`
         is a :class:`collections.defaultdict`, so *reading* a missing key
         inserts it. Dispatching an unregistered PPID through that read mutates
         class-level state shared by every later :class:`SCTP` instance in the
         process, and it makes
-        :meth:`SCTP.register <pcapkit.protocols.transport.sctp.SCTP.register>`
+        :meth:`SCTP.register <pcapkit.protocols.transport.sctp.protocol.SCTP.register>`
         subsequently claim the PPID was "already registered".
 
         The symptom is invisible unless looked for, hence the before/after
@@ -972,9 +972,9 @@ class SCTPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         # 4243 is the first code in the trailing "Unassigned" block of the IANA
         # registry, i.e. a PPID that is well-formed but cannot be registered.
@@ -1023,7 +1023,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_packet_without_a_data_chunk_has_no_payload(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         raw = self._build([(Chunk.Cookie_Acknowledgement, {})])
         proto = self._packet(raw)
@@ -1048,16 +1048,16 @@ class SCTPUnitTests(unittest.TestCase):
                          [b'first', b'second'])
 
     def test_register_rejects_a_non_protocol(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import RegistryError
 
         with self.assertRaises(RegistryError):
             SCTP.register(60, int)  # type: ignore[arg-type]
 
     def test_register_warns_on_overwrite(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         class Other(Raw):
             pass
@@ -1087,9 +1087,9 @@ class SCTPUnitTests(unittest.TestCase):
         <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         with self._proto_registry():
             SCTP.register(4243, Raw)
@@ -1099,11 +1099,11 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_register_sctp_wrapper_writes_the_ppid_registry(self) -> None:
         from pcapkit.foundation.registry.protocols import register_sctp
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         with self._proto_registry():
-            register_sctp(4243, 'pcapkit.protocols.misc.raw', 'Raw')
+            register_sctp(4243, 'pcapkit.protocols.misc.raw.protocol', 'Raw')
             self.assertIs(SCTP.__proto__[4243], Raw)
 
     ##########################################################################
@@ -1114,8 +1114,8 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.cause_code import CauseCode
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for register, code, registry in (
             (SCTP.register_chunk, Chunk.Payload_Data, SCTP.__chunk__),
@@ -1137,12 +1137,12 @@ class SCTPUnitTests(unittest.TestCase):
 
         #425's defect, on SCTP's three sub-registries. Each is a
         :class:`collections.defaultdict` on a class attribute shared by every
-        :class:`~pcapkit.protocols.transport.sctp.SCTP` instance in the process,
+        :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` instance in the process,
         so ``registry[code]`` inserted every unregistered chunk type, parameter
         type and error cause code a capture happened to carry -- and the value it
         inserted was ``'donone'``, which the default factory returns anyway. The
         entries bought nothing and made
-        :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_chunk` and its
+        :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP.register_chunk` and its
         siblings report an overwrite of something nobody registered.
 
         The chunk type, the parameter type and the error cause code (both
@@ -1153,8 +1153,8 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.cause_code import CauseCode
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport import sctp as sctp_module
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp import protocol as sctp_module
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         header = bytes.fromhex('26ab960c1122334400000000')
         for register, code, registry, chunk in (
@@ -1190,7 +1190,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_callable_sub_registry_entries_are_used(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         sentinel = object()
         parser = mock.Mock(return_value=sentinel)
@@ -1211,7 +1211,7 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_chunks_accept_prebuilt_schemas_and_raw_bytes(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.schema.transport.sctp import CookieACKChunk
+        from pcapkit.protocols.transport.sctp.schema import CookieACKChunk
 
         schema = CookieACKChunk(type=Chunk.Cookie_Acknowledgement, flags=b'\x00', length=4)
         raw = self._build([schema, bytes.fromhex('08000004')])
@@ -1289,7 +1289,7 @@ class SCTPUnitTests(unittest.TestCase):
         frames = list(extractor.frame)
         self.assertEqual(len(frames), len(packets))
 
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         parsed = []
         for index, got in enumerate(frames):

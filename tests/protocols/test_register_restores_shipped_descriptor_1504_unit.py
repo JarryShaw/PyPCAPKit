@@ -38,13 +38,13 @@ SITES = (
     ('pcapkit.protocols.link.link', 'Link',
      'pcapkit.const.reg.ethertype:EtherType.Address_Resolution_Protocol'),
     ('pcapkit.protocols.internet.internet', 'Internet', 'pcapkit.const.reg.transtype:TransType.TCP'),
-    ('pcapkit.protocols.transport.tcp', 'TCP', 80),
-    ('pcapkit.protocols.transport.udp', 'UDP', 1701),
-    ('pcapkit.protocols.transport.sctp', 'SCTP',
+    ('pcapkit.protocols.transport.tcp.protocol', 'TCP', 80),
+    ('pcapkit.protocols.transport.udp.protocol', 'UDP', 1701),
+    ('pcapkit.protocols.transport.sctp.protocol', 'SCTP',
      'pcapkit.const.sctp.payload_protocol_identifier:PayloadProtocolIdentifier.'
      'PayloadProtocolIdentifier_3GPP_NG_Application_Protocol'),
-    ('pcapkit.protocols.misc.pcap.frame', 'Frame', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
-    ('pcapkit.protocols.misc.pcapng', 'PCAPNG', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
+    ('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
+    ('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
 )
 
 #: A code no site ships an entry under.
@@ -108,18 +108,18 @@ class TestRestoreShippedDescriptor(unittest.TestCase):
     def _sites(self):  # type: ignore[no-untyped-def]
         """Yield ``(label, cls, code)``, the scratch ``ProtocolBase`` site last."""
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for module, name, code in SITES:
             yield name, getattr(importlib.import_module(module), name), _code(code)
-        table = collections.defaultdict(lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
-                                        {1: ModuleDescriptor('pcapkit.protocols.misc.no_payload', 'NoPayload')})
+        table = collections.defaultdict(lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+                                        {1: ModuleDescriptor('pcapkit.protocols.misc.no_payload.protocol', 'NoPayload')})
         yield 'ProtocolBase', type('W1504Scratch', (Raw,), {'__module__': __name__, '__proto__': table}), 1
 
     def _each_site(self, check):  # type: ignore[no-untyped-def]
         """Run ``check(cls, code, shipped, custom)`` per site, each under its own ``subTest``."""
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         custom = type('W1504Custom', (Raw,), {'__module__': __name__})
         for label, cls, code in self._sites():
@@ -173,7 +173,7 @@ class TestRestoreShippedDescriptor(unittest.TestCase):
 
     def test_dispatch_resolves_the_restored_entry_when_it_runs(self) -> None:
         """After the round trip the class is looked up at dispatch, not at the restore."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         def check(cls, code, shipped, custom):  # type: ignore[no-untyped-def]
             cls.register(code, custom)

@@ -42,7 +42,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
 
     def test_empty_parameter_is_refused(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for chunk in (Chunk.Initiation, Chunk.Initiation_Acknowledgement):
@@ -53,7 +53,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
 
     def test_empty_cause_is_refused(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for chunk in (Chunk.Abort, Chunk.Operation_Error):
@@ -64,7 +64,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
 
     def test_raw_parameter_builds_as_given(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         built = SCTP(chunks=[(Chunk.Initiation, {'parameters': [PARAMETER]})]).data
         self.assertEqual(built[12], Chunk.Initiation)
@@ -73,7 +73,7 @@ class TestSCTPEmptyRawItem(unittest.TestCase):
 
     def test_raw_cause_builds_as_given(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         built = SCTP(chunks=[(Chunk.Abort, {'error': [CAUSE]})]).data
         self.assertEqual(built[12], Chunk.Abort)

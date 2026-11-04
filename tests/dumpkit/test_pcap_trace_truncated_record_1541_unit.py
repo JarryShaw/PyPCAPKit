@@ -132,7 +132,7 @@ class TestPCAPTraceTruncatedRecord(unittest.TestCase):
         """#1541: ``incl_len`` is ``len(packet)``, whatever ``frame_info`` declares."""
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         path = os.path.join(self.tmpdir.name, 'out.pcap')
         dumper = PCAPIO(path, protocol=LinkType.ETHERNET, byteorder='little', nanosecond=False)

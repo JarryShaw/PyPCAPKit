@@ -1,11 +1,11 @@
-===========================================================
-:class:`~pcapkit.protocols.internet.hip.HIP` Vendor Crawler
-===========================================================
+====================================================================
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` Vendor Crawler
+====================================================================
 
 .. module:: pcapkit.vendor.hip
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

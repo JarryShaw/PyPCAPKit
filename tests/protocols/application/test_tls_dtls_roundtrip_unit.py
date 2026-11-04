@@ -8,13 +8,13 @@ coalesced in one record; ``alert``; ``change_cipher_spec``;
 ``application_data``; and, for DTLS, both an unfragmented handshake message
 (which decodes exactly as TLS's does) and a message split across two
 fragments (which does not, since one is not reassembled -- see
-:class:`~pcapkit.protocols.application.dtls.DTLS`).
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`).
 
 Every case is checked two ways: parsing the wire octets and rebuilding them
 through :meth:`~pcapkit.protocols.application.application.Application.from_data`
 (the parse-then-rebuild direction), and building the same octets through
-:meth:`~pcapkit.protocols.application.tls.TLS.make`/
-:meth:`~pcapkit.protocols.application.dtls.DTLS.make` and reading them back
+:meth:`~pcapkit.protocols.application.tls.protocol.TLS.make`/
+:meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.make` and reading them back
 (the make-then-parse direction) -- so neither direction is a tautology of
 the other. Segments of several TLS records, and datagrams of several DTLS
 records, are checked the same way, each record a layer of its own (#2517,
@@ -221,7 +221,7 @@ class TestTLSRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         for name, wire in TLS_RECORDS.items():
             with self.subTest(record=name):
@@ -238,7 +238,7 @@ class TestTLSRoundTrip(unittest.TestCase):
         ``from_data`` at all.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         for name, wire in TLS_RECORDS.items():
             with self.subTest(record=name):
@@ -263,8 +263,8 @@ class TestTLSRoundTrip(unittest.TestCase):
 
         """
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import Handshake
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import Handshake
 
         wire = TLS_RECORDS['handshake: HelloRequest + ServerHelloDone coalesced']
         parsed = TLS(wire, len(wire))
@@ -277,7 +277,7 @@ class TestTLSRoundTrip(unittest.TestCase):
         )
 
     def test_malformed_client_hello_raises_protocol_error(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         # A ClientHello whose declared body is shorter than its fixed fields
@@ -294,7 +294,7 @@ class TestTLSRoundTrip(unittest.TestCase):
         applied to the encrypted close_notify case below.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = _tls_record(21, b'\x02\x0a\x00')
         parsed = TLS(wire, len(wire))
@@ -314,7 +314,7 @@ def _split_records(wire: bytes) -> 'list[bytes]':
 
 def _layers(proto: 'object') -> 'tuple[list, object]':
     """Each TLS layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.tls import TLS
+    from pcapkit.protocols.application.tls.protocol import TLS
 
     layers = []
     while isinstance(proto, TLS):
@@ -330,8 +330,8 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_record_is_a_tls_layer(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for name, wire in TLS_SEGMENTS.items():
             with self.subTest(segment=name):
@@ -345,8 +345,8 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
                     self.assertEqual(layer.info.length, len(record) - 5)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp_to_443 = bytes.fromhex('c35001bb00000001000000015010ffff00000000')
         for name, wire in TLS_SEGMENTS.items():
@@ -363,7 +363,7 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
 
     def test_make_then_parse_is_byte_exact(self) -> None:
         """Each record made from its parsed content, carrying the next as ``payload``."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         for name, wire in TLS_SEGMENTS.items():
             with self.subTest(segment=name):
@@ -381,7 +381,7 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
     def test_records_match_the_specification(self) -> None:
         """Each record's own tier and content, per its header (RFC 9846 section 5.1)."""
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = TLS_SEGMENTS['TLS 1.3 ServerHello + change_cipher_spec + application_data x2']
         layers, _ = _layers(TLS(wire, len(wire)))
@@ -399,8 +399,8 @@ class TestTLSSegmentRoundTrip(unittest.TestCase):
 
     def test_trailing_partial_record_stays_raw(self) -> None:
         """The record a segment ends inside is the reassembly limit, kept as its own octets."""
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, segment in TLS_SEGMENTS.items():
             with self.subTest(segment=name):
@@ -420,7 +420,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for name, wire in DTLS_RECORDS.items():
             with self.subTest(record=name):
@@ -428,7 +428,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(DTLS.from_data(parsed.info)).hex(), wire.hex())
 
     def test_make_then_parse_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for name, wire in DTLS_RECORDS.items():
             with self.subTest(record=name):
@@ -443,7 +443,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
 
     def test_fragment_is_flagged_and_body_kept_undecoded(self) -> None:
         """The documented limitation: a fragmented message is not reassembled."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = DTLS_RECORDS['handshake: fragment 1 of 2']
         parsed = DTLS(wire, len(wire))
@@ -454,7 +454,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
         self.assertEqual(message.body, _CH_BODY[:_CH_HALF])
 
     def test_unfragmented_message_decodes_its_client_hello(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = DTLS_RECORDS['handshake: unfragmented ClientHello']
         parsed = DTLS(wire, len(wire))
@@ -471,7 +471,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
         ``ClientHello`` reader that never looked for one.
 
         """
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = DTLS_RECORDS['handshake: unfragmented ClientHello']
         parsed = DTLS(wire, len(wire))
@@ -481,7 +481,7 @@ class TestDTLSRoundTrip(unittest.TestCase):
         self.assertEqual(message.body.cookie, _CH_COOKIE)
 
     def test_unfragmented_client_hello_with_an_empty_cookie(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = DTLS_RECORDS['handshake: unfragmented ClientHello with an empty cookie']
         parsed = DTLS(wire, len(wire))
@@ -508,7 +508,7 @@ def _split_dtls_records(wire: bytes) -> 'list[bytes]':
 
 def _dtls_layers(proto: 'object') -> 'tuple[list, object]':
     """Each DTLS layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.dtls import DTLS
+    from pcapkit.protocols.application.dtls.protocol import DTLS
 
     layers = []
     while isinstance(proto, DTLS):
@@ -524,9 +524,9 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_record_is_a_dtls_layer(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.dtls import DTLSCiphertext
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.dtls.data import DTLSCiphertext
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for name, wire in DTLS_DATAGRAMS.items():
             with self.subTest(datagram=name):
@@ -546,8 +546,8 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
                     self.assertEqual(layer.info.length, len(record) - 13)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for name, wire in DTLS_DATAGRAMS.items():
             with self.subTest(datagram=name):
@@ -564,8 +564,8 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
 
     def test_make_then_parse_is_byte_exact(self) -> None:
         """Each record made from its parsed fields, carrying the next as ``payload``."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.dtls import DTLSCiphertext
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.dtls.data import DTLSCiphertext
 
         for name, wire in DTLS_DATAGRAMS.items():
             with self.subTest(datagram=name):
@@ -592,7 +592,7 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
     def test_records_match_the_specification(self) -> None:
         """Each record's own tier and fields, per its header (RFC 9147 section 4)."""
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = DTLS_DATAGRAMS['DTLS 1.3 ServerHello + unified-header records, the last without a length']
         layers, _ = _dtls_layers(DTLS(wire, len(wire)))
@@ -620,8 +620,8 @@ class TestDTLSDatagramRoundTrip(unittest.TestCase):
 
     def test_trailing_partial_record_stays_raw(self) -> None:
         """A record the datagram ends inside is kept as its own octets, with no error."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name in ('change_cipher_spec + alert', 'ClientKeyExchange + change_cipher_spec + encrypted Finished'):
             with self.subTest(datagram=name):

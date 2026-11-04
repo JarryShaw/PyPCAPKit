@@ -75,7 +75,7 @@ class SCTPChunkFlagsMessage(MakerMessageTestCase):
 
     def test_wrong_width_flags_name_the_argument(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         sctp = self.protocol(SCTP)
@@ -91,7 +91,7 @@ class SCTPChunkFlagsMessage(MakerMessageTestCase):
 
     def test_one_octet_flags_still_build(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         sctp = self.protocol(SCTP)
         for maker, name in self.MAKERS.items():
@@ -105,7 +105,7 @@ class SCTPDataChunkMessage(MakerMessageTestCase):
 
     def test_empty_data_names_the_argument(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         sctp = self.protocol(SCTP)
@@ -118,7 +118,7 @@ class SCTPDataChunkMessage(MakerMessageTestCase):
 
     def test_one_octet_of_user_data_still_builds(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         sctp = self.protocol(SCTP)
         schema = sctp._make_chunk_data(Chunk.Payload_Data, data=b'!')
@@ -131,7 +131,7 @@ class SCTPHostNameMessage(MakerMessageTestCase):
 
     def test_unterminated_name_names_the_argument(self) -> None:
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         sctp = self.protocol(SCTP)
@@ -147,7 +147,7 @@ class SCTPHostNameMessage(MakerMessageTestCase):
 
     def test_terminated_name_still_builds(self) -> None:
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         sctp = self.protocol(SCTP)
         schema = sctp._make_param_hostname(Parameter.Host_Name_Address, name=b'example\x00')
@@ -159,7 +159,7 @@ class SCTPInvalidStreamMessage(MakerMessageTestCase):
 
     def test_wrong_width_reserved_names_the_argument(self) -> None:
         from pcapkit.const.sctp.cause_code import CauseCode
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         sctp = self.protocol(SCTP)
@@ -174,7 +174,7 @@ class SCTPInvalidStreamMessage(MakerMessageTestCase):
 
     def test_two_octet_reserved_still_builds(self) -> None:
         from pcapkit.const.sctp.cause_code import CauseCode
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         sctp = self.protocol(SCTP)
         schema = sctp._make_cause_invalid_stream(CauseCode.Invalid_Stream_Identifier,
@@ -188,7 +188,7 @@ class MHMakeDataMessage(MakerMessageTestCase):
 
     def test_unreadable_data_names_the_argument(self) -> None:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         mh = self.protocol(MH)
@@ -204,7 +204,7 @@ class MHMakeDataMessage(MakerMessageTestCase):
 
     def test_bytes_data_still_builds(self) -> None:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         mh = self.protocol(MH)
         schema = mh.make(type=Packet.Binding_Refresh_Request, data=b'\x00\x00')
@@ -216,7 +216,7 @@ class MHOptionDataMessages(MakerMessageTestCase):
 
     def test_authorization_data_multiple_of_eight(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         mh = self.protocol(MH)
@@ -234,7 +234,7 @@ class MHOptionDataMessages(MakerMessageTestCase):
 
     def test_badf_authenticator_not_empty(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         mh = self.protocol(MH)
@@ -249,7 +249,7 @@ class MHOptionDataMessages(MakerMessageTestCase):
 
     def test_auth_data_keeps_the_option_aligned(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         mh = self.protocol(MH)
@@ -273,7 +273,7 @@ class MHPadOptionWarning(MakerMessageTestCase):
 
     def test_pad1_with_a_length_warns_by_name(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.warnings import ProtocolWarning
 
         mh = self.protocol(MH)
@@ -294,7 +294,7 @@ class MHPadOptionWarning(MakerMessageTestCase):
 
     def test_pad1_with_no_length_does_not_warn(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.warnings import ProtocolWarning
 
         mh = self.protocol(MH)
@@ -321,7 +321,7 @@ class TCPMPTCPCapableMessage(MakerMessageTestCase):
     def test_a_field_without_its_predecessor_names_both(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         tcp = self.protocol(TCP)
@@ -336,7 +336,7 @@ class TCPMPTCPCapableMessage(MakerMessageTestCase):
 
     def test_every_rfc_8684_length_still_builds(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = self.protocol(TCP)
         #: :rfc:`8684` section 3.1's five MP_CAPABLE lengths, by how many of
@@ -358,21 +358,21 @@ class HIPLocatorMessage(MakerMessageTestCase):
     """``_make_locator`` names the locator it could not read."""
 
     def locator(self, value: 'Any') -> 'Any':
-        from pcapkit.protocols.data.internet.hip import Locator
+        from pcapkit.protocols.internet.hip.data import Locator
 
         return Locator(traffic=0, type=0, length=16, preferred=False, reserved=0,
                        lifetime=datetime.timedelta(seconds=0), locator=value)
 
     def parameter(self, value: 'Any') -> 'Any':
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet.hip import LocatorSetParameter
+        from pcapkit.protocols.internet.hip.data import LocatorSetParameter
 
         return LocatorSetParameter(type=Parameter.LOCATOR_SET, critical=False, length=24,
                                    locator_set=(self.locator(value),))
 
     def test_unreadable_locator_names_the_argument(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         hip = self.protocol(HIP)
@@ -390,7 +390,7 @@ class HIPLocatorMessage(MakerMessageTestCase):
         import ipaddress
 
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         hip = self.protocol(HIP)
         address = ipaddress.IPv6Address('::1')
@@ -403,7 +403,7 @@ class PCAPNGDSBSecretsMessage(MakerMessageTestCase):
     """``_make_block_dsb`` names ``secrets_data`` and the forms it reads."""
 
     def test_unreadable_secrets_data_names_the_argument(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         pcapng = self.protocol(PCAPNG)
@@ -417,7 +417,7 @@ class PCAPNGDSBSecretsMessage(MakerMessageTestCase):
                     f'a DSBSecrets data model or a Schema, not {secrets_data!r}')
 
     def test_raw_secrets_data_still_builds(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         pcapng = self.protocol(PCAPNG)
         schema = pcapng._make_block_dsb(secrets_data=b'CLIENT_RANDOM 00 11\n')
@@ -442,7 +442,7 @@ class ReadersKeepInvalidFormat(MakerMessageTestCase):
                     + b'\x00\x00\x00\x01' + b'\x00\x01\x00\x02' + bytes(4))
 
     def test_the_reader_still_reports_an_invalid_format(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as context:

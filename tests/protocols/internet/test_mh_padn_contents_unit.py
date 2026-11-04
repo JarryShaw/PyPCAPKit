@@ -26,7 +26,7 @@ class TestMHPadNContents(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_padn_option_contents_rebuild_from_data(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # BRR, then a PadN of Option Length 6 with non-zero contents
         raw = bytes.fromhex('3b01000000000000' '0106aabbccddeeff')
@@ -37,7 +37,7 @@ class TestMHPadNContents(unittest.TestCase):
 
     def test_padn_option_make_writes_zeros_unless_given(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         self.assertEqual(bytes(proto._make_opt_pad(Option.PadN, length=2)).hex(), '01020000')
@@ -49,7 +49,7 @@ class TestMHPadNContents(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         def build(pad: 'dict[str, object]') -> 'bytes':
             args = {'fid': 7, 'fid_pri': 2, 'status': 0,

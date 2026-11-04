@@ -44,7 +44,7 @@ class HIPv2OnlyParameterTests(unittest.TestCase):
         }
 
     def _build(self, code: 'object', kwargs: 'dict[str, object]', version: 'int') -> 'bytes':
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(parameters=[(code, kwargs)], extension=True,
                    version=version, **HIP_BASE).data
@@ -58,7 +58,7 @@ class HIPv2OnlyParameterTests(unittest.TestCase):
                     self._build(code, kwargs, 1)
 
     def test_parsing_at_version_1_raises(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for code, kwargs in self._cases().items():
@@ -71,7 +71,7 @@ class HIPv2OnlyParameterTests(unittest.TestCase):
                     HIP(bytes(octets), len(octets), extension=True)
 
     def test_version_2_still_round_trips(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for code, kwargs in self._cases().items():
             with self.subTest(code=code):

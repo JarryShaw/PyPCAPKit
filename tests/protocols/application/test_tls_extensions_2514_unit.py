@@ -70,7 +70,7 @@ class ExtensionDecodingTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _extensions(self, wire: bytes) -> 'tuple':
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         parsed = TLS(wire, len(wire))
         self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
@@ -82,11 +82,14 @@ class ExtensionDecodingTests(unittest.TestCase):
 
     def test_client_hello_extensions(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import (KeyShareClientHello, KeyShareEntry,
-                                                            NamedGroupList, ProtocolNameList,
-                                                            ServerName, ServerNameList,
-                                                            SignatureSchemeList,
-                                                            SupportedVersionsClientHello)
+        from pcapkit.protocols.application.ssl.data import KeyShareClientHello
+        from pcapkit.protocols.application.ssl.data import KeyShareEntry
+        from pcapkit.protocols.application.ssl.data import NamedGroupList
+        from pcapkit.protocols.application.ssl.data import ProtocolNameList
+        from pcapkit.protocols.application.ssl.data import ServerName
+        from pcapkit.protocols.application.ssl.data import ServerNameList
+        from pcapkit.protocols.application.ssl.data import SignatureSchemeList
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsClientHello
 
         sni, groups, sigalgs, alpn, versions, key_share = self._extensions(
             _client_hello(SNI, GROUPS, SIGALGS, ALPN, VERSIONS, KEY_SHARE))
@@ -108,15 +111,16 @@ class ExtensionDecodingTests(unittest.TestCase):
 
     def test_empty_key_share_in_a_client_hello(self) -> None:
         """A client asking for a ``HelloRetryRequest`` sends no shares (RFC 9846 section 4.3.8)."""
-        from pcapkit.protocols.data.application.tls import KeyShareClientHello
+        from pcapkit.protocols.application.ssl.data import KeyShareClientHello
 
         key_share, = self._extensions(_client_hello(_ext(51, _vec(b''))))
         self.assertEqual(key_share.data, KeyShareClientHello(client_shares=()))
 
     def test_server_hello_extensions(self) -> None:
-        from pcapkit.protocols.data.application.tls import (KeyShareEntry, KeyShareServerHello,
-                                                            ProtocolNameList,
-                                                            SupportedVersionsServerHello)
+        from pcapkit.protocols.application.ssl.data import KeyShareEntry
+        from pcapkit.protocols.application.ssl.data import KeyShareServerHello
+        from pcapkit.protocols.application.ssl.data import ProtocolNameList
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsServerHello
 
         versions, key_share, sni, alpn = self._extensions(_server_hello(
             _ext(43, b'\x03\x04'), _ext(51, b'\x00\x1d' + _vec(b'\xaa' * 32)), _ext(0, b''),
@@ -129,9 +133,9 @@ class ExtensionDecodingTests(unittest.TestCase):
 
     def test_hello_retry_request_extensions(self) -> None:
         """A ``ServerHello`` carrying the ``HelloRetryRequest`` random takes that message's shapes."""
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import (KeyShareHelloRetryRequest,
-                                                            SupportedVersionsServerHello)
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import KeyShareHelloRetryRequest
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsServerHello
 
         wire = _server_hello(_ext(43, b'\x03\x04'), _ext(51, b'\x00\x17'), _ext(44, _vec(b'cookie')),
                              random=HRR_RANDOM)
@@ -146,9 +150,10 @@ class ExtensionDecodingTests(unittest.TestCase):
         self.assertEqual(key_share.data, b'\x00\x17')
 
     def test_encrypted_extensions(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import (EncryptedExtensions, NamedGroupList,
-                                                            ProtocolNameList)
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import EncryptedExtensions
+        from pcapkit.protocols.application.ssl.data import NamedGroupList
+        from pcapkit.protocols.application.ssl.data import ProtocolNameList
 
         wire = _encrypted_extensions(_ext(0, b''), GROUPS, _ext(16, _vec(_vec(b'h2', 1))))
         body = TLS(wire, len(wire)).info.content[0].body
@@ -163,8 +168,8 @@ class ExtensionDecodingTests(unittest.TestCase):
 
     def test_dtls_client_hello_extensions(self) -> None:
         """DTLS shares the registry, so its ``ClientHello`` decodes the same."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.tls import SupportedVersionsClientHello
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsClientHello
 
         body = (b'\xfe\xfd' + bytes(32) + b'\x00' + b'\x00' + _vec(b'\x13\x01') + _vec(b'\x00', 1)
                 + _vec(_ext(43, _vec(b'\xfe\xfc', 1)) + ALPN))
@@ -187,7 +192,7 @@ class UnknownExtensionTests(unittest.TestCase):
 
     def test_unregistered_types_stay_raw(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         cases = (
             (21, bytes(7), 'padding'),
@@ -214,9 +219,9 @@ class MalformedExtensionTests(unittest.TestCase):
 
     def test_malformed_bodies_stay_raw_and_rebuild(self) -> None:
         """The rest of the list still decodes, here a ``supported_versions`` after it."""
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import (SupportedVersionsClientHello,
-                                                            SupportedVersionsServerHello)
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsClientHello
+        from pcapkit.protocols.application.ssl.data import SupportedVersionsServerHello
 
         cases = {
             'server_name list length too long': (_client_hello, _ext(0, b'\x00\x10\x00\x00\x01a')),
@@ -250,7 +255,7 @@ class MalformedExtensionTests(unittest.TestCase):
                 self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
 
     def test_a_structure_the_message_does_not_have_stays_raw(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         for extension in (_ext(43, b'\x03\x04'), _ext(51, b'\x00\x17')):
             with self.subTest(extension=extension.hex()):
@@ -261,7 +266,7 @@ class MalformedExtensionTests(unittest.TestCase):
                 self.assertEqual(bytes(TLS.from_data(parsed.info)).hex(), wire.hex())
 
     def test_a_malformed_extension_leaves_version_detection_alone(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         wire = _client_hello(_ext(16, b'\x00\x09\x02h2'), VERSIONS)
         parsed = TLS(wire, len(wire))
@@ -271,7 +276,7 @@ class MalformedExtensionTests(unittest.TestCase):
         self.assertEqual(versions.data.versions, (0x0304, 0x0303))
 
     def test_broken_framing_raises(self) -> None:
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, wire in {
@@ -293,8 +298,8 @@ class ExtensionConstructionTests(unittest.TestCase):
     def _hello(extensions: 'tuple', *, random: bytes = bytes(range(32)), server: bool = False) -> bytes:
         from pcapkit.const.tls.content_type import ContentType
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import ClientHello, Handshake, ServerHello
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import ClientHello, Handshake, ServerHello
 
         if server:
             body = ServerHello(version=0x0303, random=random, session_id=b'', cipher_suite=0x1301,
@@ -310,7 +315,7 @@ class ExtensionConstructionTests(unittest.TestCase):
 
     def test_client_hello_from_keyword_arguments(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import KeyShareEntry, ServerName
+        from pcapkit.protocols.application.ssl.data import KeyShareEntry, ServerName
 
         made = self._hello((
             (ExtensionType.server_name, {'server_name_list': (ServerName(name_type=0, name=b'example.com'),)}),
@@ -326,7 +331,7 @@ class ExtensionConstructionTests(unittest.TestCase):
 
     def test_server_and_retry_hellos_from_keyword_arguments(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import KeyShareEntry
+        from pcapkit.protocols.application.ssl.data import KeyShareEntry
 
         share = KeyShareEntry(group=0x001D, key_exchange=b'\xaa')
         made = self._hello(((ExtensionType.supported_versions, {'selected_version': 0x0304}),
@@ -342,14 +347,14 @@ class ExtensionConstructionTests(unittest.TestCase):
 
     def test_raw_octets_are_written_as_they_are(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import Extension
+        from pcapkit.protocols.application.ssl.data import Extension
 
         made = self._hello((Extension(type=ExtensionType.supported_groups, data=b'\xab\xcd'),))
         self.assertEqual(made.hex(), _client_hello(_ext(10, b'\xab\xcd')).hex())
 
     def test_a_structure_with_nothing_to_build_from_raises(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import Extension, NamedGroupList
+        from pcapkit.protocols.application.ssl.data import Extension, NamedGroupList
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, extensions, server in (
@@ -364,7 +369,7 @@ class ExtensionConstructionTests(unittest.TestCase):
     def test_a_value_too_wide_for_its_field_raises_struct_error(self) -> None:
         """Every field ``make`` packs refuses an oversize value the same way, as ``Protocol._make_pack`` does."""
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.data.application.tls import Extension, KeyShareEntry, ServerName
+        from pcapkit.protocols.application.ssl.data import Extension, KeyShareEntry, ServerName
         from pcapkit.utilities.exceptions import StructError
 
         share = KeyShareEntry(group=0x10000, key_exchange=b'\x00')
@@ -412,8 +417,8 @@ class ExtensionConstructionTests(unittest.TestCase):
     @staticmethod
     def _record(alias: str, **kwargs: object) -> bytes:
         """``make`` a TLS or DTLS record from ``kwargs``."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         maker = object.__new__(TLS if alias == 'TLS' else DTLS)
         return bytes(maker.make(**kwargs))
@@ -429,9 +434,12 @@ class ExtensionConstructionTests(unittest.TestCase):
         """One ``(case, maker, content type, content)`` per field the hello, handshake and content makers pack."""
         from pcapkit.const.tls.content_type import ContentType
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.protocols.data.application.dtls import DTLSHandshake
-        from pcapkit.protocols.data.application.tls import (Alert, ChangeCipherSpec, ClientHello, Handshake,
-                                                            ServerHello)
+        from pcapkit.protocols.application.dtls.data import DTLSHandshake
+        from pcapkit.protocols.application.ssl.data import Alert
+        from pcapkit.protocols.application.ssl.data import ChangeCipherSpec
+        from pcapkit.protocols.application.ssl.data import ClientHello
+        from pcapkit.protocols.application.ssl.data import Handshake
+        from pcapkit.protocols.application.ssl.data import ServerHello
 
         def client(**fields: object) -> 'ClientHello':
             values = {'version': 0x0303, 'random': bytes(32), 'session_id': b'', 'cookie': None,
@@ -490,9 +498,9 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.const.tls.handshake_type import HandshakeType
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import ProtocolNameList
+        from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import ProtocolNameList
         from pcapkit.utilities.warnings import RegistryWarning
 
         calls = []
@@ -533,9 +541,9 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.const.tls.handshake_type import HandshakeType
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import ExtensionData
+        from pcapkit.protocols.application.ssl.protocol import SSL
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import ExtensionData
         from pcapkit.utilities.exceptions import ProtocolError
 
         @info_final
@@ -578,7 +586,7 @@ class ExtensionRegistryTests(unittest.TestCase):
     def test_handing_back_the_shipped_entry_is_a_silent_no_op(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.ssl.protocol import SSL
 
         shipped = dict(SSL.__extension__)
         with warnings.catch_warnings():
@@ -590,7 +598,7 @@ class ExtensionRegistryTests(unittest.TestCase):
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.const.tls.handshake_type import HandshakeType
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.ssl.protocol import SSL
         from pcapkit.utilities.exceptions import RegistryError
 
         shipped = dict(SSL.__extension__)

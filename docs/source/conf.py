@@ -53,7 +53,7 @@ os.environ['PCAPKIT_SPHINX'] = '1'
 import pcapkit
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.sentinels import NO_VALUE
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema import Schema
 
 if TYPE_CHECKING:
     from types import FunctionType, ModuleType
@@ -122,9 +122,9 @@ extensions = [
 # These are deliberately opt-in per site rather than an automatic ``#NNN`` rule,
 # because no digit-keyed pattern can tell a citation from a packet-diagram label:
 # ``#\d{3}`` misses every two- and four-digit number, while ``#\d+`` catches the
-# one-digit RFC diagram labels in ``pcapkit/protocols/internet/hip.py``,
-# ``pcapkit/protocols/transport/sctp.py`` and
-# ``pcapkit/protocols/schema/internet/hip.py`` -- ``DH GROUP ID #1``,
+# one-digit RFC diagram labels in ``pcapkit/protocols/internet/hip/protocol.py``,
+# ``pcapkit/protocols/transport/sctp/protocol.py`` and
+# ``pcapkit/protocols/internet/hip/schema.py`` -- ``DH GROUP ID #1``,
 # ``Gap Ack Block #1`` and the like -- which are not references to anything. A role
 # nobody writes cannot corrupt them.
 #
@@ -446,7 +446,7 @@ def bind_guarded_names(mock_imports: 'List[str]', module: 'ModuleType') -> None:
     :exc:`NameError` for it and the schema class signatures fell back to the bare
     ``_VT``. The Python domain then found both
     :data:`pcapkit.corekit.multidict._VT` and
-    :data:`pcapkit.protocols.schema.schema._VT` for it, warned, and linked the
+    :data:`pcapkit.protocols.schema._VT` for it, warned, and linked the
     first, which is the wrong one. Binding what the library recorded restores
     what the releases before 3.14 did.
 

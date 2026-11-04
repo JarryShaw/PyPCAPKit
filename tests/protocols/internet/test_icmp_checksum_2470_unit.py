@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ICMP and ICMPv6 verify and compute their checksums.
 
-GitHub issue #2470: :meth:`ICMPv4.read <pcapkit.protocols.internet.icmpv4.ICMPv4.read>`
+GitHub issue #2470: :meth:`ICMPv4.read <pcapkit.protocols.internet.icmpv4.protocol.ICMPv4.read>`
 verifies the checksum over the message alone (:rfc:`792`), and the enclosing IPv6
 layer verifies the ICMPv6 checksum over its pseudo-header (:rfc:`4443#section-2.3`),
 both under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`; ``make()`` computes one
@@ -63,11 +63,11 @@ class ChecksumTestCase(unittest.TestCase):
         from pcapkit.const.icmpv6.type import Type as ICMPv6Type
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

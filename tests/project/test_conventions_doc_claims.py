@@ -60,6 +60,13 @@ structure:
   :file:`.github/PULL_REQUEST_TEMPLATE.md` rather than in the owner's phrasing, which
   that page is required to paraphrase rather than quote.
 
+* :class:`PackageInitLayoutTests` -- the ``__init__`` layout
+  :file:`protocol-family-grouping.rst` shows: the protocol class's import, then
+  the ``schema`` aliases under their heading, then the ``data`` aliases under
+  theirs, each block in :program:`isort`'s own order, which :program:`isort` then
+  skips. Every protocol package's ``__init__`` is read against the page's example,
+  and the example against the package it is taken from (#2534).
+
 Deliberately **not** checked here: whether the page's cross-references resolve. That is
 a property of the built inventory rather than of the source, for the reason
 :file:`tests/project/test_documentation_claims.py` gives at length, and the honest check
@@ -69,12 +76,17 @@ is the rendered HTML.
 
 from __future__ import annotations
 
+import ast
 import enum
 import importlib
+import importlib.util
 import inspect
 import pathlib
 import pkgutil
 import re
+import subprocess  # nosec: B404
+import sys
+import textwrap
 import unittest
 
 import aenum
@@ -208,7 +220,7 @@ def _every_enumeration() -> 'dict[type, str]':
     Both the :mod:`enum` and :mod:`aenum` flavours, because the tree uses both and a
     walk over one of them silently under-reports. Nested classes are walked too: the
     ``Flags`` enumerations under
-    :mod:`pcapkit.protocols.schema.application.httpv2` are all nested, so a walk
+    :mod:`pcapkit.protocols.application.httpv2.schema` are all nested, so a walk
     that skipped nested classes would under-report the non-registry population.
 
     :mod:`pcapkit.vendor` is skipped. Its modules are crawlers whose classes are
@@ -518,7 +530,7 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
         import pcapkit.protocols.internet  # noqa: F401  # populates __subclasses__
 
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         self.internet = Internet
         self.ipv6_ext = IPv6_Ext
@@ -585,7 +597,7 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
 
         Every member reaches
         :class:`~pcapkit.protocols.internet.internet.Internet` transitively through
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, so what the convention
+        :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`, so what the convention
         encodes is the declaration. Asserting the cell against ``__bases__`` is
         therefore asserting the thing the ruling is about.
 
@@ -961,8 +973,8 @@ class GetOverrideContractTests(unittest.TestCase):
         unrelated to any ``get``, and measured before asserting on it.
 
         """
-        from pcapkit.protocols.internet import mh
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh import protocol as mh
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
 
         for klass in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
@@ -974,7 +986,7 @@ class GetOverrideContractTests(unittest.TestCase):
 
         source = pathlib.Path(mh.__file__).read_text(encoding='utf-8')
         self.assertNotIn('def get(', source,
-                         'pcapkit/protocols/internet/mh.py defines a get override '
+                         'pcapkit/protocols/internet/mh/protocol.py defines a get override '
                          'again, which the page says it does not')
         self.assertNotIn('type: ignore[override] # pylint: disable=arguments-differ',
                          source,
@@ -1013,8 +1025,8 @@ class GetOverrideContractTests(unittest.TestCase):
         import inspect
 
         from pcapkit.corekit.enum import EnumLookup
-        import pcapkit.protocols.application.ngap as ngap_mod
-        import pcapkit.protocols.internet.mh as mh_mod
+        import pcapkit.protocols.application.ngap.protocol as ngap_mod
+        import pcapkit.protocols.internet.mh.protocol as mh_mod
 
         helpers = tuple(
             obj for mod in (mh_mod, ngap_mod) for obj in vars(mod).values()
@@ -1029,7 +1041,7 @@ class GetOverrideContractTests(unittest.TestCase):
         # helper rather than a count, which can disagree with the measured one, so a
         # helper added without its name on the row fails here.
         page = _page('registry-protocol')
-        head = '   * - The :mod:`~pcapkit.protocols.internet.mh` and'
+        head = '   * - The :mod:`~pcapkit.protocols.internet.mh.protocol` and'
         self.assertIn(head, page, 'the audit table has no mh/ngap helper row')
         start = page.index(head)
         row = page[start:page.index('\n   * - ', start)]
@@ -1651,6 +1663,119 @@ class ProcessConventionTests(unittest.TestCase):
         self.assertIn('not applied uniformly', self.flat,
                       'the page no longer warns that breaking is applied unevenly '
                       'across history, which is what makes an absence weak evidence')
+
+
+#: The heading over the ``schema`` imports of a protocol package's ``__init__``, as the
+#: page shows it.
+SCHEMA_HEADING = '# Header Schemas'
+
+#: The heading over its ``data`` imports.
+DATA_HEADING = '# Data Models'
+
+
+def _init_layout(text: 'str', package: 'str') -> 'list[str]':
+    """The blocks a protocol package's ``__init__`` imports in, in order, read from its source.
+
+    Each logical line after the docstring becomes ``protocol``, ``schema`` or
+    ``data`` -- a run of imports from one module counts once -- ``schema-heading``
+    or ``data-heading``, ``blank``, or ``__all__``, where reading stops. Anything
+    else is kept whole, so it shows in the comparison. ``...`` on the page's
+    example stands for more imports of the block it sits in.
+
+    """
+    lines = text.split('\n')
+    tree = ast.parse(text)
+    docstring = tree.body[0] if tree.body and isinstance(tree.body[0], ast.Expr) else None
+    start = docstring.end_lineno if docstring is not None else 0
+    logical = []  # type: list[str]
+    for line in lines[start:]:
+        if logical and logical[-1].endswith('\\'):
+            logical[-1] = logical[-1][:-1] + line.strip()
+        else:
+            logical.append(line.strip())
+    blocks = []  # type: list[str]
+    roles = {'protocol': rf'from {re.escape(package)}\.protocol import \w+',
+             'schema': rf'from {re.escape(package)}\.schema import (\w+) as Schema_\1',
+             'data': rf'from {re.escape(package)}\.data import (\w+) as Data_\1'}
+    for line in logical:
+        if line.startswith('__all__'):
+            blocks.append('__all__')
+            break
+        kind = next((role for role, pattern in roles.items() if re.fullmatch(pattern, line)), None)
+        if kind is None:
+            kind = {'': 'blank', SCHEMA_HEADING: 'schema-heading', DATA_HEADING: 'data-heading'}.get(line, line)
+        if line == '...' or (blocks and blocks[-1] == kind and kind in roles):
+            continue
+        blocks.append(kind)
+    return blocks
+
+
+class PackageInitLayoutTests(unittest.TestCase):
+    """A protocol package's ``__init__`` imports in the blocks the page's example shows (#2534)."""
+
+    @classmethod
+    def setUpClass(cls) -> 'None':
+        page = _page('protocol-family-grouping')
+        examples = [textwrap.dedent(m.group(1)) for m in
+                    re.finditer(r'(?m)^\.\. code-block:: python\n\n((?:   [^\n]*\n|\n)+)', page)]
+        found = [example for example in examples if SCHEMA_HEADING in example]
+        cls.example = found[0] if len(found) == 1 else ''
+        cls.inits = {
+            '.'.join(path.parent.relative_to(ROOT).parts): path.parent / '__init__.py'
+            for path in sorted((ROOT / 'pcapkit' / 'protocols').rglob('protocol.py'))
+            if path.parent != ROOT / 'pcapkit' / 'protocols'
+        }
+
+    def test_the_page_shows_the_layout_once(self) -> 'None':
+        """One example on the page carries the headings, in the order it states."""
+        self.assertTrue(self.example, 'protocol-family-grouping.rst has no single __init__ layout example')
+        self.assertEqual(_init_layout(self.example, 'pcapkit.protocols.internet.ipv4'),
+                         ['protocol', 'blank', 'schema-heading', 'schema', 'blank', 'data-heading', 'data',
+                          'blank', '__all__'])
+
+    def test_the_example_is_the_tree(self) -> 'None':
+        """Every import line the example shows is in the package ``__init__`` it is taken from."""
+        text = (ROOT / 'pcapkit' / 'protocols' / 'internet' / 'ipv4' / '__init__.py').read_text(encoding='utf-8')
+        for line in self.example.splitlines():
+            if line.startswith(('from ', '#', '__all__')):
+                with self.subTest(line=line):
+                    self.assertIn(line + '\n', text)
+
+    def test_every_package_init_follows_the_layout(self) -> 'None':
+        """Each ``__init__`` has the example's blocks, less any role it binds nothing from."""
+        expected = _init_layout(self.example, 'pcapkit.protocols.internet.ipv4')
+        self.assertTrue(self.inits)
+        for package, path in self.inits.items():
+            with self.subTest(package=package):
+                text = path.read_text(encoding='utf-8')
+                found = _init_layout(text, package)
+                want = list(expected)
+                for role in ('schema', 'data'):
+                    if role not in found:
+                        index = want.index(f'{role}-heading')
+                        del want[index - 1:index + 2]
+                self.assertEqual(found, want)
+
+    @unittest.skipUnless(importlib.util.find_spec('isort') is not None, 'isort is not installed')
+    def test_isort_leaves_every_init_alone(self) -> 'None':
+        """A direct :program:`isort` run, at ``make isort``'s width, skips every ``__init__``.
+
+        The ``[tool.isort]`` section of :file:`pyproject.toml` skips them, with
+        ``filter_files`` so that naming them skips them too. Sorted as one run the
+        blocks would merge, as :program:`isort` does to ``ipv4``'s, so the skip is
+        what keeps the layout.
+
+        """
+        import isort  # pylint: disable=import-outside-toplevel
+
+        paths = [str(path.relative_to(ROOT)) for path in self.inits.values()]
+        command = [sys.executable, '-m', 'isort', '--check-only', '-l100', '-ppcapkit', *paths]
+        result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False)  # nosec: B603
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f'Skipped {len(paths)} files', result.stdout)
+        text = self.inits['pcapkit.protocols.internet.ipv4'].read_text(encoding='utf-8')
+        config = isort.Config(line_length=100, known_first_party=frozenset({'pcapkit'}))
+        self.assertNotEqual(isort.code(text, config=config), text)
 
 
 if __name__ == '__main__':

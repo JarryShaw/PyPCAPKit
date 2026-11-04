@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` Constant Enumerations
-==============================================================================
+""":class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` Constant Enumerations
+=======================================================================================
 
 .. module:: pcapkit.const.icmpv6
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` implementations. Available
+:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` implementations. Available
 enumerations include:
 
 .. list-table::

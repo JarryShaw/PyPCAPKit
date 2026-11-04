@@ -6,7 +6,7 @@ GitHub issue #679. Two defects, neither fixable alone:
 1. ``LocatorSetParameter.padding`` read the **nested** ``Locator.len`` rather than
    the parameter's. A :class:`~pcapkit.corekit.fields.collections.ListField` packs
    each nested schema into the enclosing packet context --
-   :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` opens with
+   :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` opens with
    ``packet.update(self.__dict__)`` -- and :class:`Locator` declares a ``len`` of
    its own, so by the time ``padding`` was evaluated ``pkt['len']`` was the last
    locator's. That is 4 for any IPv6 locator whatever the count, so that
@@ -58,7 +58,7 @@ This is why #679 was judged a different class of change from #664's
 one-expression padding fix rather than a second instance of it.
 ``LocatorSetParameter.locators`` is declared
 ``ListField(length=lambda pkt: pkt['len'])``, and :meth:`Schema.unpack
-<pcapkit.protocols.schema.schema.Schema.unpack>` reads exactly ``field.length``
+<pcapkit.protocols.schema.Schema.unpack>` reads exactly ``field.length``
 octets off the stream and hands only those to the list. With ``Length`` at ``4n``
 a set of *n* plain locators was offered ``4n`` octets of a ``24n``-octet
 contents, so -- measured on ``f0999858e`` -- n = 2 and n = 5 both parsed **one**
@@ -95,7 +95,7 @@ PLAIN = {'ip': '2001:db8::1'}
 #:
 #: ``type=1`` is not redundant. ``_make_param_locator_set`` sets
 #: ``length = 5`` when ``spi`` is given but leaves ``type`` at its default 0, and
-#: :func:`~pcapkit.protocols.schema.internet.hip.locator_value_selector` accepts
+#: :func:`~pcapkit.protocols.internet.hip.schema.locator_value_selector` accepts
 #: only ``type == 0, len == 4`` or ``type == 1, len == 5`` -- so ``spi=`` without
 #: an explicit ``type=1`` raises ``FieldValueError: invalid locator type or
 #: length``. That is a separate rough edge in the maker, and without ``type=1``
@@ -120,7 +120,7 @@ def rfc_total(length: 'int') -> 'int':
     """:rfc:`7401#section-5.2.1`'s ``Total Length = 11 + Length - (Length + 3) % 8``.
 
     Written out here rather than imported from
-    :func:`pcapkit.protocols.schema.internet.hip.parameter_total_len`, so the
+    :func:`pcapkit.protocols.internet.hip.schema.parameter_total_len`, so the
     packed octets are compared against the RFC rather than against the library's
     own reading of it.
 
@@ -154,7 +154,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         hip = object.__new__(HIP)
         schema = hip._make_param_locator_set(  # type: ignore[arg-type]
@@ -229,7 +229,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         the padding count is what is under test.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.schema.internet.hip import (Locator, LocatorSetParameter,
+        from pcapkit.protocols.internet.hip.schema import (Locator, LocatorSetParameter,
                                                            locator_set_padding_len)
 
         locator = Locator(traffic=0, type=0, len=4, flags={'reserved': 0, 'preferred': False},
@@ -247,7 +247,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
         # And the callback in isolation, on both the key it reads and the value
         # that key is a snapshot of.
-        from pcapkit.protocols.schema.internet.hip import LOCATOR_SET_LEN
+        from pcapkit.protocols.internet.hip.schema import LOCATOR_SET_LEN
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 9}), 3)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 4}), 0)
         self.assertEqual(locator_set_padding_len({LOCATOR_SET_LEN: 0}), 4)
@@ -259,13 +259,13 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
         The mechanism, asserted rather than inferred: after a pack, the shared
         context's ``len`` has been overwritten by the last nested locator's while
-        :data:`~pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN` still holds
+        :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN` still holds
         the parameter's. Without this the two would be indistinguishable at the
         one shape where the numbers happen to agree.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet.hip import LOCATOR_SET_LEN
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip.schema import LOCATOR_SET_LEN
 
         hip = object.__new__(HIP)
         schema = hip._make_param_locator_set(  # type: ignore[arg-type]
@@ -294,13 +294,13 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         only for the empty shape. Every nested :class:`Locator` raises one of
         them per field, because ``SchemaField`` seeds a nested schema's
         ``__length__`` at the ``-1`` placeholder
-        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+        :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
         documents; that is unrelated to ``Length`` units, and it fires once per
         locator actually parsed rather than once per truncated first locator.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet.hip import LocatorSetParameter
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip.schema import LocatorSetParameter
 
         hip = object.__new__(HIP)
         for name, locators, contents in SHAPES:
@@ -338,7 +338,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         reported ``length`` of 12 for a 32-octet record.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for name, locators, contents in SHAPES:
             with self.subTest(shape=name):

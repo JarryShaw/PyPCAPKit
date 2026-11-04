@@ -80,8 +80,8 @@ class TestMHUnrepresentableValues(unittest.TestCase):
 
     def _option(self, raw: bytes, code: 'object') -> 'object':
         """Parse ``raw`` alone and inside IPv6, check both rebuild, and return the option."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.logging import logger
 
@@ -102,7 +102,7 @@ class TestMHUnrepresentableValues(unittest.TestCase):
     @staticmethod
     def _make(code: 'object', kwargs: 'dict') -> bytes:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
                   data={'options': [(code, kwargs)]}).data

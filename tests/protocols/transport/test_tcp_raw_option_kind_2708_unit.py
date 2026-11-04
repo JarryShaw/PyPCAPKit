@@ -53,7 +53,7 @@ class TestTCPRawOptionKind(unittest.TestCase):
         self.assertIn(255, _refused_kinds())
 
     def test_raw_octets_build_as_the_pair_does(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for kind in _refused_kinds():
             with self.subTest(kind=kind):
@@ -65,7 +65,7 @@ class TestTCPRawOptionKind(unittest.TestCase):
                 self.assertEqual(built[20:], raw)
 
     def test_parsed_option_rebuilds_from_its_octets(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for kind in _refused_kinds():
             with self.subTest(kind=kind):
@@ -80,7 +80,7 @@ class TestTCPRawOptionKind(unittest.TestCase):
 
     def test_empty_octets_are_refused(self) -> None:
         """Raw octets with no kind octet raise ``ProtocolError``, not ``IndexError``."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for options in ([b''], [b'\x01', b'']):

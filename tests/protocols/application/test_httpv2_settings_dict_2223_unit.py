@@ -32,7 +32,7 @@ class TestHTTPv2SettingsPlainDict(unittest.TestCase):
     def build(self, settings: 'object') -> 'bytes':
         """Build a ``SETTINGS`` frame from ``settings``."""
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         return bytes(HTTPv2(type=Frame.SETTINGS, frame={'settings': settings}))
 
@@ -52,7 +52,7 @@ class TestHTTPv2SettingsPlainDict(unittest.TestCase):
     def test_plain_dict_frame_parses_back(self) -> None:
         import io
 
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         raw = self.build({1: 4096, 3: 100})
         info = HTTPv2(io.BytesIO(raw), len(raw)).info

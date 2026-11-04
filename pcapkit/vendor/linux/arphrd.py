@@ -31,7 +31,7 @@ __all__ = ['ARPHRD']
 # :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.
 #
 # pcapkit names only the ``ARPHRD_*`` values its Linux "cooked" capture
-# dissector (:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`) actually
+# dissector (:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`) actually
 # matches on, not every value the header defines. The rest of the ARP
 # hardware-type numbering is IANA's own
 # (:class:`~pcapkit.const.arp.hardware.Hardware`), which differs for most
@@ -62,7 +62,7 @@ class ARPHRD(Vendor):
 
     #: Destination of a bare ``ARPHRD`` member; see
     #: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.
-    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),)
+    PROTO_DEST = (ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),)
 
     def request(self) -> 'dict[int, tuple[str, str]]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.

@@ -1,0 +1,1111 @@
+# -*- coding: utf-8 -*-
+"""data model for HIP protocol"""
+
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import info_final
+from pcapkit.protocols.data import Data, Protocol
+
+if TYPE_CHECKING:
+    from datetime import timedelta
+    from ipaddress import IPv6Address
+    from typing import Optional
+
+    from pcapkit.const.hip.certificate import Certificate
+    from pcapkit.const.hip.cipher import Cipher
+    from pcapkit.const.hip.di import DITypes
+    from pcapkit.const.hip.ecdsa_curve import ECDSACurve
+    from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve
+    from pcapkit.const.hip.eddsa_curve import EdDSACurve
+    from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite
+    from pcapkit.const.hip.group import Group
+    from pcapkit.const.hip.hi_algorithm import HIAlgorithm
+    from pcapkit.const.hip.hit_suite import HITSuite
+    from pcapkit.const.hip.nat_traversal import NATTraversal
+    from pcapkit.const.hip.notify_message import NotifyMessage
+    from pcapkit.const.hip.packet import Packet
+    from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+    from pcapkit.const.hip.registration import Registration
+    from pcapkit.const.hip.registration_failure import RegistrationFailure
+    from pcapkit.const.hip.suite import Suite
+    from pcapkit.const.hip.transport import Transport
+    from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
+
+__all__ = [
+    'HIP', 'Control',
+
+    'LocatorData', 'Locator',
+    'HostIdentity',
+    'Lifetime',
+    'Flags',
+
+    'UnassignedParameter', 'ESPInfoParameter', 'R1CounterParameter',
+    'LocatorSetParameter', 'PuzzleParameter', 'SolutionParameter',
+    'SEQParameter', 'ACKParameter', 'DHGroupListParameter',
+    'DiffieHellmanParameter', 'HIPTransformParameter', 'HIPCipherParameter',
+    'NATTraversalModeParameter', 'TransactionPacingParameter', 'EncryptedParameter',
+    'HostIDParameter', 'HITSuiteListParameter', 'CertParameter',
+    'NotificationParameter', 'EchoRequestSignedParameter', 'RegInfoParameter',
+    'RegRequestParameter', 'RegResponseParameter', 'RegFailedParameter',
+    'RegFromParameter', 'EchoResponseSignedParameter', 'TransportFormatListParameter',
+    'ESPTransformParameter', 'SeqDataParameter', 'AckDataParameter',
+    'PayloadMICParameter', 'TransactionIDParameter', 'OverlayIDParameter',
+    'RouteDstParameter', 'HIPTransportModeParameter', 'HIPMACParameter',
+    'HIPMAC2Parameter', 'HIPSignature2Parameter', 'HIPSignatureParameter',
+    'EchoRequestUnsignedParameter', 'EchoResponseUnsignedParameter', 'RelayFromParameter',
+    'RelayToParameter', 'OverlayTTLParameter', 'RouteViaParameter',
+    'FromParameter', 'RVSHMACParameter', 'ViaRVSParameter',
+    'RelayHMACParameter',
+]
+
+
+@info_final
+class Control(Data):
+    """Data model for HIP controls.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1328`).
+
+    """
+
+    #: Anonymous flag.
+    anonymous: 'bool'
+    #: Reserved bits -- the 15 high-order bits of ``Controls``, carried
+    #: verbatim so that re-serialising reproduces them.
+    reserved: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, anonymous: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
+
+
+class Parameter(Data):
+    """Data model for HIP parameter data."""
+
+    #: Parameter type.
+    type: 'Enum_Parameter'
+    #: Critical flag.
+    critical: 'bool'
+    #: Parameter length, in octets -- the whole record, including ``Type``,
+    #: ``Length`` and ``Padding`` (:rfc:`7401#section-5.2.1`).
+    length: 'int'
+
+    if TYPE_CHECKING:
+        #: Trailing padding octets, as captured; present only when they are
+        #: not all zeros.
+        padding: 'bytes'
+
+
+@info_final
+class HIP(Protocol):
+    """Data model for HIP header.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``packet_fixed``, ``reserved`` and ``version_fixed``
+       (:issue:`1417`, :issue:`1459`), and ``parameters`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
+
+    #: Next header.
+    next: 'TransType'
+    #: Header length.
+    length: 'int'
+    #: Packet type.
+    type: 'Packet'
+    #: Fixed bit -- the leading bit of the ``Packet Type`` octet, sent as ``0``
+    #: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so
+    #: that re-serialising reproduces it.
+    packet_fixed: 'int'
+    #: Version.
+    version: 'int'
+    #: Reserved bits -- the three bits between ``Version`` and the fixed
+    #: low-order bit, carried verbatim so that re-serialising reproduces them.
+    reserved: 'int'
+    #: Fixed bit -- the low-order bit of the ``Version`` octet, sent as ``1``
+    #: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so
+    #: that re-serialising reproduces it.
+    version_fixed: 'int'
+    #: Checksum.
+    chksum: 'bytes'
+    #: Control.
+    control: 'Control'
+    #: Sender's host identity tag.
+    shit: 'int'
+    #: Receiver's host identity tag.
+    rhit: 'int'
+
+    if TYPE_CHECKING:
+        #: HIP parameters.
+        parameters: 'OrderedMultiInfo[Enum_Parameter, Parameter]'
+
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', packet_fixed: 'int', version: 'int', reserved: 'int', version_fixed: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class UnassignedParameter(Parameter):
+    """Data model for unassigned parameter."""
+
+    #: Content.
+    contents: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', contents: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class ESPInfoParameter(Parameter):
+    """Data model for HIP ``ESP_INFO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1328`).
+
+    """
+
+    #: Reserved octets, carried verbatim so that re-serialising reproduces them.
+    reserved: 'int'
+    #: KEYMAT index.
+    index: 'int'
+    #: Old SPI.
+    old_spi: 'int'
+    #: New SPI.
+    new_spi: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class R1CounterParameter(Parameter):
+    """Data model for HIP ``R1_COUNTER`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
+    #: R1 counter.
+    counter: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class LocatorData(Data):
+    """Data model for HIP locator data."""
+
+    #: SPI.
+    spi: 'int'
+    #: IP address.
+    ip: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, spi: 'int', ip: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
+
+
+@info_final
+class Locator(Data):
+    """Data model for HIP locator.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1365`).
+
+    """
+
+    #: Traffic.
+    traffic: 'int'
+    #: Locator type.
+    type: 'int'
+    #: Locator length.
+    length: 'int'
+    #: Preferred flag.
+    preferred: 'bool'
+    #: Reserved bits -- the 7 high-order bits of the flags octet, carried
+    #: verbatim so that re-serialising reproduces them.
+    reserved: 'int'
+    #: Locator lifetime.
+    lifetime: 'timedelta'
+    #: Locator data.
+    locator: 'LocatorData | IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', reserved: 'int', lifetime: 'timedelta', locator: 'LocatorData | IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
+
+
+@info_final
+class LocatorSetParameter(Parameter):
+    """Data model for HIP ``LOCATOR_SET`` parameter."""
+
+    #: Locator set.
+    locator_set: 'tuple[Locator, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', locator_set: 'tuple[Locator, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class PuzzleParameter(Parameter):
+    """Data model for HIP ``PUZZLE`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``lifetime_exponent`` and ``rhash_len``
+       (:issue:`653`, :issue:`1323`), and ``lifetime`` is :obj:`None` past
+       :attr:`datetime.timedelta.max` (:issue:`1323`).
+
+    """
+
+    #: Numeric index.
+    index: 'int'
+    #: The ``Lifetime`` octet as it appears on the wire. :rfc:`7401#section-5.2.4`
+    #: defines the lifetime as ``2^(value - 32)`` seconds, and this is ``value``.
+    #: It is what re-serialising writes back, since most of the 256 octets have
+    #: no exact :class:`~datetime.timedelta`.
+    lifetime_exponent: 'int'
+    #: Lifetime, derived from :attr:`lifetime_exponent` to
+    #: :class:`~datetime.timedelta`'s microsecond resolution, so octets below
+    #: ``12`` read as ``timedelta(0)``. :obj:`None` for octets of ``79`` and above,
+    #: whose duration exceeds :attr:`datetime.timedelta.max`.
+    lifetime: 'Optional[timedelta]'
+    #: Puzzle data.
+    opaque: 'bytes'
+    #: Random number.
+    random: 'int'
+    #: On-wire width of :attr:`random`, in bits -- ``RHASH_len`` in
+    #: :rfc:`7401#section-2.3` terms, which :rfc:`7401#section-5.2.4` makes the
+    #: exact width of ``Random #I``. Declared rather than recomputed from
+    #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it
+    #: a parameter read with ``Length = 12`` re-serialised as ``Length = 5``.
+    #: See :issue:`653`.
+    rhash_len: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime_exponent: 'int', lifetime: 'Optional[timedelta]', opaque: 'bytes', random: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class SolutionParameter(Parameter):
+    """Data model for HIP ``SOLUTION`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``rhash_len`` (:issue:`653`).
+
+    .. versionremoved:: 1.5.0
+
+       ``lifetime``, now :attr:`reserved`: only ``PUZZLE`` carries a lifetime
+       (:issue:`654`).
+
+    """
+
+    #: Numeric index.
+    index: 'int'
+    #: Reserved octet -- "zero when sent, ignored when received"
+    #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
+    #: Carried verbatim rather than interpreted, so that re-serialising a parsed
+    #: parameter reproduces the octet it arrived with. It is not a ``Lifetime``:
+    #: only ``PUZZLE`` has one (:rfc:`7401#section-5.2.4`), and reading it as one
+    #: would leave the conformant ``0x00`` impossible to re-serialise. See :issue:`654`.
+    reserved: 'int'
+    #: Solution data.
+    opaque: 'bytes'
+    #: Random number.
+    random: 'int'
+    #: Puzzle solution.
+    solution: 'int'
+    #: On-wire width of :attr:`random` and of :attr:`solution` -- which are equal
+    #: and each ``RHASH_len / 8`` octets -- in bits. ``RHASH_len`` in
+    #: :rfc:`7401#section-2.3` terms; :rfc:`7401#section-5.2.5` makes it the exact
+    #: width of both fields. Declared rather than recomputed from
+    #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it a
+    #: parameter read with ``Length = 20`` re-serialised as ``Length = 6``.
+    #: See :issue:`653`.
+    rhash_len: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', reserved: 'int', opaque: 'bytes', random: 'int', solution: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class SEQParameter(Parameter):
+    """Data model for HIP ``SEQ`` parameter."""
+
+    #: Update ID.
+    id: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class ACKParameter(Parameter):
+    """Data model for HIP ``ACK`` parameter."""
+
+    #: Peer update IDs.
+    update_id: 'tuple[int, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', update_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class DHGroupListParameter(Parameter):
+    """Data model for HIP ``DH_GROUP_LIST`` parameter."""
+
+    #: DH group list.
+    group_id: 'tuple[Group, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'tuple[Group, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class DiffieHellmanParameter(Parameter):
+    """Data model for HIP ``DIFFIE_HELLMAN`` parameter."""
+
+    #: Group ID.
+    group_id: 'Group'
+    #: Public value length.
+    pub_len: 'int'
+    #: Public value.
+    pub_val: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPTransformParameter(Parameter):
+    """Data model for HIP ``HIP_TRANSFORM`` parameter."""
+
+    #: Suite IDs.
+    suite_id: 'tuple[Suite, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[Suite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPCipherParameter(Parameter):
+    """Data model for HIP ``HIP_CIPHER`` parameter."""
+
+    #: Cipher IDs.
+    cipher_id: 'tuple[Cipher, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cipher_id: 'tuple[Cipher, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class NATTraversalModeParameter(Parameter):
+    """Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: Mode IDs.
+    mode_id: 'tuple[NATTraversal, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class TransactionPacingParameter(Parameter):
+    """Data model for HIP ``TRANSACTION_PACING`` parameter."""
+
+    #: Min TA.
+    min_ta: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', min_ta: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class EncryptedParameter(Parameter):
+    """Data model for HIP ``ENCRYPTED`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
+    #: Cipher ID.
+    cipher: 'Cipher'
+    #: Initialization vector.
+    iv: 'Optional[bytes]'
+    #: Encrypted data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes',
+                     cipher: 'Cipher', iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HostIdentity(Data):
+    """Data model for host identity."""
+
+    #: Curve type.
+    curve: 'ECDSACurve | ECDSALowCurve | EdDSACurve'
+    #: Public key.
+    pubkey: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, curve: 'ECDSACurve | ECDSALowCurve | EdDSACurve',
+                     pubkey: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HostIDParameter(Parameter):
+    """Data model for HIP ``HOST_ID`` parameter."""
+
+    #: Host identity length.
+    hi_len: 'int'
+    #: Domain identifier type.
+    di_type: 'DITypes'
+    #: Domain identifier length.
+    di_len: 'int'
+    #: Algorithm type.
+    algorithm: 'HIAlgorithm'
+    #: Host identity.
+    hi: 'HostIdentity | bytes'
+    #: Domain identifier.
+    di: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hi_len: 'int', di_type: 'DITypes', di_len: 'int', algorithm: 'HIAlgorithm', hi: 'HostIdentity | bytes', di: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HITSuiteListParameter(Parameter):
+    """Data model for HIP ``HIT_SUITE_LIST`` parameter."""
+
+    #: Suite IDs.
+    suite_id: 'tuple[HITSuite, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[HITSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class CertParameter(Parameter):
+    """Data model for HIP ``CERT`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       :attr:`cert_group` is an :obj:`int` rather than a
+       :class:`~pcapkit.const.hip.group.Group` (:issue:`2283`).
+
+    """
+
+    #: Certificate group -- :rfc:`8002#section-2`'s "Group ID grouping
+    #: multiple related CERT parameters". An arbitrary number, since that
+    #: section leaves the CERT group namespace to each sending host, so no
+    #: registry stands behind it; it used to decode through the
+    #: Diffie-Hellman group registry and report a group of ``7`` as the curve
+    #: ``NIST_P_256``. See :issue:`2283`.
+    cert_group: 'int'
+    #: Certificate count.
+    cert_count: 'int'
+    #: Certificate ID.
+    cert_id: 'int'
+    #: Certificate type.
+    cert_type: 'Certificate'
+    #: Certificate.
+    cert: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cert_group: 'int', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class NotificationParameter(Parameter):
+    """Data model for HIP ``NOTIFICATION`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: Notify message type.
+    msg_type: 'NotifyMessage'
+    #: Notification data.
+    msg: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class EchoRequestSignedParameter(Parameter):
+    """Data model for HIP ``ECHO_REQUEST_SIGNED`` parameter."""
+
+    #: Opaque data.
+    opaque: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class Lifetime(Data):
+    """Data model for registration lifetime.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``min_exponent`` and ``max_exponent``, and
+       :attr:`min` and :attr:`max` follow :rfc:`8003#section-4.1`'s exponential
+       encoding rather than reading the octet as a count of seconds
+       (:issue:`2281`).
+
+    """
+
+    #: The ``Min Lifetime`` octet as it appears on the wire. It is what
+    #: re-serialising writes back, since most of the 256 octets have no exact
+    #: :class:`~datetime.timedelta`.
+    min_exponent: 'int'
+    #: The ``Max Lifetime`` octet as it appears on the wire.
+    max_exponent: 'int'
+    #: Minimum lifetime, decoded from :attr:`min_exponent` per
+    #: :rfc:`8003#section-4.1`.
+    min: 'timedelta'
+    #: Maximum lifetime, decoded from :attr:`max_exponent` per
+    #: :rfc:`8003#section-4.1`.
+    max: 'timedelta'
+
+    if TYPE_CHECKING:
+        def __init__(self, min_exponent: 'int', max_exponent: 'int', min: 'timedelta', max: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RegInfoParameter(Parameter):
+    """Data model for HIP ``REG_INFO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       :attr:`lifetime` carries the raw octets alongside the durations, and the
+       durations follow :rfc:`8003#section-4.1` -- see
+       :class:`Lifetime` (:issue:`2281`).
+
+    """
+
+    #: Registration lifetime.
+    lifetime: 'Lifetime'
+    #: Registration type.
+    reg_type: 'tuple[Registration, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RegRequestParameter(Parameter):
+    """Data model for HIP ``REG_REQUEST`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``lifetime_exponent``, and :attr:`lifetime` follows
+       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the
+       octet as a count of seconds (:issue:`2281`).
+
+    """
+
+    #: The ``Lifetime`` octet as it appears on the wire. :rfc:`8003#section-4.1`
+    #: makes a non-zero octet an exponent standing for ``2^((lifetime - 64)/8)``
+    #: seconds, and this is that octet. It is what re-serialising writes back,
+    #: since most of the 256 octets have no exact
+    #: :class:`~datetime.timedelta`.
+    lifetime_exponent: 'int'
+    #: Registration lifetime, decoded from :attr:`lifetime_exponent` per
+    #: :rfc:`8003#section-4.1`.
+    lifetime: 'timedelta'
+    #: Registration type.
+    reg_type: 'tuple[Registration, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime_exponent: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RegResponseParameter(Parameter):
+    """Data model for HIP ``REG_RESPONSE`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``lifetime_exponent``, and :attr:`lifetime` follows
+       :rfc:`8003#section-4.1`'s exponential encoding rather than reading the
+       octet as a count of seconds (:issue:`2281`).
+
+    """
+
+    #: The ``Lifetime`` octet as it appears on the wire, for the reason
+    #: :attr:`RegRequestParameter.lifetime_exponent` gives.
+    lifetime_exponent: 'int'
+    #: Registration lifetime, decoded from :attr:`lifetime_exponent` per
+    #: :rfc:`8003#section-4.1`.
+    lifetime: 'timedelta'
+    #: Registration type.
+    reg_type: 'tuple[Registration, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime_exponent: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RegFailedParameter(Parameter):
+    """Data model for HIP ``REG_FAILED`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       ``lifetime`` is replaced by :attr:`failure_type`, with no alias, and
+       :attr:`reg_type` holds :class:`~pcapkit.const.hip.registration.Registration`
+       values: ``REG_FAILED`` carries a Failure Type octet ahead of its
+       registration types and no lifetime (:rfc:`8003#section-4.5`,
+       :issue:`2309`).
+
+    """
+
+    #: Registration failure type.
+    failure_type: 'RegistrationFailure'
+    #: Registration types that failed with :attr:`failure_type`.
+    reg_type: 'tuple[Registration, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', failure_type: 'RegistrationFailure', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RegFromParameter(Parameter):
+    """Data model for HIP ``REG_FROM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
+    #: Port.
+    port: 'int'
+    #: Protocol.
+    protocol: 'TransType'
+    #: Address.
+    address: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class EchoResponseSignedParameter(Parameter):
+    """Data model for HIP ``ECHO_RESPONSE_SIGNED`` parameter."""
+
+    #: Opaque data.
+    opaque: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class TransportFormatListParameter(Parameter):
+    """Data model for HIP ``TRANSPORT_FORMAT_LIST`` parameter."""
+
+    #: Transport format list.
+    tf_type: 'tuple[Enum_Parameter, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[Enum_Parameter, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class ESPTransformParameter(Parameter):
+    """Data model for HIP ``ESP_TRANSFORM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: ESP transform.
+    suite_id: 'tuple[ESPTransformSuite, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class SeqDataParameter(Parameter):
+    """Data model for HIP ``SEQ_DATA`` parameter."""
+
+    #: Sequence number.
+    seq: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class AckDataParameter(Parameter):
+    """Data model for HIP ``ACK_DATA`` parameter."""
+
+    #: Acknowledged sequence number.
+    ack: 'tuple[int, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ack: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class PayloadMICParameter(Parameter):
+    """Data model for HIP ``PAYLOAD_MIC`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The three reserved octets, as captured.
+    reserved: 'bytes'
+    #: Next header.
+    next: 'TransType'
+    #: Payload data.
+    payload: 'bytes'
+    #: MIC value.
+    mic: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class TransactionIDParameter(Parameter):
+    """Data model for HIP ``TRANSACTION_ID`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``id_len`` (:issue:`2271`).
+
+    """
+
+    #: Identifier.
+    id: 'int'
+    #: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,
+    #: which :rfc:`6078#section-4.4` gives as the "Length of the Identifier, in
+    #: octets" for what is otherwise an opaque value. Declared rather than
+    #: recomputed from :meth:`int.bit_length`, which cannot see a leading zero
+    #: octet: without it a parameter read with ``Length = 4`` re-serialised as
+    #: ``Length = 1``. Same class of bug as :issue:`653`; see :issue:`2271`.
+    id_len: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int', id_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class OverlayIDParameter(Parameter):
+    """Data model for HIP ``OVERLAY_ID`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``id_len`` (:issue:`2271`).
+
+    """
+
+    #: Identifier.
+    id: 'int'
+    #: On-wire width of :attr:`id`, in octets -- the parameter's own ``Length``,
+    #: which :rfc:`6079#section-6.1` gives as the "Length of the Identifier, in
+    #: octets" for what is otherwise an opaque value. Declared for the reason
+    #: :attr:`TransactionIDParameter.id_len` gives. See :issue:`2271`.
+    id_len: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int', id_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class Flags(Data):
+    """Data model for the flags in HIP ``ROUTE_DST`` and ``ROUTE_VIA`` parameters.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1417`).
+
+    """
+
+    #: Symmetric flag.
+    symmetric: 'bool'
+    #: Must follow flag.
+    must_follow: 'bool'
+    #: Reserved bits -- the 14 low-order bits of ``Flags``, carried verbatim
+    #: so that re-serialising reproduces them.
+    reserved: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, symmetric: 'bool', must_follow: 'bool', reserved: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RouteDstParameter(Parameter):
+    """Data model for HIP ``ROUTE_DST`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: Flags.
+    flags: 'Flags'
+    #: Destination HITs.
+    hit: 'tuple[IPv6Address, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPTransportModeParameter(Parameter):
+    """Data model for HIP ``HIP_TRANSPORT_MODE`` parameter."""
+
+    #: Port.
+    port: 'int'
+    #: Mode IDs.
+    mode_id: 'tuple[Transport, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', mode_id: 'tuple[Transport, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPMACParameter(Parameter):
+    """Data model for HIP ``HIP_MAC`` parameter."""
+
+    #: HMAC value.
+    hmac: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPMAC2Parameter(Parameter):
+    """Data model for HIP ``HIP_MAC_2`` parameter."""
+
+    #: HMAC value.
+    hmac: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPSignature2Parameter(Parameter):
+    """Data model for HIP ``HIP_SIGNATURE_2`` parameter."""
+
+    #: Signature algorithm.
+    algorithm: 'HIAlgorithm'
+    #: Signature value.
+    signature: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class HIPSignatureParameter(Parameter):
+    """Data model for HIP ``HIP_SIGNATURE`` parameter."""
+
+    #: Signature algorithm.
+    algorithm: 'HIAlgorithm'
+    #: Signature value.
+    signature: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class EchoRequestUnsignedParameter(Parameter):
+    """Data model for HIP ``ECHO_REQUEST_UNSIGNED`` parameter."""
+
+    #: Opaque data.
+    opaque: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class EchoResponseUnsignedParameter(Parameter):
+    """Data model for HIP ``ECHO_RESPONSE_UNSIGNED`` parameter."""
+
+    #: Opaque data.
+    opaque: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RelayFromParameter(Parameter):
+    """Data model for HIP ``RELAY_FROM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
+    #: Port.
+    port: 'int'
+    #: Protocol.
+    protocol: 'TransType'
+    #: Address.
+    address: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RelayToParameter(Parameter):
+    """Data model for HIP ``RELAY_TO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
+    #: Port.
+    port: 'int'
+    #: Protocol.
+    protocol: 'TransType'
+    #: Address.
+    address: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class OverlayTTLParameter(Parameter):
+    """Data model for HIP ``OVERLAY_TTL`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`), and :attr:`ttl` is an
+       :obj:`int` rather than a :class:`~datetime.timedelta` (:issue:`2282`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: TTL value -- "the number of overlay hops this packet has left"
+    #: (:rfc:`6079#section-6.2`), decremented by one per overlay hop. A count,
+    #: not a duration, so it is a plain :obj:`int`: reading it as
+    #: ``timedelta(seconds=ttl)`` reported a 5-hop budget as five seconds.
+    #: See :issue:`2282`.
+    ttl: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', ttl: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RouteViaParameter(Parameter):
+    """Data model for HIP ``ROUTE_VIA`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+    #: Flags.
+    flags: 'Flags'
+    #: HIT addresses.
+    hit: 'tuple[IPv6Address, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class FromParameter(Parameter):
+    """Data model for HIP ``FROM`` parameter."""
+
+    #: Address.
+    address: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RVSHMACParameter(Parameter):
+    """Data model for HIP ``RVS_HMAC`` parameter."""
+
+    #: HMAC value.
+    hmac: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class ViaRVSParameter(Parameter):
+    """Data model for HIP ``VIA_RVS`` parameter."""
+
+    #: Addresses.
+    address: 'tuple[IPv6Address, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+
+
+@info_final
+class RelayHMACParameter(Parameter):
+    """Data model for HIP ``RELAY_HMAC`` parameter."""
+
+    #: HMAC value.
+    hmac: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long

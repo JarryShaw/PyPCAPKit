@@ -9,7 +9,7 @@ is **not** carried on the wire.
 
 Most protocols are self-describing: every length, offset and type needed to
 walk a packet is in the packet. A few are not, and
-:class:`~pcapkit.protocols.internet.esp.ESP` is the motivating example:
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP` is the motivating example:
 :rfc:`4303` deliberately leaves the payload length, the position of the
 ``Pad Length`` / ``Next Header`` trailer and the length of the ``Integrity
 Check Value`` to the Security Association (SA), which is negotiated out of band
@@ -31,7 +31,7 @@ Decoding an ESP tunnel end to end:
 .. code-block:: python
 
    >>> import pcapkit
-   >>> from pcapkit.protocols.internet.esp import (Cipher, ESPContext,
+   >>> from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext,
    ...                                            Integrity, SecurityAssociation)
    >>> sa = SecurityAssociation(
    ...     spi=0x4321,

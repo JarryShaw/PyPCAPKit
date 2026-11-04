@@ -35,22 +35,22 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: ``(label, module, class, code)``; the code is any key the site accepts.
 SITES = (
     ('ProtocolBase', 'pcapkit.protocols.protocol', 'ProtocolBase', 1),
-    ('Frame', 'pcapkit.protocols.misc.pcap.frame', 'Frame', 1),
-    ('PCAPNG', 'pcapkit.protocols.misc.pcapng', 'PCAPNG', 1),
-    ('SCTP', 'pcapkit.protocols.transport.sctp', 'SCTP', 1),
+    ('Frame', 'pcapkit.protocols.misc.pcap.frame.protocol', 'Frame', 1),
+    ('PCAPNG', 'pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG', 1),
+    ('SCTP', 'pcapkit.protocols.transport.sctp.protocol', 'SCTP', 1),
     ('Link', 'pcapkit.protocols.link.link', 'Link', 1),
     ('Internet', 'pcapkit.protocols.internet.internet', 'Internet', 1),
     # ``Transport.register`` raises ``UnsupportedCall`` only for ``Transport``
     # itself; a concrete subclass reaches the guard.
-    ('TCP', 'pcapkit.protocols.transport.tcp', 'TCP', 1),
-    ('UDP', 'pcapkit.protocols.transport.udp', 'UDP', 1),
+    ('TCP', 'pcapkit.protocols.transport.tcp.protocol', 'TCP', 1),
+    ('UDP', 'pcapkit.protocols.transport.udp.protocol', 'UDP', 1),
 )
 
 #: Modules whose ``__proto__`` ``#:`` comment names the type of a value.
 PROTO_COMMENT_MODULES = (
     'pcapkit.protocols.protocol',
-    'pcapkit.protocols.misc.pcap.frame',
-    'pcapkit.protocols.misc.pcapng',
+    'pcapkit.protocols.misc.pcap.frame.protocol',
+    'pcapkit.protocols.misc.pcapng.protocol',
 )
 
 
@@ -111,10 +111,10 @@ class RegisterClassGuardTests(unittest.TestCase):
 
     def test_valid_class_and_descriptor_still_register(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for label, klass, code in self._sites():
-            for arg in (Raw, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')):
+            for arg in (Raw, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')):
                 with self.subTest(site=label, arg=type(arg).__name__):
                     with mock.patch.dict(klass.__proto__), warnings.catch_warnings():
                         # Overwriting the built-in entry is expected here.

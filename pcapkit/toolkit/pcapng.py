@@ -16,11 +16,11 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
-from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.internet.ipv4 import IPv4
-from pcapkit.protocols.internet.ipv6 import IPv6
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.internet.ipv4.protocol import IPv4
+from pcapkit.protocols.internet.ipv6.protocol import IPv6
+from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
+from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 from pcapkit.toolkit.pcap import _dtls_fragments, _fragment, tcp_segment
 
 if TYPE_CHECKING:
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from typing import Optional
 
     from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
-    from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-    from pcapkit.protocols.misc.pcapng import PCAPNG, Packet
+    from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
            'tcp_traceflow', 'block2frame']
@@ -39,8 +39,8 @@ def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     A frame can be reassembled if it contains an IPv4 layer
-    (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and the **DF**
-    (:attr:`IPv4.flags.df <pcapkit.protocols.data.internet.ipv4.Flags.df>`) flag is
+    (:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`) and the **DF**
+    (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.data.Flags.df>`) flag is
     :data:`False`. In an IP-in-IP tunnel, the layer is the first that is a fragment
     (see :func:`pcapkit.toolkit.pcap._fragment`).
 
@@ -85,9 +85,9 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     A frame can be reassembled if it contains an IPv6 layer
-    (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and an IPv6 Fragment header
+    (:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`) and an IPv6 Fragment header
     (:rfc:`2460#section-4.5`, i.e.,
-    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`). In an IP-in-IP tunnel,
+    :class:`~pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`). In an IP-in-IP tunnel,
     the layer is the first that has one (see :func:`pcapkit.toolkit.pcap._fragment`).
 
     Args:
@@ -110,7 +110,7 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
         ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info
 
         # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since
-        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`
         # adds each extension header's length before the Fragment-header check
         # breaks its loop. That is correct for a header length, but the
         # reassembled packet carries no Fragment header at all
@@ -149,7 +149,7 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     A frame can be reassembled if it contains a TCP layer
-    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the
+    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the
     TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).
 
     Args:
@@ -195,10 +195,10 @@ def dtls_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[DTLS_Packet, ...]]':
     """Make data for DTLS handshake-message reassembly.
 
     A frame can be reassembled if UDP carries a DTLS layer
-    (:class:`~pcapkit.protocols.application.dtls.DTLS`) whose cleartext
+    (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`) whose cleartext
     ``handshake`` record holds a fragmented message
     (:attr:`DTLSHandshake.is_fragmented
-    <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`,
+    <pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented>`,
     :rfc:`6347#section-4.2.3`). Only the frame's first record is read (see
     :func:`pcapkit.toolkit.pcap._dtls_fragments`).
 
@@ -221,7 +221,7 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
     """Trace packet flow for TCP.
 
     A frame can be traced if it contains a TCP layer
-    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the
+    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the
     TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).
 
     Args:
@@ -288,7 +288,7 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
         # which is the way round Wireshark's ``packet-frame.c`` registers the two
         # field names this pair borrows. Do not swap them to match some other
         # reader: this is the reference, and the PCAP reader in
-        # :mod:`pcapkit.protocols.misc.pcap.frame` follows it (#618), on the
+        # :mod:`pcapkit.protocols.misc.pcap.frame.protocol` follows it (#618), on the
         # strength of those registered names.
         len=block.original_len,
         cap_len=block.captured_len,

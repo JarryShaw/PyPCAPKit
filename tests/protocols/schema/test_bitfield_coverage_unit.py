@@ -82,6 +82,22 @@ def _overlaps(namespace: 'dict[str, tuple[int, int]]') -> 'list[int]':
     return sorted(shared)
 
 
+def schema_label(module: 'str') -> 'str | None':
+    """A schema module's label: its protocol's package below ``pcapkit.protocols``.
+
+    ``pcapkit.protocols.internet.ipv4.schema`` is ``internet.ipv4`` and
+    :mod:`pcapkit.protocols.schema` is ``schema``, the labels the modules had
+    in the ``pcapkit.protocols.schema`` tree before #2534; any other module is
+    :obj:`None`.
+
+    """
+    if module == 'pcapkit.protocols.schema':
+        return 'schema'
+    if module.startswith('pcapkit.protocols.') and module.endswith('.schema'):
+        return module[len('pcapkit.protocols.'):-len('.schema')]
+    return None
+
+
 class TestBitFieldCoverage(unittest.TestCase):
     """Pin that no schema bit field packs an unnamed bit."""
 
@@ -93,15 +109,16 @@ class TestBitFieldCoverage(unittest.TestCase):
     def _discover(self) -> 'dict[str, tuple[Any, bool, str]]':
         """Map ``schema.field`` to each bit field found, whether it sits under a
         :class:`ForwardMatchField`, and the module declaring it."""
-        import pcapkit.protocols.schema as package
+        import pcapkit.protocols as package
         from pcapkit.corekit.fields.misc import ForwardMatchField
         from pcapkit.corekit.fields.strings import BitField
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         self.assertTrue(os.path.abspath(package.__file__).startswith(repo + os.sep), package.__file__)
         for info in pkgutil.walk_packages(package.__path__, f'{package.__name__}.'):
-            importlib.import_module(info.name)
+            if info.name.endswith('.schema'):
+                importlib.import_module(info.name)
 
         def subclasses(cls: 'type') -> 'Iterator[type]':
             for sub in cls.__subclasses__():
@@ -127,34 +144,33 @@ class TestBitFieldCoverage(unittest.TestCase):
                 for item in vars(obj).values():
                     walk(item, where, inner, seen)
 
-        prefix = f'{package.__name__}.'
         for cls in set(subclasses(Schema)):
-            if not cls.__module__.startswith(prefix):
+            module = schema_label(cls.__module__)
+            if module is None:
                 continue
-            module = cls.__module__[len(prefix):]
             for name, field in cls.__dict__.get('__fields__', {}).items():
                 walk(field, (f'{module}.{cls.__qualname__}.{name}', module), False, set())
         return {where: (field, forward, module) for where, field, forward, module in found.values()}
 
     def test_discovery_matches_source(self) -> None:
-        import pcapkit.protocols.schema as package
+        import pcapkit.protocols as package
 
         found = self._discover()
         per_module = {}  # type: dict[str, int]
         for _, _, module in found.values():
             per_module[module] = per_module.get(module, 0) + 1
 
-        root = os.path.dirname(package.__file__)
-        for info in pkgutil.walk_packages(package.__path__, ''):
-            if info.ispkg:
+        for info in pkgutil.walk_packages(package.__path__, f'{package.__name__}.'):
+            label = schema_label(info.name)
+            if info.ispkg or label is None:
                 continue
-            path = os.path.join(root, *info.name.split('.')) + '.py'
+            path = importlib.import_module(info.name).__file__
             with open(path, encoding='utf-8') as file:
                 tree = ast.parse(file.read(), path)
             calls = sum(1 for node in ast.walk(tree)
                         if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'BitField')
-            with self.subTest(module=info.name):
-                self.assertEqual(per_module.get(info.name, 0), calls)
+            with self.subTest(module=label):
+                self.assertEqual(per_module.get(label, 0), calls)
         self.assertGreater(len(found), 0)
 
     def test_every_bitfield_names_all_its_bits(self) -> None:

@@ -4,7 +4,7 @@
 GitHub issue #575. Without the fix, :meth:`PortEnumField.post_process
 <pcapkit.corekit.fields.numbers.PortEnumField.post_process>` (TCP, UDP,
 SCTP) and :meth:`OptionEnumField.post_process
-<pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>` (PCAP-NG)
+<pcapkit.protocols.misc.pcapng.schema.OptionEnumField.post_process>` (PCAP-NG)
 each resolve a wire value by calling their registry's ``.get()`` directly::
 
     return self._namespace.get(value, proto=...)
@@ -322,7 +322,7 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc import pcapng as pcapng_schema
+        from pcapkit.protocols.misc.pcapng import schema as pcapng_schema
 
         field = pcapng_schema.OptionEnumField(length=2, namespace='if')
         before = len(OptionType.__members__)
@@ -341,7 +341,7 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
     def test_a_declared_option_code_still_resolves_to_its_member(self) -> None:
         """``if_tsresol`` (9) is still ``if_tsresol``."""
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc import pcapng as pcapng_schema
+        from pcapkit.protocols.misc.pcapng import schema as pcapng_schema
 
         field = pcapng_schema.OptionEnumField(length=2, namespace='if')
         before = len(OptionType.__members__)
@@ -354,7 +354,7 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
 
     def test_the_resolved_pseudo_member_repacks_to_the_octets_it_came_from(self) -> None:
         """The fallback is round-trip safe here too."""
-        from pcapkit.protocols.schema.misc import pcapng as pcapng_schema
+        from pcapkit.protocols.misc.pcapng import schema as pcapng_schema
 
         field = pcapng_schema.OptionEnumField(length=2, namespace='if')
         resolved = field.unpack(b'\x27\x0f', {})

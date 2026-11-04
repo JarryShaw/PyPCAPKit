@@ -185,8 +185,8 @@ class IPv6OptionMakerTests(_Case):
     )
 
     def _classes(self) -> 'dict[str, type]':
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
         return {'HOPOPT': HOPOPT, 'IPv6-Opts': IPv6_Opts}
 
     def test_out_of_range_values_are_refused(self) -> None:
@@ -284,7 +284,7 @@ class IPv4MakerTests(_Case):
     """IPv4's header maker and its fixed-width option makers."""
 
     def test_header_fields_are_refused_out_of_range(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for args, name, value in (({'id': 1 << 16}, 'identification', 1 << 16),
                                   ({'id': True}, 'identification', True),
@@ -299,7 +299,7 @@ class IPv4MakerTests(_Case):
     def test_option_fields_are_refused_out_of_range(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.qs_function import QSFunction
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         report = {'func': QSFunction.Report_of_Approved_Rate}
         for code, args, name, value in (
@@ -343,7 +343,7 @@ class IPv4MakerTests(_Case):
         # addresses at most, and a security option 252 octets of flags, whose
         # last bit is a field termination bit rather than an authority (RFC 1108).
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         proto = IPv4.__new__(IPv4)
         for code, maker in ((OptionNumber.RR, proto._make_opt_rr), (OptionNumber.LSR, proto._make_opt_lsr),
@@ -358,7 +358,7 @@ class IPv4MakerTests(_Case):
         # RFC 791: IHL counts 32-bit words in four bits, so 40 octets of
         # options at most; the route options' default of ten slots is 43.
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         data = IPv4(protocol=253, options=[(OptionNumber.RR, {'counts': 9})]).data
         self.assertEqual(data[0], 0x4F)
@@ -368,7 +368,7 @@ class IPv4MakerTests(_Case):
     def test_field_maxima_build(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.qs_function import QSFunction
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         data = IPv4(id=0xFFFF, reserved=True, offset=0x1FFF, ttl=255, protocol=253,
                     options=[(OptionNumber.SID, {'sid': 0xFFFF})]).data
@@ -391,7 +391,7 @@ class IPv6RouteMakerTests(_Case):
     """IPv6-Route's header maker and its RPL source route maker."""
 
     def test_out_of_range_values_are_refused(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         for args, name, value in (({'seg_left': 256}, 'Segments Left', 256),
                                   ({'seg_left': True}, 'Segments Left', True),
@@ -404,7 +404,7 @@ class IPv6RouteMakerTests(_Case):
                                    type=3, data={'ip': ['2001:db8::1'], 'reserved': reserved})
 
     def test_rpl_reserved_maximum_round_trips(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         data = IPv6_Route(type=3, data={'ip': ['2001:db8::1'], 'reserved': 0xFFFFF}).data
         # RFC 6554 section 3: Pad in the top four bits, then 20 reserved bits.
@@ -592,13 +592,13 @@ class MHMakerTests(_Case):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return bytes(MH(next=TransType.IPv6_NoNxt, type=Packet.Binding_Refresh_Request,
                         data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH.from_data(MH(io.BytesIO(data), len(data), extension=True).info).data
 
@@ -608,7 +608,7 @@ class MHMakerTests(_Case):
         from pcapkit.const.mh.lma_mag_suboption import LMAControlledMAGSuboption
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.qos_attribute import QoSAttribute
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         def message(packet: 'str', arg: 'str') -> 'object':
             return lambda value: bytes(MH(next=59, type=Packet[packet], data={arg: value}))
@@ -643,7 +643,7 @@ class MHMakerTests(_Case):
         self.assertSwept('MH', self._rows(), self._rebuild)
 
     def test_every_integer_argument_is_swept(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         swept = {label for label, *_ in self._rows()} | self.EXEMPT
         for name in sorted(vars(MH)):
@@ -691,7 +691,7 @@ class MHMakerTests(_Case):
         # run of eight crosses it whatever the option's alignment, so one of
         # them at least reaches the length check rather than another refusal.
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         swept = set()
@@ -760,7 +760,7 @@ class MHMakerTests(_Case):
 
     def test_cga_multi_prefix_extension_fields_are_refused(self) -> None:
         from pcapkit.const.mh.cga_extension import CGAExtension
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = MH.__new__(MH)
         maker = proto._make_ext_multiprefix
@@ -868,13 +868,13 @@ class HIPMakerTests(_Case):
     }
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP.from_data(HIP(data).info).data
 
     def _rows(self) -> 'list[tuple]':
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         def header(arg: 'str') -> 'object':
             return lambda value: bytes(HIP(version=2, **{arg: value}))
@@ -899,7 +899,7 @@ class HIPMakerTests(_Case):
         self.assertSwept('HIPv2', self._rows(), self._rebuild)
 
     def test_every_integer_argument_is_swept(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         swept = {label for label, *_ in self._rows()} | self.EXEMPT
         for name in sorted(vars(HIP)):
@@ -910,7 +910,7 @@ class HIPMakerTests(_Case):
                     self.assertIn(f'{name}.{arg}', swept)
 
     def test_version_is_refused(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (-1, 16, True):
             with self.subTest(version=version):
@@ -920,7 +920,7 @@ class HIPMakerTests(_Case):
         # RFC 7401 section 5.1: Header Length counts 8-octet units after the
         # first 8, in one octet; the two HITs are 4 of them, a SEQ is 1.
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         seq = (Parameter.SEQ, {'update_id': 1})
         data = HIP(version=2, parameters=[seq] * 251).data
@@ -930,7 +930,7 @@ class HIPMakerTests(_Case):
 
     def test_locator_type_is_refused_out_of_range(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for kind in (-1, 256):
             with self.subTest(type=kind):
@@ -939,7 +939,7 @@ class HIPMakerTests(_Case):
 
     def test_lifetimes_and_identifiers_are_refused(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         proto = HIP.__new__(HIP)
         self.assertRefused('HIPv2: invalid lifetime: True', proto._make_param_puzzle,
@@ -958,7 +958,7 @@ class HIPMakerTests(_Case):
     def test_lifetime_seconds_are_refused_unless_finite_numbers(self) -> None:
         # ``True`` would be one second, a lifetime each field holds.
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for code, arg in (('PUZZLE', 'lifetime'), ('REG_INFO', 'min_lifetime'), ('REG_INFO', 'max_lifetime'),
@@ -973,7 +973,7 @@ class HIPMakerTests(_Case):
         # RFC 7401 section 5.2.4: Length is two octets, so RHASH_len / 8 is
         # 65535 at most. ``8.0`` is refused although 8 bits is a width.
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for code, base in (('PUZZLE', {'lifetime': 1}), ('SOLUTION', {})):
             for value in (True, 8.0, -8, 8 << 16, 1 << 200):
@@ -991,10 +991,10 @@ class OptionCodeTests(_Case):
 
     def _builders(self) -> 'list[tuple[type, object]]':
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return [
             (HOPOPT, lambda code, args: HOPOPT(next=59, options=[(code, args)])),

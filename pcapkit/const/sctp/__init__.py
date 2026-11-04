@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.transport.sctp.SCTP` Constant Enumerations
-===========================================================================
+""":class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` Constant Enumerations
+====================================================================================
 
 .. module:: pcapkit.const.sctp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.sctp.SCTP` implementations. Available
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` implementations. Available
 enumerations include:
 
 .. list-table::

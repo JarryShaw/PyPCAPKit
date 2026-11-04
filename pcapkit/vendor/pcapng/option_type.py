@@ -287,7 +287,7 @@ class {NAME}(EnumRegistry, StrEnum):
             # permanent member as a side effect of a mere lookup -- exactly
             # the ``get``/``_missing_`` minting the owner's ruling forbids,
             # here on the wire-facing path
-            # (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
+            # (:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_pcapng_options`
             # calls this with raw option-code bytes off the wire).
             # ``_unregistered_member`` never touches ``__members_ns__``
             # either, so a genuinely unknown option code grows neither

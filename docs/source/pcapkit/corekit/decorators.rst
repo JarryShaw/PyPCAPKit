@@ -40,4 +40,4 @@ Type Variables
    :type: pcapkit.protocols.protocol.ProtocolBase
 
 .. data:: R_prepare
-   :type: pcapkit.protocols.schema.schema.Schema
+   :type: pcapkit.protocols.schema.Schema

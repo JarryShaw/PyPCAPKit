@@ -93,7 +93,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         """Two dispatchable classes named ``HTTP`` share a key.
 
         The registry is keyed on ``protocol.__name__.upper()``, so
-        :class:`pcapkit.protocols.application.http.HTTP` and a user class of the
+        :class:`pcapkit.protocols.application.http.protocol.HTTP` and a user class of the
         same name both land on ``'HTTP'``, and registering one replaces whichever
         was there. Guards against the replacement being silent (#675) -- no
         exception, no warning -- so that a later bare-name lookup simply returns a
@@ -104,7 +104,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         """
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols.application import http
+        from pcapkit.protocols.application.http import protocol as http
         from pcapkit.protocols.application.application import Application
         from pcapkit.utilities.warnings import RegistryWarning
 
@@ -199,8 +199,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         """
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
         UnitProtocol = self._unit_protocol()
@@ -254,9 +254,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.warnings import RegistryWarning
 
         cases = (
@@ -294,8 +294,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         Every code-keyed registrar is covered, including those that reach
         :meth:`Transport.register
         <pcapkit.protocols.transport.transport.Transport.register>` through
-        :class:`~pcapkit.protocols.transport.tcp.TCP` and
-        :class:`~pcapkit.protocols.transport.udp.UDP` rather than overriding it,
+        :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+        :class:`~pcapkit.protocols.transport.udp.protocol.UDP` rather than overriding it,
         and :meth:`ProtocolBase.register
         <pcapkit.protocols.protocol.ProtocolBase.register>` itself, which the
         others shadow.
@@ -307,14 +307,14 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase
-        from pcapkit.protocols.transport.sctp import SCTP
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
         UnitProtocol = self._unit_protocol()
@@ -446,7 +446,7 @@ class ProtocolRegistryTests(unittest.TestCase):
             ('string', 'not-a-class', 'must be a class'),
             ('none', None, 'must be a class'),
             ('descriptor argument (not unwrapped here)',
-             ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'), 'must be a class'),
+             ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'), 'must be a class'),
             ('wrong class', object, 'Protocol subclass'),
         ):
             with self.subTest(value=label):
@@ -478,7 +478,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         UnitProtocol = self._unit_protocol()
         self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
-        raw_module = ('pcapkit.protocols.misc.raw', 'Raw')
+        raw_module = ('pcapkit.protocols.misc.raw.protocol', 'Raw')
 
         class_routes = [
             (registry.register_linktype, LinkType.ETHERNET,
@@ -808,7 +808,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
-        raw_module_name = 'pcapkit.protocols.misc.raw'
+        raw_module_name = 'pcapkit.protocols.misc.raw.protocol'
         port = AppType_TCP.TCP_3exmp.port
 
         self._guard_registry(reg_transport.TCP.__proto__, port)
@@ -837,7 +837,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
-        raw_module_name = 'pcapkit.protocols.misc.raw'
+        raw_module_name = 'pcapkit.protocols.misc.raw.protocol'
         port = 65213
 
         self._guard_registry(reg_transport.TCP.__proto__, port)
@@ -888,7 +888,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import transport as reg_transport
         from pcapkit.utilities.exceptions import ProtocolError
 
-        raw_module_name = 'pcapkit.protocols.misc.raw'
+        raw_module_name = 'pcapkit.protocols.misc.raw.protocol'
         port = 65212
 
         self._guard_registry(reg_transport.TCP.__proto__, port)

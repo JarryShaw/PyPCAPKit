@@ -42,7 +42,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_length_present_with_an_8_bit_sequence_number(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = _unified(_L_SHORT_SEQ_EPOCH1, b'\x2a', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
 
@@ -57,7 +57,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         self.assertEqual(bytes(DTLS.from_data(parsed.info)), wire)
 
     def test_length_present_with_a_16_bit_sequence_number(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = _unified(_L_LONG_SEQ_EPOCH2, b'\x12\x34', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
 
@@ -71,7 +71,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         self.assertEqual(bytes(DTLS.from_data(parsed.info)), wire)
 
     def test_without_a_length_the_record_runs_to_the_end_of_the_datagram(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         wire = _unified(_NO_LENGTH_EPOCH3, b'\x07', None, _FRAGMENT)
 
@@ -84,7 +84,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         self.assertEqual(bytes(DTLS.from_data(parsed.info)), wire)
 
     def test_a_coalesced_record_after_the_length_is_not_swallowed(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         trailing = b'\xde\xad'
         wire = _unified(_L_SHORT_SEQ_EPOCH1, b'\x07', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT) + trailing
@@ -94,7 +94,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         self.assertEqual(bytes(parsed.payload), trailing)
 
     def test_a_connection_id_is_refused_rather_than_misread(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         # The connection ID's length is negotiated, not carried, so the
@@ -105,7 +105,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
             DTLS(wire, len(wire))
 
     def test_a_length_past_the_end_of_the_datagram_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = _unified(_L_SHORT_SEQ_EPOCH1, b'\x07', (0x20).to_bytes(2, 'big'), _FRAGMENT)
@@ -114,7 +114,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
             DTLS(wire, len(wire))
 
     def test_a_header_with_no_ciphertext_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = _unified(_NO_LENGTH_EPOCH3, b'\x07', None, b'')
@@ -123,7 +123,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
             DTLS(wire, len(wire))
 
     def test_a_ciphertext_shorter_than_the_sample_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         # RFC 9147 section 4.2.3: a record under 16 octets of ciphertext MUST
@@ -136,7 +136,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
                     DTLS(wire, len(wire))
 
     def test_a_ciphertext_of_the_minimum_length_is_accepted(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for name, first, length in (('length present', _L_SHORT_SEQ_EPOCH1, len(_FRAGMENT).to_bytes(2, 'big')),
                                     ('length absent', _NO_LENGTH_EPOCH3, None)):
@@ -147,7 +147,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
                 self.assertEqual(parsed.info.content, _FRAGMENT)
 
     def test_udp_port_5684_dispatches_the_unified_record(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         wire = _udp_to_5684(_unified(_L_SHORT_SEQ_EPOCH1, b'\x2a',
                                      len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT))
@@ -158,7 +158,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
         self.assertEqual(str(proto.protochain), 'UDP:DTLS 1.3')
 
     def test_a_refused_connection_id_record_degrades_to_raw_on_dispatch(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         # The genuine record is asserted alongside, so the refusal cannot be
         # satisfied by a binding that resolves to ``Raw`` unconditionally.
@@ -175,7 +175,7 @@ class UnifiedHeaderParseTests(unittest.TestCase):
 
 
     def test_a_datagram_the_record_format_forbids_degrades_to_raw_on_dispatch(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         # First octet in the 001 range and the header fits, but the ciphertext
         # is under the sample length, so it is not a DTLS 1.3 record.
@@ -198,7 +198,7 @@ class UnifiedHeaderChainTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_a_record_after_one_with_a_length_is_a_further_layer(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         first = _unified(_L_SHORT_SEQ_EPOCH1, b'\x07', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
         second = _unified(_L_LONG_SEQ_EPOCH2, b'\x12\x34', (20).to_bytes(2, 'big'), bytes(20))
@@ -214,8 +214,8 @@ class UnifiedHeaderChainTests(unittest.TestCase):
 
     def test_a_record_without_a_length_is_the_last(self) -> None:
         """It runs to the end of the datagram, so octets that would open a record are its ciphertext."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         last = _unified(_NO_LENGTH_EPOCH3, b'\x07', None, _FRAGMENT + self.CCS)
         wire = self.CCS + last
@@ -227,8 +227,8 @@ class UnifiedHeaderChainTests(unittest.TestCase):
 
     def test_a_connection_id_after_a_record_stays_raw_without_an_error(self) -> None:
         """Its negotiated length leaves the record's end unknown, so no whole record opens there."""
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         refused = _unified(_CID_PRESENT, b'\x07', len(_FRAGMENT).to_bytes(2, 'big'), _FRAGMENT)
         wire = self.CCS * 2 + refused
@@ -244,7 +244,7 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_make_writes_each_flag_combination(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         cases = (
             ('length, 8-bit sequence', dict(epoch=1, sequence_number=0x2A, sequence_long=False,
@@ -266,7 +266,7 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
                 self.assertEqual(made, expected)
 
     def test_make_then_parse_round_trips(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for sequence_long in (False, True):
             for length_present in (False, True):
@@ -283,7 +283,7 @@ class UnifiedHeaderMakeTests(unittest.TestCase):
                     self.assertEqual(parsed.info.length, len(_FRAGMENT) if length_present else None)
 
     def test_an_epoch_wider_than_two_bits_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import FieldValueError
 
         with self.assertRaises(FieldValueError):

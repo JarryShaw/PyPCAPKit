@@ -15,7 +15,7 @@ application-layer payload of a TCP datagram that
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
-from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.tcp.protocol import TCP
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -34,7 +34,7 @@ def tcp_datagram(datagram: 'TCP_Datagram') -> 'Optional[ProtocolBase]':
     A reassembled datagram carries no protocol number, so its payload is
     dispatched on its ``(source, destination)`` ports by
     :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
-    of :class:`~pcapkit.protocols.transport.tcp.TCP`. Each port is resolved to
+    of :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`. Each port is resolved to
     its :class:`~pcapkit.const.reg.apptype.tcp.TCP` member by
     :meth:`Transport._make_port
     <pcapkit.protocols.transport.transport.Transport._make_port>`, as

@@ -64,7 +64,7 @@ class TestPCAPNGSPBSnaplen(PCAPNGTestCase):
     def test_make_still_clips_to_the_snaplen(self) -> None:
         """``make`` -> parse -> pack: a fresh block holds the snaplen's worth."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context(snaplen=8)
         with warnings.catch_warnings():

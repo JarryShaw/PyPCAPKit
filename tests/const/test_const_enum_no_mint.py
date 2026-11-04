@@ -1757,7 +1757,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         """Guards against :meth:`OptionType.get` minting directly on a miss
         (bypassing ``_missing_`` entirely) -- a second, independent mint
         site, on the wire-facing path
-        (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
+        (:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_pcapng_options`
         calls ``get()`` with raw option-code bytes). The owner's ruling names
         ``get`` explicitly -- the same reason
         :class:`~pcapkit.const.ftp.command.Command`/:class:`~pcapkit.const.
@@ -2116,8 +2116,8 @@ class BespokeGetReplacementTests(unittest.TestCase):
 
     Measured when the hand-written form was replaced, so that no caller in
     :mod:`pcapkit` or :mod:`tests` depends on it: ``grep`` found exactly one
-    production call site each (:mod:`pcapkit.protocols.application.httpv1`
-    and :mod:`pcapkit.protocols.application.ftp`), neither passing a
+    production call site each (:mod:`pcapkit.protocols.application.httpv1.protocol`
+    and :mod:`pcapkit.protocols.application.ftp.protocol`), neither passing a
     ``default`` or a ``str`` key -- both call ``get(<int>)`` with no default,
     which raises identically either way on an unresolvable key. The
     hand-written ``str``-key branch (look up-or-mint *by name*, keyed on

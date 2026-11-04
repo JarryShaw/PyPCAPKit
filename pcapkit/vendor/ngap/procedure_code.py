@@ -15,7 +15,7 @@ kept in step with it. |pycrate|_ already carries the up-to-date assignment as
 compiled ASN.1, at ``pycrate_asn1dir/NGAP.py``'s ``NGAP_Constants`` class (one
 ``INT`` value object per ``id-<Name>`` constant, tagged with the ``ProcedureCode``
 or ``ProtocolIE-ID`` open type it belongs to) -- and it is the very same
-dependency :mod:`pcapkit.protocols.application.ngap` already needs installed to
+dependency :mod:`pcapkit.protocols.application.ngap.protocol` already needs installed to
 decode NGAP at all. So this crawler reads that already-installed package
 directly instead of fetching anything over the network: it leaves
 :attr:`~pcapkit.vendor.default.Vendor.LINK` at its :obj:`None` default, and
@@ -26,7 +26,7 @@ No network access happens at generation time -- only, if at all, whenever
 
 :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` is a genuinely open
 registry -- 3GPP keeps assigning new elementary procedures to TS 38.413 -- so,
-unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue :issue:`877`
+unlike the closed :mod:`pcapkit.protocols.internet.mh.protocol` enums GitHub issue :issue:`877`
 ruled on, an in-range value this crawler has not (yet) seen is not a bug to
 raise on: :meth:`~pcapkit.const.ngap.procedure_code.ProcedureCode._missing_`
 answers it with a throwaway, non-registering member instead (see

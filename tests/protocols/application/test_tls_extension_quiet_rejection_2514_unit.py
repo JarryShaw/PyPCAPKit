@@ -66,7 +66,7 @@ class QuietRejectionTests(unittest.TestCase):
         sys.excepthook, threading.excepthook = _sys_sentinel, _threading_sentinel
 
     def _parse_quietly(self, wire: bytes) -> 'tuple':
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.logging import logger
 
@@ -92,7 +92,7 @@ class QuietRejectionTests(unittest.TestCase):
     def test_a_registered_decoders_loud_rejection_is_quiet(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.ssl.protocol import SSL
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.logging import logger

@@ -58,7 +58,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         """The contract ``Datagram.completed`` has to keep as a StrEnum.
 
         Deriving from :class:`~pcapkit.utilities.compat.StrEnum` -- as
-        :class:`~pcapkit.protocols.application.httpv1.Type` does -- buys
+        :class:`~pcapkit.protocols.application.httpv1.protocol.Type` does -- buys
         serialisability and comparison against a plain string. What it must not
         cost is the truthiness callers rely on, as for a :obj:`bool` field,
         which needs ``__bool__`` overridden because every non-empty string is

@@ -48,7 +48,7 @@ class ReportPayloadCutTests(unittest.TestCase):
                     yield case, declared, message[:keep], records_end
 
     def test_unpack_then_pack_gives_the_capture(self) -> None:
-        from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.schema import IGMPv3
 
         for case, declared, cut, records_end in self.cases():
             with self.subTest(case, declared=declared, keep=len(cut)), warnings.catch_warnings():
@@ -60,7 +60,7 @@ class ReportPayloadCutTests(unittest.TestCase):
                 self.assertEqual(schema.pack(), cut)
 
     def test_from_dict_of_to_dict_gives_the_capture(self) -> None:
-        from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.schema import IGMPv3
 
         for case, declared, cut, _ in self.cases():
             with self.subTest(case, declared=declared, keep=len(cut)), warnings.catch_warnings():
@@ -71,7 +71,7 @@ class ReportPayloadCutTests(unittest.TestCase):
     def test_the_cut_is_recorded_on_the_payload(self) -> None:
         """The short read names ``payload`` and the octets of it captured; a
         message captured whole records none."""
-        from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.schema import IGMPv3
 
         for case, declared, cut, records_end in self.cases():
             with self.subTest(case, declared=declared, keep=len(cut)), warnings.catch_warnings():
@@ -82,7 +82,7 @@ class ReportPayloadCutTests(unittest.TestCase):
 
     def test_a_cut_inside_the_records_stays_on_the_records(self) -> None:
         """The control: the data ends inside a record, so the cut stays on ``records``."""
-        from pcapkit.protocols.schema.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.schema import IGMPv3
 
         message = SHAPES[0][1]
         for keep in range(9, 8 + len(RECORD)):

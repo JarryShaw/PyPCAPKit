@@ -109,8 +109,8 @@ class OptionLengthCutTests(unittest.TestCase):
         """HOPOPT and IPv6-Opts, with the next header code IPv6 gives each and the
         key IPv6 keeps each under."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         return [(HOPOPT, 0, ExtensionHeader.HOPOPT), (IPv6_Opts, 60, ExtensionHeader.IPv6_Opts)]
 
@@ -155,7 +155,7 @@ class OptionLengthCutTests(unittest.TestCase):
         # every offset: on its own, a short read that rebuilds or a ProtocolError;
         # inside IPv6, nothing reported, and the packet rebuilds
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         overrides = {Option.ILNP_Nonce: {'nonce': 0xFFFFFF},
@@ -186,7 +186,7 @@ class OptionLengthCutTests(unittest.TestCase):
         # a CALIPSO or SMF_DPD option cut after its type is a short read, as one cut
         # an octet later is, on its own and inside IPv6
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for cls, next_header, key in self.headers():
             for code, kwargs in variants():
@@ -222,8 +222,8 @@ class OptionLengthCutTests(unittest.TestCase):
         # its parser refuses the zero length the cut leaves, as Router Alert's does
         # (#2694), so the header is refused, and kept as Raw inside IPv6, quietly
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         error = r'\[OptNo 109\] option cut short: .*\[OptNo 109\] invalid format'
@@ -248,8 +248,8 @@ class OptionLengthCutTests(unittest.TestCase):
     def test_a_length_on_the_wire_too_short_is_refused_quietly(self) -> None:
         # whole headers whose option declares an ``Opt Data Len`` too short for its
         # fields: refused with a ProtocolError, and kept as Raw inside IPv6 quietly
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -284,7 +284,8 @@ class OptionLengthCutTests(unittest.TestCase):
         # a packet whose short read names ``len`` was cut before it; one naming a
         # later field, or none, holds a length read off the wire
         from pcapkit.corekit.fields.misc import SchemaField
-        from pcapkit.protocols.schema.internet import hopopt, ipv6_option
+        from pcapkit.protocols.internet.hopopt import schema as hopopt
+        from pcapkit.protocols.internet.ipv6_ext import schema as ipv6_option
         from pcapkit.utilities.exceptions import ProtocolError
 
         helpers = (
@@ -322,7 +323,7 @@ class SchemaShortReadContextTests(unittest.TestCase):
         from pcapkit.corekit.fields.misc import ForwardMatchField, SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         seen = []  # type: list[tuple[str, Any]]
 
@@ -369,7 +370,7 @@ class SchemaShortReadContextTests(unittest.TestCase):
         # ``packet`` is optional, for a caller with no packet to hand the record to,
         # and the first record still wins
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class Tiny(Schema):

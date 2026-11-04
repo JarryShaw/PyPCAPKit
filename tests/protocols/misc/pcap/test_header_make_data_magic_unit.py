@@ -26,7 +26,7 @@ class PCAPHeaderMakeDataMagicUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_make_data_keys_are_make_keywords(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.protocols.protocol import _declared_keywords
 
         accepted = _declared_keywords(Header)
@@ -36,7 +36,7 @@ class PCAPHeaderMakeDataMagicUnitTests(unittest.TestCase):
 
     def test_from_data_round_trips_every_magic(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         for (byteorder, nanosecond), magic in MAGIC.items():
             with self.subTest(byteorder=byteorder, nanosecond=nanosecond):

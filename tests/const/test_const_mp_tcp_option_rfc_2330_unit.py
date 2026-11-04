@@ -43,7 +43,7 @@ that was wrong:
   :meth:`MPTCPOptionCitationTests.test_the_generic_mptcp_figure_cites_the_registrys_rfc`),
   for the reason the next paragraph gives.
 
-:mod:`pcapkit.protocols.transport.tcp` carried the same defect, corrected
+:mod:`pcapkit.protocols.transport.tcp.protocol` carried the same defect, corrected
 alongside the table: the option-kind map's comment against
 ``Option.Multipath_TCP``, which attributes the kind rather than any subtype's
 layout, and the ``Structure of MP-TCP`` figure in ``TCP._read_mode_mp``, which
@@ -93,7 +93,7 @@ CONST = ROOT / 'pcapkit' / 'const' / 'tcp' / 'mp_tcp_option.py'
 VENDOR = ROOT / 'pcapkit' / 'vendor' / 'tcp' / 'mp_tcp_option.py'
 
 #: The parser that dispatches on these subtypes.
-TRANSPORT = ROOT / 'pcapkit' / 'protocols' / 'transport' / 'tcp.py'
+TRANSPORT = ROOT / 'pcapkit' / 'protocols' / 'transport' / 'tcp' / 'protocol.py'
 
 #: The RFC the registry gives as its reference: MPTCP v1, which obsoletes RFC 6824's v0.
 REGISTRY_RFC = '8684'

@@ -2,7 +2,7 @@
 """Ethernet rejects a non-string MAC address with an in-library error.
 
 GitHub issue #2222: :meth:`Ethernet._make_mac_addr
-<pcapkit.protocols.link.ethernet.Ethernet._make_mac_addr>` passed a
+<pcapkit.protocols.link.ethernet.protocol.Ethernet._make_mac_addr>` passed a
 :obj:`bool`, :class:`int`, :obj:`None` or :class:`float` straight to the MAC
 pattern, which raised a bare :class:`TypeError` that neither
 :class:`~pcapkit.utilities.exceptions.ProtocolError` nor :class:`ValueError`
@@ -16,7 +16,7 @@ Every case builds its own frame in memory and reads no capture.
 
 import unittest
 
-from pcapkit.protocols.link.ethernet import Ethernet
+from pcapkit.protocols.link.ethernet.protocol import Ethernet
 from pcapkit.utilities.exceptions import ProtocolError
 
 

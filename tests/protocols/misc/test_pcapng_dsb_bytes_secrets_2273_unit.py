@@ -49,7 +49,7 @@ class TestPCAPNGDSBBytesSecrets(PCAPNGTestCase):
     def _round_trip(self, block: 'dict[str, object]', octets: 'bytes') -> None:
         """Make the block, then assert make, parse and rebuild agree on ``octets``."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings():
@@ -87,7 +87,7 @@ class TestPCAPNGDSBBytesSecrets(PCAPNGTestCase):
         """The made info carries the secrets parsed out of the octets."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         made = PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Decryption_Secrets_Block,
                       block={'secrets_data': SECRETS[TLS_KEY_LOG]})

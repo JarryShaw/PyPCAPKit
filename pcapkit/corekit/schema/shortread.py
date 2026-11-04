@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional, TypeVar
 
     from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
     _PB = TypeVar('_PB', bound=ProtocolBase)
 
@@ -42,15 +42,15 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
         protocol: Protocol instance, just parsed.
 
     Called by the layer base classes, and by the PCAP global
-    :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.
+    :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`, once a parse is done.
     When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``
-    record :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+    record :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
     made, so that :meth:`Protocol.from_data
     <pcapkit.protocols.protocol.Protocol.from_data>` hands it to the rebuild,
     whose :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>` cuts
     the header back to what was captured before it is read (:issue:`1458`,
     :issue:`2703`). The key is listed
-    in :attr:`Data.__included__ <pcapkit.protocols.data.data.Data.__included__>`,
+    in :attr:`Data.__included__ <pcapkit.protocols.data.Data.__included__>`,
     so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries it
     and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for
     a header that was captured whole.
@@ -59,11 +59,11 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a
     layer whose message runs to the end of the frame records the cut too, on the
     field it runs to the end in, through :meth:`Schema._note_short_read
-    <pcapkit.protocols.schema.schema.Schema._note_short_read>`, so its rebuild
+    <pcapkit.protocols.schema.Schema._note_short_read>`, so its rebuild
     reads as cut, as the layer did inside the frame (:issue:`2711`). A layer
     whose own header declares where its message ends records none, whether the
     cut falls at that end or past it; see :meth:`Schema._frame_end_field
-    <pcapkit.protocols.schema.schema.Schema._frame_end_field>`.
+    <pcapkit.protocols.schema.Schema._frame_end_field>`.
 
     """
     header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
@@ -91,14 +91,14 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
         ``protocol`` itself.
 
     The layer base classes and the PCAP global
-    :class:`~pcapkit.protocols.misc.pcap.header.Header` call it on what
+    :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` call it on what
     :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
     returns, which is cut back before it gets here: ``from_data`` hands the
     construction the ``__short_read__`` record that :func:`keep_short_read`
     left in ``data``, :meth:`Protocol.pack
     <pcapkit.protocols.protocol.Protocol.pack>` cuts the header it makes back
     to the octets captured through :meth:`Schema._cut_short_read
-    <pcapkit.protocols.schema.schema.Schema._cut_short_read>`, and
+    <pcapkit.protocols.schema.Schema._cut_short_read>`, and
     :meth:`Protocol.__post_init__
     <pcapkit.protocols.protocol.Protocol.__post_init__>` has
     :meth:`~pcapkit.protocols.protocol.Protocol.read` parse those octets at the

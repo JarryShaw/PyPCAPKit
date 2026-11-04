@@ -2,9 +2,9 @@
 """HTTP's member classes take their modules' names. C.f. #2529.
 
 A protocol class is named after its module, and a module's top-level schema and data
-classes follow: :mod:`~pcapkit.protocols.application.httpv1`,
-:mod:`~pcapkit.protocols.schema.application.httpv1` and
-:mod:`~pcapkit.protocols.data.application.httpv1` each hold ``HTTPv1``, and the
+classes follow: :mod:`~pcapkit.protocols.application.httpv1.protocol`,
+:mod:`~pcapkit.protocols.application.httpv1.schema` and
+:mod:`~pcapkit.protocols.application.httpv1.data` each hold ``HTTPv1``, and the
 ``httpv2`` modules ``HTTPv2``. The old module-level name ``HTTP`` keeps no alias
 (#1715, #1744), while the package-level names are unchanged.
 
@@ -33,12 +33,12 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: Each renamed module, with the class it holds.
 MODULES = {
-    'pcapkit.protocols.application.httpv1': 'HTTPv1',
-    'pcapkit.protocols.application.httpv2': 'HTTPv2',
-    'pcapkit.protocols.schema.application.httpv1': 'HTTPv1',
-    'pcapkit.protocols.schema.application.httpv2': 'HTTPv2',
-    'pcapkit.protocols.data.application.httpv1': 'HTTPv1',
-    'pcapkit.protocols.data.application.httpv2': 'HTTPv2',
+    'pcapkit.protocols.application.httpv1.protocol': 'HTTPv1',
+    'pcapkit.protocols.application.httpv2.protocol': 'HTTPv2',
+    'pcapkit.protocols.application.httpv1.schema': 'HTTPv1',
+    'pcapkit.protocols.application.httpv2.schema': 'HTTPv2',
+    'pcapkit.protocols.application.httpv1.data': 'HTTPv1',
+    'pcapkit.protocols.application.httpv2.data': 'HTTPv2',
 }
 
 #: Each package that exports the classes, with the module it exports them from.
@@ -46,10 +46,6 @@ PACKAGES = {
     'pcapkit': 'pcapkit.protocols.application',
     'pcapkit.protocols': 'pcapkit.protocols.application',
     'pcapkit.protocols.application': 'pcapkit.protocols.application',
-    'pcapkit.protocols.schema': 'pcapkit.protocols.schema.application',
-    'pcapkit.protocols.schema.application': 'pcapkit.protocols.schema.application',
-    'pcapkit.protocols.data': 'pcapkit.protocols.data.application',
-    'pcapkit.protocols.data.application': 'pcapkit.protocols.data.application',
 }
 
 #: A 20-octet TCP header, data offset 5, ACK set, from port 50000 to port 80.
@@ -91,21 +87,21 @@ class HTTPMemberNameTests(unittest.TestCase):
     def test_each_protocol_binds_its_own_modules_schema_and_data(self) -> None:
         for class_name in ('HTTPv1', 'HTTPv2'):
             suffix = class_name.lower()
-            klass = getattr(importlib.import_module(f'pcapkit.protocols.application.{suffix}'),
+            klass = getattr(importlib.import_module(f'pcapkit.protocols.application.{suffix}.protocol'),
                             class_name)
-            schema = importlib.import_module(f'pcapkit.protocols.schema.application.{suffix}')
-            data = importlib.import_module(f'pcapkit.protocols.data.application.{suffix}')
+            schema = importlib.import_module(f'pcapkit.protocols.application.{suffix}.schema')
+            data = importlib.import_module(f'pcapkit.protocols.application.{suffix}.data')
             with self.subTest(klass=class_name):
                 self.assertIs(klass.__schema__, getattr(schema, class_name))
                 self.assertIs(klass.__data__, getattr(data, class_name))
 
     def test_a_dispatched_layer_sits_under_its_versions_key(self) -> None:
         """The dispatched layer is the member, so its key is the member's name."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for class_name, payload in PAYLOADS.items():
             klass = getattr(importlib.import_module(
-                f'pcapkit.protocols.application.{class_name.lower()}'), class_name)
+                f'pcapkit.protocols.application.{class_name.lower()}.protocol'), class_name)
             data = _TCP_TO_80 + payload
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
@@ -119,7 +115,7 @@ class HTTPMemberNameTests(unittest.TestCase):
     def test_a_member_built_directly_reports_its_own_name(self) -> None:
         for class_name, payload in PAYLOADS.items():
             klass = getattr(importlib.import_module(
-                f'pcapkit.protocols.application.{class_name.lower()}'), class_name)
+                f'pcapkit.protocols.application.{class_name.lower()}.protocol'), class_name)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 layer = klass(io.BytesIO(payload), len(payload))
@@ -130,7 +126,7 @@ class HTTPMemberNameTests(unittest.TestCase):
         """Each member's own key holds it, and ``'HTTP'`` keeps the base."""
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.utilities.warnings import RegistryWarning
 
         names = reg_protocol.protocol_registry
@@ -143,7 +139,7 @@ class HTTPMemberNameTests(unittest.TestCase):
         self.addCleanup(restore)
         for class_name in ('HTTPv2', 'HTTPv1'):
             klass = getattr(importlib.import_module(
-                f'pcapkit.protocols.application.{class_name.lower()}'), class_name)
+                f'pcapkit.protocols.application.{class_name.lower()}.protocol'), class_name)
             with self.subTest(klass=class_name):
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')

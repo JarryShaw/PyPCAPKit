@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.foundation.traceflow.data.data import FrameRecord
-    from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
+    from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 

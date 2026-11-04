@@ -59,11 +59,11 @@ HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VEN
 EXPECTED = {
     'pcapkit.vendor.reg.ethertype': (('pcapkit.protocols.link.link', 'Link'),),
     'pcapkit.vendor.reg.transtype': (('pcapkit.protocols.internet.internet', 'Internet'),),
-    'pcapkit.vendor.reg.linktype': (('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-                                    ('pcapkit.protocols.misc.pcapng', 'PCAPNG')),
-    'pcapkit.vendor.sctp.payload_protocol_identifier': (('pcapkit.protocols.transport.sctp',
+    'pcapkit.vendor.reg.linktype': (('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+                                    ('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG')),
+    'pcapkit.vendor.sctp.payload_protocol_identifier': (('pcapkit.protocols.transport.sctp.protocol',
                                                          'SCTP'),),
-    'pcapkit.vendor.linux.arphrd': (('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),),
+    'pcapkit.vendor.linux.arphrd': (('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),),
 }
 
 
@@ -94,11 +94,11 @@ class RenderProtoDestTests(unittest.TestCase):
         """
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.vendor.default import render_proto_dest
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
-        descriptors = (ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-                       ModuleDescriptor('pcapkit.protocols.misc.pcapng', 'PCAPNG'))
+        descriptors = (ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+                       ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'))
         source = ('from pcapkit.corekit.module import ModuleDescriptor\n\n\n'
                   'class Rendered:\n' + render_proto_dest(descriptors) + '    pass\n')
 

@@ -19,8 +19,8 @@ from pcapkit.corekit.io import SeekableReader
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
-from pcapkit.protocols.schema.misc.pcapng import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC,
+from pcapkit.protocols.misc.pcapng.protocol import PCAPNG as P_PCAPNG
+from pcapkit.protocols.misc.pcapng.schema import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC,
                                                   GENERIC_BLOCK_MINIMUM)
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -36,19 +36,19 @@ if TYPE_CHECKING:
     from typing import Literal, Optional
 
     from pcapkit.foundation.extraction import Extractor
-    from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
-    from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
-    from pcapkit.protocols.data.misc.pcapng import \
+    from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
+    from pcapkit.protocols.misc.pcapng.data import CustomBlock as Data_CustomBlock
+    from pcapkit.protocols.misc.pcapng.data import \
         DecryptionSecretsBlock as Data_DecryptionSecretsBlock
-    from pcapkit.protocols.data.misc.pcapng import \
+    from pcapkit.protocols.misc.pcapng.data import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
-    from pcapkit.protocols.data.misc.pcapng import \
+    from pcapkit.protocols.misc.pcapng.data import \
         InterfaceStatisticsBlock as Data_InterfaceStatisticsBlock
-    from pcapkit.protocols.data.misc.pcapng import NameResolutionBlock as Data_NameResolutionBlock
-    from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
-    from pcapkit.protocols.data.misc.pcapng import \
+    from pcapkit.protocols.misc.pcapng.data import NameResolutionBlock as Data_NameResolutionBlock
+    from pcapkit.protocols.misc.pcapng.data import SectionHeaderBlock as Data_SectionHeaderBlock
+    from pcapkit.protocols.misc.pcapng.data import \
         SystemdJournalExportBlock as Data_SystemdJournalExportBlock
-    from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
+    from pcapkit.protocols.misc.pcapng.data import UnknownBlock as Data_UnknownBlock
 
 
 @info_final
@@ -118,7 +118,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
     #: A Section Header Block's Byte-Order Magic, as the octets read, mapped to
     #: the byte order it declares for its section; built from the one home of
-    #: the value, :data:`pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC`
+    #: the value, :data:`pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC`
     #: (:issue:`1739`).
     _BYTE_ORDER_OCTETS = {
         BYTE_ORDER_MAGIC.to_bytes(4, 'big'): 'big',
@@ -143,7 +143,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     __engine_name__ = 'PCAP-NG'
 
     #: Engine module name.
-    __engine_module__ = 'pcapkit.protocols.misc.pcapng'
+    __engine_module__ = 'pcapkit.protocols.misc.pcapng.protocol'
 
     ##########################################################################
     # Data models.

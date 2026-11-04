@@ -4,7 +4,7 @@
 GitHub issue #1380: a nested schema may read less than its
 :class:`~pcapkit.corekit.fields.misc.SchemaField`'s declared span. Parsing then
 packing keeps the octets it left unread (#1292), but a schema rebuilt through
-:meth:`~pcapkit.protocols.schema.schema.Schema.from_dict`, or a protocol rebuilt
+:meth:`~pcapkit.protocols.schema.Schema.from_dict`, or a protocol rebuilt
 through :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`, has never
 been unpacked, and without the fix zero-fills them. They travel with the nested
 value as its ``__remainder__``.
@@ -29,7 +29,7 @@ def _nested_schemas():  # type: ignore[no-untyped-def]
     """An outer schema whose nested schema reads less than its span."""
     from pcapkit.corekit.fields.misc import SchemaField
     from pcapkit.corekit.fields.numbers import UInt8Field
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.schema import Schema, schema_final
 
     @schema_final
     class Inner(Schema):
@@ -53,7 +53,7 @@ def _sized_schemas():  # type: ignore[no-untyped-def]
     from pcapkit.corekit.fields.misc import SchemaField
     from pcapkit.corekit.fields.numbers import UInt8Field
     from pcapkit.corekit.fields.strings import BytesField
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.schema import Schema, schema_final
 
     @schema_final
     class Inner(Schema):
@@ -72,7 +72,7 @@ def _protocol(outer):  # type: ignore[no-untyped-def]
     """A protocol over ``outer`` whose data model holds the nested schema's mapping."""
     from pcapkit.corekit.infoclass import info_final
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.data.data import Data
+    from pcapkit.protocols.data import Data
     from pcapkit.protocols.protocol import ProtocolBase
 
     @info_final
@@ -93,7 +93,7 @@ def _protocol(outer):  # type: ignore[no-untyped-def]
             return len(self.__header__)
 
         def read(self, length=None, **kwargs):  # type: ignore[no-untyped-def]
-            from pcapkit.protocols.misc.no_payload import NoPayload
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
             schema = self.__header__
             self._next = NoPayload()

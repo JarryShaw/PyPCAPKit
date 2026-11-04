@@ -15,7 +15,7 @@ annotations and must come back:
 * with a key repeated through an
   :class:`~pcapkit.corekit.multidict.OrderedMultiDict` still repeated (``multi``);
 * with the bookkeeping keys the parsers attach carried through: every
-  :class:`~pcapkit.protocols.data.data.Data` with ``__short_read__`` (#1465), every
+  :class:`~pcapkit.protocols.data.Data` with ``__short_read__`` (#1465), every
   PCAP-NG block with ``__truncated_raw__`` (#1475).
 
 ``to_dict()`` must also be a plain
@@ -54,13 +54,13 @@ __tier__ = 'LATEST'
 
 #: Packages whose modules define :class:`Info` subclasses but are not imported by
 #: ``import pcapkit`` alone.
-PACKAGES = ('pcapkit.protocols.data', 'pcapkit.foundation.reassembly.data',
+PACKAGES = ('pcapkit.protocols', 'pcapkit.foundation.reassembly.data',
             'pcapkit.foundation.traceflow.data')
 
 #: Values a model's ``__post_init__`` needs in a shape no marker has, by label;
 #: each is a callable, so it is built against the current import.
 VALUES = {
-    'protocols.data.misc.pcapng:NameResolutionBlock': {
+    'protocols.misc.pcapng.data:NameResolutionBlock': {
         'records': lambda: importlib.import_module('pcapkit.corekit.multidict').OrderedMultiDict(),
     },
 }
@@ -272,8 +272,8 @@ class InfoRoundTripTests(KnownFailureTable, unittest.TestCase):
         reimport_once_per_class(self)
 
     def _cases(self) -> 'dict[str, tuple[type, str]]':
-        from pcapkit.protocols.data.data import Data
-        from pcapkit.protocols.data.misc.pcapng import PCAPNG
+        from pcapkit.protocols.data import Data
+        from pcapkit.protocols.misc.pcapng.data import PCAPNG
 
         cases = {}  # type: dict[str, tuple[type, str]]
         for label, cls in info_classes().items():
@@ -297,7 +297,8 @@ class InfoRoundTripTests(KnownFailureTable, unittest.TestCase):
         keyed = {label for label, cls in classes.items() if annotated_keys(cls)}
         covered = {label.rsplit('/', 1)[0] for label in self._cases()}
         self.assertEqual(keyed, covered)
-        self.assertGreater(sum(label.startswith('protocols.data.') for label in keyed), 400)
+        self.assertGreater(sum(label.startswith('protocols.') and label.split(':')[0].endswith('.data')
+                               for label in keyed), 400)
 
     def test_from_dict_of_to_dict_reproduces_the_instance(self) -> None:
         cases = self._cases()

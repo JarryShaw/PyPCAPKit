@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A later IPv6 fragment's data is raw, not an upper-layer header.
 
-GitHub issue #1545: :class:`~pcapkit.protocols.internet.ipv6.IPv6` handed the
+GitHub issue #1545: :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` handed the
 octets after a Fragment header with a non-zero offset to the upper-layer
 dispatch on the Fragment header's Next Header, so a slice from the middle of a
 UDP or TCP datagram read as a UDP or TCP header of its own -- ports and lengths
@@ -10,7 +10,7 @@ taken from payload octets.
 :rfc:`8200#section-4.5` puts the upper-layer header in the first fragment only.
 A later one carries a slice of the Fragmentable Part from its offset on, and
 that slice starts with no header, so it is a
-:class:`~pcapkit.protocols.misc.raw.Raw` leaf. A first fragment, and an atomic
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` leaf. A first fragment, and an atomic
 one (offset zero, M clear), are dissected on the Fragment header's Next Header.
 
 Every case builds its own octets in memory and reads no capture. Classes are
@@ -56,7 +56,7 @@ class TestIPv6LaterFragmentRaw(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, data: bytes) -> 'object':
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ipv6 = IPv6(data)
         self.assertEqual(ipv6.data, data)
@@ -64,15 +64,15 @@ class TestIPv6LaterFragmentRaw(unittest.TestCase):
 
     def assert_rebuilds(self, ipv6: 'object') -> None:
         """``ipv6`` rebuilds byte for byte from its info and its info as a dict."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         self.assertEqual(IPv6.from_data(ipv6.info).data, ipv6.data)
         self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, ipv6.data)
 
     def test_later_fragment_data_is_raw(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, (code, alias, upper) in UPPER.items():
             for offset in LATER_OFFSETS:
@@ -113,10 +113,10 @@ class TestIPv6LaterFragmentRaw(unittest.TestCase):
     def test_made_later_fragment_parses_as_raw(self) -> None:
         # make -> parse: a later fragment built with an upper-layer header's
         # octets in it reads back as raw, and rebuilds to the octets made
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         upper = UDP(srcport=51234, dstport=5001, payload=bytes(range(0x40, 0x60))).data
         header = IPv6_Frag(next=17, offset=181, mf=True, id=110308).data

@@ -106,7 +106,7 @@ class RebuildReportsOnceTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         import pcapkit
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities import config
 
         self.pcapkit = pcapkit

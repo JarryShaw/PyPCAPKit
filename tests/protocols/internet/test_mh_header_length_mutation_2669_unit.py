@@ -62,7 +62,7 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
 
     def _rebuilds(self, raw: bytes, packet: bytes) -> None:
         """``packet`` holds ``raw`` inside IPv6, and rebuilds byte for byte."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ipv6 = IPv6(packet, len(packet))
         self.assertEqual(IPv6.from_data(ipv6.info).data, packet)
@@ -72,9 +72,9 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
             self.assertEqual(type(ext).from_data(ext.info.to_dict()).data, ext.data)
 
     def test_home_test_short_header_length(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         mh = MH(HOME_TEST, len(HOME_TEST))
@@ -96,7 +96,7 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
     def test_short_header_length_cut_inside_it(self) -> None:
         # Header Len 1 declares 16 of the 24 octets; a capture ending before
         # the 16th is a cut, whose rebuild keeps Header Len 1
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         whole = HOME_TEST[:1] + b'\x01' + HOME_TEST[2:]
@@ -116,8 +116,8 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
     def test_every_message_cut_inside_it(self) -> None:
         # a valid Header Len cut short is kept: only a field reading past the
         # declared header, not past the capture, is refused
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError
 
         for code in sorted(MH.__message__, key=int):
@@ -145,7 +145,7 @@ class TestMHHeaderLengthMutation(unittest.TestCase):
                         self.assertIn(135, [int(key) for key in ipv6.extension_headers])
 
     def test_every_message_changed_in_one_octet(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError
 
         for code in sorted(MH.__message__, key=int):

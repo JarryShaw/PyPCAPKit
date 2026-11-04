@@ -24,22 +24,22 @@ from tests._support import reimport_once_per_class
 #: ``(module, class, registrar, registry)`` for every parser registrar but
 #: PCAP-NG's, which :mod:`tests.protocols.misc.test_pcapng_unit` covers.
 SITES = (
-    ('pcapkit.protocols.internet.ipv4', 'IPv4', 'register_option', '__option__'),
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT', 'register_option', '__option__'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts', 'register_option', '__option__'),
-    ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route', 'register_routing', '__routing__'),
-    ('pcapkit.protocols.internet.hip', 'HIP', 'register_parameter', '__parameter__'),
-    ('pcapkit.protocols.internet.mh', 'MH', 'register_message', '__message__'),
-    ('pcapkit.protocols.internet.mh', 'MH', 'register_option', '__option__'),
-    ('pcapkit.protocols.internet.mh', 'MH', 'register_extension', '__extension__'),
-    ('pcapkit.protocols.transport.tcp', 'TCP', 'register_option', '__option__'),
-    ('pcapkit.protocols.transport.tcp', 'TCP', 'register_mp_option', '__mp_option__'),
-    ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_chunk', '__chunk__'),
-    ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_parameter', '__parameter__'),
-    ('pcapkit.protocols.transport.sctp', 'SCTP', 'register_cause', '__cause__'),
-    ('pcapkit.protocols.transport.dccp', 'DCCP', 'register_option', '__option__'),
-    ('pcapkit.protocols.application.httpv2', 'HTTPv2', 'register_frame', '__frame__'),
-    ('pcapkit.protocols.application.ssl', 'SSL', 'register_extension', '__extension__'),
+    ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4', 'register_option', '__option__'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT', 'register_option', '__option__'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts', 'register_option', '__option__'),
+    ('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route', 'register_routing', '__routing__'),
+    ('pcapkit.protocols.internet.hip.protocol', 'HIP', 'register_parameter', '__parameter__'),
+    ('pcapkit.protocols.internet.mh.protocol', 'MH', 'register_message', '__message__'),
+    ('pcapkit.protocols.internet.mh.protocol', 'MH', 'register_option', '__option__'),
+    ('pcapkit.protocols.internet.mh.protocol', 'MH', 'register_extension', '__extension__'),
+    ('pcapkit.protocols.transport.tcp.protocol', 'TCP', 'register_option', '__option__'),
+    ('pcapkit.protocols.transport.tcp.protocol', 'TCP', 'register_mp_option', '__mp_option__'),
+    ('pcapkit.protocols.transport.sctp.protocol', 'SCTP', 'register_chunk', '__chunk__'),
+    ('pcapkit.protocols.transport.sctp.protocol', 'SCTP', 'register_parameter', '__parameter__'),
+    ('pcapkit.protocols.transport.sctp.protocol', 'SCTP', 'register_cause', '__cause__'),
+    ('pcapkit.protocols.transport.dccp.protocol', 'DCCP', 'register_option', '__option__'),
+    ('pcapkit.protocols.application.httpv2.protocol', 'HTTPv2', 'register_frame', '__frame__'),
+    ('pcapkit.protocols.application.ssl.protocol', 'SSL', 'register_extension', '__extension__'),
 )
 
 

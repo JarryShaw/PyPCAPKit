@@ -89,7 +89,7 @@ REGEXES = {name: re.compile(pattern, re.IGNORECASE) for name, pattern in PATTERN
 #: ``(path, phrase)`` of each match that is not an agreement claim, with the reason.
 EXEMPT = {
     # The default engine's own schema, describing the default engine's walk.
-    ('pcapkit/protocols/schema/internet/ipv6.py', 'as the default engine walks'),
+    ('pcapkit/protocols/internet/ipv6/schema.py', 'as the default engine walks'),
 }
 
 #: Whitespace, with the ``#`` or ``#:`` that opens a continued comment line,

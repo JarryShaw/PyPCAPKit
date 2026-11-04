@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """IPv6 rejects a header whose Version is not 6. C.f. #1680.
 
-GitHub issue #1680: :meth:`IPv6.read <pcapkit.protocols.internet.ipv6.IPv6.read>`
+GitHub issue #1680: :meth:`IPv6.read <pcapkit.protocols.internet.ipv6.protocol.IPv6.read>`
 copied the Version nibble without checking it, so a header of any Version was
-read as IPv6, and :meth:`~pcapkit.protocols.internet.ipv6.IPv6.from_data`, which
+read as IPv6, and :meth:`~pcapkit.protocols.internet.ipv6.protocol.IPv6.from_data`, which
 always writes 6, rebuilt it with another first octet. The reader rejects any
-Version but 6, as :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+Version but 6, as :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>`
 rejects any but 4: each concrete class reads only its own protocol. Behind
 Ethernet or inside a tunnel the frame stops there, kept raw and rebuilt as
 captured.
@@ -49,7 +49,7 @@ class TestIPv6Version(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipv6_rejects_every_other_version(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version in VERSIONS:
@@ -59,7 +59,7 @@ class TestIPv6Version(unittest.TestCase):
                 self.assertEqual(str(caught.exception), f'[IPv6] invalid version: {version}')
 
     def test_version_6_is_read(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         data = ipv6(6)
         proto = IPv6(data)
@@ -69,7 +69,7 @@ class TestIPv6Version(unittest.TestCase):
 
     def test_behind_ethernet_the_frame_stops_at_ipv6(self) -> None:
         # as at an IPv4 header of another version: kept raw, and rebuilt as captured
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for version in VERSIONS:
             for trailer in (b'', b'\xee' * 4):
@@ -82,8 +82,8 @@ class TestIPv6Version(unittest.TestCase):
                     self.assertEqual(Ethernet.from_data(proto.info).data, frame)
 
     def test_inside_a_tunnel_the_frame_stops_at_the_inner_header(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for version in VERSIONS:
             for label, cls, frame, chain in (

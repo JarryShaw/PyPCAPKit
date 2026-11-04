@@ -1,11 +1,11 @@
-==============================================================
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` Vendor Crawlers
-==============================================================
+=======================================================================
+:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` Vendor Crawlers
+=======================================================================
 
 .. module:: pcapkit.vendor.ipv4
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` implementations. Available
+:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` implementations. Available
 vendor crawlers include:
 
 .. list-table::

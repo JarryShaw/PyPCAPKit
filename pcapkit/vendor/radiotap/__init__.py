@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.radiotap.Radiotap` Vendor Crawlers
-========================================================================
+""":class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` Vendor Crawlers
+=================================================================================
 
 .. module:: pcapkit.vendor.radiotap
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` implementations.
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations.
 Available vendor crawlers include:
 
 .. list-table::

@@ -2,9 +2,10 @@ OSPF - Open Shortest Path First
 ===============================
 
 .. module:: pcapkit.protocols.application.ospf
+.. module:: pcapkit.protocols.application.ospf.protocol
 
-:mod:`pcapkit.protocols.application.ospf` contains
-:class:`~pcapkit.protocols.application.ospf.OSPF` only,
+:mod:`pcapkit.protocols.application.ospf.protocol` contains
+:class:`~pcapkit.protocols.application.ospf.protocol.OSPF` only,
 which implements an extractor for Open Shortest Path
 First (OSPF) [*]_, whose structure is described
 as below:
@@ -34,7 +35,7 @@ as below:
 .. versionadded:: 1.5.0
 
    Moved here from ``pcapkit.protocols.link.ospf``, with its data model and
-   header schema. :class:`~pcapkit.protocols.application.ospf.OSPF` derives
+   header schema. :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` derives
    from :class:`~pcapkit.protocols.application.application.Application`, so
    its layer is ``'Application'`` (:issue:`719`).
 
@@ -42,16 +43,16 @@ as below:
 
    ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
    ``pcapkit.protocols.schema.link.ospf``, the ``OSPF`` name that
-   :mod:`pcapkit.protocols.link`, :mod:`pcapkit.protocols.data.link` and
-   :mod:`pcapkit.protocols.schema.link` each exported, and the
+   :mod:`pcapkit.protocols.link`, ``pcapkit.protocols.data.link`` and
+   ``pcapkit.protocols.schema.link`` each exported, and the
    ``OSPF_CrytographicAuthentication`` name that
-   :mod:`pcapkit.protocols.data.link` and :mod:`pcapkit.protocols.schema.link`
+   ``pcapkit.protocols.data.link`` and ``pcapkit.protocols.schema.link``
    exported, with no alias (:issue:`719`, :issue:`1090`).
 
 .. versionchanged:: 1.5.0
 
    A rebuild keeps the parsed Packet Length and the octets past it, where
-   :meth:`~pcapkit.protocols.application.ospf.OSPF.make` recomputed the
+   :meth:`~pcapkit.protocols.application.ospf.protocol.OSPF.make` recomputed the
    length from the payload and dropped those octets; it takes them as
    ``packet_length`` and ``trailer`` (:issue:`1249`, :issue:`1455`).
 
@@ -59,7 +60,7 @@ as below:
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.ospf.OSPF
+.. autoclass:: pcapkit.protocols.application.ospf.protocol.OSPF
    :no-members:
    :show-inheritance:
 
@@ -83,31 +84,41 @@ as below:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.application.ospf
+.. module:: pcapkit.protocols.application.ospf.schema
 
-.. autoclass:: pcapkit.protocols.schema.application.ospf.OSPF
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.ospf``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.application.ospf.schema.OSPF
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.ospf.CryptographicAuthentication
+.. autoclass:: pcapkit.protocols.application.ospf.schema.CryptographicAuthentication
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.application.ospf.ospf_auth_data_selector
+.. autofunction:: pcapkit.protocols.application.ospf.schema.ospf_auth_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.application.ospf
+.. module:: pcapkit.protocols.application.ospf.data
 
-.. autoclass:: pcapkit.protocols.data.application.ospf.OSPF
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.ospf``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.application.ospf.data.OSPF
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.ospf.CryptographicAuthentication
+.. autoclass:: pcapkit.protocols.application.ospf.data.CryptographicAuthentication
    :members:
    :show-inheritance:
 

@@ -493,7 +493,7 @@ class SentinelBehaviourTests(_ReimportCase):
         """
         from pcapkit.corekit.fields.ipaddress import IPv4AddressField
         from pcapkit.corekit.fields.strings import StringField
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         no_value = _sentinels()[1][1]
         self.assertEqual(repr(no_value), 'NO_VALUE')

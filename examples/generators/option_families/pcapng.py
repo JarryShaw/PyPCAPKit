@@ -76,7 +76,7 @@ def _pcapng_context() -> 'tuple[Any, Any]':
     from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.foundation.engines.pcapng import Context
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
     section = PCAPNG(num=0, sct=1, ctx=None,
                      type=Enum_BlockType.Section_Header_Block, block={})
@@ -112,7 +112,7 @@ def _pcapng_block(code: 'Any', block: 'dict[str, Any] | Any') -> 'Any':
 
     """
     from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
     # A Section Header Block is what *starts* a section, so it is the one block
     # the engine reads with no context at all.
@@ -143,14 +143,14 @@ def _pcapng_parse(octets: 'bytes') -> 'Any':
         The parsed block.
 
     """
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
     context = None if octets[:4] == PCAPNG_SHB_MAGIC else _pcapng_context()[0]
     return PCAPNG(octets, len(octets), num=2, sct=1, ctx=context)
 
 
 def _pcapng_block_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
     return PCAPNG.__block__
 
 
@@ -211,13 +211,13 @@ PCAPNG_OPTION_HOSTS = {
 
 
 def _pcapng_option_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
     return PCAPNG.__option__
 
 
 def _pcapng_option_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
-    from pcapkit.protocols.misc.pcapng import _option_key
+    from pcapkit.protocols.misc.pcapng.protocol import _option_key
     return {
         _option_key(Enum_OptionType.opt_comment): {'comment': 'probe'},
         _option_key(Enum_OptionType.opt_custom_2988): {'pen': 32473, 'data': b'\x01\x02\x03\x04'},
@@ -280,7 +280,7 @@ def _pcapng_option_enum(key: 'Any') -> 'Any':
 
     """
     from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
-    from pcapkit.protocols.misc.pcapng import _option_key
+    from pcapkit.protocols.misc.pcapng.protocol import _option_key
 
     # The enumeration is an :mod:`aenum` one, whose metaclass does not advertise
     # ``__iter__`` to a type checker even though it iterates perfectly well.
@@ -332,7 +332,7 @@ def _pcapng_option_rebuild(info: 'Any') -> 'Any':
 
 
 def _pcapng_record_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
     return PCAPNG.__record__
 
 
@@ -368,7 +368,7 @@ def _pcapng_record_rebuild(records: 'Any') -> 'Any':
 
 
 def _pcapng_secrets_registry() -> 'Any':
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
     return PCAPNG.__secrets__
 
 
@@ -376,7 +376,7 @@ def _pcapng_secrets_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
     from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
+    from pcapkit.protocols.misc.pcapng.protocol import WireGuardKeyLabel
     return {
         Enum_SecretsType.TLS_Key_Log: {
             'entries': {Enum_TLSKeyLabel.CLIENT_RANDOM: OrderedMultiDict(

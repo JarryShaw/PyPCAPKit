@@ -2,9 +2,10 @@ Netlink - Linux Netlink Socket Framing
 =======================================
 
 .. module:: pcapkit.protocols.link.netlink
+.. module:: pcapkit.protocols.link.netlink.protocol
 
-:mod:`pcapkit.protocols.link.netlink` contains
-:class:`~pcapkit.protocols.link.netlink.Netlink`
+:mod:`pcapkit.protocols.link.netlink.protocol` contains
+:class:`~pcapkit.protocols.link.netlink.protocol.Netlink`
 only, which implements the extractor for the ``struct nlmsghdr`` framing of
 Linux's own kernel/user IPC transport, as seen on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``
@@ -30,7 +31,7 @@ was written in is ambiguous (Netlink [*]_ is kernel/userspace IPC, not wire
 format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
 ``netlink.byteorder``.
 
-.. autoclass:: pcapkit.protocols.link.netlink.Netlink
+.. autoclass:: pcapkit.protocols.link.netlink.protocol.Netlink
    :no-members:
    :show-inheritance:
 
@@ -53,23 +54,23 @@ format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
    .. autoattribute:: __proto__
       :no-value:
 
-.. autofunction:: pcapkit.protocols.link.netlink.nlmsg_byteorder
+.. autofunction:: pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.netlink
+.. module:: pcapkit.protocols.link.netlink.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.netlink.Netlink
+.. autoclass:: pcapkit.protocols.link.netlink.schema.Netlink
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.netlink
+.. module:: pcapkit.protocols.link.netlink.data
 
-.. autoclass:: pcapkit.protocols.data.link.netlink.Netlink
+.. autoclass:: pcapkit.protocols.link.netlink.data.Netlink
    :members:
    :show-inheritance:
 

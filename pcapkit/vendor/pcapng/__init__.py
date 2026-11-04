@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Vendor Crawler
-===================================================================
+""":class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` Vendor Crawler
+============================================================================
 
 .. module:: pcapkit.vendor.pcapng
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implementations. Available
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` implementations. Available
 crawlers include:
 
 .. list-table::

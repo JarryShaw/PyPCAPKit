@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """IPv4 verifies and computes its header checksum.
 
-GitHub issue #2472: :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+GitHub issue #2472: :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>`
 verifies the header checksum (:rfc:`791#section-3.1`) under
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, and :meth:`IPv4.make
-<pcapkit.protocols.internet.ipv4.IPv4.make>` computes one it is not given under
+<pcapkit.protocols.internet.ipv4.protocol.IPv4.make>` computes one it is not given under
 :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`. The captured headers are from
 the tracked :file:`examples/captures/in.pcap` and :file:`examples/captures/dhcp.pcapng`.
 
@@ -42,7 +42,7 @@ class IPv4ChecksumTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
@@ -86,7 +86,7 @@ class IPv4ChecksumTests(unittest.TestCase):
         self.assertEqual(messages, [])
 
     def test_a_rebuilt_frame_warns_once(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         frame = wire.ethernet(with_checksum(CAPTURED[0], b'\x7a\x87'), 0x0800)
         with mock.patch.object(self.config, 'CHECKSUM_VERIFY', True), \

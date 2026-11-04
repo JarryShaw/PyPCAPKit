@@ -1,11 +1,11 @@
-========================================================================
-:class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` Constant Enumerations
-========================================================================
+=================================================================================
+:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` Constant Enumerations
+=================================================================================
 
 .. module:: pcapkit.const.icmp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` implementations. Available
+:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` implementations. Available
 enumerations include:
 
 .. list-table::
