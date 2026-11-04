@@ -1267,7 +1267,9 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
 
     def test_record_list_reads_bytes_and_a_live_stream_alike(self) -> None:
         """The record list reads the octets present zero-filled to its length,
-        from a buffer or a stream part-way through, and keeps that length (#2686)."""
+        from a buffer or a stream part-way through, and keeps that length (#2686);
+        the record the data ends inside reads none of the sources it counts past
+        the data from the zeros (#2760)."""
         from pcapkit.protocols.internet.igmpv3.schema import Report
 
         records = IGMPV3_TWO_RECORD_REPORT[8:28]
@@ -1283,7 +1285,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
                 self.assertEqual([str(record.multicast_address) for record in parsed],
                                  ['239.1.1.1', '0.0.0.0'])
                 self.assertEqual(parsed[1].num_sources, 3)
-                self.assertEqual([str(source) for source in parsed[1].sources], ['0.0.0.0'] * 3)
+                self.assertEqual(parsed[1].sources, [])
                 self.assertEqual(field.length, 36)
 
 
@@ -1340,7 +1342,8 @@ class IGMPv3DirectCutTests(unittest.TestCase):
 
     def test_a_query_cut_at_every_offset(self) -> None:
         """Fewer than 12 octets is no IGMPv3 Query (:rfc:`3376#section-7.1`), so
-        those cuts are refused; every longer one ends inside the source list."""
+        those cuts are refused; every longer one ends inside the source list, which
+        holds the sources the cut begins under the Number of Sources declared (#2760)."""
         from pcapkit.utilities.exceptions import ProtocolError
 
         packet = IGMPV3_TWO_SOURCE_QUERY
@@ -1352,8 +1355,8 @@ class IGMPv3DirectCutTests(unittest.TestCase):
                         self.parse(raw)
                     continue
                 igmp = self.parse(raw)
-                self.assertEqual((str(igmp.info.group), igmp.info.qqic, len(igmp.info.sources)),
-                                 ('239.1.2.3', 125, 2))
+                self.assertEqual((str(igmp.info.group), igmp.info.qqic, igmp.info.num_sources,
+                                  len(igmp.info.sources)), ('239.1.2.3', 125, 2, -(-(keep - 12) // 4)))
                 self.assert_rebuilds(raw, igmp, ('body', keep - 1))
 
     def test_a_report_cut_at_every_offset(self) -> None:

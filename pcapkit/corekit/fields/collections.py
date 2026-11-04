@@ -4,7 +4,7 @@
 import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import FieldBase, _zero_filled_items
+from pcapkit.corekit.fields.field import FieldBase, _give_back_fill, _zero_filled_items
 from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -213,18 +213,29 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                 consumes nothing from ``buffer``, or if schema items short of the
                 field's length cannot be zero-filled.
 
-        When ``buffer`` falls short of the field's length, the schema item it
-        ends inside is read as though its missing octets were zeros, as
+        When ``buffer`` falls short of the field's length, the item it ends
+        inside is read as though its missing octets were zeros, as
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
         reads any other field, and the list ends with that item: none is read
-        from the zeros past it, which hold no octet of the data.
+        from past the data, which holds no octet of it. A ``__data_present__``
+        key in ``packet`` says that ``buffer`` holds the data that many octets
+        in, and past them the zeros an enclosing list of schema items was
+        filled out with, as :meth:`Schema.unpack
+        <pcapkit.protocols.schema.Schema.unpack>` tells the fields of the item
+        the data ends inside; the list then ends with the data there.
+
+        A ``__zero_tail__`` key in ``packet``, true, says instead that the
+        octets past ``buffer`` are zeros of the data, as radiotap.org reads the
+        octets a producer leaves off a TLV item (:issue:`2655`), so the list
+        reads its items on through them to its length.
 
         .. versionchanged:: 1.6.0
 
-           A list of schema items the data ends inside ends with the data, the
-           item it ends inside read with its missing octets as zeros, where an
-           item past the data was refused as consuming nothing (:issue:`2686`,
-           :issue:`2756`).
+           A list the data ends inside ends with the data, the item it ends
+           inside read with its missing octets as zeros, where a schema item
+           past the data was refused as consuming nothing and a plain value
+           past it was read as zeros, and so does a list in an item the data
+           ends inside (:issue:`2686`, :issue:`2756`, :issue:`2760`).
 
         """
         length = self._length
@@ -264,13 +275,23 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`
         # afterwards.
         is_schema = isinstance(self._item_type, SchemaField)
-        if is_schema and length > 0:
+        if length > 0:
             start = file.tell()
-            present = file.seek(0, io.SEEK_END) - start
+            octets = file.seek(0, io.SEEK_END) - start
             file.seek(start, io.SEEK_SET)
-            if present < length:
-                with _zero_filled_items(self.name, length, file.read()) as filled:
-                    return self._unpack_items(filled, packet, is_schema, present)
+            # NOTE: Past ``__data_present__`` octets the buffer holds an enclosing fill (#2760).
+            held = cast('int', packet.get('__data_present__', -1))
+            present = held if 0 <= held < octets else octets
+            # NOTE: Octets past the data that are zeros of it are read as items too (#2655, #2760).
+            stop = -1 if packet.get('__zero_tail__') else present
+            if present < length and is_schema:
+                with _zero_filled_items(self.name, length, file.read(), present) as filled:
+                    return self._unpack_items(filled, packet, is_schema, stop)
+            if present < length and stop >= 0:
+                # NOTE: A plain value the data ends inside zero-fills itself, as any field does.
+                items = self._unpack_items(file, packet, is_schema, present)
+                _give_back_fill(octets - (file.tell() - start))
+                return items
         return self._unpack_items(file, packet, is_schema)
 
     def _unpack_items(self, file: 'IO[bytes]', packet: 'dict[str, Any]', is_schema: 'bool',
@@ -281,9 +302,9 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             file: Stream the items are read from.
             packet: Packet data.
             is_schema: Whether the items are schemas.
-            present: Octets of ``file`` the data holds, past which it holds the
-                zeros :meth:`unpack` filled it with; negative where it holds
-                no zeros.
+            present: Octets of ``file`` the data holds, past which ``file``
+                ends or holds zeros a fill made up; negative where it holds the
+                data to the field's length.
 
         Returns:
             Unpacked items.
@@ -317,8 +338,11 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         temp = []  # type: list[_TL]
         while length > 0:
             # NOTE: An item starting past the octets present would be made of the zero-fill alone,
-            # one the capture never held, so the list ends with the data (#2756).
+            # or of nothing, one the capture never held, so the list ends with the data (#2756, #2760).
             if 0 <= present <= offset - start:
+                # NOTE: A length no whole number of plain values fills is refused, as it is whole.
+                if not is_schema and length % item_type(packet).length:
+                    raise FieldValueError(f'Field {self.name} has invalid length.')
                 break
             field = item_type(packet)
 
@@ -326,6 +350,10 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                 # NOTE: A counted list runs to the end of the data, so an item it counts
                 # running past the octets left is cut, not overrunning a length (#2749).
                 context = dict(packet, __data_end__=True) if len(temp) < self._count else packet
+                # NOTE: The item the data ends inside reads the fill past it, which the lists in it
+                # are told of, so they end with the data too (#2760).
+                if present >= 0:
+                    context = dict(context, __data_present__=present - (offset - start))
                 data = cast('SchemaField', field).unpack(file, context)
 
                 end = file.tell()
@@ -354,6 +382,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
                 buffer = file.read(field.length)
                 data = field.unpack(buffer, packet)
+                offset = file.tell()
 
             temp.append(data)
 

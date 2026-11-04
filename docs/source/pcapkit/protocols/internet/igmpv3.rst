@@ -28,7 +28,7 @@ Octets      Bits        Name                               Description
   8          68   ``igmpv3.s_flag``                  Suppress Router-Side Processing (S)
   8          69   ``igmpv3.qrv``                     Querier's Robustness Variable (QRV)
   9          72   ``igmpv3.qqic``                    Querier's Query Interval Code
-  10         80                                      Number of Sources (N)
+  10         80   ``igmpv3.num_sources``             Number of Sources (N)
   12         96   ``igmpv3.sources``                 Source Address [1..N]
 ======= ========= ================================== ===================================
 
