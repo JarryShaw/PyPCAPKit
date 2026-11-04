@@ -575,6 +575,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
@@ -672,14 +673,15 @@
 
 
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_zero_filled_items</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[bytes]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zero_filled_items</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[IO[bytes]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Zero-fill the octets of a list of schema items to its declared width.</span>
 
 <span class="sd">    :meth:`FieldBase.unpack` reads a field the data ends inside as though its</span>
 <span class="sd">    missing octets were zeros, and :meth:`ListField.unpack</span>
-<span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;` gives a list of</span>
-<span class="sd">    schema items the same reading here, so its items cover the width it</span>
-<span class="sd">    declares (:issue:`2686`). The items are read inside the block.</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.collections.ListField.unpack&gt;` gives the schema</span>
+<span class="sd">    item the data ends inside the same reading here (:issue:`2686`). The items</span>
+<span class="sd">    are read inside the block, and none from the zeros past that item, which</span>
+<span class="sd">    hold no octet of the data (:issue:`2756`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Field name.</span>
@@ -687,7 +689,8 @@
 <span class="sd">        data: Octets actually present, fewer than ``length``.</span>
 
 <span class="sd">    Yields:</span>
-<span class="sd">        ``data``, zero-filled to ``length``.</span>
+<span class="sd">        A stream of ``data``, zero-filled to ``length``. The zeros left unread</span>
+<span class="sd">        past where the stream ends up are not counted as octets read.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FieldValueError: If ``length`` is past</span>
@@ -709,8 +712,8 @@
         <span class="n">ledger</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ledger</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: The fill is made-up schema objects, not zeros, so it gets no free band or one-off</span>
-    <span class="c1"># allowance: a 15-octet SETTINGS frame declaring 65,532 octets made 10,922 pairs in 7.5 MB.</span>
+    <span class="c1"># NOTE: The fill makes up the rest of the item the data ends inside, a schema object, not</span>
+    <span class="c1"># zeros, so it gets no free band or one-off allowance (#2686); past that item it makes none.</span>
     <span class="n">padding</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">shortfall</span><span class="p">,</span> <span class="n">ratio</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_SHORTFALL</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ZERO_PAD_BUDGET_RATIO</span>
     <span class="k">if</span> <span class="n">shortfall</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
@@ -726,14 +729,17 @@
         <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
     <span class="c1"># NOTE: The items credit the zeros they read as octets supplied, so they are taken off in</span>
-    <span class="c1"># advance; items that fail credit an unknown share, so the octets read go back as they were.</span>
+    <span class="c1"># advance and those left unread given back (#2756); items that fail credit an unknown share,</span>
+    <span class="c1"># so the octets read go back as they were.</span>
     <span class="n">read</span> <span class="o">=</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">padding</span>
+    <span class="n">filled</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">filled</span>
     <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
         <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">read</span>
         <span class="k">raise</span>
+    <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 
 
 <span class="c1">#: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative</span>

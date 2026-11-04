@@ -577,7 +577,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -674,6 +673,10 @@
 <span class="sd">       (:issue:`2529`).</span>
 
 <span class="sd">    """</span>
+    <span class="c1"># NOTE: read here, not on import, which would build it and import every protocol (#2730).</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a class, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
@@ -785,6 +788,9 @@
 <span class="sd">        target: The ``(destination, code)`` being registered over.</span>
 
 <span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
     <span class="n">lease</span> <span class="o">=</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lease</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
@@ -829,6 +835,9 @@
 <span class="sd">        *targets: The ``(destination, code)`` pairs it was registered at.</span>
 
 <span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
     <span class="n">name</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="k">with</span> <span class="n">_LEASE_LOCK</span><span class="p">:</span>
         <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>

@@ -761,9 +761,10 @@
 <span class="sd">         class, where it was kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
 <span class="sd">         (:issue:`2536`).</span>
 <span class="sd">       * A ``SETTINGS`` frame the capture cut inside its settings parses, with the</span>
-<span class="sd">         settings past the data read as zeros, as a cut ``DATA`` frame's data is,</span>
-<span class="sd">         where it was :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2659`,</span>
-<span class="sd">         :issue:`2686`).</span>
+<span class="sd">         setting the cut lands inside read as zeros past it, as a cut ``DATA``</span>
+<span class="sd">         frame's data is, and no setting past the data, where it was</span>
+<span class="sd">         :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2659`,</span>
+<span class="sd">         :issue:`2686`, :issue:`2756`).</span>
 <span class="sd">       * Each enumeration field of :meth:`make` and of the frame makers takes</span>
 <span class="sd">         a member or an :class:`int` code, resolved with the enumeration's</span>
 <span class="sd">         ``get``; a name, a :obj:`bool` for a field wider than one bit, or a</span>
@@ -2059,6 +2060,15 @@
 <span class="sd">           frame with no parameters, which :rfc:`9113#section-6.5` permits,</span>
 <span class="sd">           rather than being rejected (:issue:`2274`).</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           A ``frame`` the capture cut inside its settings, as its</span>
+<span class="sd">           ``__short_read__`` records, packs the settings its parse read from the</span>
+<span class="sd">           octets its ``packet`` holds with zeros after them to the Length it</span>
+<span class="sd">           declares, since that parse reads no setting past the data, so its</span>
+<span class="sd">           rebuild declares that Length too; with its settings edited, the Length</span>
+<span class="sd">           is computed as for a whole frame (:issue:`2756`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ack</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">ACK</span>
@@ -2099,6 +2109,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="si">}</span><span class="s1">] invalid settings: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">settings</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: An unedited cut frame packs the octets its ``packet`` captured, zero to the pair, and</span>
+        <span class="c1"># keeps its Length in the zeros past them (#2756); a dict rebuilds as the base data model.</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">Data_HTTP</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings_val</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">packed</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pair</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">settings_val</span><span class="p">)</span>
+            <span class="c1"># A cut in the frame header leaves no setting captured.</span>
+            <span class="n">read</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))[:</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'frame'</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="k">if</span> <span class="n">packed</span> <span class="o">==</span> <span class="n">read</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">read</span><span class="p">)</span> <span class="o">%</span> <span class="mi">6</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">packed</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">frame</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="n">settings_val</span> <span class="o">=</span> <span class="n">packed</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">packed</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">Schema_SettingsFrame</span><span class="p">(</span>
             <span class="n">settings</span><span class="o">=</span><span class="n">settings_val</span><span class="p">,</span>

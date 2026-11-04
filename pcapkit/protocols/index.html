@@ -841,8 +841,8 @@ from given information. The class hierarchy of <a class="reference internal" hre
     click PCAPNG &quot;misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG&quot;
     click Header &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header&quot;
     click Frame &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame&quot;
-    </pre><section id="protocol-registry">
-<h2>Protocol Registry<a class="headerlink" href="#protocol-registry" title="Link to this heading">¶</a></h2>
+    </pre><section id="module-pcapkit.protocols.registry">
+<span id="protocol-registry"></span><h2>Protocol Registry<a class="headerlink" href="#module-pcapkit.protocols.registry" title="Link to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.__proto__">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.</span></span><span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.__proto__" title="Link to this definition">¶</a></dt>
@@ -852,6 +852,9 @@ from given information. The class hierarchy of <a class="reference internal" hre
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><em>ProtocolBase</em></a>]]</p>
 </dd>
 </dl>
+<p><a class="reference internal" href="#module-pcapkit.protocols.registry" title="pcapkit.protocols.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.registry</span></code></a> builds it the first time it is reached, and
+imports every protocol class <a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> exports to do so
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2730">#2730</a>).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Please refer to <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol()</span></code></a>
@@ -1734,7 +1737,7 @@ for more information with the inserted names to be excluded.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Protocol Family</a><ul>
-<li><a class="reference internal" href="#protocol-registry">Protocol Registry</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.registry">Protocol Registry</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema">Header Schema</a><ul>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>

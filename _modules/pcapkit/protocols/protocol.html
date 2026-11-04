@@ -1168,6 +1168,14 @@
     <span class="c1">#: it reads the rebuild at. Set between those two calls alone.</span>
     <span class="n">_uncaptured</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1">#: Whether the data model :meth:`from_data` rebuilds this instance from kept</span>
+    <span class="c1">#: a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` next layer past a header</span>
+    <span class="c1">#: the capture cut short, which only a parse reading the header short of its</span>
+    <span class="c1">#: width does. :meth:`_empty_next_layer` keeps it for the rebuild, read at that</span>
+    <span class="c1">#: width (:issue:`2717`). Set for the duration of that call alone, like</span>
+    <span class="c1">#: :attr:`__short_read__`.</span>
+    <span class="n">_short_of_header</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="c1">#: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.</span>
     <span class="c1">#: :meth:`self.__init__ &lt;Protocol.__init__&gt;` replaces this with a real</span>
     <span class="c1">#: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level</span>
@@ -1798,7 +1806,9 @@
 <span class="sd">        A header the capture cut short, as ``__short_read__`` records, is cut</span>
 <span class="sd">        back before it is read, and read at the width it declares, so the</span>
 <span class="sd">        rebuild parses and verifies the octets captured as the capture did</span>
-<span class="sd">        (:issue:`2703`).</span>
+<span class="sd">        (:issue:`2703`). It keeps the ``Raw`` next layer its data model holds,</span>
+<span class="sd">        which a parse reading the header short of that width leaves it</span>
+<span class="sd">        (:issue:`2717`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
@@ -1840,12 +1850,19 @@
         <span class="c1"># built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[tuple[str, int]]'</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">))</span>
+        <span class="c1"># NOTE: A cut header kept a Raw next layer only where its parse read it short of</span>
+        <span class="c1"># its width, which the rebuild, read at that width, is told of (#2717).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="n">next_type</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_type__'</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_short_of_header</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">next_type</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># initialize protocol instance</span>
             <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span>
+            <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_short_of_header'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -3503,8 +3520,9 @@
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">empty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_next_layer</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">empty</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
@@ -3514,6 +3532,42 @@
                                       <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
                                       <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_empty_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[ProtocolBase]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The class a next layer with nothing to parse is kept as.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            file\_: payload of the current layer</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`None` if octets were captured past the header and it leaves</span>
+<span class="sd">            its next layer a length, which is then parsed. Otherwise</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if no octets were</span>
+<span class="sd">            captured past a header leaving its next layer a negative length, and</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if</span>
+<span class="sd">            the header leaves none, or no octets past it.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A header leaves a negative length when it declares more than it was</span>
+<span class="sd">            given: one the capture cut short, read at the octets captured, or an</span>
+<span class="sd">            IPv6 extension header overrunning the payload (:issue:`2477`). Such a</span>
+<span class="sd">            next layer is kept raw, not dispatched on a code the cut may have</span>
+<span class="sd">            read as zeros (:issue:`1170`). :meth:`from_data` reads the rebuild of</span>
+<span class="sd">            a cut header at the width it declares (:issue:`2703`), which leaves</span>
+<span class="sd">            none, so the rebuild keeps ``Raw`` where its data model did, as</span>
+<span class="sd">            :attr:`_short_of_header` says (:issue:`2717`).</span>
+
+<span class="sd">        .. versionadded:: 1.6.0</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">file_</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_</span> <span class="ow">and</span> <span class="p">(</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_short_of_header</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="k">return</span> <span class="n">Raw</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="k">return</span> <span class="n">NoPayload</span>
 
 <div class="viewcode-block" id="ProtocolBase._parse_next_layer">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._parse_next_layer">[docs]</a>

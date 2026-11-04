@@ -722,9 +722,10 @@ rather than <a class="reference internal" href="http.html#pcapkit.protocols.appl
 class, where it was kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2536">#2536</a>).</p></li>
 <li><p>A <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> frame the capture cut inside its settings parses, with the
-settings past the data read as zeros, as a cut <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame’s data is,
-where it was <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2659">#2659</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2686">#2686</a>).</p></li>
+setting the cut lands inside read as zeros past it, as a cut <code class="docutils literal notranslate"><span class="pre">DATA</span></code>
+frame’s data is, and no setting past the data, where it was
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2659">#2659</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2686">#2686</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2756">#2756</a>).</p></li>
 <li><p>Each enumeration field of <a class="reference internal" href="#pcapkit.protocols.application.httpv2.protocol.HTTPv2.make" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> and of the frame makers takes
 a member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code, resolved with the enumeration’s
 <code class="docutils literal notranslate"><span class="pre">get</span></code>; a name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for a field wider than one bit, or a
@@ -1460,6 +1461,14 @@ carries no parameters at all.</p></li>
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">settings</span></code> of <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, the default, builds a <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code>
 frame with no parameters, which <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5"><strong>RFC 9113 Section 6.5</strong></a> permits,
 rather than being rejected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2274">#2274</a>).</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>A <code class="docutils literal notranslate"><span class="pre">frame</span></code> the capture cut inside its settings, as its
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> records, packs the settings its parse read from the
+octets its <code class="docutils literal notranslate"><span class="pre">packet</span></code> holds with zeros after them to the Length it
+declares, since that parse reads no setting past the data, so its
+rebuild declares that Length too; with its settings edited, the Length
+is computed as for a whole frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2756">#2756</a>).</p>
 </div>
 </dd></dl>
 

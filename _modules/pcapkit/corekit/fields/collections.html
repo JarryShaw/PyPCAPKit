@@ -775,15 +775,18 @@
 <span class="sd">                consumes nothing from ``buffer``, or if schema items short of the</span>
 <span class="sd">                field's length cannot be zero-filled.</span>
 
-<span class="sd">        When ``buffer`` falls short of the field's length, schema items are read</span>
-<span class="sd">        from its octets zero-filled to that length, as</span>
+<span class="sd">        When ``buffer`` falls short of the field's length, the schema item it</span>
+<span class="sd">        ends inside is read as though its missing octets were zeros, as</span>
 <span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
-<span class="sd">        reads any other field, so the items cover the length declared.</span>
+<span class="sd">        reads any other field, and the list ends with that item: none is read</span>
+<span class="sd">        from the zeros past it, which hold no octet of the data.</span>
 
 <span class="sd">        .. versionchanged:: 1.6.0</span>
 
-<span class="sd">           Schema items short of the field's length are zero-filled to it, where</span>
-<span class="sd">           an item past the data was refused as consuming nothing (:issue:`2686`).</span>
+<span class="sd">           A list of schema items the data ends inside ends with the data, the</span>
+<span class="sd">           item it ends inside read with its missing octets as zeros, where an</span>
+<span class="sd">           item past the data was refused as consuming nothing (:issue:`2686`,</span>
+<span class="sd">           :issue:`2756`).</span>
 
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
@@ -829,19 +832,23 @@
             <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">_zero_filled_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="k">as</span> <span class="n">filled</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">filled</span><span class="p">),</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">,</span> <span class="n">present</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ListField._unpack_items">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField._unpack_items">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_unpack_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_TL]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unpack_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                      <span class="n">present</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_TL]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Unpack the field's items from ``file``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Stream the items are read from.</span>
 <span class="sd">            packet: Packet data.</span>
 <span class="sd">            is_schema: Whether the items are schemas.</span>
+<span class="sd">            present: Octets of ``file`` the data holds, past which it holds the</span>
+<span class="sd">                zeros :meth:`unpack` filled it with; negative where it holds</span>
+<span class="sd">                no zeros.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked items.</span>
@@ -858,8 +865,9 @@
         <span class="c1"># which is what it read, but the schema branch sizes it by ``len(data)``,</span>
         <span class="c1"># which is only what the schema *recorded*. A schema that reads nothing</span>
         <span class="c1"># records nothing, so ``length -= len(data)`` makes no progress and the</span>
-        <span class="c1"># loop spins forever. The zero-fill in ``unpack`` gives every item octets,</span>
-        <span class="c1"># but an item schema may still consume none of them. Remembering where the</span>
+        <span class="c1"># loop spins forever. The zero-fill in ``unpack`` gives the item the data</span>
+        <span class="c1"># ends inside octets to read, and every item before it reads octets of the</span>
+        <span class="c1"># data, but an item schema may still consume none of them. Remembering where the</span>
         <span class="c1"># previous item ended is what bounds the iteration count, since it does</span>
         <span class="c1"># not depend on what the schema reports. Cf. #431, which is the same</span>
         <span class="c1"># defect in the ``OptionField`` subclass.</span>
@@ -873,6 +881,10 @@
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TL]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># NOTE: An item starting past the octets present would be made of the zero-fill alone,</span>
+            <span class="c1"># one the capture never held, so the list ends with the data (#2756).</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">present</span> <span class="o">&lt;=</span> <span class="n">offset</span> <span class="o">-</span> <span class="n">start</span><span class="p">:</span>
+                <span class="k">break</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_schema</span><span class="p">:</span>
