@@ -799,6 +799,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
 
+<span class="sd">        An IPv6 extension header parsed alone always holds a next layer in its</span>
+<span class="sd">        data model, so one whose data model holds none is rebuilt with</span>
+<span class="sd">        ``extension``, unless ``kwargs`` give it.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
 <span class="sd">            **kwargs: Construction keywords, as for :meth:`Protocol.from_data</span>
@@ -808,7 +812,17 @@
 <span class="sd">            Protocol instance, cut back to what was captured when the header</span>
 <span class="sd">            it was parsed from was cut short (:issue:`1458`).</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Such a header is rebuilt with ``extension``, rather than with a next</span>
+<span class="sd">           layer its parse did not hold (:issue:`2768`).</span>
+
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: Parsed with ``extension``, every header but ESP leaves its next layer</span>
+        <span class="c1"># to the IPv6 header walking it; ESP's data model is the same either way (#2768).</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">IPv6_Ext</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_type__'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'extension'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">replay_short_read</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span></div>
 
 
@@ -850,7 +864,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="n">depth</span> <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rebuilt_exthdr_depth</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-        <span class="n">keep_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">keep_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>

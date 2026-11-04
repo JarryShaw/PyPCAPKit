@@ -589,11 +589,13 @@
 
 <div class="viewcode-block" id="keep_short_read">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/schema/shortread.html#pcapkit.corekit.schema.shortread.keep_short_read">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">keep_short_read</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">keep_short_read</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Carry a parsed header's short read into the protocol's info.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol instance, just parsed.</span>
+<span class="sd">        length: Length of data the parse was given, :data:`None` for the octets</span>
+<span class="sd">            it holds.</span>
 
 <span class="sd">    Called by the layer base classes, and by the PCAP global</span>
 <span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`, once a parse is done.</span>
@@ -603,11 +605,13 @@
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;` hands it to the rebuild,</span>
 <span class="sd">    whose :meth:`Protocol.pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;` cuts</span>
 <span class="sd">    the header back to what was captured before it is read (:issue:`1458`,</span>
-<span class="sd">    :issue:`2703`). The key is listed</span>
+<span class="sd">    :issue:`2703`). Beside it, ``__short_width__`` records the length the parse</span>
+<span class="sd">    read the header at, which the rebuild is read at in turn, so that it holds</span>
+<span class="sd">    the values its parse read (:issue:`2761`). Both keys are listed</span>
 <span class="sd">    in :attr:`Data.__included__ &lt;pcapkit.protocols.data.Data.__included__&gt;`,</span>
-<span class="sd">    so :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries it</span>
-<span class="sd">    and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for</span>
-<span class="sd">    a header that was captured whole.</span>
+<span class="sd">    so :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries them</span>
+<span class="sd">    and ``from_data(info.to_dict())`` cuts its rebuild back too; they are absent</span>
+<span class="sd">    for a header that was captured whole.</span>
 
 <span class="sd">    Where the capture cut the frame short, as</span>
 <span class="sd">    :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a</span>
@@ -631,7 +635,8 @@
             <span class="n">header</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">+</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">octets</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
     <span class="n">record</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">protocol</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="s1">'__short_read__'</span><span class="p">:</span> <span class="n">record</span><span class="p">})</span>  <span class="c1"># pylint: disable=protected-access</span></div>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">protocol</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="s1">'__short_read__'</span><span class="p">:</span> <span class="n">record</span><span class="p">,</span> <span class="s1">'__short_width__'</span><span class="p">:</span> <span class="n">width</span><span class="p">})</span>  <span class="c1"># pylint: disable=protected-access</span></div>
 
 
 
@@ -659,8 +664,9 @@
 <span class="sd">    :meth:`Protocol.__post_init__</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` has</span>
 <span class="sd">    :meth:`~pcapkit.protocols.protocol.Protocol.read` parse those octets at the</span>
-<span class="sd">    width the header declares, so the rebuild is read and verified as its</span>
-<span class="sd">    capture was (:issue:`2703`).</span>
+<span class="sd">    width ``__short_width__`` records, the one its parse read them at, so the</span>
+<span class="sd">    rebuild is read and verified as its capture was (:issue:`2703`,</span>
+<span class="sd">    :issue:`2761`).</span>
 
 <span class="sd">    The record names the field the capture ended inside and how much of it</span>
 <span class="sd">    there was. Everything in the rebuild from that point on is dropped, which</span>

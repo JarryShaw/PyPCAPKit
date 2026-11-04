@@ -713,6 +713,9 @@ strings.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.from_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.from_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create protocol instance from data.</p>
+<p>An IPv6 extension header parsed alone always holds a next layer in its
+data model, so one whose data model holds none is rebuilt with
+<code class="docutils literal notranslate"><span class="pre">extension</span></code>, unless <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> give it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -728,6 +731,10 @@ strings.</p>
 it was parsed from was cut short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>).</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Such a header is rebuilt with <code class="docutils literal notranslate"><span class="pre">extension</span></code>, rather than with a next
+layer its parse did not hold (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

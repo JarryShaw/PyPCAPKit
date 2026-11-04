@@ -795,6 +795,9 @@
 <span class="sd">         code that does not fit in one octet raises</span>
 <span class="sd">         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than</span>
 <span class="sd">         being handed to the schema unchecked (:issue:`2594`).</span>
+<span class="sd">       * :meth:`from_data` keeps :attr:`protocol`, handing :meth:`read` the</span>
+<span class="sd">         ``alias`` its parse took, rather than rebuilding it as :data:`None`</span>
+<span class="sd">         (:issue:`2768`).</span>
 
 <span class="sd">    """</span>
 
@@ -803,6 +806,12 @@
     <span class="c1">#: only by this class itself. Without the marker, a subclass whose ``make``</span>
     <span class="c1">#: does not declare them would accept and then drop them (:issue:`2286`).</span>
     <span class="n">__own_make_keywords__</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1">#: :meth:`read` takes ``alias`` out of ``**kwargs`` by name, and</span>
+    <span class="c1">#: :meth:`_make_data` hands it back, so a rebuild keeps the :attr:`protocol`</span>
+    <span class="c1">#: its parse resolved (:issue:`2768`). Every subclass accepts it as well,</span>
+    <span class="c1">#: and drops it, as it does while parsing.</span>
+    <span class="n">__keywords__</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'alias'</span><span class="p">})</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -1117,9 +1126,12 @@
 <span class="sd">            Nothing calls a protocol's ``make`` positionally; ``__init__``</span>
 <span class="sd">            spreads ``**kwargs`` into it.</span>
 
-<span class="sd">            ``read`` needs none of this: its ``alias``/``error`` only arrive on</span>
-<span class="sd">            the *parse* path, which ``__init__`` exempts from the construction</span>
-<span class="sd">            check.</span>
+<span class="sd">            ``read`` needs none of this for ``error``: it arrives on the</span>
+<span class="sd">            *parse* path alone, which ``__init__`` exempts from the</span>
+<span class="sd">            construction check. ``alias`` arrives on a rebuild too, from</span>
+<span class="sd">            :meth:`_make_data`, so this class lists it in</span>
+<span class="sd">            :attr:`~pcapkit.protocols.protocol.Protocol.__keywords__`</span>
+<span class="sd">            (:issue:`2768`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The schema keeps everything after the two fixed octets as one</span>
@@ -1259,7 +1271,9 @@
 <span class="sd">        Emits the ``Hdr Ext Len`` octet and the body as they were read, so</span>
 <span class="sd">        the rebuild is byte-exact whichever per-protocol length rule</span>
 <span class="sd">        :meth:`read` applied, and also for an overrun, where ``data.next`` is</span>
-<span class="sd">        :data:`None` and ``data.declared_next`` keeps the octet.</span>
+<span class="sd">        :data:`None` and ``data.declared_next`` keeps the octet. Hands</span>
+<span class="sd">        :meth:`read` the ``protocol`` it resolved as ``alias``, which picks</span>
+<span class="sd">        that rule and the identity again (:issue:`2768`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
@@ -1273,6 +1287,7 @@
             <span class="s1">'len'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'data'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">'alias'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 

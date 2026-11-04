@@ -681,6 +681,9 @@ resolved with the enumeration’s <code class="docutils literal notranslate"><sp
 code that does not fit in one octet raises
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, rather than
 being handed to the schema unchecked (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code> keeps <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>, handing <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> the
+<code class="docutils literal notranslate"><span class="pre">alias</span></code> its parse took, rather than rebuilding it as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p></li>
 </ul>
 </div>
 <dl class="py property">
@@ -912,9 +915,12 @@ position to disagree about, and the allowlist is unaffected because
 parameters too.
 Nothing calls a protocol’s <code class="docutils literal notranslate"><span class="pre">make</span></code> positionally; <code class="docutils literal notranslate"><span class="pre">__init__</span></code>
 spreads <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> into it.</p>
-<p><code class="docutils literal notranslate"><span class="pre">read</span></code> needs none of this: its <code class="docutils literal notranslate"><span class="pre">alias</span></code>/<code class="docutils literal notranslate"><span class="pre">error</span></code> only arrive on
-the <em>parse</em> path, which <code class="docutils literal notranslate"><span class="pre">__init__</span></code> exempts from the construction
-check.</p>
+<p><code class="docutils literal notranslate"><span class="pre">read</span></code> needs none of this for <code class="docutils literal notranslate"><span class="pre">error</span></code>: it arrives on the
+<em>parse</em> path alone, which <code class="docutils literal notranslate"><span class="pre">__init__</span></code> exempts from the
+construction check. <code class="docutils literal notranslate"><span class="pre">alias</span></code> arrives on a rebuild too, from
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_data()</span></code></a>, so this class lists it in
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p>
 </div>
 </dd></dl>
 
@@ -925,7 +931,9 @@ check.</p>
 <p>Emits the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet and the body as they were read, so
 the rebuild is byte-exact whichever per-protocol length rule
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> applied, and also for an overrun, where <code class="docutils literal notranslate"><span class="pre">data.next</span></code> is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">data.declared_next</span></code> keeps the octet.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">data.declared_next</span></code> keeps the octet. Hands
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> it resolved as <code class="docutils literal notranslate"><span class="pre">alias</span></code>, which picks
+that rule and the identity again (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a></span>) – protocol data</p>

@@ -929,6 +929,10 @@ pair does, rather than raising
 octets, which hold no kind, raise
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> rather than an
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#IndexError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IndexError</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2708">#2708</a>).</p></li>
+<li><p>A header <a class="reference internal" href="#pcapkit.protocols.transport.tcp.protocol.TCP.make" title="pcapkit.protocols.transport.tcp.protocol.TCP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> builds, such as the one
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds, reads
+the octets after its End of Option List as <code class="docutils literal notranslate"><span class="pre">padding</span></code>, as a parse of
+its octets does, rather than as empty (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2769">#2769</a>).</p></li>
 </ul>
 </div>
 <div class="versionremoved">

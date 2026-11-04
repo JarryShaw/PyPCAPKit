@@ -1265,25 +1265,13 @@
 
     <span class="c1">#: The ``__short_read__`` record of the data model :meth:`from_data` rebuilds</span>
     <span class="c1">#: this instance from. :meth:`pack` cuts the header it makes back to the</span>
-    <span class="c1">#: octets captured, and :meth:`__post_init__` reads them at the width the</span>
-    <span class="c1">#: header declares, so the rebuild is parsed and verified as its capture was</span>
-    <span class="c1">#: (:issue:`2703`). Set for the duration of that call alone, like</span>
-    <span class="c1">#: :attr:`__reconstructing__`; the class-level :data:`None` is what every</span>
-    <span class="c1">#: other code path sees.</span>
+    <span class="c1">#: octets captured, and :meth:`__post_init__` has :meth:`unpack` parse them</span>
+    <span class="c1">#: back at the width ``__short_width__`` records beside it, the one their</span>
+    <span class="c1">#: parse read them at, so the rebuild is parsed and verified as its capture</span>
+    <span class="c1">#: was (:issue:`2703`, :issue:`2761`). Set for the duration of that call</span>
+    <span class="c1">#: alone, like :attr:`__reconstructing__`; the class-level :data:`None` is</span>
+    <span class="c1">#: what every other code path sees.</span>
     <span class="n">__short_read__</span><span class="p">:</span> <span class="s1">'Optional[tuple[str, int]]'</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1">#: How many octets of its header :meth:`pack` cut back by</span>
-    <span class="c1">#: :attr:`__short_read__`, which :meth:`__post_init__` adds back to the width</span>
-    <span class="c1">#: it reads the rebuild at. Set between those two calls alone.</span>
-    <span class="n">_uncaptured</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1">#: Whether the data model :meth:`from_data` rebuilds this instance from kept</span>
-    <span class="c1">#: a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` next layer past a header</span>
-    <span class="c1">#: the capture cut short, which only a parse reading the header short of its</span>
-    <span class="c1">#: width does. :meth:`_empty_next_layer` keeps it for the rebuild, read at that</span>
-    <span class="c1">#: width (:issue:`2717`). Set for the duration of that call alone, like</span>
-    <span class="c1">#: :attr:`__short_read__`.</span>
-    <span class="n">_short_of_header</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">#: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.</span>
     <span class="c1">#: :meth:`self.__init__ &lt;Protocol.__init__&gt;` replaces this with a real</span>
@@ -1559,12 +1547,10 @@
             <span class="k">return</span> <span class="n">data</span>
 
         <span class="c1"># NOTE: Cut back before ``unpack`` reads and verifies it, at the width</span>
-        <span class="c1"># packed here, which ``__post_init__`` passes on (#2703).</span>
+        <span class="c1"># ``from_data`` passes on (#2703, #2761).</span>
         <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">__short_read__</span>
         <span class="n">header</span><span class="o">.</span><span class="n">_cut_short_read</span><span class="p">()</span>  <span class="c1"># pylint: disable=protected-access</span>
-        <span class="n">captured</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">target</span><span class="o">.</span><span class="n">_uncaptured</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
-        <span class="k">return</span> <span class="n">captured</span></div>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">header</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProtocolBase.unpack">
@@ -2020,7 +2006,8 @@
 <span class="sd">        ``data`` may be the :obj:`dict` that :meth:`Info.to_dict</span>
 <span class="sd">        &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` returns, which carries the</span>
 <span class="sd">        metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,</span>
-<span class="sd">        which the payload is dispatched on, ``__short_read__``, and, for</span>
+<span class="sd">        which the payload is dispatched on, ``__short_read__`` and</span>
+<span class="sd">        ``__short_width__``, and, for</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header</span>
 <span class="sd">        chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them</span>
 <span class="sd">        too, or no payload (nor IPv6 extension header) is rebuilt and no short</span>
@@ -2028,14 +2015,14 @@
 <span class="sd">        its other keys (:issue:`2003`).</span>
 
 <span class="sd">        A header the capture cut short, as ``__short_read__`` records, is cut</span>
-<span class="sd">        back before it is read, and read at the width it declares, so the</span>
-<span class="sd">        rebuild parses and verifies the octets captured as the capture did</span>
-<span class="sd">        (:issue:`2703`), holding the values its parse read from them, not those</span>
-<span class="sd">        :meth:`make` fills in past the cut (:issue:`2761`). Inside a payload</span>
-<span class="sd">        :meth:`_make_payload` rebuilds, which gives only its octets, the header</span>
-<span class="sd">        made is read instead. It keeps the ``Raw`` next layer its data model holds,</span>
-<span class="sd">        which a parse reading the header short of that width leaves it</span>
-<span class="sd">        (:issue:`2717`).</span>
+<span class="sd">        back before it is read, and read at the width ``__short_width__``</span>
+<span class="sd">        records, the one its parse read it at, so the rebuild parses and</span>
+<span class="sd">        verifies the octets captured as the capture did (:issue:`2703`),</span>
+<span class="sd">        holding the values its parse read from them, not those :meth:`make`</span>
+<span class="sd">        fills in past the cut (:issue:`2761`), and the ``Raw`` next layer a</span>
+<span class="sd">        parse reading the header short of its width leaves it (:issue:`2717`).</span>
+<span class="sd">        Inside a payload :meth:`_make_payload` rebuilds, which gives only its</span>
+<span class="sd">        octets, the header made is read instead.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
@@ -2077,19 +2064,17 @@
         <span class="c1"># built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[tuple[str, int]]'</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">))</span>
-        <span class="c1"># NOTE: A cut header kept a Raw next layer only where its parse read it short of</span>
-        <span class="c1"># its width, which the rebuild, read at that width, is told of (#2717).</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="n">next_type</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_type__'</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_short_of_header</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">next_type</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span>
+        <span class="c1"># NOTE: A cut header is read at the width its parse read it at, as recorded, so</span>
+        <span class="c1"># the rebuild holds the values and the next layer its parse did (#2717, #2761).</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_width__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># initialize protocol instance</span>
             <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reconstructing__</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span>
-            <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_short_of_header'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -2322,14 +2307,10 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="c1"># NOTE: A header rebuilt from a short read holds only what was captured,</span>
-            <span class="c1"># read at the width it declares, as a capture is at its parent's (#2703).</span>
-            <span class="n">uncaptured</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'_uncaptured'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">uncaptured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">uncaptured</span>
-            <span class="c1"># NOTE: Parsed back from the octets captured, not read from what ``make`` filled</span>
-            <span class="c1"># in past the cut (#2761); a payload ``_make_payload`` rebuilds gives its octets.</span>
-            <span class="k">if</span> <span class="n">uncaptured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+            <span class="c1"># NOTE: A header rebuilt from a short read holds only what was captured, parsed</span>
+            <span class="c1"># back at the width ``from_data`` passes, not read from what ``make`` filled in</span>
+            <span class="c1"># past the cut (#2703, #2761); a payload ``_make_payload`` rebuilds gives its octets.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__short_read__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_data</span> <span class="o">=</span> <span class="n">file</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3785,16 +3766,16 @@
 <span class="sd">            IPv6 extension header overrunning the payload (:issue:`2477`). Such a</span>
 <span class="sd">            next layer is kept raw, not dispatched on a code the cut may have</span>
 <span class="sd">            read as zeros (:issue:`1170`). :meth:`from_data` reads the rebuild of</span>
-<span class="sd">            a cut header at the width it declares (:issue:`2703`), which leaves</span>
-<span class="sd">            none, so the rebuild keeps ``Raw`` where its data model did, as</span>
-<span class="sd">            :attr:`_short_of_header` says (:issue:`2717`).</span>
+<span class="sd">            a cut header at the width its parse read it at, which leaves it the</span>
+<span class="sd">            same length, so the rebuild keeps ``Raw`` where its data model did</span>
+<span class="sd">            (:issue:`2717`, :issue:`2761`).</span>
 
 <span class="sd">        .. versionadded:: 1.6.0</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">file_</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_</span> <span class="ow">and</span> <span class="p">(</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_short_of_header</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">Raw</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>

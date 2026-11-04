@@ -922,6 +922,10 @@
 <span class="sd">         octets, which hold no kind, raise</span>
 <span class="sd">         :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than an</span>
 <span class="sd">         :exc:`IndexError` (:issue:`2708`).</span>
+<span class="sd">       * A header :meth:`make` builds, such as the one</span>
+<span class="sd">         :meth:`~pcapkit.protocols.protocol.Protocol.from_data` rebuilds, reads</span>
+<span class="sd">         the octets after its End of Option List as ``padding``, as a parse of</span>
+<span class="sd">         its octets does, rather than as empty (:issue:`2769`).</span>
 
 <span class="sd">    .. versionremoved:: 1.6.0</span>
 
@@ -1177,11 +1181,14 @@
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
             <span class="c1"># NOTE: the octets after an End of Option List option are kept as</span>
             <span class="c1"># read, so that :meth:`make` rebuilds the option area -- and the</span>
-            <span class="c1"># Data Offset computed from it -- at its original length. A schema</span>
-            <span class="c1"># built by hand rather than unpacked carries no ``padding``.</span>
+            <span class="c1"># Data Offset computed from it -- at its original length. They are</span>
+            <span class="c1"># sliced from the octets, as IPv4 does, since a schema :meth:`make`</span>
+            <span class="c1"># built holds them in ``options`` and no ``padding`` (#2769).</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
+            <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-                <span class="s1">'options'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">),</span>
-                <span class="s1">'padding'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
+                <span class="s1">'options'</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
+                <span class="s1">'padding'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">TCP_MIN_HEADER_LEN</span> <span class="o">+</span> <span class="n">_used</span><span class="p">:</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">],</span>
             <span class="p">})</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">length</span> <span class="o">-</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>

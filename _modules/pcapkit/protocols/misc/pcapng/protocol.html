@@ -4716,15 +4716,17 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'if'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_InterfaceDescriptionBlock</span><span class="p">(</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_InterfaceDescriptionBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">],</span>
             <span class="n">linktype</span><span class="o">=</span><span class="n">linktype_val</span><span class="p">,</span>
             <span class="n">snaplen</span><span class="o">=</span><span class="n">snaplen</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">],</span>
-        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">)</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_packet">
@@ -4803,9 +4805,9 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'pack'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_PacketBlock</span><span class="p">(</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_PacketBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">drop_count</span><span class="o">=</span><span class="n">drop_count</span><span class="p">,</span>
@@ -4816,7 +4818,9 @@
             <span class="n">packet_data</span><span class="o">=</span><span class="n">packet_data</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_spb">
@@ -4897,14 +4901,15 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'ns'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">options_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">options_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">options_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Schema_NameResolutionBlock</span><span class="p">(</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_NameResolutionBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
             <span class="n">records</span><span class="o">=</span><span class="n">records_value</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_isb">
@@ -4941,16 +4946,17 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'isb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Schema_InterfaceStatisticsBlock</span><span class="p">(</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_InterfaceStatisticsBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">],</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">timestamp_high</span><span class="o">=</span><span class="n">timestamp_high</span><span class="p">,</span>
             <span class="n">timestamp_low</span><span class="o">=</span><span class="n">timestamp_low</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">],</span>
-        <span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_epb">
@@ -5010,9 +5016,9 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'epb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_EnhancedPacketBlock</span><span class="p">(</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_EnhancedPacketBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">timestamp_high</span><span class="o">=</span><span class="n">timestamp_high</span><span class="p">,</span>
@@ -5022,7 +5028,9 @@
             <span class="n">packet_data</span><span class="o">=</span><span class="n">packet_data</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_systemd">
@@ -5164,16 +5172,18 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'dsb'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_DecryptionSecretsBlock</span><span class="p">(</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_DecryptionSecretsBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">],</span>
             <span class="n">secrets_type</span><span class="o">=</span><span class="n">secrets_type_val</span><span class="p">,</span>
             <span class="n">secrets_length</span><span class="o">=</span><span class="n">secrets_length</span><span class="p">,</span>
             <span class="n">secrets_data</span><span class="o">=</span><span class="n">secrets_data_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">],</span>
-        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_block_cb">
@@ -5298,9 +5308,10 @@
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
+        <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Schema_SectionHeaderBlock</span><span class="p">(</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_SectionHeaderBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">],</span>
             <span class="n">magic</span><span class="o">=</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span>
             <span class="n">major</span><span class="o">=</span><span class="n">major_version</span><span class="p">,</span>
@@ -5308,7 +5319,7 @@
             <span class="n">section_length</span><span class="o">=</span><span class="n">section_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
             <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">],</span>
-        <span class="p">)</span></div>
+        <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._make_option_unknown">
@@ -7525,26 +7536,31 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">schema</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_options_trailer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Optional[Data_PCAPNG]'</span><span class="p">,</span>
-                              <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Schema_Option | bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Append the octets a parsed block held past its ``opt_endofopt``.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_options_trailer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Optional[Data_PCAPNG]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Count the octets a parsed block held past its ``opt_endofopt``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            block: Block data model, if any.</span>
-<span class="sd">            options: Constructed options, extended in place.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Number of octets appended.</span>
+<span class="sd">            Number of octets, which the block's length takes in.</span>
 
 <span class="sd">        An option area ends at its ``opt_endofopt`` and the octets after it are</span>
 <span class="sd">        read as padding. :meth:`_read_padding` keeps them as ``padding_opts``,</span>
-<span class="sd">        and they are written back after the options, verbatim (:issue:`1437`).</span>
+<span class="sd">        and :meth:`_make_padding` writes them back into the padding field after</span>
+<span class="sd">        the options, verbatim (:issue:`1437`). As an item of the options, they</span>
+<span class="sd">        would read as an area kept as captured, and a block rebuilt from its</span>
+<span class="sd">        ``info`` would lose its options and ``padding_opts`` (:issue:`2776`).</span>
+
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           Takes no ``options``, and no longer appends the octets to them</span>
+<span class="sd">           (:issue:`2776`).</span>
 
 <span class="sd">        """</span>
         <span class="n">trailer</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding_opts'</span><span class="p">)</span> <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">trailer</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">trailer</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
-        <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trailer</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">trailer</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>

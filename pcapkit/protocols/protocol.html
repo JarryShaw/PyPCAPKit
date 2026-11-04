@@ -817,21 +817,22 @@ instance.</p>
 <dd><p>Create protocol instance from data.</p>
 <p><code class="docutils literal notranslate"><span class="pre">data</span></code> may be the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> that <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> returns, which carries the
 metadata the rebuild reads: <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>,
-which the payload is dispatched on, <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>, and, for
+which the payload is dispatched on, <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and
+<code class="docutils literal notranslate"><span class="pre">__short_width__</span></code>, and, for
 <a class="reference internal" href="internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, the extension header
 chain under <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code>. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> must carry them
 too, or no payload (nor IPv6 extension header) is rebuilt and no short
 read is cut back, see <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a>; nothing is guessed from
 its other keys (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 <p>A header the capture cut short, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> records, is cut
-back before it is read, and read at the width it declares, so the
-rebuild parses and verifies the octets captured as the capture did
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>), holding the values its parse read from them, not those
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> fills in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Inside a payload
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, which gives only its octets, the header
-made is read instead. It keeps the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer its data model holds,
-which a parse reading the header short of that width leaves it
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>).</p>
+back before it is read, and read at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code>
+records, the one its parse read it at, so the rebuild parses and
+verifies the octets captured as the capture did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>),
+holding the values its parse read from them, not those <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>
+fills in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>), and the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer a
+parse reading the header short of its width leaves it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>).
+Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, which gives only its
+octets, the header made is read instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2092,9 +2093,9 @@ given: one the capture cut short, read at the octets captured, or an
 IPv6 extension header overrunning the payload (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2477">#2477</a>). Such a
 next layer is kept raw, not dispatched on a code the cut may have
 read as zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1170">#1170</a>). <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> reads the rebuild of
-a cut header at the width it declares (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>), which leaves
-none, so the rebuild keeps <code class="docutils literal notranslate"><span class="pre">Raw</span></code> where its data model did, as
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._short_of_header" title="pcapkit.protocols.protocol.Protocol._short_of_header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_short_of_header</span></code></a> says (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>).</p>
+a cut header at the width its parse read it at, which leaves it the
+same length, so the rebuild keeps <code class="docutils literal notranslate"><span class="pre">Raw</span></code> where its data model did
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 </div>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
@@ -2265,30 +2266,12 @@ built without <code class="docutils literal notranslate"><span class="pre">__ini
 <span class="sig-name descname"><span class="pre">__short_read__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__short_read__" title="Link to this definition">¶</a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> record of the data model <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds
 this instance from. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> cuts the header it makes back to the
-octets captured, and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> reads them at the width the
-header declares, so the rebuild is parsed and verified as its capture was
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). Set for the duration of that call alone, like
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__reconstructing__" title="pcapkit.protocols.protocol.Protocol.__reconstructing__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reconstructing__</span></code></a>; the class-level <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is what every
-other code path sees.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._uncaptured">
-<span class="sig-name descname"><span class="pre">_uncaptured</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._uncaptured" title="Link to this definition">¶</a></dt>
-<dd><p>How many octets of its header <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> cut back by
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__short_read__" title="pcapkit.protocols.protocol.Protocol.__short_read__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__short_read__</span></code></a>, which <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> adds back to the width
-it reads the rebuild at. Set between those two calls alone.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._short_of_header">
-<span class="sig-name descname"><span class="pre">_short_of_header</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._short_of_header" title="Link to this definition">¶</a></dt>
-<dd><p>Whether the data model <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds this instance from kept
-a <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> next layer past a header
-the capture cut short, which only a parse reading the header short of its
-width does. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._empty_next_layer" title="pcapkit.protocols.protocol.Protocol._empty_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_empty_next_layer()</span></code></a> keeps it for the rebuild, read at that
-width (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>). Set for the duration of that call alone, like
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__short_read__" title="pcapkit.protocols.protocol.Protocol.__short_read__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__short_read__</span></code></a>.</p>
+octets captured, and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> has <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parse them
+back at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records beside it, the one their
+parse read them at, so the rebuild is parsed and verified as its capture
+was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Set for the duration of that call
+alone, like <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__reconstructing__" title="pcapkit.protocols.protocol.Protocol.__reconstructing__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reconstructing__</span></code></a>; the class-level <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is
+what every other code path sees.</p>
 </dd></dl>
 
 <dl class="py attribute">
