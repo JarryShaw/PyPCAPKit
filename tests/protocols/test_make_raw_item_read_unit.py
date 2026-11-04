@@ -38,16 +38,16 @@ def _attr(path: 'str') -> 'Any':
 #: One raw item per protocol that the schema parses and ``read`` rejects:
 #: (protocol class, construction keywords, the reader's own message).
 READ_REJECTED = {
-    'IPv4 short': ('pcapkit.protocols.internet.ipv4.IPv4',
+    'IPv4 short': ('pcapkit.protocols.internet.ipv4.protocol.IPv4',
                    {'options': [b'\x0c'], 'protocol': 253},
                    r'IPv4: \[OptNo 12\] invalid format'),
-    'TCP': ('pcapkit.protocols.transport.tcp.TCP',
+    'TCP': ('pcapkit.protocols.transport.tcp.protocol.TCP',
             {'options': [b'\x03']},
             r'TCP: \[OptNo 3\] invalid format'),
-    'HOPOPT': ('pcapkit.protocols.internet.hopopt.HOPOPT',
+    'HOPOPT': ('pcapkit.protocols.internet.hopopt.protocol.HOPOPT',
                {'extension': True, 'options': [b'\x23']},
                r'HOPOPT: \[OptNo 35\] invalid format'),
-    'MH': ('pcapkit.protocols.internet.mh.MH',
+    'MH': ('pcapkit.protocols.internet.mh.protocol.MH',
            {'data': {'options': [b'\x2b']}},
            r'MH: \[Opt 43\] invalid format'),
 }
@@ -58,17 +58,17 @@ READ_REJECTED = {
 SCHEMA_REJECTED = {
     # the lone ``0x02`` takes the next item's kind octet as its length, 148,
     # which runs past the 8-octet option area
-    'IPv4 overrun': ('pcapkit.protocols.internet.ipv4.IPv4',
+    'IPv4 overrun': ('pcapkit.protocols.internet.ipv4.protocol.IPv4',
                      {'options': [b'\x02', b'\x94\x04\x00\x00'], 'protocol': 253},
                      r'runs past the end of the data'),
-    'IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts.IPv6_Opts',
+    'IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts',
                   {'extension': True, 'options': [b'\x26']},
                   r'runs past the end of the data'),
-    'SCTP': ('pcapkit.protocols.transport.sctp.SCTP',
+    'SCTP': ('pcapkit.protocols.transport.sctp.protocol.SCTP',
              {'chunks': [b'\x01']},
              r'runs past the end of the data'),
     # ESP_INFO needs a 12-octet body, and this one has 8
-    'HIP': ('pcapkit.protocols.internet.hip.HIP',
+    'HIP': ('pcapkit.protocols.internet.hip.protocol.HIP',
             {'extension': True, 'parameters': [b'\x00\x41\x00\x08' + bytes(8)]},
             r'runs past the end of the data'),
 }
@@ -96,7 +96,7 @@ class TestRawItemRejectedByRead(unittest.TestCase):
 
     def test_well_formed_raw_item_still_builds(self) -> None:
         # the wider ``try`` leaves a raw item that does parse alone
-        ipv4 = _attr('pcapkit.protocols.internet.ipv4.IPv4')
+        ipv4 = _attr('pcapkit.protocols.internet.ipv4.protocol.IPv4')
         proto = ipv4(options=[b'\x94\x04\x00\x00'], protocol=253)
         self.assertEqual(proto.data.hex(), '460000180000000000fda5e47f0000010000000094040000')
 

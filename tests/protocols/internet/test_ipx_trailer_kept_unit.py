@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Octets captured past an IPX packet's own length survive a rebuild.
 
-GitHub issue #1433: :class:`~pcapkit.protocols.link.ethernet.Ethernet` hands
+GitHub issue #1433: :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet` hands
 the whole rest of the frame to the next layer, but
-:class:`~pcapkit.protocols.internet.ipx.IPX` reads only its Packet Length. The
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` reads only its Packet Length. The
 octets after that -- most often the padding of a 60-octet minimum Ethernet
 frame -- were kept by no ``info``, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` dropped them: the
@@ -54,7 +54,7 @@ class TestIPXTrailerKept(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_frame_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for name, frame in FRAMES.items():
             with self.subTest(frame=name):
@@ -66,7 +66,7 @@ class TestIPXTrailerKept(unittest.TestCase):
                 self.assertEqual(Ethernet.from_data(parsed.info).data, frame)
 
     def test_packet_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         packet = _ipx(34) + b'abcd' + b'\xee' * 5
         parsed = IPX(packet, len(packet))
@@ -75,7 +75,7 @@ class TestIPXTrailerKept(unittest.TestCase):
         self.assertEqual(IPX.from_data(parsed.info).data, packet)
 
     def test_no_trailer_key_without_excess(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         for name, (packet, payload) in NO_TRAILER.items():
             with self.subTest(packet=name):
@@ -85,7 +85,7 @@ class TestIPXTrailerKept(unittest.TestCase):
                 self.assertEqual(IPX.from_data(parsed.info).data, packet)
 
     def test_make_writes_trailer_outside_the_length(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         made = IPX(payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(made.info.len, 34)

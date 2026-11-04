@@ -68,10 +68,10 @@ ICMPV6 = {
 
 #: Family label -> (protocol module and class, data module, expected table).
 FAMILIES = {
-    'icmpv4-type': (('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
-                    'pcapkit.protocols.data.internet.icmpv4', ICMPV4),
-    'icmpv6-type': (('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
-                    'pcapkit.protocols.data.internet.icmpv6', ICMPV6),
+    'icmpv4-type': (('pcapkit.protocols.internet.icmpv4.protocol', 'ICMPv4'),
+                    'pcapkit.protocols.internet.icmpv4.data', ICMPV4),
+    'icmpv6-type': (('pcapkit.protocols.internet.icmpv6.protocol', 'ICMPv6'),
+                    'pcapkit.protocols.internet.icmpv6.data', ICMPV6),
 }
 
 

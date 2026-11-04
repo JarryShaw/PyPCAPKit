@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema import Schema
 
 if TYPE_CHECKING:
     from typing import Any

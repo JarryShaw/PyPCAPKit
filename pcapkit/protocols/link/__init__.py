@@ -15,29 +15,29 @@ the link layer, with detailed implementation and methods.
 from pcapkit.protocols.link.link import Link
 
 # Link Layer Protocols
-from pcapkit.protocols.link.arp import ARP
-from pcapkit.protocols.link.inarp import InARP
-from pcapkit.protocols.link.ethernet import Ethernet
-from pcapkit.protocols.link.frad import FRAD
-from pcapkit.protocols.link.gre import GRE
-from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-from pcapkit.protocols.link.loopback import Loopback
-from pcapkit.protocols.link.netlink import Netlink
-from pcapkit.protocols.link.radiotap import Radiotap
+from pcapkit.protocols.link.arp.protocol import ARP
+from pcapkit.protocols.link.inarp.protocol import InARP
+from pcapkit.protocols.link.ethernet.protocol import Ethernet
+from pcapkit.protocols.link.frad.protocol import FRAD
+from pcapkit.protocols.link.gre.protocol import GRE
+from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+from pcapkit.protocols.link.loopback.protocol import Loopback
+from pcapkit.protocols.link.netlink.protocol import Netlink
+from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
 # Linux "Cooked" Capture Encapsulation Family
-from pcapkit.protocols.link.linux_sll import LinuxSLL
-from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
 # VLAN Tag Family
-from pcapkit.protocols.link.vlan import VLAN
-from pcapkit.protocols.link.c_tag import C_Tag
-from pcapkit.protocols.link.s_tag import S_Tag
+from pcapkit.protocols.link.vlan.protocol import VLAN
+from pcapkit.protocols.link.c_tag.protocol import C_Tag
+from pcapkit.protocols.link.s_tag.protocol import S_Tag
 
 # L2TP Family
-from pcapkit.protocols.link.l2tp import L2TP
-from pcapkit.protocols.link.l2tpv2 import L2TPv2
+from pcapkit.protocols.link.l2tp.protocol import L2TP
+from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
 # Link-Layer Header Type Values
 from pcapkit.const.reg.linktype import LinkType as LINKTYPE

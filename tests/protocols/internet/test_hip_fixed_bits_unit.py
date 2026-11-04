@@ -41,7 +41,7 @@ class TestHIPFixedBits(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_keeps_fixed_bits(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         cases = {
             'packet-fixed clear, version-fixed clear': (0x10, 0x20, 0, 0),
@@ -62,7 +62,7 @@ class TestHIPFixedBits(unittest.TestCase):
                 self.assertEqual(HIP.from_data(parsed.info).data, raw)
 
     def test_make_defaults_to_rfc_values(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(extension=True, **HIP_BASE).data
         self.assertEqual(built[2], 0x10)
@@ -72,7 +72,7 @@ class TestHIPFixedBits(unittest.TestCase):
         self.assertEqual(parsed.info.version_fixed, 1)
 
     def test_make_honours_explicit_values(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(packet_fixed=1, version_fixed=0, extension=True, **HIP_BASE).data
         self.assertEqual(built[2], 0x90)

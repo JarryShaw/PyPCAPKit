@@ -2,7 +2,7 @@
 """Building a PCAP frame under a zero snaplen keeps the whole packet.
 
 This guards against GitHub issue #1385, where
-:meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>` defaulted
+:meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.protocol.Frame.make>` defaulted
 ``incl_len`` to ``min(len(packet), snaplen)``, so a global header with snaplen 0
 produced a 16-octet record holding no packet data. The PCAP draft says snaplen
 "MUST NOT be zero" (draft-ietf-opsawg-pcap, section 4), and libpcap reads a zero
@@ -33,8 +33,8 @@ class TestFrameSnaplenZero(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _frame(self, ghdr: bytes) -> 'object':
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(ghdr)
         return Frame(num=1, header=header.info, ts_sec=1, ts_usec=2, packet=PACKET)
@@ -48,8 +48,8 @@ class TestFrameSnaplenZero(unittest.TestCase):
         self.assertEqual(frame.info.cap_len, 4)
 
     def test_zero_snaplen_frame_parses_and_rebuilds_byte_exact(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         built = self._frame(GLOBAL_ZERO).data
         header = Header(GLOBAL_ZERO)

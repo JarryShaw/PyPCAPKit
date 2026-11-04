@@ -1,7 +1,7 @@
 name: Coverage Comment
 
-# Posts the coverage the `test` job's `latest` leg measured in unit-tests.yml
-# as a pull-request comment. Not from unit-tests.yml itself: that file is also a
+# Posts the coverage unit-tests.yml's `coverage` job combined from its `latest`
+# legs as a pull-request comment. Not from unit-tests.yml itself: that file is also a
 # reusable workflow whose callers grant `contents: read`, and a called workflow
 # can only narrow its caller's token, so `pull-requests: write` there would
 # break every caller, the release gate included.
@@ -84,7 +84,7 @@ jobs:
 
           dir="$RUNNER_TEMP/coverage"
           if ! gh run download "$RUN_ID" --repo "$REPO" --name coverage-summary --dir "$dir"; then
-            echo "::notice::Run $RUN_ID uploaded no coverage-summary artifact (the coverage leg did not get that far)."
+            echo "::notice::Run $RUN_ID uploaded no coverage-summary artifact (the coverage job did not get that far)."
             exit 0
           fi
 

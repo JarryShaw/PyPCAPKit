@@ -21,7 +21,7 @@ generator = globals()['generator']  # type: Any
 
 
 def _httpv2_registry() -> 'Any':
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
     return HTTPv2.__frame__
 
 
@@ -50,14 +50,14 @@ HTTPV2_STREAM = 1
 
 
 def _httpv2_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
     sid = 0 if int(code) in HTTPV2_CONNECTION_FRAMES else HTTPV2_STREAM
     return HTTPv2(type=code, sid=sid, frame=dict(kwargs))
 
 
 def _httpv2_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
     return HTTPv2(octets, len(octets))
 
 
@@ -66,7 +66,7 @@ def _httpv2_extract(parsed: 'Any') -> 'Any':
 
 
 def _httpv2_rebuild(frame: 'Any') -> 'Any':
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
     # ``HTTP.make`` ORs ``flags`` into the bits the ``_make_http_*`` constructor
     # derives from ``frame``, and that constructor knows only the flags its

@@ -41,7 +41,7 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
         """#1482: the parse reproduces the input and keeps the name verbatim."""
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in PACKETS.items():
             with self.subTest(case=name):
@@ -52,7 +52,7 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_info(self) -> None:
         """#1482: ``from_data(info)`` writes back the captured octets."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in PACKETS.items():
             with self.subTest(case=name):
@@ -60,7 +60,7 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_to_dict(self) -> None:
         """#1482: the record survives ``info.to_dict()``."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in PACKETS.items():
             with self.subTest(case=name):
@@ -68,7 +68,7 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
 
     def test_rebuilds_every_cut_after_the_init_chunk(self) -> None:
         """#1482: a packet cut anywhere after its INIT chunk rebuilds as captured."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for size in range(44, 67):
             raw = MULTI[:size]
@@ -81,7 +81,7 @@ class SCTPHostNameNulUnitTests(unittest.TestCase):
         """#1482: a ``name`` keyword without a terminator is still rejected."""
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):

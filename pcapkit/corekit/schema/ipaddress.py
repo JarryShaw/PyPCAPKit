@@ -96,7 +96,7 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         :class:`~ipaddress.IPv4Address`'s version mismatches -- and that
         asymmetry is exactly what let this slip past :issue:`469`'s otherwise
         equivalent guard for :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (cf.
+        <pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id>` (cf.
         :issue:`491`).
 
         Every caller checks this *before* dispatching on the value's type,
@@ -160,7 +160,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
 
         Routing every one of them through here rather than giving each its own
         :func:`isinstance` check is the whole point: :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` carries exactly
+        <pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id>` carries exactly
         such a check (:issue:`469`), and :issue:`491` is the same defect at
         every site that lacks one. A guard that has to be remembered per call
         site is a guard that will be forgotten at the next one.
@@ -173,9 +173,9 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
         even though sibling guards for the same mistake --
         :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from :issue:`469`
+        <pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id>` from :issue:`469`
         and :class:`ESP's SecurityAssociation
-        <pcapkit.protocols.internet.esp.SecurityAssociation>` from :issue:`491`
+        <pcapkit.protocols.internet.esp.protocol.SecurityAssociation>` from :issue:`491`
         -- raise the latter. The layer decides: this is a field-level
         conversion, so it answers with what :meth:`_IPAddressField.pre_process
         <pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process>`

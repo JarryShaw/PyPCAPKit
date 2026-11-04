@@ -1,11 +1,11 @@
-==============================================================
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` Vendor Crawlers
-==============================================================
+=======================================================================
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` Vendor Crawlers
+=======================================================================
 
 .. module:: pcapkit.vendor.ipv6
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` implementations. Available
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` implementations. Available
 vendor crawlers include:
 
 .. list-table::

@@ -13,7 +13,7 @@ Every frame stops at
 :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers, counted along its
 protocol chain from the first layer its record carries, through tunnels, tags
 and extension headers alike: what follows is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, with one
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning`.
 
 Every case builds its own octets in memory and reads no capture. Classes are
@@ -185,8 +185,8 @@ class FrameLayerLimitTests(unittest.TestCase):
 
     def frame(self, data: bytes, snapped: int = 0, **kwargs: object) -> 'tuple[object, list[str]]':
         """The PCAP frame of ``data``, and the messages of the ProtocolWarnings it gave."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.warnings import ProtocolWarning
 
         header = Header(GLOBAL).info
@@ -196,8 +196,8 @@ class FrameLayerLimitTests(unittest.TestCase):
         return parsed, [str(item.message) for item in caught if issubclass(item.category, ProtocolWarning)]
 
     def raw_of(self, parsed: object) -> object:
-        """The first :class:`~pcapkit.protocols.misc.raw.Raw` layer of ``parsed``."""
-        from pcapkit.protocols.misc.raw import Raw
+        """The first :class:`~pcapkit.protocols.misc.raw.protocol.Raw` layer of ``parsed``."""
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         layer = parsed
         while not isinstance(layer, Raw):
@@ -261,7 +261,7 @@ class FrameLayerLimitTests(unittest.TestCase):
         # 65th. ESP-NULL decrypts with no keys.
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESPContext, SecurityAssociation
 
         registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=7)))
         walked = b''.join(bytes([60 if index < 29 else 50, 0, 1, 4, 0, 0, 0, 0]) for index in range(30))
@@ -337,7 +337,7 @@ class FrameLayerLimitTests(unittest.TestCase):
                     self.assertEqual((segment.srcport, segment.dstport, len(segment.header)), (40000, 9, 28))
 
     def test_a_protocol_constructed_directly_counts_from_the_layer_below_it(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         layers = SHAPES['IPv4 in IPv4'](66)
         with warnings.catch_warnings(record=True) as caught:
@@ -350,7 +350,7 @@ class FrameLayerLimitTests(unittest.TestCase):
         self.assertEqual(len(cut.protochain), 66)
 
     def test_no_recursion_error_at_any_depth_and_the_time_stays_bounded(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         cases = {'IPv4 in IPv4': 3000, '802.1Q tags': 10000, 'IPv6 in IPv6': 1500, 'mixed': 3000}
         with time_limit(scale_timeout(60)), warnings.catch_warnings(), _Logged() as logged:
@@ -363,9 +363,9 @@ class FrameLayerLimitTests(unittest.TestCase):
         self.assertEqual(logged.messages, [])
 
     def test_a_cut_frame_rebuilds_byte_exact(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(GLOBAL).info
         shapes = dict(SHAPES, chains=lambda count: chains('ipv4', 30, count // 31 + 1))
@@ -388,8 +388,8 @@ class FrameLayerLimitTests(unittest.TestCase):
     def test_rebuilding_a_cut_frame_warns_once_as_parsing_it_does(self) -> None:
         # Each layer rebuilt parses its own octets again, and each such parse
         # reaches the limit, so the rebuild warned once a layer: 65 times.
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.warnings import ProtocolWarning
 
         header = Header(GLOBAL).info
@@ -411,7 +411,7 @@ class FrameLayerLimitTests(unittest.TestCase):
         # frame, nearly twice as deep as the parse, and past the recursion limit.
         # It may go a frame or two deeper than the parse, from ``from_data``
         # itself, but not a layer's worth.
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier in ('ipv4', 'ipv6'):
             with self.subTest(carrier=carrier), warnings.catch_warnings(), _Logged() as logged:

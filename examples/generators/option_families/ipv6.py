@@ -22,12 +22,12 @@ generator = globals()['generator']  # type: Any
 
 
 def _hopopt_registry() -> 'Any':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
     return HOPOPT.__option__
 
 
 def _ipv6_opts_registry() -> 'Any':
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return IPv6_Opts.__option__
 
 
@@ -65,12 +65,12 @@ def _hopopt_base() -> 'dict[str, Any]':
 
 
 def _hopopt_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
     return HOPOPT(options=[(code, kwargs)], **_hopopt_base())
 
 
 def _hopopt_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
     return HOPOPT(octets, len(octets), extension=True)
 
 
@@ -80,27 +80,27 @@ def _ipv6_extract(parsed: 'Any') -> 'Any':
 
 
 def _hopopt_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
     return HOPOPT(options=options, **_hopopt_base())
 
 
 def _ipv6_opts_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return IPv6_Opts(options=[(code, kwargs)], **_hopopt_base())
 
 
 def _ipv6_opts_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return IPv6_Opts(octets, len(octets), extension=True)
 
 
 def _ipv6_opts_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return IPv6_Opts(options=options, **_hopopt_base())
 
 
 def _ipv6_route_registry() -> 'Any':
-    from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+    from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
     return IPv6_Route.__routing__
 
 
@@ -119,12 +119,12 @@ def _ipv6_route_base() -> 'dict[str, Any]':
 
 
 def _ipv6_route_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+    from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
     return IPv6_Route(type=code, data=dict(kwargs), **_ipv6_route_base())
 
 
 def _ipv6_route_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+    from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
     return IPv6_Route(octets, len(octets), extension=True)
 
 
@@ -135,7 +135,7 @@ def _ipv6_route_extract(parsed: 'Any') -> 'Any':
 
 
 def _ipv6_route_rebuild(info: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+    from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
     return IPv6_Route(type=info.type, data=info, next=info.next,
                       seg_left=info.seg_left, payload=b'')
 

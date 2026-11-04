@@ -7,7 +7,7 @@ than the data holds read the missing octets as zeros, and ``from_data`` rebuilt
 them -- 34 octets in and 38 out for an Ethernet frame whose IPv4 ``ihl`` is 6
 with only 20 header octets present. Such a header raises
 :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so its parent keeps the
-octets as a :class:`~pcapkit.protocols.misc.raw.Raw` payload and rebuilds them
+octets as a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload and rebuilds them
 byte for byte.
 
 It also guards against GitHub issue #1402, where ``IPv4.make()`` called
@@ -44,19 +44,19 @@ def _tcp(offset: int, opts: bytes = b'') -> bytes:
 #: Layers whose declared header length runs past the data: (module, class, octets).
 SHORT = {
     # issue #1404: options declared, none present
-    'IPv4 ihl=6, 20 octets': ('pcapkit.protocols.internet.ipv4', 'IPv4', _ipv4(6, 253, b'')),
-    'IPv4 ihl=7, 24 octets': ('pcapkit.protocols.internet.ipv4', 'IPv4', _ipv4(7, 253, bytes.fromhex('01010101'))),
-    'TCP offset=6, 20 octets': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(6)),
-    'TCP offset=10, 28 octets': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(10, bytes.fromhex('0101010101010101'))),
+    'IPv4 ihl=6, 20 octets': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4', _ipv4(6, 253, b'')),
+    'IPv4 ihl=7, 24 octets': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4', _ipv4(7, 253, bytes.fromhex('01010101'))),
+    'TCP offset=6, 20 octets': ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(6)),
+    'TCP offset=10, 28 octets': ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(10, bytes.fromhex('0101010101010101'))),
 }
 
 #: Each short layer inside its parent: (parent module, parent class, frame).
 IN_PARENT = {
-    'IPv4 ihl=6, 20 octets': ('pcapkit.protocols.link.ethernet', 'Ethernet', _ETH + SHORT['IPv4 ihl=6, 20 octets'][2]),
-    'IPv4 ihl=7, 24 octets': ('pcapkit.protocols.link.ethernet', 'Ethernet', _ETH + SHORT['IPv4 ihl=7, 24 octets'][2]),
-    'TCP offset=6, 20 octets': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'IPv4 ihl=6, 20 octets': ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet', _ETH + SHORT['IPv4 ihl=6, 20 octets'][2]),
+    'IPv4 ihl=7, 24 octets': ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet', _ETH + SHORT['IPv4 ihl=7, 24 octets'][2]),
+    'TCP offset=6, 20 octets': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                                 _ipv4(5, 6, SHORT['TCP offset=6, 20 octets'][2])),
-    'TCP offset=10, 28 octets': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'TCP offset=10, 28 octets': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                                  _ipv4(5, 6, SHORT['TCP offset=10, 28 octets'][2])),
 }
 
@@ -85,7 +85,7 @@ class TestHeaderLengthOverrun(unittest.TestCase):
                         protocol(data, len(data))
 
     def test_a_short_header_is_kept_as_captured_by_its_parent(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for case, (module, name, frame) in IN_PARENT.items():
             with self.subTest(case=case):
@@ -99,8 +99,8 @@ class TestHeaderLengthOverrun(unittest.TestCase):
 
     def test_a_complete_header_still_rebuilds_byte_for_byte(self) -> None:
         # the same option areas, every declared octet present
-        for module, name, data in (('pcapkit.protocols.internet.ipv4', 'IPv4', _ipv4(6, 253, bytes(4))),
-                                   ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(6, bytes(4)))):
+        for module, name, data in (('pcapkit.protocols.internet.ipv4.protocol', 'IPv4', _ipv4(6, 253, bytes(4))),
+                                   ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(6, bytes(4)))):
             with self.subTest(name=name):
                 protocol = self._protocol(module, name)
                 parsed = protocol(data, len(data))
@@ -117,7 +117,7 @@ class TestTimestampAddressKeys(unittest.TestCase):
         from datetime import timedelta
 
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return IPv4(options=[(OptionNumber.TS, {'timestamp': {key: timedelta(milliseconds=1)}})],
                     protocol=253).data
@@ -125,7 +125,7 @@ class TestTimestampAddressKeys(unittest.TestCase):
     def test_a_string_key_builds_like_an_address_key(self) -> None:
         from ipaddress import IPv4Address
 
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         expected = self._make(IPv4Address('1.2.3.4'))
         data = self._make('1.2.3.4')
@@ -138,7 +138,7 @@ class TestTimestampAddressKeys(unittest.TestCase):
         from ipaddress import IPv4Address
 
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         data = self._make(IPv4Address('1.2.3.4'))
         parsed = IPv4(data, len(data))

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.sslv3`.
+"""Unit tests for :mod:`pcapkit.protocols.application.sslv3.protocol`.
 
 #2529: a module holds one protocol class, named after it, so ``SSLv3`` has a
-module of its own beside :mod:`pcapkit.protocols.application.tls`. Every case
+module of its own beside :mod:`pcapkit.protocols.application.tls.protocol`. Every case
 builds its own octets.
 
 """
@@ -30,11 +30,11 @@ class SSLv3ModuleTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_sslv3_is_defined_in_its_own_module(self) -> None:
-        from pcapkit.protocols.application.sslv3 import SSLv3
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
+        from pcapkit.protocols.application.tls.protocol import TLS
 
-        sslv3 = importlib.import_module('pcapkit.protocols.application.sslv3')
-        self.assertEqual(SSLv3.__module__, 'pcapkit.protocols.application.sslv3')
+        sslv3 = importlib.import_module('pcapkit.protocols.application.sslv3.protocol')
+        self.assertEqual(SSLv3.__module__, 'pcapkit.protocols.application.sslv3.protocol')
         self.assertEqual(sslv3.__all__, ['SSLv3'])
         self.assertEqual(SSLv3.__bases__, (TLS,))
 
@@ -42,7 +42,7 @@ class SSLv3ModuleTests(unittest.TestCase):
         """#2529: one protocol class per module."""
         from pcapkit.protocols.protocol import ProtocolBase
 
-        tls = importlib.import_module('pcapkit.protocols.application.tls')
+        tls = importlib.import_module('pcapkit.protocols.application.tls.protocol')
         defined = [name for name, obj in vars(tls).items()
                    if isinstance(obj, type) and issubclass(obj, ProtocolBase)
                    and obj.__module__ == tls.__name__]
@@ -51,8 +51,8 @@ class SSLv3ModuleTests(unittest.TestCase):
 
     def test_id_and_index(self) -> None:
         """``SSLv3`` narrows ``id()`` to itself and inherits the rest of TLS."""
-        from pcapkit.protocols.application.sslv3 import SSLv3
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         self.assertEqual(SSLv3.id(), ('SSLv3',))
         self.assertEqual(TLS.id(), ('TLS',))
@@ -64,7 +64,7 @@ class SSLv3ModuleTests(unittest.TestCase):
         import pcapkit.all
         import pcapkit.protocols
         import pcapkit.protocols.application
-        from pcapkit.protocols.application.sslv3 import SSLv3
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
 
         for package in (pcapkit, pcapkit.all, pcapkit.protocols, pcapkit.protocols.application):
             with self.subTest(package=package.__name__):
@@ -74,8 +74,8 @@ class SSLv3ModuleTests(unittest.TestCase):
 
     def test_parsed_tls_keeps_its_dynamic_sslv3_alias(self) -> None:
         """Dispatch binds TLS alone; legacy version ``0x0300`` reports ``SSLv3``."""
-        from pcapkit.protocols.application.sslv3 import SSLv3
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.sslv3.protocol import SSLv3
+        from pcapkit.protocols.application.tls.protocol import TLS
 
         parsed = TLS(SSLV3_ALERT, len(SSLV3_ALERT))
         self.assertIs(type(parsed), TLS)

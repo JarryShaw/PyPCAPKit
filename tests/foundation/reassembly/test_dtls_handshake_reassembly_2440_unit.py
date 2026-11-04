@@ -555,7 +555,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         """Reassembly leaves the frames alone, so every fragment's record --
         the one completing its message included -- round-trips exactly
         through ``from_data``."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         body = _client_hello_body(cookie=b'\xab\xcd\xef\x01')
         records = self._records(1, body, _split(body, (len(body) // 2,)))
@@ -569,7 +569,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
         """A fragment whose ``fragment_offset + fragment_length`` overruns the
         declared ``length`` (5 + 10 > 10) completes its message, clipped, but
         its record stays exactly as it arrived."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         length = 10
         second = b'B' * 10  # this record's own 10 octets, but offset 5 + 10 > length 10
@@ -629,7 +629,7 @@ class TestDTLSExtractorReassembly(unittest.TestCase):
 
     def test_without_reassembly_body_stays_raw(self) -> None:
         """Parsed alone, a fragment's body stays raw whatever the fragment."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         body = _client_hello_body()
         half = len(body) // 2

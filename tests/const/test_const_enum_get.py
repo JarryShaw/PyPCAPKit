@@ -124,7 +124,7 @@ EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset()  # type: frozenset[str]
 
 #: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
 #: members at all -- every one of its 256 codes reaches ``_missing_``.
-#: Importing :mod:`pcapkit.protocols.misc.pcapng` evaluates
+#: Importing :mod:`pcapkit.protocols.misc.pcapng.protocol` evaluates
 #: ``Enum_FilterType(0)`` as a default argument at class-definition time, but
 #: FilterType's bare ``Unassigned`` label resolves to an unregistered member
 #: (the #775/#847 ruling), so that import mints nothing -- a minting label
@@ -297,7 +297,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # sweep is the census's 'int' and 'flag' registries (#2615). GitHub
         # issue #880's ngap.ProcedureCode and ngap.ProtocolIE are on
         # EnumRegistry rather than hand-rolled IntEnum classes in
-        # pcapkit.protocols.application.ngap; neither needs an exception-set
+        # pcapkit.protocols.application.ngap.protocol; neither needs an exception-set
         # entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
         self.assertEqual(census.compare(map(_qualname, self.enums), census.names('int', 'flag')),

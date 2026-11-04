@@ -124,7 +124,7 @@ class OptionAreaCutTests(unittest.TestCase):
 
     def messages(self) -> 'dict[str, bytes]':
         """Every registered MH message type, built with its defaults."""
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return {getattr(code, 'name', str(code)): bytes(MH(type=code, data={}, **MH_BASE))
                 for code in MH.__message__}
@@ -152,7 +152,7 @@ class OptionAreaCutTests(unittest.TestCase):
         return layer, messages
 
     def test_every_message_cut_at_every_offset_reads_short(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for name, whole in self.messages().items():
             for cut in range(1, len(whole)):
@@ -165,8 +165,8 @@ class OptionAreaCutTests(unittest.TestCase):
 
     def test_every_message_cut_inside_ipv6_rebuilds_quietly(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, whole in self.messages().items():
             for cut in range(1, len(whole)):
@@ -187,7 +187,7 @@ class OptionAreaCutTests(unittest.TestCase):
         # three its sequence number and status (RFC 6705, section 10.1; RFC 7077,
         # section 4.2), behind the six octets of the Mobility Header
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for code, reserved in ((Packet.Localized_Routing_Initiation, range(8, 10)),
                                (Packet.Update_Notification_Acknowledgement, range(9, 12))):
@@ -203,8 +203,8 @@ class OptionAreaCutTests(unittest.TestCase):
                     self.assertRebuildsQuietly(MH, mh, raw)
 
     def test_options_header_schema_cut_reads_short(self) -> None:
-        from pcapkit.protocols.schema.internet.hopopt import HOPOPT
-        from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.schema import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.schema import IPv6_Opts
 
         for schema in (HOPOPT, IPv6_Opts):
             for cut in range(1, len(OPTIONS)):
@@ -218,8 +218,8 @@ class OptionAreaCutTests(unittest.TestCase):
                     self.assertEqual((bytes(header), header.pack()), (raw, raw))
 
     def test_options_header_cut_at_every_offset_reads_short(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         for cls in (HOPOPT, IPv6_Opts):
             for cut in range(1, len(OPTIONS)):
@@ -232,8 +232,8 @@ class OptionAreaCutTests(unittest.TestCase):
 
     def test_options_header_cut_inside_ipv6_reads_short(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for code, key in ((0, ExtensionHeader.HOPOPT), (60, ExtensionHeader.IPv6_Opts)):
             for cut in range(1, len(OPTIONS)):
@@ -252,8 +252,8 @@ class OptionAreaCutTests(unittest.TestCase):
     def test_options_header_make_takes_the_length_a_cut_declared(self) -> None:
         # a whole header is made with the Hdr Ext Len its options fill, and one the
         # capture cut short with the one it declared
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
         from pcapkit.utilities.exceptions import ProtocolError
 
         # pylint: disable=protected-access
@@ -273,10 +273,10 @@ class OptionAreaCutTests(unittest.TestCase):
         # a Router Alert cut after its type reads a length of zero, which its parser
         # refuses; a Line Identification cut before its line ID length is made with
         # a length that leaves the line ID out
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         for cls, code in ((HOPOPT, 0), (IPv6_Opts, 60)):
@@ -297,7 +297,7 @@ class OptionAreaCutTests(unittest.TestCase):
     def test_option_past_its_area_is_still_refused(self) -> None:
         # #1325: a PadN declaring three octets past a whole header, and one
         # declaring twenty-two in an area of sixteen the data also ends inside
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         for raw in (bytes.fromhex('3b010000000000000104000000000103'),
@@ -311,9 +311,9 @@ class OptionAreaCutTests(unittest.TestCase):
         # its parser refuses; an IPv6 Address/Prefix cut before its code reads a
         # code of zero, which its closed enumeration refuses; a Flow Identification
         # cut where its sub-options start is made with a length that leaves them out
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         for raw, error in (
@@ -336,7 +336,7 @@ class OptionAreaCutTests(unittest.TestCase):
         # the Binding Refresh Advice cut inside its interval, and the PadN after it
         # cut inside its padding
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for cut in (10, 11, 13, 14, 15):
             raw = BRR_BRA[:cut]
@@ -355,9 +355,9 @@ class OptionAreaCutTests(unittest.TestCase):
         # Multi-Prefix CGA extension a length leaves part of a prefix (RFC 5535);
         # a Load Information option of an odd length (RFC 6463, section 4.3) was
         # refused quietly, and is the control
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = [(brr(bytes([44, n]) + bytes(range(1, n + 1))), 'OptNo 44') for n in (1, 3, 5)]
@@ -381,7 +381,7 @@ class OptionAreaCutTests(unittest.TestCase):
 
     def test_list_of_whole_items_reads(self) -> None:
         # the same option and extension, of a length the items fill
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for raw in (brr(bytes([44, 4, 0, 1, 0, 2])),
                     bytes.fromhex('3b060000000000000c2d086fca5e10b200c99c8ce00164277c0820010db8'
@@ -395,8 +395,8 @@ class OptionAreaCutTests(unittest.TestCase):
         # each header is handed every octet its Payload Length declares, short of
         # the header's own length: on the Payload Length's side of the line, where
         # a cut is handed fewer octets than it declares
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         headers = ((0, OPTIONS), (60, OPTIONS), (135, BRR_BRA),
                    (135, bytes(self.messages()['Localized_Routing_Initiation'])))
@@ -414,8 +414,8 @@ class OptionAreaCutTests(unittest.TestCase):
         # the review's case: a 16-octet header under a Payload Length of 8 with
         # those 8 octets, then the same header cut to 10 octets of the 16 declared
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for code, key, whole in ((0, ExtensionHeader.HOPOPT, OPTIONS),
                                  (60, ExtensionHeader.IPv6_Opts, OPTIONS),
@@ -433,7 +433,7 @@ class OptionAreaCutTests(unittest.TestCase):
     def test_option_area_told_its_data_is_bounded_runs_past_it(self) -> None:
         # the field on its own: ``__capture_cut__`` false where the data ends
         # inside the area, at an option boundary and inside an option
-        from pcapkit.protocols.schema.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.schema import HOPOPT
         from pcapkit.utilities.exceptions import ProtocolError
 
         field = HOPOPT.__fields__['options']

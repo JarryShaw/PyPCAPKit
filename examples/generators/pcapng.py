@@ -93,7 +93,7 @@ The fixtures carry these constructs as regression cover:
   section.
 
 The fixtures also cover option-area sizing errors in
-``pcapkit/protocols/schema/misc/pcapng.py``, each confirmed by bisecting one
+``pcapkit/protocols/misc/pcapng/schema.py``, each confirmed by bisecting one
 block type at a time. They warn rather than raise, and a fixture that covers
 the code path is what will catch a future crash there:
 

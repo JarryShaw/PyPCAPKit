@@ -7,9 +7,9 @@
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
 which is a base class for transport layer protocols, e.g.
-:class:`~pcapkit.protocols.transport.tcp.TCP`,
-:class:`~pcapkit.protocols.transport.udp.UDP` and
-:class:`~pcapkit.protocols.transport.sctp.SCTP`.
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
+:class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`.
 
 """
 import io
@@ -104,8 +104,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 shipped descriptor that a restore puts back (:issue:`1504`).
 
         Note:
-            :class:`~pcapkit.protocols.transport.tcp.TCP` and
-            :class:`~pcapkit.protocols.transport.udp.UDP` each define their own
+            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` each define their own
             ``__proto__`` rather than sharing one on :class:`Transport`.
             ``register_apptype`` reaches this method once per transport
             protocol, each time on that protocol's own registry, so it cannot
@@ -138,8 +138,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Args:
             ports: Source & destination ports, as the application types
                 :meth:`_make_port` resolves them to -- what
-                :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` and
-                :attr:`TCP.dst <pcapkit.protocols.transport.tcp.TCP.dst>` read
+                :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` and
+                :attr:`TCP.dst <pcapkit.protocols.transport.tcp.protocol.TCP.dst>` read
                 off a parsed header, resolved the same way.
             payload: Packet payload.
             **kwargs: Arbitrary keyword arguments.
@@ -151,9 +151,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Important:
             The annotation names the **base** registry rather than one
             transport's own, because this is the single method
-            :class:`~pcapkit.protocols.transport.tcp.TCP`,
-            :class:`~pcapkit.protocols.transport.udp.UDP` and
-            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each
+            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
+            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
+            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each
             resolves its ports in a different one --
             :class:`~pcapkit.const.reg.apptype.tcp.TCP` for the first, and so
             on. A caller that knows which transport it has gets the narrower
@@ -180,7 +180,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             :exc:`AttributeError`, and unwrapping unconditionally would have
             changed what anything *else* does here: :func:`int` of :obj:`None`
             raises where the lookup falls back to
-            :class:`~pcapkit.protocols.misc.raw.Raw`, and :func:`int` of
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and :func:`int` of
             ``'80'`` would dispatch a :class:`str` nobody registered.
 
             Nothing is written back on a miss either way, so a payload on an
@@ -208,9 +208,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort:skip
+                from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort:skip
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # pylint: disable=import-outside-toplevel # isort:skip
+                from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # pylint: disable=import-outside-toplevel # isort:skip
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
@@ -267,13 +267,13 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         r"""Resolve a family base the registry binds to the member that parses ``file_``.
 
         The HTTP ports bind the family base
-        :class:`~pcapkit.protocols.application.http.HTTP`, whose
-        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks
-        :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or
-        :class:`~pcapkit.protocols.application.httpv2.HTTPv2` from the payload,
+        :class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose
+        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` picks
+        :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or
+        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the payload,
         as :meth:`Internet._import_next_layer
         <pcapkit.protocols.internet.internet.Internet._import_next_layer>` does
-        for :class:`~pcapkit.protocols.internet.igmp.IGMP` (:issue:`2524`).
+        for :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` (:issue:`2524`).
 
         Arguments:
             klass: next layer protocol class, as the registry binds it
@@ -284,7 +284,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             The member for a family base, otherwise ``klass`` itself.
 
         """
-        from pcapkit.protocols.application.http import HTTP as HTTPBase  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.application.http.protocol import HTTP as HTTPBase  # isort: skip # pylint: disable=import-outside-toplevel
 
         if klass is HTTPBase:
             return HTTPBase._dispatch_version(file_, length)
@@ -379,14 +379,14 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             The port is forwarded **whether or not it is registered**:
             :meth:`Protocol._import_next_layer
             <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
-            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
+            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
             records it as :attr:`Data_Raw.protocol
-            <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it would
+            <pcapkit.protocols.misc.raw.data.Raw.protocol>`. Dropping it would
             make a payload on a port we do not decode indistinguishable from
             one on port 22. The lower port is the one carried, for the same
             reason it is the primary lookup key.
             :meth:`SCTP._decode_next_layer
-            <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` and
+            <pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer>` and
             :meth:`Internet._import_next_layer
             <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
             behave the same way for an unregistered PPID and transport type.

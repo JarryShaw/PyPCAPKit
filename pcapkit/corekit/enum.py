@@ -196,7 +196,7 @@ class EnumLookup:
         ruling that in-library code raises in-library exceptions --
         :exc:`~pcapkit.utilities.exceptions.EnumValueError` is the fitting one
         and is already what the closed enumerations in
-        :mod:`pcapkit.protocols.internet.mh` raise. Note what that buys on the
+        :mod:`pcapkit.protocols.internet.mh.protocol` raise. Note what that buys on the
         :meth:`get` path: :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         subclasses :exc:`ValueError`, so a rejection here is caught by
         :meth:`get`'s own ``except ValueError`` and falls back to ``default``

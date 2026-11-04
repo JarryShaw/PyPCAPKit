@@ -4,13 +4,13 @@
 This guards against GitHub issue #1170, where every ``_import_next_layer``
 parsed the next layer from
 whatever octets were captured, however few, and only picked
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` for a declared length of zero.
-:meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` zero-fills
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` for a declared length of zero.
+:meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` zero-fills
 the fields the stream ends inside, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilt a header that
 was never captured. A payload with no captured octets is a ``NoPayload``,
 and one short of the next layer's header a
-:class:`~pcapkit.protocols.misc.raw.Raw`.
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
 """
 from __future__ import annotations
@@ -41,16 +41,16 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipv6_header_without_payload_octets(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         parsed = IPv6(IPV6, len(IPV6))
         self.assertIsInstance(parsed.payload, NoPayload)
         self.assertEqual(IPv6.from_data(parsed.info).data, IPV6)
 
     def test_ipv6_partial_udp_header(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = IPV6 + UDP[:4]
         parsed = IPv6(packet, len(packet))
@@ -58,8 +58,8 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
         self.assertEqual(IPv6.from_data(parsed.info).data, packet)
 
     def test_ipv4_partial_udp_header(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for size in (1, 4, 7):
             with self.subTest(size=size):
@@ -70,9 +70,9 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
                 self.assertEqual(IPv4.from_data(parsed.info).data, packet)
 
     def test_udp_header_without_payload_octets(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.transport.udp import UDP as UDP_
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.transport.udp.protocol import UDP as UDP_
 
         packet = IPV4 + UDP[:8]
         parsed = IPv4(packet, len(packet))
@@ -81,8 +81,8 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
         self.assertEqual(IPv4.from_data(parsed.info).data, packet)
 
     def test_ipv4_header_cut_short(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         frame = ETHERNET + IPV4[:18]
         parsed = Ethernet(frame, len(frame))
@@ -92,8 +92,8 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
     def test_header_shorter_than_its_length_hint_still_parses(self) -> None:
         # A 12-octet L2TPv2 ZLB acknowledgement (flags T, L and S) is a whole
         # header, though ``L2TPv2.__length_hint__`` reports its 16-octet form.
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         zlb = bytes.fromhex('c802000c000100000001' '0002')
         udp = bytes.fromhex('06a506a5') + (8 + len(zlb)).to_bytes(2, 'big') + b'\x00\x00' + zlb
@@ -104,8 +104,8 @@ class ShortNextLayerHeaderTests(unittest.TestCase):
         self.assertEqual(parsed.payload.payload.info.length, 12)
 
     def test_captured_header_is_still_parsed(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.udp import UDP as UDP_
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.udp.protocol import UDP as UDP_
 
         packet = IPV4 + UDP
         parsed = IPv4(packet, len(packet))

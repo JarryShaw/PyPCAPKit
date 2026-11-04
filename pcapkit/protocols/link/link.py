@@ -8,14 +8,14 @@
 :mod:`pcapkit.protocols.link.link` contains
 :class:`~pcapkit.protocols.link.link.Link`,
 which is a base class for link layer protocols, e.g.
-:class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.inarp.InARP`,
-:class:`~pcapkit.protocols.link.ethernet.Ethernet`,
-:class:`~pcapkit.protocols.link.frad.FRAD`,
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`,
-:class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.loopback.Loopback`,
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` and
-:class:`~pcapkit.protocols.link.vlan.VLAN`.
+:class:`~pcapkit.protocols.link.arp.protocol.ARP`/:class:`~pcapkit.protocols.link.inarp.protocol.InARP`,
+:class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`,
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD`,
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`,
+:class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`,
+:class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` and
+:class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
 
 """
 import collections
@@ -50,19 +50,19 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
        * - Index
          - Protocol
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol`
-         - :class:`pcapkit.protocols.link.arp.ARP`
+         - :class:`pcapkit.protocols.link.arp.protocol.ARP`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`
-         - :class:`pcapkit.protocols.application.rarp.RARP`
+         - :class:`pcapkit.protocols.application.rarp.protocol.RARP`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`
-         - :class:`pcapkit.protocols.link.c_tag.C_Tag`
+         - :class:`pcapkit.protocols.link.c_tag.protocol.C_Tag`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier`
-         - :class:`pcapkit.protocols.link.s_tag.S_Tag`
+         - :class:`pcapkit.protocols.link.s_tag.protocol.S_Tag`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4`
-         - :class:`pcapkit.protocols.internet.ipv4.IPv4`
+         - :class:`pcapkit.protocols.internet.ipv4.protocol.IPv4`
        * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6`
-         - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+         - :class:`pcapkit.protocols.internet.ipv6.protocol.IPv6`
        * - 0x8137
-         - :class:`pcapkit.protocols.internet.ipx.IPX`
+         - :class:`pcapkit.protocols.internet.ipx.protocol.IPX`
 
     """
 
@@ -79,28 +79,28 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: :meth:`self._import_next_layer
     #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
-            Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp',      'ARP'),
+            Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp.protocol',      'ARP'),
             Enum_EtherType.Reverse_Address_Resolution_Protocol:
-                ModuleDescriptor('pcapkit.protocols.application.rarp', 'RARP'),
+                ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
             # The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks
             # them -- the service tag's own next-EtherType is what selects the
             # customer tag -- so the two coexist in one frame rather than
             # competing. They are separate classes only to keep their
             # ``info_name`` apart in the parsed output; the tag layout itself is
             # identical, and both share the code in
-            # :class:`~pcapkit.protocols.link.vlan.VLAN`.
+            # :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
             Enum_EtherType.Customer_VLAN_Tag_Type:
-                ModuleDescriptor('pcapkit.protocols.link.c_tag', 'C_Tag'),
+                ModuleDescriptor('pcapkit.protocols.link.c_tag.protocol', 'C_Tag'),
             Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
-                ModuleDescriptor('pcapkit.protocols.link.s_tag', 'S_Tag'),
+                ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
 
-            Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4', 'IPv4'),
-            Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6', 'IPv6'),
+            Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
+            Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
 
             # see https://en.wikipedia.org/wiki/EtherType#Values
-            0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx',  'IPX'),
+            0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',  'IPX'),
         },
     )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
@@ -110,9 +110,9 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
     #: ``code=`` key is checked exactly as
     #: :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype` checks
-    #: its own -- :class:`~pcapkit.protocols.link.ethernet.Ethernet`, which shares
+    #: its own -- :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`, which shares
     #: this registry, is therefore checked as :class:`Link` is, while
-    #: :class:`~pcapkit.protocols.link.loopback.Loopback`, which keeps one of its
+    #: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, which keeps one of its
     #: own, declares its own pairing or none at all (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_EtherType, False)
 

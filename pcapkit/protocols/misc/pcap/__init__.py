@@ -7,11 +7,11 @@
 
 :mod:`pcapkit.protocols.misc.pcap` contains header descriptions for
 PCAP files, including global header
-(:class:`~pcapkit.protocols.misc.pcap.header.Header`) and frame header
-(:class:`~pcapkit.protocols.misc.pcap.frame.Frame`).
+(:class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`) and frame header
+(:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`).
 
 """
-from pcapkit.protocols.misc.pcap.frame import Frame
-from pcapkit.protocols.misc.pcap.header import Header
+from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+from pcapkit.protocols.misc.pcap.header.protocol import Header
 
 __all__ = ['Frame', 'Header']

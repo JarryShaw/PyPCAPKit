@@ -16,13 +16,13 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 class TransportUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         # ``isolate_modules`` rather than ``purge_modules``: tests below bind
-        # stand-ins over ``pcapkit.protocols.misc.raw`` and ``...misc.no_payload``, which
+        # stand-ins over ``pcapkit.protocols.misc.raw.protocol`` and ``...misc.no_payload``, which
         # are on the import path of most of the package. See #660.
         isolate_modules(self)
 
     def test_register_validates_protocols_and_abstract_base(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.transport import Transport
         from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall
 
@@ -59,7 +59,7 @@ class TransportUnitTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             DummyTransport.register(81, object)  # type: ignore[arg-type]
 
-        DummyTransport.register(82, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+        DummyTransport.register(82, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
         self.assertIs(DummyTransport.__dict__['__proto__'][82], Raw)
 
         class Other(Raw):
@@ -83,7 +83,7 @@ class TransportUnitTests(unittest.TestCase):
         <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.transport import Transport
 
         class DummyTransport(Transport):
@@ -281,7 +281,7 @@ class TransportUnitTests(unittest.TestCase):
         class DummyTransport(Transport):
             __proto__ = collections.defaultdict(
                 lambda: None,
-                {80: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
+                {80: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')},
             )
 
             @property
@@ -376,7 +376,7 @@ class TransportUnitTests(unittest.TestCase):
         The port reaches
         :meth:`ProtocolBase._import_next_layer
         <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` as
-        ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.Raw` records
+        ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.protocol.Raw` records
         as ``Data_Raw.protocol``. Guards against passing :obj:`None`, under which
         TCP and UDP anonymise every payload they cannot dispatch -- unlike SCTP
         and IPv4, which both keep the identifier the packet arrived with. The lower port is
@@ -444,9 +444,9 @@ class TransportUnitTests(unittest.TestCase):
     def test_make_refuses_a_bool_port(self) -> None:
         # #2287: ``bool`` is an ``int`` subclass, so ``AppType.get`` resolving
         # ``True``/``False`` to port 1/0 is a defect this guards against.
-        from pcapkit.protocols.transport.sctp import SCTP
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for cls in (TCP, UDP, SCTP):

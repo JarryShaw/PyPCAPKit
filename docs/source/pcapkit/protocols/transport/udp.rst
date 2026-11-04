@@ -2,9 +2,10 @@ UDP - User Datagram Protocol
 ============================
 
 .. module:: pcapkit.protocols.transport.udp
+.. module:: pcapkit.protocols.transport.udp.protocol
 
-:mod:`pcapkit.protocols.transport.udp` contains
-:class:`~pcapkit.protocols.transport.udp.UDP` only,
+:mod:`pcapkit.protocols.transport.udp.protocol` contains
+:class:`~pcapkit.protocols.transport.udp.protocol.UDP` only,
 which implements the extractor for User Datagram Protocol
 (UDP) [*]_, whose structure is described as below:
 
@@ -17,7 +18,7 @@ Octets      Bits        Name                    Description
   6          48   ``udp.checksum``            Checksum
 ======= ========= ===================== ===============================
 
-.. autoclass:: pcapkit.protocols.transport.udp.UDP
+.. autoclass:: pcapkit.protocols.transport.udp.protocol.UDP
    :no-members:
    :show-inheritance:
 
@@ -42,18 +43,28 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.transport.udp
+.. module:: pcapkit.protocols.transport.udp.schema
 
-.. autoclass:: pcapkit.protocols.schema.transport.udp.UDP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.transport.udp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.transport.udp.schema.UDP
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.transport.udp
+.. module:: pcapkit.protocols.transport.udp.data
 
-.. autoclass:: pcapkit.protocols.data.transport.udp.UDP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.transport.udp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.transport.udp.data.UDP
    :members:
    :show-inheritance:
 

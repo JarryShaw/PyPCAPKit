@@ -9,7 +9,7 @@ description that does not match the octets.
 
 Without a check upstream, nothing warns when the mapping spells a key wrongly.
 :meth:`TCP.make
-<pcapkit.protocols.transport.tcp.TCP.make>` ends its signature with
+<pcapkit.protocols.transport.tcp.protocol.TCP.make>` ends its signature with
 ``**kwargs: 'Any'`` and never reads anything out of it, so a keyword it does not
 declare is accepted, discarded, and the parameter it was meant to set keeps its
 default. GitHub issue #602 is three such keys:
@@ -97,7 +97,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: The header every frame of :file:`examples/captures/options-tcp.pcap` has to
 #: carry, keyed by the name :meth:`TCP.make
-#: <pcapkit.protocols.transport.tcp.TCP.make>` declares for it. A SYN-only
+#: <pcapkit.protocols.transport.tcp.protocol.TCP.make>` declares for it. A SYN-only
 #: segment from port 50000 to port 80, sequence number 1, everything else at
 #: zero. Written out rather than read from ``TCP_BASE`` -- see the module
 #: docstring for why that is deliberate.
@@ -192,7 +192,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         catch a misspelling introduced tomorrow.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         options = _load_generator()
         signature = inspect.signature(TCP.make)
@@ -216,14 +216,14 @@ class TCPBaseKeywordTests(unittest.TestCase):
         forwards a keyword through ``**kwargs`` to something that *does* declare
         it -- which this library does, and documents: the same generator hands
         ``extension=True`` to ``HIP``, where :meth:`HIP.read
-        <pcapkit.protocols.internet.hip.HIP.read>` declares it even though
+        <pcapkit.protocols.internet.hip.protocol.HIP.read>` declares it even though
         ``HIP.make`` does not. ``TCP`` is not such a protocol. ``TCP.read`` takes
         ``length`` and ``**kwargs`` and reads nothing out of the latter, so for
         ``TCP`` a keyword ``make`` does not declare is a keyword nothing at all
         consumes, and the rule above is exactly right rather than merely tidy.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         declared = {
             name for name, parameter in inspect.signature(TCP.read).parameters.items()
@@ -252,7 +252,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         <pcapkit.protocols.protocol.ProtocolBase.__init__>` checks the keywords
         against the signatures before ``make`` is reached, and refuses a name none
         of them declares (#617). That closes the asymmetry with
-        :class:`~pcapkit.protocols.schema.schema.Schema` construction, which warns
+        :class:`~pcapkit.protocols.schema.Schema` construction, which warns
         :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for an unknown field.
 
         The ``**kwargs`` assertion is kept because it says why the check has to
@@ -260,7 +260,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         its own and none of this would be needed.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         signature = inspect.signature(TCP.make)
@@ -292,7 +292,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         produces ``info.seq == 0`` -- with an empty ``warnings`` list.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         options = _load_generator()
@@ -325,10 +325,10 @@ class TCPBaseHeaderTests(unittest.TestCase):
             **overrides: Header keywords replacing the ones in ``TCP_BASE``.
 
         Returns:
-            The constructed :class:`~pcapkit.protocols.transport.tcp.TCP`.
+            The constructed :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         return TCP(**{**self.options.FAMILY_MODULES['tcp'].TCP_BASE, **overrides})
 
@@ -389,7 +389,7 @@ class TCPBaseHeaderTests(unittest.TestCase):
 
         The bits are read off the octets rather than off ``info.flags`` because
         ``ns`` is not in the data model at all --
-        :class:`~pcapkit.protocols.data.transport.tcp.Flags` has its ``ns``
+        :class:`~pcapkit.protocols.transport.tcp.data.Flags` has its ``ns``
         declaration commented out, and the schema keeps the bit in ``offset``
         rather than beside the other eight. Going to the wire covers all nine
         without depending on that split.

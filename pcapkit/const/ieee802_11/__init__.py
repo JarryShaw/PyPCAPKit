@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` Constant Enumerations
-==================================================================================
+""":class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` Constant Enumerations
+===========================================================================================
 
 .. module:: pcapkit.const.ieee802_11
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` implementations, each
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` implementations, each
 from IEEE Std 802.11-2020, Table 9-1, *Valid type and subtype combinations*.
 Available enumerations include:
 

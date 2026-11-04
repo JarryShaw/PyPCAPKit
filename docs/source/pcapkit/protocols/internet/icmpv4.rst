@@ -2,9 +2,10 @@ ICMPv4 - Internet Control Message Protocol
 ==========================================
 
 .. module:: pcapkit.protocols.internet.icmpv4
+.. module:: pcapkit.protocols.internet.icmpv4.protocol
 
-:mod:`pcapkit.protocols.internet.icmpv4` contains
-:class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` only,
+:mod:`pcapkit.protocols.internet.icmpv4.protocol` contains
+:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` only,
 which implements extractor for Internet Control
 Message Protocol (ICMP) [*]_, whose structure is
 described as below:
@@ -18,7 +19,7 @@ Octets      Bits        Name                    Description
   4          32   ``icmpv4.data``           Message Body
 ======= ========= ======================= ===================================
 
-.. autoclass:: pcapkit.protocols.internet.icmpv4.ICMPv4
+.. autoclass:: pcapkit.protocols.internet.icmpv4.protocol.ICMPv4
    :no-members:
    :show-inheritance:
 
@@ -55,67 +56,67 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.icmpv4
+.. module:: pcapkit.protocols.internet.icmpv4.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.ICMPv4
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.ICMPv4
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.ICMPv4Type
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.ICMPv4Type
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.Unknown
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.Echo
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.Echo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.DestinationUnreachable
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.DestinationUnreachable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.TimeExceeded
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.TimeExceeded
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv4.ParameterProblem
+.. autoclass:: pcapkit.protocols.internet.icmpv4.schema.ParameterProblem
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.icmpv4.icmpv4_data_selector
+.. autofunction:: pcapkit.protocols.internet.icmpv4.schema.icmpv4_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.icmpv4
+.. module:: pcapkit.protocols.internet.icmpv4.data
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.ICMPv4
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.ICMPv4
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.Unknown
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.Echo
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.Echo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.DestinationUnreachable
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.DestinationUnreachable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.TimeExceeded
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.TimeExceeded
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv4.ParameterProblem
+.. autoclass:: pcapkit.protocols.internet.icmpv4.data.ParameterProblem
    :members:
    :show-inheritance:
 

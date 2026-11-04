@@ -2,11 +2,11 @@
 """A dispatched HTTP payload is parsed by its version's class. C.f. #2524.
 
 The HTTP ports bind the family base
-:class:`~pcapkit.protocols.application.http.HTTP`, and ``HTTP._dispatch_version`` picks
+:class:`~pcapkit.protocols.application.http.protocol.HTTP`, and ``HTTP._dispatch_version`` picks
 ``HTTPv1`` or ``HTTPv2`` from the payload, as ``IGMP._dispatch`` picks an IGMP
 message's class. So a segment's HTTP layer is never the base: its data sits under
 ``httpv1`` or ``httpv2``, a payload neither version identifies is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, and every round trip still reproduces
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and every round trip still reproduces
 its octets.
 
 This module is unit-tier: the segments are built in memory.
@@ -79,11 +79,11 @@ class HTTPDispatchTests(unittest.TestCase):
         import importlib
 
         return getattr(importlib.import_module(
-            f'pcapkit.protocols.application.{class_name.lower()}'), class_name)
+            f'pcapkit.protocols.application.{class_name.lower()}.protocol'), class_name)
 
     @staticmethod
     def tcp(payload: bytes) -> 'Any':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         data = _TCP_TO_80 + payload
         with warnings.catch_warnings():
@@ -92,7 +92,7 @@ class HTTPDispatchTests(unittest.TestCase):
 
     @staticmethod
     def udp(payload: bytes) -> 'Any':
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         data = bytes.fromhex('c3500050') + (8 + len(payload)).to_bytes(2, 'big') + b'\x00\x00' + payload
         with warnings.catch_warnings():
@@ -100,8 +100,8 @@ class HTTPDispatchTests(unittest.TestCase):
             return UDP(io.BytesIO(data), len(data))
 
     def test_dispatch_picks_the_member_the_payload_identifies(self) -> None:
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for label, (payload, class_name) in PAYLOADS.items():
             with self.subTest(payload=label):
@@ -126,7 +126,7 @@ class HTTPDispatchTests(unittest.TestCase):
 
     def test_reassembly_analysis_parses_with_the_member(self) -> None:
         """``Transport.analyze``, which TCP reassembly reaches, dispatches alike."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for label, (payload, class_name) in PAYLOADS.items():
             with self.subTest(payload=label):
@@ -138,7 +138,7 @@ class HTTPDispatchTests(unittest.TestCase):
 
     def test_an_unidentified_payload_is_kept_raw(self) -> None:
         """An unrecognised payload is Raw with no ``error``, as IGMP's is (#2544)."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for label, payload in UNIDENTIFIED.items():
             with self.subTest(payload=label):
@@ -154,9 +154,9 @@ class HTTPDispatchTests(unittest.TestCase):
         HTTP/2 data model holds one frame per packet and has no form for it, so
         ``HTTPv2`` refuses it and the dispatcher does not pick that class.
         """
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertIs(HTTP._dispatch_version(_PREFACE, len(_PREFACE)), Raw)
@@ -182,8 +182,8 @@ class HTTPDispatchTests(unittest.TestCase):
         segment is kept as ``Raw`` with the parser's own error. A preface alone is
         the one such payload it keeps ``Raw`` itself.
         """
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         payloads = {**{label: payload for label, (payload, _) in PAYLOADS.items()},

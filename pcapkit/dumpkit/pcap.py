@@ -16,9 +16,9 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.dumpkit.common import DumperBase
-from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
-from pcapkit.protocols.misc.pcap.header import Header
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.misc.pcap.header.data import Header as Data_Header
+from pcapkit.protocols.misc.pcap.header.protocol import Header
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.version import VersionInfo
-    from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
-    from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+    from pcapkit.protocols.misc.pcap.frame.data import Frame as Data_Frame
+    from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
 
 __all__ = [
     'PCAPIO',
@@ -196,7 +196,7 @@ class PCAPIO(DumperBase):
         #: struct.Struct: Packer for the record header preceding each frame, in the
         #: byte order of the global header just written. Taken from
         #: :attr:`self._ghdr <_ghdr>` rather than from the ``byteorder`` argument
-        #: because :class:`~pcapkit.protocols.misc.pcap.header.Header` is what
+        #: because :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` is what
         #: validates and normalises it.
         self._rechdr = _RECORD_HEADER[self._ghdr.magic_number.byteorder]
 
@@ -221,7 +221,7 @@ class PCAPIO(DumperBase):
             :meth:`self._make_timestamp <_make_timestamp>`), and the octets are
             exactly ``value.packet``. So this writes them directly, rather than
             handing them to
-            :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor
+            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose constructor
             packs the record and then **dissects it again** through the whole
             protocol stack to arrive at bytes it was given. That round trip
             measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,
@@ -286,7 +286,7 @@ class PCAPIO(DumperBase):
             ``time_epoch`` at this file's -- microseconds times 1000, or
             nanoseconds divided by 1000 and **truncated** rather than rounded.
             That is how :func:`~pcapkit.toolkit.pcapng.block2frame` and
-            :meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>`
+            :meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.protocol.Frame.make>`
             reduce a timestamp to a fraction, and how libpcap scales a
             nanosecond file down (``sf-pcap.c``). It also keeps the second:
             999,999,999 ns truncates to 999,999 us, where rounding would reach

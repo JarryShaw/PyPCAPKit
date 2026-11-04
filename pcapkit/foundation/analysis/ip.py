@@ -16,15 +16,15 @@ payload of an IPv4 or IPv6 datagram that
 from ipaddress import IPv6Address
 from typing import TYPE_CHECKING
 
-from pcapkit.protocols.internet.ipv4 import IPv4
-from pcapkit.protocols.internet.ipv6 import IPv6
+from pcapkit.protocols.internet.ipv4.protocol import IPv4
+from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
 if TYPE_CHECKING:
     from typing import Optional, Type
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
-    from pcapkit.protocols.internet.ip import IP as IP_Protocol
+    from pcapkit.protocols.internet.ip.protocol import IP as IP_Protocol
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['ip_datagram']
@@ -39,8 +39,8 @@ def ip_datagram(datagram: 'IP_Datagram') -> 'Optional[ProtocolBase]':
     **Protocol** field for IPv4, the Fragment header's **Next Header** for
     IPv6 -- by :meth:`Protocol.analyze
     <pcapkit.protocols.protocol.Protocol.analyze>` of
-    :class:`~pcapkit.protocols.internet.ipv4.IPv4` or
-    :class:`~pcapkit.protocols.internet.ipv6.IPv6`, whichever the datagram's
+    :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` or
+    :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, whichever the datagram's
     addresses belong to.
 
     Args:

@@ -23,9 +23,9 @@ from pcapkit.const.mh.option import Option as Enum_Option
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
-from pcapkit.protocols.schema.internet.hip import LocatorSetParameter
-from pcapkit.protocols.schema.internet.mh import CGAParametersOption
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.internet.hip.schema import LocatorSetParameter
+from pcapkit.protocols.internet.mh.schema import CGAParametersOption
+from pcapkit.protocols.schema import Schema
 from pcapkit.utilities.warnings import SchemaWarning
 
 #: One plain IPv6 locator: traffic, type 0, ``Locator Length`` 4, flags, lifetime.

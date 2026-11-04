@@ -356,7 +356,7 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
         body as a payload.
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         # ``extractor.frame`` holds only the packet blocks, so these two are read
         # directly to reach their ``packet`` field at all.

@@ -11,8 +11,8 @@ file that has been passing tests for months. Issue #642 found these, and mypy
 .. code-block:: text
 
    pcapkit/utilities/logging.py:350:54: error: Name "Any" is not defined  [name-defined]
-   pcapkit/protocols/schema/internet/ipv6_route.py:136:77: error: Name "Protocol" is not defined  [name-defined]
-   pcapkit/protocols/schema/internet/ipv6_route.py:271:24: error: Name "Optional" is not defined  [name-defined]
+   pcapkit/protocols/internet/ipv6_route/schema.py:136:77: error: Name "Protocol" is not defined  [name-defined]
+   pcapkit/protocols/internet/ipv6_route/schema.py:271:24: error: Name "Optional" is not defined  [name-defined]
 
 This module is the same check without mypy: cheap enough to run on every commit,
 and it does not depend on a type checker being installed or on which version of

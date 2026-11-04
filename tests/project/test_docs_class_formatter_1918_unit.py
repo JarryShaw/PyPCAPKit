@@ -98,7 +98,7 @@ class ClassFormatterTests(unittest.TestCase):
 
         import aenum  # pylint: disable=import-outside-toplevel
 
-        from pcapkit.protocols.data.protocol import Packet  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.data import Packet  # pylint: disable=import-outside-toplevel
 
         class Imposter:  # pylint: disable=too-few-public-methods
             """A third-party class named ``Packet``."""

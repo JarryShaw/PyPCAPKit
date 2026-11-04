@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Constant Enumerations
-==========================================================================
+""":class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` Constant Enumerations
+===================================================================================
 
 .. module:: pcapkit.const.pcapng
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implementations. Available
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` implementations. Available
 enumerations include:
 
 .. list-table::

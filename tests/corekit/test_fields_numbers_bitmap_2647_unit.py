@@ -35,7 +35,7 @@ class TestBitmapField(unittest.TestCase):
 
     def _schema(self, **kwargs):  # type: ignore[no-untyped-def]
         from pcapkit.corekit.fields.numbers import BitmapField, UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class Word(Schema):

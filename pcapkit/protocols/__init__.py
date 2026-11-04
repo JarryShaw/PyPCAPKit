@@ -25,11 +25,11 @@ from pcapkit.protocols.application import *
 
 # Protocol Data
 from pcapkit.protocols import data
-from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data import Data
 
 # Protocol Schema
 from pcapkit.protocols import schema
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema import Schema
 
 if TYPE_CHECKING:
     from typing import Type

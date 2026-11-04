@@ -32,7 +32,7 @@ class TestIPv4TimestampDefault(unittest.TestCase):
 
     def make(self, option: 'dict[str, object]') -> 'bytes':
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return bytes(IPv4(src='10.0.0.1', dst='10.0.0.2', ttl=64, id=0,
                           options=[(OptionNumber.TS, option)], payload=b''))
@@ -40,7 +40,7 @@ class TestIPv4TimestampDefault(unittest.TestCase):
     def test_default_timestamp_round_trips_byte_for_byte(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.ts_flag import TSFlag
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for name, option in (('omitted', {}), ('None', {'timestamp': None})):
             with self.subTest(timestamp=name):
@@ -56,7 +56,7 @@ class TestIPv4TimestampDefault(unittest.TestCase):
 
     def test_invalid_timestamp_message_uses_repr(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = IPv4.__new__(IPv4)

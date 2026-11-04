@@ -1,6 +1,6 @@
 """#1151 -- ``from_data`` re-emits a parsed TCP option list octet for octet.
 
-:meth:`TCP._make_tcp_options <pcapkit.protocols.transport.tcp.TCP._make_tcp_options>`
+:meth:`TCP._make_tcp_options <pcapkit.protocols.transport.tcp.protocol.TCP._make_tcp_options>`
 keeps the ``NOP`` and ``EOOL`` options it is given, in place, and pads only the
 end of the list to a 32-bit boundary. A parsed segment therefore rebuilds with
 the same options in the same order and the same data offset.
@@ -58,7 +58,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
 
     def test_from_data_reproduces_captured_options(self) -> None:
         """A parsed segment rebuilds to its own octets, data offset included."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for source, options in CAPTURED_OPTIONS.items():
             with self.subTest(source=source):
@@ -68,7 +68,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
 
     def test_from_data_keeps_option_order(self) -> None:
         """The rebuilt segment parses to the same option kinds, in the same order."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for source, options in CAPTURED_OPTIONS.items():
             with self.subTest(source=source):
@@ -80,7 +80,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
     def test_make_pads_the_end_of_the_list_only(self) -> None:
         """Options built from scratch are padded once, after the last option."""
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(srcport=12345, dstport=12346, options=[
             (Enum_Option.Window_Scale, {'shift': 7}),
@@ -92,7 +92,7 @@ class TCPOptionsRoundTripUnitTests(unittest.TestCase):
     def test_make_keeps_explicit_nop_options(self) -> None:
         """``NOP`` options passed to ``make()`` are emitted where they were given."""
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(srcport=12345, dstport=12346, options=[
             (Enum_Option.No_Operation, {}),

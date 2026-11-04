@@ -1,11 +1,11 @@
-=========================================================================
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` Constant Enumerations
-=========================================================================
+==================================================================================
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` Constant Enumerations
+==================================================================================
 
 .. module:: pcapkit.const.sslv2
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` implementations. Available
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` implementations. Available
 enumerations include:
 
 .. list-table::

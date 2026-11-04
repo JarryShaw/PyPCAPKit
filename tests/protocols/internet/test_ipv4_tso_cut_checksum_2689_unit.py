@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A message behind an IPv4 Total Length of 0 the capture cut short reads ``TRUNCATED``.
 
-GitHub issue #2689: :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` reads
+GitHub issue #2689: :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>` reads
 a Total Length of 0, as TCP segmentation offload leaves it, as the rest of the frame
 (#1547), so the IPv4 layer declares no length and the frame's original length is the
 only record of a snaplen cut. Cleared there by :meth:`Internet._decode_next_layer
@@ -230,7 +230,7 @@ class TSOCutChecksumTests(unittest.TestCase):
         self.assertIsNone(frame_length.get())
 
     def test_parse_rebuild_is_exact(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         for name, (_, msg, _, layer) in MESSAGES.items():
             for via_ah in (False, True):

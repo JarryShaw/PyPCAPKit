@@ -6,7 +6,7 @@ GitHub issues #1502 and #1574. Guards against :meth:`DPKT._get_protocol
 and IPv6 only, which keeps a ``LINKTYPE_RAW`` (101), ``LINKTYPE_NULL`` (0) or
 ``LINKTYPE_LOOP`` (108) frame as raw data with a warning. Raw IP is
 read as IPv4 or IPv6 by its version nibble, and both loopback link types by the
-address family, as :class:`~pcapkit.protocols.link.loopback.Loopback` reads
+address family, as :class:`~pcapkit.protocols.link.loopback.protocol.Loopback` reads
 them, with the network layer where :mod:`pcapkit.toolkit.dpkt` looks for it.
 
 Each case writes a capture built here to a temporary directory. Everything from

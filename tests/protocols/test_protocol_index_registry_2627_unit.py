@@ -50,58 +50,58 @@ APPTYPES = (APP_TCP, APP_UDP, APP_SCTP)
 #: number)``: tcpdump.org's LINKTYPE value, IEEE's EtherType, IANA's protocol
 #: number, or the IANA port the class is bound at.
 EXPECTED = {
-    'pcapkit.protocols.application.drarp.DRARP': (ETHERTYPE, 0x8035),
-    'pcapkit.protocols.application.dtls.DTLS': (APP_UDP, 5684),
-    'pcapkit.protocols.application.ftp.FTP': (APP_TCP, 21),
-    'pcapkit.protocols.application.ftp_data.FTP_DATA': (APP_TCP, 20),
-    'pcapkit.protocols.application.http.HTTP': (APP_TCP, 80),
-    'pcapkit.protocols.application.httpv1.HTTPv1': (APP_TCP, 80),
-    'pcapkit.protocols.application.httpv2.HTTPv2': (APP_TCP, 80),
-    'pcapkit.protocols.application.ngap.NGAP': (APP_SCTP, 38412),
-    'pcapkit.protocols.application.ospf.OSPF': (TRANSTYPE, 89),
-    'pcapkit.protocols.application.rarp.RARP': (ETHERTYPE, 0x8035),
-    'pcapkit.protocols.application.sslv3.SSLv3': (APP_TCP, 443),
-    'pcapkit.protocols.application.tls.TLS': (APP_TCP, 443),
-    'pcapkit.protocols.internet.ah.AH': (TRANSTYPE, 51),
-    'pcapkit.protocols.internet.esp.ESP': (TRANSTYPE, 50),
-    'pcapkit.protocols.internet.hip.HIP': (TRANSTYPE, 139),
-    'pcapkit.protocols.internet.hopopt.HOPOPT': (TRANSTYPE, 0),
-    'pcapkit.protocols.internet.icmpv4.ICMPv4': (TRANSTYPE, 1),
-    'pcapkit.protocols.internet.icmpv6.ICMPv6': (TRANSTYPE, 58),
-    'pcapkit.protocols.internet.igmp.IGMP': (TRANSTYPE, 2),
-    'pcapkit.protocols.internet.igmpv1.IGMPv1': (TRANSTYPE, 2),
-    'pcapkit.protocols.internet.igmpv2.IGMPv2': (TRANSTYPE, 2),
-    'pcapkit.protocols.internet.igmpv3.IGMPv3': (TRANSTYPE, 2),
-    'pcapkit.protocols.internet.ipv4.IPv4': (TRANSTYPE, 4),
-    'pcapkit.protocols.internet.ipv6.IPv6': (TRANSTYPE, 41),
-    'pcapkit.protocols.internet.ipv6_frag.IPv6_Frag': (TRANSTYPE, 44),
-    'pcapkit.protocols.internet.ipv6_opts.IPv6_Opts': (TRANSTYPE, 60),
-    'pcapkit.protocols.internet.ipv6_route.IPv6_Route': (TRANSTYPE, 43),
-    'pcapkit.protocols.internet.ipx.IPX': (TRANSTYPE, 111),
-    'pcapkit.protocols.internet.mh.MH': (TRANSTYPE, 135),
-    'pcapkit.protocols.link.arp.ARP': (ETHERTYPE, 0x0806),
-    'pcapkit.protocols.link.c_tag.C_Tag': (ETHERTYPE, 0x8100),
-    'pcapkit.protocols.link.ethernet.Ethernet': (LINKTYPE, 1),
-    'pcapkit.protocols.link.frad.FRAD': (LINKTYPE, 107),
-    'pcapkit.protocols.link.gre.GRE': (TRANSTYPE, 47),
-    'pcapkit.protocols.link.ieee802_11.IEEE802_11': (LINKTYPE, 105),
-    'pcapkit.protocols.link.inarp.InARP': (ETHERTYPE, 0x0806),
-    'pcapkit.protocols.link.l2tpv2.L2TPv2': (APP_UDP, 1701),
-    'pcapkit.protocols.link.linux_sll1.LinuxSLL1': (LINKTYPE, 113),
-    'pcapkit.protocols.link.linux_sll2.LinuxSLL2': (LINKTYPE, 276),
-    'pcapkit.protocols.link.loopback.Loopback': (LINKTYPE, 0),
-    'pcapkit.protocols.link.radiotap.Radiotap': (LINKTYPE, 127),
-    'pcapkit.protocols.link.s_tag.S_Tag': (ETHERTYPE, 0x88A8),
-    'pcapkit.protocols.transport.dccp.DCCP': (TRANSTYPE, 33),
-    'pcapkit.protocols.transport.sctp.SCTP': (TRANSTYPE, 132),
-    'pcapkit.protocols.transport.tcp.TCP': (TRANSTYPE, 6),
-    'pcapkit.protocols.transport.udp.UDP': (TRANSTYPE, 17),
+    'pcapkit.protocols.application.drarp.protocol.DRARP': (ETHERTYPE, 0x8035),
+    'pcapkit.protocols.application.dtls.protocol.DTLS': (APP_UDP, 5684),
+    'pcapkit.protocols.application.ftp.protocol.FTP': (APP_TCP, 21),
+    'pcapkit.protocols.application.ftp_data.protocol.FTP_DATA': (APP_TCP, 20),
+    'pcapkit.protocols.application.http.protocol.HTTP': (APP_TCP, 80),
+    'pcapkit.protocols.application.httpv1.protocol.HTTPv1': (APP_TCP, 80),
+    'pcapkit.protocols.application.httpv2.protocol.HTTPv2': (APP_TCP, 80),
+    'pcapkit.protocols.application.ngap.protocol.NGAP': (APP_SCTP, 38412),
+    'pcapkit.protocols.application.ospf.protocol.OSPF': (TRANSTYPE, 89),
+    'pcapkit.protocols.application.rarp.protocol.RARP': (ETHERTYPE, 0x8035),
+    'pcapkit.protocols.application.sslv3.protocol.SSLv3': (APP_TCP, 443),
+    'pcapkit.protocols.application.tls.protocol.TLS': (APP_TCP, 443),
+    'pcapkit.protocols.internet.ah.protocol.AH': (TRANSTYPE, 51),
+    'pcapkit.protocols.internet.esp.protocol.ESP': (TRANSTYPE, 50),
+    'pcapkit.protocols.internet.hip.protocol.HIP': (TRANSTYPE, 139),
+    'pcapkit.protocols.internet.hopopt.protocol.HOPOPT': (TRANSTYPE, 0),
+    'pcapkit.protocols.internet.icmpv4.protocol.ICMPv4': (TRANSTYPE, 1),
+    'pcapkit.protocols.internet.icmpv6.protocol.ICMPv6': (TRANSTYPE, 58),
+    'pcapkit.protocols.internet.igmp.protocol.IGMP': (TRANSTYPE, 2),
+    'pcapkit.protocols.internet.igmpv1.protocol.IGMPv1': (TRANSTYPE, 2),
+    'pcapkit.protocols.internet.igmpv2.protocol.IGMPv2': (TRANSTYPE, 2),
+    'pcapkit.protocols.internet.igmpv3.protocol.IGMPv3': (TRANSTYPE, 2),
+    'pcapkit.protocols.internet.ipv4.protocol.IPv4': (TRANSTYPE, 4),
+    'pcapkit.protocols.internet.ipv6.protocol.IPv6': (TRANSTYPE, 41),
+    'pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag': (TRANSTYPE, 44),
+    'pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts': (TRANSTYPE, 60),
+    'pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route': (TRANSTYPE, 43),
+    'pcapkit.protocols.internet.ipx.protocol.IPX': (TRANSTYPE, 111),
+    'pcapkit.protocols.internet.mh.protocol.MH': (TRANSTYPE, 135),
+    'pcapkit.protocols.link.arp.protocol.ARP': (ETHERTYPE, 0x0806),
+    'pcapkit.protocols.link.c_tag.protocol.C_Tag': (ETHERTYPE, 0x8100),
+    'pcapkit.protocols.link.ethernet.protocol.Ethernet': (LINKTYPE, 1),
+    'pcapkit.protocols.link.frad.protocol.FRAD': (LINKTYPE, 107),
+    'pcapkit.protocols.link.gre.protocol.GRE': (TRANSTYPE, 47),
+    'pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11': (LINKTYPE, 105),
+    'pcapkit.protocols.link.inarp.protocol.InARP': (ETHERTYPE, 0x0806),
+    'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': (APP_UDP, 1701),
+    'pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1': (LINKTYPE, 113),
+    'pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2': (LINKTYPE, 276),
+    'pcapkit.protocols.link.loopback.protocol.Loopback': (LINKTYPE, 0),
+    'pcapkit.protocols.link.radiotap.protocol.Radiotap': (LINKTYPE, 127),
+    'pcapkit.protocols.link.s_tag.protocol.S_Tag': (ETHERTYPE, 0x88A8),
+    'pcapkit.protocols.transport.dccp.protocol.DCCP': (TRANSTYPE, 33),
+    'pcapkit.protocols.transport.sctp.protocol.SCTP': (TRANSTYPE, 132),
+    'pcapkit.protocols.transport.tcp.protocol.TCP': (TRANSTYPE, 6),
+    'pcapkit.protocols.transport.udp.protocol.UDP': (TRANSTYPE, 17),
 }
 
 #: Classes that keep another registry's code, in the same form. Netlink keeps
 #: ARPHRD_NETLINK, as LINKTYPE_NETLINK (253) names the SLL-framed form (#2627).
 EXCEPTIONS = {
-    'pcapkit.protocols.link.netlink.Netlink': (ARPHRD, 824),
+    'pcapkit.protocols.link.netlink.protocol.Netlink': (ARPHRD, 824),
 }
 
 
@@ -148,35 +148,35 @@ def _index(cls: 'Any') -> 'Any':
 def _instances() -> 'dict[str, Any]':
     """An instance of each AppType-valued class in :data:`EXPECTED`, by its path."""
     from pcapkit.const.http.frame import Frame
-    from pcapkit.protocols.application.dtls import DTLS
-    from pcapkit.protocols.application.ftp import FTP
-    from pcapkit.protocols.application.ftp_data import FTP_DATA
-    from pcapkit.protocols.application.http import HTTP
-    from pcapkit.protocols.application.httpv1 import HTTPv1
-    from pcapkit.protocols.application.httpv2 import HTTPv2
-    from pcapkit.protocols.application.ngap import NGAP
-    from pcapkit.protocols.application.sslv3 import SSLv3
-    from pcapkit.protocols.application.tls import TLS
-    from pcapkit.protocols.link.l2tpv2 import L2TPv2
+    from pcapkit.protocols.application.dtls.protocol import DTLS
+    from pcapkit.protocols.application.ftp.protocol import FTP
+    from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
+    from pcapkit.protocols.application.http.protocol import HTTP
+    from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+    from pcapkit.protocols.application.ngap.protocol import NGAP
+    from pcapkit.protocols.application.sslv3.protocol import SSLv3
+    from pcapkit.protocols.application.tls.protocol import TLS
+    from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
     # a ChangeCipherSpec record of each, under legacy version 0x0303, 0x0300 and 0xFEFD
     tls, sslv3 = b'\x14\x03\x03\x00\x01\x01', b'\x14\x03\x00\x00\x01\x01'
     dtls = b'\x14\xfe\xfd\x00\x00' + (1).to_bytes(6, 'big') + b'\x00\x01\x01'
 
     return {
-        'pcapkit.protocols.application.dtls.DTLS': DTLS(dtls),
-        'pcapkit.protocols.application.ftp.FTP': FTP(b'USER anonymous\r\n'),
-        'pcapkit.protocols.application.ftp_data.FTP_DATA': FTP_DATA(b'abc'),
-        'pcapkit.protocols.application.http.HTTP': HTTP(b'GET / HTTP/1.1\r\n\r\n'),
-        'pcapkit.protocols.application.httpv1.HTTPv1': HTTPv1(method='GET', uri='/',
+        'pcapkit.protocols.application.dtls.protocol.DTLS': DTLS(dtls),
+        'pcapkit.protocols.application.ftp.protocol.FTP': FTP(b'USER anonymous\r\n'),
+        'pcapkit.protocols.application.ftp_data.protocol.FTP_DATA': FTP_DATA(b'abc'),
+        'pcapkit.protocols.application.http.protocol.HTTP': HTTP(b'GET / HTTP/1.1\r\n\r\n'),
+        'pcapkit.protocols.application.httpv1.protocol.HTTPv1': HTTPv1(method='GET', uri='/',
                                                               http_version='1.1'),
-        'pcapkit.protocols.application.httpv2.HTTPv2': HTTPv2(type=Frame.DATA, sid=1,
+        'pcapkit.protocols.application.httpv2.protocol.HTTPv2': HTTPv2(type=Frame.DATA, sid=1,
                                                               frame={'data': b'x'}),
         # unparsed, since decoding NGAP needs the optional pycrate
-        'pcapkit.protocols.application.ngap.NGAP': object.__new__(NGAP),
-        'pcapkit.protocols.application.sslv3.SSLv3': SSLv3(sslv3),
-        'pcapkit.protocols.application.tls.TLS': TLS(tls),
-        'pcapkit.protocols.link.l2tpv2.L2TPv2': L2TPv2(version=2, tunnel_id=1, session_id=2),
+        'pcapkit.protocols.application.ngap.protocol.NGAP': object.__new__(NGAP),
+        'pcapkit.protocols.application.sslv3.protocol.SSLv3': SSLv3(sslv3),
+        'pcapkit.protocols.application.tls.protocol.TLS': TLS(tls),
+        'pcapkit.protocols.link.l2tpv2.protocol.L2TPv2': L2TPv2(version=2, tunnel_id=1, session_id=2),
     }
 
 

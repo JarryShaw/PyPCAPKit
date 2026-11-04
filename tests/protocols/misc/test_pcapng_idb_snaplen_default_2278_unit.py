@@ -31,7 +31,7 @@ class TestPCAPNGIDBSnaplen(PCAPNGTestCase):
         """Make an Ethernet Interface Description Block from ``block``."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(num=1, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                       block={'linktype': LinkType.ETHERNET, **block})
@@ -43,7 +43,7 @@ class TestPCAPNGIDBSnaplen(PCAPNGTestCase):
         self.assertEqual(made.info.snaplen, 0)  # type: ignore[attr-defined]
 
     def test_made_info_matches_the_octets(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for snaplen in (None, 0, 1, 0x40000, 0xFFFF_FFFF):
             with self.subTest(snaplen=snaplen):

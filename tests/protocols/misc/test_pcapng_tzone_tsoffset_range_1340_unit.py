@@ -70,7 +70,7 @@ class TestPCAPNGTZoneTSOffsetRange(PCAPNGTestCase):
 
     def _interface(self, octets: 'bytes') -> 'tuple[Any, Any, list[str]]':
         """Parse ``octets`` as interface 0 of a fresh context."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings(record=True) as caught:
@@ -80,7 +80,7 @@ class TestPCAPNGTZoneTSOffsetRange(PCAPNGTestCase):
         return context, parsed, [str(item.message) for item in caught]
 
     def _packet(self, context: 'Any', octets: 'bytes') -> 'tuple[Any, list[str]]':
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -89,7 +89,7 @@ class TestPCAPNGTZoneTSOffsetRange(PCAPNGTestCase):
         return parsed, [str(item.message) for item in caught if str(item.message).startswith('PCAP-NG')]
 
     def _assert_rebuilds(self, octets: 'bytes', context: 'Any', num: 'int') -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

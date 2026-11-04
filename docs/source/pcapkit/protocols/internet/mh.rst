@@ -2,9 +2,19 @@ MH - Mobility Header
 ====================
 
 .. module:: pcapkit.protocols.internet.mh
+.. module:: pcapkit.protocols.internet.mh.protocol
 
-:mod:`pcapkit.protocols.internet.mh` contains
-:class:`~pcapkit.protocols.internet.mh.MH`,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus``,
+   ``pcapkit.protocols.internet.mh.IPv6AddressPrefixCode``,
+   ``pcapkit.protocols.internet.mh.LocalizedRoutingStatus`` and
+   ``pcapkit.protocols.internet.mh.LMAAddressCode``, with no alias: they are in this
+   module, and :mod:`pcapkit.protocols.internet.mh` exports the protocol class alone
+   (:issue:`2534`).
+
+:mod:`pcapkit.protocols.internet.mh.protocol` contains
+:class:`~pcapkit.protocols.internet.mh.protocol.MH`,
 which implements the extractor for Mobility Header
 (MH) [*]_, whose structure is described as below:
 
@@ -22,10 +32,10 @@ Octets      Bits        Name                    Description
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use
-   :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead
+   :class:`pcapkit.protocols.internet.mh.data.NTPTimestamp` instead
    (:issue:`1886`).
 
-.. autoclass:: pcapkit.protocols.internet.mh.MH
+.. autoclass:: pcapkit.protocols.internet.mh.protocol.MH
    :no-members:
    :show-inheritance:
 
@@ -281,22 +291,22 @@ Octets      Bits        Name                    Description
 Auxiliary Data
 --------------
 
-.. autoclass:: pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus
+.. autoclass:: pcapkit.protocols.internet.mh.protocol.FastBindingAcknowledgmentStatus
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.internet.mh.IPv6AddressPrefixCode
+.. autoclass:: pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.internet.mh.LocalizedRoutingStatus
+.. autoclass:: pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.internet.mh.LMAAddressCode
+.. autoclass:: pcapkit.protocols.internet.mh.protocol.LMAAddressCode
    :members:
    :undoc-members:
    :show-inheritance:
@@ -304,677 +314,682 @@ Auxiliary Data
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.mh
+.. module:: pcapkit.protocols.internet.mh.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MH
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.mh``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MH
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.Option
+.. autoclass:: pcapkit.protocols.internet.mh.schema.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PadOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRefreshAdviceOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AlternateCareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.NonceIndicesOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.NonceIndicesOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AuthorizationDataOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AuthorizationDataOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MobileNetworkPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LinkLayerAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MNIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MNIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AuthOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AuthOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MesgIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MesgIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CGAParametersRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CGAExtension
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CGAExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParameter
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CGAParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CGAParametersOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CGAParametersOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnknownExtension
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnknownExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MultiPrefixExtension
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MultiPrefixExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.Packet
+.. autoclass:: pcapkit.protocols.internet.mh.schema.Packet
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.SignatureOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.SignatureOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PermanentHomeKeygenTokenOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestInitOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CareofTestInitOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CareofTestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ExperimentalMobilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ExperimentalMobilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BADFOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BADFOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv6AddressPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv6AddressPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnknownMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnknownMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRefreshRequestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingRefreshRequestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HomeTestInitMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HomeTestInitMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestInitMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CareofTestInitMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HomeTestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HomeTestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.CareofTestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.CareofTestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingUpdateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingUpdateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingAcknowledgementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingErrorMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingErrorMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FastBindingUpdateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FastBindingAcknowledgmentMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FastNeighborAdvertisementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FastNeighborAdvertisementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ExperimentalMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ExperimentalMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverInitiateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HandoverInitiateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HandoverAcknowledgeMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HeartbeatMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HeartbeatMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HomeAgentSwitchMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HomeAgentSwitchMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRevocationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingRevocationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LocalizedRoutingInitiationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LocalizedRoutingInitiationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LocalizedRoutingAcknowledgmentMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LocalizedRoutingAcknowledgmentMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UpdateNotificationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UpdateNotificationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UpdateNotificationAcknowledgementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UpdateNotificationAcknowledgementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowBindingMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowBindingMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.SubscriptionQueryMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.SubscriptionQueryMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.SubscriptionResponseMessage
+.. autoclass:: pcapkit.protocols.internet.mh.schema.SubscriptionResponseMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HomeNetworkPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HomeNetworkPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoffIndicatorOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HandoffIndicatorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AccessTechnologyTypeOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AccessTechnologyTypeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MNLLIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MNLLIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LinkLocalAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LinkLocalAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.TimestampOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.TimestampOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.RestartCounterOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.RestartCounterOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DNSUpdateOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DNSUpdateOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.VendorSpecificOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.VendorSpecificOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ServiceSelectionOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ServiceSelectionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4HomeAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4HomeAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4AddressAcknowledgementOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4AddressAcknowledgementOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.NATDetectionOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.NATDetectionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4CareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4CareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.GREKeyOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.GREKeyOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4HomeAddressRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4HomeAddressRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4HomeAddressReplyOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4HomeAddressReplyOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4DefaultRouterAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4DefaultRouterAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4DHCPSupportModeOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4DHCPSupportModeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ContextRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ContextRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LMAAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LMAAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MNLLAIIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MNLLAIIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.TransientBindingOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.TransientBindingOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowSummaryOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowSummaryOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowIdentificationOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowIdentificationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.RedirectCapabilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.RedirectCapabilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.RedirectOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.RedirectOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LoadInformationOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LoadInformationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AlternateIPv4CareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AlternateIPv4CareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MNGroupIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MNGroupIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MAGIPv6AddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MAGIPv6AddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AccessNetworkIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AccessNetworkIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4TrafficOffloadSelectorOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4TrafficOffloadSelectorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DynamicIPMulticastSelectorOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DynamicIPMulticastSelectorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DelegatedMNPOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DelegatedMNPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ActiveMulticastSubscriptionIPv4Option
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ActiveMulticastSubscriptionIPv4Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ActiveMulticastSubscriptionIPv6Option
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ActiveMulticastSubscriptionIPv6Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.QualityOfServiceOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.QualityOfServiceOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LMAUserPlaneAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LMAUserPlaneAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MulticastMobilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MulticastMobilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MulticastAcknowledgementOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MulticastAcknowledgementOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LMAControlledMAGParametersOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LMAControlledMAGParametersOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MAGMultipathBindingOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MAGMultipathBindingOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MAGIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MAGIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AnchoredPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AnchoredPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LocalPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LocalPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PreviousMAAROption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PreviousMAAROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ServingMAAROption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ServingMAAROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DLIFLinkLocalAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DLIFLinkLocalAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DLIFLinkLayerAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DLIFLinkLayerAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedFlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnassignedFlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PadFlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PadFlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BIDReferenceSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BIDReferenceSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.TrafficSelectorSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowBindingActionSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowBindingActionSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.TargetCareofAddressSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.TargetCareofAddressSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANISuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANISuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedANISuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnassignedANISuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANINetworkIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANINetworkIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANIGeoLocationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANIGeoLocationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANIOperatorIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANIOperatorIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANICivicLocationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANICivicLocationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANIMAGGroupIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANIMAGGroupIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANIUpdateTimerSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANIUpdateTimerSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.QoSAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.QoSAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedQoSAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnassignedQoSAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BitRateAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BitRateAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PerSessionBitRateAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PerSessionBitRateAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AllocationRetentionPriorityAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AllocationRetentionPriorityAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.QoSTrafficSelectorAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.QoSTrafficSelectorAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.QoSVendorSpecificAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.schema.QoSVendorSpecificAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LMAControlledMAGSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LMAControlledMAGSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UnassignedLMAControlledMAGSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UnassignedLMAControlledMAGSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingReregistrationControlSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingReregistrationControlSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HeartbeatControlSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HeartbeatControlSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ExperimentalExtension
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ExperimentalExtension
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANSIKeyLengthTest
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MultiPrefixExtensionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingUpdateMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingAcknowledgementMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingUpdateMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FastBindingUpdateMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FastBindingAcknowledgmentMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FastBindingAcknowledgmentMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverInitiateMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HandoverInitiateMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HandoverAcknowledgeMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HandoverAcknowledgeMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.HeartbeatMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.HeartbeatMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FixedPointTimestamp
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FixedPointTimestamp
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingRevocationMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingRevocationMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.LocalizedRoutingAcknowledgmentMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.LocalizedRoutingAcknowledgmentMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.FlowBindingMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.FlowBindingMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.UpdateNotificationMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.UpdateNotificationMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.SubscriptionResponseMessageFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.SubscriptionResponseMessageFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DNSUpdateOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DNSUpdateOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4HomeAddressOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4HomeAddressOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.PrefixLengthOnly
+.. autoclass:: pcapkit.protocols.internet.mh.schema.PrefixLengthOnly
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.NATDetectionOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.NATDetectionOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.IPv4DHCPSupportModeOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.IPv4DHCPSupportModeOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.RedirectOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.RedirectOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingIdentifierOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.BindingIdentifierOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.TransientBindingOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.TransientBindingOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ModeFlagOnly
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ModeFlagOnly
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.DelegatedMNPOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.DelegatedMNPOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.MAGMultipathBindingOptionFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.MAGMultipathBindingOptionFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.ANINetworkIdentifierFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.ANINetworkIdentifierFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.GeoLocationDegrees
+.. autoclass:: pcapkit.protocols.internet.mh.schema.GeoLocationDegrees
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.SessionBitRateFlags
+.. autoclass:: pcapkit.protocols.internet.mh.schema.SessionBitRateFlags
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.mh.AllocationRetentionPriorityFields
+.. autoclass:: pcapkit.protocols.internet.mh.schema.AllocationRetentionPriorityFields
    :members:
    :undoc-members:
    :show-inheritance:
@@ -982,190 +997,195 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.mh.mh_data_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.mn_id_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.pad_opt_data_len
-.. autofunction:: pcapkit.protocols.schema.internet.mh.bid_address_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.br_code_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.cga_public_key_length
-.. autofunction:: pcapkit.protocols.schema.internet.mh.item_list_length
-.. autofunction:: pcapkit.protocols.schema.internet.mh.dmnp_prefix_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.fb_code_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.lma_address_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.lma_user_plane_selector
-.. autofunction:: pcapkit.protocols.schema.internet.mh.pad_subopt_data_len
-.. autofunction:: pcapkit.protocols.schema.internet.mh.target_coa_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.mh_data_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.mn_id_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.pad_opt_data_len
+.. autofunction:: pcapkit.protocols.internet.mh.schema.bid_address_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.br_code_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.cga_public_key_length
+.. autofunction:: pcapkit.protocols.internet.mh.schema.item_list_length
+.. autofunction:: pcapkit.protocols.internet.mh.schema.dmnp_prefix_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.fb_code_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.lma_address_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.lma_user_plane_selector
+.. autofunction:: pcapkit.protocols.internet.mh.schema.pad_subopt_data_len
+.. autofunction:: pcapkit.protocols.internet.mh.schema.target_coa_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.mh
+.. module:: pcapkit.protocols.internet.mh.data
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MH
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.mh``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.mh.data.MH
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.Option
+.. autoclass:: pcapkit.protocols.internet.mh.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PadOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.PadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingRefreshAdviceOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingRefreshAdviceOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AlternateCareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.NonceIndicesOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.NonceIndicesOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AuthorizationDataOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AuthorizationDataOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MobileNetworkPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LinkLayerAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LinkLayerAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MNIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MNIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AuthOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AuthOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MesgIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MesgIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.NTPTimestamp
+.. autoclass:: pcapkit.protocols.internet.mh.data.NTPTimestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CGAParametersRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.CGAParametersRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CGAExtension
+.. autoclass:: pcapkit.protocols.internet.mh.data.CGAExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CGAParameter
+.. autoclass:: pcapkit.protocols.internet.mh.data.CGAParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CGAParametersOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.CGAParametersOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnknownExtension
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnknownExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MultiPrefixExtension
+.. autoclass:: pcapkit.protocols.internet.mh.data.MultiPrefixExtension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.SignatureOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.SignatureOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.PermanentHomeKeygenTokenOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestInitOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.CareofTestInitOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.CareofTestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ExperimentalMobilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ExperimentalMobilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BADFOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.BADFOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv6AddressPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv6AddressPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnknownMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnknownMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingRefreshRequestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingRefreshRequestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HomeTestInitMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HomeTestInitMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestInitMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.CareofTestInitMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HomeTestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HomeTestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.CareofTestMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.CareofTestMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingUpdateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingUpdateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingAcknowledgementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingAcknowledgementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingErrorMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingErrorMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FastBindingUpdateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.FastBindingUpdateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FastBindingAcknowledgmentMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.FastBindingAcknowledgmentMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FastNeighborAdvertisementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.FastNeighborAdvertisementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ExperimentalMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.ExperimentalMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HandoverInitiateMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HandoverInitiateMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HandoverAcknowledgeMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HandoverAcknowledgeMessage
    :members:
    :show-inheritance:
 
@@ -1173,362 +1193,362 @@ Data Models
 
 .. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HeartbeatMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HeartbeatMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HomeAgentSwitchMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.HomeAgentSwitchMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingRevocationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingRevocationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LocalizedRoutingInitiationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.LocalizedRoutingInitiationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LocalizedRoutingAcknowledgmentMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.LocalizedRoutingAcknowledgmentMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UpdateNotificationMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.UpdateNotificationMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UpdateNotificationAcknowledgementMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.UpdateNotificationAcknowledgementMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FlowBindingMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.FlowBindingMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.SubscriptionQueryMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.SubscriptionQueryMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.SubscriptionResponseMessage
+.. autoclass:: pcapkit.protocols.internet.mh.data.SubscriptionResponseMessage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HomeNetworkPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.HomeNetworkPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HandoffIndicatorOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.HandoffIndicatorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AccessTechnologyTypeOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AccessTechnologyTypeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MNLLIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MNLLIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LinkLocalAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LinkLocalAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.TimestampOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.TimestampOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PMIPv6Timestamp
+.. autoclass:: pcapkit.protocols.internet.mh.data.PMIPv6Timestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.RestartCounterOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.RestartCounterOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.DNSUpdateOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.DNSUpdateOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.VendorSpecificOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.VendorSpecificOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ServiceSelectionOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ServiceSelectionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4HomeAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4HomeAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4AddressAcknowledgementOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4AddressAcknowledgementOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.NATDetectionOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.NATDetectionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4CareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4CareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.GREKeyOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.GREKeyOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4HomeAddressRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4HomeAddressRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4HomeAddressReplyOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4HomeAddressReplyOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4DefaultRouterAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4DefaultRouterAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4DHCPSupportModeOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4DHCPSupportModeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ContextRequestOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ContextRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LMAAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LMAAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MNLLAIIDOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MNLLAIIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.TransientBindingOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.TransientBindingOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FlowSummaryOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.FlowSummaryOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FlowIdentificationOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.FlowIdentificationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.RedirectCapabilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.RedirectCapabilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.RedirectOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.RedirectOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LoadInformationOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LoadInformationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AlternateIPv4CareofAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AlternateIPv4CareofAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MNGroupIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MNGroupIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MAGIPv6AddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MAGIPv6AddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AccessNetworkIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AccessNetworkIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.IPv4TrafficOffloadSelectorOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.IPv4TrafficOffloadSelectorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.DynamicIPMulticastSelectorOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.DynamicIPMulticastSelectorOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.DelegatedMNPOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.DelegatedMNPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv4Option
+.. autoclass:: pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv4Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv6Option
+.. autoclass:: pcapkit.protocols.internet.mh.data.ActiveMulticastSubscriptionIPv6Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.QualityOfServiceOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.QualityOfServiceOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LMAUserPlaneAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LMAUserPlaneAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MulticastMobilityOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MulticastMobilityOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MulticastAcknowledgementOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MulticastAcknowledgementOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LMAControlledMAGParametersOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LMAControlledMAGParametersOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MAGMultipathBindingOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MAGMultipathBindingOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MAGIdentifierOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.MAGIdentifierOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AnchoredPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.AnchoredPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LocalPrefixOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LocalPrefixOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PreviousMAAROption
+.. autoclass:: pcapkit.protocols.internet.mh.data.PreviousMAAROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ServingMAAROption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ServingMAAROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.DLIFLinkLocalAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.DLIFLinkLocalAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.DLIFLinkLayerAddressOption
+.. autoclass:: pcapkit.protocols.internet.mh.data.DLIFLinkLayerAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ContextRequest
+.. autoclass:: pcapkit.protocols.internet.mh.data.ContextRequest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.FlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedFlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnassignedFlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PadFlowIdentificationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.PadFlowIdentificationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BIDReferenceSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.BIDReferenceSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.TrafficSelectorSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.TrafficSelectorSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.FlowBindingActionSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.FlowBindingActionSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.TargetCareofAddressSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.TargetCareofAddressSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANISuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANISuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedANISuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnassignedANISuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANINetworkIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANINetworkIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANIGeoLocationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANIGeoLocationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANIOperatorIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANIOperatorIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANICivicLocationSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANICivicLocationSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANIMAGGroupIdentifierSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANIMAGGroupIdentifierSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ANIUpdateTimerSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.ANIUpdateTimerSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.QoSAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.QoSAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedQoSAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnassignedQoSAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BitRateAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.BitRateAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.PerSessionBitRateAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.PerSessionBitRateAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.AllocationRetentionPriorityAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.AllocationRetentionPriorityAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.QoSTrafficSelectorAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.QoSTrafficSelectorAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.QoSVendorSpecificAttribute
+.. autoclass:: pcapkit.protocols.internet.mh.data.QoSVendorSpecificAttribute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.LMAControlledMAGSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.LMAControlledMAGSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.UnassignedLMAControlledMAGSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.UnassignedLMAControlledMAGSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.BindingReregistrationControlSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.BindingReregistrationControlSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.HeartbeatControlSuboption
+.. autoclass:: pcapkit.protocols.internet.mh.data.HeartbeatControlSuboption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.ExperimentalExtension
+.. autoclass:: pcapkit.protocols.internet.mh.data.ExperimentalExtension
    :members:
    :show-inheritance:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Base :class:`~pcapkit.protocols.schema.schema.Schema` round trips.
+"""Base :class:`~pcapkit.protocols.schema.Schema` round trips.
 
 GitHub issue #1289: nothing on the packing path set ``__option_padding__``, so
 a padding field sized from it packed nothing, and a TCP or IPv4 header rebuilt
@@ -37,7 +37,7 @@ def _nested_schemas():  # type: ignore[no-untyped-def]
     """An outer schema whose nested schema reads less than its span."""
     from pcapkit.corekit.fields.misc import SchemaField
     from pcapkit.corekit.fields.numbers import UInt8Field
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.schema import Schema, schema_final
 
     @schema_final
     class Inner(Schema):
@@ -59,21 +59,21 @@ class TestSchemaRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_tcp_rebuild_keeps_option_padding(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         parsed = TCP(TCP_HEADER, len(TCP_HEADER))
         rebuilt = TCP.from_schema(parsed.schema.to_dict())
         self.assertEqual(bytes(rebuilt), TCP_HEADER)
 
     def test_ipv4_rebuild_keeps_option_padding(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         parsed = IPv4(IPV4_HEADER, len(IPV4_HEADER))
         rebuilt = IPv4.from_schema(parsed.schema.to_dict())
         self.assertEqual(bytes(rebuilt), IPV4_HEADER)
 
     def test_iterated_keys_are_readable(self) -> None:
-        from pcapkit.protocols.schema.internet.ipv4 import TSOption
+        from pcapkit.protocols.internet.ipv4.schema import TSOption
 
         schema = TSOption.unpack(bytes.fromhex('4408090000000001'), 8, None)
         keys = list(schema)
@@ -84,7 +84,7 @@ class TestSchemaRoundTrip(unittest.TestCase):
         self.assertEqual(list(dict(schema)), keys)
 
     def test_builtin_names_are_not_items(self) -> None:
-        from pcapkit.protocols.schema.internet.ipv4 import TSOption
+        from pcapkit.protocols.internet.ipv4.schema import TSOption
 
         schema = TSOption.unpack(bytes.fromhex('4408090000000001'), 8, None)
         for name in ('__buffer__', 'pack', 'nonexistent'):

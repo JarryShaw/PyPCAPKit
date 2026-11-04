@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Octets captured past a UDP datagram's own Length field survive a rebuild.
 
-GitHub issue #1461: :class:`~pcapkit.protocols.transport.udp.UDP` reads its
+GitHub issue #1461: :class:`~pcapkit.protocols.transport.udp.protocol.UDP` reads its
 Length field. Guards against the payload running to the end of the capture with
 nothing keeping what lies past an empty one, under which
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` drops it: a header of
@@ -52,7 +52,7 @@ class TestUDPTrailerKept(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_datagram_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for name, (raw, payload, trailer) in TRAILER.items():
             with self.subTest(datagram=name):
@@ -63,7 +63,7 @@ class TestUDPTrailerKept(unittest.TestCase):
                 self.assertEqual(UDP.from_data(parsed.info.to_dict()).data, raw)
 
     def test_no_trailer_key_without_excess(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for name, (raw, payload) in NO_TRAILER.items():
             with self.subTest(datagram=name), warnings.catch_warnings():
@@ -75,7 +75,7 @@ class TestUDPTrailerKept(unittest.TestCase):
                 self.assertEqual(UDP.from_data(parsed.info.to_dict()).data, raw)
 
     def test_make_writes_trailer_outside_length(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         made = UDP(srcport=53, dstport=53, payload=b'ab', trailer=b'pp')
         self.assertEqual(made.data, _udp(10)[:6] + b'\x00\x00' + b'ab' + b'pp')
@@ -86,7 +86,7 @@ class TestUDPTrailerKept(unittest.TestCase):
         self.assertEqual(UDP.from_data(parsed.info.to_dict()).data, made.data)
 
     def test_ipv4_keeps_both_trailers(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         udp = _udp(9) + b'a' + b'XYZ'
         total = (20 + len(udp)).to_bytes(2, 'big')

@@ -7,10 +7,10 @@
 :mod:`pcapkit.corekit.schema.byteorder` reads the byte order a capture file or
 section declares out of the packet data: :func:`byteorder_callback` sets it on a
 :class:`~pcapkit.corekit.fields.numbers.NumberField` for the record header of a
-classic PCAP file (:mod:`~pcapkit.protocols.schema.misc.pcap.frame`) and the
-blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.schema.misc.pcapng`), and
+classic PCAP file (:mod:`~pcapkit.protocols.misc.pcap.frame.schema`) and the
+blocks of a PCAP-NG file (:mod:`~pcapkit.protocols.misc.pcapng.schema`), and
 :func:`packet_byteorder` is what the callback and the PCAP-NG makers
-(:mod:`pcapkit.protocols.misc.pcapng`) read it with. It is one of the
+(:mod:`pcapkit.protocols.misc.pcapng.protocol`) read it with. It is one of the
 :mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not part of
 the header schema framework in :mod:`pcapkit.protocols.schema`; see
 :ref:`utilities-or-corekit`.
@@ -70,11 +70,11 @@ def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None'
     Notes:
         ``byteorder`` is the key a caller has to seed, and
         :func:`packet_byteorder` is what reads it.
-        :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and
-        :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
+        :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>` and
+        :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>`
         both write it from the global header's magic number. A PCAP-NG Section
         Header Block writes it from its own Byte-Order Magic (see
-        :func:`~pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback`),
+        :func:`~pcapkit.protocols.misc.pcapng.schema.shb_byteorder_callback`),
         and the blocks, options and records of that section read it, nested or
         not. The fallback to :data:`sys.byteorder` is for a schema packed or
         unpacked on its own, with no header to ask. That also means a

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """HIP writes Header Length 4 when it carries no parameters.
 
-GitHub issue #1189: :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`
+GitHub issue #1189: :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`
 wrote Header Length ``0`` for ``parameters=None``. RFC 7401 §5.1 counts the
 field in 8-octet units excluding the first 8, so the two 16-octet HITs alone
 make 4 the minimum. The header's own re-parse then computed a parameter length
 of ``-32`` and raised ``ProtocolError``. :meth:`HIP.read
-<pcapkit.protocols.internet.hip.HIP.read>` rejects a wire Header Length
+<pcapkit.protocols.internet.hip.protocol.HIP.read>` rejects a wire Header Length
 below 4 up front.
 
 Every case builds its own octets in memory and reads no capture.
@@ -33,7 +33,7 @@ class TestHIPParameterlessLength(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_make_without_parameters_writes_length_4(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
@@ -44,7 +44,7 @@ class TestHIPParameterlessLength(unittest.TestCase):
                 self.assertNotIn('parameters', proto.info)
 
     def test_parameterless_header_parses_back(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
@@ -55,7 +55,7 @@ class TestHIPParameterlessLength(unittest.TestCase):
                 self.assertEqual(parsed.data, data)
 
     def test_read_rejects_header_length_below_4(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for value in (0, 3):

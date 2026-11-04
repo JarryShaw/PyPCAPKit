@@ -26,11 +26,11 @@ NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc and PyPy's _abc keeps _py_abc's a
 class SchemaMetaAbcCacheTests(unittest.TestCase):
     """Regression tests for GitHub issue #439.
 
-    The issue: ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema.schema`)
+    The issue: ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema`)
     bypassed :meth:`abc.ABCMeta.__new__` on Python < 3.11, to dodge a ``namespace=``
     class keyword collision described in that module. Bypassing it also skipped
     :meth:`abc.ABCMeta.__new__`'s call to ``abc._abc_init(cls)``, so no
-    :class:`~pcapkit.protocols.schema.schema.Schema` subclass ever got its own
+    :class:`~pcapkit.protocols.schema.Schema` subclass ever got its own
     ``_abc_impl``. Attribute lookup then fell through the MRO to
     :class:`collections.abc.Mapping`'s ``_abc_impl`` -- the one ABC in the chain
     still built through an untouched ``ABCMeta.__new__`` -- so *every* schema class
@@ -90,8 +90,8 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         # question that leaves Schema's own cache alone.
         self.assertTrue(isinstance({}, Mapping), 'sanity: dict really is a Mapping')
 
-        from pcapkit.protocols.schema.misc.pcapng import EndRecord, IPv4Record
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.misc.pcapng.schema import EndRecord, IPv4Record
+        from pcapkit.protocols.schema import Schema
 
         # THEN ask Schema. A plain dict must not test True as a Schema, nor as
         # any concrete Schema subclass, no matter what was asked about Mapping
@@ -114,7 +114,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         side effect.
 
         """
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         # Ask Schema FIRST this time -- the opposite order from the test above.
         self.assertFalse(isinstance({}, Schema))
@@ -133,8 +133,8 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         Mapping`'s, not that one either.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import EndRecord, IPv4Record
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.misc.pcapng.schema import EndRecord, IPv4Record
+        from pcapkit.protocols.schema import Schema
 
         self.assertIsNotNone(Schema._abc_impl)
         self.assertIsNot(EndRecord._abc_impl, Schema._abc_impl)
@@ -152,7 +152,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         """
         self.assertTrue(isinstance({}, Mapping))
 
-        from pcapkit.protocols.schema.misc.pcapng import EndRecord
+        from pcapkit.protocols.misc.pcapng.schema import EndRecord
 
         # ``__new__`` rather than the normal constructor, matching how this was
         # verified in the issue itself -- EndRecord's ``__init__`` wants field
@@ -255,13 +255,13 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         """The user-facing payoff: a real ``isinstance`` call site, not a probe.
 
         :meth:`NameResolutionBlock.post_process
-        <pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock.post_process>`
+        <pcapkit.protocols.misc.pcapng.schema.NameResolutionBlock.post_process>`
         asks ``isinstance(record, (IPv4Record, IPv6Record))`` and then reads
         ``record.names``. Without the #439 fix, every schema class shares one
         ``_abc_impl``, so that question answers ``True`` for the block's
         *terminating* ``EndRecord`` -- which has no ``names`` -- provided
         *anything at all* has already asked whether that same ``EndRecord``
-        instance was a :class:`~pcapkit.protocols.schema.schema.Schema`.
+        instance was a :class:`~pcapkit.protocols.schema.Schema`.
 
         That is a lower bar than it sounds: ``isinstance(record, Schema)`` is
         genuinely, unconditionally true for any real schema instance, via
@@ -279,8 +279,8 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         real code already asks them.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import EndRecord, IPv4Record, IPv6Record
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.misc.pcapng.schema import EndRecord, IPv4Record, IPv6Record
+        from pcapkit.protocols.schema import Schema
 
         record = EndRecord.__new__(EndRecord)
         self.assertIs(type(record), EndRecord)
@@ -302,13 +302,13 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
 class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
     """Regression tests for the reserved-class-keyword guard from #439.
 
-    Renaming ``namespace=`` to ``ns=`` (see :mod:`pcapkit.protocols.schema.misc.
-    pcapng`) fixed the one collision that was actually in use, but the
+    Renaming ``namespace=`` to ``ns=`` (see
+    :mod:`pcapkit.protocols.misc.pcapng.schema`) fixed the one collision that was actually in use, but the
     collision class is not specific to ``namespace``: any class keyword
     spelled ``mcls``, ``name``, ``bases`` or ``namespace`` collides with a
     same-named parameter of :meth:`abc.ABCMeta.__new__` (on Python < 3.11 for
     the first three, on every version for the fourth -- see
-    :attr:`~pcapkit.protocols.schema.schema.SchemaMeta._RESERVED_CLASS_KWARGS`
+    :attr:`~pcapkit.protocols.schema.SchemaMeta._RESERVED_CLASS_KWARGS`
     for the precise reasoning), and ``cls`` collides with the implicit
     ``__init_subclass__`` classmethod binding on every version. Without a
     guard, the *next* accidental use of one of these names resurfaces as an
@@ -332,7 +332,7 @@ class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
         exists to replace.
 
         """
-        from pcapkit.protocols.schema.schema import Schema, SchemaMeta
+        from pcapkit.protocols.schema import Schema, SchemaMeta
         from pcapkit.utilities.exceptions import SchemaError
 
         for keyword in sorted(SchemaMeta._RESERVED_CLASS_KWARGS):
@@ -346,14 +346,14 @@ class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
 
         ``code=`` is the other class keyword :class:`Schema` subclasses use
         (see :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`), and
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`), and
         it does not appear anywhere in
-        :attr:`~pcapkit.protocols.schema.schema.SchemaMeta._RESERVED_CLASS_KWARGS`,
+        :attr:`~pcapkit.protocols.schema.SchemaMeta._RESERVED_CLASS_KWARGS`,
         so it must keep working -- as must the ``ns=`` keyword itself.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
-        from pcapkit.protocols.schema.misc.pcapng import Option
+        from pcapkit.protocols.misc.pcapng.schema import Option
 
         class _RenamedOption(Option, ns='opt', code=Enum_OptionType.opt_comment):
             pass

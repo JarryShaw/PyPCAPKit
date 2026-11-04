@@ -342,14 +342,14 @@ class DumpkitCommonTests(unittest.TestCase):
         """The same invariant for PCAP-NG's option types.
 
         ``OptionType.__new__`` sets ``opt_name`` then ``opt_value``, and
-        :class:`~pcapkit.protocols.schema.misc.pcapng.OptionEnumField` already
+        :class:`~pcapkit.protocols.misc.pcapng.schema.OptionEnumField` already
         passes them that way -- this pins it, since nothing else would notice
         if the two keyword arguments were ever swapped.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.dumpkit.common import make_dumper
-        from pcapkit.protocols.schema.misc import pcapng as pcapng_schema
+        from pcapkit.protocols.misc.pcapng import schema as pcapng_schema
 
         dumper = make_dumper(BaseDumper)()
         field = pcapng_schema.OptionEnumField(length=2, namespace='if')
@@ -372,7 +372,7 @@ class DumpkitIOTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.null import NotImplementedIO
         from pcapkit.dumpkit.pcap import PCAPIO
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         with tempfile.TemporaryDirectory() as tempdir:
             null_path = pathlib.Path(tempdir) / 'null.out'
@@ -411,7 +411,7 @@ class DumpkitIOTests(unittest.TestCase):
         # wrong endianness cannot coincide with a right one.
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         payload = bytes(range(6))
         for byteorder, endian in (('little', '<'), ('big', '>')):
@@ -448,7 +448,7 @@ class DumpkitIOTests(unittest.TestCase):
         # being preserved, not behaviour being chosen.
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         with tempfile.TemporaryDirectory() as tempdir:
             path = pathlib.Path(tempdir) / 'sample.pcap'
@@ -478,7 +478,7 @@ class DumpkitIOTests(unittest.TestCase):
         # slower but is doing work that can warn or raise on data it only had to copy.
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         def make(number: int, packet: bytes) -> Frame:
             frame = Frame(

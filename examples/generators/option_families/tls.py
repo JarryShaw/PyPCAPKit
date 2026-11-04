@@ -25,13 +25,13 @@ generator = globals()['generator']  # type: Any
 
 
 def _tls_extension_registry() -> 'Any':
-    from pcapkit.protocols.application.tls import TLS
+    from pcapkit.protocols.application.tls.protocol import TLS
     return TLS.__extension__
 
 
 def _tls_extension_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
-    from pcapkit.protocols.data.application.tls import KeyShareEntry, ServerName
+    from pcapkit.protocols.application.ssl.data import KeyShareEntry, ServerName
     return {
         # Each of these defaults to an empty list.
         Enum_ExtensionType.server_name: {
@@ -50,8 +50,8 @@ def _tls_client_hello(extensions: 'Any') -> 'Any':
     """A TLS record carrying one ``ClientHello`` with ``extensions``."""
     from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
-    from pcapkit.protocols.application.tls import TLS
-    from pcapkit.protocols.data.application.tls import ClientHello, Handshake
+    from pcapkit.protocols.application.tls.protocol import TLS
+    from pcapkit.protocols.application.ssl.data import ClientHello, Handshake
 
     hello = ClientHello(version=0x0303, random=bytes(32), session_id=b'', cookie=None,
                         cipher_suites=(0x1301,), compression_methods=(0,), extensions=extensions)
@@ -64,7 +64,7 @@ def _tls_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _tls_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.application.tls import TLS
+    from pcapkit.protocols.application.tls.protocol import TLS
     return TLS(octets, len(octets))
 
 

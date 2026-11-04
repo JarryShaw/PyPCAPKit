@@ -3,7 +3,7 @@
 
 GitHub issues:
 
-* #1249: :meth:`OSPF.make <pcapkit.protocols.application.ospf.OSPF.make>`
+* #1249: :meth:`OSPF.make <pcapkit.protocols.application.ospf.protocol.OSPF.make>`
   recomputed Packet Length from the payload and ``_make_data`` dropped the
   parsed one, so the 16-octet digest that cryptographic authentication appends
   outside the packet (:rfc:`2328#appendix-D.4.3`) was counted in it.
@@ -63,7 +63,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_keeps_parsed_packet_length(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         for name, packet in OSPF_PACKETS.items():
             with self.subTest(packet=name):
@@ -71,7 +71,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(OSPF.from_data(parsed.info)), packet)
 
     def test_make_packet_length_default_and_explicit(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         self.assertEqual(bytes(OSPF(payload=HELLO_BODY))[2:4], b'\x00\x2c')
         self.assertEqual(bytes(OSPF(packet_length=0x1e, payload=HELLO_BODY))[2:4], b'\x00\x1e')
@@ -79,8 +79,8 @@ class TestOSPFRoundTrip(unittest.TestCase):
     def test_from_data_without_len_computes_packet_length(self) -> None:
         from ipaddress import ip_address
 
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.data.application.ospf import OSPF as Data_OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.ospf.data import OSPF as Data_OSPF
 
         data = Data_OSPF.from_dict({
             'version': 2, 'type': 1, 'router_id': ip_address('192.168.0.1'),
@@ -91,7 +91,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
         self.assertEqual(bytes(OSPF.from_data(data)), ospf_header(24, 0, bytes(8)))
 
     def test_make_rejects_invalid_packet_length(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.utilities.exceptions import ProtocolError
 
         for packet_length in (-1, 0x10000, True, 24.0, '24'):
@@ -102,7 +102,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
         self.assertEqual(bytes(OSPF(packet_length=0xFFFF))[2:4], b'\xff\xff')
 
     def test_make_crypto_auth_from_bytes(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         packet = bytes(OSPF(auth_type=2, auth_data=CRYPTO_AUTH))
         self.assertEqual(packet[16:24], CRYPTO_AUTH)
@@ -112,7 +112,7 @@ class TestOSPFRoundTrip(unittest.TestCase):
         self.assertEqual(bytes(OSPF.from_data(info)), packet)
 
     def test_make_rejects_wrong_width_auth_data(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.utilities.exceptions import ProtocolError
 
         for auth_type in (0, 1, 2):
@@ -131,13 +131,13 @@ class TestNGAPTrailingOctets(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_exact_pdu_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         parsed = NGAP(NGSETUP_REQUEST, len(NGSETUP_REQUEST))
         self.assertEqual(bytes(NGAP.from_data(parsed.info)), NGSETUP_REQUEST)
 
     def test_trailing_octets_raise_protocol_error(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for suffix in (b'\x00', b'\xff\xff', b'\xde\xad\xbe\xef'):

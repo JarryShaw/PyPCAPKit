@@ -35,7 +35,7 @@ class ARPHRD(EnumRegistry, IntEnum):
     #: references rather than imported, because :mod:`pcapkit.const` sits below
     #: :mod:`pcapkit.protocols` and importing one from here would be circular.
     __proto_dest__ = (
-        ModuleDescriptor('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),
+        ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
     )
 
     #: NET/ROM pseudo.

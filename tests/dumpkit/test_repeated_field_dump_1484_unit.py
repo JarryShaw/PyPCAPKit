@@ -107,8 +107,8 @@ class RepeatedFieldDumpTests(unittest.TestCase):
         import dictdumper
 
         from pcapkit.dumpkit.common import make_dumper
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         raw = capture()
         frame = Frame(io.BytesIO(raw[24:]), num=1, header=Header(raw[:24]).info)

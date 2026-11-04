@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.ipv6.IPv6` Constant Enumerations
-==========================================================================
+""":class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` Constant Enumerations
+===================================================================================
 
 .. module:: pcapkit.const.ipv6
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` implementations. Available
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` implementations. Available
 enumerations include:
 
 .. list-table::

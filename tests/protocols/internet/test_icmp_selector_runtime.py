@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Protocol selectors tell ICMPv4 and ICMPv6 apart on parsed frames.
 
-``'ICMP'`` names the abstract :class:`~pcapkit.protocols.internet.icmp.ICMP`
+``'ICMP'`` names the abstract :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP`
 and so selects both versions; ``'ICMPv4'`` and ``'ICMPv6'`` select one each.
 Frame 1 of ``little_endian.pcap`` is an ICMPv4 echo request, and frame 1 of
 ``in.pcap`` an ICMPv6 Neighbor Solicitation.
@@ -59,7 +59,7 @@ class ICMPSelectorRuntimeTests(unittest.TestCase):
             yield f'{name} class', getattr(pcapkit, name), MATCHES[name]
 
     def test_frame_selectors(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
         for version in SAMPLES:

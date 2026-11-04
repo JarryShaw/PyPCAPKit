@@ -7,8 +7,8 @@
 :mod:`pcapkit.protocols.application.application` contains only
 :class:`~pcapkit.protocols.application.application.Application`,
 which is a base class for application layer protocols, e.g.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTPv1>` and
-:class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>`.
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` and
+:class:`HTTP/2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>`.
 
 .. versionchanged:: 1.5.0
 
@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.shortread import keep_short_read, replay_short_read
-from pcapkit.protocols.misc.no_payload import NoPayload
+from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
@@ -43,13 +43,13 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
     :meth:`_decode_next_layer` and :meth:`_import_next_layer` refuse to dispatch
     on a protocol number. What they do permit is the ``-1`` sentinel, which asks
     for the rest of the packet undissected and resolves to
-    :class:`~pcapkit.protocols.misc.raw.Raw` -- trailing bytes are not a further
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- trailing bytes are not a further
     protocol layer, unless the subclass dissects them, as
-    :class:`~pcapkit.protocols.application.tls.TLS`,
-    :class:`~pcapkit.protocols.application.sslv2.SSLv2` and
-    :class:`~pcapkit.protocols.application.dtls.DTLS` do for a further record and
-    :class:`~pcapkit.protocols.application.httpv2.HTTPv2` for a further frame --
-    or to :class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing remains.
+    :class:`~pcapkit.protocols.application.tls.protocol.TLS`,
+    :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` and
+    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` do for a further record and
+    :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` for a further frame --
+    or to :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` when nothing remains.
 
     """
 
@@ -124,7 +124,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # ``_decode_next_layer``, which already set the payload and the chain
         # (basis included); only a protocol that did not gets the empty default
         if getattr(self, '_next', None) is None:
-            #: pcapkit.protocols.misc.no_payload.NoPayload: Payload of current instance.
+            #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Payload of current instance.
             self._next = NoPayload()
             #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
             self._protos = ProtoChain(self.__class__, self.alias)
@@ -178,8 +178,8 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
-            Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of
-            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing remains.
+            Instance of :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, or of
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` when nothing remains.
 
         Raises:
             UnsupportedCall: If ``proto`` is anything but ``-1``, i.e. a real

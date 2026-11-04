@@ -5,7 +5,7 @@ GitHub issue #2473: the enclosing IPv4 or IPv6 layer verifies the TCP checksum
 (:rfc:`793#section-3.1`) once parsed, under
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, and computes it for a segment
 constructed as its payload under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`;
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` also takes the
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` also takes the
 ``pseudo`` itself. The captured segments are from the tracked
 :file:`examples/captures/in.pcap`; expected checksums are the hand-written sum of
 ``tests/foundation/_roundtrip.py`` over a hand-built pseudo-header.
@@ -62,10 +62,10 @@ class TCPChecksumTests(unittest.TestCase):
         reimport_once_per_class(self)
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

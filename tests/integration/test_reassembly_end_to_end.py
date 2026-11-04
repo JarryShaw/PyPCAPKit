@@ -289,7 +289,7 @@ class IPv6FragmentPayloadTests(EndToEndTestCase):
         octet count rather than only that the payload is non-empty.
 
         The first is the fragment offset scaling. With
-        ``pcapkit/protocols/internet/ipv6_frag.py`` passing the IPv6 fragment
+        ``pcapkit/protocols/internet/ipv6_frag/protocol.py`` passing the IPv6 fragment
         offset through unscaled where the IPv4 path scales it into octets, and
         ``pcapkit/toolkit/pcap.py`` handing it to the reassembly machinery as
         ``fo``, which is an octet offset, the four fragments land at octets 0,

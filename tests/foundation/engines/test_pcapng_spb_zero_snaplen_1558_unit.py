@@ -6,7 +6,7 @@ An SPB's packet data is ``min(original_len, snaplen)`` octets, with interface
 engine handing interface 0's snaplen to the parser as ``__packet__['snaplen']``
 as it stands, which reads a 0 as a limit of no octets and the block's padding as
 packet data: 57 data octets come out as 60. The engine hands over no limit for
-a zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` reads a zero
+a zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` reads a zero
 snaplen handed in as no limit too.
 
 Each case builds its capture here. Everything from :mod:`pcapkit` is imported
@@ -78,7 +78,7 @@ class TestSPBZeroSnaplen(unittest.TestCase):
         self.assertEqual(engine._get_snaplen(), 0xFFFF_FFFF_FFFF_FFFF)
 
     def test_engine_frame_rebuilds_byte_exactly(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         extractor = self._extract(0)
         frame, context = extractor.frame[0], extractor._exeng._ctx
@@ -90,7 +90,7 @@ class TestSPBZeroSnaplen(unittest.TestCase):
     def test_parser_reads_a_zero_snaplen_handed_in_as_no_limit(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         octets = _spb()
         for snaplen in (0, 65535):

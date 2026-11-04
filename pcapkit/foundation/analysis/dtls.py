@@ -9,20 +9,20 @@
 DTLS handshake message that :class:`~pcapkit.foundation.reassembly.dtls.DTLS`
 reassembled (:rfc:`6347#section-4.2.3`). The decode itself is
 :meth:`DTLS.analyze_handshake
-<pcapkit.protocols.application.dtls.DTLS.analyze_handshake>` (:issue:`2622`).
+<pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>` (:issue:`2622`).
 
 .. versionadded:: 1.6.0
 
 """
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.protocols.application.dtls import DTLS
+from pcapkit.protocols.application.dtls.protocol import DTLS
 
 if TYPE_CHECKING:
     from typing import Optional
 
     from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
-    from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
+    from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 
 __all__ = ['dtls_handshake']
 
@@ -32,7 +32,7 @@ def dtls_handshake(datagram: 'DTLS_Datagram') -> 'Optional[Data_DTLSHandshake]':
     :class:`~pcapkit.foundation.reassembly.dtls.DTLS`.
 
     The message is decoded by :meth:`DTLS.analyze_handshake
-    <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`, which reads
+    <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`, which reads
     it as if it had arrived unfragmented, ``fragment_offset`` 0 and
     ``fragment_length`` its ``length`` (:rfc:`6347#section-4.2.3`). So a
     ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions`` body decodes

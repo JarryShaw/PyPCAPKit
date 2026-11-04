@@ -19,9 +19,9 @@ unassigned code therefore costs the whole extraction.
 
 It also makes the "unknown" reader every one of these formats requires
 unreachable. PCAP-NG's
-:class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` exists, its
+:class:`~pcapkit.protocols.misc.pcapng.schema.UnknownBlock` exists, its
 ``__default__`` selects it, and :meth:`PCAPNG._read_block_unknown
-<pcapkit.protocols.misc.pcapng.PCAPNG._read_block_unknown>` reads it -- but the
+<pcapkit.protocols.misc.pcapng.protocol.PCAPNG._read_block_unknown>` reads it -- but the
 lookup fails several frames before the dispatch that would choose it, so the
 default only ever fires for the ``Reserved_*`` ranges :meth:`BlockType._missing_
 <pcapkit.const.pcapng.block_type.BlockType._missing_>` auto-extends. PCAP-NG
@@ -386,7 +386,7 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
 
         The chain rather than the frame count, because a count alone cannot tell
         a frame that parsed from one that was downgraded to
-        :class:`~pcapkit.protocols.misc.raw.Raw` on the way past.
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` on the way past.
 
         """
         from pcapkit.foundation.extraction import Extractor
@@ -431,16 +431,16 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
         Both halves of the dispatch are in place -- ``__block__`` falls back to
         ``'unknown'`` for a code it does not register, and the block-type schema
         registry's ``__default__`` selects
-        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`. Without the
+        :class:`~pcapkit.protocols.misc.pcapng.schema.UnknownBlock`. Without the
         fix neither is reachable for a genuinely unassigned code, because the
         enum lookup fails first. With the code resolving, both answer.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.corekit.fields.numbers import EnumField
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownBlock
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import BlockType as Schema_BlockType
+        from pcapkit.protocols.misc.pcapng.schema import UnknownBlock
 
         resolved = EnumField(length=4, namespace=BlockType).unpack(
             UNASSIGNED_BLOCK_OCTETS, dict())

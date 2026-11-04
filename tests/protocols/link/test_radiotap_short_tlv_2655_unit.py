@@ -3,7 +3,7 @@
 
 radiotap.org's TLV page has parsers take an item whose data stops before its
 layout ends, since a producer may leave out the octets it does not fill at the
-end, and those octets are zeros. :class:`~pcapkit.protocols.link.radiotap.Radiotap`
+end, and those octets are zeros. :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`
 decodes such an item as its layout padded with the zeros, records the cut as
 ``__short_read__``, as ``Schema.unpack`` does, and writes the octets back as
 captured, through ``from_data`` and through ``make()``.
@@ -104,7 +104,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, raw: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         parsed = Radiotap(raw, len(raw))
         self.assertEqual(parsed.data, raw)
@@ -153,10 +153,10 @@ class TestRadiotapShortTLV(unittest.TestCase):
         from pcapkit.corekit.fields.numbers import UInt16Field
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.foundation.registry import register_radiotap_field
-        from pcapkit.protocols.data.link.radiotap import RadiotapField as DataField
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.schema.link.radiotap import RadiotapField
-        from pcapkit.protocols.schema.schema import schema_final
+        from pcapkit.protocols.link.radiotap.data import RadiotapField as DataField
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.link.radiotap.schema import RadiotapField
+        from pcapkit.protocols.schema import schema_final
 
         # a list of no item type is the octets it spans, so the tail is not of whole items
         @schema_final
@@ -195,7 +195,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
 
     def test_from_data_rebuilds_a_short_item_as_captured(self) -> None:
         """``from_data`` of the info, and of its dict, writes the cut octets and decodes them again."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for case, (_, _, _, record, _) in CUTS.items():
             raw, _, _ = self._cut(case)
@@ -209,7 +209,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
 
     def test_make_writes_a_short_item_as_captured(self) -> None:
         """``make()`` writes the cut octets from ``decoded``, from an item's dict, and from a hand-written cut."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for case, (_, _, _, record, values) in CUTS.items():
             raw, tlv_type, _ = self._cut(case)
@@ -252,7 +252,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
 
     def test_a_short_item_decodes_quietly(self) -> None:
         """Parsing, rebuilding and making a cut item warns of nothing and logs nothing."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for case in CUTS:
             with self.subTest(case=case):
@@ -268,7 +268,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
         """Under a zero-padding limit too low for the layout the cut item stays raw, quietly; by default it decodes."""
         from unittest import mock
 
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities import config
 
         for case in CUTS:
@@ -286,7 +286,7 @@ class TestRadiotapShortTLV(unittest.TestCase):
 
     def test_make_refuses_a_malformed_cut(self) -> None:
         """A ``__short_read__`` that names no field and a count, or a vendor TLV cut short before its data, raises."""
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         usig = {'common': COMMON, 'value': 2, 'mask': 3}

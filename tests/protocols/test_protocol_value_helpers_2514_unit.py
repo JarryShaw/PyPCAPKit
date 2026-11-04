@@ -48,8 +48,8 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Callable
 
-    from pcapkit.protocols.application.ospf import OSPF
-    from pcapkit.protocols.misc.raw import Raw
+    from pcapkit.protocols.application.ospf.protocol import OSPF
+    from pcapkit.protocols.misc.raw.protocol import Raw
 
 #: Test tier (#1958): the per-helper cases of the protocol base, beside the
 #: ``ALL``-tier smoke slice in ``test_protocol_base_unit``.
@@ -64,7 +64,7 @@ class _HelperTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.proto = Raw(b'')  # type: Raw
 
@@ -79,7 +79,7 @@ class _HelperTestCase(unittest.TestCase):
 
     def unread(self) -> 'OSPF':
         """An OSPF instance ``read()`` has not run on, so its ``alias`` raises."""
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         proto = object.__new__(OSPF)
         with self.assertRaises(AttributeError):

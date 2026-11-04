@@ -125,7 +125,7 @@ Mechanical points that decide real cases:
 - **A private base class must stay documented when a documented subclass carries
   `:show-inheritance:`.** Sphinx renders that subclass's `Bases:` line as a link into the private
   class's page, so dropping the directive breaks a link a public page renders. This keeps
-  `pcapkit.protocols.schema.misc.pcapng._OPT_Option` and the other per-block option bases with
+  `pcapkit.protocols.misc.pcapng.schema._OPT_Option` and the other per-block option bases with
   documented subclasses, plus `_IPField`, `_IPInterfaceField` and `_TextField`.
 - **Dunders keep their directives.** A `__dunder__` is reached through public syntax, not by name
   (`len()` calls `__len__`, `obj[key]` calls `__getitem__`), so overriding one changes behaviour a

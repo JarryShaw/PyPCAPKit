@@ -52,7 +52,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_info(self) -> None:
         """#1474: ``from_data(info)`` writes back only the pad octets captured."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in SHORT.items():
             with self.subTest(case=name):
@@ -60,7 +60,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_to_dict(self) -> None:
         """#1474: the record survives ``info.to_dict()``."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in SHORT.items():
             with self.subTest(case=name):
@@ -68,7 +68,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_info_records_padding_as_captured(self) -> None:
         """#1474: the chunk's ``padding`` holds the octets that were there."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         info = SCTP(SHORT['unknown-chunk-no-padding']).info
         last = list(info.chunks.items(multi=True))[-1][1]
@@ -80,7 +80,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_whole_zero_padding_is_not_recorded(self) -> None:
         """#1474: a chunk padded as a fresh build pads keeps no ``padding`` key."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = COMMON + chunk(0x3f, 0, b'a')
         last = list(SCTP(raw).info.chunks.items(multi=True))[-1][1]
@@ -90,7 +90,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
     def test_parsed_short_chunk_is_short_only_when_last(self) -> None:
         """#1474: a parsed short chunk moved ahead of another pads in full; last, it stays short."""
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         short = SCTP(COMMON + chunk(0x3f, 0, b'a', pad=b'')).info
         fresh = SCTP(COMMON + chunk(0x3f, 0, b'ab')).info
@@ -113,7 +113,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_short_record_on_a_non_last_chunk_rebuilds_aligned(self) -> None:
         """#1474: only the last chunk may end short; an earlier one pads in full."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = COMMON + chunk(0x3f, 0, b'a') + chunk(0xbf, 0, b'b')
         info = SCTP(raw).info
@@ -128,7 +128,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_short_record_on_a_non_last_parameter_rebuilds_aligned(self) -> None:
         """#1474: the same holds for parameters, which end their chunk, not the packet."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         param = struct.pack('!HH', 0xbfff, 5) + b'q\x00\x00\x00'
         raw = COMMON + chunk(1, 0, INIT_HEAD + param + param) + chunk(11, 0, b'')
@@ -140,7 +140,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_short_last_parameter_in_a_non_last_chunk_rebuilds_aligned(self) -> None:
         """#1474: a non-last chunk drops its last parameter's short record too."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         # The INIT length excludes the last parameter's padding (RFC 9260 Sec. 3.2).
         value = INIT_HEAD + struct.pack('!HH', 0xbfff, 5) + b'q'
@@ -157,7 +157,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
 
     def test_short_last_cause_in_a_non_last_chunk_rebuilds_aligned(self) -> None:
         """#1474: a non-last ABORT drops its last error cause's short record too."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         # The ABORT length excludes the last cause's padding (RFC 9260 Sec. 3.2).
         value = struct.pack('!HH', 0xffff, 5) + b'q'
@@ -175,7 +175,7 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
     def test_make_still_pads_the_last_chunk(self) -> None:
         """#1474: a chunk built from keywords is padded in full, last or not."""
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         data = SCTP(chunks=[(Chunk.State_Cookie, {'cookie': b'abcde'})]).data
         self.assertEqual(data[12:], chunk(10, 0, b'abcde'))

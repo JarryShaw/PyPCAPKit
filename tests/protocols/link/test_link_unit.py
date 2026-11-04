@@ -28,14 +28,14 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_vlan_tags_declare_their_ethertypes_in_modules_of_their_own(self) -> None:
         """Each tag declares the EtherType it is reached by; the base declares none.
 
-        Each class is in a module of its own, since a module holds one protocol
-        class, named after it (#2529).
+        Each class is in a package of its own, since a package holds one
+        protocol class, named after it (#2529, #2534).
 
         """
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.link.s_tag import S_Tag
-        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.s_tag.protocol import S_Tag
+        from pcapkit.protocols.link.vlan.protocol import VLAN
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         self.assertEqual(C_Tag.__index__(), EtherType.Customer_VLAN_Tag_Type)
@@ -50,16 +50,16 @@ class LinkProtocolUnitTests(unittest.TestCase):
             VLAN.__index__()
 
         # ... and each class is in a module named after it.
-        self.assertEqual(C_Tag.__module__, 'pcapkit.protocols.link.c_tag')
-        self.assertEqual(S_Tag.__module__, 'pcapkit.protocols.link.s_tag')
-        self.assertEqual(VLAN.__module__, 'pcapkit.protocols.link.vlan')
+        self.assertEqual(C_Tag.__module__, 'pcapkit.protocols.link.c_tag.protocol')
+        self.assertEqual(S_Tag.__module__, 'pcapkit.protocols.link.s_tag.protocol')
+        self.assertEqual(VLAN.__module__, 'pcapkit.protocols.link.vlan.protocol')
 
     def test_vlan_base_is_abstract_and_tags_are_concrete(self) -> None:
-        from pcapkit.protocols.data.link.vlan import VLAN as DataVLAN
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.link.s_tag import S_Tag
-        from pcapkit.protocols.link.vlan import VLAN
-        from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
+        from pcapkit.protocols.link.vlan.data import VLAN as DataVLAN
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.s_tag.protocol import S_Tag
+        from pcapkit.protocols.link.vlan.protocol import VLAN
+        from pcapkit.protocols.link.vlan.schema import VLAN as SchemaVLAN
 
         # The base leaves ``name`` to its subclasses, which is what makes it
         # abstract -- the same reason ``internet.ip.IP`` is.
@@ -78,8 +78,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
                 self.assertIs(klass.__data__, DataVLAN)
 
     def test_vlan_tags_keep_distinct_names_and_share_vlan_id(self) -> None:
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.link.s_tag import S_Tag
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.s_tag.protocol import S_Tag
 
         c_tag = object.__new__(C_Tag)
         s_tag = object.__new__(S_Tag)
@@ -104,7 +104,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(S_Tag.id()[0], 'S_Tag')
 
     def test_vlan_base_claims_its_family_in_id(self) -> None:
-        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.link.vlan.protocol import VLAN
 
         self.assertEqual(VLAN.id(), ('VLAN', 'C_Tag', 'S_Tag'))
 
@@ -126,7 +126,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_ethernet_index_and_length_hint_are_stable(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         proto = object.__new__(Ethernet)
 
@@ -135,8 +135,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_arp_id_index_and_length_hint_are_stable(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
-        from pcapkit.protocols.link.inarp import InARP
+        from pcapkit.protocols.link.arp.protocol import ARP
+        from pcapkit.protocols.link.inarp.protocol import InARP
 
         proto = object.__new__(ARP)
 
@@ -146,8 +146,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(proto.__length_hint__(), 28)
 
     def test_vlan_length_hint_is_stable(self) -> None:
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.link.s_tag import S_Tag
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.s_tag.protocol import S_Tag
 
         for klass in (C_Tag, S_Tag):
             with self.subTest(protocol=klass.__name__):
@@ -157,7 +157,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         arp = object.__new__(ARP)
         arp._info = types.SimpleNamespace(
@@ -183,7 +183,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_ethernet_make_data_preserves_core_fields(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         data = DummyData(
             dst='aa:bb:cc:dd:ee:ff',
@@ -203,7 +203,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         data = DummyData(
             htype=Hardware.Ethernet,
@@ -229,7 +229,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         proto = object.__new__(ARP)
         schema = proto.make(
@@ -267,7 +267,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         Both IPv4 and IPv6 branches share the same guard, so both are checked here.
         """
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         proto = object.__new__(ARP)
@@ -291,7 +291,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_vlan_make_data_preserves_tci_and_type(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.vlan.priority_level import PriorityLevel
-        from pcapkit.protocols.link.vlan import VLAN
+        from pcapkit.protocols.link.vlan.protocol import VLAN
 
         # ``_make_data`` is shared plumbing on the abstract base, so it is
         # reachable from the base itself as well as from either concrete tag.
@@ -322,9 +322,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         binds no schema, exactly as ``internet.ip.IP`` does for its family.
 
         """
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
-        from pcapkit.protocols.schema.link.l2tp import L2TP as SchemaL2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+        from pcapkit.protocols.link.l2tp.schema import L2TP as SchemaL2TP
 
         self.assertEqual(L2TP.__abstractmethods__,
                          frozenset({'name', 'read', 'make', 'length'}))
@@ -343,13 +343,13 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(L2TPv2.id(), ('L2TP', 'L2TPv2'))
         self.assertEqual(L2TPv2.id()[0], 'L2TP')
 
-        self.assertEqual(L2TP.__module__, 'pcapkit.protocols.link.l2tp')
-        self.assertEqual(L2TPv2.__module__, 'pcapkit.protocols.link.l2tpv2')
+        self.assertEqual(L2TP.__module__, 'pcapkit.protocols.link.l2tp.protocol')
+        self.assertEqual(L2TPv2.__module__, 'pcapkit.protocols.link.l2tpv2.protocol')
 
     def test_l2tpv2_index_is_its_udp_port_and_make_data_preserves_flags(self) -> None:
         from pcapkit.const.reg.apptype import UDP
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         data = DummyData(
@@ -385,9 +385,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.schema.link.ethernet import callback_payload
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.link.ethernet.schema import callback_payload
 
         custom_type = EtherType.get(0x88B5)
         registry = Ethernet.__proto__
@@ -400,7 +400,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
             self.assertIs(direct_field.protocol, Raw)
 
             descriptor_field = PayloadField()
-            registry[custom_type] = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
+            registry[custom_type] = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
             callback_payload(descriptor_field, {'type': custom_type})
             self.assertIs(descriptor_field.protocol, Raw)
 
@@ -429,9 +429,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_link_base_layer_registry_and_protocol_reader(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         link = object.__new__(Ethernet)
@@ -444,7 +444,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         custom_code = EtherType.get(0x88B5)
         original = registry.get(custom_code)
         try:
-            Link.register(custom_code, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+            Link.register(custom_code, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
             self.assertIs(registry[custom_code], Raw)
 
             class Other(Raw):
@@ -479,7 +479,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         """
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         registry = Link.__dict__['__proto__']
         custom_code = EtherType.get(0x88B6)
@@ -497,8 +497,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_ethernet_properties_read_make_and_mac_helpers(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.schema.link.ethernet import Ethernet as SchemaEthernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.link.ethernet.schema import Ethernet as SchemaEthernet
         from pcapkit.utilities.exceptions import ProtocolError
 
         ethernet = object.__new__(Ethernet)
@@ -548,8 +548,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.arp import ARP
-        from pcapkit.protocols.schema.link.arp import ARP as SchemaARP
+        from pcapkit.protocols.link.arp.protocol import ARP
+        from pcapkit.protocols.link.arp.schema import ARP as SchemaARP
         from pcapkit.utilities.exceptions import ProtocolError
 
         def read_operation(oper: int) -> tuple[str, str]:
@@ -615,8 +615,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
     def test_l2tp_properties_read_and_make_variants(self) -> None:
         from pcapkit.const.l2tp.type import Type
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
-        from pcapkit.protocols.schema.link.l2tp import L2TP as SchemaL2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+        from pcapkit.protocols.link.l2tp.schema import L2TP as SchemaL2TP
 
         l2tp = object.__new__(L2TPv2)
         l2tp._info = types.SimpleNamespace(
@@ -698,9 +698,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_vlan_properties_read_and_make_variants(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.vlan.priority_level import PriorityLevel
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.schema.link.vlan import TCI as SchemaTCI
-        from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.vlan.schema import TCI as SchemaTCI
+        from pcapkit.protocols.link.vlan.schema import VLAN as SchemaVLAN
 
         vlan = object.__new__(C_Tag)
         vlan._info = types.SimpleNamespace(type=EtherType.Internet_Protocol_version_4)
@@ -762,9 +762,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         """
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.vlan.priority_level import PriorityLevel
-        from pcapkit.protocols.link.c_tag import C_Tag
-        from pcapkit.protocols.link.s_tag import S_Tag
-        from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
+        from pcapkit.protocols.link.c_tag.protocol import C_Tag
+        from pcapkit.protocols.link.s_tag.protocol import S_Tag
+        from pcapkit.protocols.link.vlan.schema import VLAN as SchemaVLAN
 
         cases = (
             # priority set, drop-eligible clear -- reading the PCP says True here

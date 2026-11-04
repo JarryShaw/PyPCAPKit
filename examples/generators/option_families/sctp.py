@@ -30,7 +30,7 @@ SCTP_BASE = {
 
 
 def _sctp_chunk_registry() -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP.__chunk__
 
 
@@ -68,12 +68,12 @@ def _sctp_chunk_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _sctp_chunk_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP(chunks=[(code, kwargs)], **SCTP_BASE)
 
 
 def _sctp_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP(octets, len(octets))
 
 
@@ -82,12 +82,12 @@ def _sctp_extract(parsed: 'Any') -> 'Any':
 
 
 def _sctp_rebuild(chunks: 'Any') -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP(chunks=chunks, **SCTP_BASE)
 
 
 def _sctp_param_registry() -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP.__parameter__
 
 
@@ -109,7 +109,7 @@ def _sctp_param_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _sctp_param_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
 
     # A parameter is not a top-level item: it travels inside a chunk, and
     # HEARTBEAT is the smallest chunk that carries an arbitrary one.
@@ -118,7 +118,7 @@ def _sctp_param_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _sctp_cause_registry() -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP.__cause__
 
 
@@ -143,7 +143,7 @@ def _sctp_cause_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _sctp_cause_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
 
     # An error cause travels inside an ERROR (or ABORT) chunk, under the
     # keyword ``error`` rather than ``causes``.

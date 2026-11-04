@@ -28,16 +28,16 @@ round-trips construct -> parse -> construct and compares octets; dispatch has no
 such symmetry to exploit, so :func:`probe` instead builds one minimal envelope
 per code, decodes it the way the library itself would (through
 :func:`pcapkit.extract` for the packet-level tables, or by handing the
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` bytes straight to
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` bytes straight to
 :func:`pcapkit.extract` for the pcap/pcapng link-type tables, which is the
 same call with a different global header), and asks whether the resulting
 :class:`~pcapkit.corekit.protochain.ProtoChain` actually contains the class
 :data:`PINNED_TARGETS` says the code is *supposed* to reach -- not merely that
 the alias string looks right, since several of these classes rename themselves
-on the wire (:class:`~pcapkit.protocols.application.rarp.RARP` reports ``'ARP'`` for
-``oper in (1, 2)``; :class:`~pcapkit.protocols.internet.hip.HIP` reports
+on the wire (:class:`~pcapkit.protocols.application.rarp.protocol.RARP` reports ``'ARP'`` for
+``oper in (1, 2)``; :class:`~pcapkit.protocols.internet.hip.protocol.HIP` reports
 ``'HIPv2'``), and a table entry whose target *is*
-:class:`~pcapkit.protocols.misc.raw.Raw` itself is not a defect.
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` itself is not a defect.
 
 The expected class is deliberately **not** read out of the registry under
 test. Read from there (``target=_resolve(entry)``), the check would be
@@ -56,13 +56,13 @@ into "dispatch failed".
 Some entries are known to degrade to :class:`Raw`, for reasons
 recorded in :data:`KNOWN_DEGRADED` rather than fixed here -- this module reports
 defects, it does not carry workarounds for them. They are
-:class:`~pcapkit.protocols.transport.sctp.SCTP` payload protocol identifiers
-reaching :class:`~pcapkit.protocols.application.ngap.NGAP`, and neither is a
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` payload protocol identifiers
+reaching :class:`~pcapkit.protocols.application.ngap.protocol.NGAP`, and neither is a
 defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
 a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
 already does, and for the same documented reason -- one PPID is DTLS-wrapped
-and :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>`
+and :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__>`
 maps it to NGAP rather than through DTLS; the other degrades
 identically because the payload is not an aligned PER encoding, exactly as
 that test's own docstring records.
@@ -105,7 +105,7 @@ EPOCH = 1500000000
 #: TCP header fields held constant across every case that needs a TCP segment.
 #: Only ``dstport``/``payload`` vary.
 #:
-#: Every key is a parameter :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`
+#: Every key is a parameter :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`
 #: declares, which is not a style point: ``ack`` is the acknowledgement *flag*,
 #: not the number, and ``seq``, ``ack_flag`` and ``urgent_pointer`` are not
 #: parameters at all. An undeclared keyword raises
@@ -194,7 +194,7 @@ def _pcap_bytes(frames: 'tuple[bytes, ...]', linktype: 'int') -> 'bytes':
 def _pcapng_bytes(linktype: 'Any', packet_data: 'bytes') -> 'bytes':
     """A minimal PCAP-NG file: one section, one interface, one packet block.
 
-    Built through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`
+    Built through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`
     construction API rather than hand-rolled :mod:`struct` packing, the same way
     :func:`examples.generators.option_families.pcapng._pcapng_context` does -- GitHub issue
     #496 judged hand-building a valid SHB+IDB+EPB stream riskier than
@@ -212,7 +212,7 @@ def _pcapng_bytes(linktype: 'Any', packet_data: 'bytes') -> 'bytes':
     """
     from pcapkit.const.pcapng.block_type import BlockType
     from pcapkit.foundation.engines.pcapng import Context
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
     shb = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
     context = Context(shb.info)
@@ -253,49 +253,49 @@ def _extract_first(data: 'bytes', suffix: 'str') -> 'Any':
 
 def _tcp(dstport: 'int', payload: 'bytes' = b'') -> 'bytes':
     """A minimal TCP segment to ``dstport``."""
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return bytes(TCP(dstport=dstport, payload=payload, **_TCP_BASE))
 
 
 def _udp(dstport: 'int', payload: 'bytes' = b'') -> 'bytes':
     """A minimal UDP datagram to ``dstport``."""
-    from pcapkit.protocols.transport.udp import UDP
+    from pcapkit.protocols.transport.udp.protocol import UDP
     return bytes(UDP(srcport=50000, dstport=dstport, payload=payload))
 
 
 def _ip4(protocol: 'int', payload: 'bytes') -> 'bytes':
     """A minimal option-less IPv4 header carrying ``payload``."""
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
     return bytes(IPv4(protocol=protocol, src='192.0.2.1', dst='198.51.100.1', payload=payload))
 
 
 def _ip6(next_: 'int', payload: 'bytes') -> 'bytes':
     """A minimal IPv6 header carrying ``payload``."""
-    from pcapkit.protocols.internet.ipv6 import IPv6
+    from pcapkit.protocols.internet.ipv6.protocol import IPv6
     return bytes(IPv6(next=next_, src='2001:db8::1', dst='2001:db8::2', payload=payload))
 
 
 def _ethernet(ethertype: 'int', payload: 'bytes') -> 'bytes':
     """A minimal Ethernet II frame carrying ``payload``."""
-    from pcapkit.protocols.link.ethernet import Ethernet
+    from pcapkit.protocols.link.ethernet.protocol import Ethernet
     return bytes(Ethernet(type=ethertype, payload=payload))
 
 
 def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> 'bytes':
     """A BSD loopback header carrying ``payload``."""
-    from pcapkit.protocols.link.loopback import Loopback
+    from pcapkit.protocols.link.loopback.protocol import Loopback
     return bytes(Loopback(family=family, byteorder=byteorder, payload=payload))
 
 
 def _linux_sll(payload: 'bytes') -> 'bytes':
     """A ``LINUX_SLL`` header carrying ``payload``."""
-    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+    from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
     return bytes(LinuxSLL1(payload=payload))
 
 
 def _linux_sll2(payload: 'bytes') -> 'bytes':
     """A ``LINUX_SLL2`` header carrying ``payload``."""
-    from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+    from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
     return bytes(LinuxSLL2(payload=payload))
 
 
@@ -303,7 +303,7 @@ def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
     """The ``protocol_type`` and payload of a cooked header on a registered ``arphrd_type``.
 
     Shared by the ``linux_sll`` and ``linux_sll2`` families, which probe
-    :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`
+    :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`
     through each version.
 
     Args:
@@ -319,20 +319,20 @@ def _linux_sll_payload(arphrd_type: 'Any') -> 'tuple[int, bytes]':
     from pcapkit.const.linux.arphrd import ARPHRD
 
     if arphrd_type == ARPHRD.FRAD:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         return 0, bytes(FRAD(nlpid=0xCC, payload=_ip4(6, _tcp(9999))))
     if arphrd_type in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         return 0x0800, bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if arphrd_type == ARPHRD.IEEE80211_RADIOTAP:
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.type import Type
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         ack = bytes(IEEE802_11(type=Type.Control, subtype=ControlSubtype.ACK, addr1='02:00:00:00:00:01'))
         return 0, bytes(Radiotap(payload=ack))
     if arphrd_type == ARPHRD.NETLINK:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
         return 0, bytes(Netlink(nlmsg_type=3, nlmsg_seq=1, byteorder='little',
                                 payload=b'\xaa\xbb\xcc\xdd'))
     raise LookupError(f'linux_sll: no payload builder for {arphrd_type!r}')  # pragma: no cover
@@ -504,9 +504,9 @@ class Outcome(NamedTuple):
     #: ``target in frame.protochain``. The latter also matches on the layer's
     #: alias string and on ``Type.id()``, which is right for telling a
     #: renamed-on-the-wire class (RARP reporting itself as ``'ARP'``) from a
-    #: wrong one -- but wrong here, because :class:`~pcapkit.protocols.misc.raw.Raw`
+    #: wrong one -- but wrong here, because :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
     #: itself constructs with ``alias=`` set to the *dispatching* code's own
-    #: name (``Raw.__post_init__``, pcapkit/protocols/misc/raw.py), so a
+    #: name (``Raw.__post_init__``, pcapkit/protocols/misc/raw/protocol.py), so a
     #: mis-pointed registry entry still renders its original code's name and
     #: would satisfy the string check while no instance of the pinned class
     #: exists anywhere in the chain.
@@ -518,7 +518,7 @@ class Outcome(NamedTuple):
     #: The first ``'error'`` value found anywhere in the parsed frame's nested
     #: info mapping, or ``''`` if none is present. This is what
     #: :func:`pcapkit.corekit.decorators.beholder` records when a dissector
-    #: raises and gets replaced with :class:`~pcapkit.protocols.misc.raw.Raw`,
+    #: raises and gets replaced with :class:`~pcapkit.protocols.misc.raw.protocol.Raw`,
     #: so it is the fragment :data:`KNOWN_DEGRADED` pins against.
     error: 'str'
 
@@ -613,7 +613,7 @@ def probe(case: 'Case') -> 'Outcome':
     # some ``oper`` values, and is still the RARP class), but it is exactly
     # the loophole that let a mis-pointed registry entry through here: several
     # dissectors -- Raw chief among them, in ``Raw.__post_init__``
-    # (pcapkit/protocols/misc/raw.py) -- construct with ``alias=`` set to
+    # (pcapkit/protocols/misc/raw/protocol.py) -- construct with ``alias=`` set to
     # the *dispatching* code's own name, so a code named ``AH`` retargeted at
     # Raw still renders as ``'...:AH'`` and still satisfies ``AH in
     # protochain`` on the string alone, even though no AH instance exists
@@ -635,7 +635,7 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
     return [probe(case) for case in cases(families)]
 
 
-#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`, each
+#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, each
 #: with the ``'error'`` fragments it may report and the reason it degrades.
 #: Recorded, not fixed -- GitHub issue #496 is a test-harness change and none
 #: of these classes is this module's to touch.
@@ -669,7 +669,7 @@ KNOWN_DEGRADED = {
     # PPID 66 is NGAP wrapped in a DTLS record, and the registry maps it to
     # NGAP rather than through DTLS -- registered so the PPID
     # is *named*, per the registry's own comment in
-    # pcapkit/protocols/transport/sctp.py, not because it decodes. The same
+    # pcapkit/protocols/transport/sctp/protocol.py, not because it decodes. The same
     # placeholder payload fails the same way, for the same reason.
     'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),

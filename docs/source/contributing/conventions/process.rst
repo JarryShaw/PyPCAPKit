@@ -304,8 +304,8 @@ carrying it are that kind:
    :issue:`759` raising one where a
    single-bit lookup used to return a member;
 *  a public attribute's meaning --
-   :issue:`618` swapping :attr:`Frame.len <pcapkit.protocols.data.misc.pcap.frame.Frame.len>`
-   and :attr:`Frame.cap_len <pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len>`
+   :issue:`618` swapping :attr:`Frame.len <pcapkit.protocols.misc.pcap.frame.data.Frame.len>`
+   and :attr:`Frame.cap_len <pcapkit.protocols.misc.pcap.frame.data.Frame.cap_len>`
    between the PCAP and PCAP-NG readers;
 *  a signature or a name a caller writes --
    :issue:`806` retyping

@@ -100,7 +100,7 @@ class TestPCAPNGDSBSecretsDict(PCAPNGTestCase):
 
     def _secrets_types(self) -> 'Iterator[int]':
         """Each Secrets Type swept, after checking that the sweep names every registered one."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         self.assertNotIn(UNKNOWN, PCAPNG.__secrets__)
         self.assertEqual(set(WHOLE) - {UNKNOWN}, {int(code) for code in PCAPNG.__secrets__})
@@ -108,7 +108,7 @@ class TestPCAPNGDSBSecretsDict(PCAPNGTestCase):
 
     def _assert_rebuilds(self, octets: 'bytes') -> None:
         """Parse ``octets``, then rebuild them from the data model and from its dict."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings():
@@ -162,7 +162,7 @@ class TestPCAPNGDSBSecretsDict(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, WireGuardKeyLabel
 
         decoded = {
             UNKNOWN: {},

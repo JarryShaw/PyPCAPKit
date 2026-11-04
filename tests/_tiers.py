@@ -52,8 +52,10 @@ So this module answers, cheaply and without needing the fixtures themselves:
   a module is in it only when it says so with ``__tier__ = 'ALL'``
   (:func:`declared_tier`), and :data:`DEFAULT_TIER`, ``LATEST``, otherwise.
   :func:`all_tier_paths` and :func:`latest_tier_paths` list them; every
-  leg but ``latest`` leaves the ``LATEST`` one out. See "The curated ``ALL`` tier" below
+  leg of ``test`` leaves the ``LATEST`` one out. See "The curated ``ALL`` tier" below
   for which modules opt in.
+* :func:`latest_tier_half` -- which half of the ``LATEST`` tier does each cell of
+  the ``test-latest-tier`` job run on ``latest`` (#2751)?
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
   once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
@@ -202,6 +204,7 @@ __all__ = [
     'InvalidTierError', 'DEFAULT_TIER', 'suite_modules', 'declared_tier', 'branches_on_interpreter', 'module_tier',
     'PROBE_MODULE_NAME', 'is_probe_module',
     'all_tier_paths', 'latest_tier_paths',
+    'LATEST_TIER_HALVES', 'LATEST_TIER_BOUNDARY', 'LATEST_HALF_SELECTOR', 'latest_tier_half',
     'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
     'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
@@ -256,8 +259,8 @@ FIXTURE_TIER_SELECTOR = (
 )
 #: The test tiers (#1958), which say on which legs a module runs. Orthogonal to the
 #: unit and fixture-dependent tiers above, which say what a module may read: ``ALL``
-#: modules run on every leg of every job that collects them, ``LATEST`` ones on the
-#: ``latest`` leg alone. See :func:`module_tier`.
+#: modules run on every leg of every job that collects them, ``LATEST`` ones on
+#: ``latest`` alone. See :func:`module_tier`.
 TIER_ALL = 'ALL'
 #: See :data:`TIER_ALL`.
 TIER_LATEST = 'LATEST'
@@ -270,9 +273,9 @@ DEFAULT_TIER = TIER_LATEST
 #: ``__tier__ = 'LATEST'``, read by AST in :func:`declared_tier`. A constant rather
 #: than a pytest marker, so plain :mod:`unittest` runs see the same module.
 TIER_MARKER = '__tier__'
-#: The ``LATEST`` tier's selector, verbatim from the workflows: every leg of ``test``
-#: but ``latest``, and every ``experimental`` leg, passes each path it prints as an
-#: ``--ignore``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
+#: The ``LATEST`` tier's selector, verbatim from the workflows: every leg of ``test``,
+#: ``latest``'s included, and every ``experimental`` leg, passes each path it prints as
+#: an ``--ignore``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
 #: workflow lists the tier. See :func:`latest_tier_paths`.
 LATEST_TIER_SELECTOR = (
     'python -c "from tests._tiers import latest_tier_paths; '
@@ -291,14 +294,29 @@ FIXTURE_ALL_TIER_SELECTOR = (
 #: :func:`is_project_pin`.
 PROJECT_PINS_DIR = 'project'
 #: The project pins' selector, verbatim from the workflows: the ``project-tests``
-#: job runs what it prints, and the ``latest`` leg of ``test`` passes each path as
-#: an ``--ignore``. Every other ``test`` leg and every ``experimental`` leg leaves
+#: job runs what it prints. Every ``test`` leg and every ``experimental`` leg leaves
 #: the pins out through :data:`LATEST_TIER_SELECTOR`, since every pin is
-#: ``LATEST``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
+#: ``LATEST``, and :func:`latest_tier_half` leaves them out of the ``LATEST`` tier's
+#: own job. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
 #: workflow can drift from :func:`is_project_pin`.
 PROJECT_PINS_SELECTOR = (
     'python -c "from tests._tiers import project_pin_paths; '
     'print(\' \'.join(project_pin_paths()))"'
+)
+#: The halves :func:`latest_tier_half` cuts the ``LATEST`` tier into (#2751), one per
+#: cell of the ``test-latest-tier`` job of :file:`.github/workflows/unit-tests.yml`.
+LATEST_TIER_HALVES = (1, 2)
+#: The path at which :func:`latest_tier_half` cuts (#2751): half 1 is every module
+#: sorting before it, half 2 the rest, so a new module lands in exactly one half. It
+#: is chosen so the halves take about the same CI time; move it to rebalance, and the
+#: cells follow.
+LATEST_TIER_BOUNDARY = 'tests/protocols/internet/test_j'
+#: The selector each cell of the ``test-latest-tier`` job asks for its half, verbatim
+#: from the workflow, with the half as its one argument. Asked at run time, as
+#: :data:`LATEST_TIER_SELECTOR` is. See :func:`latest_tier_half`.
+LATEST_HALF_SELECTOR = (
+    'python -c "import sys; from tests._tiers import latest_tier_half; '
+    'print(\' \'.join(latest_tier_half(int(sys.argv[1]))))"'
 )
 #: The package whose behaviour varies by interpreter, so a module that reaches it
 #: runs on every leg (#1954).
@@ -1075,9 +1093,9 @@ def module_tier(path: 'pathlib.Path | str') -> 'str':
     Its :func:`declared_tier` where it states one, :data:`DEFAULT_TIER` otherwise,
     so every test module has exactly one and ``ALL`` is opt-in: see "The curated
     ``ALL`` tier" in this module's docstring for which modules opt in. ``ALL``
-    modules run on every leg; ``LATEST`` ones on ``latest`` alone, which is also
-    the coverage leg, the ``gate`` job's interpreter, and every
-    ``unittest-ordering`` cell's. Within a tier, the unit and fixture-dependent
+    modules run on every leg; ``LATEST`` ones on ``latest`` alone, in the
+    ``test-latest-tier`` job (:func:`latest_tier_half`), the ``gate`` job, and
+    every ``unittest-ordering`` cell. Within a tier, the unit and fixture-dependent
     tiers still decide which job collects a module.
 
     Args:
@@ -1124,8 +1142,8 @@ def is_project_pin(path: 'pathlib.Path | str') -> 'bool':
     text or drives a ``util/`` script, so the ``project-tests`` job runs it once, on
     ``latest``. Every pin is in the :data:`TIER_LATEST` test tier (#1958): a module
     that marks itself :data:`TIER_ALL` is no pin, and one that marks itself
-    ``LATEST`` while it imports ``pcapkit`` is no pin either, and runs on the
-    ``latest`` leg of ``test``, under coverage.
+    ``LATEST`` while it imports ``pcapkit`` is no pin either, and runs in a half of
+    the ``test-latest-tier`` job, under coverage (:func:`latest_tier_half`).
 
     Args:
         path: Path to a module, absolute or relative to :data:`ROOT`.
@@ -1149,13 +1167,38 @@ def project_pin_paths() -> 'tuple[str, ...]':
     """Every :func:`project pin <is_project_pin>`, relative to :data:`ROOT`, sorted.
 
     What :data:`PROJECT_PINS_SELECTOR` prints: the ``project-tests`` job's
-    selection, and the ``--ignore`` list of the ``latest`` leg of ``test``. Each is
-    in :func:`latest_tier_paths` too, which every other leg leaves out.
+    selection. Each is in :func:`latest_tier_paths` too, which every leg of ``test``
+    leaves out, and none is in :func:`latest_tier_half`.
 
     """
     return tuple(sorted(path.relative_to(ROOT).as_posix()
                         for path in (TESTS_ROOT / PROJECT_PINS_DIR).rglob('test_*.py')
                         if is_project_pin(path)))
+
+
+def latest_tier_half(half: 'int') -> 'tuple[str, ...]':
+    """Half ``half`` of the unit-tier ``LATEST`` modules but the project pins, sorted (#2751).
+
+    What :data:`LATEST_HALF_SELECTOR` prints: the selection of one cell of the
+    ``test-latest-tier`` job, which runs it on ``latest`` under coverage, by name.
+    Half 1 is every such module of :func:`latest_tier_paths` sorting before
+    :data:`LATEST_TIER_BOUNDARY`, half 2 the rest. Both halves together are what the
+    ``latest`` leg of ``test``, which runs the ``ALL`` tier, leaves out, less the
+    :func:`project pins <project_pin_paths>`, which ``project-tests`` runs, and the
+    fixture-dependent modules, which ``integration`` runs.
+
+    Args:
+        half: One of :data:`LATEST_TIER_HALVES`.
+
+    Raises:
+        ValueError: ``half`` is not one of :data:`LATEST_TIER_HALVES`.
+
+    """
+    if half not in LATEST_TIER_HALVES:
+        raise ValueError(f'the LATEST tier has the halves {LATEST_TIER_HALVES}, not {half!r}')
+    pins = frozenset(project_pin_paths())
+    return tuple(path for path in latest_tier_paths()
+                 if is_unit_tier(path) and path not in pins and (path < LATEST_TIER_BOUNDARY) == (half == 1))
 
 
 def _git(*args: 'str') -> 'Optional[str]':

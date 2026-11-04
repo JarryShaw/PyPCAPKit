@@ -2,7 +2,7 @@
 """GitHub issue #2588: a next-layer refusal the parent's fallback handles is quiet.
 
 When :func:`~pcapkit.corekit.decorators.beholder` keeps a refused next layer as
-:class:`~pcapkit.protocols.misc.raw.Raw`, the refusal's
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, the refusal's
 :exc:`~pcapkit.utilities.exceptions.ProtocolError` logs nothing on the
 ``pcapkit`` logger, at any level, and leaves :data:`sys.excepthook` and
 :data:`threading.excepthook` as they were. The ``Raw`` layer's ``error`` still
@@ -75,7 +75,7 @@ class TestHandledRefusalIsQuiet(unittest.TestCase):
     def assert_quiet_fallback(self, klass, frame: 'bytes', chain: 'str', depth: 'int',  # type: ignore[no-untyped-def]
                               error: 'str') -> None:
         """``frame`` parses, keeping the layer ``depth`` down as ``Raw`` with ``error``, quietly."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.logging import logger
 
         with capture(logger) as recorder:
@@ -110,8 +110,8 @@ class TestHandledRefusalIsQuiet(unittest.TestCase):
 
     def test_refused_gre_under_linux_sll_is_quiet(self) -> None:
         """GRE refuses version 1; LinuxSLL's fallback keeps it as ``Raw``, and ``GRE(...)`` stays loud."""
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
         self.assert_quiet_fallback(LinuxSLL1, SLL_GRE_V1, 'LINUX_SLL1:Raw', 1,
                                    'GRE: invalid version: 1')
@@ -119,8 +119,8 @@ class TestHandledRefusalIsQuiet(unittest.TestCase):
 
     def test_refused_ipv4_under_ethernet_is_quiet(self) -> None:
         """IPv4 refuses version 5; Ethernet's fallback keeps it as ``Raw``, and ``IPv4(...)`` stays loud."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         self.assert_quiet_fallback(Ethernet, ETH_IPV4_V5, 'Ethernet:Internet_Protocol_version_4', 1,
                                    '[IPv4] invalid version: 5')
@@ -128,8 +128,8 @@ class TestHandledRefusalIsQuiet(unittest.TestCase):
 
     def test_nested_refusal_is_quiet_and_the_block_ends_with_the_frame(self) -> None:
         """TCP refused under IPv4 under Ethernet is quiet; once the frame is parsed, nothing is quieted."""
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import exceptions
 
         error = 'TCP: header length 60 runs past the end of the data (20 octets)'

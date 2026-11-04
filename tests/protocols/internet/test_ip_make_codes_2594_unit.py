@@ -15,9 +15,9 @@ reliability bits of :rfc:`791` -- and writes it as ``1``.
 ``ROWS`` holds one row per migrated field: the maker, the field, its
 enumeration, its width in bits, a member to build with, and where the code
 lands in the octets. An option maker is reached through
-:meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>`, and the group
+:meth:`IPv4.make <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>`, and the group
 record maker through :meth:`IGMPv3.make
-<pcapkit.protocols.internet.igmpv3.IGMPv3.make>`, as a caller reaches them.
+<pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.make>`, as a caller reaches them.
 
 The type of each IPv4 option is such a field as well, given to ``make`` in a
 ``(type, kwargs)`` pair or as the key of parsed options: :class:`OptionTypeTests`
@@ -42,7 +42,7 @@ SEC, RTRALT, QS = 130, 148, 25
 
 
 def _ipv4(**kwargs: 'object') -> 'bytes':
-    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
     return IPv4(**kwargs).data
 
@@ -56,39 +56,39 @@ def _ipv4_option(code: 'int', field: 'str') -> 'object':
 
 
 def _ipx(value: 'object') -> 'bytes':
-    from pcapkit.protocols.internet.ipx import IPX
+    from pcapkit.protocols.internet.ipx.protocol import IPX
 
     return IPX(type=value).data
 
 
 def _icmpv4(value: 'object') -> 'bytes':
-    from pcapkit.protocols.internet.icmpv4 import ICMPv4
+    from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
     return ICMPv4(type=value).data
 
 
 def _icmpv6(value: 'object') -> 'bytes':
-    from pcapkit.protocols.internet.icmpv6 import ICMPv6
+    from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
     return ICMPv6(type=value).data
 
 
 def _igmpv2(value: 'object') -> 'bytes':
     # IGMPv2 makes with the family base's IGMP.make.
-    from pcapkit.protocols.internet.igmpv2 import IGMPv2
+    from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
     return IGMPv2(type=value).data
 
 
 def _igmpv3(value: 'object') -> 'bytes':
-    from pcapkit.protocols.internet.igmpv3 import IGMPv3
+    from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
     return IGMPv3(type=value).data
 
 
 def _igmpv3_record(value: 'object') -> 'bytes':
     from pcapkit.const.igmp.type import Type
-    from pcapkit.protocols.internet.igmpv3 import IGMPv3
+    from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
     return IGMPv3(type=Type.IGMPv3_Membership_Report, records=[{'record_type': value}]).data
 
@@ -201,7 +201,7 @@ class OptionTypeTests(unittest.TestCase):
     def _builders(self) -> 'dict[str, object]':
         """A builder for each form ``options`` takes a type in."""
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         def pair(value: 'object') -> 'bytes':
             return _ipv4(options=[(value, {'data': b'\xa5\xa5'})])
@@ -229,7 +229,7 @@ class OptionTypeTests(unittest.TestCase):
 
     def test_the_widest_type_builds_parses_back_and_rebuilds(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for form, build in self._builders().items():
             for value in (255, OptionNumber.get(255)):

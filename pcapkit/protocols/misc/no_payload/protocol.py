@@ -1,0 +1,164 @@
+# -*- coding: utf-8 -*-
+"""No-Payload Packet
+=======================
+
+.. module:: pcapkit.protocols.misc.no_payload.protocol
+
+:mod:`pcapkit.protocols.misc.no_payload.protocol` contains
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` only, which
+implements a :class:`~pcapkit.protocols.protocol.Protocol` like
+object whose payload is
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` itself.
+
+.. versionadded:: 1.6.0
+
+   Moved here from ``pcapkit.protocols.misc.null``, with its data model and
+   header schema, since a protocol class is named after its module
+   (:issue:`2529`).
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.misc.null``, ``pcapkit.protocols.data.misc.null`` and
+   ``pcapkit.protocols.schema.misc.null``, with no alias (:issue:`2529`).
+
+"""
+import io
+from typing import TYPE_CHECKING, overload
+
+from pcapkit.protocols.misc.no_payload.data import NoPayload as Data_NoPayload
+from pcapkit.protocols.misc.no_payload.schema import NoPayload as Schema_NoPayload
+from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import IO, Any, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+__all__ = ['NoPayload']
+
+
+class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
+                schema=Schema_NoPayload, data=Data_NoPayload):
+    """This class implements no-payload protocol.
+
+    Its ``payload`` is the instance itself, so a ``.payload`` walk over it
+    never terminates; bound any such loop, or walk the protocol chain of
+    the enclosing packet instead.
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    # name of current protocol
+    @property
+    def name(self) -> 'Literal["Null"]':
+        """Name of current protocol."""
+        return 'Null'
+
+    # header length of current protocol
+    @property
+    def length(self) -> 'Literal[0]':
+        """Header length of current protocol."""
+        return 0
+
+    # name of next layer protocol
+    @property
+    def protocol(self) -> 'NoReturn':
+        """Name of next layer protocol.
+
+        Raises:
+            UnsupportedCall: This protocol doesn't support :attr:`protocol`.
+
+        """
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+
+    # protocol chain of current instance
+    @property
+    def protochain(self) -> 'None':  # type: ignore[override]
+        """Protocol chain of current instance, which an empty payload does not
+        have.
+
+        .. versionchanged:: 1.5.0
+
+           Narrows :attr:`Protocol.protochain
+           <pcapkit.protocols.protocol.Protocol.protochain>`'s declared
+           type from :class:`~pcapkit.corekit.protochain.ProtoChain` to
+           :obj:`None`, the value ``self._protos`` already held here; the fix
+           is to the declaration, not the runtime value (:issue:`2317`).
+
+        """
+        return None
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_NoPayload':  # pylint: disable=unused-argument
+        """Read (parse) packet data.
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        return Data_NoPayload()
+
+    def make(self, **kwargs: 'Any') -> 'Schema_NoPayload':
+        """Make (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet schema.
+
+        """
+        return Schema_NoPayload()
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @overload
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,  # pylint: disable=unused-argument
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        #: bytes: Raw packet data.
+        self._data = b''
+        #: io.BytesIO: Source data stream.
+        self._file = io.BytesIO()
+        #: pcapkit.protocols.misc.no_payload.data.NoPayload: Data model of current instance.
+        self._info = Data_NoPayload()
+
+        #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Payload of current instance.
+        self._next = self
+        #: None: Protocol chain of current instance, which an empty payload
+        #: does not have.
+        self._protos = None  # type: ignore[assignment]
+
+    @classmethod
+    def __index__(cls) -> 'NoReturn':
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

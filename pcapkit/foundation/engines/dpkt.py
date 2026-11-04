@@ -17,8 +17,8 @@ from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
-from pcapkit.protocols.schema.misc.pcapng import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
+from pcapkit.protocols.misc.pcapng.schema import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
                                                   GENERIC_BLOCK_MINIMUM)
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import FormatError, stacklevel
@@ -39,12 +39,12 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.foundation.extraction import Extractor
-    from pcapkit.protocols.data.misc.pcapng import IF_TSOffsetOption as Data_IF_TSOffsetOption
-    from pcapkit.protocols.data.misc.pcapng import IF_TSResolOption as Data_IF_TSResolOption
-    from pcapkit.protocols.data.misc.pcapng import \
+    from pcapkit.protocols.misc.pcapng.data import IF_TSOffsetOption as Data_IF_TSOffsetOption
+    from pcapkit.protocols.misc.pcapng.data import IF_TSResolOption as Data_IF_TSResolOption
+    from pcapkit.protocols.misc.pcapng.data import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
-    from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
-    from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimplePacketBlock
+    from pcapkit.protocols.misc.pcapng.data import SectionHeaderBlock as Data_SectionHeaderBlock
+    from pcapkit.protocols.misc.pcapng.data import SimplePacketBlock as Data_SimplePacketBlock
 
     Reader = Union[PCAPReader, 'PCAPNGReader']
 
@@ -107,7 +107,7 @@ logger = get_logger(__name__)
 #: either byte order, spelled once rather than per block read.
 _SHB_TYPE_OCTETS = Enum_BlockType.Section_Header_Block.to_bytes(4, 'big')
 
-#: :data:`~pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC` as a
+#: :data:`~pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC` as a
 #: little-endian section writes it, spelled once rather than per block read.
 _LITTLE_BYTE_ORDER_OCTETS = BYTE_ORDER_MAGIC.to_bytes(4, 'little')
 
@@ -119,7 +119,7 @@ class PCAPNGReader:
     Block (IDB) of a file, and applies its link type and timestamp resolution
     to every packet (:issue:`1379`). This reader walks the blocks itself
     instead: it parses each Section Header Block and IDB with :mod:`pcapkit`'s
-    own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, keeps the interfaces
+    own :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, keeps the interfaces
     of the current section, and resolves every packet's link type,
     ``if_tsresol`` and ``if_tsoffset`` from the interface it names. Packet
     blocks are still decoded by `DPKT`_.
@@ -127,7 +127,7 @@ class PCAPNGReader:
     It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet
     Blocks, and skips every other block. ``dpkt.pcapng.Reader`` skips the
     Simple Packet Block too, and `DPKT`_ has no type for one, so that block is
-    parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well
+    parsed with :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` as well
     (:issue:`1520`).
 
     Args:
@@ -160,7 +160,7 @@ class PCAPNGReader:
     def _read(self) -> 'Iterator[tuple[float, bytes]]':
         """Read blocks until the next packet block, and yield its timestamp and data."""
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG as P_PCAPNG
 
         while True:
             head = self._file.read(8)
@@ -242,7 +242,7 @@ class PCAPNGReader:
         offset = 0 if tsoffset is None else tsoffset.offset
 
         # same arithmetic as :meth:`PCAPNG._read_timestamp
-        # <pcapkit.protocols.misc.pcapng.PCAPNG._read_timestamp>`
+        # <pcapkit.protocols.misc.pcapng.protocol.PCAPNG._read_timestamp>`
         ticks = (pkt.ts_high << 32) | pkt.ts_low
         with localcontext(prec=64):
             timestamp = decimal.Decimal(ticks) / resolution + offset
@@ -255,7 +255,7 @@ class PCAPNGReader:
         """Decode a Simple Packet Block, against the section's first interface.
 
         `DPKT`_ has no type for this block, so it is parsed by
-        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`: the packet data is
+        :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`: the packet data is
         ``min(original_len, snaplen)`` octets, with the snaplen of interface 0.
 
         Args:
@@ -272,7 +272,7 @@ class PCAPNGReader:
                 PCAP-NG specification).
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG as P_PCAPNG
         from pcapkit.toolkit.dpkt import Timestamp  # isort:skip
 
         if not self._ctx.interfaces:
@@ -371,7 +371,7 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
     """A :class:`dpkt.loopback.Loopback` that reads the address family by link type.
 
     It reads the address family in the byte order
-    :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for
+    :func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` gives for
     ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for
     ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30
     (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or
@@ -394,7 +394,7 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
     """
     import dpkt  # isort:skip
 
-    from pcapkit.protocols.link.loopback import family_byteorder  # isort:skip
+    from pcapkit.protocols.link.loopback.protocol import family_byteorder  # isort:skip
 
     layers = {2: ip, 24: ip6, 28: ip6, 30: ip6}
 

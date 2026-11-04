@@ -2,10 +2,10 @@
 """GitHub issue #2411: the ESP read path and one warning missed the ``ESP:`` prefix.
 
 #2366 (fixing #2297) put the house ``ESP: <lowercase description>`` prefix on
-:meth:`ESP.make <pcapkit.protocols.internet.esp.ESP.make>`'s
+:meth:`ESP.make <pcapkit.protocols.internet.esp.protocol.ESP.make>`'s
 :exc:`~pcapkit.utilities.exceptions.ProtocolError` messages and on
 :meth:`SecurityAssociation.unavailable
-<pcapkit.protocols.internet.esp.SecurityAssociation.unavailable>`, but eight
+<pcapkit.protocols.internet.esp.protocol.SecurityAssociation.unavailable>`, but eight
 sites were outside its checklist and kept the bare wording -- so the *same*
 condition read two different ways depending on which direction it was hit from
 (``ESP: no security association for SPI 0x...`` from ``make``, and
@@ -14,16 +14,16 @@ condition read two different ways depending on which direction it was hit from
 The eight, as #2411 enumerates them:
 
 * three diagnostics returned by :meth:`ESP._read_trailer
-  <pcapkit.protocols.internet.esp.ESP._read_trailer>` -- the one for a
+  <pcapkit.protocols.internet.esp.protocol.ESP._read_trailer>` -- the one for a
   plaintext too short to hold a trailer, the one for a pad length the
   plaintext cannot hold, and the padding-pattern one, which is both returned
   and warned with (:class:`ReadTrailerMessages`);
 * four built inline in :meth:`ESP.read
-  <pcapkit.protocols.internet.esp.ESP.read>` and surfaced as
-  :attr:`esp.error <pcapkit.protocols.data.internet.esp.ESP.error>`
+  <pcapkit.protocols.internet.esp.protocol.ESP.read>` and surfaced as
+  :attr:`esp.error <pcapkit.protocols.internet.esp.data.ESP.error>`
   (:class:`ReadErrorMessages`);
 * the integrity-key warning in :meth:`SecurityAssociation.__init__
-  <pcapkit.protocols.internet.esp.SecurityAssociation.__init__>`
+  <pcapkit.protocols.internet.esp.protocol.SecurityAssociation.__init__>`
   (:class:`IntegrityKeyWarning`). :func:`~pcapkit.utilities.warnings.warn`
   blames the caller's frame rather than the protocol, so the message text is
   the only thing that names ESP at all -- it needs the prefix more than the
@@ -90,7 +90,7 @@ class ESPMessageTestCase(unittest.TestCase):
         paths that carry the messages under test without a cipher in the way.
 
         """
-        from pcapkit.protocols.internet.esp import SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import SecurityAssociation
 
         kwargs.setdefault('spi', SPI)
         return SecurityAssociation(**kwargs)
@@ -103,7 +103,7 @@ class ESPMessageTestCase(unittest.TestCase):
 
         """
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESP, ESPContext
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext
 
         registry = ContextRegistry.make(ESPContext(*associations)) if associations else None
         with warnings.catch_warnings():
@@ -118,13 +118,13 @@ class ReadTrailerMessages(ESPMessageTestCase):
 
     ``_read_trailer`` is a :func:`staticmethod`, so it has no ``self.alias`` to
     read and spells the prefix literally -- the same way every site in
-    :class:`~pcapkit.protocols.internet.esp.SecurityAssociation` does.
+    :class:`~pcapkit.protocols.internet.esp.protocol.SecurityAssociation` does.
 
     """
 
     def trailer(self, plaintext: bytes, **kwargs: 'Any') -> 'Any':
         """``_read_trailer`` over ``plaintext``, for an SA built from ``kwargs``."""
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
 
         return ESP._read_trailer(plaintext, self.sa(**kwargs), SPI)
 
@@ -191,14 +191,14 @@ class ReadErrorMessages(ESPMessageTestCase):
     """
 
     def test_no_security_association_names_the_protocol(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
 
         info = self.parse(esp_packet(b'opaque-ciphertext'))
         self.assertIs(info.status, ESPStatus.NO_SA)
         self.assertEqual(info.error, f'ESP: no security association for SPI {SPI_TEXT}')
 
     def test_a_payload_shorter_than_the_declared_icv(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
 
         # the ICV length comes from the SA, so declaring 16 octets over a
         # 4-octet payload is reported as TRUNCATED with no cipher involved
@@ -210,7 +210,7 @@ class ReadErrorMessages(ESPMessageTestCase):
             'security association declares')
 
     def test_an_icv_that_does_not_verify(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus, Integrity
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus, Integrity
 
         sa = self.sa(integrity=Integrity.HMAC_SHA2_256_128, integrity_key=bytes(32))
         # a 16-octet ICV that is not the one the key computes
@@ -223,7 +223,7 @@ class ReadErrorMessages(ESPMessageTestCase):
             f'ESP: integrity check value does not verify for SPI {SPI_TEXT} sequence 7')
 
     def test_the_right_icv_still_verifies(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus, Integrity
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus, Integrity
 
         key = bytes(range(32))
         sa = self.sa(integrity=Integrity.HMAC_SHA2_256_128, integrity_key=key)
@@ -236,7 +236,7 @@ class ReadErrorMessages(ESPMessageTestCase):
 
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_aead_tag_mismatch_names_the_protocol(self) -> None:
-        from pcapkit.protocols.internet.esp import Cipher, ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import Cipher, ESPStatus
 
         # a combined-mode SA verifies its own tag inside decryption, so the
         # wrong key surfaces as the library's InvalidTag rather than as a
@@ -257,12 +257,12 @@ class IntegrityKeyWarning(ESPMessageTestCase):
 
     :func:`~pcapkit.utilities.warnings.warn` reports the *caller's* frame, so
     without the prefix the text is all a reader has to go on -- there is no
-    ``pcapkit/protocols/internet/esp.py`` in the location it prints.
+    ``pcapkit/protocols/internet/esp/protocol.py`` in the location it prints.
 
     """
 
     def test_a_short_integrity_key_warns_by_name(self) -> None:
-        from pcapkit.protocols.internet.esp import Integrity
+        from pcapkit.protocols.internet.esp.protocol import Integrity
         from pcapkit.utilities.warnings import ProtocolWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -277,7 +277,7 @@ class IntegrityKeyWarning(ESPMessageTestCase):
              'got 16 octets; the ICV will very likely fail to verify'])
 
     def test_a_key_of_the_right_size_does_not_warn(self) -> None:
-        from pcapkit.protocols.internet.esp import Integrity
+        from pcapkit.protocols.internet.esp.protocol import Integrity
         from pcapkit.utilities.warnings import ProtocolWarning
 
         with warnings.catch_warnings(record=True) as caught:

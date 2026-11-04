@@ -167,7 +167,7 @@ class TestMHReservedPadding(unittest.TestCase):
 
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         module, enum = ENUMS[carrier]
         code = getattr(getattr(importlib.import_module(module), enum), name)
@@ -186,7 +186,7 @@ class TestMHReservedPadding(unittest.TestCase):
         return bytes(MH(type=Packet.Binding_Refresh_Request, data={'options': [option]}, **base))
 
     def test_reserved_octets_rebuild_as_captured(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for site, _, _, raw_hex, zero_hex in CASES:
             raw = bytes.fromhex(raw_hex)
@@ -198,7 +198,7 @@ class TestMHReservedPadding(unittest.TestCase):
                 self.assertEqual(rebuilt.hex(), raw_hex)
 
     def test_fresh_build_writes_zeros(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for site, carrier, name, _, zero_hex in CASES:
             with self.subTest(site=site):
@@ -211,7 +211,7 @@ class TestMHReservedPadding(unittest.TestCase):
 
     def test_every_padding_site_has_a_case(self) -> None:
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import schema
 
         # ``PadOption`` and ``PadFlowIdentificationSuboption`` carry padding
         # rather than a reserved field, and are pinned by
@@ -224,7 +224,7 @@ class TestMHReservedPadding(unittest.TestCase):
         self.assertEqual(sites, {case[0] for case in CASES})
 
     def test_data_model_keeps_the_octets(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         hoti = bytes.fromhex(dict((case[0], case[3]) for case in CASES)['HomeTestInitMessage'])
         info = MH(io.BytesIO(hoti), len(hoti), extension=True).info
@@ -237,7 +237,7 @@ class TestMHReservedPadding(unittest.TestCase):
 
     def test_maker_takes_reserved_keyword(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         self.assertEqual(bytes(proto._make_msg_hoti(msg_reserved=b'\xaa\xbb').pack())[:2], b'\xaa\xbb')

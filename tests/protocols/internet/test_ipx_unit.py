@@ -22,8 +22,8 @@ class IPXUnitTests(unittest.TestCase):
     def test_ipx_index_length_and_make_data(self) -> None:
         from pcapkit.const.ipx.socket import Socket
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.ipx import Address
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.data import Address
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         data = DummyDict(
             chksum=b'\xff\xff',
@@ -50,7 +50,7 @@ class IPXUnitTests(unittest.TestCase):
         self.assertIn('payload', values)
 
     def test_ipx_make_builds_schema_with_addresses(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         proto = object.__new__(IPX)
         dst = b'\x00\x00\x00\x01\x00\x01\x02\x03\x04\x05\x04\x56'
@@ -74,8 +74,8 @@ class IPXUnitTests(unittest.TestCase):
     def test_ipx_read_properties_and_address_decoding(self) -> None:
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.const.ipx.socket import Socket
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.internet.ipx.schema import IPX as Schema_IPX
 
         proto = object.__new__(IPX)
         dst = b'\x00\x00\x00\x01\x00\x01\x02\x03\x04\x05\x04\x56'

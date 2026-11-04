@@ -57,7 +57,7 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, data: 'bytes') -> 'object':
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -69,7 +69,7 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         return self.parse(data).info.options[OptionNumber[kind]]  # type: ignore[attr-defined]
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for name, data in HEADERS.items():
             with self.subTest(header=name):
@@ -83,7 +83,7 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         import ipaddress
 
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         # Each of these floors one short through ``total_seconds() * 1000``.
         for msec in (1001, 1009, 2048006, 2147483644):
@@ -119,8 +119,8 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         from pcapkit.const.ipv4.classification_level import ClassificationLevel
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
-        from pcapkit.protocols.data.internet.ipv4 import SECOption
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.data import SECOption
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         proto = IPv4.__new__(IPv4)
         # One recorded indicator, but the authorities reach a second octet.

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.hip.HIP` Constant Enumerations
-========================================================================
+""":class:`~pcapkit.protocols.internet.hip.protocol.HIP` Constant Enumerations
+=================================================================================
 
 .. module:: pcapkit.const.hip
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` implementations. Available
 enumerations include:
 
 .. list-table::

@@ -6,19 +6,19 @@ house ``<prefix>: <lowercase description>: … {value!r}`` form with no closing
 full stop (#2232, #2257). These guards did not.
 
 #2300 -- the guards that reject a file's magic number or byte order carried no
-prefix at all: :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback`
+prefix at all: :func:`~pcapkit.protocols.misc.pcap.header.schema.magic_number_callback`
 raised ``invalid magic number``, naming neither the module nor the four octets
 it had just read; :meth:`Header._make_magic
-<pcapkit.protocols.misc.pcap.header.Header._make_magic>` raised ``unresolved
+<pcapkit.protocols.misc.pcap.header.protocol.Header._make_magic>` raised ``unresolved
 byte order`` and ``unknown byte order: 'middle'``; and PCAP-NG's
-:func:`~pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback` and
+:func:`~pcapkit.protocols.misc.pcapng.schema.shb_byteorder_callback` and
 :meth:`SectionHeaderBlock.post_process
-<pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.post_process>` raised
+<pcapkit.protocols.misc.pcapng.schema.SectionHeaderBlock.post_process>` raised
 ``unknown byteorder magic: 0x11223344``, spelling the specification's
 "Byte-Order Magic" as one word.
 
 #2301 -- the PCAP-NG option guards closed with a full stop, and the placement
-guard formatted :attr:`PCAPNG._type <pcapkit.protocols.misc.pcapng.PCAPNG._type>`
+guard formatted :attr:`PCAPNG._type <pcapkit.protocols.misc.pcapng.protocol.PCAPNG._type>`
 with a bare ``{}``. That attribute is an :class:`~enum.IntEnum`, which a bare
 ``{}`` renders as its value, so the message named the block type as a number:
 ``must be in Interface Description Block, but found in 6 block.`` rather than
@@ -30,7 +30,7 @@ pass assigns what :meth:`~pcapkit.protocols.protocol.Protocol._make_index`
 resolves the code to: the member for a code a member holds, which the make-pass
 cases below pin, and the plain :obj:`int` for an in-range code no member holds.
 That int has no ``.name``, so
-:func:`~pcapkit.protocols.misc.pcapng._block_type_name` looks the code up and
+:func:`~pcapkit.protocols.misc.pcapng.protocol._block_type_name` looks the code up and
 names either.
 
 Every case builds its own octets in memory and reads no capture. Classes are
@@ -59,7 +59,7 @@ class TestPCAPHeaderMessages(unittest.TestCase):
 
     def test_magic_number_is_prefixed_and_names_the_octets(self) -> None:
         """The magic-number guard says which module rejected what."""
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -69,7 +69,7 @@ class TestPCAPHeaderMessages(unittest.TestCase):
 
     def test_magic_number_names_the_octets_it_read(self) -> None:
         """The rejected octets are the ones read, not a fixed string."""
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import ProtocolError
 
         octets = b'\xde\xad\xbe\xef' + b'\x00' * 20
@@ -80,7 +80,7 @@ class TestPCAPHeaderMessages(unittest.TestCase):
 
     def test_unresolved_byte_order_is_prefixed(self) -> None:
         """Contradictory ``lilendian`` and ``bigendian`` flags name the module."""
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import EndianError
 
         with self.assertRaises(EndianError) as ctx:
@@ -89,7 +89,7 @@ class TestPCAPHeaderMessages(unittest.TestCase):
 
     def test_unknown_byte_order_is_prefixed(self) -> None:
         """An unrecognised ``byteorder`` names the module and the value."""
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import EndianError
 
         with self.assertRaises(EndianError) as ctx:
@@ -105,7 +105,7 @@ class TestPCAPNGByteOrderMessages(unittest.TestCase):
 
     def test_callback_is_prefixed_and_hyphenates_byte_order(self) -> None:
         """``shb_byteorder_callback`` takes the house prefix."""
-        from pcapkit.protocols.schema.misc.pcapng import shb_byteorder_callback
+        from pcapkit.protocols.misc.pcapng.schema import shb_byteorder_callback
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -121,7 +121,7 @@ class TestPCAPNGByteOrderMessages(unittest.TestCase):
         which is a byte order in neither direction (#1422).
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         octets = struct.pack('<II', 0x0A0D0D0A, 16) + struct.pack('<I', 12) + struct.pack('<I', 16)
@@ -142,7 +142,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -156,7 +156,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """The block type is named, not numbered, and the message has no full stop."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -172,7 +172,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """The make pass's ``_type`` reaches the guard as the member, not an AttributeError (#2594)."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         seen = {}  # type: dict[str, Any]
@@ -208,7 +208,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import _block_type_name
+        from pcapkit.protocols.misc.pcapng.protocol import _block_type_name
 
         self.assertEqual(_block_type_name(BlockType.Enhanced_Packet_Block),
                          'Enhanced_Packet_Block')
@@ -225,7 +225,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import _block_type_name
+        from pcapkit.protocols.misc.pcapng.protocol import _block_type_name
 
         with self.assertRaises(ValueError):
             BlockType(0x100)
@@ -235,7 +235,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """A repeated "only one" option reports the count in the house form."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -251,7 +251,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """The ``if_tsresol`` resolution guard takes the same ``not …`` form."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -267,7 +267,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """The ``if_tzone`` timezone guard takes the same ``not …`` form."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -283,7 +283,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
         """#2301: the whole module is free of the full-stop form, not just the guards hit above."""
         import re
 
-        from pcapkit.protocols.misc import pcapng
+        from pcapkit.protocols.misc.pcapng import protocol as pcapng
 
         with open(pcapng.__file__, encoding='utf-8') as file:
             source = file.read()
@@ -295,7 +295,7 @@ class TestPCAPNGOptionGuardMessages(unittest.TestCase):
 
     def test_no_guard_formats_the_block_type_with_a_bare_brace(self) -> None:
         """#2301: ``{self._type}`` in a message would render the block type as a number."""
-        from pcapkit.protocols.misc import pcapng
+        from pcapkit.protocols.misc.pcapng import protocol as pcapng
 
         with open(pcapng.__file__, encoding='utf-8') as file:
             source = file.read()

@@ -1,0 +1,972 @@
+# -*- coding: utf-8 -*-
+"""IPv6-Route - Routing Header for IPv6
+==========================================
+
+.. module:: pcapkit.protocols.internet.ipv6_route.protocol
+
+:mod:`pcapkit.protocols.internet.ipv6_route.protocol` contains
+:class:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route`
+only, which implements the extractor for Routing Header for IPv6
+(IPv6-Route) [*]_, whose structure is described as below:
+
+======= ========= ==================== ===============================
+Octets      Bits        Name                    Description
+======= ========= ==================== ===============================
+  0           0   ``route.next``            Next Header
+  1           8   ``route.length``          Header Extension Length
+  2          16   ``route.type``            Routing Type
+  3          24   ``route.seg_left``        Segments Left
+  4          32   ``route.data``            Type-Specific Data
+======= ========= ==================== ===============================
+
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Routing
+
+"""
+import collections
+import math
+import os.path as os_path
+from typing import TYPE_CHECKING, cast, overload
+
+from pcapkit.const.ipv6.routing import Routing as Enum_Routing
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+from pcapkit.protocols.internet.ipv6_route.data import RPL as Data_RPL
+from pcapkit.protocols.internet.ipv6_route.data import IPv6_Route as Data_IPv6_Route
+from pcapkit.protocols.internet.ipv6_route.data import SourceRoute as Data_SourceRoute
+from pcapkit.protocols.internet.ipv6_route.data import Type2 as Data_Type2
+from pcapkit.protocols.internet.ipv6_route.data import UnknownType as Data_UnknownType
+from pcapkit.protocols.internet.ipv6_route.schema import RPL as Schema_RPL
+from pcapkit.protocols.internet.ipv6_route.schema import IPv6_Route as Schema_IPv6_Route
+from pcapkit.protocols.internet.ipv6_route.schema import RoutingType as Schema_RoutingType
+from pcapkit.protocols.internet.ipv6_route.schema import SourceRoute as Schema_SourceRoute
+from pcapkit.protocols.internet.ipv6_route.schema import Type2 as Schema_Type2
+from pcapkit.protocols.internet.ipv6_route.schema import UnknownType as Schema_UnknownType
+from pcapkit.protocols.internet.ipv6_route.schema import (ipv6_route_data_length,
+                                                          ipv6_route_header_length)
+from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+from pcapkit.protocols.schema import Schema
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.warnings import RegistryWarning, warn
+
+if TYPE_CHECKING:
+    from ipaddress import IPv6Address
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
+
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
+    from typing_extensions import Literal
+
+    from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.protocol import ProtocolBase
+
+    TypeParser = Callable[[Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
+    TypeConstructor = Callable[[Enum_Routing, DefaultArg(Optional[Data_IPv6_Route]),
+                                NamedArg(Optional[IPv6Address], 'dst'), KwArg(Any)], Schema_RoutingType]
+
+__all__ = ['IPv6_Route']
+
+
+class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
+                 schema=Schema_IPv6_Route, data=Data_IPv6_Route):
+    """This class implements Routing Header for IPv6.
+
+    This class parses the following Routing Header for IPv6 routing data types,
+    which are registered in the
+    :attr:`self.__routing__ <pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.__routing__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Routing Code
+         - Data Parser
+         - Data Constructor
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Source_Route`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_src`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data_type_src`
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_2`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data_type_2`
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._make_data_type_rpl`
+
+    .. versionchanged:: 1.3.4
+
+       :attr:`length`, and the ``length`` field of the parsed data model, is
+       the header's size in octets rather than the raw Hdr Ext Len value
+       (:issue:`218`).
+
+    .. versionchanged:: 1.5.0
+
+       * Hdr Ext Len is in 8-octet units both on read and on build
+         (:issue:`487`).
+       * The RPL fixed area is sized at 4 octets, per :rfc:`6554`
+         (:issue:`564`).
+       * A :obj:`bool` given as an address raises
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError` (:issue:`540`).
+       * :meth:`make` takes ``data`` as :obj:`bytes` for every routing type
+         (:issue:`1236`), and an RPL source route rebuilds byte for byte, its
+         address compression and a truncated address list included
+         (:issue:`1456`, :issue:`1457`).
+       * A rebuild keeps the reserved bits of an RPL source route
+         (:issue:`1235`), and the reserved octets of a Source Route or Type 2
+         header and the ``Pad`` octets of an RPL one as captured
+         (:issue:`1223`).
+
+    .. versionchanged:: 1.6.0
+
+       * :meth:`make` and the RPL source route maker, given a value a
+         fixed-width field cannot carry -- negative, too wide, or a
+         :obj:`bool` for a field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception
+         (:issue:`2614`).
+       * The Source Route and Type 2 makers raise it for ``reserved`` octets that
+         are not four, rather than padding or cutting them (:issue:`2676`).
+       * Each enumeration field of :meth:`make`, ``next`` and ``type``, takes
+         a member or an :class:`int` code, resolved with the enumeration's
+         ``get``; a name, a :obj:`bool`, or a code that does not fit in one
+         octet raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than resolving against an enumeration inferred from the
+         caller's frame or writing a different value (:issue:`2594`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``next_default``, ``next_namespace``, ``next_reversed``,
+       ``type_default``, ``type_namespace`` and ``type_reversed`` arguments of
+       :meth:`make`; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Type code to method mapping. A :obj:`str` value names the methods
+    #: ``_read_data_type_${name}`` and ``_make_data_type_${name}``, falling back
+    #: to ``_read_data_type_none`` / ``_make_data_type_none`` when they do not
+    #: exist; any other value is a ``(parser, constructor)`` pair of callables.
+    __routing__ = collections.defaultdict(
+        lambda: 'none',
+        {
+            Enum_Routing.Source_Route: 'src',             # [RFC 5095] DEPRECATED
+            Enum_Routing.Type_2_Routing_Header: '2',      # [RFC 6275]
+            Enum_Routing.RPL_Source_Route_Header: 'rpl',  # [RFC 6554]
+        },
+    )  # type: DefaultDict[Enum_Routing | int, str | tuple[TypeParser, TypeConstructor]]
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'Literal["Routing Header for IPv6"]':
+        """Name of current protocol."""
+        return 'Routing Header for IPv6'
+
+    @property
+    def alias(self) -> 'Literal["IPv6-Route"]':
+        """Acronym of corresponding protocol."""
+        return 'IPv6-Route'
+
+    @property
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.length
+
+    @property
+    def payload(self) -> 'ProtocolBase | NoReturn':
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+        return self._next
+
+    @property
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def read(self, length: 'Optional[int]' = None, *, extension: 'bool' = False,  # pylint: disable=arguments-differ
+             **kwargs: 'Any') -> 'Data_IPv6_Route':  # pylint: disable=unused-argument
+        """Read Routing Header for IPv6.
+
+        Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`]:
+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |  Hdr Ext Len  |  Routing Type | Segments Left |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                       type-specific data                      .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            length: Length of packet data.
+            extension: If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        if length is None:
+            length = len(self)
+        schema = self.__header__
+
+        name = self._lookup_registry(self.__routing__, schema.type)
+        if isinstance(name, str):
+            name = f'_read_data_type_{name.lower()}'
+            meth = cast('TypeParser',
+                            getattr(self, name, self._read_data_type_none))
+        else:
+            meth = name[0]
+        ipv6_route = meth(schema.data, header=schema)
+
+        if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            return ipv6_route
+        return self._decode_next_layer(ipv6_route, schema.next, length - ipv6_route.length)
+
+    def make(self,
+             dst: 'Optional[IPv6Address | str | int| bytes]' = None,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             type: 'Enum_Routing | int' = Enum_Routing.Source_Route,
+             seg_left: 'int' = 0,
+             data: 'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
+             hdr_ext_len: 'Optional[int]' = None,
+             payload: 'ProtocolBase | Schema | bytes' = b'',
+             **kwargs: 'Any') -> 'Schema_IPv6_Route':
+        """Make (construct) packet data.
+
+        Args:
+            dst: Destination address.
+            next: Next header type.
+            type: Routing type.
+            seg_left: Segments left.
+            data: Routing data.
+            hdr_ext_len: ``Hdr Ext Len`` field value; computed from ``data``
+                when omitted.
+            payload: Payload of current instance.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Raises:
+            FieldValueError: If ``dst`` is a :obj:`bool` (see
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`)
+                and ``data`` is a :obj:`dict` or a data model; ``dst`` is not
+                read for any other ``data``.
+            ProtocolError: If ``next`` or ``type`` is a name, a :obj:`bool`,
+                or a member or code that does not fit in one octet; if
+                ``data`` is :obj:`bytes` that do not parse as the routing data
+                of ``type``, or is of none of the accepted types; or if
+                ``seg_left``, or ``hdr_ext_len`` or the ``Hdr Ext Len``
+                computed from ``data``, does not fit in one octet.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``hdr_ext_len`` ahead of ``payload`` (:issue:`1457`), which
+           shifts a positional ``payload``.
+
+        """
+        next_val = self._make_index(next, Enum_TransType, bits=8, name='next header')
+        type_val = self._make_index(type, Enum_Routing, bits=8, name='routing type')
+
+        if isinstance(data, bytes):
+            # ``data`` here *is* the type-specific data (no per-type
+            # constructor involved), so pad it to the next octet count
+            # ``_make_hdr_ext_len`` can express exactly, then derive
+            # ``Hdr Ext Len`` from the aligned length with that same helper.
+            length = self._make_hdr_ext_len(len(data))
+            data_raw = data.ljust(ipv6_route_data_length(length), b'\x00')
+
+            # NOTE: Unpacked into the routing type's own schema, since
+            # :meth:`read` hands the schema's ``data`` to the per-type reader,
+            # which reads fields rather than octets off it.
+            try:
+                data_val = Schema_RoutingType.registry[type_val].unpack(  # pylint: disable=unsubscriptable-object
+                    data_raw, len(data_raw), {})  # type: Schema_RoutingType
+            except Exception as exc:
+                raise ProtocolError(f'{self.alias}: [TypeNo {type_val}] routing data '
+                                    f'{data_raw.hex()} does not parse as this type') from exc
+        elif isinstance(data, (dict, Data_IPv6_Route)):
+            name = self._lookup_registry(self.__routing__, type_val)
+            if isinstance(name, str):
+                name = f'_make_data_type_{name.lower()}'
+                meth = cast('TypeConstructor',
+                            getattr(self, name, self._make_data_type_none))
+            else:
+                meth = name[1]
+
+            # NOTE: Through ``parse_ip_address`` rather than
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``
+            # subclass the latter accepts silently: ``dst=True`` would become
+            # ``::1``.
+            dst_val = cast('IPv6Address', parse_ip_address(
+                dst, f'{self.alias}: invalid destination address', version=6)) if dst is not None else None
+            if isinstance(data, dict):
+                data_val = meth(type_val, dst=dst_val, **data)
+            else:
+                data_val = meth(type_val, data, dst=dst_val)
+            length = self._make_hdr_ext_len(len(data_val.pack()))
+        elif isinstance(data, Schema):
+            length = self._make_hdr_ext_len(len(data.pack()))
+            data_val = data
+        else:
+            raise ProtocolError(f'{self.alias}: invalid routing data type: {data.__class__}')
+
+        # NOTE: An explicit ``hdr_ext_len`` is written as given, so that a
+        # ``from_data`` rebuild of a header the capture cut short keeps the
+        # length the sender declared instead of the one that was recorded
+        # (#1457), the same as IPv6's ``payload_length``.
+        if hdr_ext_len is not None:
+            length = hdr_ext_len
+
+        return Schema_IPv6_Route(
+            next=next_val,
+            length=self._make_uint(length, bits=8, name='Hdr Ext Len'),
+            type=type_val,
+            seg_left=self._make_uint(seg_left, bits=8, name='Segments Left'),
+            data=data_val,
+            payload=payload,
+        )
+
+    @classmethod
+    def register_routing(cls, code: 'Enum_Routing', meth: 'str | tuple[TypeParser, TypeConstructor]') -> 'None':
+        """Register a routing data parser.
+
+        Args:
+            code: IPv6-Route data type code.
+            meth: Name ``X`` of the ``_read_data_type_X`` and
+                ``_make_data_type_X`` methods, or a ``(parser, constructor)`` pair
+                of callables, see :attr:`__routing__`.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
+        """
+        incumbent = cls.__routing__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
+            warn(f'routing {code} already registered, overwriting', RegistryWarning)
+        cls.__routing__[code] = meth
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv6_Route"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv6_Route',)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @overload
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = ..., src_ip: 'Optional[IPv6Address]'= ...,
+                      dst_ip: 'Optional[IPv6Address]'= ..., **kwargs: 'Any') -> 'None': ...
+
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            extension: If the protocol is used as an IPv6 extension header.
+            src_ip: source IP address
+            dst_ip: destination IP address
+            **kwargs: Arbitrary keyword arguments.
+
+        Note:
+            ``src_ip`` and ``dst_ip`` are declared only in the ``@overload``
+            stub above, which types them as optional keyword parameters. The
+            runtime accepts them through ``**kwargs`` without defaulting them.
+            The discrepancy with the implementation signature is deliberate
+            (GitHub issue :issue:`505`).
+
+        See Also:
+            For construction arguments, please refer to :meth:`self.make <IPv6_Route.make>`.
+
+        """
+        #: bool: If the protocol is used as an IPv6 extension header.
+        self._extf = extension
+
+        # call super __post_init__
+        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
+
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object.
+
+        Eight octets: the four fixed ones and the type-specific data that
+        :rfc:`8200#section-4.4` counts in the first 8-octet unit.
+
+        """
+        return 8
+
+    @classmethod
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return Enum_TransType.IPv6_Route  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6_Route') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'type': data.type,
+            'seg_left': data.seg_left,
+            'data': data,
+            # NOTE: ``data.length`` is the parsed header length in octets,
+            # passed through as ``Hdr Ext Len`` rather than left to ``make`` to
+            # recompute, so that a truncated capture rebuilds with the length
+            # that was on the wire (#1457).
+            'hdr_ext_len': (data.length - 8) // 8,
+            'payload': cls._make_payload(data),
+        }
+
+    @staticmethod
+    def _make_hdr_ext_len(data_length: 'int') -> 'int':
+        """Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.
+
+        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is the length of the
+        Routing header in 8-octet units, not including the first 8 octets. The
+        fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so
+        the on-the-wire header is ``4 + data_length`` octets; equating that to
+        ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.
+        :func:`~pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length`
+        is the inverse, used on the read side.
+
+        This is the *only* place ``Hdr Ext Len`` is computed on the write side:
+        separate per-branch copies in :meth:`make` drift apart, so keep one
+        helper. Do NOT "simplify" the ``- 4`` / ``/ 8``
+        away: the units either side differ (octets vs. 8-octet units), and
+        dropping the offset silently reinterprets the field.
+
+        Args:
+            data_length: packed length, in octets, of the type-specific data
+                (i.e. ``len(data_val.pack())`` for a
+                :class:`~pcapkit.protocols.schema.Schema`-based payload, or the padded raw
+                :obj:`bytes` length for the unknown/raw-bytes case).
+
+        Returns:
+            The ``Hdr Ext Len`` field value.
+
+        """
+        return math.ceil(max(0, data_length - 4) / 8)
+
+    def _read_data_type_none(self, schema: 'Schema_UnknownType', *, header: 'Schema_IPv6_Route') -> 'Data_UnknownType':
+        """Read IPv6-Route unknown type data.
+
+        Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`]:
+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |  Hdr Ext Len  |  Routing Type | Segments Left |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                       type-specific data                      .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
+
+        Returns:
+            Parsed route data.
+
+        """
+        ipv6_route = Data_UnknownType(
+            next=header.next,
+            length=ipv6_route_header_length(header.length),
+            type=header.type,
+            seg_left=header.seg_left,
+            data=schema.data,
+        )
+        return ipv6_route
+
+    def _read_data_type_src(self, schema: 'Schema_SourceRoute', *, header: 'Schema_IPv6_Route') -> 'Data_SourceRoute':
+        """Read IPv6-Route Source Route data.
+
+        Structure of IPv6-Route Source Route data [:rfc:`5095`]:
+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |  Hdr Ext Len  | Routing Type=0| Segments Left |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Reserved                           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                           Address[1]                          +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                           Address[2]                          +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                           Address[n]                          +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
+
+        Returns:
+            Parsed route data.
+
+        Raises:
+            ProtocolError: If ``Hdr Ext Len`` is odd.
+
+        """
+        # ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200
+        # #section-4.4`), not octets. Each 16-octet address costs 2 of those
+        # units, so a well-formed Source Route header always carries an even
+        # ``Hdr Ext Len``; a check that assumes it is a total octet count
+        # rejects most well-formed headers.
+        if header.length % 2 != 0:
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
+
+        ipv6_route = Data_SourceRoute(
+            next=header.next,
+            length=ipv6_route_header_length(header.length),
+            type=header.type,
+            seg_left=header.seg_left,
+            reserved=schema.reserved,
+            ip=tuple(schema.ip),
+        )
+        return ipv6_route
+
+    def _read_data_type_2(self, schema: 'Schema_Type2', *, header: 'Schema_IPv6_Route') -> 'Data_Type2':
+        """Read IPv6-Route Type 2 data.
+
+        Structure of IPv6-Route Type 2 data [:rfc:`6275`]:
+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  | Hdr Ext Len=2 | Routing Type=2|Segments Left=1|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Reserved                           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                         Home Address                          +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
+
+        Returns:
+            Parsed route data.
+
+        Raises:
+            ProtocolError: If ``Hdr Ext Len`` is **NOT** ``2``.
+
+        """
+        # A Type 2 Routing header is fixed at 24 octets (4 fixed + 4 reserved
+        # + 16-octet home address), so its ``Hdr Ext Len``, in 8-octet units
+        # rather than octets (:rfc:`8200#section-4.4`), is always ``2``; a
+        # literal ``24`` could never match.
+        if header.length != 2:
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
+
+        ipv6_route = Data_Type2(
+            next=header.next,
+            length=ipv6_route_header_length(header.length),
+            type=header.type,
+            seg_left=header.seg_left,
+            reserved=schema.reserved,
+            ip=schema.ip,
+        )
+        return ipv6_route
+
+    def _read_data_type_rpl(self, schema: 'Schema_RPL', *, header: 'Schema_IPv6_Route') -> 'Data_RPL':
+        """Read IPv6-Route RPL Source data.
+
+        Structure of IPv6-Route RPL Source data [:rfc:`6554`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |  Hdr Ext Len  | Routing Type  | Segments Left |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | CmprI | CmprE |  Pad  |               Reserved                |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Addresses[1..n]                        .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
+
+        Returns:
+            Parsed route data.
+
+        Raises:
+            ProtocolError: If ``Hdr Ext Len``, ``Pad``, ``CmprI`` and
+                ``CmprE`` do not give a whole number of addresses, at least
+                one (:rfc:`6554#section-4.2`).
+
+        """
+        # NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units
+        # :rfc:`6554#section-3` specifies, not octets, and the addresses are
+        # not always 16 octets: an SRH carries full addresses only when
+        # ``CmprI`` and ``CmprE`` are both 0. A plain ``% 16`` bound on the
+        # length is therefore wrong on both counts.
+        #
+        # :rfc:`6554#section-4.2` derives the address count from the fields
+        # this reader has to hand:
+        #
+        #     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1
+        #
+        # so the invariant available is that the division closes: non-negative
+        # and whole. ``16 - cmpr_i`` cannot be zero, since ``CmprI`` is a
+        # 4-bit unsigned integer (:rfc:`6554#section-3`), at most 15. This is
+        # the well-formedness check the library needs to walk
+        # ``Addresses[1..n]`` at all; the RFC specifies no malformed-header
+        # drop condition beyond ``Segments Left > n``, so nothing stricter is
+        # imposed. Not checked against a real RPL capture.
+        cmpr_i = schema.cmpr['cmpr_i']
+        cmpr_e = schema.cmpr['cmpr_e']
+        pad_len = schema.pad['pad_len']
+
+        remainder = header.length * 8 - pad_len - (16 - cmpr_e)
+        if remainder < 0 or remainder % (16 - cmpr_i) != 0:
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
+
+        ipv6_route = Data_RPL(
+            next=header.next,
+            length=ipv6_route_header_length(header.length),
+            type=header.type,
+            seg_left=header.seg_left,
+            cmpr_i=cmpr_i,
+            cmpr_e=cmpr_e,
+            pad=pad_len,
+            reserved=schema.pad['reserved'],
+            ip=tuple(schema.ip),
+            padding=schema.padding,
+        )
+        return ipv6_route
+
+    def _make_data_type_none(self, type: 'Enum_Routing', route: 'Optional[Data_UnknownType]' = None, *,
+                             dst: 'Optional[IPv6Address]' = None,
+                             data: 'bytes' = b'\x00\x00\x00\x00',
+                             **kwargs: 'Any') -> 'Schema_UnknownType':
+        """Make IPv6-Route unknown type data.
+
+        Args:
+            type: routing type
+            route: route data
+            dst: destination IPv6 address
+            data: raw route data as :obj:`bytes`
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed route data schema.
+
+        """
+        if route is not None:
+            data = route.data
+
+        pad_len = pad_length(len(data) + 4, 8)
+        if pad_len:
+            data += bytes(pad_len)
+
+        return Schema_UnknownType(
+            data=data,
+        )
+
+    def _make_data_type_src(self, type: 'Enum_Routing', route: 'Optional[Data_SourceRoute]' = None, *,
+                            dst: 'Optional[IPv6Address]' = None,
+                            ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
+                            reserved: 'bytes' = b'\x00\x00\x00\x00',
+                            **kwargs: 'Any') -> 'Schema_SourceRoute':
+        """Make IPv6-Route Source Route data.
+
+        Args:
+            type: routing type
+            route: route data
+            dst: destination IPv6 address
+            ip: list of IPv6 addresses
+            reserved: the four reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed route data schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not four octets.
+
+        """
+        if route is not None:
+            ip = cast('list[IPv6Address | str | bytes | int]', route.ip)
+            reserved = self._fill_short_read(getattr(route, 'reserved', b'\x00\x00\x00\x00'),
+                                             size=4, model=route, field='data')
+        else:
+            ip = [] if ip is None else ip
+
+        return Schema_SourceRoute(
+            reserved=self._make_octets(reserved, size=4, name='reserved octets'),
+            ip=ip,
+        )
+
+    def _make_data_type_2(self, type: 'Enum_Routing', route: 'Optional[Data_Type2]' = None, *,
+                          dst: 'Optional[IPv6Address]' = None,
+                          ip: 'IPv6Address | str | bytes | int' = '::',
+                          reserved: 'bytes' = b'\x00\x00\x00\x00',
+                          **kwargs: 'Any') -> 'Schema_Type2':
+        """Make IPv6-Route Type 2 data.
+
+        Args:
+            type: routing type
+            route: route data
+            dst: destination IPv6 address
+            ip: home address
+            reserved: the four reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed route data schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` is not four octets.
+
+        """
+        if route is not None:
+            ip = cast('IPv6Address | str | bytes | int', route.ip)
+            reserved = self._fill_short_read(getattr(route, 'reserved', b'\x00\x00\x00\x00'),
+                                             size=4, model=route, field='data')
+
+        return Schema_Type2(
+            reserved=self._make_octets(reserved, size=4, name='reserved octets'),
+            ip=ip,
+        )
+
+    def _make_data_type_rpl(self, type: 'Enum_Routing', route: 'Optional[Data_RPL]' = None, *,
+                            dst: 'Optional[IPv6Address]' = None,
+                            ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
+                            reserved: 'int' = 0,
+                            padding: 'bytes' = b'',
+                            **kwargs: 'Any') -> 'Schema_RPL':
+        """Make IPv6-Route RPL Source data.
+
+        Args:
+            type: routing type
+            route: route data
+            dst: destination IPv6 address
+            ip: list of IPv6 addresses
+            reserved: reserved bits after ``Pad``
+            padding: the ``Pad`` octets after the addresses, truncated or
+                zero-filled to ``Pad`` octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed route data schema.
+
+        Raises:
+            FieldValueError: If an entry of ``ip`` is a :obj:`bool` (see
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
+            ProtocolError: If ``ip`` is empty, or ``reserved`` does not fit in
+                its twenty bits.
+
+        """
+        if route is not None:
+            cmpr_i = route.cmpr_i
+            cmpr_e = route.cmpr_e
+            pad = route.pad
+            reserved = route.reserved
+            padding = getattr(route, 'padding', b'')
+
+            # NOTE: A parsed address is decoded to its full 16 octets whenever
+            # the header sat inside IPv6, the ``dst`` prefix restored, so it is
+            # compressed again here: ``Addresses[n]`` by ``CmprE``, every other
+            # one by ``CmprI``. Which item is ``Addresses[n]`` comes from the
+            # count ``Hdr Ext Len`` declares (:rfc:`6554#section-4.2`), since a
+            # capture cut inside the list holds fewer; one it cut short is left
+            # as the raw :obj:`bytes` read and written back as is.
+            area = route.length - 8 - pad
+            count = max(area - (16 - cmpr_e), 0) // (16 - cmpr_i) + 1
+            last = max(len(route.ip), count) - 1
+            ip_val = [
+                addr if isinstance(addr, bytes) else addr.packed[cmpr_e if index == last else cmpr_i:]
+                for index, addr in enumerate(route.ip)
+            ]
+        else:
+            ip = [] if ip is None else ip
+
+            # NOTE: Through ``parse_ip_address`` rather than
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an ``int``
+            # subclass the latter accepts silently. Here the value would not
+            # just pack wrong but also feed ``cmpr_i``/``cmpr_e`` below,
+            # corrupting the compression metadata: ``ip=[True]`` would pack an
+            # address of ``00000001`` with ``cmpr_e=0``.
+            descr = f'{self.alias}: invalid RPL source address'
+
+            # NOTE: :rfc:`6554#section-4.2` counts ``n`` as ``(...) + 1``, so
+            # a header always carries ``Addresses[n]``; one with none would not
+            # parse back.
+            if not ip:
+                raise ProtocolError(f'{self.alias}: [TypeNo {type}] RPL source route needs at least one address')
+
+            if dst is None:
+                pad = 0
+                cmpr_i = 0
+                cmpr_e = 0
+                ip_val = [
+                    cast('IPv6Address', parse_ip_address(addr, descr, version=6)).packed for addr in ip
+                ]
+            else:
+                test_list = [dst.packed]  # type: list[bytes]
+                for item in ip[:-1]:
+                    if isinstance(item, bytes):
+                        test_list.append(item)
+                    else:
+                        test_list.append(cast('IPv6Address', parse_ip_address(item, descr, version=6)).packed)
+                prefix_i = os_path.commonprefix(test_list)
+
+                # NOTE: ``CmprI`` and ``CmprE`` are 4-bit fields
+                # (:rfc:`6554#section-3`), so a prefix of all 16 octets -- an
+                # address equal to ``dst``, or no ``Addresses[1..n-1]`` at all,
+                # which leaves ``dst`` alone in the list -- is elided as 15. With
+                # no ``Addresses[1..n-1]``, ``CmprI`` governs nothing and is 0.
+                cmpr_i = min(len(prefix_i), 15) if len(ip) > 1 else 0
+
+                test_list = [dst.packed]
+                if isinstance(ip[-1], bytes):
+                    test_list.append(ip[-1])
+                else:
+                    test_list.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed)
+                prefix_e = os_path.commonprefix(test_list)
+                cmpr_e = min(len(prefix_e), 15)
+
+                # NOTE: An aligned vector gets no padding, as :rfc:`6554#section-3`
+                # requires a Pad of 0 when CmprI and CmprE are both 0.
+                pad = pad_length((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e), 8)
+
+                ip_val = []
+                for item in ip[:-1]:
+                    if isinstance(item, bytes):
+                        ip_val.append(item[cmpr_i:])
+                    else:
+                        ip_val.append(cast('IPv6Address', parse_ip_address(item, descr, version=6)).packed[cmpr_i:])
+                if isinstance(ip[-1], bytes):
+                    ip_val.append(ip[-1][cmpr_e:])
+                else:
+                    ip_val.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed[cmpr_e:])
+
+        return Schema_RPL(
+            cmpr={
+                'cmpr_i': cmpr_i,
+                'cmpr_e': cmpr_e,
+            },
+            pad={
+                'pad_len': pad,
+                'reserved': self._make_uint(reserved, bits=20, name='RPL reserved bits'),
+            },
+            addresses=ip_val,
+            padding=padding,
+        )

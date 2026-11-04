@@ -94,7 +94,8 @@ class Workflow(NamedTuple):
 #: pypy3.10 installs under #2040's cryptography cap.
 WORKFLOWS = {
     'Unit Tests': Workflow(
-        'unit-tests', re.compile(r'(?:Python |Integration Python |Engines \(|PyPCAP/PyPCAPFile parity Python )'),
+        'unit-tests', re.compile(r'(?:Python |Integration Python |Engines \(|PyPCAP/PyPCAPFile parity Python '
+                                 r'|Coverage$)'),
         {}),
     'Experimental Tests': Workflow('experimental', re.compile(r'Python .* \(experimental\)$'), {}),
     'Python Compatibility': Workflow('python-compatibility', re.compile(r'Compat Python '), {}),

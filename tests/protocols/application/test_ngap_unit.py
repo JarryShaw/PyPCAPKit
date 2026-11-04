@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.ngap`.
+"""Unit tests for :mod:`pcapkit.protocols.application.ngap.protocol`.
 
 The fixture is 58 bytes of real aligned PER, built inline rather than read from
 a capture: this is a unit-tier module, so :file:`tests/conftest.py` will not let
 it read a generated capture, and an SCTP frame carrying it is cheap to construct
-with :meth:`SCTP.make <pcapkit.protocols.transport.sctp.SCTP.make>`.
+with :meth:`SCTP.make <pcapkit.protocols.transport.sctp.protocol.SCTP.make>`.
 
 Two axes have to keep working, and only one of them needs |pycrate|_:
 
@@ -52,7 +52,7 @@ class NGAPUnitTests(unittest.TestCase):
     @staticmethod
     def _protocol():
         """An :class:`NGAP` instance with no packet bound to it."""
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         return object.__new__(NGAP)
 
@@ -60,7 +60,7 @@ class NGAPUnitTests(unittest.TestCase):
     def _sctp_frame(payload: bytes, ppid: int = 60) -> bytes:
         """An SCTP packet whose single DATA chunk carries ``payload``."""
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         proto = SCTP.__new__(SCTP)
         return SCTP.make(
@@ -78,7 +78,7 @@ class NGAPUnitTests(unittest.TestCase):
     def test_enumerations_are_defined_without_pycrate(self) -> None:
         from pcapkit.const.ngap.procedure_code import ProcedureCode
         from pcapkit.const.ngap.protocol_ie import ProtocolIE
-        from pcapkit.protocols.application.ngap import Criticality, PDUKind
+        from pcapkit.protocols.application.ngap.protocol import Criticality, PDUKind
 
         # Counts as measured against pycrate 0.8.1's NGAP_Constants. A drift
         # here means the pasted-in block was regenerated against a different
@@ -103,7 +103,7 @@ class NGAPUnitTests(unittest.TestCase):
         self.assertEqual(PDUKind.UNSUCCESSFUL_OUTCOME, 'unsuccessfulOutcome')
 
     def test_criticality_resolves_names_and_rejects_a_fourth_value(self) -> None:
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         # pycrate hands back the ASN.1 identifier as a string, so the member
         # names have to be spelled that way for the lookup to be direct.
@@ -200,8 +200,8 @@ class NGAPUnitTests(unittest.TestCase):
 
     def test_registered_on_both_ngap_payload_protocol_identifiers(self) -> None:
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
-        from pcapkit.protocols.application.ngap import NGAP
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for ppid in (PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol,  # noqa: E501
                      PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP):  # noqa: E501
@@ -213,11 +213,11 @@ class NGAPUnitTests(unittest.TestCase):
                 if module is None:
                     self.assertIs(entry, NGAP)
                 else:
-                    self.assertEqual(module, 'pcapkit.protocols.application.ngap')
+                    self.assertEqual(module, 'pcapkit.protocols.application.ngap.protocol')
                     self.assertEqual(entry.name, 'NGAP')
 
     def test_name_length_and_length_hint(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         ngap = self._protocol()
         self.assertEqual(ngap.name, 'NG Application Protocol')
@@ -236,9 +236,9 @@ class NGAPUnitTests(unittest.TestCase):
     def test_exported_from_the_package_namespaces(self) -> None:
         import pcapkit
         from pcapkit.protocols.application import NGAP as ApplicationNGAP
-        from pcapkit.protocols.application.ngap import NGAP
-        from pcapkit.protocols.data.application import NGAP as DataNGAP
-        from pcapkit.protocols.schema.application import NGAP as SchemaNGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
+        from pcapkit.protocols.application.ngap.data import NGAP as DataNGAP
+        from pcapkit.protocols.application.ngap.schema import NGAP as SchemaNGAP
 
         self.assertIs(pcapkit.NGAP, NGAP)
         self.assertIs(ApplicationNGAP, NGAP)
@@ -252,7 +252,7 @@ class NGAPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_read_without_pycrate_raises_protocol_error(self) -> None:
-        from pcapkit.protocols.application import ngap as ngap_module
+        from pcapkit.protocols.application.ngap import protocol as ngap_module
         from pcapkit.utilities.exceptions import ProtocolError
 
         ngap = self._protocol()
@@ -267,7 +267,7 @@ class NGAPUnitTests(unittest.TestCase):
         self.assertIn('pypcapkit[NGAP]', str(caught.exception))
 
     def test_make_without_pycrate_raises_protocol_error(self) -> None:
-        from pcapkit.protocols.application import ngap as ngap_module
+        from pcapkit.protocols.application.ngap import protocol as ngap_module
         from pcapkit.utilities.exceptions import ProtocolError
 
         ngap = self._protocol()
@@ -278,7 +278,7 @@ class NGAPUnitTests(unittest.TestCase):
         self.assertIn('pycrate', str(caught.exception))
 
     def test_load_pycrate_caches_a_failed_import(self) -> None:
-        from pcapkit.protocols.application import ngap as ngap_module
+        from pcapkit.protocols.application.ngap import protocol as ngap_module
 
         # ``None`` in sys.modules makes ``from pycrate_asn1dir.NGAP import ...``
         # raise ImportError, which is the branch a machine without pycrate takes.
@@ -299,7 +299,7 @@ class NGAPUnitTests(unittest.TestCase):
                     ngap.make(**kwargs)
 
     def test_make_from_raw_bytes_needs_no_pycrate(self) -> None:
-        from pcapkit.protocols.application import ngap as ngap_module
+        from pcapkit.protocols.application.ngap import protocol as ngap_module
 
         ngap = self._protocol()
         with mock.patch.object(ngap_module, '_PYCRATE', None):
@@ -310,16 +310,16 @@ class NGAPUnitTests(unittest.TestCase):
         """A capture parses end to end with no |pycrate|_ installed.
 
         This is the behaviour the optional dependency buys its optionality with:
-        the payload reaches :class:`~pcapkit.protocols.misc.raw.Raw` through
+        the payload reaches :class:`~pcapkit.protocols.misc.raw.protocol.Raw` through
         :func:`~pcapkit.corekit.decorators.beholder` rather than aborting the
         frame, and keeps the PPID's name while doing so.
 
         """
         import io
 
-        from pcapkit.protocols.application import ngap as ngap_module
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.application.ngap import protocol as ngap_module
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = self._sctp_frame(NGSETUP_REQUEST)
         with mock.patch.object(ngap_module, '_PYCRATE', None):
@@ -339,7 +339,7 @@ class NGAPUnitTests(unittest.TestCase):
     def test_fixture_decodes_and_surfaces_the_promised_fields(self) -> None:
         from pcapkit.const.ngap.procedure_code import ProcedureCode
         from pcapkit.const.ngap.protocol_ie import ProtocolIE
-        from pcapkit.protocols.application.ngap import NGAP, Criticality, PDUKind
+        from pcapkit.protocols.application.ngap.protocol import NGAP, Criticality, PDUKind
 
         info = NGAP(NGSETUP_REQUEST).info
 
@@ -364,8 +364,8 @@ class NGAPUnitTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_generic_conversion_preserves_asn1_shapes(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
-        from pcapkit.protocols.data.application.ngap import BitString, Choice, Sequence
+        from pcapkit.protocols.application.ngap.protocol import NGAP
+        from pcapkit.protocols.application.ngap.data import BitString, Choice, Sequence
 
         info = NGAP(NGSETUP_REQUEST).info
 
@@ -398,7 +398,7 @@ class NGAPUnitTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_read_make_round_trip_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         ngap = NGAP(NGSETUP_REQUEST)
         rebuilt = ngap.make(**NGAP._make_data(ngap.info))
@@ -406,7 +406,7 @@ class NGAPUnitTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_make_data_reports_every_field_make_consumes(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         info = NGAP(NGSETUP_REQUEST).info
         kwargs = NGAP._make_data(info)
@@ -420,7 +420,7 @@ class NGAPUnitTests(unittest.TestCase):
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_make_accepts_plain_python_values(self) -> None:
         from pcapkit.const.ngap.procedure_code import ProcedureCode
-        from pcapkit.protocols.application.ngap import NGAP, Criticality
+        from pcapkit.protocols.application.ngap.protocol import NGAP, Criticality
 
         ngap = self._protocol()
         schema = ngap.make(
@@ -461,7 +461,7 @@ class NGAPUnitTests(unittest.TestCase):
         fails differently from every other protocol in the library.
 
         """
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = {
@@ -493,8 +493,8 @@ class NGAPUnitTests(unittest.TestCase):
         import io
 
         from pcapkit.const.ngap.procedure_code import ProcedureCode
-        from pcapkit.protocols.application.ngap import NGAP
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = self._sctp_frame(NGSETUP_REQUEST)
         packet = SCTP(io.BytesIO(raw), len(raw))
@@ -517,7 +517,7 @@ class NGAPUnitTests(unittest.TestCase):
         should hold.
 
         """
-        from pcapkit.protocols.application.ngap import NGAP, load_pycrate
+        from pcapkit.protocols.application.ngap.protocol import NGAP, load_pycrate
 
         pdu = load_pycrate()
         with mock.patch.object(type(pdu), 'reset_val') as reset:
@@ -533,7 +533,7 @@ class NGAPUnitTests(unittest.TestCase):
         the next decode. Two decodes and a comparison is what catches that.
 
         """
-        from pcapkit.protocols.application.ngap import NGAP
+        from pcapkit.protocols.application.ngap.protocol import NGAP
 
         first = NGAP(NGSETUP_REQUEST).info
         snapshot = (first.message, [ie.id for ie in first.ies],

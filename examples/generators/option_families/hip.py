@@ -60,7 +60,7 @@ HIP_COPIES = 1
 
 def _hip_registry() -> 'Any':
     from pcapkit.const.hip.parameter import Parameter
-    from pcapkit.protocols.internet.hip import HIP
+    from pcapkit.protocols.internet.hip.protocol import HIP
     return generator._named_registry(HIP, Parameter, '_make_param_', '__parameter__')
 
 
@@ -95,7 +95,7 @@ def _hip_base(code: 'Any') -> 'dict[str, Any]':
 
 
 def _hip_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.hip import HIP
+    from pcapkit.protocols.internet.hip.protocol import HIP
 
     # ``extension=True`` is not decoration. ``HIP.alias`` reads ``self._info``,
     # which ``__post_init__`` only assigns after ``read`` returns, and the sole
@@ -107,7 +107,7 @@ def _hip_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _hip_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.hip import HIP
+    from pcapkit.protocols.internet.hip.protocol import HIP
     return HIP(octets, len(octets), extension=True)
 
 
@@ -117,7 +117,7 @@ def _hip_extract(parsed: 'Any') -> 'Any':
 
 
 def _hip_rebuild(parameters: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.hip import HIP
+    from pcapkit.protocols.internet.hip.protocol import HIP
 
     # ``parameters`` is the parsed collection, so the version has to come off
     # one of its members rather than from the code being tested.

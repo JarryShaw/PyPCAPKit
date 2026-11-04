@@ -2,9 +2,16 @@ SCTP - Stream Control Transmission Protocol
 ===========================================
 
 .. module:: pcapkit.protocols.transport.sctp
+.. module:: pcapkit.protocols.transport.sctp.protocol
 
-:mod:`pcapkit.protocols.transport.sctp` contains
-:class:`~pcapkit.protocols.transport.sctp.SCTP` only,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.transport.sctp.CRC32C_TABLE``, with no alias: it is in this
+   module, and :mod:`pcapkit.protocols.transport.sctp` exports the protocol class alone
+   (:issue:`2534`).
+
+:mod:`pcapkit.protocols.transport.sctp.protocol` contains
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` only,
 which implements the extractor for Stream Control
 Transmission Protocol (SCTP) [*]_, whose structure is
 described as below:
@@ -19,7 +26,7 @@ Octets      Bits        Name                    Description
   12         96   ``sctp.chunks``           Chunks
 ======= ========= ========================= =======================================
 
-.. autoclass:: pcapkit.protocols.transport.sctp.SCTP
+.. autoclass:: pcapkit.protocols.transport.sctp.protocol.SCTP
    :no-members:
    :show-inheritance:
 
@@ -153,382 +160,392 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.transport.sctp
+.. module:: pcapkit.protocols.transport.sctp.schema
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.SCTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.transport.sctp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.SCTP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.Chunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.Chunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnknownChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnknownChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.DATAChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.DATAChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.INITChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.INITChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.INITACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.INITACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.SACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.SACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.HeartbeatChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.HeartbeatChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.HeartbeatACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.HeartbeatACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.AbortChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.AbortChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ShutdownChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ShutdownChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ShutdownACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ShutdownACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ErrorChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ErrorChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.CookieEchoChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.CookieEchoChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.CookieACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.CookieACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ShutdownCompleteChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ShutdownCompleteChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.GapAckBlock
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.GapAckBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.Parameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnknownParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnknownParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.HeartbeatInfoParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.HeartbeatInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.IPv4AddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IPv4AddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.IPv6AddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.IPv6AddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.StateCookieParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.StateCookieParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnrecognizedParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnrecognizedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.CookiePreservativeParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.CookiePreservativeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.HostNameAddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.HostNameAddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.SupportedAddressTypesParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.SupportedAddressTypesParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ErrorCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ErrorCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnknownCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnknownCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.InvalidStreamIdentifierCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.InvalidStreamIdentifierCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.MissingMandatoryParameterCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.MissingMandatoryParameterCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.StaleCookieCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.StaleCookieCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.OutOfResourceCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.OutOfResourceCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnresolvableAddressCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnresolvableAddressCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnrecognizedChunkTypeCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnrecognizedChunkTypeCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.InvalidMandatoryParameterCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.InvalidMandatoryParameterCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UnrecognizedParametersCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UnrecognizedParametersCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.NoUserDataCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.NoUserDataCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.CookieReceivedWhileShuttingDownCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.CookieReceivedWhileShuttingDownCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.RestartOfAnAssociationWithNewAddressesCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.RestartOfAnAssociationWithNewAddressesCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.UserInitiatedAbortCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.UserInitiatedAbortCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ProtocolViolationCause
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ProtocolViolationCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.PaddedOptionField
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.PaddedOptionField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.ChunkListField
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.ChunkListField
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.DATAChunkFlags
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.DATAChunkFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.sctp.TBitFlags
+.. autoclass:: pcapkit.protocols.transport.sctp.schema.TBitFlags
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.transport.sctp.padding_length
-.. autofunction:: pcapkit.protocols.schema.transport.sctp.pre_pack_padding
-.. autofunction:: pcapkit.protocols.schema.transport.sctp.bounded
-.. autofunction:: pcapkit.protocols.schema.transport.sctp.nested_length
-.. autofunction:: pcapkit.protocols.schema.transport.sctp.whole_chunks_length
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.padding_length
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.pre_pack_padding
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.bounded
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.nested_length
+.. autofunction:: pcapkit.protocols.transport.sctp.schema.whole_chunks_length
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.transport.sctp
+.. module:: pcapkit.protocols.transport.sctp.data
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.SCTP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.transport.sctp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.transport.sctp.data.SCTP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.DATAChunkFlags
+.. autoclass:: pcapkit.protocols.transport.sctp.data.DATAChunkFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.TBitFlags
+.. autoclass:: pcapkit.protocols.transport.sctp.data.TBitFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.GapAckBlock
+.. autoclass:: pcapkit.protocols.transport.sctp.data.GapAckBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.Chunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.Chunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnknownChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnknownChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.DATAChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.DATAChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.INITChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.INITChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.INITACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.INITACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.SACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.SACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.HeartbeatChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.HeartbeatChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.HeartbeatACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.HeartbeatACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.AbortChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.AbortChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ShutdownChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ShutdownChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ShutdownACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ShutdownACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ErrorChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ErrorChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.CookieEchoChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.CookieEchoChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.CookieACKChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.CookieACKChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ShutdownCompleteChunk
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ShutdownCompleteChunk
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.Parameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnknownParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnknownParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.HeartbeatInfoParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.HeartbeatInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.IPv4AddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.IPv4AddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.IPv6AddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.IPv6AddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.StateCookieParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.StateCookieParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnrecognizedParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnrecognizedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.CookiePreservativeParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.CookiePreservativeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.HostNameAddressParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.HostNameAddressParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.SupportedAddressTypesParameter
+.. autoclass:: pcapkit.protocols.transport.sctp.data.SupportedAddressTypesParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ErrorCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ErrorCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnknownCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnknownCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.InvalidStreamIdentifierCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.InvalidStreamIdentifierCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.MissingMandatoryParameterCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.MissingMandatoryParameterCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.StaleCookieCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.StaleCookieCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.OutOfResourceCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.OutOfResourceCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnresolvableAddressCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnresolvableAddressCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnrecognizedChunkTypeCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnrecognizedChunkTypeCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.InvalidMandatoryParameterCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.InvalidMandatoryParameterCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UnrecognizedParametersCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UnrecognizedParametersCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.NoUserDataCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.NoUserDataCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.CookieReceivedWhileShuttingDownCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.CookieReceivedWhileShuttingDownCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.RestartOfAnAssociationWithNewAddressesCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.RestartOfAnAssociationWithNewAddressesCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.UserInitiatedAbortCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.UserInitiatedAbortCause
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.sctp.ProtocolViolationCause
+.. autoclass:: pcapkit.protocols.transport.sctp.data.ProtocolViolationCause
    :members:
    :show-inheritance:
 

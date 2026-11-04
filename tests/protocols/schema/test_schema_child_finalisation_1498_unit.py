@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #1498: each non-final :class:`~pcapkit.protocols.schema.schema.Schema`
+"""GitHub issue #1498: each non-final :class:`~pcapkit.protocols.schema.Schema`
 subclass is finalised on its own state, whatever was built before it.
 
 Without the fix,
-:meth:`Schema.__new__ <pcapkit.protocols.schema.schema.Schema.__new__>` reads
+:meth:`Schema.__new__ <pcapkit.protocols.schema.Schema.__new__>` reads
 ``__finalised__`` through inheritance, so once a non-final parent has been built
 its non-final children read the parent's ``BASE`` and are never finalised. They
 keep the ``__excluded__`` copied at declaration, and ``to_dict()`` then includes
@@ -31,11 +31,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 #: generic ``Option`` and the Quick-Start schema can read.
 MODELS = {
     'synthetic': ('', 'Parent', 'Child', '01', '0102'),
-    'hopopt.QuickStartOption': ('pcapkit.protocols.schema.internet.hopopt', 'Option', 'QuickStartOption',
+    'hopopt.QuickStartOption': ('pcapkit.protocols.internet.hopopt.schema', 'Option', 'QuickStartOption',
                                 '2606000000000000', '2606000000000000'),
-    'ipv6_opts.QuickStartOption': ('pcapkit.protocols.schema.internet.ipv6_opts', 'Option', 'QuickStartOption',
+    'ipv6_opts.QuickStartOption': ('pcapkit.protocols.internet.ipv6_opts.schema', 'Option', 'QuickStartOption',
                                    '2606000000000000', '2606000000000000'),
-    'ipv4.QSOption': ('pcapkit.protocols.schema.internet.ipv4', 'Option', 'QSOption',
+    'ipv4.QSOption': ('pcapkit.protocols.internet.ipv4.schema', 'Option', 'QSOption',
                       '1906000000000000', '1906000000000000'),
 }
 
@@ -43,7 +43,7 @@ SCRIPT = r'''
 import importlib, json, sys
 import pcapkit
 from pcapkit.corekit.fields.numbers import UInt8Field
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema import Schema
 
 module, parent, child, pdata, cdata, order = sys.argv[1:]
 if module:
@@ -95,7 +95,7 @@ class SchemaChildFinalisationTests(unittest.TestCase):
         """The other side of the inheritance: declared *after* the parent's ``BASE``."""
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.infoclass import FinalisedState
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         class Parent(Schema):
             a: 'int' = UInt8Field()
@@ -120,7 +120,7 @@ class SchemaChildFinalisationTests(unittest.TestCase):
         """A bare ``@final`` does not escape the guard by reading ``BASE`` off its parent."""
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.infoclass import FinalisedState
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
         from pcapkit.utilities.compat import final
         from pcapkit.utilities.exceptions import SchemaError
 

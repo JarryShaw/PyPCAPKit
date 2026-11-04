@@ -3,18 +3,18 @@
 
 GitHub issue #2439 implemented IGMPv1 (:rfc:`1112#appendix-I`) and IGMPv2
 (:rfc:`2236#section-2`), which share one 8-octet message shape, as the
-concrete :class:`~pcapkit.protocols.internet.igmpv1.IGMPv1` and
-:class:`~pcapkit.protocols.internet.igmpv2.IGMPv2` siblings of the abstract
-:class:`~pcapkit.protocols.internet.igmp.IGMP` base. GitHub issue #2448
+concrete :class:`~pcapkit.protocols.internet.igmpv1.protocol.IGMPv1` and
+:class:`~pcapkit.protocols.internet.igmpv2.protocol.IGMPv2` siblings of the abstract
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` base. GitHub issue #2448
 extends the same three-sibling pattern with a third, :class:`IGMPv3
-<pcapkit.protocols.internet.igmpv3.IGMPv3>` (:rfc:`3376`): the Membership
+<pcapkit.protocols.internet.igmpv3.protocol.IGMPv3>` (:rfc:`3376`): the Membership
 Query's source-list extension and the Version 3 Membership Report's
 group-record list, both materially different shapes of their own.
 
 Each case parses its octets with the concrete class for the version it
 names; constructing the abstract base gives that class (#2574). A type none
 of the three versions define falls back to
-:class:`~pcapkit.protocols.misc.raw.Raw`, as does a Membership Query of 9 to
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as does a Membership Query of 9 to
 11 octets, which is neither IGMPv1/v2 (8) nor IGMPv3 (12 or more)
 (:rfc:`3376#section-7.1`).
 
@@ -109,8 +109,9 @@ def igmpv3_report(records: 'tuple[bytes, ...]') -> 'bytes':
 
 def igmp_class(version: 'str'):
     """Return the concrete class for ``version``: ``'IGMPv1'``, ``'IGMPv2'`` or ``'IGMPv3'``."""
-    from pcapkit.protocols.internet import (  # pylint: disable=import-outside-toplevel
-        igmpv1, igmpv2, igmpv3)
+    from pcapkit.protocols.internet.igmpv1 import protocol as igmpv1  # pylint: disable=import-outside-toplevel
+    from pcapkit.protocols.internet.igmpv2 import protocol as igmpv2  # pylint: disable=import-outside-toplevel
+    from pcapkit.protocols.internet.igmpv3 import protocol as igmpv3  # pylint: disable=import-outside-toplevel
     return {'IGMPv1': igmpv1.IGMPv1, 'IGMPv2': igmpv2.IGMPv2, 'IGMPv3': igmpv3.IGMPv3}[version]
 
 
@@ -200,7 +201,7 @@ class IGMPRoundTripTests(unittest.TestCase):
 
     def test_type_and_group_are_parsed(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         parsed = IGMPv2(io.BytesIO(IGMP_PACKETS['v2-report'][0]), 8)
         self.assertEqual(parsed.info.type, Type.IGMPv2_Membership_Report)
@@ -215,11 +216,11 @@ class IGMPRoundTripTests(unittest.TestCase):
     def test_trailing_octets_are_kept_as_raw_and_rebuilt(self) -> None:
         """Octets past the 8-octet header have no next-protocol field to
         dispatch on, so they are kept as
-        :class:`~pcapkit.protocols.misc.raw.Raw`, as :meth:`ESP.read
-        <pcapkit.protocols.internet.esp.ESP.read>` keeps its own trailer.
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as :meth:`ESP.read
+        <pcapkit.protocols.internet.esp.protocol.ESP.read>` keeps its own trailer.
         """
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = IGMP_PACKETS['v2-report'][0] + b'XY'
         with warnings.catch_warnings():
@@ -231,8 +232,8 @@ class IGMPRoundTripTests(unittest.TestCase):
         self.assertEqual(IGMPv2.from_data(parsed.info).data, packet)
 
     def test_no_trailing_octets_have_no_payload(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         parsed = IGMPv1(io.BytesIO(IGMP_PACKETS['v1-query'][0]), 8)
         self.assertIsInstance(parsed.payload, NoPayload)
@@ -244,8 +245,8 @@ class IGMPRoundTripTests(unittest.TestCase):
         the "reserved" and "number of group records" octets as a group
         address (#2439).
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for cls in (IGMPv1, IGMPv2):
@@ -254,12 +255,12 @@ class IGMPRoundTripTests(unittest.TestCase):
 
     def test_non_v1_v2_type_dispatches_to_igmpv3(self) -> None:
         """Dispatched as an IPv4 payload, an IGMPv3 Membership Report must
-        reach :class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`, not be
+        reach :class:`~pcapkit.protocols.internet.igmpv3.protocol.IGMPv3`, not be
         mis-decoded by IGMPv1/v2's 8-octet layout with ``group=0.0.0.1``
         (#2439, #2448).
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         made = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_REPORT)
         packet = made.data
@@ -274,8 +275,8 @@ class IGMPRoundTripTests(unittest.TestCase):
         10-octet Query must be refused, not labelled ``IGMPv2`` on the
         strength of a nonzero Max Resp Code (#2439).
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for cls in (IGMPv1, IGMPv2):
@@ -285,10 +286,10 @@ class IGMPRoundTripTests(unittest.TestCase):
 
     def test_12_octet_query_dispatches_to_igmpv3(self) -> None:
         """Dispatched as an IPv4 payload, a 12-octet Query reaches
-        :class:`~pcapkit.protocols.internet.igmpv3.IGMPv3`, not ``IPv4:IGMPv2:Raw``.
+        :class:`~pcapkit.protocols.internet.igmpv3.protocol.IGMPv3`, not ``IPv4:IGMPv2:Raw``.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         packet = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=IGMPV3_QUERY).data
         parsed = IPv4(io.BytesIO(packet), len(packet))
@@ -299,11 +300,11 @@ class IGMPRoundTripTests(unittest.TestCase):
     def test_10_octet_query_falls_back_to_raw_on_dispatch(self) -> None:
         """Dispatched as an IPv4 payload, a 10-octet Query -- neither
         IGMPv1/v2 (8) nor IGMPv3 (12 or more) -- falls back to
-        :class:`~pcapkit.protocols.misc.raw.Raw` in full, not as IGMPv2 with
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` in full, not as IGMPv2 with
         a Raw tail and not as IGMPv3.
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1',
                       payload=IGMP_QUERY_10_OCTETS).data
@@ -327,9 +328,9 @@ class IGMPReadTests(unittest.TestCase):
 
     def test_alias_names_the_version_read(self) -> None:
         """``alias`` follows the concrete class, and each concrete class is an
-        instance of the :class:`~pcapkit.protocols.internet.igmp.IGMP` base.
+        instance of the :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` base.
         """
-        from pcapkit.protocols.internet.igmp import IGMP as IGMPBase
+        from pcapkit.protocols.internet.igmp.protocol import IGMP as IGMPBase
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
             with self.subTest(packet=name):
@@ -338,9 +339,9 @@ class IGMPReadTests(unittest.TestCase):
                 self.assertEqual(parsed.alias, expected_alias(version))
 
     def test_refusals_name_the_version_refused(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.utilities.exceptions import ProtocolError
 
         v1_report, v2_report = IGMP_PACKETS['v1-report'][0], IGMP_PACKETS['v2-report'][0]
@@ -358,14 +359,14 @@ class IGMPReadTests(unittest.TestCase):
             IGMPv3(io.BytesIO(v2_query), len(v2_query))
 
     def test_membership_query_max_resp_time_zero_is_v1(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
 
         packet = igmp_packet(0x11, 0, '0.0.0.0')
         parsed = IGMPv1(io.BytesIO(packet), len(packet))
         self.assertEqual(parsed.alias, 'IGMP')
 
     def test_membership_query_max_resp_time_nonzero_is_v2(self) -> None:
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         packet = igmp_packet(0x11, 1, '0.0.0.0')
         parsed = IGMPv2(io.BytesIO(packet), len(packet))
@@ -373,7 +374,7 @@ class IGMPReadTests(unittest.TestCase):
 
     def test_classify_rejects_a_non_igmp_type(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         self.assertEqual(IGMP._classify(Type.DVMRP, 0, 8), 0)
 
@@ -384,7 +385,7 @@ class IGMPReadTests(unittest.TestCase):
         (:rfc:`2236#section-2.5`), and the IGMPv3 Report is always IGMPv3.
         """
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         query = Type.IGMP_Membership_Query
         self.assertEqual(IGMP._classify(query, 0, 8), 1)
@@ -413,8 +414,8 @@ class IGMPVersionedClassTests(unittest.TestCase):
 
     def test_base_is_abstract(self) -> None:
         """The base stays abstract; constructing it gives the version class (#2574)."""
-        from pcapkit.protocols.internet.igmp import IGMP
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         self.assertIn('version', IGMP.__abstractmethods__)
         with self.assertRaises(TypeError):
@@ -423,9 +424,9 @@ class IGMPVersionedClassTests(unittest.TestCase):
         self.assertIs(type(IGMP(io.BytesIO(packet), len(packet))), IGMPv2)
 
     def test_id_and_version(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         self.assertEqual(IGMPv1.id(), ('IGMP',))
         self.assertEqual(IGMPv2.id(), ('IGMPv2',))
@@ -450,7 +451,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
     def test_base_id_covers_all_three_versions(self) -> None:
         """The base lists each version's canonical name, and only those: IGMPv1's
         is the family name itself, so no ``id()`` carries ``'IGMPv1'``."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         self.assertEqual(IGMP.id(), ('IGMP', 'IGMPv2', 'IGMPv3'))
         members = (igmp_class('IGMPv1'), igmp_class('IGMPv2'), igmp_class('IGMPv3'))
@@ -477,9 +478,9 @@ class IGMPVersionedClassTests(unittest.TestCase):
         ``('IGMP',)`` (#2529). The data model key follows the class name."""
         import importlib
 
-        for module, name in (('internet.igmpv1', 'IGMPv1'), ('internet.igmpv2', 'IGMPv2'),
-                             ('internet.igmpv3', 'IGMPv3'), ('schema.internet.igmpv3', 'IGMPv3'),
-                             ('data.internet.igmpv3', 'IGMPv3')):
+        for module, name in (('internet.igmpv1.protocol', 'IGMPv1'), ('internet.igmpv2.protocol', 'IGMPv2'),
+                             ('internet.igmpv3.protocol', 'IGMPv3'), ('internet.igmpv3.schema', 'IGMPv3'),
+                             ('internet.igmpv3.data', 'IGMPv3')):
             mod = importlib.import_module(f'pcapkit.protocols.{module}')
             with self.subTest(module=mod.__name__):
                 self.assertEqual(getattr(mod, name).__name__, name)
@@ -492,7 +493,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 self.assertEqual(parsed.info_name, version.lower())
 
     def test_igmpv1_parses_its_own_messages_directly(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
 
         for name in ('v1-query', 'v1-report'):
             packet, _version = IGMP_PACKETS[name]
@@ -501,7 +502,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 self.assertEqual(parsed.alias, 'IGMP')
 
     def test_igmpv1_rejects_a_v2_only_message(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         packet, _version = IGMP_PACKETS['v2-report']
@@ -509,7 +510,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
             IGMPv1(io.BytesIO(packet), len(packet))
 
     def test_igmpv1_rejects_a_query_with_nonzero_max_resp_time(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         packet, _version = IGMP_PACKETS['v2-query-general']
@@ -517,7 +518,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
             IGMPv1(io.BytesIO(packet), len(packet))
 
     def test_igmpv2_parses_its_own_messages_directly(self) -> None:
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         for name in ('v2-query-general', 'v2-query-group', 'v2-report', 'v2-leave'):
             packet, _version = IGMP_PACKETS[name]
@@ -526,7 +527,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 self.assertEqual(parsed.alias, 'IGMPv2')
 
     def test_igmpv2_rejects_a_v1_only_message(self) -> None:
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         packet, _version = IGMP_PACKETS['v1-report']
@@ -534,7 +535,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
             IGMPv2(io.BytesIO(packet), len(packet))
 
     def test_igmpv2_rejects_a_query_with_zero_max_resp_time(self) -> None:
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         packet, _version = IGMP_PACKETS['v1-query']
@@ -545,7 +546,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
         """A 12-octet IGMPv3 General Query or a 10-octet Query is refused by
         the IGMPv2 class, as a v1 message is (:rfc:`3376#section-7.1`).
         """
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, packet in (('v3-query', IGMPV3_QUERY), ('10-octet-query', IGMP_QUERY_10_OCTETS)):
@@ -556,7 +557,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
         """Likewise for the IGMPv1 class, with a zero Max Resp Code so the
         length is the only thing refusing it (:rfc:`3376#section-7.1`).
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         for tail in (bytes(4), bytes(2)):
@@ -565,7 +566,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 IGMPv1(io.BytesIO(packet), len(packet))
 
     def test_igmpv3_parses_its_own_messages_directly(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         for name, (packet, _version) in IGMPV3_PACKETS.items():
             with self.subTest(packet=name):
@@ -573,7 +574,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 self.assertEqual(parsed.alias, 'IGMPv3')
 
     def test_igmpv3_rejects_an_8_octet_v1_or_v2_message(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name in ('v1-query', 'v1-report', 'v2-query-general', 'v2-report', 'v2-leave'):
@@ -585,7 +586,7 @@ class IGMPVersionedClassTests(unittest.TestCase):
         """Neither IGMPv1/v2 (8 octets) nor IGMPv3 (12 or more) claims a
         Membership Query of 9 to 11 octets; the IGMPv3 class refuses it too.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -593,11 +594,11 @@ class IGMPVersionedClassTests(unittest.TestCase):
 
     def test_versions_take_the_length_from_the_data_when_none_is_given(self) -> None:
         """Without a ``length``, each version reads the whole of ``bytes``
-        data: trailing octets become :class:`~pcapkit.protocols.misc.raw.Raw`.
+        data: trailing octets become :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         cases = (
             (IGMPv1, 'v1-report'),
@@ -617,8 +618,8 @@ class IGMPVersionedClassTests(unittest.TestCase):
                 self.assertEqual(trailed.payload.info.packet, b'XY')
 
     def test_igmpv3_takes_the_length_from_the_data_when_none_is_given(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet, _version = IGMPV3_PACKETS['v3-query']
         parsed = IGMPv3(packet)
@@ -640,8 +641,8 @@ class IGMPUnitTests(unittest.TestCase):
 
     def test_igmp_index_length_and_name(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.igmp import IGMP
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         proto = object.__new__(IGMPv2)
 
@@ -652,7 +653,7 @@ class IGMPUnitTests(unittest.TestCase):
         self.assertEqual(proto.alias, 'IGMPv2')
 
     def test_igmpv3_length_varies_with_the_message(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         for name, (packet, _version) in IGMPV3_PACKETS.items():
             with self.subTest(packet=name):
@@ -662,7 +663,7 @@ class IGMPUnitTests(unittest.TestCase):
 
     def test_make_data_round_trip(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         class DummyDict(dict):
             __getattr__ = dict.__getitem__
@@ -683,7 +684,7 @@ class IGMPUnitTests(unittest.TestCase):
 
     def test_make_builds_schema(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
 
         proto = object.__new__(IGMPv1)
         schema = proto.make(
@@ -698,7 +699,7 @@ class IGMPUnitTests(unittest.TestCase):
         self.assertEqual(bytes(schema)[4:8], ipaddress.ip_address('224.0.0.1').packed)
 
     def test_make_rejects_out_of_range_octets(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IGMPv1)
@@ -709,7 +710,7 @@ class IGMPUnitTests(unittest.TestCase):
                     proto.make(**{field: value})
 
     def test_make_rejects_non_int_max_resp_time(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IGMPv1)
@@ -719,7 +720,7 @@ class IGMPUnitTests(unittest.TestCase):
                 proto.make(max_resp_time=value)  # type: ignore[arg-type]
 
     def test_make_rejects_bool_type(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IGMPv1)
@@ -744,7 +745,7 @@ class IGMPUnitTests(unittest.TestCase):
 class IGMPv3MaxRespCodeTests(unittest.TestCase):
     """The floating-point Max Resp Code/QQIC decode (:rfc:`3376#section-4.1.1`,
     :rfc:`3376#section-4.1.7`), module-level helpers on
-    :mod:`pcapkit.protocols.internet.igmpv3`.
+    :mod:`pcapkit.protocols.internet.igmpv3.protocol`.
 
     :rfc:`3376#section-4.1.1` gives the formula as::
 
@@ -778,13 +779,13 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
 
         224 in units of 1/10 second is 22.4 seconds.
         """
-        from pcapkit.protocols.internet.igmpv3 import _decode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code
 
         self.assertEqual(_decode_resp_code(0x8c), 224)
         self.assertEqual(224 / 10, 22.4)
 
     def test_decode_values_below_128_are_literal(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import _decode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code
 
         for code in (0, 1, 100, 127):
             with self.subTest(code=code):
@@ -796,7 +797,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         in ``0..7`` -- round-trips through :func:`_encode_resp_code` and
         :func:`_decode_resp_code` to the same code and the same value.
         """
-        from pcapkit.protocols.internet.igmpv3 import _decode_resp_code, _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import _decode_resp_code, _encode_resp_code
 
         for exp in range(8):
             for mant in range(16):
@@ -807,7 +808,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
                     self.assertEqual(_decode_resp_code(code), value)
 
     def test_encode_values_below_128_are_literal(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import _encode_resp_code
 
         for value in (0, 1, 100, 127):
             with self.subTest(value=value):
@@ -819,7 +820,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         what reading ``0x8c`` as a plain tenths-of-a-second integer (140)
         would give.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         packet = igmpv3_query(0x8c, '239.1.2.3', qqic=0x8c)
         parsed = IGMPv3(io.BytesIO(packet), len(packet))
@@ -836,7 +837,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         """An IGMPv2 Query has no extension, so its code is literal: 200 is
         20.0 seconds. Read as floating-point it would be 3072.
         """
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         packet = igmp_packet(0x11, 200, '239.1.2.3')
         parsed = IGMPv2(io.BytesIO(packet), len(packet))
@@ -848,7 +849,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         """A 12-octet IGMPv3 Query carries the extension, so code 200
         (``0xc8``: exp 4, mant 8) decodes to ``(8 | 0x10) << 7 = 3072``.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         packet = igmpv3_query(200, '239.1.2.3')
         self.assertEqual(len(packet), 12)
@@ -862,7 +863,7 @@ class IGMPv3MaxRespCodeTests(unittest.TestCase):
         ``0x89`` (``(9 | 0x10) << 3 = 200``), and parsing that octet gives
         200 back.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3, _encode_resp_code
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3, _encode_resp_code
 
         self.assertEqual(_encode_resp_code(200), 0x89)
         proto = object.__new__(IGMPv3)
@@ -881,7 +882,7 @@ class IGMPv3QueryTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_general_query_with_no_sources_round_trips(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         packet = igmpv3_query(100, '0.0.0.0', s_flag=0, qrv=2, qqic=125)
         parsed = IGMPv3(io.BytesIO(packet), len(packet))
@@ -896,7 +897,7 @@ class IGMPv3QueryTests(unittest.TestCase):
         self.assertEqual(IGMPv3.from_data(parsed.info).data, packet)
 
     def test_group_and_source_specific_query_round_trips(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         sources = ('10.0.0.1', '10.0.0.2', '10.0.0.3')
         packet = igmpv3_query(50, '239.5.5.5', s_flag=1, qrv=5, qqic=60, sources=sources)
@@ -914,12 +915,12 @@ class IGMPv3QueryTests(unittest.TestCase):
         self.assertEqual(IGMPv3.from_data(parsed.info).data, packet)
 
     def test_make_defaults_build_a_12_octet_general_query(self) -> None:
-        """Unlike the base's own :meth:`~pcapkit.protocols.internet.igmp.IGMP.make`,
+        """Unlike the base's own :meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP.make`,
         this class always writes the extension: it is specifically IGMPv3,
         so there is no plain-8-octet default to fall back to.
         """
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         proto = object.__new__(IGMPv3)
         schema = proto.make(type=Type.IGMP_Membership_Query, group='0.0.0.0')
@@ -929,7 +930,7 @@ class IGMPv3QueryTests(unittest.TestCase):
 
     def test_qqi_alone_is_honoured(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         proto = object.__new__(IGMPv3)
         schema = proto.make(type=Type.IGMP_Membership_Query, group='0.0.0.0', qqi=125)
@@ -940,11 +941,11 @@ class IGMPv3QueryTests(unittest.TestCase):
         """:rfc:`3376#section-4.1.10` permits octets past the source list
         ("Additional Data"). They are kept as payload, outside the source
         list, so they count toward neither
-        :attr:`~pcapkit.protocols.internet.igmpv3.IGMPv3.length` nor the
+        :attr:`~pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.length` nor the
         source list, and the rebuild reproduces them.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = igmpv3_query(0x7d, '239.1.2.3', s_flag=0, qrv=0, qqic=0x7d,
                               sources=('10.0.0.1',)) + b'\xca\xfe'
@@ -962,7 +963,7 @@ class IGMPv3QueryTests(unittest.TestCase):
         model, so a non-conformant sender's value survives the rebuild
         instead of being rewritten to zero.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         packet = bytearray(igmpv3_query(0x7d, '239.1.2.3', s_flag=1, qrv=3, qqic=0x7d))
         # Byte 8 is Resv(4)/S(1)/QRV(3); flip Resv from 0 to 0xA (1010).
@@ -984,7 +985,7 @@ class IGMPv3ReportTests(unittest.TestCase):
 
     def test_report_with_no_group_records_round_trips(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         packet = igmpv3_report(())
         parsed = IGMPv3(io.BytesIO(packet), len(packet))
@@ -1000,7 +1001,7 @@ class IGMPv3ReportTests(unittest.TestCase):
         record each, with a mix of zero, one and multiple source addresses.
         """
         from pcapkit.const.igmp.record_type import RecordType
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         records = (
             ('MODE_IS_INCLUDE', 1, '224.0.1.1', ()),
@@ -1038,7 +1039,7 @@ class IGMPv3ReportTests(unittest.TestCase):
         and removes sources is sent as two records for the same multicast
         address, one ``ALLOW_NEW_SOURCES`` and one ``BLOCK_OLD_SOURCES``.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         raw_records = (
             igmpv3_group_record(5, '239.9.9.9', ('10.1.1.1',)),
@@ -1060,7 +1061,7 @@ class IGMPv3ReportTests(unittest.TestCase):
         be silently ignored" -- i.e. parsing continues and the value is
         simply not one of the six named ones, rather than raising.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         raw_records = (igmpv3_group_record(200, '224.0.2.1'),)
         packet = igmpv3_report(raw_records)
@@ -1073,13 +1074,13 @@ class IGMPv3ReportTests(unittest.TestCase):
 
     def test_additional_data_after_the_last_record_is_kept_as_payload(self) -> None:
         """:rfc:`3376#section-4.2.11` permits octets past the last group
-        record ("Additional Data"). :attr:`~pcapkit.protocols.schema.internet.igmpv3.Report.records`
+        record ("Additional Data"). :attr:`~pcapkit.protocols.internet.igmpv3.schema.Report.records`
         reads to the end of the message, since a count field cannot bound it
         in octets, so those octets are trimmed back out and kept as this
         message's trailing payload rather than read as a further record.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw_records = (igmpv3_group_record(1, '224.0.1.1'),)
         packet = igmpv3_report(raw_records) + b'\xca\xfe'
@@ -1099,7 +1100,7 @@ class IGMPv3ReportTests(unittest.TestCase):
         the data model, so a non-conformant sender's values survive the
         rebuild.
         """
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         raw_records = (igmpv3_group_record(1, '224.0.1.1'),)
         packet = bytearray(igmpv3_report(raw_records))
@@ -1117,7 +1118,7 @@ class IGMPv3ReportTests(unittest.TestCase):
     def test_make_builds_report_from_dict_records(self) -> None:
         from pcapkit.const.igmp.record_type import RecordType
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         proto = object.__new__(IGMPv3)
         schema = proto.make(
@@ -1157,7 +1158,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
 
     def parse_cut(self, packet: 'bytes', keep: 'int'):
         """Parse ``packet`` inside an IPv4 datagram cut to ``keep`` octets of it."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -1168,8 +1169,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
 
     def assert_rebuilds(self, cut: 'bytes', parsed) -> None:
         """Both layers rebuild the octets captured, from ``info`` and its dict."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         igmp = parsed.payload
         with warnings.catch_warnings():
@@ -1180,8 +1181,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
             self.assertEqual(IPv4.from_data(parsed.info).data, cut)
 
     def test_whole_report_is_not_marked(self) -> None:
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         packet = IGMPV3_TWO_RECORD_REPORT
         cut, parsed = self.parse_cut(packet, len(packet))
@@ -1203,8 +1204,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         """Cut after the second record's Number of Sources, before its
         Multicast Address: the first record is whole, the second is kept as
         far as it was read."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         packet = IGMPV3_TWO_RECORD_REPORT
         cut, parsed = self.parse_cut(packet, 28)
@@ -1228,8 +1229,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         """Cut inside the first record's second source: the source reads as far
         as it was captured, and the second record the count declares reads as
         zeros, as a zero-filled record of no sources (#2686)."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         packet = IGMPV3_TWO_RECORD_REPORT
         cut, parsed = self.parse_cut(packet, 22)
@@ -1250,8 +1251,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
     def test_cut_additional_data_goes_to_the_next_layer(self) -> None:
         """Octets past the counted records still go to the payload when the
         capture ends inside them (:rfc:`3376#section-4.2.11`)."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = igmpv3_report((igmpv3_group_record(1, '224.0.1.1', ('10.0.0.1',)),)) + b'\xca\xfe\xba\xbe'
         cut, parsed = self.parse_cut(packet, len(packet) - 2)
@@ -1267,7 +1268,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
     def test_record_list_reads_bytes_and_a_live_stream_alike(self) -> None:
         """The record list reads the octets present zero-filled to its length,
         from a buffer or a stream part-way through, and keeps that length (#2686)."""
-        from pcapkit.protocols.schema.internet.igmpv3 import Report
+        from pcapkit.protocols.internet.igmpv3.schema import Report
 
         records = IGMPV3_TWO_RECORD_REPORT[8:28]
         field = Report.__fields__['records']({'__length__': 36})
@@ -1304,7 +1305,7 @@ class IGMPv3DirectCutTests(unittest.TestCase):
 
     def parse(self, raw: 'bytes'):
         """Parse ``raw`` with the IGMPv3 class, its length as the message's."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         with warnings.catch_warnings():
             # a cut field warns that its length runs past the data, which is the point
@@ -1313,7 +1314,7 @@ class IGMPv3DirectCutTests(unittest.TestCase):
 
     def assert_rebuilds(self, raw: 'bytes', igmp, record: 'object') -> None:
         """``igmp`` records ``record`` and rebuilds ``raw``, from ``info`` and its dict."""
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         self.assertEqual(igmp.info.get('__short_read__'), record)
         self.assertEqual(igmp.data, raw)
@@ -1371,7 +1372,7 @@ class IGMPv3DirectCutTests(unittest.TestCase):
     def test_a_cut_is_recorded_as_inside_ipv4(self) -> None:
         """The record a direct parse makes is the one the enclosing IPv4 layer's
         longer length gives the body."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for name, packet, keep in (('query', IGMPV3_TWO_SOURCE_QUERY, 17),
                                    ('report', IGMPV3_TWO_RECORD_REPORT, 30)):
@@ -1402,7 +1403,7 @@ class IGMPv3RecordCountTests(unittest.TestCase):
         import re
 
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IGMPv3)
@@ -1421,7 +1422,7 @@ class IGMPv3RecordCountTests(unittest.TestCase):
 
     def test_a_count_from_the_records_to_the_field_maximum_is_written(self) -> None:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         records = igmpv3_group_record(1, '239.1.1.1') + igmpv3_group_record(2, '239.2.2.2')
         for count, wire in ((None, 2), (2, 2), (3, 3), (0xFFFF, 0xFFFF)):
@@ -1441,14 +1442,14 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_registry_entry_is_the_abstract_base(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.protocols.internet.internet import Internet
 
         self.assertIs(Internet.__proto__[TransType.IGMP].klass, IGMP)
 
     def test_dispatch_selects_version_per_message(self) -> None:
-        from pcapkit.protocols.internet.igmp import IGMP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
             with self.subTest(packet=name):
@@ -1459,7 +1460,7 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_parsing_through_the_base_gives_the_version_class(self) -> None:
         """``IGMP(octets)`` is the class ``_dispatch`` picks, and keeps the octets (#2574)."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
             for source in ('bytes', 'stream'):
@@ -1472,7 +1473,7 @@ class IGMPDispatchTests(unittest.TestCase):
                     self.assertEqual(IGMP.from_data(layer.info).data, packet)
 
     def test_octets_no_version_reads_raise(self) -> None:
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, octets in (('10-octet-query', IGMP_QUERY_10_OCTETS),
@@ -1484,7 +1485,7 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_class_from_octets(self) -> None:
         """``IGMP(octets, version=N)`` parses as that class, and only as it (#2574)."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         packets = {**IGMP_PACKETS, **IGMPV3_PACKETS}
@@ -1508,7 +1509,7 @@ class IGMPDispatchTests(unittest.TestCase):
     def test_version_picks_the_class_from_fields(self) -> None:
         """Each build is byte-exact against the class's own and parses back unchanged (#2574)."""
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         cases = {
             'v1 defaults': ({}, 'IGMPv1'),
@@ -1532,7 +1533,7 @@ class IGMPDispatchTests(unittest.TestCase):
     def test_fields_without_version_raise(self) -> None:
         """Even a field only IGMPv3 takes picks nothing (#2574)."""
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = {
@@ -1551,7 +1552,7 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_version_is_the_only_check(self) -> None:
         """The class ``version`` names refuses what it does not build, by its own checks."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         for version in (0, 4, True, '2', 1.0, 3.0):
@@ -1569,8 +1570,8 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_a_version_class_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must be the class's; parsing, it is handed on unread."""
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertEqual(IGMPv1(version=1).data, IGMPv1().data)
@@ -1585,7 +1586,7 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_version_is_in_the_data_model_only(self) -> None:
         """Each data model carries ``version``; no octet does, and every round trip keeps it (#2574)."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
             with self.subTest(packet=name):
@@ -1606,7 +1607,7 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_from_data_on_the_base_dispatches_on_the_data_s_version(self) -> None:
         """Not on its type, max response time or length (#2574)."""
-        from pcapkit.protocols.internet.igmp import IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
@@ -1634,10 +1635,10 @@ class IGMPDispatchTests(unittest.TestCase):
 
     def test_only_the_base_dispatches(self) -> None:
         """A subclass of the base is constructed as itself, on every path."""
-        from pcapkit.protocols.data.internet.igmp import IGMP as Data_IGMP
-        from pcapkit.protocols.internet.igmp import IGMP
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.schema.internet.igmp import IGMP as Schema_IGMP
+        from pcapkit.protocols.internet.igmp.data import IGMP as Data_IGMP
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmp.schema import IGMP as Schema_IGMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         class Custom(IGMP, schema=Schema_IGMP, data=Data_IGMP):  # type: ignore[type-arg]
@@ -1658,10 +1659,10 @@ class IGMPDispatchTests(unittest.TestCase):
             Custom(type=0x16, group='239.1.2.3', version=1)
 
     def test_ipv4_dispatches_igmp_to_each_version(self) -> None:
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         expected_classes = {'IGMPv1': IGMPv1, 'IGMPv2': IGMPv2, 'IGMPv3': IGMPv3}
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
@@ -1689,7 +1690,7 @@ class IGMPSelectorTests(unittest.TestCase):
     def parse(packet: 'bytes'):
         """Return ``(frame, layer)``: ``packet`` carried by IPv4, and the IGMP
         layer IP protocol 2 dispatched it to."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         outer = IPv4(protocol=2, src='10.0.0.1', dst='224.0.0.1', payload=packet).data
         with warnings.catch_warnings():

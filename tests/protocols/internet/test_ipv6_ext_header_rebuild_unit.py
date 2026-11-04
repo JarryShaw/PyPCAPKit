@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """An IPv6 extension header rebuilds byte for byte from its own info.
 
-GitHub issue #1446: :class:`~pcapkit.protocols.internet.ipv6.IPv6` hands each
+GitHub issue #1446: :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` hands each
 extension header the rest of the datagram, with ``extension=True``. The header
 parses only itself -- its info holds no payload -- but its ``data`` kept every
 octet after it, so ``type(ex).from_data(ex.info).data`` came back short: 8 of
@@ -39,9 +39,9 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, mod: str, cls: str, code: int, upper: bytes) -> 'tuple[bytes, object, object]':
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
-        klass = getattr(importlib.import_module(f'pcapkit.protocols.internet.{mod}'), cls)
+        klass = getattr(importlib.import_module(f'pcapkit.protocols.internet.{mod}.protocol'), cls)
         header = klass(next=17, payload=b'').data
         ipv6 = IPv6(IPv6(next=code, src='2001:db8::1', dst='2001:db8::2',
                          payload=header + upper).data)
@@ -50,7 +50,7 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
         return header, ext, ipv6
 
     def test_extension_header_rebuilds_from_info(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         upper = UDP(srcport=1, dstport=2, payload=b'hello world!').data
         for mod, cls, code in EXTENSIONS:
@@ -61,8 +61,8 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
                 self.assertEqual(type(ext).from_data(ext.info).data, ext.data)
 
     def test_parent_ipv6_still_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         upper = UDP(srcport=1, dstport=2, payload=b'hello world!').data
         for mod, cls, code in EXTENSIONS:
@@ -73,8 +73,8 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
     def test_fragment_keeps_header_only(self) -> None:
         # a non-first fragment, as in ``examples/captures/ipv6.pcap``: the
         # remainder is fragment data, not a decodable upper layer
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         header = IPv6_Frag(next=17, offset=181, id=0x1234).data
         ipv6 = IPv6(IPv6(next=44, src='2001:db8::1', dst='2001:db8::2',
@@ -86,8 +86,8 @@ class TestIPv6ExtHeaderRebuild(unittest.TestCase):
 
     def test_standalone_parse_keeps_payload(self) -> None:
         # without ``extension=True`` the header still owns what follows it
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         upper = UDP(srcport=1, dstport=2, payload=b'hello world!').data
         packet = HOPOPT(next=17, payload=upper).data

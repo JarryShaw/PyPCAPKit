@@ -2,9 +2,10 @@ IPv6-Route - Routing Header for IPv6
 ====================================
 
 .. module:: pcapkit.protocols.internet.ipv6_route
+.. module:: pcapkit.protocols.internet.ipv6_route.protocol
 
-:mod:`pcapkit.protocols.internet.ipv6_route` contains
-:class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
+:mod:`pcapkit.protocols.internet.ipv6_route.protocol` contains
+:class:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route`
 only, which implements the extractor for Routing Header for IPv6
 (IPv6-Route) [*]_, whose structure is described as below:
 
@@ -18,7 +19,7 @@ Octets      Bits        Name                    Description
   4          32   ``route.data``            Type-Specific Data
 ======= ========= ==================== ===============================
 
-.. autoclass:: pcapkit.protocols.internet.ipv6_route.IPv6_Route
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route
    :no-members:
    :show-inheritance:
 
@@ -58,72 +59,82 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipv6_route
+.. module:: pcapkit.protocols.internet.ipv6_route.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipv6_route``, with no alias: the module moved
+   here (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.IPv6_Route
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.RoutingType
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.RoutingType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.UnknownType
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.UnknownType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.SourceRoute
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.SourceRoute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.Type2
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.Type2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.RPL
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.RPL
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.CmprInfo
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.CmprInfo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.PadInfo
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.schema.PadInfo
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_header_length
+.. autofunction:: pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_selector
+.. autofunction:: pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length
+.. autofunction:: pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_header_length
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipv6_route
+.. module:: pcapkit.protocols.internet.ipv6_route.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.IPv6_Route
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ipv6_route``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.data.IPv6_Route
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.UnknownType
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.data.UnknownType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.SourceRoute
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.data.SourceRoute
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.Type2
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.data.Type2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RPL
+.. autoclass:: pcapkit.protocols.internet.ipv6_route.data.RPL
    :members:
    :show-inheritance:
 

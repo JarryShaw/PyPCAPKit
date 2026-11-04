@@ -103,7 +103,7 @@ class TestPCAPNGOptionAreaKept(PCAPNGTestCase):
                             and 'kept as captured' in str(item.message) for item in caught))
 
     def test_an_option_schema_alone_refuses_the_overrun(self) -> None:
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, 'left in its area'):

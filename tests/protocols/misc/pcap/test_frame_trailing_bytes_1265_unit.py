@@ -3,7 +3,7 @@
 
 This guards against GitHub issue #1265, where, with fewer than sixteen octets
 left after the last record,
-:meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` parsed a
+:meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` parsed a
 record header out of zero padding, and the payload read got a negative length
 (``ValueError: read length must be non-negative or -1``). A tail that short
 raises :exc:`~pcapkit.utilities.exceptions.StreamEOFError`, which the extractor
@@ -36,8 +36,8 @@ class TestFrameTrailingBytes(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_short_tail_raises_stream_eof(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.utilities.exceptions import StreamEOFError
 
         header = Header(GLOBAL)

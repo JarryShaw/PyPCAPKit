@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Self
 
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
 _TL = TypeVar('_TL', 'Schema', 'FieldBase', 'bytes')
 _TS = TypeVar('_TS', bound='Schema')
@@ -36,7 +36,7 @@ class _ShortReadTracker:
         file: Stream to read from.
 
     Only the ``read``, ``seek`` and ``tell`` calls that
-    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` and
+    :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` and
     :meth:`OptionField.unpack` make are delegated.
 
     """
@@ -86,7 +86,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
     A list whose octets hold fewer items than ``count`` ended with the data
     before the rest, and reports them as :attr:`shortfall`, so that
-    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+    :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
     records the cut; the items absent are not made up.
 
     .. versionchanged:: 1.6.0
@@ -180,8 +180,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         if self._item_type is None and isinstance(value, bytes):
             return value
 
-        from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.schema import Schema  # pylint: disable=import-outside-toplevel
 
         temp = []  # type: list[bytes]
         for item in value:
@@ -250,7 +249,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead
         # of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
         # :meth:`TCP._read_mode_sack
-        # <pcapkit.protocols.transport.tcp.TCP._read_mode_sack>`, depending on
+        # <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack>`, depending on
         # unrelated things that ran earlier in the same process. Cf. #525.
         # Importing at module level, once, for the life of this module object,
         # closes that off: ``SchemaField`` then stays whatever class this
@@ -374,7 +373,7 @@ class OptionField(ListField, Generic[_TS]):
         1. it is the base schema's **first** field, so that it is what sits at the
            front of the option;
         2. it is a :class:`~pcapkit.corekit.fields.numbers.NumberField`, so that
-           :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+           :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
            reads it through its ordinary per-field branch;
         3. its length is a fixed integer rather than a callable, so that its width
            does not depend on packet data the shortcut has not read.
@@ -478,7 +477,7 @@ class OptionField(ListField, Generic[_TS]):
             If the option list ended before the specified size limit,
             :attr:`self.option_padding <OptionField.option_padding>` is set
             to the remaining length, which :meth:`Schema.unpack
-            <pcapkit.protocols.schema.schema.Schema.unpack>` records in
+            <pcapkit.protocols.schema.Schema.unpack>` records in
             ``packet`` as ``__option_padding__`` so that the next fields can
             be aware of it.
 
@@ -486,7 +485,7 @@ class OptionField(ListField, Generic[_TS]):
             ends at the length the enclosing layer declares for it, so that an
             area the data ends inside runs past that length rather than being
             cut short by the capture, as
-            :class:`~pcapkit.protocols.internet.ipv6.IPv6` tells the extension
+            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` tells the extension
             headers it walks (:issue:`2694`). Absent, the data may end at a cut.
 
         Raises:
@@ -511,7 +510,7 @@ class OptionField(ListField, Generic[_TS]):
            Where the data ends inside the area, as a capture cut short leaves
            it, the list ends with the data, and an option it ends inside is
            kept if its fields fit the area, so :meth:`Schema.unpack
-           <pcapkit.protocols.schema.schema.Schema.unpack>` records the cut as
+           <pcapkit.protocols.schema.Schema.unpack>` records the cut as
            a short read rather than either error being raised
            (:issue:`2694`). See :meth:`_accepts_cut`, and ``__capture_cut__``
            above.
@@ -560,7 +559,7 @@ class OptionField(ListField, Generic[_TS]):
         # ``examples/captures/profile.pcapng``.
         #
         # Reading the type field alone deliberately mirrors what
-        # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+        # :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
         # does for one field -- ``field(packet)``, read ``field.length`` octets,
         # then ``field.unpack(byte, packet.copy())`` -- rather than reaching for
         # :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both
@@ -709,8 +708,8 @@ class OptionField(ListField, Generic[_TS]):
             (:issue:`1325`): padding cut short may be content the option's own
             length declares, as a ``PadN`` option's is. A list whose items'
             lengths leave out their trailing padding may override this, as
-            :class:`~pcapkit.protocols.schema.transport.sctp.PaddedOptionField`
-            does; :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+            :class:`~pcapkit.protocols.transport.sctp.schema.PaddedOptionField`
+            does; :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
             then writes back only the octets read.
 
         """
@@ -725,10 +724,10 @@ class OptionField(ListField, Generic[_TS]):
 
         Returns:
             :data:`True`, so that :meth:`unpack` keeps the option, as the short
-            read :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+            read :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
             records (:issue:`2694`). A list that keeps such an area as the octets
             captured instead may override this, as
-            :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField` does.
+            :class:`~pcapkit.protocols.misc.pcapng.schema.OptionAreaField` does.
 
         """
         return True

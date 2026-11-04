@@ -2,12 +2,13 @@ No-Payload Packet
 =================
 
 .. module:: pcapkit.protocols.misc.no_payload
+.. module:: pcapkit.protocols.misc.no_payload.protocol
 
-:mod:`pcapkit.protocols.misc.no_payload` contains
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` only, which
+:mod:`pcapkit.protocols.misc.no_payload.protocol` contains
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` only, which
 implements a :class:`~pcapkit.protocols.protocol.Protocol` like
 object whose payload is recursively
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` itself.
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` itself.
 
 .. versionadded:: 1.6.0
 
@@ -20,7 +21,7 @@ object whose payload is recursively
    ``pcapkit.protocols.misc.null``, ``pcapkit.protocols.data.misc.null`` and
    ``pcapkit.protocols.schema.misc.null``, with no alias (:issue:`2529`).
 
-.. autoclass:: pcapkit.protocols.misc.no_payload.NoPayload
+.. autoclass:: pcapkit.protocols.misc.no_payload.protocol.NoPayload
    :no-members:
    :show-inheritance:
 
@@ -37,17 +38,17 @@ object whose payload is recursively
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.misc.no_payload
+.. module:: pcapkit.protocols.misc.no_payload.schema
 
-.. autoclass:: pcapkit.protocols.schema.misc.no_payload.NoPayload
+.. autoclass:: pcapkit.protocols.misc.no_payload.schema.NoPayload
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.misc.no_payload
+.. module:: pcapkit.protocols.misc.no_payload.data
 
-.. autoclass:: pcapkit.protocols.data.misc.no_payload.NoPayload
+.. autoclass:: pcapkit.protocols.misc.no_payload.data.NoPayload
    :members:
    :show-inheritance:

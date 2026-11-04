@@ -69,7 +69,7 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, raw: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         parsed = Radiotap(raw, len(raw))
         self.assertEqual(parsed.data, raw)
@@ -81,7 +81,7 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
     def test_the_layouts_match_linux_wireshark_and_radiotap_org(self) -> None:
         import importlib
 
-        from pcapkit.protocols.schema.link import radiotap
+        from pcapkit.protocols.link.radiotap import schema as radiotap
 
         for source, table in (('linux', LINUX), ('wireshark', WIRESHARK)):
             for (schema, name), masks in table.items():
@@ -152,7 +152,7 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
 
     def test_make_takes_members_or_ints(self) -> None:
         from pcapkit.const.radiotap.he_data1_known import HEData1Known
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         expected = _radiotap([1 << 23], struct.pack('<6H', 0x0006, 0, 0, 0, 0, 0))
         rest = {'data2': {'ru_offset': 0, 'pri_sec_80mhz': 0, 'known': 0},
@@ -164,7 +164,7 @@ class TestRadiotapMixedBitmaps(unittest.TestCase):
                 self.assertEqual(made.data, expected)
 
     def test_make_refuses_what_a_bitmap_cannot_hold(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         flags = {'bandwidth': 0, 'guard_interval': 0, 'ht_format': 0, 'fec_type': 0, 'stbc_streams': 0, 'ness_bit0': 0}

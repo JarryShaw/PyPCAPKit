@@ -2,9 +2,10 @@ SSLv2 - Secure Sockets Layer Version 2
 =======================================
 
 .. module:: pcapkit.protocols.application.sslv2
+.. module:: pcapkit.protocols.application.sslv2.protocol
 
-:mod:`pcapkit.protocols.application.sslv2` contains
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` only,
+:mod:`pcapkit.protocols.application.sslv2.protocol` contains
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` only,
 which implements an extractor for Secure Sockets Layer
 version 2 (SSLv2) [*]_, whose record header is 2 or 3 octets, chosen by the
 high bit of its first octet (``sslv2.indicator``):
@@ -30,7 +31,7 @@ high bit of its first octet (``sslv2.indicator``):
      |sslv2.msg_type |   handshake message body ...
 
 ``E`` is the ``IS-ESCAPE`` flag, meaningful only in the 3-octet form. See
-:func:`~pcapkit.protocols.schema.application.sslv2.sslv2_record_length` for the
+:func:`~pcapkit.protocols.application.sslv2.schema.sslv2_record_length` for the
 exact bit arithmetic.
 
 SSLv2 is wire-*incompatible* with SSLv3 and TLS: it carries no content-type
@@ -46,12 +47,12 @@ Records in One Segment
 ----------------------
 
 A whole record after the first in a TCP segment is dissected as a further
-:class:`~pcapkit.protocols.application.sslv2.SSLv2` layer, the previous record's
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` layer, the previous record's
 payload, whatever its message type (:issue:`2567`): a ``CLIENT-HELLO`` followed by
 a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
 
 * A whole record that fails to decode -- a ``RECORD-LENGTH`` of ``0``, which
-  leaves no ``MSG-TYPE`` -- becomes :class:`~pcapkit.protocols.misc.raw.Raw`
+  leaves no ``MSG-TYPE`` -- becomes :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
   together with everything after it.
 * Octets that open no record -- a header cut short, or a record the segment
   ends inside -- stay raw, with no error.
@@ -66,7 +67,7 @@ a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.sslv2.SSLv2
+.. autoclass:: pcapkit.protocols.application.sslv2.protocol.SSLv2
    :no-members:
    :show-inheritance:
 
@@ -86,50 +87,50 @@ a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.application.sslv2
+.. module:: pcapkit.protocols.application.sslv2.schema
 
-.. autoclass:: pcapkit.protocols.schema.application.sslv2.SSLv2
+.. autoclass:: pcapkit.protocols.application.sslv2.schema.SSLv2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.sslv2.HandshakeBody
+.. autoclass:: pcapkit.protocols.application.sslv2.schema.HandshakeBody
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.sslv2.UnknownHandshakeBody
+.. autoclass:: pcapkit.protocols.application.sslv2.schema.UnknownHandshakeBody
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.sslv2.ClientHello
+.. autoclass:: pcapkit.protocols.application.sslv2.schema.ClientHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.sslv2.ServerHello
+.. autoclass:: pcapkit.protocols.application.sslv2.schema.ServerHello
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.application.sslv2.sslv2_record_length
-.. autofunction:: pcapkit.protocols.schema.application.sslv2.sslv2_hello_probe_length
-.. autofunction:: pcapkit.protocols.schema.application.sslv2.sslv2_hello_probe_is_plausible
-.. autofunction:: pcapkit.protocols.schema.application.sslv2.sslv2_body_selector
+.. autofunction:: pcapkit.protocols.application.sslv2.schema.sslv2_record_length
+.. autofunction:: pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_length
+.. autofunction:: pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_is_plausible
+.. autofunction:: pcapkit.protocols.application.sslv2.schema.sslv2_body_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.application.sslv2
+.. module:: pcapkit.protocols.application.sslv2.data
 
-.. autoclass:: pcapkit.protocols.data.application.sslv2.SSLv2
+.. autoclass:: pcapkit.protocols.application.sslv2.data.SSLv2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.sslv2.ClientHello
+.. autoclass:: pcapkit.protocols.application.sslv2.data.ClientHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.sslv2.ServerHello
+.. autoclass:: pcapkit.protocols.application.sslv2.data.ServerHello
    :members:
    :show-inheritance:
 

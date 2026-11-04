@@ -35,8 +35,8 @@ class TestRawErrorStr(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_failure_error_is_str(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -45,8 +45,8 @@ class TestRawErrorStr(unittest.TestCase):
         self.assertIsInstance(raw.info.error, str)
 
     def test_layer_limit_error_is_str(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities import config
 
         # Ethernet, then IPv4 carrying one octet of TCP: TCP is the second
@@ -60,8 +60,8 @@ class TestRawErrorStr(unittest.TestCase):
         self.assertIsInstance(raw.info.error, str)
 
     def test_annotations_say_str(self) -> None:
-        from pcapkit.protocols.data.misc import raw as data_raw
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw import data as data_raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertEqual(data_raw.Raw.__annotations__['error'], 'Optional[str]')
         self.assertEqual(Raw.read.__annotations__['error'], 'Optional[str]')

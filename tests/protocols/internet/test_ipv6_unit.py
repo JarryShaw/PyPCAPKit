@@ -26,7 +26,7 @@ class IPv6UnitTests(unittest.TestCase):
 
     def test_ipv6_index_length_and_id_are_stable(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         proto = object.__new__(IPv6)
 
@@ -38,7 +38,7 @@ class IPv6UnitTests(unittest.TestCase):
         from ipaddress import ip_address
 
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         data = DummyDict({
             'class': 0x2a,
@@ -63,7 +63,7 @@ class IPv6UnitTests(unittest.TestCase):
 
     def test_ipv6_make_builds_schema_with_normalised_fields(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         proto = object.__new__(IPv6)
         schema = proto.make(
@@ -87,8 +87,8 @@ class IPv6UnitTests(unittest.TestCase):
         from ipaddress import ip_address
 
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6
 
         proto = object.__new__(IPv6)
         proto._info = DummyDict(
@@ -142,10 +142,10 @@ class IPv6UnitTests(unittest.TestCase):
 
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
+        from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         proto = object.__new__(IPv6)
         proto.__header__ = SimpleNamespace(get_payload=lambda: b'fragment-payload')
@@ -193,11 +193,11 @@ class IPv6UnitTests(unittest.TestCase):
 
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
+        from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         proto = object.__new__(IPv6)
         proto.__header__ = SimpleNamespace(get_payload=lambda: b'udp-data')
@@ -233,7 +233,7 @@ class IPv6UnitTests(unittest.TestCase):
         proto._sigterm = False
         custom_proto = TransType.get(250)
         proto.__proto__ = defaultdict(lambda: Raw, {
-            custom_proto: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+            custom_proto: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         })
         imported = proto._import_next_layer(custom_proto, payload=b'module')
         self.assertIsInstance(imported, Raw)
@@ -245,12 +245,12 @@ class IPv6UnitTests(unittest.TestCase):
         from ipaddress import ip_address
 
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6
 
         proto = object.__new__(IPv6)
         proto.__header__ = Schema_IPv6(
@@ -314,7 +314,7 @@ class IPv6UnitTests(unittest.TestCase):
         import io
         import struct
 
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         src = bytes.fromhex('fe80000000000000a423b61d7c9270c6')
         dst = bytes.fromhex('fe80000000000000821f12fffec9d13d')
@@ -353,7 +353,7 @@ class IPv6UnitTests(unittest.TestCase):
         the way in. Asserting an exact tiling catches both directions at once.
 
         """
-        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+        from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6
 
         namespace = Schema_IPv6.__fields__['hextet']._namespace
         self.assertEqual(namespace, {'version': (0, 4), 'class': (4, 8), 'label': (12, 20)})
@@ -375,8 +375,8 @@ class IPv6UnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6.schema import IPv6 as Schema_IPv6
 
         schema = Schema_IPv6(
             hextet={'version': 6, 'class': 0x2a, 'label': 0x12345},

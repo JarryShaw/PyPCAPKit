@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A DTLS handshake message read and written on its own (#2496).
 
-:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
+:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake>`
 reads one handshake message outside any record, so a message longer than a
 record's 16-bit ``length`` still decodes. A fragmented message is written with
 exactly ``fragment_length`` body octets (RFC 6347, section 4.2.3): a body that is
@@ -56,7 +56,7 @@ class ReadHandshakeTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_a_message_reads_as_it_does_in_a_record(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for name, message in {
                 'ClientHello': _handshake(1, BODY),
@@ -70,8 +70,8 @@ class ReadHandshakeTests(unittest.TestCase):
                 self.assertEqual(DTLS.read_handshake(message), expected)
 
     def test_a_message_longer_than_a_record_holds_decodes(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.tls import ClientHello, Extension
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.data import ClientHello, Extension
 
         body = _client_hello_body(b'\x00\x15' + (65500).to_bytes(2, 'big') + bytes(65500))
         message = _handshake(1, body)
@@ -83,7 +83,7 @@ class ReadHandshakeTests(unittest.TestCase):
                          (len(body), 3, False))
 
     def test_anything_but_one_message_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         whole = _handshake(1, BODY)
@@ -107,14 +107,14 @@ class FragmentBodyTests(unittest.TestCase):
     @staticmethod
     def _fragment(body: 'object', fragment_offset: int, fragment_length: int) -> 'object':
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.protocols.data.application.dtls import DTLSHandshake
+        from pcapkit.protocols.application.dtls.data import DTLSHandshake
 
         return DTLSHandshake(msg_type=HandshakeType.client_hello, length=len(BODY), body=body,
                              message_seq=3, fragment_offset=fragment_offset,
                              fragment_length=fragment_length, is_fragmented=True)
 
     def test_a_whole_message_body_is_cut_to_the_fragment(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         hello = DTLS.read_handshake(_handshake(1, BODY)).body
         for body in (hello, BODY):
@@ -129,7 +129,7 @@ class FragmentBodyTests(unittest.TestCase):
                                      BODY[offset:offset + length])
 
     def test_a_body_of_any_other_length_is_refused(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, (body, offset, length) in {
@@ -143,7 +143,7 @@ class FragmentBodyTests(unittest.TestCase):
     def test_a_parsed_fragment_rebuilds_byte_exact(self) -> None:
         """A fragment's own body is never cut, even one whose range overruns
         its message (offset 5 + 10 > length 10)."""
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         for name, message in {
                 'first half': _handshake(1, BODY[:HALF], fragment_length=HALF, length=len(BODY)),

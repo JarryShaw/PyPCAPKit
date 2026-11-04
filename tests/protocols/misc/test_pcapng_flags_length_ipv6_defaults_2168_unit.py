@@ -59,7 +59,7 @@ class TestPCAPNGIPv6MakeDefaults(PCAPNGTestCase):
 
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,
@@ -75,7 +75,7 @@ class TestPCAPNGIPv6MakeDefaults(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Name_Resolution_Block,

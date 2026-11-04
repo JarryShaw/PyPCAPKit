@@ -6,8 +6,8 @@ a fresh header from its keywords alone. This guards against it assigning that
 header to the instance as well, where a bare
 ``UDP(srcport=1234, dstport=53).pack()`` left ``schema.srcport`` at ``0`` while
 ``info.srcport`` was still ``1234``, and
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` overwrote
-:attr:`~pcapkit.protocols.transport.tcp.TCP.connection` on the way. The
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` overwrote
+:attr:`~pcapkit.protocols.transport.tcp.protocol.TCP.connection` on the way. The
 ``pack`` overrides of ``Frame`` and ``PCAPNG`` did the same, and HTTP/2's
 dropped the header altogether.
 
@@ -65,11 +65,11 @@ class TestLayers(_KeepsState):
     """A link, an internet and two transport protocols, constructed and parsed."""
 
     CASES = (
-        ('pcapkit.protocols.link.ethernet', 'Ethernet',
+        ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet',
          {'src': 'aa:bb:cc:dd:ee:ff', 'dst': '11:22:33:44:55:66'}),
-        ('pcapkit.protocols.internet.ipv4', 'IPv4', {'src': '1.2.3.4', 'dst': '5.6.7.8', 'ttl': 7}),
-        ('pcapkit.protocols.transport.udp', 'UDP', {'srcport': 1234, 'dstport': 53}),
-        ('pcapkit.protocols.transport.tcp', 'TCP', {'srcport': 80, 'dstport': 443, 'syn': True, 'ack': True}),
+        ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4', {'src': '1.2.3.4', 'dst': '5.6.7.8', 'ttl': 7}),
+        ('pcapkit.protocols.transport.udp.protocol', 'UDP', {'srcport': 1234, 'dstport': 53}),
+        ('pcapkit.protocols.transport.tcp.protocol', 'TCP', {'srcport': 80, 'dstport': 443, 'syn': True, 'ack': True}),
     )
 
     def test_bare_pack_returns_a_default_header(self) -> 'None':
@@ -99,7 +99,7 @@ class TestLayers(_KeepsState):
                 self.assertEqual(bytes(proto.schema), octets)
 
     def test_issue_example(self) -> 'None':
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         udp = UDP(srcport=1234, dstport=53)
         self.assertEqual(udp.data, bytes.fromhex('04d2003500080000'))
@@ -109,7 +109,7 @@ class TestLayers(_KeepsState):
 
     def test_tcp_connection_flags(self) -> 'None':
         from pcapkit.const.tcp.flags import Flags
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(srcport=80, dstport=443, syn=True, ack=True)
         self.assertEqual(tcp.connection, Flags.SYN | Flags.ACK)
@@ -122,8 +122,8 @@ class TestOverrides(_KeepsState):
     """The ``pack`` overrides that built their own header."""
 
     def test_frame(self) -> 'None':
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header().info
         frame = Frame(num=1, header=header, ts_sec=1, ts_usec=2, packet=b'abcd')
@@ -136,7 +136,7 @@ class TestOverrides(_KeepsState):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={'byteorder': 'big'})
         self.assertEqual(section.byteorder, 'big')
@@ -158,7 +158,7 @@ class TestOverrides(_KeepsState):
         self.assertEqual(interface.block, BlockType.Interface_Description_Block)
 
     def test_httpv2(self) -> 'None':
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         kwargs = {'type': 0x00, 'sid': 1, 'frame': {'data': b'abc'}}
         frame = HTTPv2(**kwargs)

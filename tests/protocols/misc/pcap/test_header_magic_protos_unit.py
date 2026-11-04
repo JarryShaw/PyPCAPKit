@@ -18,7 +18,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_make_magic_endian_flags_honour_nanosecond(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = object.__new__(Header)
         cases = [
@@ -33,7 +33,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
                                                     nanosecond=nanosecond), expected)
 
     def test_make_magic_byteorder_matches_endian_flags(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = object.__new__(Header)
         for byteorder in ('little', 'big'):
@@ -47,7 +47,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
 
     def test_read_protos_reads_size_bytes(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = object.__new__(Header)
         for size in (1, 2, 4):
@@ -59,7 +59,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
     def test_read_protos_honours_file_byte_order(self) -> None:
         # #2312: a big-endian file was read as little-endian.
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         for byteorder in ('big', 'little'):
             for size in (1, 2, 4):
@@ -73,7 +73,7 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
     def test_read_protos_parsed_big_endian_header(self) -> None:
         # #2312: the byte order comes from the magic number ``read`` parsed.
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         raw = Header(bigendian=True, network=LinkType.ETHERNET).data
         self.assertEqual(raw[:4], b'\xa1\xb2\xc3\xd4')

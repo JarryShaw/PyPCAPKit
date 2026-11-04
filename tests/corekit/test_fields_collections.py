@@ -27,7 +27,7 @@ class OptionFieldTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import OptionField
         from pcapkit.corekit.fields.numbers import UInt16Field
         from pcapkit.corekit.fields.strings import BytesField, PaddingField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         #: Every schema unpacked while parsing an option list, in order.
         self.unpacked = []  # type: list[str]
@@ -150,7 +150,7 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
         """
         from pcapkit.corekit.fields.collections import OptionField
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         registry = collections.defaultdict(lambda: body, {1: body, 0: end})
 
@@ -170,7 +170,7 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
         """A base schema whose type field is its *second* field."""
         from pcapkit.corekit.fields.numbers import UInt16Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         unpacked = self.unpacked
 
@@ -207,7 +207,7 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
         """
         from pcapkit.corekit.fields.numbers import UInt16Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         unpacked = self.unpacked
         kind_field = UInt16Field(length=lambda pkt: 2) if callable_length else UInt16Field()
@@ -291,7 +291,7 @@ class OptionFieldPackageDeclarationTests(unittest.TestCase):
     def test_no_declaration_in_the_package_falls_back(self) -> None:
         import pcapkit.all  # noqa: F401  (realises every schema declaration)
         from pcapkit.corekit.fields.collections import OptionField
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         def subclasses(cls: 'Any') -> 'Any':
             for sub in cls.__subclasses__():
@@ -352,7 +352,7 @@ class ListFieldSchemaItemTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         recorded = []  # type: list[int]
 
@@ -390,7 +390,7 @@ class ListFieldSchemaItemTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         seen = []  # type: list[str]
 

@@ -7,6 +7,12 @@ only an *explicit* re-export goes: an alias assignment, a name in a non-home
 module's ``__all__``, or a name documented as importable there. A module that still uses a name it imports from
 the new home keeps the import, so the old path resolving through it is expected.
 
+The protocol packages' ``Schema_*`` and ``Data_*`` names are the exception the
+owner ruled in review of #2753: a package binds each public class its ``schema``
+and ``data`` modules define under them, outside ``__all__``, as 1.5.1's aggregators
+exposed those classes; :mod:`tests.protocols.test_protocol_packages_2534_unit`
+pins them.
+
 These checks pin that:
 
 * :class:`TestNotExported` -- no removed name is in its old module's
@@ -28,6 +34,11 @@ These checks pin that:
 * :class:`TestMovedModules` -- a shipped module that moved whole does not import
   at its old path, and the module that took its place records ``versionremoved``
   for that path, in the docstring and on the docs page.
+* :class:`TestShippedNames` -- every name the latest release shipped under
+  :mod:`pcapkit.protocols` resolves at its old path, or a ``versionremoved``
+  names that path, or names its module where the module went whole or only
+  re-exported the name (#2534). The names are read from the release tag by
+  :file:`util/shipped_names.py` into a checked-in fixture, as CI has no tags.
 
 This module is unit-tier and reads no capture.
 
@@ -36,9 +47,12 @@ from __future__ import annotations
 
 import ast
 import importlib
+import json
 import pathlib
 import re
 import unittest
+
+from util import shipped_names
 
 #: Test tier (#1958): checks that each moved name's old path is gone, a question about
 #: the tree.
@@ -49,7 +63,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Removed paths the old module does not bind at all, as ``(old module, name)``.
 PURE = (
-    ('pcapkit.protocols.misc.pcapng', 'TLSKeyLabel'),
+    ('pcapkit.protocols.misc.pcapng.protocol', 'TLSKeyLabel'),
     ('pcapkit.corekit.fields.field', 'NoValueType'),
     ('pcapkit.corekit.enum', 'NoDefaultType'),
     ('pcapkit.corekit.module', 'NullType'),
@@ -58,25 +72,25 @@ PURE = (
     ('pcapkit.foundation.reassembly.data', 'DeferredPacket'),
     ('pcapkit.foundation.reassembly.data.data', 'DeferredPacket'),
     ('pcapkit.foundation.traceflow.data.data', 'DeferredPacket'),
-    ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
-    ('pcapkit.protocols.application.rarp', 'DRARP'),
-    ('pcapkit.protocols.application.ngap', 'ProcedureCode'),
-    ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
-    ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
-    ('pcapkit.protocols.internet.mh', 'PMIPv6Timestamp'),
-    ('pcapkit.protocols.link.arp', 'InARP'),
+    ('pcapkit.protocols.application.ftp.protocol', 'FTP_DATA'),
+    ('pcapkit.protocols.application.rarp.protocol', 'DRARP'),
+    ('pcapkit.protocols.application.ngap.protocol', 'ProcedureCode'),
+    ('pcapkit.protocols.application.ngap.protocol', 'ProtocolIE'),
+    ('pcapkit.protocols.internet.mh.protocol', 'NTPTimestamp'),
+    ('pcapkit.protocols.internet.mh.protocol', 'PMIPv6Timestamp'),
+    ('pcapkit.protocols.link.arp.protocol', 'InARP'),
     # #2529: renamed after their modules.
-    ('pcapkit.protocols.application.httpv1', 'HTTP'),
-    ('pcapkit.protocols.application.httpv2', 'HTTP'),
-    ('pcapkit.protocols.schema.application.httpv1', 'HTTP'),
-    ('pcapkit.protocols.schema.application.httpv2', 'HTTP'),
-    ('pcapkit.protocols.data.application.httpv1', 'HTTP'),
-    ('pcapkit.protocols.data.application.httpv2', 'HTTP'),
+    ('pcapkit.protocols.application.httpv1.protocol', 'HTTP'),
+    ('pcapkit.protocols.application.httpv2.protocol', 'HTTP'),
+    ('pcapkit.protocols.application.httpv1.schema', 'HTTP'),
+    ('pcapkit.protocols.application.httpv2.schema', 'HTTP'),
+    ('pcapkit.protocols.application.httpv1.data', 'HTTP'),
+    ('pcapkit.protocols.application.httpv2.data', 'HTTP'),
     # #2674: helpers called from outside the schema layer, moved to
     # pcapkit.corekit.schema.
     ('pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
-    ('pcapkit.protocols.schema.schema', 'keep_short_read'),
-    ('pcapkit.protocols.schema.schema', 'replay_short_read'),
+    ('pcapkit.protocols.schema', 'keep_short_read'),
+    ('pcapkit.protocols.schema', 'replay_short_read'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -91,7 +105,7 @@ USED = (
     ('pcapkit.corekit.fields.ipaddress', '_reject_bool', 'pcapkit.corekit.schema.ipaddress'),
     ('pcapkit.corekit.fields.ipaddress', '_reraise_as_field_value_error',
      'pcapkit.corekit.schema.ipaddress'),
-    ('pcapkit.protocols.schema.internet.ipv6', 'jumbo_payload_length', 'pcapkit.corekit.schema.jumbogram'),
+    ('pcapkit.protocols.internet.ipv6.schema', 'jumbo_payload_length', 'pcapkit.corekit.schema.jumbogram'),
 )
 
 #: Every removed ``(old module, name)`` pair.
@@ -101,39 +115,39 @@ REMOVED = PURE + tuple((module, name) for module, name, _ in USED)
 #: the version that removed it)``.
 SHIPPED = (
     ('pcapkit.protocols.misc.pcapng', 'TLSKeyLabel',
-     'pcapkit/protocols/misc/pcapng.py', 'pcapkit/protocols/misc/pcapng.rst', '1.5.0'),
+     'pcapkit/protocols/misc/pcapng/protocol.py', 'pcapkit/protocols/misc/pcapng.rst', '1.5.0'),
     ('pcapkit.corekit.fields.field', 'NoValueType',
      'pcapkit/corekit/fields/field.py', 'pcapkit/corekit/fields/field.rst', '1.5.0'),
     ('pcapkit.protocols.internet.mh', 'NTPTimestamp',
-     'pcapkit/protocols/internet/mh.py', 'pcapkit/protocols/internet/mh.rst', '1.5.0'),
+     'pcapkit/protocols/internet/mh/protocol.py', 'pcapkit/protocols/internet/mh.rst', '1.5.0'),
     ('pcapkit.protocols.application.ftp', 'FTP_DATA',
-     'pcapkit/protocols/application/ftp.py',
+     'pcapkit/protocols/application/ftp/protocol.py',
      'pcapkit/protocols/application/ftp.rst', '1.5.0'),
     # #2529: shipped in 1.5.x, moved to their own modules.
     ('pcapkit.protocols.application.rarp', 'DRARP',
-     'pcapkit/protocols/application/rarp.py',
+     'pcapkit/protocols/application/rarp/protocol.py',
      'pcapkit/protocols/application/rarp.rst', '1.6.0'),
     ('pcapkit.protocols.link.arp', 'InARP',
-     'pcapkit/protocols/link/arp.py',
+     'pcapkit/protocols/link/arp/protocol.py',
      'pcapkit/protocols/link/arp.rst', '1.6.0'),
     # #2529: shipped in 1.5.x, renamed after their modules.
     ('pcapkit.protocols.application.httpv1', 'HTTP',
-     'pcapkit/protocols/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1/protocol.py',
      'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
     ('pcapkit.protocols.application.httpv2', 'HTTP',
-     'pcapkit/protocols/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2/protocol.py',
      'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
     ('pcapkit.protocols.schema.application.httpv1', 'HTTP',
-     'pcapkit/protocols/schema/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1/schema.py',
      'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
     ('pcapkit.protocols.schema.application.httpv2', 'HTTP',
-     'pcapkit/protocols/schema/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2/schema.py',
      'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
     ('pcapkit.protocols.data.application.httpv1', 'HTTP',
-     'pcapkit/protocols/data/application/httpv1.py',
+     'pcapkit/protocols/application/httpv1/data.py',
      'pcapkit/protocols/application/httpv1.rst', '1.6.0'),
     ('pcapkit.protocols.data.application.httpv2', 'HTTP',
-     'pcapkit/protocols/data/application/httpv2.py',
+     'pcapkit/protocols/application/httpv2/data.py',
      'pcapkit/protocols/application/httpv2.rst', '1.6.0'),
     # #2674: shipped in 1.5.x, moved to pcapkit.corekit.schema.
     ('pcapkit.corekit.fields.ipaddress', 'parse_ip_address',
@@ -141,27 +155,56 @@ SHIPPED = (
     ('pcapkit.corekit.fields.ipaddress', '_reject_bool',
      'pcapkit/corekit/fields/ipaddress.py', 'pcapkit/corekit/fields/ipaddress.rst', '1.6.0'),
     ('pcapkit.protocols.schema.schema', 'keep_short_read',
-     'pcapkit/protocols/schema/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
+     'pcapkit/protocols/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
     ('pcapkit.protocols.schema.schema', 'replay_short_read',
-     'pcapkit/protocols/schema/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
+     'pcapkit/protocols/schema.py', 'pcapkit/protocols/index.rst', '1.6.0'),
     ('pcapkit.protocols.schema.internet.ipv6', 'jumbo_payload_length',
-     'pcapkit/protocols/schema/internet/ipv6.py', 'pcapkit/protocols/internet/ipv6.rst', '1.6.0'),
+     'pcapkit/protocols/internet/ipv6/schema.py', 'pcapkit/protocols/internet/ipv6.rst', '1.6.0'),
 )
 
 #: Shipped modules that moved whole, as ``(old module, the module recording its
 #: removal, docs page, the version that removed it)``.
 MOVED_MODULES = (
     # #2529: shipped in 1.5.x, renamed after the class they hold.
-    ('pcapkit.protocols.misc.null', 'pcapkit.protocols.misc.no_payload',
+    ('pcapkit.protocols.misc.null', 'pcapkit.protocols.misc.no_payload.protocol',
      'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
-    ('pcapkit.protocols.schema.misc.null', 'pcapkit.protocols.misc.no_payload',
+    ('pcapkit.protocols.schema.misc.null', 'pcapkit.protocols.misc.no_payload.protocol',
      'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
-    ('pcapkit.protocols.data.misc.null', 'pcapkit.protocols.misc.no_payload',
+    ('pcapkit.protocols.data.misc.null', 'pcapkit.protocols.misc.no_payload.protocol',
      'pcapkit/protocols/misc/no_payload.rst', '1.6.0'),
     # #2674: shipped in 1.5.x, moved whole into pcapkit.corekit.schema.
     ('pcapkit.corekit.fields.byteorder', 'pcapkit.corekit.schema.byteorder',
      'pcapkit/corekit/schema/byteorder.rst', '1.6.0'),
 )
+
+
+#: The names the latest release shipped under :mod:`pcapkit.protocols`, which
+#: :file:`util/shipped_names.py` reads from its tag (CI checks out no tags).
+SHIPPED_NAMES = ROOT / 'tests' / 'project' / 'shipped_names_fixtures' / 'v1.5.1.json'
+
+#: A ``versionremoved`` block, as its indentation and its body: the lines indented past it.
+REMOVAL_BLOCK = re.compile(r'(?m)^(?P<indent>[ \t]*)\.\. versionremoved::[^\n]*\n'
+                           r'(?P<body>(?:(?P=indent)[ \t]+[^\n]*\n|[ \t]*\n)*)')
+
+#: A module whose public names :meth:`TestShippedNames.test_the_generator_reads_what_a_module_binds`
+#: reads.
+SAMPLE = """\
+from typing import TYPE_CHECKING
+from pcapkit.protocols.protocol import Protocol as Base
+__all__ = ['Kept', 'Base']
+if TYPE_CHECKING:
+    Hidden = int
+else:
+    Shown = int
+try:
+    Tried = 1
+except ImportError:
+    Handled = 2
+LIMIT, (PAIR, _PRIVATE) = 1, (2, 3)
+Base.__proto__[1] = None
+class Kept: ...
+def helper(): ...
+"""
 
 
 def _sources() -> 'list[pathlib.Path]':
@@ -230,6 +273,31 @@ def _claims(text: 'str', owner: 'str | None' = None) -> 'list[str]':
                              or re.search(rf'(?<![\w.]){name_re}(?!\w)', sentence) is not None)):
                 found.append(f'{module_name}.{name}: {sentence}')
     return found
+
+
+def _removal_notes() -> 'str':
+    """Every ``versionremoved`` block's body on a docs page or in a protocol module's docstring.
+
+    The changelogs are left out: they record a removal, rather than standing at
+    the path it left.
+
+    """
+    bodies = []  # type: list[str]
+    for page in sorted(_docs_dir().rglob('*.rst')):
+        if 'changelog' not in page.relative_to(_docs_dir()).parts:
+            bodies.extend(m.group('body') for m in REMOVAL_BLOCK.finditer(page.read_text(encoding='utf-8')))
+    for path in sorted((ROOT / 'pcapkit' / 'protocols').rglob('*.py')):
+        docstring = ast.get_docstring(ast.parse(path.read_text(encoding='utf-8')), clean=False) or ''
+        bodies.extend(m.group('body') for m in REMOVAL_BLOCK.finditer(docstring))
+    return '\n'.join(bodies)
+
+
+def _module(name: 'str') -> 'object':
+    """The module ``name`` imports as, or :data:`None` where it no longer imports."""
+    try:
+        return importlib.import_module(name)
+    except ImportError:
+        return None
 
 
 class TestNotExported(unittest.TestCase):
@@ -352,8 +420,10 @@ class TestVersionRemoved(unittest.TestCase):
     def test_docstring_and_docs_page_carry_the_directive(self) -> 'None':
         for module_name, name, source, page, version in SHIPPED:
             old_path = f'``{module_name}.{name}``'
-            module = importlib.import_module(module_name)
-            for label, text in (('docstring', module.__doc__ or ''),
+            # the docstring of the module holding the note now, read from its
+            # file: the old module may have gone with its tree (#2534)
+            tree = ast.parse((ROOT / source).read_text(encoding='utf-8'))
+            for label, text in (('docstring', ast.get_docstring(tree, clean=False) or ''),
                                 ('docs page', (_docs_dir() / page).read_text(encoding='utf-8'))):
                 with self.subTest(path=f'{module_name}.{name}', where=label):
                     blocks = re.findall(rf'(?ms)^\.\. versionremoved:: {re.escape(version)}\n\n(.*?)(?=^\S|\Z)',
@@ -382,6 +452,59 @@ class TestMovedModules(unittest.TestCase):
                                         text)
                     self.assertTrue(any(f'``{old}``' in block for block in blocks),
                                     f'no versionremoved:: {version} block names ``{old}`` in {label}')
+
+
+class TestShippedNames(unittest.TestCase):
+    """Each name the release shipped under :mod:`pcapkit.protocols` resolves, or is recorded as gone."""
+
+    def setUp(self) -> 'None':
+        self.fixture = json.loads(SHIPPED_NAMES.read_text(encoding='utf-8'))
+
+    def test_the_fixture_names_its_release(self) -> 'None':
+        """The fixture names the tag and commit it was read from, and the command that wrote it."""
+        tag = SHIPPED_NAMES.stem
+        self.assertEqual(self.fixture['tag'], tag)
+        self.assertRegex(self.fixture['commit'], r'^[0-9a-f]{40}$')
+        self.assertEqual(self.fixture['generator'], f'python3 util/shipped_names.py {tag}')
+        self.assertEqual(self.fixture['scope'], shipped_names.SCOPE)
+        self.assertIn('pcapkit.protocols.protocol', self.fixture['modules'])
+
+    def test_every_shipped_name_resolves_or_is_recorded(self) -> 'None':
+        """A name gone from its old path has a ``versionremoved`` naming that path (#2534).
+
+        One naming the module stands for the name where the module went whole,
+        or where the module only re-exported the name.
+
+        """
+        notes = _removal_notes()
+        missing = []  # type: list[str]
+        for module_name, names in sorted(self.fixture['modules'].items()):
+            module = _module(module_name)
+            for name in names['defined'] + names['exported'] + names['documented']:
+                if module is not None and hasattr(module, name):
+                    continue
+                if f'``{module_name}.{name}``' in notes:
+                    continue
+                if f'``{module_name}``' in notes and (module is None or name in names['exported']):
+                    continue
+                missing.append(f'{module_name}.{name}')
+        self.assertEqual(missing, [], 'record each in a versionremoved naming its old path')
+
+    def test_the_generator_reads_what_a_module_binds(self) -> 'None':
+        """:file:`util/shipped_names.py` reads the names bound at run time, the re-exports and the documented."""
+        tree = ast.parse(SAMPLE)
+        self.assertEqual(shipped_names.defined(tree.body),
+                         ['__all__', 'Shown', 'Tried', 'Handled', 'LIMIT', 'PAIR', '_PRIVATE', 'Kept',
+                          'helper'])
+        self.assertEqual(shipped_names.exported(tree), ['Kept', 'Base'])
+        self.assertEqual(shipped_names.module_name('pcapkit/protocols/link/__init__.py'),
+                         'pcapkit.protocols.link')
+        page = ('.. module:: pcapkit.protocols.link.vlan\n\n'
+                '.. autoclass:: pcapkit.protocols.link.vlan.VLAN\n   :members:\n\n'
+                '   .. autoattribute:: pcapkit.protocols.link.vlan.Nested\n\n'
+                '.. data:: _CACHE\n\n.. autofunction:: helper\n')
+        self.assertEqual(shipped_names.documented(page, {'pcapkit.protocols.link.vlan'}),
+                         {'pcapkit.protocols.link.vlan': {'VLAN', '_CACHE', 'helper'}})
 
 
 if __name__ == '__main__':

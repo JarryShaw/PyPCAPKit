@@ -37,7 +37,7 @@ class TestHIPEmptyRawParam(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_empty_octets_are_refused(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for parameters in ([b''], [ECHO_REQUEST_SIGNED, b''], [b'', ECHO_REQUEST_SIGNED]):
@@ -47,7 +47,7 @@ class TestHIPEmptyRawParam(unittest.TestCase):
 
     def test_raw_parameter_builds_as_given(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(parameters=[ECHO_REQUEST_SIGNED]).data
         self.assertEqual(built[1], 5)  # Header Length: (40 + 8 - 8) / 8

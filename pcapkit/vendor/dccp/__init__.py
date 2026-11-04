@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.transport.dccp.DCCP` Vendor Crawlers
-=====================================================================
+""":class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` Vendor Crawlers
+==============================================================================
 
 .. module:: pcapkit.vendor.dccp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.dccp.DCCP` implementations. Available
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` implementations. Available
 enumerations include:
 
 .. list-table::

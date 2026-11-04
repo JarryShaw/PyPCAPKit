@@ -32,11 +32,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 #: Parent and child, by ``module:qualname``; ``synthetic`` is declared in the script.
 MODELS = {
     'synthetic': ('', 'Parent', 'Child'),
-    'hopopt.QuickStartOption': ('pcapkit.protocols.data.internet.hopopt', 'Option', 'QuickStartOption'),
-    'hopopt.SMFDPDOption': ('pcapkit.protocols.data.internet.hopopt', 'Option', 'SMFDPDOption'),
-    'ipv6_opts.QuickStartOption': ('pcapkit.protocols.data.internet.ipv6_opts', 'Option', 'QuickStartOption'),
-    'ipv4.QSOption': ('pcapkit.protocols.data.internet.ipv4', 'Option', 'QSOption'),
-    'tcp.MPTCPJoin': ('pcapkit.protocols.data.transport.tcp', 'MPTCP', 'MPTCPJoin'),
+    'hopopt.QuickStartOption': ('pcapkit.protocols.internet.hopopt.data', 'Option', 'QuickStartOption'),
+    'hopopt.SMFDPDOption': ('pcapkit.protocols.internet.hopopt.data', 'Option', 'SMFDPDOption'),
+    'ipv6_opts.QuickStartOption': ('pcapkit.protocols.internet.ipv6_opts.data', 'Option', 'QuickStartOption'),
+    'ipv4.QSOption': ('pcapkit.protocols.internet.ipv4.data', 'Option', 'QSOption'),
+    'tcp.MPTCPJoin': ('pcapkit.protocols.transport.tcp.data', 'MPTCP', 'MPTCPJoin'),
 }
 
 SCRIPT = r'''

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.arp.ARP` Constant Enumerations
-====================================================================
+""":class:`~pcapkit.protocols.link.arp.protocol.ARP` Constant Enumerations
+=============================================================================
 
-This module contains all constant enumerations of :class:`~pcapkit.protocols.link.arp.ARP`
-and :class:`~pcapkit.protocols.application.rarp.RARP` implementations. Available
+This module contains all constant enumerations of :class:`~pcapkit.protocols.link.arp.protocol.ARP`
+and :class:`~pcapkit.protocols.application.rarp.protocol.RARP` implementations. Available
 enumerations include:
 
 .. list-table::

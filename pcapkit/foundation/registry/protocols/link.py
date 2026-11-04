@@ -23,13 +23,13 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
-from pcapkit.protocols.link.frad import FRAD
+from pcapkit.protocols.link.frad.protocol import FRAD
 from pcapkit.protocols.link.link import Link
-from pcapkit.protocols.link.linux_sll import LinuxSLL
-from pcapkit.protocols.link.loopback import Loopback
-from pcapkit.protocols.link.netlink import Netlink
-from pcapkit.protocols.link.radiotap import Radiotap
-from pcapkit.protocols.schema.link.radiotap import RadiotapField as Schema_Radiotap_Field
+from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+from pcapkit.protocols.link.loopback.protocol import Loopback
+from pcapkit.protocols.link.netlink.protocol import Netlink
+from pcapkit.protocols.link.radiotap.protocol import Radiotap
+from pcapkit.protocols.link.radiotap.schema import RadiotapField as Schema_Radiotap_Field
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
@@ -38,8 +38,9 @@ if TYPE_CHECKING:
 
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.corekit.sentinels import NullType
-    from pcapkit.protocols.link.radiotap import FieldConstructor as Radiotap_FieldConstructor
-    from pcapkit.protocols.link.radiotap import FieldParser as Radiotap_FieldParser
+    from pcapkit.protocols.link.radiotap.protocol import \
+        FieldConstructor as Radiotap_FieldConstructor
+    from pcapkit.protocols.link.radiotap.protocol import FieldParser as Radiotap_FieldParser
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
@@ -109,7 +110,7 @@ def register_loopback(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Typ
 def register_loopback(code: 'int', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.link.loopback.Loopback.__proto__
+# NOTE: pcapkit.protocols.link.loopback.protocol.Loopback.__proto__
 def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                       class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -119,7 +120,7 @@ def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase]
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.link.loopback.Loopback.__proto__` registry.
+    :data:`pcapkit.protocols.link.loopback.protocol.Loopback.__proto__` registry.
 
     Arguments:
         code: BSD address family
@@ -129,7 +130,7 @@ def register_loopback(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase]
 
     Important:
         Unlike :func:`register_ethertype`, ``code`` is an address family,
-        **not** an EtherType: :class:`~pcapkit.protocols.link.loopback.Loopback`
+        **not** an EtherType: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`
         keeps a registry of its own.
 
     Raises:
@@ -160,7 +161,7 @@ def register_arphrd(code: 'Enum_ARPHRD', module: 'ModuleDescriptor[ProtocolBase]
 def register_arphrd(code: 'Enum_ARPHRD', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__
+# NOTE: pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__
 def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                     class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -170,7 +171,7 @@ def register_arphrd(code: 'Enum_ARPHRD', module: 'str | ModuleDescriptor[Protoco
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__` registry, so
+    :data:`pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__` registry, so
     that a Linux "cooked" capture on that ``arphrd_type`` dispatches to it
     instead of reading ``protocol_type`` as an EtherType.
 
@@ -206,7 +207,7 @@ def register_frad(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[Pr
 def register_frad(code: 'int', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.link.frad.FRAD.__proto__
+# NOTE: pcapkit.protocols.link.frad.protocol.FRAD.__proto__
 def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -216,7 +217,7 @@ def register_frad(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | T
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.link.frad.FRAD.__proto__` registry.
+    :data:`pcapkit.protocols.link.frad.protocol.FRAD.__proto__` registry.
 
     Arguments:
         code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header
@@ -248,7 +249,7 @@ def register_netlink(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type
 def register_netlink(code: 'int', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.link.netlink.Netlink.__proto__
+# NOTE: pcapkit.protocols.link.netlink.protocol.Netlink.__proto__
 def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                      class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -258,7 +259,7 @@ def register_netlink(code: 'int', module: 'str | ModuleDescriptor[ProtocolBase] 
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.link.netlink.Netlink.__proto__` registry.
+    :data:`pcapkit.protocols.link.netlink.protocol.Netlink.__proto__` registry.
 
     Arguments:
         code: ``nlmsg_type`` of the dissected message
@@ -290,7 +291,7 @@ def register_radiotap(code: 'Enum_LinkType', module: 'ModuleDescriptor[ProtocolB
 def register_radiotap(code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.link.radiotap.Radiotap.__proto__
+# NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__
 def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                       class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -300,9 +301,9 @@ def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[Pro
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.link.radiotap.Radiotap.__proto__` registry, keyed
+    :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__` registry, keyed
     by the link type of the frame a radiotap header precedes. Any link type is
-    accepted, but :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.Radiotap.read>`
+    accepted, but :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.protocol.Radiotap.read>`
     consults :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`
     alone: registering that key replaces the 802.11 dissector, and an entry
     under any other key is stored and never reached.
@@ -333,30 +334,30 @@ def register_radiotap(code: 'Enum_LinkType', module: 'str | ModuleDescriptor[Pro
     _register_name(module, (Radiotap, code))
 
 
-# NOTE: pcapkit.protocols.link.radiotap.Radiotap.__field__
+# NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__
 def register_radiotap_field(code: 'Radiotap_FieldType',
                             meth: 'str | tuple[Radiotap_FieldParser, Radiotap_FieldConstructor]', *,
                             schema: 'Optional[Type[Schema_Radiotap_Field]]' = None) -> 'None':
     """Register a radiotap field parser.
 
     The function will register the given field parser to the
-    :data:`pcapkit.protocols.link.radiotap.Radiotap.__field__` registry. A
+    :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__` registry. A
     field type is decoded once both it and the schema registry hold an entry
     for it. A presence bit 28 to 30 follows rules of its own, as does a vendor
     namespace TLV item, so an entry for one is stored and not reached there; a
     type from 32 on is reached only as a TLV item.
 
     Args:
-        code: :class:`~pcapkit.protocols.link.radiotap.Radiotap` field type as
+        code: :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` field type as
             in :class:`~pcapkit.const.radiotap.field_type.FieldType`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the field. A name names the
             ``_read_field_*`` and ``_make_field_*`` methods, and has to name
             an existing ``_read_field_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the
             field, whose fields are its subfields and whose ``__align__`` is its
             alignment. It should be a subclass of
-            :class:`pcapkit.protocols.schema.link.radiotap.RadiotapField`.
+            :class:`pcapkit.protocols.link.radiotap.schema.RadiotapField`.
 
     Raises:
         RegistryError: If ``code`` is not a

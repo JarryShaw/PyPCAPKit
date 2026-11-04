@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """IPv6 core headers rebuild byte for byte.
 
-* GitHub issue #1230: :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+* GitHub issue #1230: :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
   dropped the header body on rebuild, and wrote an overrun's ``Hdr Ext Len``
   as ``0xff``.
 * GitHub issue #1231: next-header codes 253 and 254 were recorded as an
@@ -40,7 +40,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipv6_ext_rebuilds_body(self) -> None:
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         cases = {
             'len0': bytes.fromhex('3b00010203040506'),
@@ -55,13 +55,13 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
         self.assertIsNone(parsed.info.next)
 
     def test_ipv6_ext_rebuilds_through_ipv6(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         frame = ipv6(140, bytes.fromhex('3b00010203040506'))
         self.assertEqual(IPv6.from_data(IPv6(frame).info).data, frame)
 
     def test_private_codes_are_not_extension_headers(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for code in (253, 254):
             with self.subTest(code=code):
@@ -72,7 +72,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
                 self.assertEqual(IPv6.from_data(parsed.info).data, frame)
 
     def test_route_make_accepts_bytes_data(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         for type_ in (0, 2, 3, 4, 5):
             with self.subTest(type=type_):
@@ -83,7 +83,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
                 self.assertEqual(IPv6_Route.from_data(parsed.info).data, octets)
 
     def test_route_make_rejects_bytes_that_do_not_parse(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         from pcapkit.utilities.exceptions import ProtocolError
 
         # An RPL header whose Pad (15) exceeds the octets that follow it.
@@ -92,7 +92,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
             IPv6_Route(next=59, type=3, data=b'\x00\xf0\x00\x00')
 
     def test_frag_keeps_reserved_bits(self) -> None:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         octets = bytes.fromhex('3b00000712345678')
         parsed = IPv6_Frag(io.BytesIO(octets), len(octets), extension=True)
@@ -100,7 +100,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
         self.assertEqual(IPv6_Frag.from_data(parsed.info).data, octets)
 
     def test_rpl_route_keeps_reserved_bits(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         octets = bytes.fromhex('3b020301000abcde') + bytes(16)
         parsed = IPv6_Route(io.BytesIO(octets), len(octets), extension=True)

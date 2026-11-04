@@ -2,10 +2,10 @@
 """A PCAP frame hands its dissector the captured length, not the on-wire one.
 
 This pins the length argument :meth:`Frame.read
-<pcapkit.protocols.misc.pcap.frame.Frame.read>` passes to ``_decode_next_layer``
+<pcapkit.protocols.misc.pcap.frame.protocol.Frame.read>` passes to ``_decode_next_layer``
 (#2236): ``frame.cap_len``, the octets present, never the on-wire ``frame.len``.
 A frame the snapshot length cut inside its IPv4 header keeps IPv4 as
-:class:`~pcapkit.protocols.misc.raw.Raw`, whose ``error`` names the cut, and the
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, whose ``error`` names the cut, and the
 trial parse's ``packet length < 0`` warnings go with the layer (#2308). The
 dissection reads the same for either length, so the argument is read where it
 is passed.
@@ -52,9 +52,9 @@ class TestFrameReadCapLen(unittest.TestCase):
         warnings, ``packet length < 0`` down to ``-10``, describe the IPv4 layer
         the result does not have, and are dropped with it.
         """
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.warnings import SchemaWarning
 
         decode = unittest.mock.patch.object(Frame, '_decode_next_layer', autospec=True,

@@ -19,7 +19,7 @@ from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
                                                     DatagramID, Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
-from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 from pcapkit.utilities import config
 
 if TYPE_CHECKING:
@@ -683,8 +683,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             :meth:`Transport.analyze
             <pcapkit.protocols.transport.transport.Transport.analyze>` keeps the
             base in its own signature, since it is the one method
-            :class:`~pcapkit.protocols.transport.udp.UDP` and
-            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each of
+            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
+            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each of
             them would name a different registry.
 
         Important:
@@ -710,7 +710,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         Note:
             The resolution is reached through
-            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through
+            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through
             :attr:`self.protocol
             <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`,
             which is what :meth:`submit` reads the analyser itself off. That is
@@ -728,7 +728,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         """
         # NOTE: ``_make_port`` is protected, and reached from outside its own
         # class as :meth:`SCTP._decode_next_layer
-        # <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` reaches
+        # <pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer>` reaches
         # ``ProtocolBase._decode_next_layer``. Duplicating it here instead would
         # put a second port normaliser beside the maker path's, free to drift
         # from it; it is idempotent, so a ``bufid`` that already holds a member
@@ -765,12 +765,12 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             <pcapkit.protocols.transport.transport.Transport._make_port>`, so it
             is the one the maker path uses and cannot drift from it. See
             :meth:`_make_ports` for why it is reached through
-            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through
+            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through
             :attr:`self.protocol
             <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol>`.
 
             For a *registered* port that is the very member
-            :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>` reads off
+            :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads off
             a parsed header. For an unassigned one the two are **equal but not
             identical**, and not even equally named: the parse path builds its
             member through :meth:`EnumField._unregistered_member

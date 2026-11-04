@@ -3,21 +3,20 @@ PCAP File Headers
 =================
 
 .. module:: pcapkit.protocols.misc.pcap
-.. module:: pcapkit.protocols.data.misc.pcap
-.. module:: pcapkit.protocols.schema.misc.pcap
 
 :mod:`pcapkit.protocols.misc.pcap` contains header descriptions for
 PCAP files, including global header
-(:class:`~pcapkit.protocols.misc.pcap.header.Header`) and frame header
-(:class:`~pcapkit.protocols.misc.pcap.frame.Frame`).
+(:class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`) and frame header
+(:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`).
 
 Global Header
 =============
 
 .. module:: pcapkit.protocols.misc.pcap.header
+.. module:: pcapkit.protocols.misc.pcap.header.protocol
 
-:mod:`pcapkit.protocols.misc.pcap.header` contains
-:class:`~pcapkit.protocols.misc.pcap.header.Header` only,
+:mod:`pcapkit.protocols.misc.pcap.header.protocol` contains
+:class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` only,
 which implements an extractor for global headers [*]_
 of PCAP, whose structure is described as below:
 
@@ -38,7 +37,7 @@ of PCAP, whose structure is described as below:
    A global header cut short rebuilds as captured, where it rebuilt at full
    width (:issue:`1470`).
 
-.. autoclass:: pcapkit.protocols.misc.pcap.header.Header
+.. autoclass:: pcapkit.protocols.misc.pcap.header.protocol.Header
    :no-members:
    :show-inheritance:
 
@@ -64,33 +63,43 @@ of PCAP, whose structure is described as below:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.misc.pcap.header
+.. module:: pcapkit.protocols.misc.pcap.header.schema
 
-.. autodata:: pcapkit.protocols.schema.misc.pcap.header.GLOBAL_HEADER_LEN
+.. versionremoved:: 1.6.0
 
-.. autodata:: pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER
+   ``pcapkit.protocols.schema.misc.pcap.header``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autodata:: pcapkit.protocols.misc.pcap.header.schema.GLOBAL_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER
    :no-value:
 
-.. autodata:: pcapkit.protocols.schema.misc.pcap.header.RESOLUTION
+.. autodata:: pcapkit.protocols.misc.pcap.header.schema.RESOLUTION
    :no-value:
 
-.. autodata:: pcapkit.protocols.schema.misc.pcap.header.RESOLUTION_PLACES
+.. autodata:: pcapkit.protocols.misc.pcap.header.schema.RESOLUTION_PLACES
    :no-value:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcap.header.Header
+.. autoclass:: pcapkit.protocols.misc.pcap.header.schema.Header
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.misc.pcap.header
+.. module:: pcapkit.protocols.misc.pcap.header.data
 
-.. autoclass:: pcapkit.protocols.data.misc.pcap.header.Header
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.misc.pcap.header``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.misc.pcap.header.data.Header
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcap.header.MagicNumber
+.. autoclass:: pcapkit.protocols.misc.pcap.header.data.MagicNumber
    :members:
    :show-inheritance:
 
@@ -98,9 +107,10 @@ Frame Header
 ============
 
 .. module:: pcapkit.protocols.misc.pcap.frame
+.. module:: pcapkit.protocols.misc.pcap.frame.protocol
 
-:mod:`pcapkit.protocols.misc.pcap.frame` contains
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
+:mod:`pcapkit.protocols.misc.pcap.frame.protocol` contains
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` only,
 which implements an extractor for frame headers [*]_ of PCAP,
 whose structure is described as below:
 
@@ -121,7 +131,7 @@ whose structure is described as below:
    ``len`` is the on-wire length and ``cap_len`` the captured one, where the
    two were swapped (:issue:`618`).
 
-.. autoclass:: pcapkit.protocols.misc.pcap.frame.Frame
+.. autoclass:: pcapkit.protocols.misc.pcap.frame.protocol.Frame
    :no-members:
    :show-inheritance:
 
@@ -152,24 +162,34 @@ whose structure is described as below:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.misc.pcap.frame
+.. module:: pcapkit.protocols.misc.pcap.frame.schema
 
-.. autodata:: pcapkit.protocols.schema.misc.pcap.frame.RECORD_HEADER_LEN
+.. versionremoved:: 1.6.0
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcap.frame.Frame
+   ``pcapkit.protocols.schema.misc.pcap.frame``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autodata:: pcapkit.protocols.misc.pcap.frame.schema.RECORD_HEADER_LEN
+
+.. autoclass:: pcapkit.protocols.misc.pcap.frame.schema.Frame
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.misc.pcap.frame
+.. module:: pcapkit.protocols.misc.pcap.frame.data
 
-.. autoclass:: pcapkit.protocols.data.misc.pcap.frame.Frame
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.misc.pcap.frame``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.misc.pcap.frame.data.Frame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcap.frame.FrameInfo
+.. autoclass:: pcapkit.protocols.misc.pcap.frame.data.FrameInfo
    :members:
    :show-inheritance:
 

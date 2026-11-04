@@ -11,7 +11,7 @@ reaches fails here instead of surfacing as "clean locally, red in CI" the way
 Those flags set the width to 100, exactly as :file:`CONTRIBUTING.md` documents
 ("120 for ``pylint`` and 100 for ``isort``, not PEP 8's 79"): a deliberate,
 written-down split, not a misconfiguration. #757 was filed from a bare
-``isort --check-only --diff pcapkit/protocols/schema/schema.py``, which wraps at
+``isort --check-only --diff pcapkit/protocols/schema.py``, which wraps at
 isort's own default of 79 columns and so flagged an 89-character import the
 Makefile's width accepts. So this module does not re-litigate the width.
 
@@ -134,7 +134,7 @@ HAS_ISORT = importlib.util.find_spec('isort') is not None
 #: * 5.13.2, 6.1.0, 7.0.0, 8.0.0 -- red on the whole-tree line, in five files
 #:   (``scapy.py``, ``pyshark.py`` and ``dpkt.py`` under
 #:   :file:`pcapkit/foundation/engines/`, :file:`pcapkit/protocols/protocol.py`,
-#:   :file:`pcapkit/protocols/application/http.py`): ten blank lines after
+#:   :file:`pcapkit/protocols/application/http/protocol.py`): ten blank lines after
 #:   ``# isort:skip`` imports to drop, and one to add in ``dpkt.py``.
 #:   5.13.2 on 3.8.20 and 6.1.0 on 3.9.25 flag the same five, so the verdict
 #:   follows the isort release, not the Python.

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2575: the IEEE 802.11 MAC header behind radiotap.
 
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` decodes the MAC header
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` decodes the MAC header
 of IEEE Std 802.11-2020 §9.2 and keeps the frame body as
-:class:`~pcapkit.protocols.misc.raw.Raw`. Covers data frames under each To
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`. Covers data frames under each To
 DS/From DS combination, management frames, the header length of every
 control subtype, Control Frame Extension and Extension frames, the QoS and HT
 Control fields, a refused protocol version, truncated input and ``make()``,
@@ -94,7 +94,7 @@ class TestIEEE802_11(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, raw: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         parsed = IEEE802_11(raw, len(raw))
         self.assertEqual(parsed.data, raw)
@@ -287,7 +287,7 @@ class TestIEEE802_11(unittest.TestCase):
         values builds the same octets."""
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.type import Type
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         ta_subtypes = {0b0010, 0b0011, 0b0100, 0b0101, 0b0110, 0b1000, 0b1001, 0b1010, 0b1011,
                        0b1110, 0b1111}
@@ -322,7 +322,7 @@ class TestIEEE802_11(unittest.TestCase):
         are written as zeros where the header carries them."""
         from pcapkit.const.ieee802_11.data_subtype import DataSubtype
         from pcapkit.const.ieee802_11.type import Type
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         made = IEEE802_11(type=Type.Data, subtype=DataSubtype.QoS_Data, order=True)
         self.assertEqual(made.data, bytes.fromhex('8880') + bytes(2 + 18 + 2 + 2 + 4))
@@ -378,7 +378,7 @@ class TestIEEE802_11(unittest.TestCase):
     def test_protocol_version_other_than_zero_is_refused(self) -> None:
         """Version 1 is PV1 (§9.8) and versions 2-3 are reserved: never read
         as protocol version 0."""
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version in (1, 2, 3):
@@ -390,7 +390,7 @@ class TestIEEE802_11(unittest.TestCase):
     def test_truncated_header_rebuilds_as_captured(self) -> None:
         """A capture ending anywhere in the longest header parses without
         raising and rebuilds to exactly the octets captured."""
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         raw = (_fc(2, 0b1000, TO_DS | FROM_DS | ORDER) + bytes(2) + ADDR[0] + ADDR[1]
                + ADDR[2] + b'\x10\x00' + ADDR[3] + b'\x05\x00' + b'\x01\x00\x00\x00' + b'body')
@@ -410,7 +410,7 @@ class TestIEEE802_11(unittest.TestCase):
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
         from pcapkit.const.ieee802_11.data_subtype import DataSubtype
         from pcapkit.const.ieee802_11.type import Type
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         made = IEEE802_11(type=Type.Data, subtype=DataSubtype.QoS_Data, to_ds=True, from_ds=True,
                           order=True, duration_id=0x2c, addr1=_mac(1), addr2=_mac(2), addr3=_mac(3),
@@ -433,7 +433,7 @@ class TestIEEE802_11(unittest.TestCase):
                          bytes.fromhex('1ca50000') + bytes(6))
 
     def test_make_rejects_what_the_frame_does_not_carry(self) -> None:
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in (
@@ -453,7 +453,7 @@ class TestIEEE802_11(unittest.TestCase):
                 IEEE802_11(**kwargs)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
         from pcapkit.utilities.exceptions import ProtocolError
 
         qos = {'tid': 0, 'eosp': False, 'ack_policy': 0, 'amsdu_present': False, 'bits_8_15': 0}
@@ -475,7 +475,7 @@ class TestIEEE802_11(unittest.TestCase):
 
     def test_id_index_and_names(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
 
         self.assertEqual(IEEE802_11.id(), ('IEEE802_11',))
         self.assertIs(IEEE802_11.__index__(), LinkType.IEEE802_11)  # 105 (#2608)
@@ -495,8 +495,8 @@ class TestIEEE802_11WidestValues(unittest.TestCase):
     def test_widest_value_builds_and_parses_back(self) -> None:
         """All ones lands on the field's own bits and reads back whole, and
         both layers rebuild the octets from their info."""
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         for name, bits, kwargs, read, octets in WIDEST:
             with self.subTest(field=name):
@@ -512,8 +512,8 @@ class TestIEEE802_11WidestValues(unittest.TestCase):
                 self.assertEqual(Radiotap.from_data(parsed.info).data.hex(), raw.hex())
 
     def test_one_past_the_widest_value_is_refused(self) -> None:
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, bits, kwargs, _, _ in WIDEST:

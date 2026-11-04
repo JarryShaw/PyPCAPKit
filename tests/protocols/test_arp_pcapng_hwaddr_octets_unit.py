@@ -2,12 +2,12 @@
 """ARP and PCAP-NG pack hardware addresses as raw octets.
 
 GitHub issue #1134: :meth:`ARP._make_addr_resolve
-<pcapkit.protocols.link.arp.ARP._make_addr_resolve>` and PCAP-NG's MAC and EUI
+<pcapkit.protocols.link.arp.protocol.ARP._make_addr_resolve>` and PCAP-NG's MAC and EUI
 address makers stripped the separators from a ``aa:bb:cc:dd:ee:ff`` string and
 returned the remaining *hex text*, so ``make()`` wrote the ASCII digits of the
 address onto the wire. ARP did the same for the plain hex string it parses a
 non-Ethernet hardware address into. PCAP-NG makes both addresses with
-:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>`,
+:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_mac_addr>`,
 the EUI one with ``size=8`` (#2614).
 
 Every case builds its own octets in memory and reads no capture.
@@ -20,9 +20,9 @@ import unittest
 from pcapkit.const.arp.hardware import Hardware
 from pcapkit.const.pcapng.block_type import BlockType
 from pcapkit.const.pcapng.option_type import OptionType
-from pcapkit.protocols.link.arp import ARP
-from pcapkit.protocols.misc.pcapng import PCAPNG
-from pcapkit.protocols.schema.misc.pcapng import IF_EUIAddrOption, IF_MACAddrOption
+from pcapkit.protocols.link.arp.protocol import ARP
+from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+from pcapkit.protocols.misc.pcapng.schema import IF_EUIAddrOption, IF_MACAddrOption
 from pcapkit.utilities.exceptions import ProtocolError
 
 #: ARP request: htype, ptype (IPv4), hlen, plen, oper, then sha/spa/tha/tpa.

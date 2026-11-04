@@ -55,8 +55,8 @@ class SettingsCutTests(unittest.TestCase):
 
     def assert_cut(self, http: 'object', keep: int) -> None:
         """``http`` holds the first ``keep`` octets of the settings and rebuilds them."""
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         self.assertIsInstance(http, HTTPv2)
         self.assertEqual(http.data, SETTINGS[:9 + keep])
@@ -69,7 +69,7 @@ class SettingsCutTests(unittest.TestCase):
         self.assertEqual(HTTPv2.from_data(http.info.to_dict()).data, http.data)
 
     def test_cut_through_tcp_at_every_offset(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         packet = _datagram(SETTINGS)
         head = len(packet) - len(SETTINGS)
@@ -86,7 +86,7 @@ class SettingsCutTests(unittest.TestCase):
                 self.assertEqual(caught, [])
 
     def test_cut_through_httpv2_at_every_offset(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for keep in range(len(PAIRS)):
             with self.subTest(keep=keep):
@@ -100,7 +100,7 @@ class SettingsCutTests(unittest.TestCase):
         past the data reads as identifier and value zero, as a cut ``DATA`` frame
         reads its data as zeros (#2686)."""
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         http = HTTPv2(SETTINGS[:9 + 9], len(SETTINGS))
         self.assertEqual(list(http.info.settings.items(multi=True)),
@@ -112,8 +112,8 @@ class SettingsCutTests(unittest.TestCase):
 
     def test_whole_frame_is_the_control(self) -> None:
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         packet = _datagram(SETTINGS)
         for name, http in (('TCP', IPv4(packet, len(packet)).payload.payload),
@@ -128,9 +128,9 @@ class SettingsCutTests(unittest.TestCase):
                 self.assertEqual(HTTPv2.from_data(http.info).data, SETTINGS)
 
     def test_the_next_frame_is_not_swallowed(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = _datagram(SETTINGS + WINDOW_UPDATE)
         for keep in (len(WINDOW_UPDATE), len(WINDOW_UPDATE) - 1):
@@ -153,9 +153,9 @@ class SettingsCutTests(unittest.TestCase):
         """A Length the octets read cannot back is refused, as zero-filling it would
         make a setting per six octets of it, and the segment stays ``Raw`` (#2686)."""
         from pcapkit.corekit.fields.field import _zero_pad_budget
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         # a multiple of 6, and the most an IPv4 datagram holds past the three headers
         length = 65484
@@ -176,7 +176,7 @@ class SettingsListTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_reads_bytes_and_a_live_stream_alike(self) -> None:
-        from pcapkit.protocols.schema.application.httpv2 import SettingsFrame
+        from pcapkit.protocols.application.httpv2.schema import SettingsFrame
 
         field = SettingsFrame.__fields__['settings']({'__length__': len(PAIRS)})
         stream = io.BytesIO(b'\xde\xad' + PAIRS[:9])
@@ -192,7 +192,7 @@ class SettingsListTests(unittest.TestCase):
         self.assertEqual(stream.tell(), 2 + 9)
 
     def test_a_live_stream_is_read_no_further_than_the_length(self) -> None:
-        from pcapkit.protocols.schema.application.httpv2 import SettingsFrame
+        from pcapkit.protocols.application.httpv2.schema import SettingsFrame
 
         field = SettingsFrame.__fields__['settings']({'__length__': 12})
         stream = io.BytesIO(PAIRS + WINDOW_UPDATE)
@@ -242,7 +242,7 @@ class EditedFrameTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_frame_type_rebuilds_its_edit(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for case, raw, edit, expected in EDITS:
             with self.subTest(case):
@@ -258,7 +258,7 @@ class EditedFrameTests(unittest.TestCase):
     def test_the_length_is_computed_when_not_given(self) -> None:
         from pcapkit.const.http.frame import Frame
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         http = HTTPv2(type=Frame.SETTINGS, frame={'settings': [(Setting.HEADER_TABLE_SIZE, 4096)]})
         self.assertEqual(http.data, _frame(0x4, 0x0, 0, PAIRS[:6]))
@@ -268,7 +268,7 @@ class EditedFrameTests(unittest.TestCase):
     def test_a_dict_with_no_length_computes_it(self) -> None:
         from pcapkit.const.http.frame import Frame
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for label, data, wire_ in (
                 ('SETTINGS', {'type': Frame.SETTINGS, 'flags': {'ACK': False, '__value__': 0}, 'reserved': 0,

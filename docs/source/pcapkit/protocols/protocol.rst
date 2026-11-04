@@ -2,7 +2,6 @@ Root Protocol
 =============
 
 .. module:: pcapkit.protocols.protocol
-.. module:: pcapkit.protocols.data.protocol
 .. currentmodule:: pcapkit.protocols.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
@@ -23,7 +22,7 @@ Internal Definitions below.
    Constructing a protocol with a keyword that none of its signatures
    declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`,
    where it was discarded (:issue:`617`). A next layer captured shorter than
-   its header is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, where it
+   its header is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, where it
    was parsed with zero-filled fields (:issue:`1170`).
 
 .. autoclass:: pcapkit.protocols.protocol.Protocol
@@ -144,7 +143,7 @@ A frame is dissected to at most
 :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers of its protocol
 chain, counted from the first layer the frame record carries, through tunnels,
 VLAN tags and IPv6 extension headers alike. What follows is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, with one
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and is
 marked :attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
 :term:`default engine`'s TCP reassembly and flow tracing do not read a TCP segment
@@ -182,11 +181,11 @@ length to an alignment boundary.
 Data Models
 -----------
 
-.. autoclass:: pcapkit.protocols.data.protocol.Protocol
+.. autoclass:: pcapkit.protocols.data.Protocol
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.protocol.Packet
+.. autoclass:: pcapkit.protocols.data.Packet
    :members:
    :show-inheritance:
 
@@ -353,7 +352,7 @@ Type Variables
 --------------
 
 .. data:: _PT
-   :type: pcapkit.protocols.data.data.Data
+   :type: pcapkit.protocols.data.Data
 
 .. data:: _ST
-   :type: pcapkit.protocols.schema.schema.Schema
+   :type: pcapkit.protocols.schema.Schema

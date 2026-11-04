@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pcapkit.corekit.sentinels import NoValueType
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
 _T = TypeVar('_T')
 
@@ -398,7 +398,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         This method is to be called by the metaclass during class creation.
         It is used to set the field name and update the field list, i.e.,
-        :attr:`Schema.__fields__ <pcapkit.protocols.schema.schema.Schema.__fields__>`
+        :attr:`Schema.__fields__ <pcapkit.protocols.schema.Schema.__fields__>`
         mapping dictionary.
 
         """

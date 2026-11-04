@@ -33,7 +33,7 @@ class ListZeroFillTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities import config
         from pcapkit.utilities.exceptions import FieldValueError
 
@@ -126,7 +126,7 @@ class ListZeroFillTests(unittest.TestCase):
         bad list does not refuse the later cuts of its context; the fill stays charged.
         Only a failure restores them: a later fill that succeeds is counted as usual."""
         from pcapkit.corekit.fields.numbers import UInt16Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import ProtocolError
 
         @schema_final

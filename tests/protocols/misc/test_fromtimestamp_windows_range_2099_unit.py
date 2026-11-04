@@ -149,7 +149,7 @@ class TestPCAPNGOnWindows(PCAPNGTestCase):
     """PCAP-NG packet timestamps decode alike on Windows and Linux."""
 
     def _packet(self, idb: 'bytes', epb: 'bytes') -> 'tuple[Any, list[str]]':
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings(record=True) as caught, windows_gmtime():
@@ -215,8 +215,8 @@ class TestMHOnWindows(unittest.TestCase):
 
     def test_mesg_id_before_1970(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import MesgIDOption
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import MesgIDOption
 
         for interval in (_REAL_DATETIME(1900, 1, 1, tzinfo=UTC),
                          _REAL_DATETIME(1950, 6, 1, 12, 0, 0, 500_000, tzinfo=UTC),
@@ -232,7 +232,7 @@ class TestMHOnWindows(unittest.TestCase):
 
     def test_timestamp_option_after_3000(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         cases = (

@@ -695,7 +695,7 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
         :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value is stored
         as a :class:`MultiInfo` or :class:`OrderedMultiInfo` respectively, or
         as the subclass of either that the key's annotation names, such as
-        :class:`~pcapkit.protocols.data.application.httpv2.Settings`.
+        :class:`~pcapkit.protocols.application.httpv2.data.Settings`.
 
         The rebuild is as unchecked as the rest of this method: a mapping whose
         keys are not the nested class's own is accepted and becomes an instance
@@ -1211,7 +1211,7 @@ def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
     value it describes is a container, and :meth:`Info.from_dict` has nothing
     to rebuild it from. A :class:`MultiInfo` or :class:`OrderedMultiInfo`
     subclass is an :class:`Info` subclass too, so that :meth:`Info.from_dict`
-    restores e.g. :class:`~pcapkit.protocols.data.application.httpv2.Settings`
+    restores e.g. :class:`~pcapkit.protocols.application.httpv2.data.Settings`
     from the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that
     :meth:`Info.to_dict` writes it as.
 
@@ -1305,7 +1305,7 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         :meth:`Info.from_dict` call stays one-way for the life of the process.
         That is accepted rather than fixed: :meth:`Info.from_dict` runs per
         parsed packet (see :meth:`IPv4.read
-        <pcapkit.protocols.internet.ipv4.IPv4.read>`, which builds its ToS
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>`, which builds its ToS
         field with it), and
         re-resolving the annotations on every call to catch a case that does
         not arise in this package costs far more than it saves.

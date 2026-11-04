@@ -2,8 +2,8 @@
 """``test_start_line`` is public and lives in the HTTP base module. C.f. #1519.
 
 The predicate :meth:`HTTP._guess_version
-<pcapkit.protocols.application.http.HTTP._guess_version>` uses to recognise an
-HTTP/1.* start line is :func:`~pcapkit.protocols.application.http.test_start_line`,
+<pcapkit.protocols.application.http.protocol.HTTP._guess_version>` uses to recognise an
+HTTP/1.* start line is :func:`~pcapkit.protocols.application.http.protocol.test_start_line`,
 not a private ``httpv1._test_start_line`` imported lazily, and the patterns it
 shares with the HTTP/1.* parser -- ``_RE_METHOD``, ``_RE_VERSION``,
 ``_RE_STATUS`` and ``_HTTP2_PREFACE_HEADER`` -- live beside it, so ``httpv1.py``
@@ -42,7 +42,7 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_accepts_a_request_line(self) -> None:
         """A ``request-line``: method, request target, HTTP version."""
-        from pcapkit.protocols.application.http import test_start_line
+        from pcapkit.protocols.application.http.protocol import test_start_line
 
         for raw in (b'GET /index.html HTTP/1.1\r\nHost: example.test\r\n\r\n',
                     b'M-SEARCH * HTTP/1.1\r\nHost: example.test\r\n\r\n',
@@ -53,7 +53,7 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_accepts_a_status_line(self) -> None:
         """A ``status-line``: HTTP version, three-digit status, reason phrase."""
-        from pcapkit.protocols.application.http import test_start_line
+        from pcapkit.protocols.application.http.protocol import test_start_line
 
         for raw in (b'HTTP/1.1 200 OK\r\nServer: example\r\n\r\nhello',
                     b'HTTP/1.0 404 Not Found\r\nServer: example\r\n\r\n',
@@ -63,8 +63,8 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_refuses_the_http2_connection_preface(self) -> None:
         """The preface is a well-formed request line, refused by name."""
-        from pcapkit.protocols.application import http
-        from pcapkit.protocols.application.http import test_start_line
+        from pcapkit.protocols.application.http import protocol as http
+        from pcapkit.protocols.application.http.protocol import test_start_line
 
         self.assertEqual(http._HTTP2_PREFACE_HEADER, b'PRI * HTTP/2.0')
         for raw in (PREFACE, PREFACE + SETTINGS, b'PRI * HTTP/2.0\r\n\r\n'):
@@ -73,7 +73,7 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_refuses_payloads_that_are_not_http(self) -> None:
         """Text and binary that carry no HTTP/1.* start line."""
-        from pcapkit.protocols.application.http import test_start_line
+        from pcapkit.protocols.application.http.protocol import test_start_line
 
         for raw in (b'',
                     b'not http at all',
@@ -88,7 +88,8 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_httpv1_parses_with_the_patterns_defined_in_http(self) -> None:
         """One copy of each pattern, so the predicate and the parser cannot drift."""
-        from pcapkit.protocols.application import http, httpv1
+        from pcapkit.protocols.application.http import protocol as http
+        from pcapkit.protocols.application.httpv1 import protocol as httpv1
 
         self.assertIn('test_start_line', http.__all__)
         self.assertFalse(hasattr(httpv1, '_test_start_line'))
@@ -98,7 +99,7 @@ class StartLinePredicateTests(unittest.TestCase):
 
     def test_guess_version_calls_the_module_level_predicate(self) -> None:
         """The dispatcher calls ``http.test_start_line``, not a lazy import of it."""
-        from pcapkit.protocols.application import http
+        from pcapkit.protocols.application.http import protocol as http
 
         raw = b'GET / HTTP/1.1\r\nHost: example.test\r\n\r\n'
         with unittest.mock.patch.object(http, 'test_start_line',

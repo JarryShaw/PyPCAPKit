@@ -2,15 +2,15 @@
 """The PCAP magic number is looked up in its one home, as a comparison would read it. C.f. #1739.
 
 The magic numbers live in
-:data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, and the code
+:data:`pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER`, and the code
 that reads them looks them up there, which pins two behaviours a comparison
 against literals has:
 
-* :meth:`Header._make_magic <pcapkit.protocols.misc.pcap.header.Header._make_magic>`
+* :meth:`Header._make_magic <pcapkit.protocols.misc.pcap.header.protocol.Header._make_magic>`
   raises :exc:`KeyError` for a nanosecond flag that is neither, not a
   :exc:`StopIteration` that a generator would turn into :exc:`RuntimeError`;
-* :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback` and
-  :meth:`Header.read <pcapkit.protocols.misc.pcap.header.Header.read>` match a
+* :func:`~pcapkit.protocols.misc.pcap.header.schema.magic_number_callback` and
+  :meth:`Header.read <pcapkit.protocols.misc.pcap.header.protocol.Header.read>` match a
   :obj:`bytearray` magic number, which compares equal to the literals, rather
   than reject it as unhashable.
 
@@ -33,8 +33,8 @@ MAGICS = (
 
 
 def _header() -> 'object':
-    """A :class:`~pcapkit.protocols.misc.pcap.header.Header` with no file behind it."""
-    from pcapkit.protocols.misc.pcap.header import Header  # pylint: disable=import-outside-toplevel
+    """A :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` with no file behind it."""
+    from pcapkit.protocols.misc.pcap.header.protocol import Header  # pylint: disable=import-outside-toplevel
     return Header.__new__(Header)
 
 
@@ -66,7 +66,7 @@ class TestBytearrayMagic(unittest.TestCase):
     """A :obj:`bytearray` magic number is matched, as it was compared."""
 
     def test_callback(self) -> 'None':
-        from pcapkit.protocols.schema.misc.pcap.header import \
+        from pcapkit.protocols.misc.pcap.header.schema import \
             magic_number_callback  # pylint: disable=import-outside-toplevel
         for magic, byteorder, _ in MAGICS:
             with self.subTest(magic=magic):
@@ -75,7 +75,7 @@ class TestBytearrayMagic(unittest.TestCase):
                 self.assertEqual(field._byteorder, byteorder)  # pylint: disable=protected-access
 
     def test_callback_rejects_others(self) -> 'None':
-        from pcapkit.protocols.schema.misc.pcap.header import \
+        from pcapkit.protocols.misc.pcap.header.schema import \
             magic_number_callback  # pylint: disable=import-outside-toplevel
         from pcapkit.utilities.exceptions import ProtocolError  # pylint: disable=import-outside-toplevel
         for magic in (bytearray(b'\x00\x00\x00\x00'), 0xA1B2C3D4, None):

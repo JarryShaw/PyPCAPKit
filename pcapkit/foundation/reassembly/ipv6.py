@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.ip import IP
-from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
-from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
+from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
+from pcapkit.protocols.internet.ipv6.protocol import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType

@@ -1,0 +1,774 @@
+# -*- coding: utf-8 -*-
+# mypy: disable-error-code=assignment
+"""header schema for internet protocol version 4"""
+
+import collections
+import datetime
+from typing import TYPE_CHECKING, cast
+
+from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
+from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
+from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
+from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
+                                         SchemaField, SwitchField)
+from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.protocols.schema import EnumSchema, Schema, schema_final
+from pcapkit.utilities.exceptions import EnumValueError, FieldValueError
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
+from pcapkit.utilities.warnings import ProtocolWarning, warn
+
+__all__ = [
+    'IPv4',
+
+    'Option',
+    'UnassignedOption', 'EOOLOption', 'NOPOption',
+    'SECOption', 'LSROption', 'TSOption',
+    'ESECOption', 'RROption', 'SIDOption',
+    'SSROption', 'MTUPOption', 'MTUROption',
+    'TROption', 'RTRALTOption', 'QSOption',
+    'QuickStartRequestOption', 'QuickStartReportOption',
+]
+
+if TYPE_CHECKING:
+    from datetime import timedelta
+    from ipaddress import IPv4Address
+    from typing import Any, DefaultDict, Optional, Type
+
+    from pcapkit.corekit.fields.field import FieldBase as Field
+    from pcapkit.protocols.protocol import ProtocolBase
+
+#: Length of the fixed IPv4 header, i.e. with no options, :rfc:`791#section-3.1`.
+#: The one home of this value (:issue:`1739`), here so that the schema's option
+#: length and the protocol modules read the same one; it is fixed by the RFC, so
+#: it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+IPV4_HEADER_LEN = 20
+
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
+    from typing_extensions import TypedDict
+
+    class VerIHLField(TypedDict):
+        """Version and header length field."""
+
+        #: IP version.
+        version: int
+        #: Internet header length, in 32-bit words.
+        ihl: int
+
+    #: Type of service field.
+    ToSField = TypedDict('ToSField', {
+        'pre': int,
+        'del': int,
+        'thr': int,
+        'rel': int,
+        'ecn': int,
+    })
+
+    class Flags(TypedDict):
+        """Flags and fragment offset field."""
+
+        #: Reserved flag bit.
+        reserved: int
+        #: Don't fragment flag.
+        df: int
+        #: More fragments flag.
+        mf: int
+        #: Fragment offset, in 8-octet units.
+        offset: int
+
+    class TSFlags(TypedDict):
+        """Timestamp flags field."""
+
+        #: Overflow count.
+        oflw: int
+        #: Timestamp type flag.
+        flag: int
+
+    class QuickStartFlags(TypedDict):
+        """Quick-Start flags."""
+
+        #: QS function.
+        func: int
+        #: Rate request/report.
+        rate: int
+
+    class QSTestFlags(TypedDict):
+        """Quick start test flag."""
+
+        #: Option length.
+        length: int
+        #: QS function.
+        func: int
+
+    class QSNonce(TypedDict):
+        """Quick start nonce field."""
+
+        #: Nonce.
+        nonce: int
+        #: Reserved bits.
+        reserved: int
+
+
+def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
+    """On-the-wire length, in octets, of a resolved Quick-Start (``QS``) suboption.
+
+    The Quick-Start suboption schemas carry the option's own ``type`` and
+    ``length`` octets -- they inherit them from :class:`Option` -- so what
+    :func:`quick_start_data_selector` has to hand the nested
+    :class:`~pcapkit.corekit.fields.misc.SchemaField` is the length of the
+    *whole* option, not of the data after its header. Per
+    :rfc:`4782#section-3.1` -- figure 3 for a Quick-Start Request and figure 4
+    for a Report of Approved Rate -- that is eight octets for both functions,
+    which differ in what the fourth octet holds rather than in how many there
+    are: *"The second byte contains the length field, indicating an option
+    length of eight bytes"*, and *"For a Report of Approved Rate, the fourth
+    byte of the Quick-Start Option is not used"*. And
+    :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._read_opt_qs` rejects any other
+    value in the ``length`` field outright.
+
+    It is summed from the resolved schema's own fields rather than written as
+    that literal, because the registry is open -- :class:`QSOption` is an
+    :class:`~pcapkit.protocols.schema.EnumSchema`, so a caller may
+    register a further function code with a schema of its own width -- and a
+    number written here would have to be kept in step by hand with every field
+    the suboptions declare.
+
+    Args:
+        schema: Quick-Start suboption schema, as resolved from the ``func``
+            sub-field by :func:`quick_start_data_selector`.
+
+    Returns:
+        Length, in octets, that ``schema`` occupies on the wire.
+
+    Raises:
+        FieldValueError: If ``schema`` declares a field whose width is not
+            fixed. Every field of a Quick-Start suboption is fixed-width,
+            because the option is, and a variable-width one cannot be summed
+            here without a packet to size it against -- which is the one thing
+            a selector does not have for the schema it is about to return. It
+            fails rather than guessing a width.
+
+    """
+    length = 0
+    for name, field in schema.__fields__.items():
+        # NOTE: A forward match consumes nothing and contributes no octets to
+        # ``bytes(schema)`` either, see the ``ForwardMatchField`` branches of
+        # :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` and
+        # :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`.
+        if isinstance(field, ForwardMatchField):
+            continue
+
+        # NOTE: The only conditional field a Quick-Start suboption has is the
+        # ``length`` octet it inherits from :class:`Option`, whose test is false
+        # only for ``EOOL`` and ``NOP`` -- neither of which is a Quick-Start
+        # function -- so it is always on the wire and always counted.
+        inner = field.field if isinstance(field, ConditionalField) else field
+
+        # NOTE: ``_length_callback`` rather than a ``length < 0`` test, because a
+        # dynamically sized field does not report a negative width: it reports
+        # whatever its template says, and the templates fall back to a
+        # "reasonable default" of ``1024s`` -- measured on ``LSROption.remainder``,
+        # a ``PaddingField`` with a length callback, which reports 1024. So the
+        # callback's presence is the only reliable signal, and reaching for it is
+        # worth one private access. A :class:`~pcapkit.corekit.fields.misc.SwitchField`
+        # is named separately because its width is dynamic *without* a length
+        # callback: it carries a
+        # :class:`~pcapkit.corekit.fields.misc.NoValueField` until its own selector
+        # resolves it, and so reports a width of zero rather than refusing to
+        # answer. That is exactly what :class:`_QSOption` -- the outer wrapper,
+        # which is not itself a suboption -- would hand back here.
+        if (isinstance(inner, SwitchField)
+                or getattr(inner, '_length_callback', None) is not None):  # pylint: disable=protected-access
+            raise FieldValueError(
+                f'IPv4: [OptNo {Enum_OptionNumber.QS}] {schema.__name__}: '
+                f'{name!r} is not of a fixed width'
+            )
+        length += field.length
+    return length
+
+
+def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`_QSOption.data` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        The field for the option data, chosen by the QS function.
+
+        * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartRequestOption`
+          instance.
+        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartReportOption`
+          instance.
+        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.internet.ipv4.schema.UnassignedOption`
+          instance, sized by the option's own ``length`` octet.
+
+    Notes:
+        The length handed to the :class:`~pcapkit.corekit.fields.misc.SchemaField`
+        comes from :func:`quick_start_option_length`, i.e. from the suboption that
+        was just resolved, rather than from a fixed literal: a wrong width
+        mis-sizes the nested read, so the ``nonce`` decodes wrongly and the
+        leftover octets are read as a further, fabricated option.
+
+    """
+    # NOTE: The enumeration admits the whole four-bit range, ``0`` to ``15``,
+    # as an ``Unassigned`` member for every code but ``0`` and ``8``, and only
+    # those have a schema registered. A value past four bits, which only a
+    # caller-built packet can carry, fails the lookup and is just as unassigned.
+    try:
+        func = Enum_QSFunction.get(pkt['flags']['func'])
+    except EnumValueError:
+        schema = None
+    else:
+        pkt['flags']['func'] = func
+        schema = QSOption.registry[func]
+
+    if schema is None:
+        # An unassigned function has no defined layout, so the option is kept
+        # as raw data, sized by its own ``length`` octet: two octets at least,
+        # so that a shorter length reaches the reader and is rejected there.
+        return SchemaField(length=max(pkt['flags']['length'], 2), schema=UnassignedOption)
+    return SchemaField(length=quick_start_option_length(schema), schema=schema)
+
+
+class Option(EnumSchema[Enum_OptionNumber]):
+    """Header schema for IPv4 options."""
+
+    __default__ = lambda: UnassignedOption
+
+    #: Option type.
+    type: 'Enum_OptionNumber' = EnumField(length=1, namespace=Enum_OptionNumber)
+    #: Option length.
+    length: 'int' = ConditionalField(
+        UInt8Field(),
+        lambda pkt: pkt['type'] not in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP),
+    )
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        # for EOOL/NOP option, length is always 1
+        if self.type in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP):
+            self.length = 1
+        return self
+
+
+@schema_final
+class UnassignedOption(Option):
+    """Header schema for IPv4 unassigned options."""
+
+    #: Option data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class EOOLOption(Option, code=Enum_OptionNumber.EOOL):
+    """Header schema for IPv4 end of option list (``EOOL``) option."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
+
+
+@schema_final
+class NOPOption(Option, code=Enum_OptionNumber.NOP):
+    """Header schema for IPv4 no operation (``NOP``) option."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
+
+
+@schema_final
+class SECOption(Option, code=Enum_OptionNumber.SEC):
+    """Header schema for IPv4 security (``SEC``) option."""
+
+    #: Classification level.
+    level: 'Enum_ClassificationLevel' = EnumField(length=1, namespace=Enum_ClassificationLevel)
+    #: Protection authority flags.
+    data: 'bytes' = ConditionalField(
+        BytesField(length=lambda pkt: pkt['length'] - 3),
+        lambda pkt: pkt['length'] > 3,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', level: 'int', data: 'Optional[bytes]') -> 'None': ...
+
+
+@schema_final
+class LSROption(Option, code=Enum_OptionNumber.LSR):
+    """Header schema for IPv4 loose source route (``LSR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route, i.e. every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
+        item_type=IPv4AddressField(),
+    )
+    #: Trailing octets that do not make up a whole address slot.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+@schema_final
+class TSOption(Option, code=Enum_OptionNumber.TS):
+    """Header schema for IPv4 timestamp (``TS``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Overflow and flags.
+    flags: 'TSFlags' = BitField(length=1, namespace={
+        'oflw': (0, 4),
+        'flag': (4, 4),
+    })
+    #: Timestamps and internet addresses, i.e. every 32-bit slot of the option,
+    #: those before the pointer and those at or beyond it alike.
+    ts_data: 'list[int]' = ListField(
+        length=lambda pkt: max(pkt['length'] - 4, 0) // 4 * 4,
+        item_type=UInt32Field(),
+    )
+    #: Trailing octets that do not make up a whole 32-bit slot, kept as read
+    #: rather than packed as zeros.
+    remainder: 'bytes' = BytesField(
+        length=lambda pkt: max(pkt['length'] - 4, 0) % 4,
+        default=b'',
+    )
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        Raises:
+            FieldValueError: If an entry of :attr:`ts_data` that the timestamp
+                flag makes an address is a :obj:`bool`, is not a valid IP
+                address, or is not IPv4 -- see
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`.
+
+        Notes:
+            This runs on the **packing** path as well as the unpacking one --
+            :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
+            calls it once the buffer is filled -- so the ``ts_data`` entries it
+            converts below are whatever the caller passed to the constructor,
+            not octets read off the wire. That is why those conversions go
+            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
+            rather than :func:`ipaddress.ip_address`: this schema is reachable
+            from public :meth:`IPv4.make
+            <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>`, which accepts a
+            caller-built option schema and packs it, and
+            :attr:`ts_data`'s :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
+            item type takes a :obj:`bool` as the :class:`int` it is a subclass
+            of, so nothing downstream can question it: ``ts_data=[True, 5]``
+            would otherwise pack as ``0000000100000005`` and report
+            ``IPv4Address('0.0.0.1')`` with no exception and no warning.
+
+        """
+        ts_flag = Enum_TSFlag.get(self.flags['flag'])
+
+        # NOTE: Only the slots wholly before the pointer have been filled in, so
+        # the rest are kept apart, as the raw 32-bit words, in ``remaining``. A
+        # pre-specified address is part of the option's content whether or not
+        # its timestamp has been filled in yet, so that flag consumes every whole
+        # address and timestamp pair. A paired flag never splits a pair.
+        if ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
+            used = len(self.ts_data)
+        else:
+            used = min(max(self.pointer - 5, 0) // 4, len(self.ts_data))
+        if ts_flag in (Enum_TSFlag.IP_with_Timestamp, Enum_TSFlag.Prespecified_IP_with_Timestamp):
+            used -= used % 2
+        self.remaining = tuple(self.ts_data[used:])
+
+        if ts_flag == Enum_TSFlag.Timestamp_Only:
+            ts_data = self.ts_data[:used]
+            self.data = []
+            ts_list = []  # type: list[int | timedelta]
+
+            for ts in ts_data:
+                self.data.append(ts)
+
+                # NOTE: A set high-order bit marks a non-standard time value,
+                # per :rfc:`791`, so it is kept as the raw 32-bit integer.
+                if ts >> 31:
+                    ts_val = ts  # type: int | timedelta
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                ts_list.append(ts_val)
+            timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
+        elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
+            ts_data = self.ts_data[:used]
+            self.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
+
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', parse_ip_address(
+                    ip, f'IPv4: [OptNo {self.type}] invalid timestamp address', version=4))
+                self.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    ts_val = ts
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+        elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
+            ts_data = self.ts_data[:used]
+            self.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
+
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', parse_ip_address(
+                    ip, f'IPv4: [OptNo {self.type}] invalid timestamp address', version=4))
+                self.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    ts_val = ts
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+        else:
+            warn(f'IPv4: [OptNo {self.type}] invalid format: unknown timestamp flag: {ts_flag}', ProtocolWarning)
+            self.data = self.ts_data[:used]
+            timestamp = tuple(self.data)
+
+        self.ts_flag = ts_flag
+        self.timestamp = timestamp
+        return self
+
+    if TYPE_CHECKING:
+        ts_flag: 'Enum_TSFlag'
+        data: 'list[int] | OrderedMultiDict[IPv4Address, int]'
+        remaining: 'tuple[int, ...]'
+        timestamp: 'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'
+
+        # NOTE: The keyword is ``ts_data``, the name of the field above, not
+        # ``data``. ``data`` is the *derived* attribute :meth:`post_process`
+        # writes and is declared just above; passing it as a constructor
+        # argument would drop the timestamps in silence, because
+        # :meth:`Schema.__update__
+        # <pcapkit.protocols.schema.Schema.__update__>` answers an unknown
+        # field name with an
+        # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an
+        # error.
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', ts_data: 'list[int]', remainder: 'bytes' = ...) -> 'None': ...
+
+
+@schema_final
+class ESECOption(Option, code=Enum_OptionNumber.E_SEC):
+    """Header schema for IPv4 extended security (``ESEC``) option."""
+
+    #: Additional security information format code.
+    format: 'int' = UInt8Field()
+    #: Additional security information.
+    info: 'bytes' = ConditionalField(
+        BytesField(length=lambda pkt: pkt['length'] - 3),
+        lambda pkt: pkt['length'] > 3,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', format: 'int', info: 'Optional[bytes]') -> 'None': ...
+
+
+@schema_final
+class RROption(Option, code=Enum_OptionNumber.RR):
+    """Header schema for IPv4 record route (``RR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route, i.e. every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
+        item_type=IPv4AddressField(),
+    )
+    #: Trailing octets that do not make up a whole address slot.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+@schema_final
+class SIDOption(Option, code=Enum_OptionNumber.SID):
+    """Header schema for IPv4 stream identifier (``SID``) option."""
+
+    #: Stream identifier. Two octets, per :rfc:`791` section 3.1, which gives the
+    #: option as four octets in total: one of type, one of length, and a 16-bit
+    #: stream identifier.
+    sid: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', sid: 'int') -> 'None': ...
+
+
+@schema_final
+class SSROption(Option, code=Enum_OptionNumber.SSR):
+    """Header schema for IPv4 strict source route (``SSR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route, i.e. every address slot of the option, those before the pointer and
+    #: those at or beyond it alike.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
+        item_type=IPv4AddressField(),
+    )
+    #: Trailing octets that do not make up a whole address slot.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: max(pkt['length'] - 3, 0) % 4,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+@schema_final
+class MTUPOption(Option, code=Enum_OptionNumber.MTUP):
+    """Header schema for IPv4 MTU probe (``MTUP``) option."""
+
+    #: MTU.
+    mtu: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
+
+
+@schema_final
+class MTUROption(Option, code=Enum_OptionNumber.MTUR):
+    """Header schema for IPv4 MTU reply (``MTUR``) option."""
+
+    #: MTU.
+    mtu: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
+
+
+@schema_final
+class TROption(Option, code=Enum_OptionNumber.TR):
+    """Header schema for IPv4 traceroute (``TR``) option."""
+
+    #: ID number.
+    id: 'int' = UInt16Field()
+    #: Outbound hop count.
+    out: 'int' = UInt16Field()
+    #: Return hop count.
+    ret: 'int' = UInt16Field()
+    #: Originator IP address.
+    origin: 'IPv4Address' = IPv4AddressField()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', id: 'int', out: 'int', ret: 'int', origin: 'IPv4Address | str | bytes | int') -> 'None': ...
+
+
+@schema_final
+class RTRALTOption(Option, code=Enum_OptionNumber.RTRALT):
+    """Header schema for IPv4 router alert (``RTRALT``) option."""
+
+    #: Router alert value.
+    alert: 'Enum_RouterAlert' = EnumField(length=2, namespace=Enum_RouterAlert)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
+
+
+@schema_final
+class _QSOption(Schema):
+    """Header schema for IPv4 quick start (``QS``) options in generic representation."""
+
+    #: Flags.
+    flags: 'QSTestFlags' = ForwardMatchField(BitField(length=3, namespace={
+        'length': (8, 8),
+        'func': (16, 4),
+    }))
+    #: QS data.
+    data: 'QuickStartRequestOption | QuickStartReportOption' = SwitchField(
+        selector=quick_start_data_selector,
+    )
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'QSOption | UnassignedOption':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        ret = self.data
+        if isinstance(ret, QSOption):
+            ret.func = Enum_QSFunction.get(self.flags['func'])
+        return ret
+
+
+# register ``_QSOption`` as ``QS`` option
+Option.register(Enum_OptionNumber.QS, _QSOption)
+
+
+class QSOption(Option, EnumSchema[Enum_QSFunction]):
+    """Header schema for IPv4 quick start (``QS``) options."""
+
+    __enum__: 'DefaultDict[Enum_QSFunction, Type[QSOption]]' = collections.defaultdict(lambda: None)  # type: ignore[return-value,arg-type]
+
+    #: Flags.
+    flags: 'QuickStartFlags' = BitField(length=1, namespace={
+        'func': (0, 4),
+        'rate': (4, 4),
+    })
+
+    if TYPE_CHECKING:
+        func: 'Enum_QSFunction'
+
+
+@schema_final
+class QuickStartRequestOption(QSOption, code=Enum_QSFunction.Quick_Start_Request):
+    """Header schema for IPv4 quick start request options."""
+
+    #: QS time-to-live (TTL).
+    ttl: 'int' = UInt8Field()
+    #: QS nonce.
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+        'reserved': (30, 2),
+    })
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
+                     ttl: 'int', nonce: 'QSNonce') -> 'None': ...
+
+
+@schema_final
+class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_Rate):
+    """Header schema for IPv4 quick start report of approved rate options."""
+
+    #: Not used. One octet, holding the place a Quick-Start Request fills with
+    #: ``QS TTL``: :rfc:`4782#section-3.1` says in as many words that *"for a
+    #: Report of Approved Rate, the fourth byte of the Quick-Start Option is not
+    #: used"*, and that *"bytes 5-8 contain a 30-bit QS Nonce and a 2-bit
+    #: Reserved field"* -- so the nonce begins at the fifth octet for both
+    #: functions, and figure 4 gives this option as ``Length=8`` like figure 3
+    #: gives its sibling. Without this field the schema would be seven octets
+    #: wide against the eight
+    #: :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._make_opt_qs` writes into
+    #: ``length`` and the eight
+    #: :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._read_opt_qs` demands of it,
+    #: and the ``nonce`` would decode one octet early. Kept as an integer rather
+    #: than as padding, so that whatever the sender put there is written back.
+    reserved: 'int' = UInt8Field()
+    #: QS nonce.
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+        'reserved': (30, 2),
+    })
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
+                     reserved: 'int', nonce: 'QSNonce') -> 'None': ...
+
+
+@schema_final
+class IPv4(Schema):
+    """Header schema for IPv4 packet.
+
+    .. versionchanged:: 1.5.0
+
+       New field :attr:`trailer`, which keeps the octets captured past the
+       Total Length rather than dropping them (:issue:`1209`).
+
+    """
+
+    #: Version and header length.
+    vihl: 'VerIHLField' = BitField(length=1, namespace={
+        'version': (0, 4),
+        'ihl': (4, 4),
+    })
+    #: Type of service.
+    tos: 'ToSField' = BitField(length=1, namespace={
+        'pre': (0, 3),
+        'del': (3, 1),
+        'thr': (4, 1),
+        'rel': (5, 1),
+        'ecn': (6, 2),
+    })
+    #: Total length.
+    length: 'int' = UInt16Field()
+    #: Identification.
+    id: 'int' = UInt16Field()
+    #: Flags and fragment offset.
+    flags: 'Flags' = BitField(length=2, namespace={
+        'reserved': (0, 1),
+        'df': (1, 1),
+        'mf': (2, 1),
+        'offset': (3, 13),
+    })
+    #: Time to live.
+    ttl: 'int' = UInt8Field()
+    #: Protocol.
+    proto: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header checksum.
+    chksum: 'bytes' = BytesField(length=2)
+    #: Source address.
+    src: 'IPv4Address' = IPv4AddressField()
+    #: Destination address.
+    dst: 'IPv4Address' = IPv4AddressField()
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['vihl']['ihl'] * 4 - IPV4_HEADER_LEN,
+        base_schema=Option,
+        type_name='type',
+        registry=Option.registry,
+        eool=Enum_OptionNumber.EOOL,
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    #: Payload. A Total Length of 0, as TCP segmentation offload leaves it in a
+    #: capture taken on the sending host, takes the rest of the data and leaves
+    #: no trailer; any other Total Length shorter than the header leaves the
+    #: payload empty and the rest to the trailer (:issue:`1547`). The rest is
+    #: sized as what is left of the length given, so a frame the capture cut
+    #: records its cut on it (:issue:`2711`).
+    payload: 'bytes' = PayloadField(length=lambda pkt: (
+        pkt['__length__'] if pkt['length'] == 0 else max(pkt['length'] - pkt['vihl']['ihl'] * 4, 0)))
+    #: Octets captured past the Total Length, such as Ethernet minimum-frame
+    #: padding. A :class:`~pcapkit.corekit.fields.misc.PayloadField` with no
+    #: length takes whatever the payload leaves on unpack and writes its value
+    #: verbatim on pack, so the octets survive whatever they hold.
+    trailer: 'bytes' = PayloadField(default=b'')
+
+    if TYPE_CHECKING:
+        def __init__(self, vihl: 'VerIHLField', tos: 'ToSField', length: 'int', id: 'int',
+                     flags: 'Flags', ttl: 'int', proto: 'Enum_TransType', chksum: 'bytes',
+                     src: 'IPv4Address | str | bytes | int', dst: 'IPv4Address | str | bytes | int',
+                     options: 'list[Option | bytes] | bytes', payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> 'None': ...

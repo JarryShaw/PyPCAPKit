@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.application.ftp.FTP` Vendor Crawler
-====================================================================
+""":class:`~pcapkit.protocols.application.ftp.protocol.FTP` Vendor Crawler
+=============================================================================
 
 .. module:: pcapkit.vendor.ftp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.ftp.FTP` implementations. Available
+:class:`~pcapkit.protocols.application.ftp.protocol.FTP` implementations. Available
 crawlers include:
 
 .. list-table::

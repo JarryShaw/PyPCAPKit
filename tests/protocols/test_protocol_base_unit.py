@@ -27,9 +27,9 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.corekit.fields.misc import PayloadField
         from pcapkit.corekit.protochain import ProtoChain
-        from pcapkit.protocols.data.data import Data
+        from pcapkit.protocols.data import Data
         from pcapkit.protocols.protocol import Protocol
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @info_final
         class DummyData(Data):
@@ -64,7 +64,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                 data = DummyData(value=value)
                 self._next = next_protocol
                 if self._next is None:
-                    from pcapkit.protocols.misc.no_payload import NoPayload
+                    from pcapkit.protocols.misc.no_payload.protocol import NoPayload
                     self._next = NoPayload()
                 self._protos = ProtoChain(self.__class__, self.alias, basis=self._next.protochain)
                 return data
@@ -160,7 +160,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
     def test_expand_comp_eq_contains_and_getitem(self) -> None:
         DummyProtocol, _, _ = self._make_protocol_class()
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
         payload = Raw(packet=b'body')
@@ -263,14 +263,14 @@ class ProtocolBaseUnitTests(unittest.TestCase):
     def test_register_analyze_and_next_layer_paths(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import RegistryError
 
         with self.assertRaises(RegistryError):
             DummyProtocol.register(1, object)  # type: ignore[arg-type]
 
-        DummyProtocol.register(9, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+        DummyProtocol.register(9, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
         self.assertIs(DummyProtocol.__proto__[9], Raw)
 
         class Other(Raw):
@@ -288,7 +288,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         DummyProtocol.__proto__ = collections.defaultdict(
             lambda: Raw,
-            {4: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
+            {4: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')},
         )
         analyzed_module = DummyProtocol.analyze(4, b'module-body', alias=4)
         self.assertIsInstance(analyzed_module, Raw)
@@ -347,7 +347,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         DummyProtocol.__proto__ = collections.defaultdict(lambda: BrokenRaw, {2: BrokenRaw, 3: EOFProtocol})
         self.assertIsInstance(DummyProtocol.analyze(2, b'bad'), Raw)
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         self.assertIsInstance(DummyProtocol.analyze(3, b''), NoPayload)
 
         proto = DummyProtocol(packet=b'abpayload')
@@ -364,7 +364,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         proto_module._sigterm = False
         proto_module.__proto__ = collections.defaultdict(
             lambda: Raw,
-            {5: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
+            {5: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')},
         )
         self.assertIsInstance(proto_module._import_next_layer(5, None), Raw)
         self.assertIsInstance(proto_module.__proto__[5], ModuleDescriptor)  # not written back (#1559)
@@ -417,7 +417,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         """
         DummyProtocol, _, _ = self._make_protocol_class()
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         with mock.patch('pcapkit.protocols.protocol.warn') as warn:
             DummyProtocol.register(1, Raw)
@@ -478,11 +478,11 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         """
         DummyProtocol, _, _ = self._make_protocol_class()
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         DummyProtocol.__proto__ = collections.defaultdict(
-            lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
-            {7: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
+            lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+            {7: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')},
         )
 
         registry = DummyProtocol.__proto__
@@ -532,7 +532,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
     def test_make_payload_branches(self) -> None:
         DummyProtocol, DummyData, _ = self._make_protocol_class()
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         self.assertIsInstance(DummyProtocol._make_payload({}), NoPayload)  # type: ignore[arg-type]
         self.assertIsInstance(DummyProtocol._make_payload({  # type: ignore[arg-type]
@@ -687,7 +687,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         RFC 7731 lets an MPL option elide its Seed-ID from the wire when the
         Seed-ID type is ``IPV6_SOURCE_ADDRESS``, in which case the seed *is* the
         enclosing IPv6 source address.
-        ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
+        ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``
         implements that by reading ``packet['src']`` -- a value only the outer
         layer knows -- and ``IPv6.read`` does put it in the dict it hands down.
         The dict never arrived as ``__packet__``, so the seed silently came back
@@ -699,7 +699,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.seed_id import SeedID
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         source = ipaddress.IPv6Address('2001:db8::1')
         destination = ipaddress.IPv6Address('ff02::1')

@@ -22,14 +22,14 @@ from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 #: cases for the link layer, each written out by hand.
 __tier__ = 'ALL'
 
-ETHERNET = 'pcapkit.protocols.link.ethernet:Ethernet'
-C_TAG = 'pcapkit.protocols.link.c_tag:C_Tag'
-S_TAG = 'pcapkit.protocols.link.s_tag:S_Tag'
-ARP = 'pcapkit.protocols.link.arp:ARP'
-RARP = 'pcapkit.protocols.application.rarp:RARP'
-L2TPV2 = 'pcapkit.protocols.link.l2tpv2:L2TPv2'
-LOOPBACK = 'pcapkit.protocols.link.loopback:Loopback'
-OSPF = 'pcapkit.protocols.application.ospf:OSPF'
+ETHERNET = 'pcapkit.protocols.link.ethernet.protocol:Ethernet'
+C_TAG = 'pcapkit.protocols.link.c_tag.protocol:C_Tag'
+S_TAG = 'pcapkit.protocols.link.s_tag.protocol:S_Tag'
+ARP = 'pcapkit.protocols.link.arp.protocol:ARP'
+RARP = 'pcapkit.protocols.application.rarp.protocol:RARP'
+L2TPV2 = 'pcapkit.protocols.link.l2tpv2.protocol:L2TPv2'
+LOOPBACK = 'pcapkit.protocols.link.loopback.protocol:Loopback'
+OSPF = 'pcapkit.protocols.application.ospf.protocol:OSPF'
 
 #: Destination and source MAC.
 MACS = bytes.fromhex('0123456789ab') + bytes.fromhex('fedcba987654')

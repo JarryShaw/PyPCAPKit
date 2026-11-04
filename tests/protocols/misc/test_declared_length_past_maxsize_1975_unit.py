@@ -190,8 +190,8 @@ class TestDeclaredLengthPastMaxsize(unittest.TestCase):
         self.assertEqual(stream.read(1), b'')
 
     def test_a_frame_claiming_past_maxsize_is_kept_as_captured(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(GLOBAL).info
         for claim in CLAIMS:

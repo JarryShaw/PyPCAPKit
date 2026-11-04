@@ -4,9 +4,9 @@
 GitHub issue #1547. A capture taken on a host that offloads TCP segmentation
 (TSO/GSO) records its outgoing IPv4 headers with ``total_length`` 0, since the
 NIC fills it in later. These tests guard against
-:meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` handing the next
+:meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>` handing the next
 layer ``0 - hdr_len`` octets, under which TCP falls back to
-:class:`~pcapkit.protocols.misc.raw.Raw` and the flow is never traced. A Total
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` and the flow is never traced. A Total
 Length of 0 means the rest of the captured frame, with no trailer, as dpkt
 (``ip.py``) and Wireshark ("presumed TSO") read it, and the rebuild writes the 0
 back. Following the owner's ruling to match Wireshark, any other Total Length
@@ -98,7 +98,7 @@ class TSOTotalLengthTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _parse(self, octets: 'bytes') -> 'Any':
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.warnings import SchemaWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -108,9 +108,9 @@ class TSOTotalLengthTests(unittest.TestCase):
         return parsed
 
     def test_tcp_is_parsed_and_every_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         _, original = _records()
         for fix_checksum in (True, False):
@@ -143,8 +143,8 @@ class TSOTotalLengthTests(unittest.TestCase):
 
     def test_make_with_a_zero_total_length_round_trips(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         segment = _records()[1][0][3][34:]
         made = IPv4(total_length=0, protocol=TransType.TCP, ttl=64, src='10.20.30.130', dst='10.20.30.131',
@@ -163,7 +163,7 @@ class TSOTotalLengthTests(unittest.TestCase):
         self.assertEqual(struct.unpack('!H', computed.data[2:4])[0], 20 + len(segment))
 
     def test_schema_splits_payload_and_trailer(self) -> None:
-        from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+        from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
 
         frame = _records()[1][0][3]
         # 0 is TSO: the rest is payload. 1 to 19 are bogus: the rest is trailer.
@@ -184,9 +184,9 @@ class TSOTotalLengthTests(unittest.TestCase):
         # no negative length reaches one, the octets after the header are kept
         # as the trailer, and the Total Length is written back as it was.
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         frame = _records()[1][0][3]
         lengths: 'list[int]' = []
@@ -228,9 +228,9 @@ class TSOTotalLengthTests(unittest.TestCase):
         # exceeds packet length (64 bytes)" while still dissecting TCP: the
         # declared length is kept for the rebuild (#1155), and #1547's TSO
         # reading does not apply to it.
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         frame = _records()[1][0][3]
         octets = _with_total_length(frame, 100, fix_checksum=True)

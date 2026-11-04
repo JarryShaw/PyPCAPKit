@@ -127,8 +127,8 @@ def field_cases() -> 'tuple[FieldCase, ...]':  # pylint: disable=too-many-locals
     from pcapkit.corekit.fields import misc as fmisc
     from pcapkit.corekit.fields import numbers as fnum
     from pcapkit.corekit.fields import strings as fstr
-    from pcapkit.protocols.misc.raw import Raw
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.misc.raw.protocol import Raw
+    from pcapkit.protocols.schema import Schema, schema_final
 
     cases = []  # type: list[FieldCase]
 
@@ -390,7 +390,7 @@ def schema_cases() -> 'tuple[SchemaCase, ...]':
     from pcapkit.corekit.fields import misc as fmisc
     from pcapkit.corekit.fields import numbers as fnum
     from pcapkit.corekit.fields import strings as fstr
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.schema import Schema, schema_final
 
     def forward() -> 'Any':
         @schema_final
@@ -633,13 +633,15 @@ class FieldRoundTripTests(KnownFailureTable, unittest.TestCase):
         import importlib
         import pkgutil
 
-        import pcapkit.protocols.schema as package
+        import pcapkit.protocols as package
         from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField
         from pcapkit.corekit.fields.strings import BitField
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         total, uncovered = 0, []
         for info in pkgutil.walk_packages(package.__path__, f'{package.__name__}.'):
+            if not info.name.endswith('.schema'):
+                continue
             module = importlib.import_module(info.name)
             for obj in vars(module).values():
                 if not (inspect.isclass(obj) and issubclass(obj, Schema) and obj.__module__ == module.__name__):

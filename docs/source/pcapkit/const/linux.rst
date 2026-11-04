@@ -5,7 +5,7 @@ Linux-Specific Constant Enumerations
 .. module:: pcapkit.const.linux
 
 This module contains all constant enumerations of the Linux-specific
-encapsulations, e.g. :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`.
+encapsulations, e.g. :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`.
 Available enumerations include:
 
 .. list-table::

@@ -1,11 +1,11 @@
-======================================================================
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` Vendor Crawlers
-======================================================================
+===============================================================================
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` Vendor Crawlers
+===============================================================================
 
 .. module:: pcapkit.vendor.radiotap
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` implementations, each scraping
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations, each scraping
 radiotap.org [*]_. Available vendor crawlers include:
 
 .. list-table::

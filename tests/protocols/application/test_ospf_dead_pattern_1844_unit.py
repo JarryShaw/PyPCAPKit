@@ -2,7 +2,7 @@
 """The unused Ethernet-address pattern in the OSPF, Ethernet and PCAP-NG modules.
 
 GitHub issue #1844. Guards against
-:mod:`pcapkit.protocols.application.ospf` defining a ``PAT_MAC_ADDR`` that
+:mod:`pcapkit.protocols.application.ospf.protocol` defining a ``PAT_MAC_ADDR`` that
 nothing reads, and importing :mod:`re` only to compile it. These tests pin
 that the constant is absent and that the module does not import :mod:`re`
 without using it.
@@ -31,9 +31,9 @@ class OSPFDeadPatternUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_pat_mac_addr_is_gone(self) -> None:
-        from pcapkit.protocols.application import ospf
-        from pcapkit.protocols.link import ethernet
-        from pcapkit.protocols.misc import pcapng
+        from pcapkit.protocols.application.ospf import protocol as ospf
+        from pcapkit.protocols.link.ethernet import protocol as ethernet
+        from pcapkit.protocols.misc.pcapng import protocol as pcapng
 
         for module in (ospf, ethernet, pcapng):
             with self.subTest(module=module.__name__):
@@ -43,8 +43,8 @@ class OSPFDeadPatternUnitTests(unittest.TestCase):
         # Read the source of the module actually imported, so the check runs
         # against the tree under test. ``re`` may come back if something uses
         # it; what must not return is the import with no reader.
-        from pcapkit.protocols.application import ospf
-        from pcapkit.protocols.link import ethernet
+        from pcapkit.protocols.application.ospf import protocol as ospf
+        from pcapkit.protocols.link.ethernet import protocol as ethernet
 
         for module in (ospf, ethernet):
             with open(module.__file__, encoding='utf-8') as file:

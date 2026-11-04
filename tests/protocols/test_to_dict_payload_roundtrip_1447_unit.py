@@ -94,8 +94,8 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def frame(self, name: str):  # type: ignore[no-untyped-def]
         """Parse ``FRAMES[name]`` as the first record of a PCAP file."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         packet = FRAMES[name]
         record = struct.pack('<IIII', 1, 2, len(packet), len(packet)) + packet
@@ -104,7 +104,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def layers(self, name: str):  # type: ignore[no-untyped-def]
         """Yield every layer of ``FRAMES[name]``, from the frame down."""
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         layer = self.frame(name)
         while not isinstance(layer, NoPayload):
@@ -113,7 +113,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
     def rebuild(self, layer):  # type: ignore[no-untyped-def]
         """``type(layer).from_data(layer.info.to_dict())``."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         kwargs = {'num': 1, 'header': self.header} if isinstance(layer, Frame) else {}
         return type(layer).from_data(layer.info.to_dict(), **kwargs)
@@ -134,7 +134,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
                     self.assertIs(type(self.rebuild(layer).payload), type(layer.payload))
 
     def test_ipv6_extension_headers_rebuild_from_its_dict(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ipv6 = self.frame('ipv6-exthdr-udp')[IPv6]
         dict_ = ipv6.info.to_dict()
@@ -148,8 +148,8 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
         )
 
     def test_payload_is_found_under_its_info_name(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         udp_ = self.frame('ipv4-udp-l2tpv2')[UDP]
         self.assertIsInstance(udp_.payload, L2TPv2)
@@ -161,7 +161,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
         self.assertEqual(len(rebuilt.data), 8 + len(L2TPV2))
 
     def test_http_dict_keeps_its_version(self) -> None:
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         for name, alias in (('ipv4-tcp-http1', 'HTTP/1.1'), ('ipv4-tcp-http2', 'HTTP/2')):
             with self.subTest(frame=name):
@@ -170,8 +170,8 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
                 self.assertEqual(type(http).from_data(http.info.to_dict()).alias, alias)
 
     def test_dict_without_a_payload_key_rebuilds_the_header_alone(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         eth = Ethernet(FRAMES['ipv4-udp'])
         dict_ = eth.info.to_dict()
@@ -182,8 +182,8 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
         self.assertEqual(rebuilt.data, FRAMES['ipv4-udp'][:14])
 
     def test_dict_without_the_dispatch_keys_rebuilds_the_header_alone(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         # The payload is still there under its name, but nothing names it.
         eth = Ethernet(FRAMES['ipv4-udp'])

@@ -51,8 +51,8 @@ class InternetBaseUnitTests(unittest.TestCase):
     def test_layer_register_and_protocol_byte_reader(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.internet.ip import IP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ip.protocol import IP
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         DummyInternet = self._make_internet_class()
@@ -65,7 +65,7 @@ class InternetBaseUnitTests(unittest.TestCase):
 
         DummyInternet.register(TransType.get(250), Raw)
         self.assertIs(DummyInternet.__dict__['__proto__'][TransType.get(250)], Raw)
-        DummyInternet.register(TransType.get(251), ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+        DummyInternet.register(TransType.get(251), ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
         self.assertIs(DummyInternet.__dict__['__proto__'][TransType.get(251)], Raw)
         with self.assertRaises(RegistryError):
             DummyInternet.register(TransType.get(252), object)  # type: ignore[arg-type]
@@ -92,7 +92,7 @@ class InternetBaseUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         DummyInternet = self._make_internet_class()
 
@@ -156,7 +156,7 @@ class InternetBaseUnitTests(unittest.TestCase):
         DummyInternet = self._make_internet_class(FakePayload)
         DummyInternet.__dict__['__proto__'][TransType.get(250)] = FakePayload
         DummyInternet.__dict__['__proto__'][TransType.get(251)] = ModuleDescriptor(
-            'pcapkit.protocols.misc.raw',
+            'pcapkit.protocols.misc.raw.protocol',
             'Raw',
         )
 
@@ -210,8 +210,8 @@ class InternetBaseUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_transtype
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         # version/IHL, ToS, total length 24, id, flags/offset, TTL, proto=253
         # (RFC 3692 experimentation), checksum, 127.0.0.1 -> 127.0.0.1, then

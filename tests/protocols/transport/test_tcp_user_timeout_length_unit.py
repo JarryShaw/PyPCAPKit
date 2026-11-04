@@ -4,10 +4,10 @@
 GitHub issue #1120. The option is ``Kind`` (1 octet), ``Length`` (1 octet) and
 a 16-bit field holding the ``G`` granularity bit and the 15-bit timeout, so its
 ``Length`` is **4**. :meth:`TCP._read_mode_timeout
-<pcapkit.protocols.transport.tcp.TCP._read_mode_timeout>` checks for exactly
-that, and :class:`~pcapkit.protocols.schema.transport.tcp.UserTimeout` packs
+<pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_timeout>` checks for exactly
+that, and :class:`~pcapkit.protocols.transport.tcp.schema.UserTimeout` packs
 four octets; :meth:`TCP._make_mode_timeout
-<pcapkit.protocols.transport.tcp.TCP._make_mode_timeout>` wrote **3**, so every
+<pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_timeout>` wrote **3**, so every
 option it made failed with ``TCP: [OptNo 28] invalid format``.
 
 Every case builds its own octets in memory, so this belongs to the unit tier.
@@ -38,7 +38,7 @@ class UserTimeoutLengthTests(unittest.TestCase):
     def test_maker_writes_length_four(self) -> 'None':
         """Both granularities, and the ``opt`` path, declare four octets."""
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         proto = object.__new__(TCP)
         cases = {
@@ -59,7 +59,7 @@ class UserTimeoutLengthTests(unittest.TestCase):
 
         """
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(options=[(Option.User_Timeout_Option, {'timeout': 30})])
         raw = tcp.data

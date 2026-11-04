@@ -22,9 +22,9 @@ from tests._support import reimport_once_per_class
 
 #: Protocol module, class name and option enum module of each padding builder.
 PROTOCOLS = (
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT', 'pcapkit.const.ipv6.option'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts', 'pcapkit.const.ipv6.option'),
-    ('pcapkit.protocols.internet.mh', 'MH', 'pcapkit.const.mh.option'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT', 'pcapkit.const.ipv6.option'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts', 'pcapkit.const.ipv6.option'),
+    ('pcapkit.protocols.internet.mh.protocol', 'MH', 'pcapkit.const.mh.option'),
 )
 
 #: Parsed headers whose padding is two ``Pad1`` options, which have to rebuild

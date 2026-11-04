@@ -33,7 +33,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def assertRoundTrip(self, hexdata: str) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = bytes.fromhex(hexdata)
         self.assertEqual(SCTP.from_data(SCTP(raw).info).data.hex(), raw.hex())
@@ -57,7 +57,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
 
     def test_reserved_flag_bits_round_trip(self) -> None:
         """#1221: DATA, ABORT and SHUTDOWN COMPLETE keep their reserved flag bits."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         cases = {
             'DATA': (HEADER + '00f30011' + '00000001' + '00010002' + '00000000' + 'ab000000', 0xf),
@@ -72,7 +72,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
 
     def test_invalid_stream_cause_reserved_round_trip(self) -> None:
         """#1221: the Invalid Stream Identifier cause keeps its reserved field."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         hexdata = HEADER + '0600000c' + '00010008' + '0005beef'
         self.assertRoundTrip(hexdata)
@@ -82,7 +82,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
     def test_make_defaults_flags_to_zero(self) -> None:
         """#1221: a chunk built from keywords still emits zero flags."""
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         data = SCTP(srcport=1, dstport=2, chunks=[(Chunk.Initiation, {})]).data
         self.assertEqual(data[13], 0)
@@ -110,7 +110,7 @@ class SCTPRoundTripUnitTests(unittest.TestCase):
         """#1222: ``make()`` declares the RFC 9260 length for an unpadded final parameter."""
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         data = SCTP(srcport=1, dstport=2, chunks=[
             (Chunk.Heartbeat_Request, {'parameters': [(Parameter.Heartbeat_Info, {'info': b'abc'})]}),

@@ -88,7 +88,7 @@ class TCPRuntimeTests(unittest.TestCase):
         <pcapkit.protocols.transport.transport.Transport._decode_next_layer>` as
         plain :obj:`int` (``srcport.port``), not as
         :class:`~pcapkit.const.reg.apptype.AppType` members, so
-        :class:`~pcapkit.protocols.misc.raw.Raw` has no name to label itself
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` has no name to label itself
         with.
 
         """

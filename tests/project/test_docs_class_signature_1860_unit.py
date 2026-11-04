@@ -6,7 +6,7 @@ class defines or inherits, before ``__init__``. ``sphinx-autodoc-typehints`` 3.1
 takes a ``__new__`` defined beside the ``__init__``, as :func:`inspect.signature`
 does. :class:`~pcapkit.protocols.protocol.ProtocolBase`,
 :class:`~pcapkit.corekit.infoclass.Info`,
-:class:`~pcapkit.protocols.schema.schema.Schema` and the reassembly and
+:class:`~pcapkit.protocols.schema.Schema` and the reassembly and
 flow-tracing bases each define a ``__new__`` that only passes ``*args`` and
 ``**kwargs`` through, so by default their classes render that catch-all, and
 their class docstrings lose the types of the parameters they list.
@@ -85,7 +85,7 @@ def resolve(name: 'str') -> 'Any':
 
 #: Each class, and the signature restored for it.
 RESTORED = {
-    'pcapkit.protocols.application.ftp.FTP': '(file=None, length=None, **kwargs)',
+    'pcapkit.protocols.application.ftp.protocol.FTP': '(file=None, length=None, **kwargs)',
     'pcapkit.dumpkit.pcap.PCAPIO': '(fname, *, protocol, byteorder=sys.byteorder, nanosecond=False, **kwargs)',
     'pcapkit.foundation.reassembly.ipv4.IPv4': '(*, strict=True, store=True, timeout=None)',
     'pcapkit.foundation.traceflow.tcp.TCP': ('(fout, format, byteorder=sys.byteorder, nanosecond=False, '
@@ -93,7 +93,7 @@ RESTORED = {
     'pcapkit.corekit.infoclass.Info': '(dict_=None, **kwargs)',
     'pcapkit.corekit.infoclass.MultiInfo': '(mapping=None)',
     'pcapkit.interface.misc.Stream': '(filename, packets, conversations)',
-    'pcapkit.protocols.schema.transport.udp.UDP': ('(srcport=NO_VALUE, dstport=NO_VALUE, len=NO_VALUE, '
+    'pcapkit.protocols.transport.udp.schema.UDP': ('(srcport=NO_VALUE, dstport=NO_VALUE, len=NO_VALUE, '
                                                    'checksum=NO_VALUE, payload=NO_VALUE, trailer=NO_VALUE, *, '
                                                    '__packet__=None, **kwargs)'),
 }
@@ -102,7 +102,7 @@ RESTORED = {
 #: finalised, whose ``__init__`` is generated on its first construction; a class
 #: whose ``__new__`` takes parameters of its own; a class with no ``__new__`` at all.
 LEFT_ALONE = (
-    'pcapkit.protocols.data.application.ftp.FTP',
+    'pcapkit.protocols.application.ftp.data.FTP',
     'pcapkit.corekit.fields.strings.DecodedString',
     'pcapkit.foundation.extraction.Extractor',
 )
@@ -171,7 +171,7 @@ class ClassSignatureTests(unittest.TestCase):
         for name in LEFT_ALONE:
             with self.subTest(name=name):
                 self.assertIsNone(self.restore(name))
-        self.assertIsNone(self.restore('pcapkit.protocols.application.ftp.FTP', what='attribute'))
+        self.assertIsNone(self.restore('pcapkit.protocols.application.ftp.protocol.FTP', what='attribute'))
         self.library.assert_not_called()
 
     def test_new_with_parameters_is_left_to_autodoc(self) -> 'None':
@@ -198,7 +198,7 @@ class ClassSignatureTests(unittest.TestCase):
 
     def test_build_restores_the_signature(self) -> 'None':
         """Through the event, the catch-all the library answers is replaced."""
-        name = 'pcapkit.protocols.application.ftp.FTP'
+        name = 'pcapkit.protocols.application.ftp.protocol.FTP'
         result = emit(self.conf, self.app, EVENT, 'class', name, resolve(name), {}, CATCH_ALL, None,
                       library=lambda *args: (CATCH_ALL, None))
         self.assertEqual(result, (RESTORED[name], None))
@@ -225,13 +225,13 @@ class ConstructorTypesTests(unittest.TestCase):
 
     def test_overloaded_init_keeps_the_library_choice(self) -> 'None':
         """Reading it would add an ``Overloads`` field to every protocol class."""
-        cls = resolve('pcapkit.protocols.application.ftp.FTP')
+        cls = resolve('pcapkit.protocols.application.ftp.protocol.FTP')
         self.assertEqual(self.conf.constructor_for_types(cls), self.conf.typehints_constructor_name(cls))
 
     def test_other_classes_keep_the_library_choice(self) -> 'None':
         """A class with no pass-through ``__new__`` in the way is left as the library reads it."""
         for name in ('pcapkit.dumpkit.pcap.PCAPIO', 'pcapkit.corekit.fields.strings.DecodedString',
-                     'pcapkit.protocols.data.application.ftp.FTP'):
+                     'pcapkit.protocols.application.ftp.data.FTP'):
             cls = resolve(name)
             with self.subTest(name=name):
                 self.assertEqual(self.conf.constructor_for_types(cls), self.conf.typehints_constructor_name(cls))

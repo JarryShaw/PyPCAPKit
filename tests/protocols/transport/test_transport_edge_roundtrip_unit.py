@@ -24,9 +24,9 @@ from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 #: cases for the transport layer, each written out by hand.
 __tier__ = 'ALL'
 
-TCP = 'pcapkit.protocols.transport.tcp:TCP'
-UDP = 'pcapkit.protocols.transport.udp:UDP'
-SCTP = 'pcapkit.protocols.transport.sctp:SCTP'
+TCP = 'pcapkit.protocols.transport.tcp.protocol:TCP'
+UDP = 'pcapkit.protocols.transport.udp.protocol:UDP'
+SCTP = 'pcapkit.protocols.transport.sctp.protocol:SCTP'
 
 
 def tcp(opts: bytes = b'', payload: bytes = b'', flags: int = 0x002, reserved: int = 0,

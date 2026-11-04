@@ -17,6 +17,7 @@ import signal
 import sys
 import time
 import types
+import typing
 import unittest
 import warnings
 from typing import Callable, Iterable, Iterator, Optional, TypeVar
@@ -553,9 +554,9 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
             :func:`install_fake_protocol_module` -- these two names are on the
             import path of most of the package, so leaving stand-ins bound to
             them poisons every later test that imports :mod:`pcapkit`.
-        raw_cls: Stand-in to bind as ``pcapkit.protocols.misc.raw.Raw``.
+        raw_cls: Stand-in to bind as ``pcapkit.protocols.misc.raw.protocol.Raw``.
         null_cls: Stand-in to bind as
-            ``pcapkit.protocols.misc.no_payload.NoPayload``.
+            ``pcapkit.protocols.misc.no_payload.protocol.NoPayload``.
 
     Raises:
         RuntimeError: If ``test`` is not under :func:`isolate_modules`.
@@ -565,13 +566,13 @@ def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
 
     ensure_package('pcapkit.protocols.misc', ROOT / 'pcapkit' / 'protocols' / 'misc')
 
-    raw_module = types.ModuleType('pcapkit.protocols.misc.raw')
+    raw_module = types.ModuleType('pcapkit.protocols.misc.raw.protocol')
     raw_module.Raw = raw_cls
-    sys.modules['pcapkit.protocols.misc.raw'] = raw_module
+    sys.modules['pcapkit.protocols.misc.raw.protocol'] = raw_module
 
-    null_module = types.ModuleType('pcapkit.protocols.misc.no_payload')
+    null_module = types.ModuleType('pcapkit.protocols.misc.no_payload.protocol')
     null_module.NoPayload = null_cls
-    sys.modules['pcapkit.protocols.misc.no_payload'] = null_module
+    sys.modules['pcapkit.protocols.misc.no_payload.protocol'] = null_module
 
 
 def _reset_abc_caches() -> None:
@@ -599,6 +600,29 @@ def _reset_abc_caches() -> None:
     for obj in vars(collections.abc).values():
         if isinstance(obj, type) and hasattr(obj, '_abc_impl'):
             reset(obj)
+
+
+def _clear_typing_caches() -> None:
+    """Empty the :mod:`typing` subscription caches.
+
+    Each import of :mod:`pcapkit` subscribes generics with its own classes --
+    ``Protocol[...]`` at class creation, ``Optional[...]`` when
+    :func:`typing.get_type_hints` resolves an ``Info`` annotation -- and
+    :mod:`typing` caches those aliases where no purge reaches. An entry naming a
+    purged class keeps its generation reachable, and through that generation's
+    ``_previous_excepthook`` the generation whose hook it saved. So in one
+    plain-unittest process the live generations grow from module to module, and
+    with them the heap and the cost of every negative
+    :class:`collections.abc.Mapping` subclass check, which walks the subclasses of
+    them all (#2750).
+
+    ``typing._cleanups`` holds each cache's ``cache_clear``, which CPython's own
+    test runner calls before each test module. A runtime without it skips the
+    clear rather than erroring, as :func:`_reset_abc_caches` does.
+
+    """
+    for clear in getattr(typing, '_cleanups', ()):
+        clear()
 
 
 #: Default :data:`sys.modules` prefixes the isolation helpers below cover, and
@@ -689,6 +713,7 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
     # subclasses and churned the shared ABC caches, and those stale answers
     # outlive the modules that caused them.
     _reset_abc_caches()
+    _clear_typing_caches()
 
 
 def _rebind_parent_attributes(prefixes: 'tuple[str, ...]') -> None:
@@ -1066,6 +1091,7 @@ def purge_modules(prefixes: Iterable[str]) -> None:
         if _under_prefix(name, tuple(prefixes)):
             sys.modules.pop(name, None)
     _reset_abc_caches()
+    _clear_typing_caches()
 
 
 #: Class attribute :func:`reimport_once_per_class` keeps a class's own import in.

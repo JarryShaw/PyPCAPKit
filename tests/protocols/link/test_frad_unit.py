@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2460: Frame Relay Access Device (FRAD) frames.
 
-:class:`~pcapkit.protocols.link.frad.FRAD` dissects the ``arphrd_type``
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD` dissects the ``arphrd_type``
 ``ARPHRD_FRAD`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.Raw` (see
-:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 Q.922 address field, the direct-NLPID and SNAP-encapsulated forms per
 :rfc:`2427`, and byte-exact round trips. The FRAD-dispatch side of
 ``LinuxSLL1``/``LinuxSLL2`` is covered in their own test modules.
@@ -58,7 +58,7 @@ class TestFRAD(unittest.TestCase):
 
     def test_address_field_decodes_the_rfc_example(self) -> None:
         """RFC 2427 section 3's own example: DLCI 50 packs as ``0x0C21``."""
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         raw = _direct(0xCC, IPV4)
         parsed = FRAD(raw, len(raw))
@@ -70,7 +70,7 @@ class TestFRAD(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_direct_nlpid_dispatches_ipv4_and_ipv6(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         for nlpid, payload, name in ((0xCC, IPV4, 'IPv4'), (0x8E, IPV6, 'IPv6')):
             with self.subTest(nlpid=hex(nlpid)):
@@ -91,9 +91,9 @@ class TestFRAD(unittest.TestCase):
         """A SNAP header whose OUI is ``00-00-00`` carries an EtherType in its
         PID -- ARP's own, ``0x0806`` -- resolved through the family registry
         Ethernet/VLAN/LinuxSLL share, not through :attr:`FRAD.__proto__
-        <pcapkit.protocols.link.frad.FRAD.__proto__>`.
+        <pcapkit.protocols.link.frad.protocol.FRAD.__proto__>`.
         """
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         raw = _snap(b'\x00\x00\x00', 0x0806, ARP_REQUEST)
         parsed = FRAD(raw, len(raw))
@@ -109,12 +109,12 @@ class TestFRAD(unittest.TestCase):
     def test_snap_with_nonzero_oui_is_kept_raw(self) -> None:
         """A SNAP header naming a bridged medium (OUI ``00-80-C2``, :rfc:`2427`
         section 4.2) is not a bridging dissector this class implements, so it
-        is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, OUI and PID
-        intact in :attr:`~pcapkit.protocols.data.link.frad.FRAD.snap_oui` /
-        :attr:`~pcapkit.protocols.data.link.frad.FRAD.snap_pid`.
+        is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, OUI and PID
+        intact in :attr:`~pcapkit.protocols.link.frad.data.FRAD.snap_oui` /
+        :attr:`~pcapkit.protocols.link.frad.data.FRAD.snap_pid`.
         """
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _snap(b'\x00\x80\xc2', 0x0001, IPV4)
         parsed = FRAD(raw, len(raw))
@@ -130,8 +130,8 @@ class TestFRAD(unittest.TestCase):
         FRF.9/FRF.12 (``0xB0``/``0xB1``) and PPP-in-Frame-Relay (``0xCF``), per
         :rfc:`2427` Appendix A, have no dissector in this package.
         """
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for nlpid in (0x08, 0x81, 0x82, 0x83, 0xB0, 0xB1, 0xCF):
             with self.subTest(nlpid=hex(nlpid)):
@@ -144,7 +144,7 @@ class TestFRAD(unittest.TestCase):
                 self._assert_rebuilds(parsed)
 
     def test_make_then_parse_direct(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         made = FRAD(dlci=50, nlpid=0xCC, payload=IPV4).data
         self.assertEqual(made, _direct(0xCC, IPV4))
@@ -155,7 +155,7 @@ class TestFRAD(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_then_parse_snap(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         made = FRAD(dlci=50, nlpid=0x80, snap_oui=b'\x00\x00\x00', snap_pid=0x0806,
                    payload=ARP_REQUEST).data
@@ -166,13 +166,13 @@ class TestFRAD(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_defaults(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         # dlci=0, with ea2=1 per the 2-octet address form: 0x00 0x01.
         self.assertEqual(FRAD().data, b'\x00\x01\x03\xcc')
 
     def test_make_round_trips_every_bit_of_the_address(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         made = FRAD(dlci=1023, cr=1, fecn=1, becn=1, de=1, nlpid=0xCC, payload=IPV4)
         parsed = FRAD(made.data, len(made.data))
@@ -181,7 +181,7 @@ class TestFRAD(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_rejects_an_invalid_dlci(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         for dlci in (-1, 1024, True, '50'):
@@ -192,7 +192,7 @@ class TestFRAD(unittest.TestCase):
         # NOTE: True/False are not cases here -- bool is an int subclass and
         # True == 1, so a bit flag (unlike dlci, a numeric identifier) treats
         # it as a legitimate spelling of 1 rather than rejecting it.
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in ({'cr': 2}, {'fecn': -1}, {'becn': 3}, {'de': 'x'}):
@@ -202,7 +202,7 @@ class TestFRAD(unittest.TestCase):
     def test_make_rejects_a_float_flag_bit(self) -> None:
         """``1.0`` equals ``1`` but is no bit, so it raises ``ProtocolError``
         rather than reaching the bit-field packer's ``ValueError`` (#2614)."""
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name in ('cr', 'fecn', 'becn', 'de'):
@@ -215,14 +215,14 @@ class TestFRAD(unittest.TestCase):
     def test_make_tolerates_nlpid_zero_for_short_read_replay(self) -> None:
         """``0x00`` is the SNAP pad marker, never a value of its own on the
         wire, but :meth:`make` must not refuse it: see the ``Note`` on
-        :meth:`FRAD.make <pcapkit.protocols.link.frad.FRAD.make>`.
+        :meth:`FRAD.make <pcapkit.protocols.link.frad.protocol.FRAD.make>`.
         """
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         FRAD(nlpid=0)  # must not raise
 
     def test_make_rejects_snap_fields_without_snap(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -231,7 +231,7 @@ class TestFRAD(unittest.TestCase):
             FRAD(nlpid=0xCC, snap_pid=0x0806)
 
     def test_make_rejects_snap_without_snap_fields(self) -> None:
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -247,8 +247,8 @@ class TestFRAD(unittest.TestCase):
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         self.assertEqual(FRAD.id(), ('FRAD',))
         self.assertIs(FRAD.__index__(), LinkType.FRELAY)
@@ -263,7 +263,7 @@ class TestFRAD(unittest.TestCase):
         """
         import warnings
 
-        from pcapkit.protocols.link.frad import FRAD
+        from pcapkit.protocols.link.frad.protocol import FRAD
 
         raw = _direct(0xCC, IPV4)
         for keep in (1, 2, 3):

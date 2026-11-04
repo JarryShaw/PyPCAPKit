@@ -62,7 +62,7 @@ class SCTPUnpaddedFinalParameterUnitTests(unittest.TestCase):
 
     def test_parses_and_rebuilds_through_data(self) -> None:
         """#1479: the packet parses and ``.data`` is the octets as captured."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in SHORT.items():
             with self.subTest(case=name):
@@ -70,7 +70,7 @@ class SCTPUnpaddedFinalParameterUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_info(self) -> None:
         """#1479: ``from_data(info)`` writes no padding the final item lacked."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in SHORT.items():
             with self.subTest(case=name):
@@ -78,7 +78,7 @@ class SCTPUnpaddedFinalParameterUnitTests(unittest.TestCase):
 
     def test_rebuilds_from_to_dict(self) -> None:
         """#1479: the record survives ``info.to_dict()``."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, raw in SHORT.items():
             with self.subTest(case=name):
@@ -86,7 +86,7 @@ class SCTPUnpaddedFinalParameterUnitTests(unittest.TestCase):
 
     def test_only_the_final_item_records_short_padding(self) -> None:
         """#1479: the final item keeps ``padding=b''``; the one before it keeps none."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, field in (('init-two-hostnames', 'parameters'), ('abort-two-causes', 'error')):
             with self.subTest(case=name):
@@ -98,7 +98,7 @@ class SCTPUnpaddedFinalParameterUnitTests(unittest.TestCase):
 
     def test_issue_init_repro_parses(self) -> None:
         """#1479: the INIT from the issue parses, its host name read in full."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = bytes.fromhex('13881389deadbeef000000000100001d00000001000003e8000a000a'
                             '00000001000b00096162636465')

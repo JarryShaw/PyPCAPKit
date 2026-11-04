@@ -23,7 +23,7 @@ class AHUnitTests(unittest.TestCase):
 
     def test_ah_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         data = DummyDict(
             next=TransType.TCP,
@@ -47,7 +47,7 @@ class AHUnitTests(unittest.TestCase):
 
     def test_ah_make_builds_schema_with_payload_length(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         proto = object.__new__(AH)
         schema = proto.make(
@@ -66,9 +66,9 @@ class AHUnitTests(unittest.TestCase):
 
     def test_ah_read_properties_and_ipsec_id(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ah import AH
-        from pcapkit.protocols.internet.ipsec import IPsec
-        from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
+        from pcapkit.protocols.internet.ah.protocol import AH
+        from pcapkit.protocols.internet.ipsec.protocol import IPsec
+        from pcapkit.protocols.internet.ah.schema import AH as Schema_AH
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         proto = object.__new__(AH)
@@ -145,13 +145,13 @@ class AHUnitTests(unittest.TestCase):
         IP header ... before the next layer protocol") is legitimate
         prose here too -- it is the primary-source evidence that AH
         also travels directly as an IPv4 payload, exactly as
-        :mod:`~pcapkit.protocols.internet.hip` cites its own IPv4
+        :mod:`~pcapkit.protocols.internet.hip.protocol` cites its own IPv4
         appendix for the same reason. Per
         ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
         "own-protocolhood on its own is not sufficient" ruling (MH is the
         settling case),
         that fact *qualifies* an already-standalone header for a base
-        besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
+        besides :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`;
         it does not *make* the header standalone, and the RFC has no
         say in which base is named, so a claim that the RFC "makes it a
         standalone protocol" or "names ``IPsec`` as the second base" is
@@ -161,7 +161,7 @@ class AHUnitTests(unittest.TestCase):
         """
         import re
 
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         # Normalise the docstring's line-wrapping before matching, since the
         # citation may be split across lines by hand-wrapping.
@@ -219,14 +219,14 @@ class AHMembershipTests(unittest.TestCase):
         return struct.pack('!II', 0x1234, 1) + bytes(16)
 
     def _parse_ipv6(self, data: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             return IPv6(io.BytesIO(data), len(data))
 
     def test_terminal_ah_membership_is_false_for_other_selectors(self) -> None:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         ipv6 = self._parse_ipv6(self._ipv6(51, self._ah(59)))
         (ah,) = [ext for ext in ipv6.extension_headers.values() if isinstance(ext, AH)]
@@ -236,7 +236,7 @@ class AHMembershipTests(unittest.TestCase):
         self.assertNotIn('TCP', ah)
 
     def test_ah_followed_by_esp_membership_does_not_raise(self) -> None:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         ipv6 = self._parse_ipv6(self._ipv6(51, self._ah(50) + self._esp()))
         ah = next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, AH))
@@ -244,7 +244,7 @@ class AHMembershipTests(unittest.TestCase):
         self.assertNotIn('ESP', ah)
 
     def test_esp_extension_layer_membership_is_unchanged(self) -> None:
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
 
         ipv6 = self._parse_ipv6(self._ipv6(50, self._esp()))
         esp = next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, ESP))
@@ -255,7 +255,7 @@ class AHMembershipTests(unittest.TestCase):
     def test_ipv4_ah_membership_is_unchanged(self) -> None:
         import struct  # pylint: disable=import-outside-toplevel
 
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         body = self._ah(59)
         data = struct.pack('!BBHHHBBH', 0x45, 0, 20 + len(body), 0, 0, 64, 51, 0) + bytes(8) + body

@@ -78,7 +78,7 @@ class TCPFlagsWireMasksTests(unittest.TestCase):
 
     def test_a_parsed_syn_ack_reports_its_header_bits(self) -> None:
         from pcapkit.const.tcp.flags import Flags
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(SYN_ACK, len(SYN_ACK))
         word = struct.unpack('!H', SYN_ACK[12:14])[0]
@@ -93,7 +93,7 @@ class TCPFlagsWireMasksTests(unittest.TestCase):
 
     def test_every_flags_octet_reads_back_as_its_value(self) -> None:
         """The eight flags the parser reports, each combination, as the octet they came from."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for octet in range(0x100):
             with self.subTest(octet=hex(octet)):
@@ -103,7 +103,7 @@ class TCPFlagsWireMasksTests(unittest.TestCase):
                 self.assertEqual(TCP.from_data(tcp.info).data, raw)
 
     def test_make_builds_the_header_bits_its_connection_names(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         made = TCP(srcport=1, dstport=2, syn=True, ack=True)
         self.assertEqual(int(made.connection), 0x012)

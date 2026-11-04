@@ -443,7 +443,7 @@ class RealObjectTests(_ReimportCase):
     """The objects #1842 measured, which hold ``NO_VALUE`` in practice."""
 
     def test_a_parsed_mpl_seed_keeps_its_identity(self) -> 'None':
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         no_value = _module().NO_VALUE
         schema = HOPOPT(MPL_HEADER, len(MPL_HEADER), extension=True).schema

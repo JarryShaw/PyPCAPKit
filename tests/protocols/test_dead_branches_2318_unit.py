@@ -4,9 +4,9 @@
 A guard is worth keeping only where some route reaches it. The guards removed
 here are unreachable, because something earlier raises first:
 ``Header.read``'s ``FileError`` on an unknown magic number, which the schema's
-:func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback` beats
+:func:`~pcapkit.protocols.misc.pcap.header.schema.magic_number_callback` beats
 to it; and the ``Opt Data Len`` guards of ``_read_opt_calipso``, which
-:func:`~pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len` beats to
+:func:`~pcapkit.protocols.internet.ipv6_ext.schema.calipso_pad_len` beats to
 it whether the option is unpacked off the wire or packed from a caller's own
 schema. For each, a test feeds the input that would have reached it, pins what
 is raised -- or parsed -- instead, and pins the source as holding no such
@@ -111,7 +111,7 @@ class MagicNumberTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_unknown_magic_number_raises_protocol_error(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as caught:
@@ -119,7 +119,7 @@ class MagicNumberTests(unittest.TestCase):
         self.assertIn('invalid magic number', str(caught.exception))
 
     def test_the_header_module_names_protocol_error(self) -> None:
-        from pcapkit.protocols.misc.pcap import header
+        from pcapkit.protocols.misc.pcap.header import protocol as header
 
         docstring = header.Header.read.__doc__ or ''
         self.assertIn('ProtocolError', docstring)
@@ -136,7 +136,7 @@ class QuickStartFunctionTests(unittest.TestCase):
     registry holds.
 
     A parse runs
-    :func:`~pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector`
+    :func:`~pcapkit.protocols.internet.ipv6_ext.schema.quick_start_data_selector`
     over the octets first, and that selector reads the registry. Under the stock
     registry, which assigns ``Quick_Start_Request`` (``0``) and
     ``Report_of_Approved_Rate`` (``8``) and nothing else, any other ``func``
@@ -179,12 +179,12 @@ class QuickStartFunctionTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.schema.internet import hopopt as schema_hopopt
-        from pcapkit.protocols.schema.internet import ipv4 as schema_ipv4
-        from pcapkit.protocols.schema.internet import ipv6_opts as schema_ipv6_opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt import schema as schema_hopopt
+        from pcapkit.protocols.internet.ipv4 import schema as schema_ipv4
+        from pcapkit.protocols.internet.ipv6_opts import schema as schema_ipv6_opts
 
         flags = {'func': func, 'rate': 1}
         nonce = {'nonce': 0x12345, 'reserved': 0}
@@ -253,9 +253,9 @@ class QuickStartFunctionTests(unittest.TestCase):
     def test_every_function_nibble_parses(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         expected = {0: 'QuickStartRequestOption', 8: 'QuickStartReportOption'}
         for func in range(16):
@@ -282,9 +282,9 @@ class QuickStartFunctionTests(unittest.TestCase):
         makes it look dead.
 
         """
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         for protocol in (HOPOPT, IPv6_Opts, IPv4):
             with self.subTest(protocol=protocol.__name__):
@@ -300,10 +300,10 @@ class RegisteredQuickStartFunctionTests(unittest.TestCase):
     """A parse reaches the guard once a caller registers an unassigned function.
 
     ``QuickStartOption`` is an
-    :class:`~pcapkit.protocols.schema.schema.EnumSchema`, so a caller may
+    :class:`~pcapkit.protocols.schema.EnumSchema`, so a caller may
     register a layout of their own against a function code the stock registry
     leaves empty.
-    :func:`~pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector`
+    :func:`~pcapkit.protocols.internet.ipv6_ext.schema.quick_start_data_selector`
     then hands the reader that schema rather than an ``UnassignedOption``, and
     ordinary octets off a file read reach the ``unknown QS function`` arm --
     the arm is therefore not construction-only.
@@ -324,7 +324,7 @@ class RegisteredQuickStartFunctionTests(unittest.TestCase):
         """Register a caller's own layout for ``code`` against ``base``."""
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import schema_final
+        from pcapkit.protocols.schema import schema_final
 
         self.assertIsNone(base.registry[code])
 
@@ -341,12 +341,12 @@ class RegisteredQuickStartFunctionTests(unittest.TestCase):
         """Ordinary octets reach the arm once the function has a layout."""
         from pcapkit.const.ipv4.qs_function import QSFunction as QSFunction4
         from pcapkit.const.ipv6.qs_function import QSFunction as QSFunction6
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as QSOption_hopopt
-        from pcapkit.protocols.schema.internet.ipv4 import QSOption as QSOption_ipv4
-        from pcapkit.protocols.schema.internet.ipv6_opts import \
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.schema import QuickStartOption as QSOption_hopopt
+        from pcapkit.protocols.internet.ipv4.schema import QSOption as QSOption_ipv4
+        from pcapkit.protocols.internet.ipv6_opts.schema import \
             QuickStartOption as QSOption_ipv6_opts
         from pcapkit.utilities.exceptions import ProtocolError
 
@@ -385,8 +385,8 @@ class CALIPSOLengthTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_short_option_raises_from_the_pad_length(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
         from pcapkit.utilities.exceptions import ProtocolError
 
         for length, cmpt_len in ((7, 0), (5, 0), (8, 1), (11, 1)):
@@ -402,7 +402,7 @@ class CALIPSOLengthTests(unittest.TestCase):
         """``make`` rejects the same option, before any reader runs.
 
         Construction packs the caller's own option schema, so
-        :func:`~pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len`
+        :func:`~pcapkit.protocols.internet.ipv6_ext.schema.calipso_pad_len`
         sizes ``pad`` there too and raises out of ``schema.pack()`` while the
         header is being made. ``_read_opt_calipso`` never sees the option, so
         a length guard of its own would be unreachable on this route as well
@@ -410,10 +410,10 @@ class CALIPSOLengthTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.schema.internet import hopopt as schema_hopopt
-        from pcapkit.protocols.schema.internet import ipv6_opts as schema_ipv6_opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt import schema as schema_hopopt
+        from pcapkit.protocols.internet.ipv6_opts import schema as schema_ipv6_opts
         from pcapkit.utilities.exceptions import ProtocolError
 
         for length, cmpt_len in ((7, 0), (5, 0), (8, 1), (11, 1)):
@@ -434,8 +434,8 @@ class CALIPSOLengthTests(unittest.TestCase):
                     self.assertIn(f'invalid CALIPSO option length: {length}', str(caught.exception))
 
     def test_the_reader_keeps_no_length_guard(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         for protocol in (HOPOPT, IPv6_Opts):
             with self.subTest(protocol=protocol.__name__):
@@ -444,7 +444,7 @@ class CALIPSOLengthTests(unittest.TestCase):
 
     def test_a_well_formed_option_parses(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         option = (bytes([7, 12]) + (0x12345678).to_bytes(4, 'big') + bytes([1, 5])
                   + b'\xab\xcd' + bytes([0xde, 0xad, 0xbe, 0xef]))

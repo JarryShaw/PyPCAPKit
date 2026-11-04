@@ -8,12 +8,12 @@ names the keyword at fault and the value passed -- not the *reader's*
 parsed. Each sits on the maker side, outside #2296's checklist:
 
 * :meth:`HOPOPT._make_opt_pad
-  <pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pad>` and
+  <pcapkit.protocols.internet.hopopt.protocol.HOPOPT._make_opt_pad>` and
   :meth:`IPv6_Opts._make_opt_pad
-  <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_pad>`, the twins of
-  the ``Pad1`` length warning on :class:`~pcapkit.protocols.internet.mh.MH` (#2296);
-* :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTPv2.make>` and
-  :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.PCAPNG.make>`, the
+  <pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._make_opt_pad>`, the twins of
+  the ``Pad1`` length warning on :class:`~pcapkit.protocols.internet.mh.protocol.MH` (#2296);
+* :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.protocol.HTTPv2.make>` and
+  :meth:`PCAPNG.make <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make>`, the
   dispatchers whose unsupported-``frame``/``block`` guard is the same shape as
   ``MH.make``'s.
 
@@ -72,8 +72,8 @@ class IPv6ExtensionPadOptionWarnings(MakerMessageTestCase):
 
     def protocols(self) -> 'list[tuple[Any, str]]':
         """Each padding-option maker, paired with the alias it names itself by."""
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         return [(HOPOPT, 'HOPOPT'), (IPv6_Opts, 'IPv6-Opts')]
 
@@ -134,7 +134,7 @@ class HTTPFrameMessage(MakerMessageTestCase):
 
     def test_unreadable_frame_names_the_argument(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         http = self.protocol(HTTPv2)
@@ -150,7 +150,7 @@ class HTTPFrameMessage(MakerMessageTestCase):
 
     def test_raw_frame_still_builds(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         http = self.protocol(HTTPv2)
         schema = http.make(type=Frame.DATA, frame=b'\x01\x02')
@@ -159,7 +159,7 @@ class HTTPFrameMessage(MakerMessageTestCase):
 
     def test_an_omitted_frame_is_not_rejected(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         # ``frame=None`` dispatches to the frame type's own constructor (#2274)
         # rather than reaching the guard, so the guard does not cover it.
@@ -185,7 +185,7 @@ class PCAPNGBlockMessage(MakerMessageTestCase):
 
     def test_unreadable_block_names_the_argument(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         pcapng = self.protocol(PCAPNG)
@@ -201,7 +201,7 @@ class PCAPNGBlockMessage(MakerMessageTestCase):
 
     def test_raw_block_still_builds(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         pcapng = self.protocol(PCAPNG)
         schema = pcapng.make(type=BlockType.Enhanced_Packet_Block, block=b'\x00\x01')
@@ -221,10 +221,10 @@ class ReadersKeepInvalidFormat(MakerMessageTestCase):
 
     def readers(self) -> 'list[tuple[Any, Any, str]]':
         """Each padding-option reader, its schema class and its alias."""
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.schema.internet.hopopt import PadOption as Schema_HOPOPTPad
-        from pcapkit.protocols.schema.internet.ipv6_opts import PadOption as Schema_IPv6OptsPad
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.schema import PadOption as Schema_HOPOPTPad
+        from pcapkit.protocols.internet.ipv6_opts.schema import PadOption as Schema_IPv6OptsPad
 
         return [(HOPOPT, Schema_HOPOPTPad, 'HOPOPT'),
                 (IPv6_Opts, Schema_IPv6OptsPad, 'IPv6-Opts')]

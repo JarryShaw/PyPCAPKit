@@ -59,7 +59,7 @@ class TestTCPMPTCPDSSLength(unittest.TestCase):
 
     def test_every_flag_combination_at_every_length(self) -> None:
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import BaseError
 
         for F, m, M, a, A in itertools.product((0, 1), repeat=5):
@@ -89,7 +89,7 @@ class TestTCPMPTCPDSSLength(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import \
             MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import BaseError
 
         shapes = (

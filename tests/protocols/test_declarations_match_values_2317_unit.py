@@ -9,7 +9,7 @@ that never occurs: ``cmpt_bitmap`` annotated :obj:`bytes` while
 ``Optional`` on an ``RR``/``SSR`` ``route`` that is always built,
 :attr:`~pcapkit.protocols.protocol.ProtocolBase.protochain` declaring a
 :class:`~pcapkit.corekit.protochain.ProtoChain` that
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` does not have, a ``pack_flags``
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` does not have, a ``pack_flags``
 constructor stub typing the EPB flags, ``ARP._make_addr_resolve`` leaving out
 the :obj:`bytearray` its body handles, an undeclared ``entry_raw``, two HIP
 parameters missing from both ``__all__`` lists, and a ``version`` that one
@@ -99,8 +99,8 @@ class CALIPSOBitmapTests(unittest.TestCase):
 
     def test_parsed_bitmap_is_a_tuple_of_ints(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         for protocol in (HOPOPT, IPv6_Opts):
             with self.subTest(protocol=protocol.__name__):
@@ -111,7 +111,8 @@ class CALIPSOBitmapTests(unittest.TestCase):
                     self.assertIsInstance(octet, int)
 
     def test_annotation_says_tuple(self) -> None:
-        from pcapkit.protocols.data.internet import hopopt, ipv6_opts
+        from pcapkit.protocols.internet.hopopt import data as hopopt
+        from pcapkit.protocols.internet.ipv6_opts import data as ipv6_opts
 
         for module in (hopopt, ipv6_opts):
             with self.subTest(module=module.__name__):
@@ -129,8 +130,8 @@ class SMFHashBasedDPDTests(unittest.TestCase):
     OPTION = bytes([8, 5]) + bytes([0x80, 0x11, 0x22, 0x33, 0x44])
 
     def test_declaration_names_the_schema_returned(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         for protocol in (HOPOPT, IPv6_Opts):
             with self.subTest(protocol=protocol.__name__):
@@ -148,7 +149,7 @@ class RecordRouteTests(unittest.TestCase):
 
     def test_parsed_route_is_a_tuple(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         # One header does not hold all three: ``IHL`` caps the options at 40
         # octets, and a route option with three slots is 15.
@@ -158,7 +159,7 @@ class RecordRouteTests(unittest.TestCase):
                 self.assertIsInstance(parsed[code].route, tuple)
 
     def test_the_three_annotations_agree(self) -> None:
-        from pcapkit.protocols.data.internet import ipv4
+        from pcapkit.protocols.internet.ipv4 import data as ipv4
 
         for name in ('RROption', 'SSROption', 'LSROption'):
             with self.subTest(name=name):
@@ -173,7 +174,7 @@ class NoPayloadProtochainTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_protochain_is_none_and_says_so(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         from pcapkit.protocols.protocol import ProtocolBase
 
         self.assertIsNone(NoPayload().protochain)
@@ -188,7 +189,7 @@ class PACKFlagsTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_stub_matches_the_field(self) -> None:
-        from pcapkit.protocols.schema.misc import pcapng
+        from pcapkit.protocols.misc.pcapng import schema as pcapng
 
         for name, flags in (('PACK_FlagsOption', 'PACKFlags'), ('EPB_FlagsOption', 'EPBFlags')):
             with self.subTest(name=name):
@@ -208,7 +209,7 @@ class ARPHardwareAddressTests(unittest.TestCase):
 
     def test_a_bytearray_resolves(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         arp = ARP(self.PACKET)
         self.assertEqual(arp._make_addr_resolve(bytearray(b'aa:bb:cc:dd:ee:ff'),
@@ -217,7 +218,7 @@ class ARPHardwareAddressTests(unittest.TestCase):
                          b'\x01\x02')
 
     def test_annotation_names_bytearray(self) -> None:
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         self.assertEqual(ARP._make_addr_resolve.__annotations__['addr'],
                          'str | bytes | bytearray')
@@ -236,14 +237,14 @@ class JournalEntryRawTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_entry_raw_is_declared(self) -> None:
-        from pcapkit.protocols.data.misc import pcapng
+        from pcapkit.protocols.misc.pcapng import data as pcapng
 
         self.assertEqual(declared(pcapng, 'SystemdJournalExportBlock', 'entry_raw'), 'bytes')
 
     def test_the_reader_still_adds_it(self) -> None:
         import warnings
 
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         entry = b'BIN\n' + struct.pack('<Q', 100) + b'abc' + bytes(1)
         octets = struct.pack('<II', 9, len(entry) + 12) + entry + struct.pack('<I', len(entry) + 12)
@@ -259,8 +260,8 @@ class HIPParameterNameTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_all_lists_every_parameter(self) -> None:
-        from pcapkit.protocols.data.internet import hip as data_hip
-        from pcapkit.protocols.schema.internet import hip as schema_hip
+        from pcapkit.protocols.internet.hip import data as data_hip
+        from pcapkit.protocols.internet.hip import schema as schema_hip
 
         for module in (schema_hip, data_hip):
             with self.subTest(module=module.__name__):
@@ -278,7 +279,7 @@ class HIPReadParameterSignatureTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_version_and_options_are_keyword_only(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         readers = [name for name in dir(HIP) if name.startswith('_read_param_')]
         self.assertIn('_read_param_relay_hmac', readers)

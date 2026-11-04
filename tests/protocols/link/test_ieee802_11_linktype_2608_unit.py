@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2608: link types 105 and 127 reach the 802.11 and radiotap dissectors.
 
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` bind
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` and
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` bind
 ``LinkType.IEEE802_11`` (105) to
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` and
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` and
 ``LinkType.IEEE802_11_RADIOTAP`` (127) to
-:class:`~pcapkit.protocols.link.radiotap.Radiotap`. A pcap and a pcapng capture
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`. A pcap and a pcapng capture
 of each, built here octet by octet, parse to ``802.11`` and
 ``Radiotap:802.11``, and every frame and layer rebuilds byte-exactly.
 
@@ -101,10 +101,10 @@ class TestIEEE802_11LinkTypes(unittest.TestCase):
     def test_registered_against_frame_and_pcapng(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (Frame, PCAPNG):
             for code, target in ((LinkType.IEEE802_11, IEEE802_11),

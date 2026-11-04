@@ -38,7 +38,7 @@ def _chunk(code: int, flags: int, value: bytes) -> bytes:
 
 def _packet(*chunks: bytes) -> bytes:
     """An SCTP packet from port 5000 to 5001 carrying ``chunks``, with its CRC32c."""
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
 
     raw = struct.pack('!HHI', 5000, 5001, 0x11223344) + bytes(4) + b''.join(chunks)
     return raw[:8] + SCTP.calculate_checksum(raw) + raw[12:]
@@ -98,7 +98,7 @@ class SCTPCutTests(unittest.TestCase):
 
     def assert_rebuilds(self, sctp: 'object', raw: bytes) -> None:
         """``sctp`` holds ``raw`` and rebuilds it three ways."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         assert isinstance(sctp, SCTP)
         self.assertEqual(sctp.data, raw)
@@ -107,8 +107,8 @@ class SCTPCutTests(unittest.TestCase):
         self.assertEqual(SCTP.from_data(sctp.info.to_dict()).data, raw)
 
     def test_cut_through_ipv4_at_every_offset(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (whole, _) in _shapes().items():
             packet = wire.ipv4(whole, proto=132)
@@ -122,8 +122,8 @@ class SCTPCutTests(unittest.TestCase):
                     self.assertEqual(IPv4.from_data(ipv4.info.to_dict()).data, raw)
 
     def test_cut_through_ipv6_at_every_offset(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (whole, _) in _shapes().items():
             packet = wire.ipv6(whole, nxt=132)
@@ -138,7 +138,7 @@ class SCTPCutTests(unittest.TestCase):
 
     def test_cut_with_the_whole_length_declared(self) -> None:
         # the envelope's case, with no envelope: the length given exceeds the data
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (whole, _) in _shapes().items():
             for keep in range(12, len(whole) + 1):
@@ -148,7 +148,7 @@ class SCTPCutTests(unittest.TestCase):
                     self.assert_rebuilds(SCTP(io.BytesIO(raw), len(whole)), raw)
 
     def test_cut_with_its_own_length_is_the_control(self) -> None:
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (whole, _) in _shapes().items():
             for keep in range(12, len(whole) + 1):
@@ -159,7 +159,7 @@ class SCTPCutTests(unittest.TestCase):
     def test_a_chunk_cut_short_is_the_trailer(self) -> None:
         # ten octets into the DATA chunk, after the whole INIT
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         whole, _ = _shapes()['init-data-heartbeat']
         init = 4 + len(INIT_HEAD) + 8 + 8 + 16 + 8
@@ -178,7 +178,7 @@ class SCTPCutTests(unittest.TestCase):
     def test_a_cut_inside_the_last_padding_is_a_short_read(self) -> None:
         # one of the DATA chunk's three padding octets, ahead of the HEARTBEAT
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         whole, _ = _shapes()['init-data-heartbeat']
         init = 4 + len(INIT_HEAD) + 8 + 8 + 16 + 8
@@ -194,7 +194,7 @@ class SCTPCutTests(unittest.TestCase):
         self.assert_rebuilds(sctp, whole[:12 + init + data + 1])
 
     def test_schema_reads_no_further_than_the_octets_present(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         for name, (whole, _) in _shapes().items():
             for keep in range(12, len(whole) + 1):
@@ -213,7 +213,7 @@ class SCTPCutTests(unittest.TestCase):
                     self.assertEqual(schema.pack(), raw)
 
     def test_schema_given_no_length_past_the_data_is_the_control(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         for name, (whole, _) in _shapes().items():
             for given in (len(whole), None):
@@ -225,8 +225,8 @@ class SCTPCutTests(unittest.TestCase):
                     self.assertEqual(schema.pack(), whole)
 
     def test_whole_packets_are_the_control(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, (whole, types) in _shapes().items():
             for via, sctp in (('IPv4', IPv4(wire.ipv4(whole, proto=132)).payload),

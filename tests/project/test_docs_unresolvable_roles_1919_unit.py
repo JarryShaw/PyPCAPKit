@@ -181,7 +181,7 @@ class DocumentedEntryTests(unittest.TestCase):
         """The class-level ``registry`` that serves ``Option.registry[type]``."""
         page = (ROOT / 'docs' / 'source' / 'pcapkit' / 'protocols' / 'index.rst').read_text(
             encoding='utf-8')
-        start = page.index('.. autoclass:: pcapkit.protocols.schema.schema.EnumMeta\n')
+        start = page.index('.. autoclass:: pcapkit.protocols.schema.EnumMeta\n')
         end = page.index('\n.. ', start + 1)
         self.assertIn('.. autoproperty:: registry', page[start:end])
 

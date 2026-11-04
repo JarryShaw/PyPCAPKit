@@ -4,10 +4,10 @@
 GitHub issue #1195: an ``SMF_DPD`` option of ``Opt Data Len`` zero, placed in
 the last two octets of the header (``3b00010200000800``), raised a bare
 :exc:`TypeError` from
-:func:`~pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_id_len`. The option
+:func:`~pcapkit.protocols.internet.hopopt.schema.smf_i_dpd_id_len`. The option
 starts with a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` three
 octets wide, which came back one octet short at the end of the stream, yet
-:meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` rewound
+:meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` rewound
 the full three. The option was therefore re-read from the preceding ``PadN``
 padding octet, as a ``Pad1`` option, so ``len`` was skipped and left as
 :data:`~pcapkit.corekit.sentinels.NO_VALUE`.
@@ -33,8 +33,8 @@ PREFIX = bytes.fromhex('3b00' '01020000')
 
 #: The protocol classes sharing the option schema, by module and class name.
 PROTOCOLS = (
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
 )
 
 

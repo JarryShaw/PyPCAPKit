@@ -22,7 +22,7 @@ class FTPUnitTests(unittest.TestCase):
 
     def test_ftp_length_is_unsupported(self) -> None:
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         ftp = object.__new__(FTP)
@@ -36,7 +36,7 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_read_parses_request_response_and_rejects_invalid(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode
-        from pcapkit.protocols.application.ftp import FTP, Type
+        from pcapkit.protocols.application.ftp.protocol import FTP, Type
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -68,14 +68,14 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_type_values_are_pinned(self) -> None:
         """GitHub issue #884: pin every member's exact value and the member set.
 
-        :class:`~pcapkit.protocols.application.ftp.Type` takes its values from
+        :class:`~pcapkit.protocols.application.ftp.protocol.Type` takes its values from
         ``auto()``, which on a :class:`~pcapkit.utilities.compat.StrEnum`
         returns ``name.lower()``, so a change to ``_generate_next_value_``
         could silently alter these wire-visible strings without this test
         noticing unless every member and every value is asserted explicitly.
 
         """
-        from pcapkit.protocols.application.ftp import Type
+        from pcapkit.protocols.application.ftp.protocol import Type
 
         self.assertEqual([member.name for member in Type], ['REQUEST', 'RESPONSE'])
 
@@ -148,7 +148,7 @@ class FTPUnitTests(unittest.TestCase):
         crash the parse -- #582.
         """
         from pcapkit.const.ftp.command import Command
-        from pcapkit.protocols.application.ftp import FTP, Type
+        from pcapkit.protocols.application.ftp.protocol import FTP, Type
 
         ftp = object.__new__(FTP)
         ftp.__cached__ = {}
@@ -168,7 +168,7 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_make_builds_request_and_response_packets(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         ftp = object.__new__(FTP)
         request = ftp.make(cmmd=Command.USER, args='anonymous')
@@ -186,7 +186,7 @@ class FTPUnitTests(unittest.TestCase):
         self.assertEqual(response_bytes.data, b'230 Logged in\r\n')
 
     def test_ftp_make_rejects_ambiguous_packet_type(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -198,7 +198,7 @@ class FTPUnitTests(unittest.TestCase):
 
     def test_ftp_make_rejects_a_command_that_is_not_str_bytes_or_bytearray(self) -> None:
         """A command of any other type raises ``ProtocolError`` (#2290)."""
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -217,7 +217,7 @@ class FTPUnitTests(unittest.TestCase):
 
     def test_ftp_make_rejects_arguments_that_are_not_str_bytes_or_bytearray(self) -> None:
         """Arguments of any other type raise ``ProtocolError`` (#2410)."""
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -239,7 +239,7 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_make_rejects_a_status_code_that_is_not_three_digits(self) -> None:
         """A code of any other type, or out of ``0``--``999``, raises (#2416)."""
         from pcapkit.const.ftp.return_code import ReturnCode
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -267,7 +267,7 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_make_data_preserves_request_and_response_fields(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         request = DummyData(cmmd=Command.USER, code=None, args='anonymous', more=False, charset=None,
                             raw_cmmd=None, lines=())
@@ -286,7 +286,7 @@ class FTPUnitTests(unittest.TestCase):
         )
 
     def test_ftp_data_channel_name_is_stable(self) -> None:
-        from pcapkit.protocols.application.ftp_data import FTP_DATA
+        from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
 
         ftp_data = object.__new__(FTP_DATA)
 

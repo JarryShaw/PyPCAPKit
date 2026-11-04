@@ -30,8 +30,8 @@ HEADERS = {
 
 
 def _classes() -> 'dict[str, type]':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return {'HOPOPT': HOPOPT, 'IPv6_Opts': IPv6_Opts}
 
 

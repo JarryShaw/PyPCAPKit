@@ -2,9 +2,10 @@ Radiotap - IEEE 802.11 Radiotap Header
 ========================================
 
 .. module:: pcapkit.protocols.link.radiotap
+.. module:: pcapkit.protocols.link.radiotap.protocol
 
-:mod:`pcapkit.protocols.link.radiotap` contains
-:class:`~pcapkit.protocols.link.radiotap.Radiotap`
+:mod:`pcapkit.protocols.link.radiotap.protocol` contains
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap`
 only, which implements the extractor for the radiotap header [*]_ capture
 tools prepend to an 802.11 frame, as seen on a
 ``LINKTYPE_IEEE802_11_RADIOTAP`` capture, or on a
@@ -37,18 +38,18 @@ This class:
 
 * **Decodes** the fixed 8-octet start -- ``it_version``, ``it_pad``,
   ``it_len`` -- and walks the present-flags chain, recording every word as
-  :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.present`.
+  :attr:`~pcapkit.protocols.link.radiotap.data.Radiotap.present`.
 * **Keeps** the optional-field region those bits select whole, as
-  :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.fields`, which is
+  :attr:`~pcapkit.protocols.link.radiotap.data.Radiotap.fields`, which is
   what a rebuild from the data model writes, and **decodes** it as
-  :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.decoded`, by the
+  :attr:`~pcapkit.protocols.link.radiotap.data.Radiotap.decoded`, by the
   rules below.
 * **Hands** everything from ``it_len`` on, the 802.11 MAC frame, to
-  :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`
-  (:class:`~pcapkit.protocols.misc.no_payload.NoPayload` when nothing follows).
+  :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`
+  (:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` when nothing follows).
   The header names no next protocol, since an 802.11 frame always follows it,
   so the frame is looked up in
-  :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.Radiotap.__proto__>`
+  :attr:`Radiotap.__proto__ <pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__>`
   under :attr:`LinkType.IEEE802_11 <pcapkit.const.reg.linktype.LinkType.IEEE802_11>`;
   :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap` replaces
   the entry.
@@ -59,9 +60,9 @@ Field Decoding
 The bits are walked in order, word by word, and the fields they select follow
 one another in the same order, each aligned to its own boundary counted from
 the start of the header. A field type is read and made by the methods
-:attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.Radiotap.__field__>`
+:attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__>`
 names for it, through the schema the
-:class:`~pcapkit.protocols.schema.link.radiotap.RadiotapField` registry holds
+:class:`~pcapkit.protocols.link.radiotap.schema.RadiotapField` registry holds
 for it: the schema's fields are the subfields of the type's page on
 radiotap.org, their total is its size, and its ``__align__`` its alignment,
 which match the tables of the Linux kernel, Wireshark and radiotap.org's own
@@ -93,24 +94,24 @@ decoded the same way.
   data. radiotap.org lets a producer leave out the octets that end an item, which
   are then zeros, so an item short of its schema, or of the vendor header, is
   decoded as though they were there. Its decoded data records the cut as
-  ``__short_read__``, as :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
-  does, so :meth:`Radiotap.make <pcapkit.protocols.link.radiotap.Radiotap.make>`
+  ``__short_read__``, as :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
+  does, so :meth:`Radiotap.make <pcapkit.protocols.link.radiotap.protocol.Radiotap.make>`
   writes the octets that were captured.
 * **What is not decoded.** A radiotap-namespace bit no field is defined for --
   18, FreeBSD's XChannel, which radiotap.org lists as unofficial, and every one
   numbered 32 or more, the TLV-only types included -- or a field that runs
   past the region, ends the walk, since nothing after it can be located: an
-  :class:`~pcapkit.protocols.data.link.radiotap.Unknown` entry keeps every
+  :class:`~pcapkit.protocols.link.radiotap.data.Unknown` entry keeps every
   octet from there on, and its ``reason`` says which of the two it was.
 
 Each bit with data in the radiotap namespace, and each namespace field, has
-one entry in :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.decoded`,
+one entry in :attr:`~pcapkit.protocols.link.radiotap.data.Radiotap.decoded`,
 keyed by its :class:`~pcapkit.const.radiotap.field_type.FieldType`; the
 subfields keep radiotap.org's names.
-:meth:`~pcapkit.protocols.link.radiotap.Radiotap.make` takes the same entries
+:meth:`~pcapkit.protocols.link.radiotap.protocol.Radiotap.make` takes the same entries
 as ``fields`` and encodes them with zero padding.
 
-.. autoclass:: pcapkit.protocols.link.radiotap.Radiotap
+.. autoclass:: pcapkit.protocols.link.radiotap.protocol.Radiotap
    :no-members:
    :show-inheritance:
 
@@ -208,332 +209,332 @@ as ``fields`` and encodes them with zero padding.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.radiotap
+.. module:: pcapkit.protocols.link.radiotap.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Radiotap
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Radiotap
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.RadiotapField
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.RadiotapField
    :members:
    :show-inheritance:
 
    .. autoattribute:: __align__
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Unknown
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.TSFT
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.TSFT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Flags
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Rate
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Rate
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Channel
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Channel
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.FHSS
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.FHSS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.AntennaSignal
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.AntennaSignal
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.AntennaNoise
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.AntennaNoise
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.LockQuality
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.LockQuality
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.TXAttenuation
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.TXAttenuation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.DBTXAttenuation
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.DBTXAttenuation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.DBmTXPower
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.DBmTXPower
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Antenna
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Antenna
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.DBAntennaSignal
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.DBAntennaSignal
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.DBAntennaNoise
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.DBAntennaNoise
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.RXFlags
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.RXFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.TXFlags
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.TXFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.RTSRetries
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.RTSRetries
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.DataRetries
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.DataRetries
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.MCS
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.MCS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.AMPDUStatus
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.AMPDUStatus
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.VHT
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.VHT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.Timestamp
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.Timestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.HE
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.HE
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.HEMU
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.HEMU
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.HEMUOtherUser
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.HEMUOtherUser
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.ZeroLengthPSDU
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.ZeroLengthPSDU
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.LSIG
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.LSIG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.VendorNamespace
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.VendorNamespace
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.S1G
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.S1G
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.USIG
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.USIG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.EHT
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.EHT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.TLV
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.TLV
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.radiotap.VendorTLV
+.. autoclass:: pcapkit.protocols.link.radiotap.schema.VendorTLV
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.radiotap
+.. module:: pcapkit.protocols.link.radiotap.data
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Radiotap
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Radiotap
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.RadiotapField
+.. autoclass:: pcapkit.protocols.link.radiotap.data.RadiotapField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Unknown
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.TSFT
+.. autoclass:: pcapkit.protocols.link.radiotap.data.TSFT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Flags
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Rate
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Rate
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Channel
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Channel
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.FHSS
+.. autoclass:: pcapkit.protocols.link.radiotap.data.FHSS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.AntennaSignal
+.. autoclass:: pcapkit.protocols.link.radiotap.data.AntennaSignal
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.AntennaNoise
+.. autoclass:: pcapkit.protocols.link.radiotap.data.AntennaNoise
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.LockQuality
+.. autoclass:: pcapkit.protocols.link.radiotap.data.LockQuality
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.TXAttenuation
+.. autoclass:: pcapkit.protocols.link.radiotap.data.TXAttenuation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.DBTXAttenuation
+.. autoclass:: pcapkit.protocols.link.radiotap.data.DBTXAttenuation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.DBmTXPower
+.. autoclass:: pcapkit.protocols.link.radiotap.data.DBmTXPower
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Antenna
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Antenna
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.DBAntennaSignal
+.. autoclass:: pcapkit.protocols.link.radiotap.data.DBAntennaSignal
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.DBAntennaNoise
+.. autoclass:: pcapkit.protocols.link.radiotap.data.DBAntennaNoise
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.RXFlags
+.. autoclass:: pcapkit.protocols.link.radiotap.data.RXFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.TXFlags
+.. autoclass:: pcapkit.protocols.link.radiotap.data.TXFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.RTSRetries
+.. autoclass:: pcapkit.protocols.link.radiotap.data.RTSRetries
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.DataRetries
+.. autoclass:: pcapkit.protocols.link.radiotap.data.DataRetries
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.MCS
+.. autoclass:: pcapkit.protocols.link.radiotap.data.MCS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.MCSFlags
+.. autoclass:: pcapkit.protocols.link.radiotap.data.MCSFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.AMPDUStatus
+.. autoclass:: pcapkit.protocols.link.radiotap.data.AMPDUStatus
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.VHT
+.. autoclass:: pcapkit.protocols.link.radiotap.data.VHT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.Timestamp
+.. autoclass:: pcapkit.protocols.link.radiotap.data.Timestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HE
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HE
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData1
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEData1
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEData2
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEData2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMU
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEMU
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags1
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEMUFlags1
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUFlags2
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEMUFlags2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.HEMUOtherUser
+.. autoclass:: pcapkit.protocols.link.radiotap.data.HEMUOtherUser
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.ZeroLengthPSDU
+.. autoclass:: pcapkit.protocols.link.radiotap.data.ZeroLengthPSDU
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.LSIG
+.. autoclass:: pcapkit.protocols.link.radiotap.data.LSIG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.TLVFields
+.. autoclass:: pcapkit.protocols.link.radiotap.data.TLVFields
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.RadiotapNamespace
+.. autoclass:: pcapkit.protocols.link.radiotap.data.RadiotapNamespace
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.VendorNamespace
+.. autoclass:: pcapkit.protocols.link.radiotap.data.VendorNamespace
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.S1G
+.. autoclass:: pcapkit.protocols.link.radiotap.data.S1G
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.USIG
+.. autoclass:: pcapkit.protocols.link.radiotap.data.USIG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.USIGCommon
+.. autoclass:: pcapkit.protocols.link.radiotap.data.USIGCommon
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.EHT
+.. autoclass:: pcapkit.protocols.link.radiotap.data.EHT
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.TLV
+.. autoclass:: pcapkit.protocols.link.radiotap.data.TLV
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.radiotap.VendorTLV
+.. autoclass:: pcapkit.protocols.link.radiotap.data.VendorTLV
    :members:
    :show-inheritance:
 

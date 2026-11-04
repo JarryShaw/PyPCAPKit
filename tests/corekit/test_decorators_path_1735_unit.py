@@ -35,8 +35,8 @@ IMPORTERS = (
     ('pcapkit.protocols.protocol', 'seekset'),
     ('pcapkit.protocols.protocol', 'beholder'),
     ('pcapkit.protocols.internet.internet', 'beholder'),
-    ('pcapkit.protocols.internet.ipv6', 'beholder'),
-    ('pcapkit.protocols.schema.schema', 'prepare'),
+    ('pcapkit.protocols.internet.ipv6.protocol', 'beholder'),
+    ('pcapkit.protocols.schema', 'prepare'),
 )
 
 

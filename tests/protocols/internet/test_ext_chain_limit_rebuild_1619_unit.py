@@ -131,7 +131,7 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         # Without the #1619 fix, a rebuild warns from IPv6 and the Ethernet
         # around it both, and over IPv4 from each header rebuilt whose own
         # count gets to the chain limit before the frame limit: 33 times.
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier in ETHERTYPE:
             for name, code in HEADERS.items():
@@ -143,9 +143,9 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         # A protocol constructed from its own octets is in no chain, and counts
         # the next header as the first; so is one rebuilt on its own, rather
         # than one past the layer it was the payload of.
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for klass, carrier in ((IPv4, 'ipv4'), (IPv6, 'ipv6')):
             for count in COUNTS:
@@ -163,9 +163,9 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         # chain, 33 times in all.
         # Ethernet constructed on its own is not counted, so it takes 31
         # tunnels, and 30 in a frame.
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(GLOBAL).info
         for carrier in ETHERTYPE:
@@ -185,7 +185,7 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         # Guard: 40 tunnels put the 65th layer at the chain's 24th header, short
         # of the chain limit; the rebuild warns once with or without the #1619
         # fix.
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier in ETHERTYPE:
             with self.subTest(carrier=carrier):
@@ -198,7 +198,7 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         # frames deeper than the parse, at 1000 headers. A rebuild may go a
         # frame or two deeper, from ``from_data`` itself, but not a header's
         # worth.
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier in ETHERTYPE:
             for count in (33, 1000):

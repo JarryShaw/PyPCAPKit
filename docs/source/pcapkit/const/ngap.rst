@@ -1,11 +1,11 @@
-========================================================================
-:class:`~pcapkit.protocols.application.ngap.NGAP` Constant Enumerations
-========================================================================
+=================================================================================
+:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` Constant Enumerations
+=================================================================================
 
 .. module:: pcapkit.const.ngap
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ngap.NGAP` implementations. Available
+:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` implementations. Available
 enumerations include:
 
 .. list-table::

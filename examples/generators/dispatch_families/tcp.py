@@ -19,7 +19,7 @@ generator = globals()['generator']  # type: Any
 #: A minimal, genuine TLS record: ``application_data`` (23), legacy version
 #: 3.3, and a zero-length fragment -- content type and legacy version both in
 #: range, and the (zero) declared length fits the (zero) remaining buffer, so
-#: :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.SSL._validate_tls_record>`
+#: :meth:`SSL._validate_tls_record <pcapkit.protocols.application.ssl.protocol.SSL._validate_tls_record>`
 #: accepts it rather than degrading it to :class:`Raw`.
 _TLS_RECORD = b'\x17\x03\x03\x00\x00'
 
@@ -34,7 +34,7 @@ _PORT_PAYLOAD = {
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
     return TCP.__proto__
 
 
@@ -54,11 +54,11 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
-    'tcp/20': ('pcapkit.protocols.application.ftp_data', 'FTP_DATA'),
-    'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
+    'tcp/20': ('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
+    'tcp/21': ('pcapkit.protocols.application.ftp.protocol', 'FTP'),
     # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``;
     # it dispatches to HTTPv1 or HTTPv2 (#2524).
-    'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
-    'tcp/443': ('pcapkit.protocols.application.tls', 'TLS'),
-    'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
+    'tcp/80': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
+    'tcp/443': ('pcapkit.protocols.application.tls.protocol', 'TLS'),
+    'tcp/8080': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
 }

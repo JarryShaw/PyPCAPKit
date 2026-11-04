@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
     from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
     P = ParamSpec('P')
     R_seekset = TypeVar('R_seekset')
@@ -107,8 +107,8 @@ def beholder(
 
     This decorator calls the decorated function. Should any exception be
     raised, it re-parses the current layer's payload as
-    :class:`~pcapkit.protocols.misc.raw.Raw` -- or as
-    :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, if the error is an
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- or as
+    :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, if the error is an
     end-of-file :exc:`~pcapkit.utilities.exceptions.StructError` -- whose
     ``error`` is the exception's message.
 
@@ -196,9 +196,9 @@ def beholder(
                 beholding.reset(token)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.no_payload import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # NOTE: Keyed on the class, not on quietness: a quiet end-of-file StructError is still
@@ -263,25 +263,25 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
 
     Important:
         This decorator function is designed for decorating the
-        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+        :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
         *class method*.
 
     This decorator will revise the parameter list provided to the original
-    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` method
+    :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` method
     and extract necessary information based on the given parameters, then provide
     the revised version of parameter list to the original method.
 
     Note:
         The decorated function should have the following signature::
 
-            func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',
+            func(cls: 'typing.Type[pcapkit.protocols.schema.Schema]',
                  data: 'bytes | typing.IO[bytes]',
                  length: 'Optional[int]',
-                 packet: 'Optional[dict[str, Any]]') -> 'pcapkit.protocols.schema.schema.Schema'
+                 packet: 'Optional[dict[str, Any]]') -> 'pcapkit.protocols.schema.Schema'
 
         No further positional or keyword arguments are read from -- or
         forwarded to -- the decorated function. :func:`prepare` is applied only to
-        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`,
+        :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`,
         whose real signature has exactly these parameters, and nothing
         calls it with more. Rather than discard extras silently (:issue:`454`),
         the wrapper raises :exc:`TypeError` for an extra positional argument or
@@ -289,7 +289,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         arguments would.
 
     See Also:
-        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`
+        :meth:`pcapkit.protocols.schema.Schema.unpack`
 
     :param func: decorated function
     :meta decorator:
@@ -371,7 +371,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         # the schema's own fields and therefore holding none of the enclosing
         # layer's, so it overwrites exactly the values ``post_process`` derived
         # from that context. It would discard, for one, the IPv6 source address
-        # that ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``
+        # that ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``
         # has just resolved: ``OptionField.unpack`` measures each parsed option
         # with ``len(data)``, which triggers the re-pack one option later.
         #
@@ -382,7 +382,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         # Guarded rather than assigned outright because ``post_process`` may hand
         # back something other than a schema: an implementation is free to return
         # a nested one instead of ``self``, as
-        # ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` does, and the
+        # ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, and the
         # decorator is also applied to stand-ins in the test suite that return
         # the packet mapping. Only a real schema carries the flag.
         if hasattr(ret, '__updated__'):

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2502: the IEEE 802.11 radiotap header.
 
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` dissects the
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` dissects the
 ``arphrd_type`` ``ARPHRD_IEEE80211_RADIOTAP`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.Raw` (see
-:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 fixed 8-octet start, the present-flags chain (plain and extended), the
 field-data region being skipped rather than decoded, the 802.11 MAC frame
-being handed to :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`
+being handed to :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`
 (:issue:`2575`), malformed/truncated headers, and byte-exact round trips.
 The Radiotap-dispatch side of ``LinuxSLL1``/``LinuxSLL2`` is covered in their
 own test modules.
@@ -52,8 +52,8 @@ class TestRadiotap(unittest.TestCase):
         """The shortest valid radiotap header: 8 octets, no fields, no
         extended present-flags word.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         raw = _radiotap(8, [0])
         parsed = Radiotap(raw, len(raw))
@@ -72,10 +72,10 @@ class TestRadiotap(unittest.TestCase):
         """A non-empty bitmask with a field-data region: the region is
         skipped over whole, per the module docstring's *Scope* section, and
         the 802.11 MAC frame behind it is handed to
-        :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` (:issue:`2575`).
+        :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` (:issue:`2575`).
         """
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         # bit 0 (TSFT, 8 octets) + bit 1 (Flags, 1 octet) + bit 2 (Rate, 1
         # octet) -- the exact field widths are not decoded, so any 10-octet
@@ -95,10 +95,10 @@ class TestRadiotap(unittest.TestCase):
     def test_mac_frame_dispatches_to_ieee802_11(self) -> None:
         """GitHub issue #2575: the frame from ``it_len`` on is an 802.11 MAC
         frame, whose header is decoded and whose body (here the FCS alone)
-        is kept as :class:`~pcapkit.protocols.misc.raw.Raw`.
+        is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
         from pcapkit.const.ieee802_11.control_subtype import ControlSubtype
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         raw = _radiotap(8, [0]) + ACK
         parsed = Radiotap(raw, len(raw))
@@ -113,15 +113,15 @@ class TestRadiotap(unittest.TestCase):
 
     def test_mac_frame_of_another_protocol_version_stays_raw(self) -> None:
         """A frame whose protocol version is not 0 is refused by
-        :class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` and kept as
-        :class:`~pcapkit.protocols.misc.raw.Raw`, error recorded. The
-        :class:`~pcapkit.protocols.misc.raw.Raw` holds the frame alone, not
+        :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` and kept as
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, error recorded. The
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` holds the frame alone, not
         the present-flags chain and field-data region before it, and is
         labelled with the link type it was looked up under, as Ethernet's is
         with its EtherType.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         mac = b'\xd5' + ACK[1:]
         word0 = (1 << 31) | 0b111
@@ -137,10 +137,10 @@ class TestRadiotap(unittest.TestCase):
 
     def test_termination_threshold_keeps_the_frame_raw(self) -> None:
         """Extraction that stops at this layer leaves the 802.11 frame as
-        :class:`~pcapkit.protocols.misc.raw.Raw`, as every other layer's
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as every other layer's
         dispatch does.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         raw = _radiotap(8, [0]) + ACK
         for kwargs in ({'protocol': 'Radiotap'}, {'layer': 'Link'}):
@@ -154,10 +154,10 @@ class TestRadiotap(unittest.TestCase):
     def test_extended_presence_chaining(self) -> None:
         """Bit 31 of a present-flags word chains in another word; the chain
         is walked fully, every word recorded in
-        :attr:`~pcapkit.protocols.data.link.radiotap.Radiotap.present`.
+        :attr:`~pcapkit.protocols.link.radiotap.data.Radiotap.present`.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         word0 = (1 << 31) | 0b1      # bit 31 set: a second word follows
         word1 = (1 << 31) | 0b10     # bit 31 set: a third word follows
@@ -183,8 +183,8 @@ class TestRadiotap(unittest.TestCase):
         empty rather than negative, and the frame behind the (malformed)
         header is not swallowed by it.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         word0 = (1 << 31) | 0b1
         word1 = 0b10
@@ -206,8 +206,8 @@ class TestRadiotap(unittest.TestCase):
         genuinely short capture, covered below). Nothing is decoded past
         what is there, and the payload is empty rather than negative-length.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         raw = _radiotap(200, [0]) + b'\x01\x02\x03'
         parsed = Radiotap(raw, len(raw))
@@ -225,7 +225,7 @@ class TestRadiotap(unittest.TestCase):
         ``tests/protocols/test_short_read_roundtrip_unit.py`` for the sweep
         that cuts this (and every other) family at every offset.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         word0 = (1 << 31) | 0b1
         word1 = 0b10
@@ -241,7 +241,7 @@ class TestRadiotap(unittest.TestCase):
                 self.assertEqual(Radiotap.from_data(parsed.info).data, cut)
 
     def test_make_then_parse_minimal(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         made = Radiotap().data
         self.assertEqual(made, _radiotap(8, [0]))
@@ -251,7 +251,7 @@ class TestRadiotap(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_then_parse_with_fields_and_payload(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         fields = bytes.fromhex('0102030405060708090a')
         made = Radiotap(present=(0b111,), fields=fields, payload=ACK).data
@@ -264,7 +264,7 @@ class TestRadiotap(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_then_parse_extended_presence(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         word0 = (1 << 31) | 0b1
         word1 = 0b10
@@ -276,25 +276,25 @@ class TestRadiotap(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_computes_it_len_from_present_and_fields(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         made = Radiotap(present=(0, 0), fields=bytes(5), payload=bytes(3))
         self.assertEqual(made.info.it_len, 8 + 4 + 5)
 
     def test_make_explicit_it_len_is_written_as_given(self) -> None:
         """An explicit ``it_len`` is written as given, not recomputed -- the
-        same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.UDP.make>`
+        same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.protocol.UDP.make>`
         keeps an explicit ``total_length`` (:issue:`1155`), and
-        :meth:`Netlink.make <pcapkit.protocols.link.netlink.Netlink.make>`
+        :meth:`Netlink.make <pcapkit.protocols.link.netlink.protocol.Netlink.make>`
         keeps an explicit ``nlmsg_len``.
         """
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         made = Radiotap(it_len=999)
         self.assertEqual(made.info.it_len, 999)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in (
@@ -312,7 +312,7 @@ class TestRadiotap(unittest.TestCase):
         """Put back every registry ``register_radiotap`` writes after the test."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.protocols import __proto__ as names
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         tables = (Radiotap.__proto__, names, reg_protocol._CODE_LEASES, reg_protocol._NAME_LEASES)
         copies = [dict(table) for table in tables]
@@ -328,13 +328,13 @@ class TestRadiotap(unittest.TestCase):
         """Keyed by link type, holding the 802.11 dissector alone (#2575)."""
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertIn('__proto__', vars(Radiotap))
         self.assertEqual(dict(Radiotap.__proto__),
-                         {LinkType.IEEE802_11: ModuleDescriptor('pcapkit.protocols.link.ieee802_11',
+                         {LinkType.IEEE802_11: ModuleDescriptor('pcapkit.protocols.link.ieee802_11.protocol',
                                                                 'IEEE802_11')})
         self.assertEqual(Radiotap.__proto_key__, (LinkType, False))
         self.assertIs(Radiotap._lookup_next_layer(Radiotap.__proto__, LinkType.IEEE802_11),
@@ -345,8 +345,8 @@ class TestRadiotap(unittest.TestCase):
         """A class registered under ``LinkType.IEEE802_11`` takes the frame."""
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.registry import register_radiotap
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.warnings import RegistryWarning
 
         self._snapshot()
@@ -362,15 +362,15 @@ class TestRadiotap(unittest.TestCase):
         self.assertEqual(parsed.payload.data, ACK)
 
         with self.assertWarnsRegex(RegistryWarning, r'^link type 105 already registered, overwriting '):
-            register_radiotap(LinkType.IEEE802_11, 'pcapkit.protocols.link.ieee802_11', 'IEEE802_11')
+            register_radiotap(LinkType.IEEE802_11, 'pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11')
         self.assertEqual(Radiotap(raw, len(raw)).protochain.chain, 'Radiotap:802.11:Raw')
 
     def test_register_radiotap_rejects_a_code_of_the_wrong_kind(self) -> None:
         """It refuses before writing anything, naming the registry that refused."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.foundation.registry import register_radiotap
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         for code, message in ((105, r'^Radiotap: code must be a member of LinkType, not 105$'),
@@ -389,8 +389,8 @@ class TestRadiotap(unittest.TestCase):
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.radiotap import Radiotap
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
         self.assertEqual(Radiotap.id(), ('Radiotap',))
         self.assertIs(Radiotap.__index__(), LinkType.IEEE802_11_RADIOTAP)

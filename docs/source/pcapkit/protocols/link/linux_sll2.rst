@@ -2,9 +2,10 @@ Linux "Cooked" Capture Encapsulation v2
 =========================================
 
 .. module:: pcapkit.protocols.link.linux_sll2
+.. module:: pcapkit.protocols.link.linux_sll2.protocol
 
-:mod:`pcapkit.protocols.link.linux_sll2` contains
-:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`
+:mod:`pcapkit.protocols.link.linux_sll2.protocol` contains
+:class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2`
 only, which implements the extractor for the Linux "cooked" capture
 encapsulation v2 [*]_ of ``LINKTYPE_LINUX_SLL2``, whose structure is described
 as below:
@@ -31,14 +32,14 @@ as below:
 
 Unlike v1, ``protocol_type`` comes first, ``interface_index`` is new, and
 ``packet_type`` and ``link_addr_length`` are 1 octet rather than 2. See
-:class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1` for v1; next-layer
-dispatch is shared, see :mod:`~pcapkit.protocols.link.linux_sll`. Its
-:meth:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2.id` is
+:class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1` for v1; next-layer
+dispatch is shared, see :mod:`~pcapkit.protocols.link.linux_sll.protocol`. Its
+:meth:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2.id` is
 ``('LinuxSLL2',)``, and its
-:attr:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2.alias` is ``'LINUX_SLL2'``;
+:attr:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2.alias` is ``'LINUX_SLL2'``;
 see :ref:`linux-sll-labels`.
 
-.. autoclass:: pcapkit.protocols.link.linux_sll2.LinuxSLL2
+.. autoclass:: pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2
    :no-members:
    :show-inheritance:
 
@@ -59,18 +60,18 @@ see :ref:`linux-sll-labels`.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.linux_sll2
+.. module:: pcapkit.protocols.link.linux_sll2.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.linux_sll2.LinuxSLL2
+.. autoclass:: pcapkit.protocols.link.linux_sll2.schema.LinuxSLL2
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.linux_sll2
+.. module:: pcapkit.protocols.link.linux_sll2.data
 
-.. autoclass:: pcapkit.protocols.data.link.linux_sll2.LinuxSLL2
+.. autoclass:: pcapkit.protocols.link.linux_sll2.data.LinuxSLL2
    :members:
    :show-inheritance:
 

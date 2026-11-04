@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """OSPFv2 verifies and computes its checksum.
 
-GitHub issue #2475: :meth:`OSPF.read <pcapkit.protocols.application.ospf.OSPF.read>`
+GitHub issue #2475: :meth:`OSPF.read <pcapkit.protocols.application.ospf.protocol.OSPF.read>`
 verifies the OSPFv2 checksum under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`,
-and :meth:`OSPF.make <pcapkit.protocols.application.ospf.OSPF.make>` computes one it
+and :meth:`OSPF.make <pcapkit.protocols.application.ospf.protocol.OSPF.make>` computes one it
 is not given under :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`. It covers the
 packet but its Authentication field, with no pseudo-header
 (:rfc:`2328#appendix-A.3.1`), and is unused under cryptographic authentication
@@ -55,7 +55,7 @@ class OSPFChecksumTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.const.ospf.packet import Packet
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.corekit.checksum.internet import ChecksumStatus
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning

@@ -14,29 +14,29 @@ application layer.
 #       SSH, TELNET, XMPP.
 #
 # NB: NGAP's decoder below is an optional
-#     dependency; see pcapkit.protocols.application.ngap. Importing the module
+#     dependency; see pcapkit.protocols.application.ngap.protocol. Importing the module
 #     is free -- ``pycrate`` is imported inside the parse path, not here.
 
 # Base Class for Application Layer
 from pcapkit.protocols.application.application import Application
 
 # Utility Classes for Protocols
-from pcapkit.protocols.application.ftp import FTP
-from pcapkit.protocols.application.ftp_data import FTP_DATA
-from pcapkit.protocols.application.httpv1 import HTTPv1
-from pcapkit.protocols.application.httpv2 import HTTPv2
-from pcapkit.protocols.application.ngap import NGAP
-from pcapkit.protocols.application.ospf import OSPF
-from pcapkit.protocols.application.rarp import RARP
-from pcapkit.protocols.application.drarp import DRARP
-from pcapkit.protocols.application.sslv2 import SSLv2
-from pcapkit.protocols.application.tls import TLS
-from pcapkit.protocols.application.sslv3 import SSLv3
-from pcapkit.protocols.application.dtls import DTLS
+from pcapkit.protocols.application.ftp.protocol import FTP
+from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
+from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+from pcapkit.protocols.application.ngap.protocol import NGAP
+from pcapkit.protocols.application.ospf.protocol import OSPF
+from pcapkit.protocols.application.rarp.protocol import RARP
+from pcapkit.protocols.application.drarp.protocol import DRARP
+from pcapkit.protocols.application.sslv2.protocol import SSLv2
+from pcapkit.protocols.application.tls.protocol import TLS
+from pcapkit.protocols.application.sslv3.protocol import SSLv3
+from pcapkit.protocols.application.dtls.protocol import DTLS
 
 # Base Classes
-from pcapkit.protocols.application.http import HTTP
-from pcapkit.protocols.application.ssl import SSL
+from pcapkit.protocols.application.http.protocol import HTTP
+from pcapkit.protocols.application.ssl.protocol import SSL
 
 # Application Layer Protocol Numbers
 from pcapkit.const.reg.apptype import AppType as APPTYPE

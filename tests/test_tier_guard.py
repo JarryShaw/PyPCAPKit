@@ -285,11 +285,13 @@ class WorkflowAgreementTests(unittest.TestCase):
 
     @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_the_legs_leave_out_exactly_the_latest_tier_or_the_pins(self) -> None:
-        """#1958: run as bash runs them, the ``test`` legs but ``latest`` ignore each ``LATEST`` module.
+        """#1958: run as bash runs them, the ``test`` legs, ``latest``'s too, ignore each ``LATEST`` module.
 
-        ``latest`` ignores each project pin (#1954), which ``project-tests`` runs,
-        and runs the rest of the ``LATEST`` tier itself. Every step asks
-        :data:`~tests._tiers.LATEST_TIER_SELECTOR` or
+        #2751: each cell of ``test-latest-tier`` runs its half of the ``LATEST`` tier
+        by name, and the halves leave out each project pin (#1954), which
+        ``project-tests`` runs. Every step asks
+        :data:`~tests._tiers.LATEST_TIER_SELECTOR`,
+        :data:`~tests._tiers.LATEST_HALF_SELECTOR` or
         :data:`~tests._tiers.PROJECT_PINS_SELECTOR` at run time, so none can drift
         from :func:`~tests._tiers.module_tier`; what can is how each uses the
         answer, which is what running them checks. experimental.yml asks in a step
@@ -304,11 +306,20 @@ class WorkflowAgreementTests(unittest.TestCase):
         latest = list(_tiers.latest_tier_paths())
         self.assertTrue(pins)
         self.assertLess(len(pins), len(latest))
-        self.assertEqual(leg_ignores(text, 'true', self.selectors), pins)
-        self.assertEqual(leg_ignores(text, 'false', self.selectors), latest)
+        self.assertEqual(leg_ignores(text, cache=self.selectors), latest)
+        self.assertEqual(leg_selects(text, cache=self.selectors), [])
+        halves = []  # type: list[str]
+        for half in _tiers.LATEST_TIER_HALVES:
+            with self.subTest(half=half):
+                selected = leg_selects(text, str(half), self.selectors)
+                self.assertTrue(selected)
+                self.assertEqual(selected, list(_tiers.latest_tier_half(half)))
+                self.assertEqual(leg_ignores(text, str(half), self.selectors), [])
+                halves.extend(selected)
+        self.assertEqual(sorted(halves + pins), sorted(path for path in latest if _tiers.is_unit_tier(path)))
         self.assertEqual(project_pins_run(text, self.selectors), pins)
         for workflow, job, step, selector in (
-                (WORKFLOW, 'test', 'Run unit tests', _tiers.PROJECT_PINS_SELECTOR),
+                (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_HALF_SELECTOR),
                 (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_TIER_SELECTOR),
                 (WORKFLOW, 'project-tests', 'Run the project pins', _tiers.PROJECT_PINS_SELECTOR),
                 (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the LATEST tier',
@@ -316,7 +327,7 @@ class WorkflowAgreementTests(unittest.TestCase):
             with self.subTest(job=job, selector=selector):
                 script = run_script(job_section(workflow.read_text(encoding='utf-8'), job), step)
                 self.assertIn(selector, script)
-        # The experimental legs ignore what that step printed, as `test`'s legs but `latest` do.
+        # The experimental legs ignore what that step printed, as `test`'s legs do.
         tests = step_run_block(job_section(EXPERIMENTAL_WORKFLOW.read_text(encoding='utf-8'), 'experimental'),
                                'Run unit tests')
         self.assertIn('LATEST_TIER: ${{ steps.tier.outputs.paths }}', tests)
@@ -330,24 +341,31 @@ class WorkflowAgreementTests(unittest.TestCase):
         text = WORKFLOW.read_text(encoding='utf-8')
         loop = 'set -- "$@" --ignore="$module"'
         self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
-        for latest in ('true', 'false'):
-            with self.subTest(latest=latest):
-                self.assertEqual(leg_ignores(text.replace(loop, ':'), latest, self.selectors), [])
+        self.assertEqual(leg_ignores(text.replace(loop, ':'), cache=self.selectors), [])
+        # #2751: and a cell that computes its half and then drops it, which would run the whole suite.
+        loop = 'set -- "$@" "$module"'
+        self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
+        self.assertEqual(leg_selects(text.replace(loop, ':'), '1', self.selectors), [])
 
     @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
-        """Off ``latest``, the pins alone are not the ``LATEST`` tier; on it, the tier is not the pins."""
+        """The pins alone are not the ``LATEST`` tier, and one half is not the other (#2751)."""
         if not WORKFLOW.is_file():
             self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
         text = WORKFLOW.read_text(encoding='utf-8')
         latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
         pins = _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1]
         self.assertEqual(text.count(latest), 1)
-        self.assertEqual(text.count(pins), 2)  # the `test` step's and `project-tests`'s
-        self.assertNotEqual(leg_ignores(text.replace(latest, pins), 'false', self.selectors),
+        self.assertEqual(text.count(pins), 1)  # `project-tests`'s
+        self.assertNotEqual(leg_ignores(text.replace(latest, pins), cache=self.selectors),
                             list(_tiers.latest_tier_paths()))
-        swapped = text.replace(pins, latest, 1)
-        self.assertNotEqual(leg_ignores(swapped, 'true', self.selectors), list(_tiers.project_pin_paths()))
+        asked = 'latest_tier_half(int(sys.argv[1]))'
+        self.assertEqual(text.count(asked), 1)
+        first = _tiers.LATEST_TIER_HALVES[0]
+        for half in _tiers.LATEST_TIER_HALVES[1:]:
+            with self.subTest(half=half):
+                self.assertNotEqual(leg_selects(text.replace(asked, f'latest_tier_half({first})'), str(half),
+                                                self.selectors), list(_tiers.latest_tier_half(half)))
 
 
 #: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
@@ -453,18 +471,27 @@ class PythonStubTests(unittest.TestCase):
             self.assertEqual(real.read_text(encoding='utf-8').splitlines(), ['-c a', '-c b', '-c fail', '-c fail'])
 
 
-def leg_ignores(text: 'str', latest: 'str', cache: 'str' = '') -> 'list[str]':
-    """The modules a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s, ``latest`` or not.
+def leg_argv(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
+    """What the ``Run unit tests`` step hands pytest on a ``test`` leg, or with ``half`` a ``test-latest-tier`` cell.
 
     ``cache`` is a directory for :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE``; empty runs every selector.
 
     """
     script = run_script(job_section(text, 'test'), 'Run unit tests')
     # #2005: a leg that runs pytest once, as a PyPy leg's own `SHARDS` would otherwise reach the stubbed step.
-    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest, 'SHARDS': '',
+    return stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'HALF': half, 'SHARDS': '',
                                  'SELECTOR_CACHE': cache})
-    return [arg.split('=', 1)[1] for arg in argv
+
+
+def leg_ignores(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
+    """The modules :func:`leg_argv` ``--ignore``\\ s, less the fixture tier's directory."""
+    return [arg.split('=', 1)[1] for arg in leg_argv(text, half, cache)
             if arg.startswith('--ignore=') and arg != f'--ignore=tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}']
+
+
+def leg_selects(text: 'str', half: 'str' = '', cache: 'str' = '') -> 'list[str]':
+    """The modules :func:`leg_argv` names for pytest to run, a ``test-latest-tier`` cell's half (#2751)."""
+    return [arg for arg in leg_argv(text, half, cache) if not arg.startswith('-') and arg.endswith('.py')]
 
 
 def project_pins_run(text: 'str', cache: 'str' = '') -> 'list[str]':

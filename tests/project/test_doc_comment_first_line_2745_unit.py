@@ -345,7 +345,7 @@ class FirstLineTests(unittest.TestCase):
         self.assertTrue(self.package.is_enum('pcapkit.foundation.reassembly.data.data', 'Completion'))
         self.assertTrue(self.package.is_enum('pcapkit.const.sctp.payload_protocol_identifier',
                                              'PayloadProtocolIdentifier'))
-        self.assertFalse(self.package.is_enum('pcapkit.protocols.data.internet.igmp', 'IGMP'))
+        self.assertFalse(self.package.is_enum('pcapkit.protocols.internet.igmp.data', 'IGMP'))
 
     def test_no_first_line_reads_as_a_type(self) -> 'None':
         """A misread first line names its documentation and the *Type* it renders."""

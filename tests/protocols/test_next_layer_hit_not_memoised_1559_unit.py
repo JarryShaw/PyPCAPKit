@@ -31,7 +31,7 @@ from unittest import mock
 from tests._support import isolate_modules
 
 #: Module of the class the reload tests dispatch to.
-UDP_MODULE = 'pcapkit.protocols.transport.udp'
+UDP_MODULE = 'pcapkit.protocols.transport.udp.protocol'
 
 #: An HTTP request, so that a TCP segment to port 80 dispatches once more.
 HTTP_REQUEST = b'GET / HTTP/1.1\r\nHost: x\r\n\r\n'
@@ -59,7 +59,7 @@ class NextLayerHitNotMemoisedTests(unittest.TestCase):
 
     def _parse_ipv4_udp(self) -> 'object':
         """Parse an IPv4/UDP packet and return its UDP layer."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         packet = _ipv4(17, _udp(b'hello'))
         return IPv4(packet, len(packet)).payload
@@ -96,11 +96,11 @@ class NextLayerHitNotMemoisedTests(unittest.TestCase):
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         hits = (
             ('Link', Link.__proto__, EtherType.Internet_Protocol_version_4),
@@ -132,7 +132,7 @@ class NextLayerHitNotMemoisedTests(unittest.TestCase):
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         def overwrites() -> 'list[str]':
             with mock.patch.dict(Internet.__proto__), warnings.catch_warnings(record=True) as caught:

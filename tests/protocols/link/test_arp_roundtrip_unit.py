@@ -3,13 +3,13 @@
 
 GitHub issues:
 
-* #1204: :class:`~pcapkit.protocols.link.inarp.InARP` and
-  :class:`~pcapkit.protocols.application.drarp.DRARP` did not pass
+* #1204: :class:`~pcapkit.protocols.link.inarp.protocol.InARP` and
+  :class:`~pcapkit.protocols.application.drarp.protocol.DRARP` did not pass
   ``schema=``/``data=``, so they fell back to the ``Raw`` schema and could not
   parse any input.
 * #1205: an Ethernet hardware address whose ``hlen`` is not 6 was read as
   colon-joined hex, but :meth:`ARP._make_addr_resolve
-  <pcapkit.protocols.link.arp.ARP._make_addr_resolve>` accepted only a
+  <pcapkit.protocols.link.arp.protocol.ARP._make_addr_resolve>` accepted only a
   6-octet MAC.
 * #1206: the protocol address was decoded as IPv4 or IPv6 by its length alone,
   ignoring ``ptype``/``plen``, so a mismatched pair either decoded as the other
@@ -33,10 +33,10 @@ __tier__ = 'ALL'
 
 #: ``(module, class)`` for every ARP-family class.
 CLASSES = (
-    ('pcapkit.protocols.link.arp', 'ARP'),
-    ('pcapkit.protocols.link.inarp', 'InARP'),
-    ('pcapkit.protocols.application.rarp', 'RARP'),
-    ('pcapkit.protocols.application.drarp', 'DRARP'),
+    ('pcapkit.protocols.link.arp.protocol', 'ARP'),
+    ('pcapkit.protocols.link.inarp.protocol', 'InARP'),
+    ('pcapkit.protocols.application.rarp.protocol', 'RARP'),
+    ('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
 )
 
 
@@ -61,8 +61,8 @@ class TestARPRoundTrip(unittest.TestCase):
 
     def test_subclasses_use_arp_schema(self) -> None:
         """#1204: InARP and DRARP inherit ARP's schema and data classes."""
-        from pcapkit.protocols.data.link.arp import ARP as Data_ARP
-        from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
+        from pcapkit.protocols.link.arp.data import ARP as Data_ARP
+        from pcapkit.protocols.link.arp.schema import ARP as Schema_ARP
 
         for module, name in CLASSES:
             with self.subTest(cls=name):
@@ -72,8 +72,8 @@ class TestARPRoundTrip(unittest.TestCase):
 
     def test_subclasses_round_trip(self) -> None:
         """#1204: the issue's repro parses and rebuilds for InARP and DRARP."""
-        for module, name, oper in (('pcapkit.protocols.link.inarp', 'InARP', '0008'),
-                                   ('pcapkit.protocols.application.drarp', 'DRARP', '0005')):
+        for module, name, oper in (('pcapkit.protocols.link.inarp.protocol', 'InARP', '0008'),
+                                   ('pcapkit.protocols.application.drarp.protocol', 'DRARP', '0005')):
             with self.subTest(cls=name):
                 cls = self._cls(module, name)
                 data = bytes.fromhex('000108000604' + oper + '001122334455' '0a000001'
@@ -92,7 +92,7 @@ class TestARPRoundTrip(unittest.TestCase):
 
     def test_ethernet_issue_repro_round_trips(self) -> None:
         """#1205: the issue's parsed hlen-8 and hlen-0 headers rebuild."""
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
 
         for hlen, data in (
             (8, bytes.fromhex('0001080008040001' + '01' * 8 + '0a000001' + '02' * 8 + '0a000002')),
@@ -138,7 +138,7 @@ class TestARPRoundTrip(unittest.TestCase):
     def test_ethernet_mac_still_validated(self) -> None:
         """#1205: a malformed MAC string is still rejected."""
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.link.arp.protocol import ARP
         from pcapkit.utilities.exceptions import ProtocolError
 
         arp = object.__new__(ARP)

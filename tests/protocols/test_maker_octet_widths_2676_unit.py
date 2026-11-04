@@ -39,21 +39,21 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Fixed-size octet fields a maker writes without ``_make_octets``, and why.
 EXEMPT = {
-    ('pcapkit/protocols/application/httpv2.py', '_make_http_ping', 'data'):
+    ('pcapkit/protocols/application/httpv2/protocol.py', '_make_http_ping', 'data'):
         'its own length check refuses any width but eight',
-    ('pcapkit/protocols/internet/mh.py', '_make_opt_mn_lla_iid', 'iid'):
+    ('pcapkit/protocols/internet/mh/protocol.py', '_make_opt_mn_lla_iid', 'iid'):
         'its own length check refuses any width but eight',
-    ('pcapkit/protocols/link/linux_sll1.py', 'make', 'link_addr'):
+    ('pcapkit/protocols/link/linux_sll1/protocol.py', 'make', 'link_addr'):
         '_validate_link_addr refuses more than eight octets and zero-fills a shorter '
         'address, whose length link_addr_length carries',
-    ('pcapkit/protocols/link/linux_sll2.py', 'make', 'link_addr'):
+    ('pcapkit/protocols/link/linux_sll2/protocol.py', 'make', 'link_addr'):
         '_validate_link_addr refuses more than eight octets and zero-fills a shorter '
         'address, whose length link_addr_length carries',
-    ('pcapkit/protocols/link/radiotap.py', '_make_tlv_data', 'oui'):
+    ('pcapkit/protocols/link/radiotap/protocol.py', '_make_tlv_data', 'oui'):
         '_make_vendor_data refuses any width but the field\'s',
-    ('pcapkit/protocols/link/radiotap.py', '_make_vendor_namespace', 'oui'):
+    ('pcapkit/protocols/link/radiotap/protocol.py', '_make_vendor_namespace', 'oui'):
         '_make_vendor_data refuses any width but the field\'s',
-    ('pcapkit/protocols/misc/pcap/header.py', 'make', 'magic_number'):
+    ('pcapkit/protocols/misc/pcap/header/protocol.py', 'make', 'magic_number'):
         'made from the byte order and resolution flags, not given as octets',
 }
 
@@ -71,12 +71,12 @@ def _base_name(node: 'ast.expr') -> 'str | None':
 def _schema_fields() -> 'dict[tuple[str, str], tuple[dict[str, int | None], list[tuple[str, str]]]]':
     """``{(module, class): ({field: fixed size or None}, [base (module, class)])}`` for every schema."""
     classes = {}  # type: dict[tuple[str, str], tuple[dict[str, int | None], list[tuple[str, str]]]]
-    for path in sorted((ROOT / 'pcapkit/protocols/schema').rglob('*.py')):
+    for path in sorted((ROOT / 'pcapkit/protocols').rglob('schema.py')):
         module = '.'.join(path.relative_to(ROOT).with_suffix('').parts)
         tree = ast.parse(path.read_text(encoding='utf-8'))
         names = {node.name: (module, node.name) for node in tree.body if isinstance(node, ast.ClassDef)}
         for node in tree.body:
-            if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('pcapkit.protocols.schema'):
+            if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('pcapkit.protocols') and node.module.endswith('.schema'):
                 names.update({alias.asname or alias.name: (node.module, alias.name) for alias in node.names})
         for node in tree.body:
             if not isinstance(node, ast.ClassDef):
@@ -130,13 +130,13 @@ def unchecked_octet_fields() -> 'tuple[set[tuple[str, str, str]], set[tuple[str,
     classes = _schema_fields()
     found, unchecked = set(), set()
     for path in sorted((ROOT / 'pcapkit/protocols').rglob('*.py')):
-        if 'schema' in path.parts or 'data' in path.parts:
+        if path.name in ('schema.py', 'data.py'):
             continue
         rel = path.relative_to(ROOT).as_posix()
         tree = ast.parse(path.read_text(encoding='utf-8'))
         imports = {}
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('pcapkit.protocols.schema'):
+            if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('pcapkit.protocols') and node.module.endswith('.schema'):
                 imports.update({alias.asname or alias.name: (node.module, alias.name) for alias in node.names})
         for func in ast.walk(tree):
             if not isinstance(func, ast.FunctionDef) or not (func.name == 'make' or func.name.startswith('_make')):
@@ -204,7 +204,7 @@ class SweepTests(unittest.TestCase):
         # An exemption names a field the sweep finds unchecked, so a fix
         # deletes its row.
         found, unchecked = unchecked_octet_fields()
-        self.assertIn(('pcapkit/protocols/internet/hopopt.py', '_make_opt_calipso', 'checksum'), found)
+        self.assertIn(('pcapkit/protocols/internet/hopopt/protocol.py', '_make_opt_calipso', 'checksum'), found)
         self.assertEqual(sorted(unchecked - set(EXEMPT)), [])
         self.assertEqual(sorted(set(EXEMPT) - unchecked), [])
 
@@ -213,8 +213,8 @@ class IPv6OptionTests(_Case):
     """HOPOPT and IPv6-Opts, which share their option makers."""
 
     def _classes(self) -> 'dict[str, type]':
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
         return {'HOPOPT': HOPOPT, 'IPv6-Opts': IPv6_Opts}
 
     def test_calipso_checksum(self) -> None:
@@ -247,12 +247,12 @@ class IPv4TimestampTests(_Case):
 
     def _make(self, **args: 'object') -> 'bytes':
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return IPv4(protocol=253, options=[(OptionNumber.TS, args)]).data
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return IPv4.from_data(IPv4(data).info).data
 
@@ -279,7 +279,7 @@ class IPv4TimestampTests(_Case):
 
     def test_header_checksum(self) -> None:
         # RFC 791 section 3.1: the Header Checksum is octets 10 and 11.
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         self.assertWidth('IPv4', 'checksum', 2, lambda value: IPv4(protocol=253, checksum=value).data,
                          self._rebuild, offset=10)
@@ -310,13 +310,13 @@ class MHTests(_Case):
     def _make(self, *options: 'tuple[str, dict[str, object]]', **kwargs: 'object') -> 'bytes':
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return bytes(MH(next=59, type=Packet.Binding_Refresh_Request,
                         data={'options': [(Option[name], args) for name, args in options]}, **kwargs))
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH.from_data(MH(io.BytesIO(data), len(data), extension=True).info).data
 
@@ -325,7 +325,7 @@ class MHTests(_Case):
         self.assertWidth('MH', 'checksum', 2, lambda value: self._make(chksum=value), self._rebuild, offset=4)
 
     def test_message_octets(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         packets = {name: code for code, name in MH.__message__.items() if isinstance(name, str)}
         swept = []
@@ -346,7 +346,7 @@ class MHTests(_Case):
         # The interface identifier is a fixed 8 octets (RFC 5949),
         # which its maker refuses at any other width in a message of its own.
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         swept = []
@@ -390,7 +390,7 @@ class HIPTests(_Case):
     BASE = {'puzzle': {'lifetime': 1}}
 
     def _rebuild(self, data: 'bytes') -> 'bytes':
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.warnings import ProtocolWarning
 
         # An ENCRYPTED parameter with no HIP_CIPHER beside it warns on read.
@@ -400,14 +400,14 @@ class HIPTests(_Case):
 
     def test_header_checksum(self) -> None:
         # RFC 7401 section 5.1: Checksum is octets 4 and 5.
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         self.assertWidth('HIPv2', 'checksum', 2, lambda value: bytes(HIP(version=2, checksum=value)),
                          self._rebuild, offset=4)
 
     def test_parameter_octets(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         names = {'reserved': 'reserved octets', 'payload': 'payload data'}
         swept = []
@@ -435,8 +435,8 @@ class OtherMakerTests(_Case):
         # RFC 792 and RFC 4443 sections 2.1 and 3: the checksum is octets 2 and
         # 3, and the unused octets follow it, after a pointer octet for
         # Parameter Problem. ICMPv4 takes RFC 792's name, ICMP, as its alias.
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         for alias, cls, rows in (('ICMP', ICMPv4, ((3, 4, 4), (11, 4, 4), (12, 3, 5))),
                                  ('ICMPv6', ICMPv6, ((1, 4, 4), (3, 4, 4)))):
@@ -454,8 +454,8 @@ class OtherMakerTests(_Case):
         # RFC 2236 section 2 and RFC 3376 section 4.2: the checksum is octets 2
         # and 3, and a version 3 report's second reserved field octets 4 and 5.
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
 
         self.assertWidth('IGMPv2', 'checksum', 2,
                          lambda value: IGMPv2(type=Type.IGMP_Membership_Query, max_resp_time=1, checksum=value).data,
@@ -468,8 +468,8 @@ class OtherMakerTests(_Case):
     def test_ipv6_frag_and_route_reserved(self) -> None:
         # RFC 8200 sections 4.5 and 4.4, and RFC 6275 section 6.4: the reserved
         # octet follows Next Header; the reserved word follows Segments Left.
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         self.assertWidth('IPv6-Frag', 'reserved octet', 1,
                          lambda value: IPv6_Frag(next=59, reserved_octet=value).data,
@@ -487,7 +487,7 @@ class OtherMakerTests(_Case):
     def test_ipx_checksum_and_addresses(self) -> None:
         # The IPX header: checksum at octet 0, the 12-octet destination and
         # source addresses at octets 6 and 18.
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         for arg, name, size, offset in (('chksum', 'checksum', 2, 0), ('dst', 'destination address', 12, 6),
                                         ('src', 'source address', 12, 18)):
@@ -498,7 +498,7 @@ class OtherMakerTests(_Case):
         # RFC 2328 appendix A.3.1 and D.3: the checksum is octets 12 and 13;
         # cryptographic authentication opens with two reserved octets at 16.
         from pcapkit.const.ospf.authentication import Authentication
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         rebuild = (lambda data: OSPF.from_data(OSPF(data).info).data)  # noqa: E731
         self.assertWidth('OSPF', 'checksum', 2, lambda value: OSPF(checksum=value).data, rebuild, offset=12)
@@ -511,7 +511,7 @@ class OtherMakerTests(_Case):
     def test_pcapng_zigbee_keys(self) -> None:
         # The ZigBee NWK and APS Key Secrets Data open with a 16-octet key.
         from pcapkit.const.pcapng.secrets_type import SecretsType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         proto = PCAPNG.__new__(PCAPNG)
         for code, maker, arg, name in (
@@ -540,7 +540,7 @@ class CapturedOctetTests(_Case):
     NOTHING_AFTER = {'_make_msg_fna', '_make_msg_has', '_make_msg_sq'}
 
     def _mh_messages(self) -> 'list[tuple[str, object, int]]':
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         packets = {name: code for code, name in MH.__message__.items() if isinstance(name, str)}
         rows = []
@@ -602,7 +602,7 @@ class CapturedOctetTests(_Case):
     def test_mh_message_cut_inside_reserved_octets(self) -> None:
         # the LRI and UPA cuts parse as the short read their options area records
         # where the data ends inside it (#2694)
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         swept = []
         for name, code, size in self._mh_messages():
@@ -617,8 +617,8 @@ class CapturedOctetTests(_Case):
     def test_ipv6_frag_and_route_cut_inside_reserved_octets(self) -> None:
         # RFC 8200 section 4.5 and RFC 6275 section 6.4: the reserved octet
         # follows Next Header; the reserved word follows Segments Left.
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         self.assertCutRebuilds(IPv6_Frag, IPv6_Frag(next=59, reserved_octet=b'\xa1').data, b'\xa1',
                                extension=True)
@@ -632,7 +632,7 @@ class CapturedOctetTests(_Case):
         # reserved octets, at octet 16 of the header. The dict form turns the
         # authentication data model into a mapping, which is filled the same.
         from pcapkit.const.ospf.authentication import Authentication
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         data = OSPF(auth_type=Authentication.Cryptographic_authentication,
                     auth_data={'key_id': 1, 'len': 16, 'seq': 1, 'reserved': b'\xa1\xa2'}).data
@@ -649,10 +649,10 @@ class CapturedOctetTests(_Case):
         # A short read names where the capture ended; octets read whole before
         # it are checked as a caller's are, an edit to them included.
         from pcapkit.const.ospf.authentication import Authentication
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         def update(key: 'str') -> 'object':
             return lambda info, value: info.__update__({key: value})
@@ -688,10 +688,10 @@ class CapturedOctetTests(_Case):
         # to the maker as ``message``.
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.ospf.authentication import Authentication
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         frag = IPv6_Frag(next=59, reserved_octet=b'\xa1').data

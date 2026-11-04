@@ -2,7 +2,7 @@
 """The IPv6 option helpers HOPOPT and IPv6-Opts share.
 
 GitHub issue #1519. The field helpers of the HOPOPT and IPv6-Opts option
-schemas live once, in :mod:`pcapkit.protocols.schema.internet.ipv6_option`,
+schemas live once, in :mod:`pcapkit.protocols.internet.ipv6_ext.schema`,
 rather than as two copies differing only in the error prefix and in which
 module's option schemas the selectors return; each header module binds its own
 prefix and schemas. This module pins the shared helpers under
@@ -27,12 +27,12 @@ from tests._support import reimport_once_per_class
 #: interpreter.
 __tier__ = 'ALL'
 
-SHARED = 'pcapkit.protocols.schema.internet.ipv6_option'
+SHARED = 'pcapkit.protocols.internet.ipv6_ext.schema'
 
 #: Each header's schema module, and the prefix its errors carry.
 HEADERS = (
-    ('pcapkit.protocols.schema.internet.hopopt', 'HOPOPT'),
-    ('pcapkit.protocols.schema.internet.ipv6_opts', 'IPv6-Opts'),
+    ('pcapkit.protocols.internet.hopopt.schema', 'HOPOPT'),
+    ('pcapkit.protocols.internet.ipv6_opts.schema', 'IPv6-Opts'),
 )
 
 #: ``(helper, packet, message after the prefix, error)`` for every ``raise`` in
@@ -86,7 +86,9 @@ class TestIPv6OptionHelpers(unittest.TestCase):
 
     def test_shared_module_holds_every_helper(self) -> None:
         shared = self._shared()
-        self.assertEqual(sorted(shared.__all__), sorted([*BOUND, 'quick_start_data_selector', *UNBOUND]))
+        # the module is the IPv6_Ext header schema as well (#2534)
+        helpers = [name for name in shared.__all__ if name != 'IPv6_Ext']
+        self.assertEqual(sorted(helpers), sorted([*BOUND, 'quick_start_data_selector', *UNBOUND]))
 
     def test_shared_helpers_report_the_prefix_they_are_given(self) -> None:
         from pcapkit.utilities import exceptions

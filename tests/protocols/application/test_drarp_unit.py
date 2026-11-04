@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.drarp`.
+"""Unit tests for :mod:`pcapkit.protocols.application.drarp.protocol`.
 
 #2529: a module holds one protocol class, named after it, so ``DRARP`` left
-:mod:`pcapkit.protocols.application.rarp` for a module of its own, with no
+:mod:`pcapkit.protocols.application.rarp.protocol` for a module of its own, with no
 re-export at the old path. Every case builds its own octets.
 
 """
@@ -30,17 +30,17 @@ class DRARPModuleTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_drarp_is_defined_in_its_own_module(self) -> None:
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
-        drarp = importlib.import_module('pcapkit.protocols.application.drarp')
-        self.assertEqual(DRARP.__module__, 'pcapkit.protocols.application.drarp')
+        drarp = importlib.import_module('pcapkit.protocols.application.drarp.protocol')
+        self.assertEqual(DRARP.__module__, 'pcapkit.protocols.application.drarp.protocol')
         self.assertEqual(drarp.__all__, ['DRARP'])
         self.assertEqual(DRARP.__bases__, (RARP,))
 
     def test_rarp_module_holds_rarp_alone(self) -> None:
         """#2529: no re-export at the old path (#1715, #1744)."""
-        rarp = importlib.import_module('pcapkit.protocols.application.rarp')
+        rarp = importlib.import_module('pcapkit.protocols.application.rarp.protocol')
 
         self.assertEqual(rarp.__all__, ['RARP'])
         self.assertFalse(hasattr(rarp, 'DRARP'))
@@ -48,8 +48,8 @@ class DRARPModuleTests(unittest.TestCase):
     def test_id_and_index(self) -> None:
         """``DRARP`` narrows ``id()`` to itself and inherits RARP's ``__index__``."""
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
         self.assertEqual(DRARP.id(), ('DRARP',))
         self.assertEqual(RARP.id(), ('RARP', 'DRARP'))
@@ -60,7 +60,7 @@ class DRARPModuleTests(unittest.TestCase):
         import pcapkit
         import pcapkit.protocols
         import pcapkit.protocols.application
-        from pcapkit.protocols.application.drarp import DRARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
 
         for package in (pcapkit, pcapkit.protocols, pcapkit.protocols.application):
             with self.subTest(package=package.__name__):
@@ -69,8 +69,8 @@ class DRARPModuleTests(unittest.TestCase):
 
     def test_parsed_rarp_keeps_its_dynamic_drarp_alias(self) -> None:
         """EtherType ``0x8035`` binds RARP alone; operation 5 reports ``DRARP``."""
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
         parsed = RARP(DRARP_REQUEST)
         self.assertIs(type(parsed), RARP)

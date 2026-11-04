@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """DCCP dissection, construction and its checksum over the IP pseudo-header.
 
-GitHub issue #2489: :class:`~pcapkit.protocols.transport.dccp.DCCP` parses the
+GitHub issue #2489: :class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` parses the
 :rfc:`4340` generic header with short and long sequence numbers, the fields each
 packet type adds, DCCP-Listen (:rfc:`5596`) and the options, and rebuilds every
 packet byte for byte. The enclosing IPv4 or IPv6 layer verifies and computes the
@@ -92,10 +92,10 @@ class DCCPTestCase(unittest.TestCase):
         from pcapkit.const.dccp.reset_code import ResetCode
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
         from pcapkit.utilities import config
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
@@ -375,8 +375,8 @@ class DCCPOptionTests(DCCPTestCase):
 
     def test_register_option_and_its_wrapper(self) -> None:
         from pcapkit.foundation.registry.protocols import register_dccp_option
-        from pcapkit.protocols.data.transport.dccp import UnassignedOption
-        from pcapkit.protocols.schema.transport.dccp import UnassignedOption as Schema_UnassignedOption
+        from pcapkit.protocols.transport.dccp.data import UnassignedOption
+        from pcapkit.protocols.transport.dccp.schema import UnassignedOption as Schema_UnassignedOption
         from pcapkit.utilities.exceptions import RegistryError
         from pcapkit.utilities.warnings import RegistryWarning
 
@@ -402,7 +402,7 @@ class DCCPOptionTests(DCCPTestCase):
 
     def test_register_dccp_dispatches_a_port(self) -> None:
         from pcapkit.foundation.registry.protocols import register_dccp
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         class Probe(Raw):  # pylint: disable=too-few-public-methods
             """A stand-in application protocol."""
@@ -415,7 +415,7 @@ class DCCPOptionTests(DCCPTestCase):
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
         from pcapkit.utilities.warnings import RegistryWarning
         with self.assertWarns(RegistryWarning):
-            register_dccp(AppType.get(DST, proto=TransportProtocol.dccp), 'pcapkit.protocols.misc.raw', 'Raw')
+            register_dccp(AppType.get(DST, proto=TransportProtocol.dccp), 'pcapkit.protocols.misc.raw.protocol', 'Raw')
         self.assertIs(type(self.DCCP(packet(2, data=b'app', x=False)).payload), Raw)
 
 

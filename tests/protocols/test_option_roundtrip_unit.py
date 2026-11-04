@@ -11,7 +11,7 @@ That third step is what this module exists for. A construct-then-parse test
 passes for a ``_make_*`` that takes only keyword arguments and cannot consume
 the data model its own ``_read_*`` produced -- which is a defect that ships, and
 one such a test cannot see. HIP parameters are the example: their data models
-declare a ``tuple``, which :class:`~pcapkit.protocols.schema.schema.Schema`'s
+declare a ``tuple``, which :class:`~pcapkit.protocols.schema.Schema`'s
 ``ListField`` pack branch has to accept as well as a ``list`` (#476).
 
 The case list and the cycle both live in
@@ -147,8 +147,8 @@ class Gap(NamedTuple):
     #: Make it as specific as the message allows, because a fragment that matches
     #: half the tree does not pin anything: ``'invalid format'`` alone occurs at
     #: sites across many modules, and repeatedly within
-    #: :file:`pcapkit/protocols/internet/hip.py` and
-    #: :file:`pcapkit/protocols/transport/tcp.py`, so it is satisfied by a
+    #: :file:`pcapkit/protocols/internet/hip/protocol.py` and
+    #: :file:`pcapkit/protocols/transport/tcp/protocol.py`, so it is satisfied by a
     #: regression at any of them. Prefer the alias and whatever bracketed code the
     #: message carries -- ``'TCP: [OptNo 28] invalid format'`` narrows the TCP
     #: sites to the one option that can print ``28``. The tuple form is for
@@ -481,7 +481,7 @@ class OptionRoundTripTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         base = dict(self.options.FAMILY_MODULES['hip'].HIP_BASE)
         one = [(Parameter.SEQ, {})]  # type: list[tuple[Any, dict[str, Any]]]

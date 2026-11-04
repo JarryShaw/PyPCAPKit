@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """TCP's HTTP ports dispatch through the version-identifying proxy. C.f. #682.
 
-Guards against :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
-binding :class:`pcapkit.protocols.application.httpv1.HTTPv1` directly for ports 80
+Guards against :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`
+binding :class:`pcapkit.protocols.application.httpv1.protocol.HTTPv1` directly for ports 80
 and 8080, which makes a segment on either port HTTP/1 by assertion of the port
 number: an HTTP/2 payload there would be refused by the HTTP/1 parser and
-reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those ports on the
+reported as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. Both versions share those ports on the
 wire -- :rfc:`9113#section-3` gives HTTP/2 the ``http`` scheme and HTTP/1.1's
 default port numbers -- so the
 port cannot decide the version and the payload has to, which is what
-:class:`pcapkit.protocols.application.http.HTTP` does: its ``_dispatch_version`` picks
+:class:`pcapkit.protocols.application.http.protocol.HTTP` does: its ``_dispatch_version`` picks
 ``HTTPv1`` or ``HTTPv2``, and the layer is that class (#2524).
 
 Nothing is parsed from :file:`examples/captures/`, so this is unit tier. The
@@ -60,12 +60,12 @@ class TCPHTTPDispatchTests(unittest.TestCase):
         collision), so the module name is the only thing that tells them apart.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for port in (80, 8080):
             with self.subTest(port=port):
                 descriptor = TCP.__proto__[port]
-                self.assertEqual(descriptor.module, 'pcapkit.protocols.application.http')
+                self.assertEqual(descriptor.module, 'pcapkit.protocols.application.http.protocol')
                 self.assertEqual(descriptor.name, 'HTTP')
 
     def test_tcp_and_udp_agree_on_the_http_ports(self) -> None:
@@ -76,8 +76,8 @@ class TCPHTTPDispatchTests(unittest.TestCase):
         makes a future one-sided edit fail here.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for port in (80, 8080):
             with self.subTest(port=port):
@@ -94,12 +94,12 @@ class TCPHTTPDispatchTests(unittest.TestCase):
         into ``Raw``. The HTTP/1.1 half guards the HTTP/1.1 frames in the
         fixture corpus, which these ports route through
         :meth:`HTTP._dispatch_version
-        <pcapkit.protocols.application.http.HTTP._dispatch_version>`: they have to
+        <pcapkit.protocols.application.http.protocol.HTTP._dispatch_version>`: they have to
         come back HTTP/1.1, each as its own version's class, and both halves are
         asserted here so neither can be satisfied at the other's expense.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         cases = (
             (_TCP_TO_80, _HTTP2_FRAME, 'TCP:HTTP/2', 'httpv2'),
@@ -120,7 +120,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
 
                 self.assertEqual(str(proto.protochain), expected)
                 self.assertEqual(type(proto.payload).__module__,
-                                 f'pcapkit.protocols.application.{module}')
+                                 f'pcapkit.protocols.application.{module}.protocol')
 
 
 if __name__ == '__main__':

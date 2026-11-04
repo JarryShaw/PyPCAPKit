@@ -55,7 +55,7 @@ class TestTrialParseRaises(unittest.TestCase):
 
     def _parse(self, frame: 'bytes', action: 'str' = 'always') -> 'tuple[object, list[str]]':
         """Parse ``frame`` as Ethernet, with the :class:`SchemaWarning` messages it reports."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.warnings import SchemaWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -65,7 +65,7 @@ class TestTrialParseRaises(unittest.TestCase):
 
     def test_cut_ipv4_header_is_raw_and_warns_nothing(self) -> None:
         """IPv4 cut to 10 octets raises, is kept as ``Raw`` naming the cut, and reports nothing."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.logging import logger
 
         with capture(logger) as recorder:
@@ -79,7 +79,7 @@ class TestTrialParseRaises(unittest.TestCase):
 
     def test_error_filter_keeps_the_cut_as_the_error(self) -> None:
         """Under ``error``, the ``Raw`` names the cut header, not a warning it dropped."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         parsed, messages = self._parse(FRAME, 'error')
         self.assertIsInstance(parsed.payload, Raw)  # type: ignore[attr-defined]
@@ -88,7 +88,7 @@ class TestTrialParseRaises(unittest.TestCase):
 
     def test_cut_ipv6_extension_header_is_raw_and_warns_nothing(self) -> None:
         """A cut Hop-by-Hop header raises and is kept as ``Raw`` (#2477), which warns nothing."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         parsed, messages = self._parse(_ipv6(0))
         self.assertEqual(str(parsed.protochain), 'Ethernet:IPv6:HOPOPT')  # type: ignore[attr-defined]
@@ -103,7 +103,7 @@ class TestTrialParseRaises(unittest.TestCase):
 
     def test_raise_outside_beholder_reports(self) -> None:
         """With no ``beholder`` to replace it, the layer's error and its warnings both reach the caller."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import SchemaWarning

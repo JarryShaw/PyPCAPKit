@@ -55,7 +55,7 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
         """Constructor arguments for ``octets``, an SHB or a block in a section."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         if octets[:4] == b'\x0a\x0d\x0d\x0a':
             return {'num': 0, 'sct': 1, 'ctx': None}
@@ -64,7 +64,7 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
         return {'num': 1, 'sct': 1, 'ctx': Context(section.info)}
 
     def _parse(self, octets: 'bytes', kwargs: 'dict[str, Any]') -> 'tuple[Any, list[str]]':
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -72,7 +72,7 @@ class TestPCAPNGShortSHBIDB(unittest.TestCase):
         return parsed, [str(item.message) for item in caught]
 
     def _rebuild(self, info: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

@@ -448,10 +448,10 @@ class RouterAlertPacketParseTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parses_igmp_over_router_alert_zero(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.router_alert import RouterAlert
-        from pcapkit.protocols.data.internet.ipv4 import RTRALTOption
+        from pcapkit.protocols.internet.ipv4.data import RTRALTOption
 
         # IPv4 header, 28 bytes, carrying a Router Alert option (type 148,
         # length 4, value 0) ahead of an IGMP payload -- the packet from

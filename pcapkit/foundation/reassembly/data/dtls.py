@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
     from pcapkit.foundation.reassembly.data.data import Completion
-    from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
+    from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 

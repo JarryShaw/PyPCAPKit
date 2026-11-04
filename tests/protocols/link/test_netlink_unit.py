@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2500: Linux Netlink socket framing (``nlmsghdr``).
 
-:class:`~pcapkit.protocols.link.netlink.Netlink` dissects the ``arphrd_type``
+:class:`~pcapkit.protocols.link.netlink.protocol.Netlink` dissects the ``arphrd_type``
 ``ARPHRD_NETLINK`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.Raw` (see
-:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 16-octet ``nlmsghdr`` fields, the byte-order heuristic
-:func:`~pcapkit.protocols.link.netlink.nlmsg_byteorder` resolves (see
+:func:`~pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder` resolves (see
 :rfc:`3549#section-2.3.2`), and byte-exact round trips. The NETLINK-dispatch
 side of ``LinuxSLL1``/``LinuxSLL2`` is covered in their own test modules.
 
@@ -45,7 +45,7 @@ class TestNetlink(unittest.TestCase):
                 self.assertEqual(type(layer).from_data(data, **kwargs).data.hex(), layer.data.hex())
 
     def test_little_endian_header_decodes_every_field(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         raw = _nlmsghdr('little', nlmsg_type=3, nlmsg_flags=0x0101, nlmsg_seq=42,
                         nlmsg_pid=1234, payload=b'\xaa\xbb\xcc\xdd')
@@ -66,9 +66,9 @@ class TestNetlink(unittest.TestCase):
 
     def test_big_endian_header_is_detected_by_heuristic(self) -> None:
         """A length field that only makes sense read big-endian is read
-        that way, per :func:`~pcapkit.protocols.link.netlink.nlmsg_byteorder`.
+        that way, per :func:`~pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder`.
         """
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         raw = _nlmsghdr('big', nlmsg_type=16, nlmsg_flags=5, nlmsg_seq=7,
                         nlmsg_pid=0, payload=b'\x01\x02\x03\x04\x05\x06')
@@ -84,7 +84,7 @@ class TestNetlink(unittest.TestCase):
         way they were packed -- the heuristic is not biased toward one
         reading regardless of the octets.
         """
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         for byteorder in ('little', 'big'):
             with self.subTest(byteorder=byteorder):
@@ -99,10 +99,10 @@ class TestNetlink(unittest.TestCase):
     def test_payload_is_always_raw_regardless_of_type(self) -> None:
         """Per-family payload decoding is out of scope: every ``nlmsg_type``,
         including the generic control values, resolves to
-        :class:`~pcapkit.protocols.misc.raw.Raw`.
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
-        from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         # NLMSG_NOOP, NLMSG_ERROR, NLMSG_DONE, NLMSG_OVERRUN, and a
         # family-specific value (RTM_NEWLINK = 16, NETLINK_ROUTE's own).
@@ -116,8 +116,8 @@ class TestNetlink(unittest.TestCase):
                 self._assert_rebuilds(parsed)
 
     def test_zero_length_payload_is_no_payload(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         raw = _nlmsghdr('little', nlmsg_type=3)
         parsed = Netlink(raw, len(raw))
@@ -127,7 +127,7 @@ class TestNetlink(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_then_parse(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         made = Netlink(nlmsg_type=3, nlmsg_flags=0x0101, nlmsg_seq=1, nlmsg_pid=0,
                       byteorder='little', payload=b'\xaa\xbb\xcc\xdd').data
@@ -140,7 +140,7 @@ class TestNetlink(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_computes_nlmsg_len_from_payload(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         made = Netlink(payload=bytes(10))
         self.assertEqual(made.info.nlmsg_len, 26)
@@ -148,14 +148,14 @@ class TestNetlink(unittest.TestCase):
     def test_make_defaults(self) -> None:
         import sys
 
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         made = Netlink()
         self.assertEqual(made.data, struct.pack(
             ('<' if sys.byteorder == 'little' else '>') + 'IHHII', 16, 0, 0, 0, 0))
 
     def test_make_explicit_byteorder_round_trips(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         for byteorder in ('little', 'big'):
             with self.subTest(byteorder=byteorder):
@@ -166,14 +166,14 @@ class TestNetlink(unittest.TestCase):
                 self.assertEqual(parsed.info.nlmsg_type, 5)
 
     def test_make_rejects_invalid_byteorder(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
             Netlink(byteorder='middle')  # type: ignore[arg-type]
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in (
@@ -188,10 +188,10 @@ class TestNetlink(unittest.TestCase):
 
     def test_make_explicit_nlmsg_len_is_written_as_given(self) -> None:
         """An explicit ``nlmsg_len`` is written as given, not recomputed --
-        the same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.UDP.make>`
+        the same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.protocol.UDP.make>`
         keeps an explicit ``total_length`` (:issue:`1155`).
         """
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         made = Netlink(nlmsg_len=999, payload=b'\x01\x02')
         self.assertEqual(made.info.nlmsg_len, 999)
@@ -199,8 +199,8 @@ class TestNetlink(unittest.TestCase):
     def test_id_and_index(self) -> None:
         """``__index__`` is the ``arphrd_type`` LinuxSLL dispatches here (#2510)."""
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         self.assertEqual(Netlink.id(), ('Netlink',))
         self.assertIs(Netlink.__index__(), ARPHRD.NETLINK)
@@ -216,7 +216,7 @@ class TestNetlink(unittest.TestCase):
         """
         import warnings
 
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         raw = _nlmsghdr('little', nlmsg_type=3, payload=b'\xaa\xbb\xcc\xdd')
         for keep in (1, 2, 3, 4, 8, 15):

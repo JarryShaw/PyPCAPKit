@@ -2,7 +2,7 @@
 """GitHub issue #1580: a next layer replaced by ``Raw`` reports no warnings.
 
 :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer` parses a next
-layer on trial and keeps it as :class:`~pcapkit.protocols.misc.raw.Raw` when
+layer on trial and keeps it as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` when
 fewer octets were captured than its header needs (#1170). Without the fix, the
 trial's warnings are reported anyway, for a layer the result does not have: a
 PCAP-NG Simple Packet Block cut to 10 octets by its interface's snaplen warns
@@ -142,8 +142,8 @@ class TestTrialParseWarnings(unittest.TestCase):
     def test_cut_packet_blocks_warn_nothing(self) -> None:
         """SPB, EPB and Packet Block cut to 10 octets, in both byte orders, on every path."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for endian in '<>':
             for type_ in (BlockType.Simple_Packet_Block, BlockType.Enhanced_Packet_Block,
@@ -172,7 +172,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_cut_pcap_record_warns_nothing(self) -> None:
         """A PCAP record of 10 octets: the Ethernet header was not PCAP-NG's to drop."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         header = struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 65535, 1)  # Ethernet
         record = struct.pack('<IIII', 0, 0, SNAPLEN, ORIGINAL) + DATA
@@ -185,7 +185,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_ethernet_asked_for_still_warns(self) -> None:
         """``Ethernet(bytes(10))`` is not on trial: it is built directly, kept, and warns."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -195,7 +195,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_kept_cut_layers_still_warn_from_the_callers_line(self) -> None:
         """A held layer that is kept reports as it did, on both channels."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.logging import logger
         from pcapkit.utilities.warnings import SchemaWarning
 
@@ -225,8 +225,8 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_holds_nest(self) -> None:
         """Each block reports what it keeps when it is left; a discarded one drops its own."""
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
 
@@ -261,10 +261,10 @@ class TestTrialParseWarnings(unittest.TestCase):
         drop its warnings: they are reported as they are raised. Under
         ``beholder`` the same cut is held and dropped with the layer (#2516).
         """
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase, _short_of_hint
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import hold_warnings
 
@@ -305,7 +305,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
         """
         import pcapkit.protocols.protocol as protocol_module
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         def chains() -> 'list[str]':
             found = []
@@ -334,7 +334,7 @@ class TestTrialParseWarnings(unittest.TestCase):
     def test_always_filter_only_drops_warnings(self) -> None:
         """Under ``always``, every cut reports the warnings it reports holding nothing, less some."""
         import pcapkit.protocols.protocol as protocol_module
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         def reports() -> 'list[list[tuple[Any, ...]]]':
             found = []
@@ -484,7 +484,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
         """
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from tests.protocols.misc.test_pcapng_unit import NamedBuffer
 
         octets, _ = _pcapng('>', 3)

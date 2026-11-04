@@ -76,8 +76,8 @@ class TestTrialParseFullLength(unittest.TestCase):
     @staticmethod
     def _parse(klass: 'str', data: 'bytes', action: 'str' = 'always') -> 'tuple[object, list[warnings.WarningMessage]]':
         """Parse ``data`` as ``klass``, TCP or Ethernet, with the warnings it reports."""
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter(action)
@@ -86,7 +86,7 @@ class TestTrialParseFullLength(unittest.TestCase):
 
     def test_mid_record_segment_is_raw_and_warns_nothing(self) -> None:
         """The issue's segment: TLS and its SSLv2 fallback both reject it, on both channels."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.logging import logger
 
         with capture(logger) as recorder:
@@ -114,7 +114,7 @@ class TestTrialParseFullLength(unittest.TestCase):
 
     def test_full_length_layer_that_raises_warns_nothing(self) -> None:
         """TCP past its hint raises under IPv4's and IPv6's own ``beholder`` alike."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, frame in (('IPv4', _ipv4(6, TCP_CUT)),
                             ('IPv6', MACS + b'\x86\xdd' + _ipv6(6, TCP_CUT))):
@@ -132,7 +132,7 @@ class TestTrialParseFullLength(unittest.TestCase):
 
     def test_kept_layer_still_warns_from_the_callers_line(self) -> None:
         """Control: a kept IPv4 is held, and reports its warning from the caller's line."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.warnings import ProtocolWarning
 
         frame = _ipv4(17, struct.pack('!HHHH', 40000, 40001, 12, 0) + b'abcd', SECURITY)
@@ -158,7 +158,7 @@ class TestTrialParseFullLength(unittest.TestCase):
         ``beholder`` parses are held, and report as their parse ends.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.warnings import hold_warnings
 

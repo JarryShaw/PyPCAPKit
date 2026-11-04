@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """HTTP's ``id()`` carries the RFC names of its versions. C.f. #2524.
 
-:meth:`HTTP.id() <pcapkit.protocols.application.http.HTTP.id>` lists its members
+:meth:`HTTP.id() <pcapkit.protocols.application.http.protocol.HTTP.id>` lists its members
 alone, ``('HTTP/1', 'HTTP/2')``, as ``IP.id()`` does, and each versioned class
 narrows to its own name: ``HTTP/2`` is RFC 9113's, and ``HTTP/1`` covers RFC 9112's
 HTTP/1.1 with the versions before it. No ``id()`` carries ``'HTTP'``, ``'HTTPv1'``
@@ -61,16 +61,16 @@ class HTTPIdTests(unittest.TestCase):
 
     @staticmethod
     def classes() -> 'tuple[Any, Any, Any]':
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTPv1
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         return HTTP, HTTPv1, HTTPv2
 
     @staticmethod
     def frame(payload: bytes, **kwargs: 'Any') -> 'Any':
         """Return the TCP segment carrying ``payload`` to port 80, parsed."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         data = _TCP_TO_80 + payload
         with warnings.catch_warnings():

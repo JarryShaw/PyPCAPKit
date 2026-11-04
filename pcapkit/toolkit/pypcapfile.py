@@ -52,13 +52,13 @@ from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.internet import ipv6 as Module_IPv6
-from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol_IPv4
-from pcapkit.protocols.schema.internet import ah as Schema_AH_Module
-from pcapkit.protocols.schema.internet import ipv4 as Schema_IPv4_Module
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
-from pcapkit.protocols.schema.transport import tcp as Schema_TCP_Module
-from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
+from pcapkit.protocols.internet.ah import schema as Schema_AH_Module
+from pcapkit.protocols.internet.ipv4 import schema as Schema_IPv4_Module
+from pcapkit.protocols.internet.ipv4.protocol import IPv4 as Protocol_IPv4
+from pcapkit.protocols.internet.ipv6 import protocol as Module_IPv6
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION
+from pcapkit.protocols.transport.tcp import schema as Schema_TCP_Module
+from pcapkit.protocols.transport.tcp.protocol import TCP as Protocol_TCP
 from pcapkit.utilities import config
 from pcapkit.utilities.contextvars import beholding
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
@@ -555,7 +555,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than
-        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`. Any other
+        :data:`~pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN`. Any other
         is stepped over by the length :func:`_default_extension_header` gives,
         so one it keeps though cut short leaves no octets after it
         (:issue:`2695`).

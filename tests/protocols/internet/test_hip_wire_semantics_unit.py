@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """HIP parameters carry the units, widths and registries their RFCs define.
 
-Seven defects in :mod:`pcapkit.protocols.internet.hip`, each a field read or
+Seven defects in :mod:`pcapkit.protocols.internet.hip.protocol`, each a field read or
 written against the wrong definition:
 
 * #2271 -- ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
@@ -12,7 +12,7 @@ written against the wrong definition:
   its maker had no version gate and built octets that reader rejects.
 * #2276 -- a ``LOCATOR_SET`` locator built with ``spi=`` left ``type`` at ``0``
   while setting ``Locator Length`` to ``5``, a pair
-  :func:`~pcapkit.protocols.schema.internet.hip.locator_value_selector`
+  :func:`~pcapkit.protocols.internet.hip.schema.locator_value_selector`
   refuses; :rfc:`8046#section-4.2` makes the SPI form Type 1.
 * #2281 -- ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` read their
   lifetime octets as counts of seconds, where :rfc:`8003#section-4.1` makes a
@@ -67,7 +67,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
 
     def _packet(self, code: 'object', value: 'object', version: 'int' = 2) -> 'bytes':
         """Build a whole HIP packet carrying the one parameter ``code``."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(parameters=[(code, value)], extension=True,
                    version=version, **HIP_BASE).data  # type: ignore[arg-type]
@@ -78,14 +78,14 @@ class HIPWireSemanticsTests(unittest.TestCase):
 
     def _wrap(self, raw: 'bytes', version: 'int' = 2) -> 'bytes':
         """Build a whole HIP packet whose parameter octets are ``raw``."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(parameters=[raw], extension=True,
                    version=version, **HIP_BASE).data
 
     def _parse(self, code: 'object', raw: 'bytes', version: 'int' = 2) -> 'object':
         """Parse the parameter octets ``raw`` and return the parsed data."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         wire = self._wrap(raw, version)
         return HIP(io.BytesIO(wire), len(wire), extension=True).info.parameters[code]  # type: ignore[index]
@@ -135,7 +135,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """#2275: the *maker* gates on version, as its own reader does.
 
         The maker is called directly rather than through
-        :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`, because a
+        :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`, because a
         whole-packet build raised this same message from
         ``_read_param_hip_transform`` all along -- the packet is parsed back on
         the way out. Going through the public path therefore cannot tell a
@@ -146,7 +146,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.hip.suite import Suite
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = HIP.__new__(HIP)
@@ -345,7 +345,7 @@ class HIPWireSemanticsTests(unittest.TestCase):
         """#2283: the namespace arguments existed only for the wrong registry."""
         import inspect
 
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         keywords = inspect.signature(HIP._make_param_cert).parameters
         for dropped in ('cert_group_default', 'cert_group_namespace',
@@ -360,8 +360,8 @@ class HIPWireSemanticsTests(unittest.TestCase):
     def test_host_id_errors_use_the_house_prefix(self) -> None:
         """#2299: ``HIPv2: [ParamNo 705] ...``, not ``[HIPv2] ...``."""
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet.hip import HostIdentity
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.data import HostIdentity
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = HIP.__new__(HIP)

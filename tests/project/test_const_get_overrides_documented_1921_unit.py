@@ -71,7 +71,7 @@ RELATIVE_PINS = (
 ABSOLUTE_PINS = (
     ('pcapkit/vendor/http/method.py', 'pcapkit.const.ftp.command.Command.get'),
     ('pcapkit/vendor/ftp/command.py', 'pcapkit.const.http.method.Method.get'),
-    ('pcapkit/protocols/schema/misc/pcapng.py',
+    ('pcapkit/protocols/misc/pcapng/schema.py',
      'pcapkit.const.pcapng.option_type.OptionType.get'),
 )
 

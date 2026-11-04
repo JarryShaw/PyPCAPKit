@@ -1111,12 +1111,12 @@ class AppTypeSplitTests(unittest.TestCase):
 
         callers = [
             'pcapkit/protocols/transport/transport.py',
-            'pcapkit/protocols/transport/tcp.py',
-            'pcapkit/protocols/transport/udp.py',
-            'pcapkit/protocols/transport/sctp.py',
-            'pcapkit/protocols/schema/transport/tcp.py',
-            'pcapkit/protocols/schema/transport/udp.py',
-            'pcapkit/protocols/schema/transport/sctp.py',
+            'pcapkit/protocols/transport/tcp/protocol.py',
+            'pcapkit/protocols/transport/udp/protocol.py',
+            'pcapkit/protocols/transport/sctp/protocol.py',
+            'pcapkit/protocols/transport/tcp/schema.py',
+            'pcapkit/protocols/transport/udp/schema.py',
+            'pcapkit/protocols/transport/sctp/schema.py',
             'pcapkit/foundation/registry/protocols/transport.py',
             'pcapkit/corekit/fields/numbers.py',
         ]
@@ -1195,19 +1195,19 @@ class AppTypeSplitTests(unittest.TestCase):
             'pcapkit/corekit/fields/numbers.py _dispatch(proto=proto)',
             'pcapkit/corekit/fields/numbers.py get(proto=proto)',
             'pcapkit/corekit/fields/numbers.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/sctp.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
-            'pcapkit/protocols/schema/transport/sctp.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
-            'pcapkit/protocols/schema/transport/tcp.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
-            'pcapkit/protocols/schema/transport/tcp.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
-            'pcapkit/protocols/schema/transport/udp.py PortEnumField(proto=Enum_TransportProtocol.udp)',
-            'pcapkit/protocols/schema/transport/udp.py PortEnumField(proto=Enum_TransportProtocol.udp)',
-            'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
-            'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
-            'pcapkit/protocols/transport/tcp.py _make_port(proto=Enum_TransportProtocol.tcp)',
-            'pcapkit/protocols/transport/tcp.py _make_port(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/sctp/protocol.py _make_port(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/sctp/protocol.py _make_port(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/sctp/schema.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/sctp/schema.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/tcp/protocol.py _make_port(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/tcp/protocol.py _make_port(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/tcp/schema.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/tcp/schema.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
             'pcapkit/protocols/transport/transport.py get(proto=proto)',
-            'pcapkit/protocols/transport/udp.py _make_port(proto=Enum_TransportProtocol.udp)',
-            'pcapkit/protocols/transport/udp.py _make_port(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/transport/udp/protocol.py _make_port(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/transport/udp/protocol.py _make_port(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/transport/udp/schema.py PortEnumField(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/transport/udp/schema.py PortEnumField(proto=Enum_TransportProtocol.udp)',
         ])
 
         # ``register_apptype`` takes the transports one at a time and resolves each
@@ -1258,7 +1258,7 @@ class AppTypeSplitTests(unittest.TestCase):
 
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         missing = object()
         previous = reg_transport.UDP.__proto__.get(65210, missing)

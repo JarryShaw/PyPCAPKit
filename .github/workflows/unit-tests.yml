@@ -40,11 +40,11 @@ jobs:
   # needs 3.11). Runs on every path, `gate-only` included, with no write
   # permission, since callers of this reusable workflow grant `contents: read`.
   #
-  # The other single-interpreter jobs (`unittest-ordering`, `changelog`,
-  # `project-tests`) run the script in a step of their own: setup-python takes
-  # an empty `python-version` as "the Python on PATH", with only a warning, so
-  # `unittest-ordering`'s `!cancelled()` would otherwise need a check that this
-  # job succeeded.
+  # The other single-interpreter jobs (`coverage`, `unittest-ordering`,
+  # `changelog`, `project-tests`) run the script in a step of their own:
+  # setup-python takes an empty `python-version` as "the Python on PATH", with
+  # only a warning, so the `!cancelled()` of `coverage` and `unittest-ordering`
+  # would otherwise need a check that this job succeeded.
   python-versions:
     name: Read the Python versions
     runs-on: ubuntu-latest
@@ -100,17 +100,19 @@ jobs:
       # so nothing here waits on it (#1732). #1958, the owner's ruling E: PyPy's
       # legs run the same `ALL` tier as every CPython leg but `latest`.
       #
-      # `include` marks one leg `coverage: true`, `latest` (#1661), so coverage
-      # adds no leg to the queue. That leg runs slower than the rest: it runs the
-      # `LATEST` tier as well as `ALL`, under coverage. util/ci_timing.py's W3
-      # tracks the gap.
+      # `include` marks one leg `coverage: true`, `latest` (#1661). It runs the
+      # `ALL` tier, as every leg does, under coverage; util/ci_timing.py's W3
+      # weighs that against its paired legs. #2751: the `LATEST` tier runs in
+      # `test-latest-tier`, under coverage too, and `coverage` combines the two.
       #
       # #2243, the owner's option B: a test-only pull request runs the
-      # `latest` leg alone, the coverage leg, which runs the whole suite with
-      # `integration`'s `latest` leg and `project-tests`. See `required-checks`.
+      # `latest` leg alone, which with `test-latest-tier`, `integration`'s
+      # `latest` leg and `project-tests` runs the whole suite. See
+      # `required-checks`.
       matrix: ${{ fromJSON(needs.changes.outputs.test-only == 'true' && needs.python-versions.outputs.test-latest || needs.python-versions.outputs.test) }}
 
-    # `&test-steps`: `test-ktlo` runs these same steps, by YAML alias.
+    # `&test-steps`: `test-ktlo` and `test-latest-tier` run these same steps,
+    # by YAML alias.
     steps: &test-steps
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
@@ -189,15 +191,16 @@ jobs:
         #
         # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
         # module in `ALL`, a curated list each stating `__tier__ = 'ALL'` (#1963),
-        # or else in `LATEST`, and `LATEST` runs on `latest`
-        # alone, which is also the coverage leg. Every other leg -- `test-ktlo`'s
-        # too -- passes each module latest_tier_paths() prints as an `--ignore`,
-        # which takes in the round-trip sweeps (#1732).
+        # or else in `LATEST`, and `LATEST` runs on `latest` alone. Every leg of
+        # `test` and `test-ktlo`, `latest`'s too, passes each module
+        # latest_tier_paths() prints as an `--ignore`, which takes in the
+        # round-trip sweeps (#1732).
         #
-        # #1954, the owner's option 3: the project pins, tests/_tiers.py's
-        # project_pin_paths(), run once per push in `project-tests`, so `latest`
-        # passes each as an `--ignore` too. They import no pcapkit, so coverage
-        # loses nothing.
+        # #2751: `test-latest-tier`'s cells, on `latest`, set `HALF`, and each
+        # runs the half latest_tier_half() prints by name instead. It leaves out
+        # the project pins, tests/_tiers.py's project_pin_paths(), which run
+        # once per push in `project-tests` (#1954, the owner's option 3). They
+        # import no pcapkit, so coverage loses nothing.
         #
         # #2005: on PyPy an xdist worker's RSS grows with every test it runs, so
         # the `ALL` tier took the workers past 20 GB. A smaller `-n` only hands
@@ -212,12 +215,18 @@ jobs:
         # of its own, and `tests/protocols` then takes the remainder.
         env:
           COVERAGE: ${{ matrix.coverage }}
-          LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
+          HALF: ${{ matrix.half }}
           SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols/internet tests/protocols/application tests/protocols/misc tests/protocols tests/corekit' || '' }}
         run: |
-          if [ "$LATEST" = "true" ]; then
-            if ! skipped=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
-              echo "::${ANNOTATION_LEVEL} title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
+          skipped=
+          selected=
+          if [ -n "$HALF" ]; then
+            if ! selected=$(python -c "import sys; from tests._tiers import latest_tier_half; print(' '.join(latest_tier_half(int(sys.argv[1]))))" "$HALF"); then
+              echo "::${ANNOTATION_LEVEL} title=Could not compute the LATEST tier's half::tests._tiers.latest_tier_half($HALF) failed -- see the traceback above."
+              exit 1
+            fi
+            if [ -z "$selected" ]; then
+              echo "::${ANNOTATION_LEVEL} title=No LATEST modules in half $HALF::tests._tiers.latest_tier_half($HALF) returned nothing. Refusing to run pytest with no module, which would run the whole suite."
               exit 1
             fi
           elif ! skipped=$(python -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))"); then
@@ -232,6 +241,9 @@ jobs:
           for module in $skipped; do
             set -- "$@" --ignore="$module"
           done
+          for module in $selected; do
+            set -- "$@" "$module"
+          done
           if [ "$COVERAGE" = "true" ]; then
             # Logs every measured process and its parent, for the check below.
             COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
@@ -243,20 +255,38 @@ jobs:
             python util/cap_file_size.py python -m pytest "$@"
           fi
 
-      # util/coverage_report.py (#1967) fails, posting no number, unless every
-      # measured process saved its data (#1387). coverage-comment.yml posts the
-      # PR comment from the artifact, since callers of this reusable workflow
-      # grant only `contents: read`. `!cancelled()` so a failing test still
-      # reports what it measured. #2030: its summary goes to the job's copy too.
-      - name: Report coverage
+      # #2751: a coverage leg measures one part of the suite -- `test`'s
+      # `latest` leg the `ALL` tier, each `test-latest-tier` cell a half of the
+      # `LATEST` one -- and the `coverage` job combines the parts. Each part's
+      # check, util/coverage_report.py's (#1967), fails its leg unless every
+      # measured process saved its data (#1387). `!cancelled()` so a failing
+      # test still hands on what it measured, with the tests step's outcome
+      # beside it. #2030: a failure's summary goes to the job's copy too.
+      - name: Check coverage data
+        id: coverage-check
         if: ${{ !cancelled() && matrix.coverage }}
         shell: bash
         env:
-          SHA: ${{ github.sha }}
-          PYTHON: ${{ matrix.python-version }}
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
           JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
-        run: python util/coverage_report.py
+        run: |
+          printf '%s\n' "$TESTS_OUTCOME" > coverage-tests-outcome
+          python util/coverage_report.py check
+
+      # Only a part whose check passed, so `coverage` finds a lost one missing
+      # and posts no number, rather than reporting the rest as the whole. The
+      # data files are hidden ones, and `coverage` reads them in this run.
+      - name: Upload coverage data
+        if: ${{ !cancelled() && matrix.coverage && steps.coverage-check.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-data-${{ matrix.half && 'latest-half-' || 'all' }}${{ matrix.half }}
+          path: |
+            .coverage.*
+            coverage-tests-outcome
+          include-hidden-files: true
+          retention-days: 1
+          if-no-files-found: error
 
       # #1423: this log is the only record of a measured process that saved no
       # data. Kept whenever the leg ran, not only on failure: a run that passed
@@ -265,36 +295,21 @@ jobs:
         if: ${{ !cancelled() && matrix.coverage }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: coverage-processes-log
+          name: coverage-processes-log-${{ matrix.half && 'latest-half-' || 'all' }}${{ matrix.half }}
           path: coverage-processes.log
           retention-days: 30
           if-no-files-found: warn
 
-      - name: Upload coverage HTML report
-        if: ${{ !cancelled() && matrix.coverage }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: coverage-html
-          path: coverage-html/
-          retention-days: 30
-
-      - name: Upload coverage summary
-        if: ${{ !cancelled() && matrix.coverage }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: coverage-summary
-          path: coverage-comment/coverage-summary.json
-          retention-days: 7
-
       # #1538: ci-timing.yml reads these from the newest push runs. Diagnostic
       # only, so an artifact service outage must not fail a gating leg. The glob
-      # takes a PyPy leg's JUnit file per run too (#2005).
+      # takes a PyPy leg's JUnit file per run too (#2005), and a half of the
+      # `LATEST` tier's file is its own, read as `latest`'s (#2751).
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: junit-unit-${{ matrix.python-version }}
+          name: junit-unit-${{ matrix.python-version }}${{ matrix.half && '-latest-half-' || '' }}${{ matrix.half }}
           path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
@@ -328,7 +343,7 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          JOB_NAME: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+          JOB_NAME: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}${{ matrix.half && ' (LATEST tier, half ' || '' }}${{ matrix.half }}${{ matrix.half && ')' || '' }}
         run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
 
       - name: Upload the job summary
@@ -369,6 +384,120 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.python-versions.outputs.test-ktlo) }}
     steps: *test-steps
+
+  # #2751: the `LATEST` tier, on `latest` alone, under coverage, out of `test`'s
+  # `latest` leg, as `project` was cut out of one cell in #2254. That leg ran
+  # both tiers, and its `Run unit tests` took 30.8, 23.4, 28.6 and 27.4 min of
+  # the job's 45 on the push runs of f45c82b5d, 21ec0a6f1, ab7be2fb0 and
+  # 596dcfaf8: 6795, 5040, 6303 and 6027 test-seconds, of which the `LATEST`
+  # tier, less the pins, took 3942, 2894, 3598 and 3384. So each cell runs a
+  # half, tests/_tiers.py's latest_tier_half(), cut at LATEST_TIER_BOUNDARY,
+  # whose halves took 1830 and 1661 test-seconds there at the median, and the
+  # `latest` leg runs the `ALL` tier alone. The steps are `test`'s, by YAML
+  # alias, so each cell installs as that leg does and hands its coverage data
+  # to `coverage`.
+  test-latest-tier:
+    name: Python ${{ matrix.python-version }} (LATEST tier, half ${{ matrix.half }})
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes, python-versions]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANNOTATION_LEVEL: error
+    strategy:
+      fail-fast: false
+      # `ktlo: false` names the key `test`'s steps read, which actionlint asks
+      # a matrix written out here to define.
+      matrix:
+        python-version: ['${{ needs.python-versions.outputs.latest }}']
+        half: [1, 2]
+        include:
+          - coverage: true
+            ktlo: false
+    steps: *test-steps
+
+  # #2751: the coverage legs' parts, combined into the one number
+  # coverage-comment.yml posts, which comes from this job's artifact since
+  # callers of this reusable workflow grant only `contents: read`. Each part
+  # was checked whole on its own leg; util/coverage_report.py's `combine`
+  # fails, posting no number, unless every part named below arrived, as
+  # `test`'s `latest` leg and each `half` of `test-latest-tier` upload them.
+  # `!cancelled()` so a failing test still reports what was measured, as
+  # partial. `required-checks` needs it, as it needed the leg that reported.
+  coverage:
+    name: Coverage
+    needs: [changes, test, test-latest-tier]
+    if: ${{ !cancelled() && inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # See `unittest-ordering` below.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ steps.python-versions.outputs.latest }}
+
+      # The version the legs measured with, as `test`'s step of the same name.
+      - name: Install coverage
+        run: python -m pip install 'coverage>=7.10'
+
+      - name: Download coverage data
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: coverage-data-*
+          path: coverage-data
+
+      # #2030: its summary goes to the job's copy too.
+      - name: Report coverage
+        shell: bash
+        env:
+          SHA: ${{ github.sha }}
+          PYTHON: ${{ steps.python-versions.outputs.latest }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
+        run: python util/coverage_report.py combine coverage-data/coverage-data-all coverage-data/coverage-data-latest-half-1 coverage-data/coverage-data-latest-half-2
+
+      - name: Upload coverage HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-html
+          path: coverage-html/
+          retention-days: 30
+
+      - name: Upload coverage summary
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-summary
+          path: coverage-comment/coverage-summary.json
+          retention-days: 7
+
+      # #2030: as `test`'s steps of the same names.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Coverage
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
 
   integration:
     name: Integration Python ${{ matrix.python-version }}
@@ -1502,7 +1631,9 @@ jobs:
   # so depending on it would skip this job on every ordinary PR. `changelog`
   # is left out too: it is a drift check, and folding it in would widen what
   # merging requires, which is the maintainer's call. `project-tests` gates
-  # every diff, as the one run of the project pins (#1954). `engine-tests`'s
+  # every diff, as the one run of the project pins (#1954). `test-latest-tier`
+  # and `coverage` gate as `test`'s `latest` leg did when it ran the `LATEST`
+  # tier and reported coverage itself (#2751). `engine-tests`'s
   # `unsupported` and `not-installable` cells exit 0 when they decline as
   # expected, and its KTLO cells are non-blocking through step-level
   # `continue-on-error`; the KTLO legs of the matrix jobs are jobs of their
@@ -1511,21 +1642,23 @@ jobs:
   #
   # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories, `test`,
-  # `integration`, `engine-tests` and `pypcap-parity` are skipped by their own
-  # `if:`, and `project-tests` runs the docs readers as well. A job-level `if:`
-  # rather than workflow-level `paths-ignore`, which would leave this required
-  # context pending forever. So `skipped` is accepted for those legs **only**
-  # when `changes` succeeded and said `code == 'false'`.
+  # `test-latest-tier`, `coverage`, `integration`, `engine-tests` and
+  # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs
+  # the docs readers as well. A job-level `if:` rather than workflow-level
+  # `paths-ignore`, which would leave this required context pending forever.
+  # So `skipped` is accepted for those legs **only** when `changes` succeeded
+  # and said `code == 'false'`.
   #
   # The test-only path (#2243). On one whose diff touches tests and docs alone,
-  # `test` and `integration` run their `latest` leg alone and must succeed, and
-  # `engine-tests` and `pypcap-parity` are skipped by their own `if:`. So
-  # `skipped` is accepted for those two **only** when `changes` succeeded and
-  # said `code == 'true'` and `test-only == 'true'`. `project-tests` must have
-  # succeeded on every path, and every other combination fails this gate.
+  # `test` and `integration` run their `latest` leg alone and must succeed, as
+  # must `test-latest-tier` and `coverage`, and `engine-tests` and
+  # `pypcap-parity` are skipped by their own `if:`. So `skipped` is accepted
+  # for those two **only** when `changes` succeeded and said `code == 'true'`
+  # and `test-only == 'true'`. `project-tests` must have succeeded on every
+  # path, and every other combination fails this gate.
   required-checks:
     name: Required checks passed
-    needs: [changes, test, integration, engine-tests, pypcap-parity, project-tests]
+    needs: [changes, test, test-latest-tier, coverage, integration, engine-tests, pypcap-parity, project-tests]
     if: ${{ always() && inputs.gate-only != true }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -1537,6 +1670,8 @@ jobs:
           CODE: ${{ needs.changes.outputs.code }}
           TEST_ONLY: ${{ needs.changes.outputs.test-only }}
           TEST: ${{ needs.test.result }}
+          TEST_LATEST_TIER: ${{ needs.test-latest-tier.result }}
+          COVERAGE: ${{ needs.coverage.result }}
           INTEGRATION: ${{ needs.integration.result }}
           ENGINE_TESTS: ${{ needs.engine-tests.result }}
           PYPCAP_PARITY: ${{ needs.pypcap-parity.result }}
@@ -1545,6 +1680,8 @@ jobs:
           set -eu
           echo "changes: $CHANGES (code: '$CODE', test-only: '$TEST_ONLY')"
           echo "test: $TEST"
+          echo "test-latest-tier: $TEST_LATEST_TIER"
+          echo "coverage: $COVERAGE"
           echo "integration: $INTEGRATION"
           echo "engine-tests: $ENGINE_TESTS"
           echo "pypcap-parity: $PYPCAP_PARITY"
@@ -1568,13 +1705,13 @@ jobs:
           # every leg must have succeeded.
           [ "$PROJECT_TESTS" = "success" ] || { echo "::error title=project-tests did not succeed::result was '$PROJECT_TESTS'; it runs the project pins, and on a docs-only diff the docs readers too, so it has to pass."; failed=1; }
           if [ "$CODE" = "false" ]; then
-            may_skip="test integration engine-tests pypcap-parity"
+            may_skip="test test-latest-tier coverage integration engine-tests pypcap-parity"
           elif [ "$TEST_ONLY" = "true" ]; then
             may_skip="engine-tests pypcap-parity"
           else
             may_skip=""
           fi
-          for pair in "test=$TEST" "integration=$INTEGRATION" "engine-tests=$ENGINE_TESTS" "pypcap-parity=$PYPCAP_PARITY"; do
+          for pair in "test=$TEST" "test-latest-tier=$TEST_LATEST_TIER" "coverage=$COVERAGE" "integration=$INTEGRATION" "engine-tests=$ENGINE_TESTS" "pypcap-parity=$PYPCAP_PARITY"; do
             job="${pair%%=*}"
             result="${pair#*=}"
             case " $may_skip " in

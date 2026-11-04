@@ -107,7 +107,7 @@ def _udp(payload: bytes, from_client: bool = True) -> bytes:
 
 def _dtls_layers(proto: 'Any') -> 'tuple[list, Any]':
     """Each DTLS layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.dtls import DTLS
+    from pcapkit.protocols.application.dtls.protocol import DTLS
 
     layers = []
     while isinstance(proto, DTLS):
@@ -118,7 +118,7 @@ def _dtls_layers(proto: 'Any') -> 'tuple[list, Any]':
 
 def _cid_layers(proto: 'Any') -> 'tuple':
     """``(cid, epoch, sequence number, length)`` of each ``tls12_cid`` layer under ``proto``."""
-    from pcapkit.protocols.data.application.dtls import DTLSCIDCiphertext
+    from pcapkit.protocols.application.dtls.data import DTLSCIDCiphertext
 
     return tuple((layer.info.cid, layer.info.epoch, layer.info.sequence_number, layer.info.length)
                  for layer in _dtls_layers(proto)[0] if isinstance(layer.info, DTLSCIDCiphertext))
@@ -152,8 +152,8 @@ class ConnectionIdExtensionTests(unittest.TestCase):
 
     def test_each_hello_decodes_the_id_its_sender_receives(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.tls import ConnectionId
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.data import ConnectionId
 
         for name, (_, wire), cid in (('ClientHello', MBEDTLS[0], CLIENT_CID),
                                      ('ServerHello', MBEDTLS[3], SERVER_CID)):
@@ -166,7 +166,7 @@ class ConnectionIdExtensionTests(unittest.TestCase):
 
     def test_a_malformed_extension_stays_raw_and_teaches_nothing(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         # The ``cid`` vector says 5 octets, but 4 follow it.
         bad = MBEDTLS[0][1].replace(bytes.fromhex('0036000504c1c2c3c4'), bytes.fromhex('0036000505c1c2c3c4'))
@@ -179,8 +179,8 @@ class ConnectionIdExtensionTests(unittest.TestCase):
     def test_the_extension_is_made_from_a_cid(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.const.tls.handshake_type import HandshakeType
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.data.application.tls import ConnectionId, Extension
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.application.ssl.data import ConnectionId, Extension
 
         maker = object.__new__(DTLS)
         for name, extension in (('from kwargs', (ExtensionType.connection_id, {'cid': b'\x01\x02'})),
@@ -193,8 +193,8 @@ class ConnectionIdExtensionTests(unittest.TestCase):
     def test_a_tls_hello_carrying_the_extension_decodes_it_too(self) -> None:
         """RFC 9146 section 10.2 makes it DTLS-only; TLS shares the decoder regardless."""
         from pcapkit.const.tls.extension_type import ExtensionType
-        from pcapkit.protocols.application.tls import TLS
-        from pcapkit.protocols.data.application.tls import ConnectionId
+        from pcapkit.protocols.application.tls.protocol import TLS
+        from pcapkit.protocols.application.ssl.data import ConnectionId
 
         extensions = bytes.fromhex('0036000302abcd')
         body = (b'\x03\x03' + bytes(32) + b'\x00' + b'\x00\x02\x13\x01' + b'\x01\x00'
@@ -209,7 +209,7 @@ class ConnectionIdExtensionTests(unittest.TestCase):
     def test_handing_back_the_shipped_entry_is_a_silent_no_op(self) -> None:
         from pcapkit.const.tls.extension_type import ExtensionType
         from pcapkit.foundation.registry.protocols import register_tls_extension
-        from pcapkit.protocols.application.ssl import SSL
+        from pcapkit.protocols.application.ssl.protocol import SSL
 
         shipped = dict(SSL.__extension__)
         self.assertEqual(shipped[ExtensionType.connection_id], 'connection_id')
@@ -227,8 +227,8 @@ class CaptureTests(unittest.TestCase):
 
     def test_the_handshake_teaches_each_direction_its_id(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.application.dtls import DTLSContext
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.dtls.protocol import DTLSContext
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         registry = ContextRegistry()
         for index, ((from_client, payload), (chain, records)) in enumerate(zip(MBEDTLS, TSHARK), 1):
@@ -256,8 +256,8 @@ class CaptureTests(unittest.TestCase):
             close_extractor(extraction)
 
     def test_a_caller_supplied_length_reads_records_without_the_handshake(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLSContext
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.dtls.protocol import DTLSContext
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for index in range(6, 10):
             (from_client, payload), (chain, records) = MBEDTLS[index], TSHARK[index]
@@ -290,7 +290,7 @@ class InstanceMemoryTests(unittest.TestCase):
         return extraction
 
     def test_two_fresh_instances_share_nothing(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
         from pcapkit.utilities.exceptions import ProtocolError
 
         first = DTLSContext()
@@ -344,7 +344,7 @@ class InstanceMemoryTests(unittest.TestCase):
                                   'record': 'Ethernet:IPv4:UDP:Raw'})
 
     def test_a_reused_caller_instance_keeps_its_ids(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLSContext
 
         context = DTLSContext()
         self._extract(MBEDTLS, context=context)
@@ -362,7 +362,7 @@ class InstanceMemoryTests(unittest.TestCase):
 
     def test_a_constructed_payload_registers_on_the_instance_in_use(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
         from pcapkit.utilities.exceptions import ProtocolError
 
         def build(**kwargs: 'Any') -> 'Any':
@@ -409,8 +409,8 @@ class QuietRefusalTests(unittest.TestCase):
         sys.excepthook, threading.excepthook = _sys_sentinel, _threading_sentinel
 
     def test_dispatch_keeps_the_record_raw_and_logs_nothing(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.logging import logger
 
@@ -430,7 +430,7 @@ class QuietRefusalTests(unittest.TestCase):
                 self.assertEqual(bytes(UDP.from_data(proto.info)).hex(), datagram.hex())
 
     def test_a_direct_parse_raises(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = MBEDTLS[6][1]
@@ -445,7 +445,7 @@ class ResolutionTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_a_learned_id_comes_before_cid_length(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         wire = MBEDTLS[6][1]
         parsed = DTLS(wire, len(wire), __context__=DTLSContext(SERVER_CID, cid_length=4))
@@ -453,7 +453,7 @@ class ResolutionTests(unittest.TestCase):
         self.assertEqual(parsed.info.length, 80)
 
     def test_the_longest_id_whose_record_fits(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         fragment = b'\xff\xff' + bytes(14)
         for name, cid, ids in (
@@ -467,7 +467,7 @@ class ResolutionTests(unittest.TestCase):
                 self.assertEqual(parsed.length, 13 + len(cid))
 
     def test_a_record_no_candidate_fits_reports_its_overrun(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = _cid_record(SERVER_CID, bytes(16))[:-1]
@@ -479,7 +479,7 @@ class ResolutionTests(unittest.TestCase):
 
     def test_only_dtls_1_2_carries_tls12_cid(self) -> None:
         """RFC 9146 section 10.3 applies the content type to DTLS 1.2 alone."""
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
         from pcapkit.utilities.exceptions import ProtocolError
 
         wire = _cid_record(SERVER_CID, bytes(16), version=b'\xfe\xff')
@@ -492,7 +492,7 @@ class ResolutionTests(unittest.TestCase):
 
     def test_an_empty_id_is_not_learned(self) -> None:
         """A zero-length ``connection_id`` asks for no ID (RFC 9146 section 3)."""
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         # An empty ``connection_id``, then an unknown empty extension (0xFFCE),
         # in the 9 octets the vector's own extension takes.
@@ -503,7 +503,7 @@ class ResolutionTests(unittest.TestCase):
 
     def test_a_context_of_another_type_is_left_alone(self) -> None:
         from pcapkit.corekit.context import ContextRegistry, ProtocolContext
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         class Other(ProtocolContext):
             """A context some other code keeps under ``DTLS``."""
@@ -519,7 +519,7 @@ class ResolutionTests(unittest.TestCase):
         self.assertEqual(len(registry), 1)
 
     def test_the_context_validates_what_it_is_given(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLSContext
         from pcapkit.utilities.exceptions import ProtocolError
 
         for name, args, kwargs in (('an empty id', (b'',), {}), ('a 256-octet id', (bytes(256),), {}),
@@ -543,7 +543,7 @@ class ChainTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_records_either_side_of_one_are_further_layers(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
 
         record = _cid_record(CLIENT_CID, bytes(range(24)))
         for name, wire, chain in (('after a legacy record', CCS + record, 'DTLS 1.2:DTLS 1.2'),
@@ -558,8 +558,8 @@ class ChainTests(unittest.TestCase):
                 self.assertEqual(bytes(DTLS.from_data(parsed.info)).hex(), wire.hex())
 
     def test_an_unknown_id_after_a_record_stays_raw_without_an_error(self) -> None:
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         record = _cid_record(CLIENT_CID, bytes(range(24)))
         parsed = DTLS(CCS + record, len(CCS + record))
@@ -577,8 +577,8 @@ class RoundTripTests(unittest.TestCase):
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.application.dtls import DTLS
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         registry = ContextRegistry()
         for index, (from_client, payload) in enumerate(MBEDTLS, 1):
@@ -598,8 +598,8 @@ class RoundTripTests(unittest.TestCase):
 
     def test_make_then_parse_is_byte_exact(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS, DTLSContext
-        from pcapkit.protocols.data.application.dtls import DTLSCIDCiphertext
+        from pcapkit.protocols.application.dtls.protocol import DTLS, DTLSContext
+        from pcapkit.protocols.application.dtls.data import DTLSCIDCiphertext
 
         for index in (4, 5, 6, 7):
             wire = MBEDTLS[index][1]
@@ -629,7 +629,7 @@ class RoundTripTests(unittest.TestCase):
     def test_a_record_made_with_a_payload_parses_it_again(self) -> None:
         """The constructed payload's connection IDs are registered for its parse."""
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
 
         inner = DTLS(content_type=ContentType.tls12_cid, epoch=1, sequence_number=0, cid=SERVER_CID,
                      content=bytes(range(32)))
@@ -640,7 +640,7 @@ class RoundTripTests(unittest.TestCase):
 
     def test_make_refuses_a_misplaced_or_invalid_id(self) -> None:
         from pcapkit.const.tls.content_type import ContentType
-        from pcapkit.protocols.application.dtls import DTLS
+        from pcapkit.protocols.application.dtls.protocol import DTLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         maker = object.__new__(DTLS)

@@ -30,13 +30,13 @@ from tests._support import reimport_once_per_class
 #: ``ProtocolBase.register`` itself, so that one is exercised on a scratch
 #: subclass in its own test.
 SITES = (
-    ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    ('pcapkit.protocols.link.ethernet', 'Ethernet'),
-    ('pcapkit.protocols.transport.tcp', 'TCP'),
-    ('pcapkit.protocols.transport.udp', 'UDP'),
-    ('pcapkit.protocols.transport.sctp', 'SCTP'),
-    ('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-    ('pcapkit.protocols.misc.pcapng', 'PCAPNG'),
+    ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
+    ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet'),
+    ('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
+    ('pcapkit.protocols.transport.udp.protocol', 'UDP'),
+    ('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),
+    ('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+    ('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
 )
 
 
@@ -93,11 +93,11 @@ class TestRegistryStoredDescriptor(unittest.TestCase):
 
     def test_a_different_entry_still_warns(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         def check(register, registry):  # type: ignore[no-untyped-def]
             code = next(iter(registry))
-            other = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
+            other = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
             self.assertEqual(self._count(register, code, other), 1)
             self.assertIs(registry[code], Raw)
         self._each_site(check)
@@ -114,15 +114,15 @@ class TestRegistryStoredDescriptor(unittest.TestCase):
 
     def test_protocol_base_register_keeps_the_stored_descriptor(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
-        descriptor = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
+        descriptor = ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw')
         scratch = type('W1364Raw', (Raw,), {'__proto__': {1: descriptor}})
         self.assertEqual(self._count(scratch.register, 1, descriptor), 0)
         self.assertIs(scratch.__proto__[1], descriptor)
         self.assertEqual(self._count(scratch.register, 1, ModuleDescriptor(*descriptor)), 0)
         self.assertIs(scratch.__proto__[1], descriptor)
-        other = ModuleDescriptor('pcapkit.protocols.misc.no_payload', 'NoPayload')
+        other = ModuleDescriptor('pcapkit.protocols.misc.no_payload.protocol', 'NoPayload')
         self.assertEqual(self._count(scratch.register, 1, other), 1)
         self.assertIs(scratch.__proto__[1], other.klass)
 

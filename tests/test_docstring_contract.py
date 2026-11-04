@@ -6,7 +6,7 @@ labels by hand. Issue #519 then showed the class was not exhausted -- more
 phantom ``Raises:`` clauses and more ``Args:`` entries naming parameters that do
 not exist -- because nothing in the suite *derives* the answer from the code.
 A docstring label is not executed, so no existing test could notice that
-:meth:`Frame.register <pcapkit.protocols.misc.pcap.frame.Frame.register>`
+:meth:`Frame.register <pcapkit.protocols.misc.pcap.frame.protocol.Frame.register>`
 documented a ``module`` argument it does not accept.
 
 That is what this module closes, the same way
@@ -51,19 +51,19 @@ consumed from ``**kwargs``, and does so correctly.
 :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`
 documents ``_layer`` and ``_protocol`` and really does read them
 (``kwargs.pop('_layer', None)``), and :meth:`Frame.unpack
-<pcapkit.protocols.misc.pcap.frame.Frame.unpack>` documents ``\\_seek_set`` as
+<pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` documents ``\\_seek_set`` as
 "forwarded to :meth:`self.read <read>` through ``**kwargs``", which is exactly
 true. Deleting either would destroy real documentation, so the presence of
 ``**kwargs`` exonerates a name here and those cases are excluded by
 construction rather than by being listed.
 
-:meth:`Raw.__post_init__ <pcapkit.protocols.misc.raw.Raw.__post_init__>` shows
+:meth:`Raw.__post_init__ <pcapkit.protocols.misc.raw.protocol.Raw.__post_init__>` shows
 how sharp that trap is. It documents ``error`` and ``alias``, has neither in
 its signature, and its body assigns a *local* ``alias`` from
 ``self._info.protocol.name`` -- which reads
 exactly like a docstring naming a parameter that does not exist. It is not:
-``__post_init__`` forwards ``**kwargs`` to :meth:`~pcapkit.protocols.misc.raw.Raw.unpack`,
-which dispatches to :meth:`Raw.read <pcapkit.protocols.misc.raw.Raw.read>`, and
+``__post_init__`` forwards ``**kwargs`` to :meth:`~pcapkit.protocols.misc.raw.protocol.Raw.unpack`,
+which dispatches to :meth:`Raw.read <pcapkit.protocols.misc.raw.protocol.Raw.read>`, and
 ``read`` declares both as keyword-only parameters and uses them. The local
 variable merely shares a name with the keyword. A checker that reported this
 would be asking for correct documentation to be deleted, which is the outcome
@@ -74,7 +74,7 @@ A function with ``**kwargs`` that documents ``name`` where its parameter is
 ``protocol``, and whose body never reads ``kwargs['name']``, is invisible here.
 Catching that needs the intent behind a keyword, not just its absence from the
 signature -- ``src_ip`` and ``dst_ip`` on :meth:`IPv6_Route.__post_init__
-<pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__>` look
+<pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.__post_init__>` look
 identical and are very likely legitimate keywords forwarded to ``super()``.
 Guessing between the two would fail correct docstrings, so this module does not
 guess.
@@ -343,14 +343,14 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
     ``def`` that is a local helper the enclosing body actually calls, so the
     exception really does propagate out of the enclosing function:
     :meth:`HIP._read_param_locator_set
-    <pcapkit.protocols.internet.hip.HIP._read_param_locator_set>` documents
+    <pcapkit.protocols.internet.hip.protocol.HIP._read_param_locator_set>` documents
     ``ProtocolError`` and raises none itself, but its ``_read_locator`` helper
     does and it calls that helper once per locator. Attributing the raise
     outward is therefore correct there, and the clause is not a phantom. It can
     mislead for a nested ``def`` that is *returned* rather than called, and
     several are: the wrappers inside
     :func:`~pcapkit.corekit.decorators.prepare` and
-    :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``bounded_option``, and the
+    :mod:`pcapkit.protocols.misc.pcapng.schema`'s ``bounded_option``, and the
     methods of the classes :func:`~pcapkit.dumpkit.common.make_dumper` and the
     Scapy engine's ``_reader_type`` build.
 
@@ -375,12 +375,12 @@ def _calls_anything_callable(node: 'ast.AST') -> 'bool':
     Data-model construction without a packet context is excluded: this
     project's ``_read_*`` methods build :class:`~pcapkit.corekit.infoclass.Info`
     subclasses named ``Data_*`` and
-    :class:`~pcapkit.protocols.schema.schema.Schema` subclasses named
+    :class:`~pcapkit.protocols.schema.Schema` subclasses named
     ``Schema_*``, and constructing one without a packet context runs no field
     code -- ``Schema_UDP(srcport=70000, ...)`` constructs, and only ``bytes()``
     packs it. A call that passes ``__packet__``, or a ``**`` mapping that may
     carry it, is a different matter: :meth:`Schema.__post_init__
-    <pcapkit.protocols.schema.schema.Schema.__post_init__>` packs on the spot,
+    <pcapkit.protocols.schema.Schema.__post_init__>` packs on the spot,
     and field code under :mod:`pcapkit.corekit.fields` raises
     ``ProtocolError``, so such a call counts as possibly-raising (#2319).
     :meth:`Info.__update__` is excluded too. Anything else counts as
@@ -470,7 +470,7 @@ def docstrings() -> 'Iterator[tuple[str, str, str]]':
 
     Wider than :func:`functions`, which yields only function docstrings, because
     a quoted RFC sentence is just as likely to sit in a module or class docstring
-    as in a method's -- :class:`~pcapkit.protocols.schema.schema.Schema`
+    as in a method's -- :class:`~pcapkit.protocols.schema.Schema`
     subclasses carry their wire-format prose at class level. Kept separate rather
     than widening :func:`functions` because the ``Args:`` and ``Raises:`` checks
     are about signatures and ``raise`` statements, neither of which a module or
@@ -588,7 +588,7 @@ class DocstringRaisesTests(unittest.TestCase):
         """A ``Schema_*`` call that passes ``__packet__`` counts as raising.
 
         :meth:`Schema.__post_init__
-        <pcapkit.protocols.schema.schema.Schema.__post_init__>` packs when given
+        <pcapkit.protocols.schema.Schema.__post_init__>` packs when given
         a packet context, and packing runs field code that raises
         ``ProtocolError`` -- the live construction below is that case. Treating
         the call as inert would report a correct ``Raises: ProtocolError`` as a
@@ -596,7 +596,7 @@ class DocstringRaisesTests(unittest.TestCase):
         what lets the reachability check catch a phantom at all.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import CommentOption
+        from pcapkit.protocols.misc.pcapng.schema import CommentOption
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -619,7 +619,7 @@ class DocstringRaisesTests(unittest.TestCase):
         """A commented-out ``raise`` never keeps its ``Raises:`` clause.
 
         :meth:`HTTP._read_http_none
-        <pcapkit.protocols.application.httpv2.HTTPv2._read_http_none>` is where
+        <pcapkit.protocols.application.httpv2.protocol.HTTPv2._read_http_none>` is where
         this went wrong: the ``raise ProtocolError(...)`` was commented out and
         replaced by a :class:`~pcapkit.utilities.warnings.ProtocolWarning`,
         and the ``Raises:`` clause stayed. Downgrading a raise to a warning is

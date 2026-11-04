@@ -1,6 +1,6 @@
 """Regression tests for GitHub issue #555.
 
-:class:`~pcapkit.protocols.schema.schema.EnumSchema`'s :attr:`registry` is a
+:class:`~pcapkit.protocols.schema.EnumSchema`'s :attr:`registry` is a
 :class:`collections.defaultdict`-backed mapping of enumeration codes to schema
 classes. These tests guard against a bare ``registry[code]`` read for a code
 nobody registered *inserting* that code -- with whatever the default factory
@@ -8,9 +8,9 @@ produced -- the same defect fixed at the protocol layer's ``__proto__`` family
 by GitHub issue #421 and its option, chunk and block registries by #425. They cover
 both the auto-created
 :attr:`EnumSchema.__enum__` (the shape used by
-e.g. :class:`pcapkit.protocols.schema.transport.tcp.Option`) and a manually
+e.g. :class:`pcapkit.protocols.transport.tcp.schema.Option`) and a manually
 seeded one declared directly in a subclass's own class body (the shape used by
-e.g. :class:`pcapkit.protocols.schema.misc.pcapng.Option`'s outer, namespaced
+e.g. :class:`pcapkit.protocols.misc.pcapng.schema.Option`'s outer, namespaced
 mapping).
 """
 from __future__ import annotations
@@ -42,11 +42,11 @@ class EnumSchemaRegistryRetentionTests(unittest.TestCase):
         :class:`EnumSchema` subclasses that never assign :attr:`__enum__`
         themselves get one built by :meth:`EnumSchema.__init_subclass__` --
         the shape used by e.g.
-        :class:`pcapkit.protocols.schema.transport.tcp.Option`. A bare
+        :class:`pcapkit.protocols.transport.tcp.schema.Option`. A bare
         ``registry[code]`` for an unregistered ``code`` must keep returning
         the default schema without inserting ``code``.
         """
-        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.protocols.schema import EnumSchema
 
         class Code(enum.IntEnum):
             registered = 1
@@ -87,14 +87,14 @@ class EnumSchemaRegistryRetentionTests(unittest.TestCase):
 
         A subclass may assign :attr:`__enum__` itself, as a plain
         :class:`collections.defaultdict`, in its own class body -- the shape
-        used by e.g. :class:`pcapkit.protocols.schema.misc.pcapng.Option`'s
+        used by e.g. :class:`pcapkit.protocols.misc.pcapng.schema.Option`'s
         outer, namespaced mapping and
-        :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`. This must be
+        :class:`pcapkit.protocols.transport.tcp.schema.MPTCP`. This must be
         just as retention-safe as the auto-created case, even though the
         object was never touched by :meth:`EnumSchema.__init_subclass__`'s
         creation branch.
         """
-        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.protocols.schema import EnumSchema
 
         class Code(enum.IntEnum):
             registered = 1
@@ -132,7 +132,7 @@ class EnumSchemaRegistryRetentionTests(unittest.TestCase):
         so ``is``-identity across the class-level accessor, the instance-level
         accessor and a fresh instance all hold.
         """
-        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.protocols.schema import EnumSchema
 
         class Code(enum.IntEnum):
             one = 1
@@ -148,12 +148,12 @@ class EnumSchemaRegistryRetentionTests(unittest.TestCase):
 
         ``OptionNumber(156)`` is unassigned in
         :class:`pcapkit.const.tcp.option.Option`, so nothing registers it
-        against :class:`pcapkit.protocols.schema.transport.tcp.Option`. A
+        against :class:`pcapkit.protocols.transport.tcp.schema.Option`. A
         single bare-subscript read must not make it appear registered
         afterwards.
         """
         from pcapkit.const.tcp.option import Option as OptionNumber
-        from pcapkit.protocols.schema.transport.tcp import Option, UnassignedOption
+        from pcapkit.protocols.transport.tcp.schema import Option, UnassignedOption
 
         probe = OptionNumber(156)
         self.assertNotIn(probe, Option.registry)
@@ -170,7 +170,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
 
     Every public registrar in :mod:`pcapkit.foundation.registry.protocols` that
     takes a ``schema`` registers two halves of one binding: a parser class,
-    through e.g. :meth:`~pcapkit.protocols.internet.ipv4.IPv4.register_option`,
+    through e.g. :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option`,
     and a schema class, through :meth:`EnumSchema.register`. The parser half has
     warned on an overwrite for as long as it has existed; the schema half
     assigned bare. So one ``register_ipv4_option`` call replacing a built-in
@@ -241,7 +241,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
         first subclass in a chain.
 
         """
-        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.protocols.schema import EnumSchema
 
         class Code(enum.IntEnum):
             one = 1
@@ -392,7 +392,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
         ``A is B`` pair like the alias case below invisible at the call site.
 
         """
-        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.protocols.schema import EnumSchema
         from pcapkit.utilities.warnings import RegistryWarning
 
         Code, BaseSchema = self._base_schema()
@@ -518,7 +518,7 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
 
         """
         from pcapkit.const.tcp.option import Option as OptionNumber
-        from pcapkit.protocols.schema.transport.tcp import Option
+        from pcapkit.protocols.transport.tcp.schema import Option
         from pcapkit.utilities.warnings import RegistryWarning
 
         code = OptionNumber.Maximum_Segment_Size

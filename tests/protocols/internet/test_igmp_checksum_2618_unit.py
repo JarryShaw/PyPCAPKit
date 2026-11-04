@@ -4,7 +4,7 @@
 GitHub issue #2618: the checksum of every IGMP version covers the whole message,
 the entire IP payload, with no pseudo-header (:rfc:`2236#section-2.3`,
 :rfc:`2236#section-2.5`, :rfc:`3376#section-4.1.2`, :rfc:`3376#section-4.2.2`).
-:class:`~pcapkit.protocols.internet.igmp.IGMP` verifies it on read for all three
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` verifies it on read for all three
 versions under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, as ICMP does, and
 ``make()`` computes one it is not given under
 :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`.
@@ -64,11 +64,11 @@ class IGMPChecksumTestCase(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.igmp import IGMP
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmp.protocol import IGMP
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

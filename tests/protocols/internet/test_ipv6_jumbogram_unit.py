@@ -3,9 +3,9 @@
 
 GitHub issue #1434: a jumbogram [:rfc:`2675`] sets the Payload Length to zero
 and carries its real length in a Jumbo Payload option of the Hop-by-Hop
-Options header. :class:`~pcapkit.protocols.internet.ipv6.IPv6` read only the
+Options header. :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` read only the
 Payload Length, so its next layer was
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` and the whole jumbo payload
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` and the whole jumbo payload
 ended up in ``info.trailer``. The Jumbo Payload Length gives the payload
 extent, and only the octets past it are ``trailer``. Every packet rebuilds
 byte for byte.
@@ -15,7 +15,7 @@ detect -- a Payload Length of 0 with a Hop-by-Hop Options header and no Jumbo
 Payload option, a non-zero Payload Length with the option, a Jumbo Payload
 Length below 65,536, and the option with a Fragment header. Guards against the
 parser reading each as a jumbogram, or warning and going on: it rejects each, as
-:meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` rejects a version
+:meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>` rejects a version
 other than 4, so behind Ethernet the frame stops at the IPv6 layer, kept raw.
 And ``IPv6.make`` with no ``payload_length`` writes a Payload Length of 0 for a
 payload carrying a Jumbo Payload option, rather than its own length, so a
@@ -94,7 +94,7 @@ class TestIPv6Jumbogram(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, data: 'bytes') -> 'object':
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         proto = IPv6(data)
         self.assertEqual(IPv6.from_data(proto.info).data, data)
@@ -131,7 +131,7 @@ class TestIPv6Jumbogram(unittest.TestCase):
         self.assertEqual(proto.info.raw_len, len(segment))
 
     def test_inside_ethernet(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         frame = ETHER + JUMBO
         proto = Ethernet(frame)
@@ -145,7 +145,7 @@ class TestIPv6Jumbogram(unittest.TestCase):
         self.assertEqual(proto.info.trailer, body)
 
     def test_make_writes_zero_payload_length_past_65535(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         body = hbh(59, 8 + 70000) + bytes(70000)
         proto = IPv6(next=0, payload=body, trailer=b'\xee\xee')
@@ -165,7 +165,7 @@ class TestRFC2675Errors(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_ipv6_rejects_each_error(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, (data, message) in ERRORS.items():
@@ -176,7 +176,7 @@ class TestRFC2675Errors(unittest.TestCase):
 
     def test_behind_ethernet_the_frame_stops_at_ipv6(self) -> None:
         # as at an IPv4 header of another version: kept raw, and rebuilt as captured
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for label, (data, _) in ERRORS.items():
             for trailer in (b'', b'\xee' * 4):
@@ -197,8 +197,8 @@ class TestMakeJumbogram(unittest.TestCase):
 
     def test_a_jumbo_payload_option_makes_payload_length_zero(self) -> None:
         # a Jumbo Payload Length past the octets at hand, as in a capture cut short
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         body = hbh(6, 70000) + TCP
         for label, payload in (('bytes', body), ('protocol', HOPOPT(body)), ('schema', HOPOPT(body).schema)):
@@ -211,7 +211,7 @@ class TestMakeJumbogram(unittest.TestCase):
                 self.assertEqual(IPv6(proto.data).data, proto.data)
 
     def test_explicitly_invalid_input_still_raises(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, kwargs, message in (
@@ -231,7 +231,7 @@ class TestMakeJumbogram(unittest.TestCase):
 
     def test_no_leading_jumbo_payload_option_keeps_the_payload_length(self) -> None:
         # RFC 2675 section 2: only a Hop-by-Hop Options header right after the IPv6 header holds one
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for label, nxt, body in (
             ('Hop-by-Hop Options header, no Jumbo Payload option', 0, bytes([6, 0, 1, 4, 0, 0, 0, 0]) + TCP),
@@ -246,8 +246,8 @@ class TestMakeJumbogram(unittest.TestCase):
     def test_hopopt_alone_and_in_ipv4_are_unchanged(self) -> None:
         # the Payload Length rule is IPv6's, so a short Jumbo Payload Length elsewhere is kept as given
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         hop = HOPOPT(next=6, options=[(Option.Jumbo_Payload, {'len': 8 + len(TCP)})], payload=TCP)
         self.assertEqual(hop.data, hbh(6, 8 + len(TCP)) + TCP)

@@ -8,16 +8,18 @@ than a name glob: :func:`tests._tiers.module_tier` puts each module in ``ALL`` o
 rulings there, paraphrased, keep the hand-picked round trips on every leg and send
 only the real sweeps, with the modules whose answer no interpreter changes, to
 ``latest``. So ``test``'s ``Run unit tests`` step passes each module
-:func:`~tests._tiers.latest_tier_paths` prints as an ``--ignore`` on every leg whose
-version is not ``latest`` -- the KTLO and older supported legs -- as
-``experimental``'s does on each of its legs, and ``latest``, the coverage leg, keeps
-the whole unit tier less the project pins (#1954). ``integration`` does the same
+:func:`~tests._tiers.latest_tier_paths` prints as an ``--ignore`` on every leg,
+``latest``'s too, as ``experimental``'s does on each of its legs, and #2751:
+``test-latest-tier`` runs the tier by the same step on ``latest``, a half a cell, as
+:func:`~tests._tiers.latest_tier_half` prints it, which leaves out the project pins
+(#1954). The coverage legs together measure the whole unit tier less the pins.
+``integration`` does the same
 with the fixture tier: off ``latest``, its ``Run full test suite`` asks for
 :func:`~tests._tiers.fixture_tier_paths`'s ``ALL`` part, and ``pypcap-parity``, none
 of whose legs is ``latest``, asks for it on each, :class:`TestTheIntegrationSubset`.
 
 :class:`TestTheStepSelectsByLeg` runs the step's script on each leg the tier file
-gives either job, with a ``python`` on ``PATH`` that records its arguments, so what
+gives each job, with a ``python`` on ``PATH`` that records its arguments, so what
 is checked is the selection bash builds, not what the text appears to say.
 :class:`TestTheIgnoresAreTheLatestTier` asks pytest itself what those ignores leave
 out. :class:`TestEveryXdistRunCountsLogicalCPUs` holds every xdist run in the
@@ -60,6 +62,8 @@ __tier__ = 'LATEST'
 #: The jobs and step that run the unit tier: ``test``, and the experimental legs' own (#1732).
 JOB = ('unit-tests.yml', 'test')
 EXPERIMENTAL = ('experimental.yml', 'experimental')
+#: #2751: the ``LATEST`` tier's own job, which runs ``test``'s steps by YAML alias.
+LATEST_TIER = ('unit-tests.yml', 'test-latest-tier')
 STEP = 'Run unit tests'
 #: The jobs and step that run the fixture tier, which the tiers cover too (#1732, #1958).
 INTEGRATION = ('unit-tests.yml', 'integration')
@@ -73,7 +77,8 @@ REPORTERS = ('ci-reports.yml',)
 #: main's, ``experimental``'s are sized for GraalPy (#2739: about 1.5 times its leg in job
 #: 125752017215, whose last run is estimated).
 #: The watcher's interpreter and its requests are capped too (#1938).
-CAPS = {JOB: (45, {}), EXPERIMENTAL: (210, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 190})}
+CAPS = {JOB: (45, {}), LATEST_TIER: (45, {}),
+        EXPERIMENTAL: (210, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 190})}
 #: A pytest-xdist worker count on a command line: ``-n X``, ``-nX``, ``--numprocesses X`` or
 #: ``--numprocesses=X``, with or without ``--dist`` after it.
 WORKERS_FLAG = re.compile(r'(?<![\w-])(?:--numprocesses(?:=|\s+)|-n\s*)(?P<value>[^\s;|&]+)')
@@ -103,7 +108,7 @@ RUNNER_TEMP = '/home/runner/work/_temp'
 
 
 def step(where: 'tuple[str, str]' = JOB) -> 'dict[str, Any]':
-    name = STEP if where in (JOB, EXPERIMENTAL) else INTEGRATION_STEP
+    name = STEP if where in (JOB, EXPERIMENTAL, LATEST_TIER) else INTEGRATION_STEP
     found = [entry for entry in job(*where)['steps'] if entry.get('name') == name]
     if len(found) != 1:
         raise AssertionError(f'expected one {name!r} step in {where}, found {len(found)}')
@@ -247,9 +252,14 @@ def ignored(argv: 'list[str]') -> 'list[str]':
     return [arg.split('=', 1)[1] for arg in pytest_args(argv) if arg.startswith('--ignore=') and arg not in TIER_FLAGS]
 
 
+def selected(argv: 'list[str]') -> 'list[str]':
+    """The modules the arguments name for pytest to run, a ``test-latest-tier`` cell's half (#2751)."""
+    return [arg for arg in pytest_args(argv) if not arg.startswith('-') and arg.endswith('.py')]
+
+
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
 class TestTheStepSelectsByLeg(unittest.TestCase):
-    """Each leg of ``test`` and ``experimental``, from the tier file, through the step's own script."""
+    """Each leg of ``test``, ``test-latest-tier`` and ``experimental``, from the tier file, through the step's own script."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -260,34 +270,54 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                                             else rest_unsharded(leg, where, run_step_each(leg, where)[-1]))
                     for where in (JOB, EXPERIMENTAL) for leg in legs(*where)}
         assert len(cls.runs) == len(legs(*JOB)) + len(legs(*EXPERIMENTAL)), 'a version runs in both jobs'
+        # #2751: each half of the LATEST tier, on `latest`, by the same step.
+        cls.halves = {leg['half']: (leg, unsharded(leg, run_step_each(leg, LATEST_TIER))) for leg in legs(*LATEST_TIER)}
 
     def test_only_latest_runs_the_latest_tier(self) -> None:
-        """Every other leg ignores each ``LATEST`` module; ``latest`` ignores the project pins alone."""
+        """Every leg of ``test``, ``latest``'s too, and of ``experimental`` ignores each ``LATEST`` module.
+
+        #2751: ``test-latest-tier``'s cells, on ``latest``, run the tier less the project pins, a half each, by name.
+
+        """
         self.assertIn(self.latest, self.runs)
         self.assertTrue(any(is_experimental(leg) for leg, _ in self.runs.values()))
         tier, pins = list(_tiers.latest_tier_paths()), list(_tiers.project_pin_paths())
         self.assertLess(set(pins), set(tier))
         for version, (_, argv) in self.runs.items():
             with self.subTest(python=version):
-                self.assertEqual(ignored(argv), pins if version == self.latest else tier)
+                self.assertEqual(ignored(argv), tier)
+                self.assertEqual(selected(argv), [])
                 self.assertFalse([arg for arg in argv if 'roundtrip' in arg and arg.startswith('--ignore-glob')])
+        self.assertEqual(sorted(self.halves), [str(half) for half in _tiers.LATEST_TIER_HALVES])
+        for half, (leg, argv) in self.halves.items():
+            with self.subTest(half=half):
+                self.assertEqual(leg['python-version'], self.latest)
+                self.assertEqual(ignored(argv), [])
+                self.assertEqual(selected(argv), list(_tiers.latest_tier_half(int(half))))
 
     def test_latest_keeps_the_unit_tier_less_the_pins_under_coverage(self) -> None:
         """Coverage is measured over the whole unit tier, less the project pins, which
-        import no pcapkit and run in ``project-tests`` (#1954)."""
-        leg, argv = self.runs[self.latest]
-        self.assertIs(leg.get('coverage'), True)
-        self.assertEqual(argv[:4], ['-m', 'coverage', 'run', '--rcfile=.github/coverage.toml'])
-        flags = [arg for arg in pytest_args(argv) if arg.startswith('--ignore')]
-        pins = [f'--ignore={pin}' for pin in _tiers.project_pin_paths()]
+        import no pcapkit and run in ``project-tests`` (#1954): #2751, ``test``'s ``latest`` leg over
+        the ``ALL`` tier and each half of ``test-latest-tier`` over its part of the ``LATEST`` one."""
+        covered = [self.runs[self.latest]] + [self.halves[half] for half in sorted(self.halves)]
+        for leg, argv in covered:
+            with self.subTest(leg=leg):
+                self.assertIs(leg.get('coverage'), True)
+                self.assertEqual(argv[:4], ['-m', 'coverage', 'run', '--rcfile=.github/coverage.toml'])
+        tier, pins = set(_tiers.latest_tier_paths()), set(_tiers.project_pin_paths())
         self.assertTrue(pins)
-        self.assertEqual(flags, list(TIER_FLAGS) + pins)
+        unit = [module for module in _tiers.suite_modules() if _tiers.is_unit_tier(module)]
+        # The `latest` leg collects the unit tier less the LATEST one; each half names its modules.
+        ran = [module for module in unit if module not in tier]
+        for _, argv in covered[1:]:
+            self.assertEqual([arg for arg in pytest_args(argv) if arg.startswith('--ignore')], list(TIER_FLAGS))
+            ran.extend(selected(argv))
+        self.assertEqual(len(ran), len(set(ran)))
+        self.assertEqual(sorted(ran), sorted(module for module in unit if module not in pins))
 
     def test_every_other_leg_runs_the_rest(self) -> None:
-        """The same selection as ``latest``, the ``LATEST`` tier ignored in place of the pins, and no coverage."""
-        pins = {f'--ignore={pin}' for pin in _tiers.project_pin_paths()}
-        expected = ([arg for arg in pytest_args(self.runs[self.latest][1]) if arg not in pins]
-                    + [f'--ignore={module}' for module in _tiers.latest_tier_paths()])
+        """The same selection as ``latest``, the ``LATEST`` tier ignored, and no coverage."""
+        expected = pytest_args(self.runs[self.latest][1])
         for version, (leg, argv) in self.runs.items():
             if version == self.latest:
                 continue

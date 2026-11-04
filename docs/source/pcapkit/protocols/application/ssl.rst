@@ -2,20 +2,21 @@ SSL - Secure Sockets Layer
 ===============================
 
 .. module:: pcapkit.protocols.application.ssl
+.. module:: pcapkit.protocols.application.ssl.protocol
 
-:mod:`pcapkit.protocols.application.ssl` contains
-:class:`~pcapkit.protocols.application.ssl.SSL` only,
+:mod:`pcapkit.protocols.application.ssl.protocol` contains
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL` only,
 which is the umbrella base class for the Secure Sockets Layer protocol
 family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
 
-* :class:`~pcapkit.protocols.application.sslv2.SSLv2` -- SSL 2.0, whose
+* :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` -- SSL 2.0, whose
   record layer shares no wire format with the others;
-* :class:`~pcapkit.protocols.application.tls.TLS` -- SSLv3 and TLS 1.0
-  through TLS 1.3, with :class:`~pcapkit.protocols.application.sslv3.SSLv3` as
+* :class:`~pcapkit.protocols.application.tls.protocol.TLS` -- SSLv3 and TLS 1.0
+  through TLS 1.3, with :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3` as
   its thin subclass for explicit construction;
-* :class:`~pcapkit.protocols.application.dtls.DTLS` -- DTLS 1.0, 1.2 and 1.3.
+* :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` -- DTLS 1.0, 1.2 and 1.3.
 
-:meth:`SSL.id <pcapkit.protocols.application.ssl.SSL.id>` lists the direct
+:meth:`SSL.id <pcapkit.protocols.application.ssl.protocol.SSL.id>` lists the direct
 concrete subclasses, so a lookup keyed on ``SSL`` matches any of them.
 
 The TLS record header (:rfc:`9846#section-5.1`) is a
@@ -24,7 +25,7 @@ and a length. The DTLS ``DTLSPlaintext`` header (:rfc:`9147#section-4`) has
 the same fields plus an epoch and a 48-bit sequence number *between* the
 version and the length, and DTLS adds a fragment header to each handshake
 message. Each record header is declared in its subclass's own schema, and
-:class:`~pcapkit.protocols.application.dtls.DTLS` reads the epoch and sequence
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` reads the epoch and sequence
 number. This base class carries the logic the two share -- content-type
 dispatch, handshake-message decoding (including the DTLS fragment header), the
 extension registry, and the record-level validation that keeps dispatch from
@@ -36,7 +37,7 @@ accepting bytes that cannot be a genuine record.
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.ssl.SSL
+.. autoclass:: pcapkit.protocols.application.ssl.protocol.SSL
    :no-members:
    :show-inheritance:
 
@@ -89,85 +90,85 @@ accepting bytes that cannot be a genuine record.
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.application.tls
+.. module:: pcapkit.protocols.application.ssl.data
 
-.. autoclass:: pcapkit.protocols.data.application.tls.Handshake
+.. autoclass:: pcapkit.protocols.application.ssl.data.Handshake
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ClientHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.ClientHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ServerHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.ServerHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.EncryptedExtensions
+.. autoclass:: pcapkit.protocols.application.ssl.data.EncryptedExtensions
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.Extension
+.. autoclass:: pcapkit.protocols.application.ssl.data.Extension
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ExtensionData
+.. autoclass:: pcapkit.protocols.application.ssl.data.ExtensionData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ServerNameList
+.. autoclass:: pcapkit.protocols.application.ssl.data.ServerNameList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ServerName
+.. autoclass:: pcapkit.protocols.application.ssl.data.ServerName
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.NamedGroupList
+.. autoclass:: pcapkit.protocols.application.ssl.data.NamedGroupList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.SignatureSchemeList
+.. autoclass:: pcapkit.protocols.application.ssl.data.SignatureSchemeList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ProtocolNameList
+.. autoclass:: pcapkit.protocols.application.ssl.data.ProtocolNameList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.SupportedVersionsClientHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.SupportedVersionsClientHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.SupportedVersionsServerHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.SupportedVersionsServerHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareClientHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.KeyShareClientHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareHelloRetryRequest
+.. autoclass:: pcapkit.protocols.application.ssl.data.KeyShareHelloRetryRequest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareServerHello
+.. autoclass:: pcapkit.protocols.application.ssl.data.KeyShareServerHello
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.KeyShareEntry
+.. autoclass:: pcapkit.protocols.application.ssl.data.KeyShareEntry
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ConnectionId
+.. autoclass:: pcapkit.protocols.application.ssl.data.ConnectionId
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.Alert
+.. autoclass:: pcapkit.protocols.application.ssl.data.Alert
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.tls.ChangeCipherSpec
+.. autoclass:: pcapkit.protocols.application.ssl.data.ChangeCipherSpec
    :members:
    :show-inheritance:
 

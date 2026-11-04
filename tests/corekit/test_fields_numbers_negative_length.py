@@ -4,7 +4,7 @@ GitHub issue #828. :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__`
 caches ``self._bit_length`` from the resolved ``length`` whenever ``bit_length``
 was not supplied, and shifts by it immediately: ``1 << (length * 8)``. A
 resolved length below zero -- the real shape is
-``pcapkit/protocols/schema/internet/hip.py``'s
+``pcapkit/protocols/internet/hip/schema.py``'s
 ``NumberField(length=lambda pkt: pkt['len'] - 4, signed=False)``, which goes
 negative for any wire ``len`` under ``4`` -- therefore raised a bare
 :exc:`ValueError` (``negative shift count``): not one of
@@ -87,8 +87,8 @@ class NegativeResolvedLengthTests(unittest.TestCase):
     def test_the_real_callable_shape_from_hip_py_also_raises_protocolerror(self) -> None:
         """``lambda pkt: pkt['len'] - 4`` against a truncated ``len``, verbatim.
 
-        This is the exact shape at ``pcapkit/protocols/schema/internet/
-        hip.py``'s ``PuzzleParameter.random`` field (as of
+        This is the exact shape at
+        ``pcapkit/protocols/internet/hip/schema.py``'s ``PuzzleParameter.random`` field (as of
         ``21e9588af``): a wire ``len`` of ``3`` -- one octet short of the
         4-octet header this parameter always carries -- resolves the
         remaining ``random`` payload to ``-1`` octets, negative because the
@@ -259,7 +259,7 @@ class NegativeBitLengthTests(unittest.TestCase):
     def test_a_positive_bit_length_is_unaffected(self) -> None:
         """The control: the ordinary, well-formed case is not touched.
 
-        The exact shape at ``pcapkit/protocols/schema/link/vlan.py``'s
+        The exact shape at ``pcapkit/protocols/link/vlan/schema.py``'s
         ``TCI.pcp``/``dei``/``vid`` fields (on
         ``5576708d4``): a positive literal ``bit_length`` alongside a fixed
         byte ``length``.

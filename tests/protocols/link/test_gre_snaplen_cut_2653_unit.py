@@ -2,12 +2,12 @@
 """A GRE frame the capture cut short reads ``TRUNCATED``, not ``INVALID``.
 
 GitHub issue #2653: neither the GRE header nor the Linux cooked-capture header in
-front of it states a length, so :meth:`GRE.read <pcapkit.protocols.link.gre.GRE.read>`
+front of it states a length, so :meth:`GRE.read <pcapkit.protocols.link.gre.protocol.GRE.read>`
 cannot tell from its own octets a frame the snapshot length cut short from one whose
 checksum is wrong. The record's original length tells them apart, as Wireshark's
 captured length against its reported one does:
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` set
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` and
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` set
 :data:`~pcapkit.utilities.contextvars.frame_length` around the parse of their
 payload, and GRE reads it. A complete frame whose checksum is wrong stays
 ``INVALID`` and warns.
@@ -202,7 +202,7 @@ class GRESnaplenCutTests(unittest.TestCase):
         self.assertEqual((frame['GRE'].info.checksum_status, caught), (self.Status.TRUNCATED, []))
 
     def test_the_lengths_reach_the_layers_below_the_frame_only(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.contextvars import frame_length
 
         seen = []  # type: list[object]
@@ -229,7 +229,7 @@ class GRESnaplenCutTests(unittest.TestCase):
         self.assertEqual([item.category for item in caught], [self.ChecksumWarning])
 
     def test_parse_rebuild_is_exact(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         def rebuild(frame: 'Any') -> 'tuple[Any, list[type]]':
             """``frame`` rebuilt from its data model, and the checksum warnings that gave."""
@@ -282,7 +282,7 @@ class GREBehindIPTests(GRESnaplenCutTests):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry import register_transtype
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         previous = Internet.__proto__.get(TransType.GRE)
         with warnings.catch_warnings():
@@ -323,7 +323,7 @@ class GREBehindIPTests(GRESnaplenCutTests):
         self.assertBehindIPReads(pcapng(epb))
 
     def test_the_lengths_are_cleared_behind_ip(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.contextvars import frame_length
 
         seen = []  # type: list[object]

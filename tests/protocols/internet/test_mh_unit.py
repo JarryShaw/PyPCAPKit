@@ -26,7 +26,7 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_index_length_and_make_data(self) -> None:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         data = DummyDict(
             next=TransType.UDP,
@@ -49,11 +49,11 @@ class MHUnitTests(unittest.TestCase):
 
     def test_mh_register_message_warns_on_overwrite(self) -> None:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         original = MH.__dict__['__message__'][Packet.Binding_Refresh_Request]
         try:
-            with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
                 MH.register_message(Packet.Binding_Refresh_Request, 'hoti')
             warn.assert_called_once()
             self.assertEqual(MH.__dict__['__message__'][Packet.Binding_Refresh_Request], 'hoti')
@@ -62,11 +62,11 @@ class MHUnitTests(unittest.TestCase):
 
     def test_mh_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         original = MH.__dict__['__option__'][Option.Pad1]
         try:
-            with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
                 MH.register_option(Option.Pad1, 'bra')
             warn.assert_called_once()
             self.assertEqual(MH.__dict__['__option__'][Option.Pad1], 'bra')
@@ -75,11 +75,11 @@ class MHUnitTests(unittest.TestCase):
 
     def test_mh_register_extension_warns_on_overwrite(self) -> None:
         from pcapkit.const.mh.cga_extension import CGAExtension
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         original = MH.__dict__['__extension__'][CGAExtension.Multi_Prefix]
         try:
-            with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
                 MH.register_extension(CGAExtension.Multi_Prefix, 'exp')
             warn.assert_called_once()
             self.assertEqual(MH.__dict__['__extension__'][CGAExtension.Multi_Prefix], 'exp')
@@ -91,24 +91,24 @@ class MHUnitTests(unittest.TestCase):
 
         #425's defect on MH's registries. Each is a
         :class:`collections.defaultdict` on a class attribute shared by every
-        :class:`~pcapkit.protocols.internet.mh.MH` instance in the process, so
+        :class:`~pcapkit.protocols.internet.mh.protocol.MH` instance in the process, so
         ``registry[code]`` inserted every unrecognised message type, option type
         and CGA extension type -- and the value it inserted was the one the
         default factory returns anyway, so it bought nothing while making
-        :meth:`~pcapkit.protocols.internet.mh.MH.register_message` and its
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH.register_message` and its
         siblings warn about an overwrite that never happened.
 
         ``__extension__`` is reached through the construction path rather than a
-        parse: :meth:`~pcapkit.protocols.internet.mh.MH._make_cga_extensions`
+        parse: :meth:`~pcapkit.protocols.internet.mh.protocol.MH._make_cga_extensions`
         reads that registry as
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_cga_extensions` does, and
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_cga_extensions` does, and
         had the identical defect.
 
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         def parse(hexstr: str) -> None:
             raw = bytes.fromhex(hexstr)
@@ -143,7 +143,7 @@ class MHUnitTests(unittest.TestCase):
                     exercise()
                     self.assertEqual(set(registry), before)
 
-                    with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+                    with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
                         register(code, 'none' if label != 'message' else 'unknown')
                     self.assertEqual(warn.call_count, 0)
                 finally:
@@ -152,9 +152,9 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_read_make_properties_and_extension_accessors(self) -> None:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import BindingRefreshRequestMessage
-        from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import BindingRefreshRequestMessage
+        from pcapkit.protocols.internet.mh.schema import MH as Schema_MH
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         proto = object.__new__(MH)
@@ -202,7 +202,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.status_code import StatusCode
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         proto._read_mh_options = mock.Mock(return_value='opts')
@@ -304,8 +304,8 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh import schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -477,9 +477,9 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import mh as data
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import data
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh import schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -488,7 +488,7 @@ class MHUnitTests(unittest.TestCase):
                                               data.UnassignedOption(type=Option.get(250),
                                                                     length=4,
                                                                     data=b'yy')).data, b'yy')
-        with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
             self.assertEqual(proto._make_opt_pad(Option.Pad1, length=2).type, Option.PadN)
             self.assertEqual(proto._make_opt_pad(Option.PadN, length=0).type, Option.PadN)
         self.assertEqual(warn.call_count, 1)
@@ -605,10 +605,10 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.status_code import StatusCode
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import mh as data
+        from pcapkit.protocols.internet.mh import data
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh import schema
 
         proto = object.__new__(MH)
         proto._extf = False
@@ -664,7 +664,7 @@ class MHUnitTests(unittest.TestCase):
             return schema.UnknownExtension(type=code, length=len(value), data=value)
 
         try:
-            with mock.patch('pcapkit.protocols.internet.mh.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warn:
                 MH.register_message(custom_packet, (parse_message, make_message))
                 MH.register_option(custom_option, (parse_option, make_option))
                 MH.register_extension(custom_extension, (parse_extension, make_extension))
@@ -871,7 +871,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import schema
 
         message_field = schema.mh_data_selector({
             'type': Packet.Binding_Refresh_Request,
@@ -911,7 +911,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.handover_initiate_status import HandoverInitiateStatus
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH, FastBindingAcknowledgmentStatus
+        from pcapkit.protocols.internet.mh.protocol import MH, FastBindingAcknowledgmentStatus
 
         proto = object.__new__(MH)
         proto._read_mh_options = mock.Mock(return_value='opts')
@@ -1063,7 +1063,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.status_code import StatusCode
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         proto._read_mh_options = mock.Mock(return_value='opts')
@@ -1124,9 +1124,9 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_fmipv6_option_readers_constructors_and_guards(self) -> None:
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import mh as data
-        from pcapkit.protocols.internet.mh import MH, IPv6AddressPrefixCode
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import data
+        from pcapkit.protocols.internet.mh.protocol import MH, IPv6AddressPrefixCode
+        from pcapkit.protocols.internet.mh import schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -1232,7 +1232,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (MH, FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
 
         def parse(hexstr: str) -> object:
@@ -1353,7 +1353,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (MH, FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
 
         badf_type = Option.Binding_Authorization_Data_for_FMIPv6
@@ -1453,7 +1453,7 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_rfc5568_local_enums_cover_unregistered_value_sets(self) -> None:
         """:rfc:`5568` defines two value sets inline, with no IANA registry.
 
-        Both are therefore enumerated in :mod:`pcapkit.protocols.internet.mh`
+        Both are therefore enumerated in :mod:`pcapkit.protocols.internet.mh.protocol`
         itself rather than in :mod:`pcapkit.const.mh`. Per the owner's ruling
         on GitHub issue #877, both stay **closed**: a value the RFC leaves
         unassigned raises rather than being minted an ``Unassigned_N``
@@ -1462,7 +1462,7 @@ class MHUnitTests(unittest.TestCase):
         *name*, aliases a second unknown key onto the first at a shared ``-1``
         sentinel. So an unassigned code does not grow the class. Over IPv4
         ``@beholder`` replaces the MH layer and everything above it with
-        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 the MH header is
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; over IPv6 the MH header is
         replaced by ``Raw``, which ends the walk, so the layers above stay
         unparsed (:issue:`2477`) --
         see ``test_mh_local_enums_raise_and_do_not_alias`` for that distinction
@@ -1472,7 +1472,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.status_code import StatusCode
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (MH, FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumValueError
 
@@ -1646,7 +1646,7 @@ class MHUnitTests(unittest.TestCase):
         Measured at 382375811, the one-argument overrides raise the
         ``TypeError`` above.
         """
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
@@ -1720,12 +1720,12 @@ class MHUnitTests(unittest.TestCase):
 
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.mh.protocol import (MH, FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import EnumValueError
 
         with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and have get()'):
@@ -1834,7 +1834,7 @@ class MHUnitTests(unittest.TestCase):
                 raw = eth_header + ipv6_header + mh_payload
                 return Ethernet(io.BytesIO(raw), len(raw))
 
-            from pcapkit.protocols.internet.ipv6 import IPv6
+            from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
             eth = wrap_in_ethernet_ipv6(bytes(fback_raw))
             self.assertIsInstance(eth.payload, IPv6)
@@ -1853,7 +1853,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # A|H|L|K, one flag set at a time, c.f. RFC 5568 section 6.2.2.
         for flag, octets in [('ack', b'\x80\x00'), ('home', b'\x40\x00'),
@@ -1893,7 +1893,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         header = b'\x3b\x01\x00\x00\x00\x00' + b'\x00\x00'
         cases = (
@@ -1926,7 +1926,7 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_padding_option_schema_sizes_itself(self) -> None:
         """The padding option schema on its own, and the helper behind it.
 
-        :func:`~pcapkit.protocols.schema.internet.mh.pad_opt_data_len` has to read
+        :func:`~pcapkit.protocols.internet.mh.schema.pad_opt_data_len` has to read
         a skipped conditional field -- which is recorded as
         :data:`~pcapkit.corekit.sentinels.NO_VALUE`, not omitted -- as zero
         padding octets, rather than handing that singleton to
@@ -1935,7 +1935,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.sentinels import NO_VALUE
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import schema
 
         self.assertEqual(schema.pad_opt_data_len({}), 0)
         self.assertEqual(schema.pad_opt_data_len({'length': NO_VALUE}), 0)
@@ -1968,8 +1968,8 @@ class MHUnitTests(unittest.TestCase):
         produced a ``PadN`` two octets longer than the one that was parsed.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.data.internet.mh import PadOption
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import PadOption
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         for code, total in ((Option.Pad1, 1), (Option.PadN, 3), (Option.PadN, 6)):
@@ -1992,7 +1992,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         brr = Packet.Binding_Refresh_Request
         cases = (
@@ -2036,7 +2036,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.warnings import ProtocolWarning
 
         proto = object.__new__(MH)
@@ -2044,7 +2044,7 @@ class MHUnitTests(unittest.TestCase):
         # without the fix, each of these emits 6 + n octets while declaring only 8
         for n in (4, 6, 8):
             with self.subTest(body=n):
-                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warned:
                     padded = proto._pad_mh_message(b'\x00' * n)
                 self.assertEqual(warned.call_count, 1)
                 self.assertIs(warned.call_args.args[1], ProtocolWarning)
@@ -2060,7 +2060,7 @@ class MHUnitTests(unittest.TestCase):
         for n in (2, 10):
             with self.subTest(body=n):
                 body = b'\x00' * n
-                with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
+                with mock.patch('pcapkit.protocols.internet.mh.protocol.warn') as warned:
                     self.assertIs(proto._pad_mh_message(body), body)
                 warned.assert_not_called()
 
@@ -2080,7 +2080,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.cga_extension import CGAExtension
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for enum, registry, read_pre, make_pre in (
             (Packet, '__message__', '_read_msg_', '_make_msg_'),
@@ -2111,7 +2111,7 @@ class MHUnitTests(unittest.TestCase):
         import datetime as dt
 
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -2148,7 +2148,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.ani_suboption import ANISuboption
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -2187,7 +2187,7 @@ class MHUnitTests(unittest.TestCase):
         which :class:`~pcapkit.corekit.fields.collections.ListField` refuses.
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -2227,7 +2227,7 @@ class MHUnitTests(unittest.TestCase):
         mobility option's are.
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -2250,11 +2250,11 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_cga_extension_length_counts_the_four_octet_header(self) -> None:
         """Every CGA extension reader must report the octets actually on the wire (#512).
 
-        All three readers -- :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_none`,
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_multiprefix` and
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp` -- must not pass
+        All three readers -- :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_ext_none`,
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_ext_multiprefix` and
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._read_ext_exp` -- must not pass
         their ``Extension Data Length`` through
-        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length`, which adds the
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._mh_option_length`, which adds the
         ``2`` octets an :rfc:`6275#section-6.2` mobility option's Option Type and
         Option Length occupy. A CGA extension's header is twice that: per
         :rfc:`4581#section-2` the ``Extension Type`` is a *"16-bit identifier"* and
@@ -2269,8 +2269,8 @@ class MHUnitTests(unittest.TestCase):
         read side is at stake.
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh import schema
 
         proto = object.__new__(MH)
 
@@ -2338,7 +2338,7 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_option_and_extension_length_helpers_do_not_share_a_header_width(self) -> None:
         """The two wire-unit helpers are distinct because the two headers are (#512).
 
-        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` is correct and
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._mh_option_length` is correct and
         stays correct -- an :rfc:`6275#section-6.2` mobility option's Option Type and
         Option Length are one octet each. What it must not do is serve CGA
         extensions too, whose two header fields are 16 bits each
@@ -2346,7 +2346,7 @@ class MHUnitTests(unittest.TestCase):
         reader picks the right one, and pins the ``+2`` against being "fixed" to
         ``+4`` to suit the CGA extension readers, where the defect of #512 lies.
         """
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # the numbers quoted in #512
         self.assertEqual(MH._mh_option_length(4), 6)
@@ -2360,7 +2360,7 @@ class MHUnitTests(unittest.TestCase):
                     MH._mh_extension_length(stored) - MH._mh_option_length(stored), 2)
 
         # a real mobility option round-trips through the 2-octet helper
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh import schema
         option = schema.BindingRefreshAdviceOption.unpack(bytes.fromhex('02020064'))
         self.assertEqual(MH._mh_option_length(option.length), 4)
         self.assertEqual(MH._mh_option_length(option.length), len(option.pack()))
@@ -2369,7 +2369,7 @@ class MHUnitTests(unittest.TestCase):
         """``_read_opt_pad`` must route through the helper, not open-code ``clen + 2`` (#517).
 
         #509 extracted
-        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` so that "a future
+        :meth:`~pcapkit.protocols.internet.mh.protocol.MH._mh_option_length` so that "a future
         fix to this arithmetic only has to happen once", and the equivalent branch of
         ``hopopt.py`` and ``ipv6_opts.py`` routes through each module's own helper.
         Guards against the
@@ -2383,8 +2383,8 @@ class MHUnitTests(unittest.TestCase):
         it, while an open-coded one ignores it.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet import mh as schema
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh import schema
 
         proto = object.__new__(MH)
         padn = schema.PadOption(type=Option.PadN, length=5)
@@ -2410,7 +2410,7 @@ class MHUnitTests(unittest.TestCase):
 
         ``make`` then ``read`` then ``make`` again has to give identical octets,
         and the parse must land on a real handler rather than falling through to
-        :class:`~pcapkit.protocols.data.internet.mh.UnassignedOption` -- a
+        :class:`~pcapkit.protocols.internet.mh.data.UnassignedOption` -- a
         fall-through is what a missing dispatch entry looks like, and it does not
         raise.
 
@@ -2430,8 +2430,8 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.qos_attribute import QoSAttribute
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.mh import UnassignedOption
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import UnassignedOption
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         v6 = '2001:db8::1'
         v4 = '198.51.100.7'
@@ -2598,8 +2598,8 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.mh import UnknownMessage
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import UnknownMessage
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         v6 = '2001:db8::1'
 
@@ -2682,7 +2682,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.revocation_status_code import RevocationStatusCode
         from pcapkit.const.mh.revocation_trigger import RevocationTrigger
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         def build(packet_type, payload):
             payload = dict(payload, options=[])
@@ -2739,7 +2739,7 @@ class MHUnitTests(unittest.TestCase):
         count would under-read the payload by a factor of four.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -2777,7 +2777,7 @@ class MHUnitTests(unittest.TestCase):
         import ipaddress
 
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -2853,7 +2853,7 @@ class MHUnitTests(unittest.TestCase):
 
         from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         proto = object.__new__(MH)
@@ -2908,7 +2908,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.binding_revocation import BindingRevocation
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -2941,7 +2941,7 @@ class MHUnitTests(unittest.TestCase):
         before it can pick a family (#508).
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
@@ -2974,7 +2974,7 @@ class MHUnitTests(unittest.TestCase):
         check out from under a valid input.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
@@ -3001,7 +3001,7 @@ class MHUnitTests(unittest.TestCase):
         import ipaddress
 
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
@@ -3034,8 +3034,8 @@ class MHUnitTests(unittest.TestCase):
         ``290601000a000001``: an IPv4 length with the IPv6 code.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH, LMAAddressCode
-        from pcapkit.protocols.schema.internet.mh import LMAAddressOption
+        from pcapkit.protocols.internet.mh.protocol import MH, LMAAddressCode
+        from pcapkit.protocols.internet.mh.schema import LMAAddressOption
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
@@ -3098,7 +3098,7 @@ class MHUnitTests(unittest.TestCase):
         import ipaddress
 
         from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -3128,9 +3128,9 @@ class MHUnitTests(unittest.TestCase):
         exercises that catch-all's data-model path.
         """
         from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
-        from pcapkit.protocols.data.internet.mh import \
+        from pcapkit.protocols.internet.mh.data import \
             UnassignedFlowIdentificationSuboption as Data_Unassigned
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         code = FlowIDSuboption(200)
@@ -3162,7 +3162,7 @@ class MHUnitTests(unittest.TestCase):
         import ipaddress
 
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
 
@@ -3204,8 +3204,8 @@ class MHUnitTests(unittest.TestCase):
 
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import \
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import \
             MNIDOption as Schema_MNIDOption
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
@@ -3362,7 +3362,7 @@ class MHUnitTests(unittest.TestCase):
 
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
@@ -3457,7 +3457,7 @@ class MHUnitTests(unittest.TestCase):
         """
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -3486,8 +3486,8 @@ class MHUnitTests(unittest.TestCase):
         of the same fact, which a parser has to see agree.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import RedirectOption
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import RedirectOption
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)
@@ -3527,7 +3527,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.lma_mag_suboption import LMAControlledMAGSuboption
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.qos_attribute import QoSAttribute
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         proto = object.__new__(MH)
         payload = b'\xde\xad\xbe\xef'
@@ -3578,9 +3578,9 @@ class MHUnitTests(unittest.TestCase):
 
         This guards against a :exc:`KeyError` on the exact reproduction below:
         sizing
-        :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions`
+        :attr:`~pcapkit.protocols.internet.mh.schema.CGAParameter.extensions`
         reads ``pkt['length']``, a name only the enclosing
-        :class:`~pcapkit.protocols.schema.internet.mh.CGAParametersOption`
+        :class:`~pcapkit.protocols.internet.mh.schema.CGAParametersOption`
         declares, so :class:`~pcapkit.corekit.fields.misc.SchemaField` has to
         let the nested lookup fall through to the enclosing schema rather than
         hand it a fresh packet dict (#445). It also guards against a
@@ -3591,7 +3591,7 @@ class MHUnitTests(unittest.TestCase):
         for the same reproduction asserting the parsed fields.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # type 12, 30 octets: a 16-octet modifier, 8-octet subnet prefix, one
         # collision count octet and a 5-octet ASN.1 public key -- no extensions
@@ -3624,8 +3624,8 @@ class MHExtensionMembershipTests(unittest.TestCase):
         import struct  # pylint: disable=import-outside-toplevel
         import warnings  # pylint: disable=import-outside-toplevel
 
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # MH: next=59, Hdr Len 0 (8 octets), MH type 0, reserved, checksum
         mh_body = struct.pack('!BBBBH', 59, 0, 0, 0, 0) + bytes(4)

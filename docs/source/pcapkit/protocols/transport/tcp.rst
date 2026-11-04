@@ -2,9 +2,10 @@ TCP - Transmission Control Protocol
 ===================================
 
 .. module:: pcapkit.protocols.transport.tcp
+.. module:: pcapkit.protocols.transport.tcp.protocol
 
-:mod:`pcapkit.protocols.transport.tcp` contains
-:class:`~pcapkit.protocols.transport.tcp.TCP` only,
+:mod:`pcapkit.protocols.transport.tcp.protocol` contains
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` only,
 which implements the extractor for Transmission Control
 Protocol (TCP) [*]_, whose structure is described as
 below:
@@ -33,7 +34,7 @@ Octets      Bits        Name                    Description
   20        160   ``tcp.options``           TCP Options (if data offset > 5)
 ======= ========= ========================= =======================================
 
-.. autoclass:: pcapkit.protocols.transport.tcp.TCP
+.. autoclass:: pcapkit.protocols.transport.tcp.protocol.TCP
    :no-members:
    :show-inheritance:
 
@@ -144,410 +145,420 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.transport.tcp
+.. module:: pcapkit.protocols.transport.tcp.schema
 
-.. autodata:: pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN
+.. versionremoved:: 1.6.0
 
-.. autodata:: pcapkit.protocols.schema.transport.tcp.TCP_DATA_OFFSET_OCTET
+   ``pcapkit.protocols.schema.transport.tcp``, with no alias: the module moved here
+   (:issue:`2534`).
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.TCP
+.. autodata:: pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.transport.tcp.schema.TCP_DATA_OFFSET_OCTET
+
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.TCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Flags
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Option
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.UnassignedOption
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.EndOfOptionList
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.EndOfOptionList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.NoOperation
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.NoOperation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MaximumSegmentSize
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.WindowScale
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.WindowScale
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACKPermitted
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.SACKPermitted
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACK
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.SACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACKBlock
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.SACKBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Echo
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.Echo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.EchoReply
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.EchoReply
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Timestamps
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.Timestamps
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.PartialOrderConnectionPermitted
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderServiceProfile
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.PartialOrderServiceProfile
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.CC
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.CC
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.CCNew
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.CCNew
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.CCEcho
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.CCEcho
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.AlternateChecksumRequest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.AlternateChecksumData(kind, length, data)
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.AlternateChecksumData(kind, length, data)
    :no-members:
    :show-inheritance:
 
    .. autoattribute:: data
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MD5Signature(kind, length, digest)
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MD5Signature(kind, length, digest)
    :no-members:
    :show-inheritance:
 
    .. autoattribute:: digest
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartResponse
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.QuickStartResponse
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.UserTimeout
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.UserTimeout
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Authentication
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.Authentication
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.FastOpenCookie
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.FastOpenCookie
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp._MPTCP
+.. autoclass:: pcapkit.protocols.transport.tcp.schema._MPTCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCP
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPUnknown
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPUnknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPCapable
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPCapable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoin
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPJoin
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYN
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPJoinSYN
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPJoinSYNACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPJoinACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPDSS
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPDSS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPAddAddress
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPRemoveAddress
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPPriority
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPPriority
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPFallback
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPFallback
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPFastclose
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPFastclose
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.OffsetFlag
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.OffsetFlag
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.POCProfile
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.POCProfile
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartFlags
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.QuickStartFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartNonce
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.QuickStartNonce
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.TimeoutInfo
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.TimeoutInfo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeTest
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypeTest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeUnknown
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypeUnknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeCapable
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypeCapable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPCapableFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypeJoin
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtype
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtype
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPDSSFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypeAddAddress
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority
+.. autoclass:: pcapkit.protocols.transport.tcp.schema.MPTCPSubtypePriority
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_checksum
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector
+.. autofunction:: pcapkit.protocols.transport.tcp.schema.mptcp_data_selector
+.. autofunction:: pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector
+.. autofunction:: pcapkit.protocols.transport.tcp.schema.mptcp_dss_checksum
+.. autofunction:: pcapkit.protocols.transport.tcp.schema.mptcp_dss_ack_selector
+.. autofunction:: pcapkit.protocols.transport.tcp.schema.mptcp_dss_dsn_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.transport.tcp
+.. module:: pcapkit.protocols.transport.tcp.data
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.TCP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.transport.tcp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.transport.tcp.data.TCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Flags
+.. autoclass:: pcapkit.protocols.transport.tcp.data.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Option
+.. autoclass:: pcapkit.protocols.transport.tcp.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.UnassignedOption
+.. autoclass:: pcapkit.protocols.transport.tcp.data.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.EndOfOptionList
+.. autoclass:: pcapkit.protocols.transport.tcp.data.EndOfOptionList
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.NoOperation
+.. autoclass:: pcapkit.protocols.transport.tcp.data.NoOperation
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MaximumSegmentSize
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MaximumSegmentSize
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.WindowScale
+.. autoclass:: pcapkit.protocols.transport.tcp.data.WindowScale
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKPermitted
+.. autoclass:: pcapkit.protocols.transport.tcp.data.SACKPermitted
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.SACK
+.. autoclass:: pcapkit.protocols.transport.tcp.data.SACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKBlock
+.. autoclass:: pcapkit.protocols.transport.tcp.data.SACKBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Echo
+.. autoclass:: pcapkit.protocols.transport.tcp.data.Echo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.EchoReply
+.. autoclass:: pcapkit.protocols.transport.tcp.data.EchoReply
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamps
+.. autoclass:: pcapkit.protocols.transport.tcp.data.Timestamps
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted
+.. autoclass:: pcapkit.protocols.transport.tcp.data.PartialOrderConnectionPermitted
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderServiceProfile
+.. autoclass:: pcapkit.protocols.transport.tcp.data.PartialOrderServiceProfile
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CC
+.. autoclass:: pcapkit.protocols.transport.tcp.data.CC
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CCNew
+.. autoclass:: pcapkit.protocols.transport.tcp.data.CCNew
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CCEcho
+.. autoclass:: pcapkit.protocols.transport.tcp.data.CCEcho
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest
+.. autoclass:: pcapkit.protocols.transport.tcp.data.AlternateChecksumRequest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumData(kind, length, data)
+.. autoclass:: pcapkit.protocols.transport.tcp.data.AlternateChecksumData(kind, length, data)
    :no-members:
    :show-inheritance:
 
    .. autoattribute:: data
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MD5Signature(kind, length, digest)
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MD5Signature(kind, length, digest)
    :no-members:
    :show-inheritance:
 
    .. autoattribute:: digest
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse
+.. autoclass:: pcapkit.protocols.transport.tcp.data.QuickStartResponse
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.UserTimeout
+.. autoclass:: pcapkit.protocols.transport.tcp.data.UserTimeout
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Authentication
+.. autoclass:: pcapkit.protocols.transport.tcp.data.Authentication
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.FastOpenCookie
+.. autoclass:: pcapkit.protocols.transport.tcp.data.FastOpenCookie
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCP
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPUnknown
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPUnknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapable
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPCapable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPCapableFlag
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoin
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPJoin
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPJoinSYN
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPJoinSYNACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinACK
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPJoinACK
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSS
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPDSS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPAddAddress
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPAddAddress
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPRemoveAddress
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPPriority
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPPriority
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFallback
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPFallback
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFastclose
+.. autoclass:: pcapkit.protocols.transport.tcp.data.MPTCPFastclose
    :members:
    :show-inheritance:
 

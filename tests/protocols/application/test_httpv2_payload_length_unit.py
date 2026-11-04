@@ -3,7 +3,7 @@
 
 GitHub issue #668. Guards against the payload length callbacks of the frame
 types that take a ``PADDED`` flag in
-:mod:`pcapkit.protocols.schema.application.httpv2` putting the conditional
+:mod:`pcapkit.protocols.application.httpv2.schema` putting the conditional
 expression in the wrong place, under which an **unpadded** ``DATA``,
 ``HEADERS`` or ``PUSH_PROMISE`` frame parses with its whole payload silently
 discarded.
@@ -31,7 +31,7 @@ raises, nothing warns, and ``info.data`` is simply empty.
 Why the arithmetic comes out
 ----------------------------
 
-:meth:`~pcapkit.protocols.schema.schema.Schema.unpack` decrements
+:meth:`~pcapkit.protocols.schema.Schema.unpack` decrements
 ``packet['__length__']`` by every field's width as it goes, so at the payload
 field ``__length__`` is whatever the preceding fields left. For a padded
 ``DATA`` frame whose declared payload is ``1 + len(data) + pad_len``, the
@@ -94,9 +94,9 @@ test_the_padded_arm_reaches_zero_and_is_not_clamped` is the latter.
 The clean controls
 ------------------
 
-:attr:`~pcapkit.protocols.schema.application.httpv2.ContinuationFrame.fragment`,
-:attr:`~pcapkit.protocols.schema.application.httpv2.UnassignedFrame.data` and
-:attr:`~pcapkit.protocols.schema.application.httpv2.GoawayFrame.debug` use the
+:attr:`~pcapkit.protocols.application.httpv2.schema.ContinuationFrame.fragment`,
+:attr:`~pcapkit.protocols.application.httpv2.schema.UnassignedFrame.data` and
+:attr:`~pcapkit.protocols.application.httpv2.schema.GoawayFrame.debug` use the
 plain ``length=lambda pkt: pkt['__length__']`` with no conditional, and each
 carries its payload correctly with or without the defect.
 :class:`HTTPv2PlainLengthFormControlUnitTests` asserts them, because they are
@@ -206,7 +206,7 @@ class FramePayloadMixin:
         """Parse ``raw`` through the public path and assert nothing warned.
 
         A :class:`~pcapkit.utilities.warnings.SchemaWarning` is how
-        :meth:`~pcapkit.protocols.schema.schema.Schema.unpack` reports
+        :meth:`~pcapkit.protocols.schema.Schema.unpack` reports
         ``__length__`` having gone negative, i.e. a field having read past the
         declared payload. Requiring silence makes that an assertion rather than
         something a reader has to notice in the captured output.
@@ -218,7 +218,7 @@ class FramePayloadMixin:
             The parsed data object, i.e. ``HTTP(...).info``.
 
         """
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -234,7 +234,7 @@ class FramePayloadMixin:
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``DATA`` -- ``DataFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
+    """``DATA`` -- ``DataFrame`` in ``pcapkit/protocols/application/httpv2/schema.py``."""
 
     #: ``DATA``, :rfc:`9113#section-6.1`.
     TYPE = 0x00
@@ -298,7 +298,7 @@ class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``HEADERS`` -- ``HeadersFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
+    """``HEADERS`` -- ``HeadersFrame`` in ``pcapkit/protocols/application/httpv2/schema.py``."""
 
     #: ``HEADERS``, :rfc:`9113#section-6.2`.
     TYPE = 0x01
@@ -410,7 +410,7 @@ class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestC
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2PushPromiseFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``PUSH_PROMISE`` -- ``PushPromiseFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
+    """``PUSH_PROMISE`` -- ``PushPromiseFrame`` in ``pcapkit/protocols/application/httpv2/schema.py``."""
 
     #: ``PUSH_PROMISE``, :rfc:`9113#section-6.6`.
     TYPE = 0x05
@@ -520,11 +520,11 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
         raw = http2_frame_bytes(0xF0, 0x00, 1, DATA_PAYLOAD)
 
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         registry = HTTPv2.__dict__['__frame__']
         try:
-            with mock.patch('pcapkit.protocols.application.httpv2.warn'):
+            with mock.patch('pcapkit.protocols.application.httpv2.protocol.warn'):
                 info = HTTPv2(io.BytesIO(raw), len(raw)).info
             self.assertEqual(info.data, DATA_PAYLOAD)
         finally:
@@ -555,7 +555,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
             One entry per mis-parenthesised site.
 
         """
-        from pcapkit.protocols.schema.application.httpv2 import (DataFrame, HeadersFrame,
+        from pcapkit.protocols.application.httpv2.schema import (DataFrame, HeadersFrame,
                                                                  PushPromiseFrame)
         return [
             ('DataFrame.data', DataFrame, 'data'),
@@ -570,7 +570,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
         unpadded mapping because that is what the
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` ahead of the
         payload actually leaves behind when ``PADDED`` is clear -- see
-        :meth:`~pcapkit.protocols.schema.schema.Schema.unpack`.
+        :meth:`~pcapkit.protocols.schema.Schema.unpack`.
 
         Args:
             padded: Whether to set the ``PADDED`` flag bit.
@@ -702,13 +702,13 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
         """Construct one frame through the public API and pack it.
 
         Args:
-            **kwargs: Forwarded to :class:`~pcapkit.protocols.application.httpv2.HTTPv2`.
+            **kwargs: Forwarded to :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`.
 
         Returns:
             The packed frame.
 
         """
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')

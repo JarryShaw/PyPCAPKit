@@ -25,7 +25,7 @@ class TestRawEmptyBytes(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_empty_bytes_parse(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for source in (b'', io.BytesIO(b'')):
             with self.subTest(source=type(source).__name__):
@@ -35,7 +35,7 @@ class TestRawEmptyBytes(unittest.TestCase):
                 self.assertEqual(Raw.from_data(raw.info).data, b'')
 
     def test_both_forms_agree(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for payload in (b'', b'abc'):
             with self.subTest(payload=payload):

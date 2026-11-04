@@ -1,11 +1,11 @@
-=====================================================================
-:class:`~pcapkit.protocols.transport.sctp.SCTP` Vendor Crawlers
-=====================================================================
+==============================================================================
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` Vendor Crawlers
+==============================================================================
 
 .. module:: pcapkit.vendor.sctp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.sctp.SCTP` implementations. Available
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

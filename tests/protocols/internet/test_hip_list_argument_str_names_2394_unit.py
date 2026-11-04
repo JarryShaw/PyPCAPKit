@@ -146,7 +146,7 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
             The packet's octets.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         base = dict(HIP_BASE)
         # ``extension=True`` keeps ``HIP.alias`` off ``self._info``, which
@@ -300,7 +300,7 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         argument. A further parameter of that shape gets a case here.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         found = set()
         for name, method in vars(HIP).items():
@@ -333,7 +333,7 @@ class HIPListArgumentStrNameTests(unittest.TestCase):
         :mod:`pcapkit.protocols`, so naming them at runtime closes no cycle.
 
         """
-        from pcapkit.protocols.internet import hip
+        from pcapkit.protocols.internet.hip import protocol as hip
 
         for name in ('Enum_Suite', 'Enum_NATTraversal', 'Enum_Registration',
                      'Enum_ESPTransformSuite', 'Enum_Transport'):

@@ -184,7 +184,7 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
         """The report is readable by :func:`json.load` despite its keys.
 
         :meth:`TLSKeyLog.post_process
-        <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>` keys the
+        <pcapkit.protocols.misc.pcapng.schema.TLSKeyLog.post_process>` keys the
         entries by ``bytes.fromhex(random)``, so the key the writer formats is a
         :class:`bytes` repr carrying ``"`` and ``\\``:
         ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``, which a key written into

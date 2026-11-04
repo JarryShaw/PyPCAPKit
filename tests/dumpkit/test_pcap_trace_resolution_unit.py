@@ -86,7 +86,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
         return list(extractor.frame)
 
     def dump(self, frames: 'list[Any]', nanosecond: 'bool') -> 'str':
-        """Write ``frames``, each a :class:`~pcapkit.protocols.data.misc.pcap.frame.Frame`."""
+        """Write ``frames``, each a :class:`~pcapkit.protocols.misc.pcap.frame.data.Frame`."""
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
 
@@ -170,7 +170,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
 
     def test_nanoseconds_are_truncated_not_rounded(self) -> None:
         """#1500: 999,999,999 ns is 999,999 us of the same second, and half a microsecond drops."""
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         frames = []
         for frac in (999_999_999, 123_456_500, 500):
@@ -201,7 +201,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
 
     def test_a_binary_resolution_keeps_its_sub_microsecond_part(self) -> None:
         """#1500: a fraction truncated to microseconds is rescaled from the exact timestamp."""
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         # What :func:`~pcapkit.toolkit.pcapng.block2frame` makes of tick 1 of an
         # ``if_tsresol`` of 2**-10: 0.0009765625 s, truncated to 976 us.
@@ -215,7 +215,7 @@ class TestPCAPTraceResolution(unittest.TestCase):
 
     def test_a_frame_whose_timestamp_fits_neither_resolution_is_written_as_given(self) -> None:
         """A hand-built frame whose ``time_epoch`` fits neither resolution keeps its fields."""
-        from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import Frame, FrameInfo
 
         for nanosecond in (False, True):
             with self.subTest(nanosecond=nanosecond):

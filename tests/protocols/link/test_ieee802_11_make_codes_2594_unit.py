@@ -49,7 +49,7 @@ class TestIEEE802_11MakeCodes(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _build(self, **kwargs: 'Any') -> 'bytes':
-        return _attr('pcapkit.protocols.link.ieee802_11.IEEE802_11')(**kwargs).data
+        return _attr('pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11')(**kwargs).data
 
     def test_refusals(self) -> None:
         exc = _attr('pcapkit.utilities.exceptions.ProtocolError')

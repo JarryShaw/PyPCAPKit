@@ -47,7 +47,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: Header fields for a segment built through the public constructor, spelled with
-#: the parameter names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`
+#: the parameter names :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`
 #: actually declares. The same mapping, and the same reason for not reusing
 #: :data:`examples.generators.option_families.tcp.TCP_BASE`, as
 #: :data:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit.TCP_HEADER`.
@@ -90,7 +90,7 @@ def build_mptcp(*, syn: 'bool' = False, ack: 'bool' = False, **option: 'Any') ->
         **option: The option's own arguments, including ``subtype``.
 
     Returns:
-        The constructed :class:`~pcapkit.protocols.transport.tcp.TCP` instance.
+        The constructed :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` instance.
 
     Note:
         :mod:`pcapkit` is imported inside the function rather than at module
@@ -101,7 +101,7 @@ def build_mptcp(*, syn: 'bool' = False, ack: 'bool' = False, **option: 'Any') ->
 
     """
     from pcapkit.const.tcp.option import Option as Enum_Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     return TCP(syn=syn, ack=ack,
                options=[(Enum_Option.Multipath_TCP, option)],  # type: ignore[arg-type]
@@ -118,7 +118,7 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
 
         Reached by calling the dispatcher directly on a *parsed* flagless segment.
         The public read path cannot get here --
-        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector`
+        :func:`~pcapkit.protocols.transport.tcp.schema.mptcp_data_selector`
         rejects a flagless MP_JOIN with a ``FieldError`` before the dispatcher
         runs -- so the branch is latent, but latent only by virtue of a guard in
         a different file, and the string is still what a caller reaching it sees.
@@ -132,7 +132,7 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         # A bare 20-octet header -- data offset 5, no options -- with no flags set.
@@ -203,7 +203,7 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         messages outright is caught by the tests above, which raise each one.
 
         """
-        import pcapkit.protocols.transport.tcp as tcp_module
+        import pcapkit.protocols.transport.tcp.protocol as tcp_module
 
         source = pathlib.Path(tcp_module.__file__).read_text(encoding='utf-8')
 

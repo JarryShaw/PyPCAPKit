@@ -74,7 +74,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    ``dpkt.pcapng.Reader`` also skips Simple Packet Blocks, which `DPKT`_ has no
    type for; :class:`~pcapkit.foundation.engines.dpkt.PCAPNGReader` reads them
-   through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`
+   through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`
    and, since the block carries no timestamp, dates them 0 (:issue:`1520`).
 
 .. autoclass:: pcapkit.foundation.engines.dpkt.DPKT

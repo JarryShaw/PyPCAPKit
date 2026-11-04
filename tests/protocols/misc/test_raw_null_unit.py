@@ -20,7 +20,7 @@ class RawNullUnitTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_raw_properties_make_data_and_index_error(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         raw = object.__new__(Raw)
@@ -45,7 +45,7 @@ class RawNullUnitTests(unittest.TestCase):
         self.assertIsNone(raw._info.protocol)
 
     def test_no_payload_properties_read_make_and_index_error(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         null = object.__new__(NoPayload)

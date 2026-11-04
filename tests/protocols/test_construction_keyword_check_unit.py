@@ -9,7 +9,7 @@ nothing says so, and the mapping that produced them reads correctly.
 
 The cost is not hypothetical. Issue #602 was
 :data:`examples.generators.option_families.tcp.TCP_BASE` asking for ``seq=1`` where
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` spells the parameter
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` spells the parameter
 ``seq_no``. Measured without the fix::
 
     declared seq = 1   built info.seq = 0
@@ -21,9 +21,9 @@ reading the mapping against the signature reveals it. Issues #541 and #556 are
 the same family of silence.
 
 The schema layer is not so permissive: :meth:`Schema.__update__
-<pcapkit.protocols.schema.schema.Schema.__update__>` warns
+<pcapkit.protocols.schema.Schema.__update__>` warns
 :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it does not
-know (:file:`pcapkit/protocols/schema/schema.py`). The asymmetry between the two
+know (:file:`pcapkit/protocols/schema.py`). The asymmetry between the two
 is what #617 is about, and
 :meth:`AsymmetryTests.test_the_schema_layer_warns_where_construction_raises`
 pins both halves of it in one place.
@@ -38,7 +38,7 @@ because ``make`` is not the only consumer of the keywords it is handed:
 <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` passes one ``**kwargs``
 to the construction *and* to the parse of what it has just constructed, so a
 keyword declared only by ``read`` travels through ``make`` as well.
-:class:`~pcapkit.protocols.internet.hip.HIP` is the live example and
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` is the live example and
 :class:`ForwardedKeywordTests` is where it is pinned; rejecting on ``make``'s
 signature alone would reject correct code.
 
@@ -90,7 +90,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: A correct TCP header, spelled the way :meth:`TCP.make
-#: <pcapkit.protocols.transport.tcp.TCP.make>` declares it. The baseline every
+#: <pcapkit.protocols.transport.tcp.protocol.TCP.make>` declares it. The baseline every
 #: rejection below is a single-keyword departure from, so that a test failing
 #: says "this keyword" rather than "something in here".
 GOOD_HEADER = {
@@ -126,9 +126,9 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
     from pcapkit.corekit.fields.misc import PayloadField
     from pcapkit.corekit.infoclass import info_final
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.data.data import Data
+    from pcapkit.protocols.data import Data
     from pcapkit.protocols.protocol import Protocol
-    from pcapkit.protocols.schema.schema import Schema, schema_final
+    from pcapkit.protocols.schema import Schema, schema_final
 
     @info_final
     class DummyData(Data):
@@ -157,7 +157,7 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
             return 2
 
         def read(self, length: 'int | None' = None, **kwargs: 'Any') -> 'DummyData':
-            from pcapkit.protocols.misc.no_payload import NoPayload
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -192,7 +192,7 @@ class RejectionTests(unittest.TestCase):
         -- and captures no warning at all.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         for wrong, right in MISSPELLINGS:
@@ -220,7 +220,7 @@ class RejectionTests(unittest.TestCase):
         produces the octets :rfc:`9293` puts at those offsets.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         segment = TCP(**GOOD_HEADER)
         octets = bytes(segment)
@@ -240,7 +240,7 @@ class RejectionTests(unittest.TestCase):
 
         """
         from pcapkit.protocols.protocol import _declared_keywords
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         accepted = _declared_keywords(TCP)
         for name, parameter in inspect.signature(TCP.make).parameters.items():
@@ -259,7 +259,7 @@ class RejectionTests(unittest.TestCase):
         rather than fixing one and rediscovering the other.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
@@ -279,7 +279,7 @@ class RejectionTests(unittest.TestCase):
         ``seq`` for ``seq_no`` is the exact case that cost #602 its fixture bytes.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
@@ -307,7 +307,7 @@ class RejectionTests(unittest.TestCase):
         preferred to another spelling of the same idea, but the trade is real.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import BaseError, UnsupportedCall
 
         with self.assertRaises(UnsupportedCall) as context:
@@ -324,17 +324,17 @@ class ForwardedKeywordTests(unittest.TestCase):
     def test_hip_declares_extension_on_read_and_not_on_make(self) -> None:
         """The real asymmetry the check has to tolerate.
 
-        :meth:`HIP.read <pcapkit.protocols.internet.hip.HIP.read>` declares
-        ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>`
+        :meth:`HIP.read <pcapkit.protocols.internet.hip.protocol.HIP.read>` declares
+        ``extension``, :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>`
         does not, and :meth:`HIP.__post_init__
-        <pcapkit.protocols.internet.hip.HIP.__post_init__>` forwards it to both --
+        <pcapkit.protocols.internet.hip.protocol.HIP.__post_init__>` forwards it to both --
         so ``examples/generators/option_families/hip.py``'s ``_hip_build`` passing
         ``extension=True`` on the construction path is correct code that a check
         against ``make`` alone would have broken. Asserted from the signatures, so
         it fails if either side of the asymmetry moves.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.protocols.protocol import _declared_keywords
 
         def keywords(method: 'Any') -> 'set[str]':
@@ -350,12 +350,12 @@ class ForwardedKeywordTests(unittest.TestCase):
 
     def test_tls_declares_chained_on_unpack_and_not_on_make(self) -> None:
         """The same asymmetry on ``unpack``: :meth:`TLS.unpack
-        <pcapkit.protocols.application.tls.TLS.unpack>` declares ``chained``,
+        <pcapkit.protocols.application.tls.protocol.TLS.unpack>` declares ``chained``,
         which a further record in the segment is parsed with (#2517), and
-        :meth:`TLS.make <pcapkit.protocols.application.tls.TLS.make>` does not.
+        :meth:`TLS.make <pcapkit.protocols.application.tls.protocol.TLS.make>` does not.
 
         """
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.protocols.protocol import _declared_keywords
 
         def keywords(method: 'Any') -> 'set[str]':
@@ -381,7 +381,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         def read(self, length: 'int | None' = None, *, eggs: 'int' = 0,
                  **kwargs: 'Any') -> 'Any':
             from pcapkit.corekit.protochain import ProtoChain
-            from pcapkit.protocols.misc.no_payload import NoPayload
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -399,7 +399,7 @@ class ForwardedKeywordTests(unittest.TestCase):
 
         Signatures cannot show a keyword a method reads with
         ``kwargs.get('spam')`` -- which :meth:`ESP.read
-        <pcapkit.protocols.internet.esp.ESP.read>` does with ``packet``, and which
+        <pcapkit.protocols.internet.esp.protocol.ESP.read>` does with ``packet``, and which
         a third-party protocol may do with anything. Such a protocol names the
         keyword on the class instead, so the check has an answer other than
         "break it". Opt-in per class, so it can only exempt a name whose author
@@ -408,7 +408,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         """
         def read(self, length: 'int | None' = None, **kwargs: 'Any') -> 'Any':
             from pcapkit.corekit.protochain import ProtoChain
-            from pcapkit.protocols.misc.no_payload import NoPayload
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
             self._next = NoPayload()
             self._protos = ProtoChain(type(self), self.alias, basis=self._next.protochain)
@@ -451,7 +451,7 @@ class ForwardedKeywordTests(unittest.TestCase):
         """``__own_make_keywords__`` drops a base's ``make`` once it is overridden.
 
         For a base whose subclasses replace ``make`` without forwarding to it, as
-        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s do (#2286). The
+        :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`'s do (#2286). The
         base's ``make`` counts for the base itself and for a subclass that does
         not override it, and the marker is not inherited: an overriding
         subclass's own ``make`` is handed down as usual. ``__keywords__`` is
@@ -508,7 +508,7 @@ class ScopeTests(unittest.TestCase):
         what its octets say.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         octets = bytes(TCP(**GOOD_HEADER))
         parsed = TCP(io.BytesIO(octets), len(octets),
@@ -526,7 +526,7 @@ class ScopeTests(unittest.TestCase):
         ``SomeProtocol.make(...)`` is not: it still absorbs an undeclared keyword
         and discards it. ``object.__new__(cls).make(**kwargs)`` is the idiom that
         reaches it -- used by several modules of this suite, and by
-        :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` itself to
+        :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` itself to
         reach its versioned implementation.
 
         Closing it would mean interposing on every ``make``
@@ -536,7 +536,7 @@ class ScopeTests(unittest.TestCase):
         if the gap is ever closed this test goes red and gets deleted.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         bare = object.__new__(IPv4)
         with warnings.catch_warnings(record=True) as caught:
@@ -563,7 +563,7 @@ class ScopeTests(unittest.TestCase):
 
         """
         from pcapkit.protocols.protocol import OUT_OF_BAND_KEYWORDS
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         segment = TCP(**GOOD_HEADER, _layer='Internet', _protocol='tcp',
                       __context__=None, __packet__={})
@@ -582,7 +582,7 @@ class ScopeTests(unittest.TestCase):
         default :meth:`ProtocolBase._make_data
         <pcapkit.protocols.protocol.ProtocolBase._make_data>` is ``data.to_dict()``
         -- so ``from_data`` hands ``packet`` to a ``make`` that very often does not
-        declare it. :class:`~pcapkit.protocols.misc.no_payload.NoPayload` is the case
+        declare it. :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` is the case
         that matters, because :meth:`ProtocolBase._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
         innermost layer of every packet: refusing ``packet`` breaks ``from_data``
@@ -595,7 +595,7 @@ class ScopeTests(unittest.TestCase):
         which this test does not pin.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         octets = bytes(IPv4(src='127.0.0.1', dst='127.0.0.2'))
         parsed = IPv4(io.BytesIO(octets), len(octets))
@@ -608,10 +608,10 @@ class ScopeTests(unittest.TestCase):
     def test_a_dispatcher_may_decline_the_check(self) -> None:
         """``__keywords__ = None`` skips it, for a protocol that cannot enumerate.
 
-        :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` declares
+        :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` declares
         only ``version`` and forwards every other keyword to
-        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>` or
-        :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTPv2>` according to
+        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` or
+        :class:`HTTPv2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>` according to
         that value, so no fixed set of names is correct for it. Measured without
         the opt-out::
 
@@ -620,7 +620,7 @@ class ScopeTests(unittest.TestCase):
         Asserted through the real class rather than a dummy, because the point is
         that this one protocol declines and the rest do not. The construction
         succeeds, and the packet it builds -- ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
-        which only :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTPv1>`'s
+        which only :class:`HTTPv1 <pcapkit.protocols.application.httpv1.protocol.HTTPv1>`'s
         ``make`` produces from these keywords -- is the proof that they reached
         the delegate rather than being refused on the way.
 
@@ -630,11 +630,11 @@ class ScopeTests(unittest.TestCase):
         pins the same outcome from the HTTP side.
 
         """
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTPv1
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.protocols.protocol import _declared_keywords
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         self.assertIsNone(_declared_keywords(HTTP))
         self.assertIsNotNone(_declared_keywords(TCP))
@@ -675,7 +675,7 @@ class ReconstructionTests(unittest.TestCase):
         will itself be fixed.
 
         """
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
         class Mismatched(L2TPv2):
@@ -708,14 +708,14 @@ class AsymmetryTests(unittest.TestCase):
         This is the asymmetry #617 reported, asserted from both ends so that it
         cannot drift apart again unnoticed. The schema keeps warning rather than
         raising: :meth:`Schema.__update__
-        <pcapkit.protocols.schema.schema.Schema.__update__>` is the constructor of
+        <pcapkit.protocols.schema.Schema.__update__>` is the constructor of
         every schema in the tree and runs on the parse path too, so tightening it
         is a separate change with a far wider blast radius -- deliberately out of
         scope here, and recorded as such.
 
         """
-        from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import UnsupportedCall
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
@@ -740,7 +740,7 @@ class SentinelTests(unittest.TestCase):
     check, and the key not being there at all. :obj:`None` is taken by the second
     of those -- :attr:`ProtocolBase.__keywords__
     <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` is typed
-    ``Optional[frozenset[str]]`` and :class:`~pcapkit.protocols.application.http.HTTP`
+    ``Optional[frozenset[str]]`` and :class:`~pcapkit.protocols.application.http.protocol.HTTP`
     sets it -- so the third needs a marker of its own.
 
     That marker is :data:`~pcapkit.corekit.sentinels.ABSENT`, an instance of

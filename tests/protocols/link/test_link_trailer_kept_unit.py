@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Octets captured past an IP packet's own length survive a rebuild.
 
-GitHub issue #1209: :class:`~pcapkit.protocols.link.ethernet.Ethernet` and the
+GitHub issue #1209: :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet` and the
 VLAN tags hand the whole rest of the frame to the next layer, but
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` reads only its Total Length and
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` only its Payload Length. The
+:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` reads only its Total Length and
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` only its Payload Length. The
 octets after that -- most often the padding of a 60-octet minimum Ethernet
 frame -- were kept by no ``info``, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` dropped them: the
@@ -45,18 +45,18 @@ FRAMES = {
 
 #: Bare IP packets with octets past their own length, and those octets.
 PACKETS = {
-    'ipv4': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'ipv4': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
              bytes.fromhex('450000180001000040fd0000' '7f000001' '7f000001') + b'abcd' + bytes(6),
              bytes(6)),
-    'ipv4-options': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'ipv4-options': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                      bytes.fromhex('4600001c0001000040fd0000' '7f000001' '7f000001' '01010100')
                      + b'abcd' + b'\xee' * 5,
                      b'\xee' * 5),
-    'ipv4-header-only': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'ipv4-header-only': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                          bytes.fromhex('450000140001000040fd0000' '7f000001' '7f000001') + b'wxyz',
                          b'wxyz'),
-    'ipv6': ('pcapkit.protocols.internet.ipv6', 'IPv6', NONXT6 + b'\xaa\xbb', b'\xaa\xbb'),
-    'ipv6-hopopt': ('pcapkit.protocols.internet.ipv6', 'IPv6',
+    'ipv6': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', NONXT6 + b'\xaa\xbb', b'\xaa\xbb'),
+    'ipv6-hopopt': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6',
                     bytes.fromhex('60000000' '0010' '00' '40') + ADDRS6
                     + bytes.fromhex('1100010400000000' '0035003500080000') + bytes(6),
                     bytes(6)),
@@ -64,12 +64,12 @@ PACKETS = {
 
 #: Bare IP packets that end at or before their own length.
 NO_TRAILER = {
-    'ipv4-exact': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'ipv4-exact': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                    bytes.fromhex('450000180001000040fd0000' '7f000001' '7f000001') + b'abcd'),
-    'ipv4-truncated': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'ipv4-truncated': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                        bytes.fromhex('450000280001000040fd0000' '7f000001' '7f000001') + b'abcdefghij'),
-    'ipv6-exact': ('pcapkit.protocols.internet.ipv6', 'IPv6', NONXT6),
-    'ipv6-truncated': ('pcapkit.protocols.internet.ipv6', 'IPv6',
+    'ipv6-exact': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', NONXT6),
+    'ipv6-truncated': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6',
                        bytes.fromhex('60000000' '0010' '3b' '40') + ADDRS6 + b'\xaa' * 4),
 }
 
@@ -85,7 +85,7 @@ class TestLinkTrailerKept(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_frame_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for name, frame in FRAMES.items():
             with self.subTest(frame=name):
@@ -110,7 +110,7 @@ class TestLinkTrailerKept(unittest.TestCase):
                 self.assertEqual(proto.from_data(parsed.info).data, packet)
 
     def test_padded_frame_records_padding_on_ipv4(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         info = Ethernet(FRAMES['ethernet']).info
         self.assertEqual(info.ipv4.len, 28)
@@ -118,8 +118,8 @@ class TestLinkTrailerKept(unittest.TestCase):
         self.assertNotIn('trailer', info)
 
     def test_make_writes_trailer_outside_the_length(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ipv4 = IPv4(protocol=253, payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(ipv4.info.len, 24)

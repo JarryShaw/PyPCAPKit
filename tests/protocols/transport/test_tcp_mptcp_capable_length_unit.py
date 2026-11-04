@@ -62,7 +62,7 @@ MP_CAPABLE_WITH_KEY_SPEC_OCTETS = bytes([0x1E, 0x14, 0x01, 0x81]) + b'\xAA' * 8 
 def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
     """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
 
-    Goes through :class:`~pcapkit.protocols.schema.transport.tcp.TCP` (the schema, not the
+    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
     protocol) directly, supplying ``option_octets`` to the ``options`` field as raw bytes,
     which :class:`~pcapkit.corekit.fields.collections.OptionField` packs unchanged -- so
     nothing here calls a ``_make_mptcp_*`` maker.
@@ -82,7 +82,7 @@ def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
         ``sys.modules`` and a later import re-creates them.
 
     """
-    from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 
     if len(option_octets) % 4:
         raise ValueError('option_octets must already be a multiple of 4 octets long')
@@ -103,14 +103,14 @@ def make_capable(**kwargs: 'object') -> 'bytes':
 
     Args:
         **kwargs: forwarded to :meth:`TCP._make_mptcp_capable
-            <pcapkit.protocols.transport.tcp.TCP._make_mptcp_capable>`.
+            <pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_capable>`.
 
     Returns:
         The packed option bytes.
 
     """
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     tcp = TCP.__new__(TCP)
     schema = tcp._make_mptcp_capable(Enum_MPTCPOption.MP_CAPABLE, **kwargs)  # pylint: disable=protected-access
@@ -188,7 +188,7 @@ class TCPMPTCPCapableParseUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_CAPABLE_NO_KEY_SPEC_OCTETS)
         tcp = TCP(raw, len(raw))
@@ -211,7 +211,7 @@ class TCPMPTCPCapableParseUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_CAPABLE_WITH_KEY_SPEC_OCTETS)
         tcp = TCP(raw, len(raw))
@@ -242,7 +242,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
         """``rkey=None`` through ``TCP()`` packs a 12-octet option and reports no ``rkey``."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(
             options=[(Enum_Option.Multipath_TCP, {
@@ -266,7 +266,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
         """An explicit ``rkey`` through ``TCP()`` packs a 20-octet option and reports it back."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(
             options=[(Enum_Option.Multipath_TCP, {
@@ -322,7 +322,7 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
 
     def _parse(self, length: 'int') -> 'object':
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         octets, _ = ALL_LENGTHS[length]
         # NOTE: pad with NOPs to the 4-octet boundary ``build_tcp_segment`` requires.
@@ -344,7 +344,7 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
         """``make`` through the public ``TCP()`` constructor, then ``read`` the bytes back."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         octets, fields = ALL_LENGTHS[length]
         made = TCP(
@@ -406,7 +406,7 @@ class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
     def test_inconsistent_fields_are_rejected(self) -> None:
         """A later field without the one before it has no RFC 8684 length, so ``make`` refuses."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         tcp = TCP.__new__(TCP)

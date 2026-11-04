@@ -1,11 +1,11 @@
-===================================================================
-:class:`~pcapkit.protocols.transport.tcp.TCP` Constant Enumerations
-===================================================================
+============================================================================
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` Constant Enumerations
+============================================================================
 
 .. module:: pcapkit.const.tcp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.transport.tcp.TCP` implementations. Available
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` implementations. Available
 enumerations include:
 
 .. list-table::

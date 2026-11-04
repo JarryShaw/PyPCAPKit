@@ -74,7 +74,7 @@ class TestPCAPNGValueHelpers(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                       block={'linktype': LinkType.ETHERNET, 'snaplen': snaplen,
@@ -137,9 +137,9 @@ class TestPCAPNGValueHelpers(PCAPNGTestCase):
                 self.assertEqual(self._reparse(self._idb(snaplen=snaplen)).snaplen, snaplen)
 
     def test_eui_address_is_the_base_mac_pair(self) -> None:
-        import pcapkit.protocols.misc.pcapng as module
+        import pcapkit.protocols.misc.pcapng.protocol as module
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.protocols.protocol import ProtocolBase
 
         self.assertFalse(hasattr(module, 'PAT_EUI_ADDR'))
@@ -167,7 +167,7 @@ class TestPCAPNGSectionLength(PCAPNGTestCase):
     def _shb(self, **block: 'Any') -> 'Any':
         """Make a little-endian section header block from the given fields."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
                       block={'byteorder': 'little', **block})
@@ -208,7 +208,7 @@ class TestPCAPNGSectionLength(PCAPNGTestCase):
 
     def test_section_length_of_a_data_model_is_checked_too(self) -> None:
         """A parsed block rebuilds byte-exact; one given a value the field cannot hold is refused."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         for section_length in (-1, 0, 1024):
@@ -231,7 +231,7 @@ class TestPCAPNGPacketBlockDropCount(PCAPNGTestCase):
     def _packet_block(self, context: 'Any' = None, **block: 'Any') -> 'Any':
         """Make an obsolete Packet Block from the given fields, whose warning is silenced."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -273,7 +273,7 @@ class TestPCAPNGPacketBlockDropCount(PCAPNGTestCase):
 
     def test_drop_count_of_a_data_model_is_checked_too(self) -> None:
         """The data model path of the maker checks the field as the keyword path does."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         context = self._context()
@@ -293,7 +293,7 @@ class TestPCAPNGPadLength(PCAPNGTestCase):
 
     def _custom(self, type_: 'Any', data: 'bytes', options: 'Any') -> 'Any':
         """Make a custom block of ``type_`` with private enterprise number 1."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(num=2, sct=1, ctx=None, type=type_, block={'pen': 1, 'data': data, 'options': options})
 

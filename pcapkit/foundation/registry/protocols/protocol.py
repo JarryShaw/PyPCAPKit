@@ -92,7 +92,7 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     name as a plain string, and the ``protocol`` properties on
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
-    :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. The registry redesign of
     :issue:`514` keeps this key, and its thread records the shared namespace as
     a risk that design does not resolve, so the collision is reported here
     rather than fixed.
@@ -113,10 +113,10 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     .. versionchanged:: 1.6.0
 
        The HTTP member classes are named
-       :class:`~pcapkit.protocols.application.httpv1.HTTPv1` and
-       :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, so registering
+       :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` and
+       :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`, so registering
        one keeps its own key and no longer displaces
-       :class:`~pcapkit.protocols.application.http.HTTP` under ``'HTTP'``
+       :class:`~pcapkit.protocols.application.http.protocol.HTTP` under ``'HTTP'``
        (:issue:`2529`).
 
     """
@@ -382,21 +382,21 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
       :class:`~pcapkit.const.reg.transtype.TransType` to
       :class:`~pcapkit.protocols.internet.internet.Internet`,
       :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-      to :class:`~pcapkit.protocols.transport.sctp.SCTP`,
+      to :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`,
       :class:`~pcapkit.const.linux.arphrd.ARPHRD` to
-      :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`, and
+      :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`, and
       :class:`~pcapkit.const.reg.linktype.LinkType` to *both*
-      :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
-      :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or
+      :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` **and**
+      :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`; or
     * a :class:`dict` mapping an explicit destination class to a key -- the
       only form accepted for a bare :class:`int`, since e.g. a port number
       does not say by itself whether it means
-      :class:`~pcapkit.protocols.transport.tcp.TCP` or
-      :class:`~pcapkit.protocols.transport.udp.UDP`;
+      :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` or
+      :class:`~pcapkit.protocols.transport.udp.protocol.UDP`;
 
     or an iterable of either, to register ``protocol`` into several
     registries from one call -- e.g. a
-    :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both by its
+    :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable both by its
     IP protocol number and by a UDP port:
 
     .. code-block:: python
@@ -409,13 +409,13 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
 
     Note:
         That example names ``L2TPv3``, which this package does not implement,
-        rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is
+        rather than :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`. It is
         v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it
         directly over IP on protocol 115 and §4.1.2 puts it over UDP on port
-        1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.L2TPv2>` answers on
+        1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2>` answers on
         port 1701 only, and registering *it* at
         :attr:`TransType.L2TP <pcapkit.const.reg.transtype.TransType.L2TP>` would point the
-        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.L2TP`
+        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`
         and GitHub issue :issue:`548` for what that produced when measured.
 
     Args:
@@ -449,7 +449,7 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
         # NOTE: the pairing is read out of the owner's own ``vars()`` rather than
         # with ``getattr``, which walks the MRO and would hand a class keeping a
         # registry of its own its parent's pairing --
-        # :attr:`Loopback.__proto__ <pcapkit.protocols.link.loopback.Loopback.__proto__>`
+        # :attr:`Loopback.__proto__ <pcapkit.protocols.link.loopback.protocol.Loopback.__proto__>`
         # is keyed by address family rather than by EtherType, so inheriting
         # :class:`Link`'s would reject every key it does accept. A class is
         # checked against the registry it owns, or not at all.

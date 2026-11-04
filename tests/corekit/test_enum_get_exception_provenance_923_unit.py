@@ -19,8 +19,8 @@ own bare :exc:`ValueError`.
 Deriving :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from :exc:`KeyError`
 is what keeps the blast radius at nothing for the in-library sites that catch the
 base's name miss -- in :meth:`~pcapkit.const.http.method.Method.get`,
-:mod:`pcapkit.toolkit.scapy`, :mod:`pcapkit.protocols.internet.hopopt` and
-:mod:`pcapkit.protocols.internet.ipv6_opts` -- and ``Method.get`` catches it to
+:mod:`pcapkit.toolkit.scapy`, :mod:`pcapkit.protocols.internet.hopopt.protocol` and
+:mod:`pcapkit.protocols.internet.ipv6_opts.protocol` -- and ``Method.get`` catches it to
 return an unregistered member, which mints nothing, so for that one a name miss is
 part of a *successful* call. :class:`MethodUnregisteredMemberMintsNothingTests`
 pins that one directly.
@@ -33,8 +33,8 @@ Call sites that would otherwise carry the shape the ruling rejects are pinned to
   :class:`TransportProtocolCaseFoldingTests`.
 * ``Criticality.get`` does not exist, since its body would be a pure
   pass-through -- :class:`CriticalityGetDeletionTests`.
-* :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus` and
-  :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode` raise from
+* :class:`~pcapkit.protocols.internet.mh.protocol.FastBindingAcknowledgmentStatus` and
+  :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode` raise from
   :mod:`pcapkit.utilities.exceptions` on a *name* miss as ``EnumKeyError``, not
   as ``EnumValueError`` -- the right provenance in the wrong shape --
   :class:`MobilityHeaderNameMissTests`.
@@ -435,14 +435,14 @@ class CriticalityGetDeletionTests(unittest.TestCase):
     """
 
     def test_the_override_is_gone(self) -> 'None':
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertNotIn('get', Criticality.__dict__)
 
     def test_names_and_values_resolve_through_the_inherited_get(self) -> 'None':
         """Invariants rather than repros -- they pass without the #923 fix too,
         and are what relying on the inherited ``get`` has to preserve."""
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get('reject'), Criticality.reject)
         self.assertIs(Criticality.get('ignore'), Criticality.ignore)
@@ -452,7 +452,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertIs(Criticality.get(Criticality.reject), Criticality.reject)
 
     def test_a_name_miss_reports_in_the_stdlib_shape(self) -> 'None':
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
         from pcapkit.utilities.exceptions import EnumKeyError
 
         with self.assertRaises(EnumKeyError) as caught:
@@ -462,7 +462,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertIn('nosuch', str(caught.exception))
 
     def test_a_member_valued_default_is_honoured(self) -> 'None':
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
 
         self.assertIs(Criticality.get('nosuch', Criticality.reject), Criticality.reject)
         self.assertIs(Criticality.get('nosuch', Criticality.notify), Criticality.notify)
@@ -472,7 +472,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         ASN.1 ``ENUMERATED``: a default resolves through
         ``_value2member_map_`` and never through the constructor, so no path
         here can mint a fourth value."""
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
         from pcapkit.utilities.exceptions import EnumKeyError
 
         before = len(Criticality.__members__)
@@ -481,7 +481,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertEqual(len(Criticality.__members__), before)
 
     def test_a_value_miss_still_goes_through_missing(self) -> 'None':
-        from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.protocols.application.ngap.protocol import Criticality
         from pcapkit.utilities.exceptions import EnumValueError
 
         with self.assertRaises(EnumValueError) as caught:
@@ -502,7 +502,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
     """
 
     def test_a_name_miss_is_key_shaped(self) -> 'None':
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -516,7 +516,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
                 self.assertIn(enum_cls.__name__, str(caught.exception))
 
     def test_a_value_miss_stays_value_shaped(self) -> 'None':
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumValueError
 
@@ -529,7 +529,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
                 self.assertNotIsInstance(caught.exception, KeyError)
 
     def test_a_declared_name_and_value_still_resolve(self) -> 'None':
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
 
         self.assertIs(FastBindingAcknowledgmentStatus.get('Insufficient_resources'),
@@ -541,7 +541,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
         self.assertIs(IPv6AddressPrefixCode.get(4), IPv6AddressPrefixCode.NAR_Prefix)
 
     def test_neither_class_grows(self) -> 'None':
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumKeyError
 

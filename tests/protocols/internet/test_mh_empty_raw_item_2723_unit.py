@@ -47,7 +47,7 @@ HEADER = 8
 def _build(options: 'list[Any]') -> 'bytes':
     """The octets of a Binding Refresh Request carrying ``options``."""
     from pcapkit.const.mh.packet import Packet
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
 
     return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
               data={'options': options}).data
@@ -79,7 +79,7 @@ def _cga_fields() -> 'dict[str, Any]':
 
 def _cga_schema(extensions: 'list[Any]') -> 'Any':
     """A CGA parameter schema carrying ``extensions``."""
-    from pcapkit.protocols.schema.internet.mh import CGAParameter
+    from pcapkit.protocols.internet.mh.schema import CGAParameter
 
     return CGAParameter(extensions=extensions, public_key_test={'len': 2}, **_cga_fields())
 
@@ -91,7 +91,7 @@ class TestMHEmptyRawItem(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_empty_option_is_refused(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         for options in ([b''], [PADN, b''], [b'', PADN]):
@@ -110,7 +110,7 @@ class TestMHEmptyRawItem(unittest.TestCase):
 
     def test_empty_cga_extension_is_refused(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.data.internet.mh import CGAParameter
+        from pcapkit.protocols.internet.mh.data import CGAParameter
         from pcapkit.utilities.exceptions import ProtocolError
 
         parameters = {
@@ -140,7 +140,7 @@ class TestMHEmptyRawItem(unittest.TestCase):
 
     def test_whole_cga_extension_builds_as_its_pair(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.data.internet.mh import CGAParameter
+        from pcapkit.protocols.internet.mh.data import CGAParameter
 
         raw = _build([(Option.CGA_Parameters, {'parameters': [_cga_schema([EXTENSION])]})])
         pair = _build([(Option.CGA_Parameters, {'parameters': [

@@ -1,11 +1,11 @@
-===================================================================
-:class:`~pcapkit.protocols.transport.tcp.TCP` Vendor Crawlers
-===================================================================
+============================================================================
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` Vendor Crawlers
+============================================================================
 
 .. module:: pcapkit.vendor.tcp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.tcp.TCP` implementations. Available
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

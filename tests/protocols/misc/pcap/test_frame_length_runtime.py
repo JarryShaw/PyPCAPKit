@@ -2,10 +2,10 @@
 """``Frame.len`` is the on-wire length and ``Frame.cap_len`` the captured one.
 
 Both readers that build a
-:class:`~pcapkit.protocols.data.misc.pcap.frame.Frame` have to agree about which
+:class:`~pcapkit.protocols.misc.pcap.frame.data.Frame` have to agree about which
 of the two wire fields lands in which attribute. GitHub issue #618 is the
 defect where they did not: the classic-PCAP reader in
-:mod:`pcapkit.protocols.misc.pcap.frame` wrote ``len=incl_len,
+:mod:`pcapkit.protocols.misc.pcap.frame.protocol` wrote ``len=incl_len,
 cap_len=orig_len`` while :func:`pcapkit.toolkit.pcapng.block2frame` wrote
 ``len=original_len, cap_len=captured_len``. Exactly inverted, so ``frame.len``
 meant the *captured* length out of a ``.pcap`` and the *on-wire* length out of a

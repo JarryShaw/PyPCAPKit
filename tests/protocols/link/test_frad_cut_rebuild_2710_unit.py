@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """A FRAD header rebuilds as captured and quietly at every cut, or is refused.
 
-GitHub issue #2710: a :class:`~pcapkit.protocols.link.frad.FRAD` header the data ends
+GitHub issue #2710: a :class:`~pcapkit.protocols.link.frad.protocol.FRAD` header the data ends
 before its NLPID reads that octet as the ``0x00`` pad, so its data model holds an NLPID
-of zero. :meth:`FRAD.make <pcapkit.protocols.link.frad.FRAD.make>` then left out the
+of zero. :meth:`FRAD.make <pcapkit.protocols.link.frad.protocol.FRAD.make>` then left out the
 ``ext_nlpid`` the schema reads after the pad, and the rebuild logged ``NoDefaultValue``
 at ``CRITICAL``. It writes the pad and an NLPID of zero instead, which the schema's own
 short read cuts back.
 
 The data model keeps no EA bits of the Q.922 address, so a header whose EA bits are not
 the 2-octet form, ``0`` then ``1``, rebuilt other octets, cut or whole.
-:meth:`FRAD.read <pcapkit.protocols.link.frad.FRAD.read>` refuses it, which a
-:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` frame keeps as
-:class:`~pcapkit.protocols.misc.raw.Raw`, quietly. An EA bit the data never held is not
+:meth:`FRAD.read <pcapkit.protocols.link.frad.protocol.FRAD.read>` refuses it, which a
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` frame keeps as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, quietly. An EA bit the data never held is not
 checked.
 
 The frames are built here; this module is unit-tier and reads no capture file.
@@ -92,9 +92,9 @@ class FRADCutRebuildTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.FRAD = FRAD

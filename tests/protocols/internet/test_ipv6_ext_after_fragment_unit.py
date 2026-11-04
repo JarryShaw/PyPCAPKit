@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """An IPv6 extension header behind a first fragment dissects as without it.
 
-GitHub issue #1539: guards against :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+GitHub issue #1539: guards against :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`
 ending its extension header walk at every Fragment header and handing what
 follows to the upper-layer dispatch. That dispatch neither passes
 ``extension=True`` nor ``version=6``, so Shim6 fails
-:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate and
-becomes a plain :class:`~pcapkit.protocols.misc.raw.Raw` leaf, so the TCP
+:class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`'s version gate and
+becomes a plain :class:`~pcapkit.protocols.misc.raw.protocol.Raw` leaf, so the TCP
 behind it is never dissected, though it is without the Fragment header. A
 header whose dedicated parser raises, such as a zero-filled HIP header or a
-Routing header of type 3, is :class:`~pcapkit.protocols.misc.raw.Raw` either
+Routing header of type 3, is :class:`~pcapkit.protocols.misc.raw.protocol.Raw` either
 way (#2477).
 
 :rfc:`8200#section-4.5` puts every header through the upper-layer one in the
@@ -73,7 +73,7 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
         warnings.filterwarnings('ignore', message='packet length < 0')
 
     def _parse(self, data: bytes) -> 'object':
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         ipv6 = IPv6(data)
         self.assertEqual(ipv6.data, data)
@@ -81,7 +81,7 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
 
     def assert_rebuilds(self, ipv6: 'object') -> None:
         """``ipv6`` rebuilds byte for byte from its info and its info as a dict."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         self.assertEqual(IPv6.from_data(ipv6.info).data, ipv6.data)
         self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, ipv6.data)
@@ -97,7 +97,7 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
 
     def test_direct_forms(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, (code, header) in HEADERS.items():
             with self.subTest(header=name):
@@ -113,7 +113,7 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
                 self.assert_rebuilds(ipv6)
 
     def test_first_fragment_dissects_as_without_it(self) -> None:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         for name, (code, header) in HEADERS.items():
             direct = self._parse(datagram(code, header + TCP))
@@ -134,8 +134,8 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
         # Without the #1539 fix, Destination Options reaches TCP behind a first
         # fragment too, but as an upper layer holding it, not as an extension
         # header beside it
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         opts = bytes.fromhex('0600010400000000')
         direct = self._parse(datagram(60, opts + TCP))
@@ -158,7 +158,7 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
         self.assertEqual(ipv6.info.fragment.payload, header + TCP)
 
     def test_later_fragment_ends_the_walk(self) -> None:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         for name, (code, header) in HEADERS.items():
             with self.subTest(header=name):

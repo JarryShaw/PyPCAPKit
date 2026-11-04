@@ -25,7 +25,7 @@ __all__ = ['TLSKeyLabel']
 
 #: Hand-carried comment for the ``RSA`` member, copied verbatim from the text
 #: GitHub issue :issue:`882` gave it in
-#: the hand-written ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` -- ``RSA`` has no row in
+#: the hand-written ``pcapkit.protocols.misc.pcapng.protocol.TLSKeyLabel`` -- ``RSA`` has no row in
 #: :attr:`TLSKeyLabel.LINK`'s registry to generate a comment from (``grep -c
 #: RSA`` on the fetched CSV is 0), so it is carried across rather than
 #: derived, per GitHub issue :issue:`886`'s first constraint. The embedded
@@ -165,7 +165,7 @@ class TLSKeyLabel(Vendor):
             pref = f"{renm} = '{label}'"
             # NOTE: mirrors the ``nosec B105`` bandit suppression every
             # such member carried in the hand-written
-            # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#882) --
+            # ``pcapkit.protocols.misc.pcapng.protocol.TLSKeyLabel`` (#882) --
             # bandit's B105 (hardcoded password string) flags a string
             # constant assigned to a name containing ``SECRET``, which most
             # of these labels' names do.

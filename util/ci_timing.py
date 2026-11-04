@@ -142,10 +142,13 @@ TESTS_STEP = 'Run unit tests'
 #: 3.13 -- the newest such leg when W4's baseline was measured -- so that W4 compares
 #: one interpreter with itself week over week.
 MS_PER_TEST_LEG = '3.13'
-#: The JUnit artifacts read, by leg, and from how many push runs. ``latest``'s holds
-#: the ``LATEST`` tier, which no other leg runs (#2571).
+#: The JUnit artifacts read, by leg, and from how many push runs. ``latest``'s are
+#: read with the ``LATEST`` tier's, which no other leg runs (#2571): one per half of
+#: the job that runs it (#2751), each read as part of ``latest``'s.
 JUNIT_LEGS = tuple(dict.fromkeys(('3.13', '3.14', LATEST_VERSION)))
 JUNIT_ARTIFACT = 'junit-unit-{leg}'
+JUNIT_HALF_ARTIFACT = 'junit-unit-{leg}-latest-half-{half}'
+JUNIT_HALVES = (1, 2)
 JUNIT_RUNS = 5
 
 #: Steps reported on their own, by full-match pattern against the step's name.
@@ -711,16 +714,24 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
                      client.paginate(f'{base}/runs/{run["id"]}/artifacts', 'artifacts')
                      if not item.get('expired')}
         for leg in JUNIT_LEGS:
-            artifact = artifacts.get(JUNIT_ARTIFACT.format(leg=leg))
-            if artifact is None:
-                continue
-            raw = client.fetch(artifact['archive_download_url'])[0]
-            say(f'JUnit: run {run["id"]}, {JUNIT_ARTIFACT.format(leg=leg)}, {len(raw) / 1e6:.2f} MB.')
-            archive = zipfile.ZipFile(io.BytesIO(raw))
-            members = [name for name in archive.namelist() if name.endswith('.xml')]
-            if members:
-                data['junit'].append({'run_id': run['id'], 'created_at': run['created_at'],
-                                      'leg': leg, **parse_junit(archive.read(members[0]))})
+            # #2751: a run's halves of the LATEST tier are one entry with its `latest` leg's.
+            names = [JUNIT_ARTIFACT.format(leg=leg)] + ([JUNIT_HALF_ARTIFACT.format(leg=leg, half=half)
+                                                         for half in JUNIT_HALVES] if leg == LATEST_VERSION else [])
+            parsed = []  # type: list[dict[str, Any]]
+            for name in names:
+                artifact = artifacts.get(name)
+                if artifact is None:
+                    continue
+                raw = client.fetch(artifact['archive_download_url'])[0]
+                say(f'JUnit: run {run["id"]}, {name}, {len(raw) / 1e6:.2f} MB.')
+                archive = zipfile.ZipFile(io.BytesIO(raw))
+                members = [member for member in archive.namelist() if member.endswith('.xml')]
+                if members:
+                    parsed.append(parse_junit(archive.read(members[0])))
+            if parsed:
+                data['junit'].append({'run_id': run['id'], 'created_at': run['created_at'], 'leg': leg,
+                                      'cases': [case for entry in parsed for case in entry['cases']],
+                                      'suite_tests': sum(entry['suite_tests'] for entry in parsed)})
     if not data['junit']:
         data['notes'].append(f'No {JUNIT_ARTIFACT.format(leg="*")} artifact in the newest '
                              f'{len(pushes)} successful push runs, so there '

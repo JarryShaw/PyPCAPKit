@@ -2,11 +2,12 @@ VLAN - 802.1Q/802.1ad VLAN Tag Types
 ====================================
 
 .. module:: pcapkit.protocols.link.vlan
+.. module:: pcapkit.protocols.link.vlan.protocol
 
-:mod:`pcapkit.protocols.link.vlan` contains
-:class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
+:mod:`pcapkit.protocols.link.vlan.protocol` contains
+:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` only, an abstract base class holding
 the tag layout shared by every VLAN tag [*]_. The concrete tags live in
-modules of their own:
+packages of their own:
 
 .. list-table::
    :header-rows: 1
@@ -14,9 +15,9 @@ modules of their own:
    * - EtherType
      - Class
    * - ``0x8100`` (customer tag, 802.1Q)
-     - :class:`~pcapkit.protocols.link.c_tag.C_Tag`
+     - :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag`
    * - ``0x88A8`` (service tag, 802.1ad)
-     - :class:`~pcapkit.protocols.link.s_tag.S_Tag`
+     - :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag`
 
 The tag structure is described as below, keyed as for a customer tag; a service
 tag's keys start ``s_tag`` instead:
@@ -56,13 +57,13 @@ next-EtherType is ``0x8100``, which selects a customer tag in turn:
 would nest a ``c_tag`` inside a ``c_tag``, leaving nothing to say which was the
 service tag.
 
-Each tag has a module of its own because a module holds one protocol class,
+Each tag has a package of its own because a package holds one protocol class,
 named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`
 exempt (:issue:`2529`). This base is abstract, nothing dispatches to it, and it
 declares no :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, so its
 ``__index__`` raises.
 
-.. autoclass:: pcapkit.protocols.link.vlan.VLAN
+.. autoclass:: pcapkit.protocols.link.vlan.protocol.VLAN
    :no-members:
    :show-inheritance:
 
@@ -80,35 +81,45 @@ declares no :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, so its
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.vlan
+.. module:: pcapkit.protocols.link.vlan.schema
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.link.vlan``, with no alias: the module moved here
+   (:issue:`2534`).
 
 Both tags share these, since their layouts are identical.
 
-.. autoclass:: pcapkit.protocols.schema.link.vlan.VLAN
+.. autoclass:: pcapkit.protocols.link.vlan.schema.VLAN
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.link.vlan.TCI
+.. autoclass:: pcapkit.protocols.link.vlan.schema.TCI
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.link.vlan.TCIType
+.. autoclass:: pcapkit.protocols.link.vlan.schema.TCIType
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.vlan
+.. module:: pcapkit.protocols.link.vlan.data
 
-.. autoclass:: pcapkit.protocols.data.link.vlan.VLAN
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.link.vlan``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.link.vlan.data.VLAN
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.vlan.TCI
+.. autoclass:: pcapkit.protocols.link.vlan.data.TCI
    :members:
    :show-inheritance:
 

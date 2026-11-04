@@ -117,8 +117,8 @@ class ReportCountCutTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning
 
