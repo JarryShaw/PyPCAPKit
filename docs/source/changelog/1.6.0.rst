@@ -779,11 +779,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol`
   calls, and each protocol class's ``registry``, a property of
   :class:`~pcapkit.protocols.protocol.ProtocolMeta`, is a read-only view of
-  the entries as stored, importing nothing. A concrete subclass of
+  the entries as stored, importing nothing. A subclass of
   :class:`~pcapkit.protocols.protocol.Protocol` registers itself as it is
-  defined, where 1.5.x registered it only through ``register_protocol``; one
-  whose name is taken keeps the entry there and warns with
-  :exc:`~pcapkit.utilities.warnings.RegistryWarning`.
+  defined, as in 1.5.x, but an abstract one is skipped, where 1.5.x
+  registered it too, and one whose name is taken leaves the existing entry in
+  place, warning with :exc:`~pcapkit.utilities.warnings.RegistryWarning`,
+  where 1.5.x replaced the entry and warned that it was overwriting it.
 
 * **Changed** -- **a breaking change to** the schema helpers that code outside
   the schema layer calls, which move to :mod:`pcapkit.corekit.schema`, a
@@ -1288,8 +1289,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   cut left as zeros, and carries no ``error``, where 1.5.x's carried the failed
   dispatch's, as ``Field padding resolved to a negative length; template='-20s'``.
   A cut header rebuilt on its own reads back the values its parse read, its
-  Reserved octets, option area and length among them, rather than those its
-  maker filled in past the cut (:issue:`2761`, :pr:`2767`).
+  Reserved octets and option area among them, rather than those its maker
+  filled in past the cut (:issue:`2761`, :pr:`2767`).
 
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
