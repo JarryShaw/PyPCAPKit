@@ -103,14 +103,15 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.application.http import protocol as http
         from pcapkit.protocols.application.application import Application
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.warnings import RegistryWarning
 
+        protocol_registry = ProtocolBase.__registry__
         self._guard_registry(protocol_registry, 'HTTP')
 
-        # Defining a Protocol subclass registers it, so this displaces the base.
+        # An abstract class, so defining it names nothing.
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             custom = type('HTTP', (Application,), {'__module__': __name__})
@@ -132,7 +133,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                 # The overwrite still happens. The warning reports the
                 # collision, it does not resolve it -- resolving it is #514's
                 # business.
-                self.assertIs(protocol_registry['HTTP'], replacement)
+                self.assertIs(ProtocolBase.get_protocol('HTTP'), replacement)
 
                 messages = self._registry_warnings(caught, RegistryWarning)
                 self.assertEqual(len(messages), 1)
@@ -148,23 +149,22 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_a_protocol_subclass_shadowing_a_builtin_name_warns(self) -> None:
         """The collision is reachable without calling the registrar at all.
 
-        :meth:`Protocol.__init_subclass__
-        <pcapkit.protocols.protocol.Protocol.__init_subclass__>` calls
-        :func:`~pcapkit.foundation.registry.protocols.register_protocol`
-        unconditionally, so merely *defining* a subclass of the public
-        :class:`~pcapkit.protocols.protocol.Protocol` under a name a built-in
-        already holds displaces the built-in's entry. That is the sharpest form
-        of #675: there is no call to any registry function anywhere in the
-        user's code, so without the fix nothing at all marks the moment the
-        dispatch table changes meaning.
+        :meth:`ProtocolBase.__init_subclass__
+        <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>` names every
+        concrete subclass, so merely *defining* one under a name a built-in
+        already holds meets the built-in's entry. That is the sharpest form of
+        #675: there is no call to any registry function anywhere in the user's
+        code. The entry is kept and the clash reported, naming both, so a
+        bare-name lookup keeps its meaning and the moment is still marked
+        (#2763); only the registrar replaces it.
 
         """
-        from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols import __proto__ as protocol_registry
-        from pcapkit.protocols.protocol import Protocol
+        from pcapkit.protocols.protocol import Protocol, ProtocolBase
         from pcapkit.utilities.warnings import RegistryWarning
 
+        protocol_registry = ProtocolBase.__registry__
         incumbent = protocol_registry['HTTP']
+        builtin = ProtocolBase.get_protocol('HTTP')
         self._guard_registry(protocol_registry, 'HTTP')
 
         with warnings.catch_warnings(record=True) as caught:
@@ -173,13 +173,28 @@ class ProtocolRegistryTests(unittest.TestCase):
             class HTTP(Protocol):
                 """A user protocol that happens to be named like the built-in."""
 
-        self.assertIs(protocol_registry['HTTP'], HTTP)
-        self.assertIsNot(protocol_registry['HTTP'], incumbent)
+                name = 'User HTTP'
+                length = 0
+
+                def read(self, length=None, **kwargs):  # type: ignore[no-untyped-def]
+                    return None
+
+                def make(self, **kwargs):  # type: ignore[no-untyped-def]
+                    return None
+
+                @classmethod
+                def __index__(cls):  # type: ignore[no-untyped-def]
+                    return None
+
+        self.assertIs(protocol_registry['HTTP'], incumbent)
+        self.assertIs(ProtocolBase.get_protocol('HTTP'), builtin)
+        self.assertIsNot(builtin, HTTP)
 
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
         self.assertIn(repr(incumbent), messages[0])
         self.assertIn(repr(HTTP), messages[0])
+        self.assertLess(messages[0].index(repr(incumbent)), messages[0].index(repr(HTTP)))
 
     def test_register_protocol_stays_quiet_when_nothing_is_displaced(self) -> None:
         """A fresh key and an identical re-registration are both silent.
@@ -198,11 +213,12 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
+        protocol_registry = ProtocolBase.__registry__
         UnitProtocol = self._unit_protocol()
         self._guard_registry(protocol_registry, 'UNITPROTOCOL')
 
@@ -382,9 +398,10 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.warnings import RegistryWarning
 
+        protocol_registry = ProtocolBase.__registry__
         first = self._unit_protocol()
         second = self._unit_protocol()
 
@@ -419,9 +436,10 @@ class ProtocolRegistryTests(unittest.TestCase):
 
     def test_register_protocol_validates_and_updates_registry(self) -> None:
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import RegistryError
 
+        protocol_registry = ProtocolBase.__registry__
         UnitProtocol = self._unit_protocol()
         self._guard_registry(protocol_registry, 'UNITPROTOCOL')
         registry.register_protocol(UnitProtocol)
@@ -474,9 +492,10 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import misc as reg_misc
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
-        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 
+        protocol_registry = ProtocolBase.__registry__
         UnitProtocol = self._unit_protocol()
         self._guard_registry(protocol_registry, 'UNITPROTOCOL')
         raw_module = ('pcapkit.protocols.misc.raw.protocol', 'Raw')

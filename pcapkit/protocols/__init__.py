@@ -8,9 +8,9 @@
 :mod:`pcapkit.protocols` is a collection of all protocol families,
 with detailed implementation and methods.
 
-Each protocol class, and :data:`__proto__`, is imported the first time it is
-reached rather than with this package, through
-:func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+Each protocol class is imported the first time it is reached rather than with
+this package, through :func:`~pcapkit.utilities.importlib.lazy_exports`
+(:issue:`2730`).
 
 """
 from typing import TYPE_CHECKING
@@ -31,10 +31,6 @@ from pcapkit.protocols.schema import Schema
 from pcapkit.utilities.importlib import lazy_exports
 
 if TYPE_CHECKING:
-    from typing import Type
-
-    from pcapkit.protocols.protocol import ProtocolBase
-
     # Utility Classes for Protocols
     from pcapkit.protocols.misc import *
 
@@ -43,9 +39,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet import *
     from pcapkit.protocols.transport import *
     from pcapkit.protocols.application import *
-
-    #: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.
-    __proto__ = {}  # type: dict[str, Type[ProtocolBase]]
 
 __all__ = [
     # PCAP Headers
@@ -99,5 +92,4 @@ __all__ = [
 # NOTE: ``Protocol`` is bound above, and named here so that ``dir()`` lists it.
 __getattr__, __dir__ = lazy_exports(__name__, globals(), {
     'Protocol': ('protocol', 'Protocol'),
-    '__proto__': ('registry', '__proto__'),
 }, packages=('misc', 'link', 'internet', 'transport', 'application'))

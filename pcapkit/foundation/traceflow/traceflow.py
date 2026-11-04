@@ -22,6 +22,7 @@ from dictdumper.dumper import Dumper
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols.misc.raw.protocol import Raw
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
@@ -48,7 +49,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.infoclass import Info
-    from pcapkit.protocols.protocol import ProtocolBase
 
     CallbackFn = Callable[[_IT], None]
 
@@ -79,10 +79,7 @@ class TraceFlowMeta(abc.ABCMeta):
         """Protocol of current object."""
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
-        # NOTE: read here, not on import, which would build it and import every protocol (#2730).
-        from pcapkit.protocols import \
-            __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
-        return protocol_registry.get(cls.name.upper(), Raw)
+        return ProtocolBase.get_protocol(cls.name, Raw)
 
     @property
     def registry(cls) -> 'dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]':

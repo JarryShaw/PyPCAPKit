@@ -758,8 +758,10 @@ public wrapper in :mod:`pcapkit.foundation.registry`, carrying the validation th
 established ones carry. A map's registration comes in two parts:
 
 1. **A** ``register`` **or** ``register_<kind>`` **classmethod** on the class owning
-   the map -- ``register`` for ``__proto__``, ``register_<kind>`` for ``__<kind>__``
-   -- which writes it and warns when it displaces an entry. An inherited one counts
+   the map -- ``register`` for ``__proto__``, ``register_<kind>`` for ``__<kind>__``,
+   and ``register_protocol`` for the by-name registry below, named for the class it
+   registers (:issue:`2763`) -- which writes it and warns when it displaces an
+   entry. An inherited one counts
    only when it is typed and validated for exactly that map's keys, which the owner
    chose over an override on every class (:issue:`2511`). So
    :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
@@ -838,8 +840,30 @@ depart from it:
 
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol` and
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` are
-outside the rule: the first writes :data:`pcapkit.protocols.__proto__`, keyed by
-class name, and the second whichever maps its ``code`` names.
+outside the rule: the first writes the by-name registry, keyed by class name, and the
+second whichever maps its ``code`` names.
+
+**The by-name registry is a class-level map as well**, ruled on :issue:`2763`.
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`
+maps each upper-cased class name to its class, and lists every built-in protocol as a
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, as a ``__proto__`` map names its
+targets, so it is whole before any protocol module is imported and
+:meth:`ProtocolBase.get_protocol <pcapkit.protocols.protocol.ProtocolBase.get_protocol>`
+imports a class only when it resolves its entry, while
+:attr:`ProtocolMeta.registry <pcapkit.protocols.protocol.ProtocolMeta.registry>` is a
+read-only view of the entries as stored, read as ``AnyProtocol.registry`` and importing
+nothing. The map and both readers stay on the internal base, and only the hook that
+fills it is on the public one: a concrete subclass of
+:class:`~pcapkit.protocols.protocol.Protocol` names itself from
+:meth:`Protocol.__init_subclass__ <pcapkit.protocols.protocol.Protocol.__init_subclass__>`,
+as the library's other public bases register theirs, and an abstract one, or a class
+deriving :class:`~pcapkit.protocols.protocol.ProtocolBase` alone, does not. A name
+already held keeps its entry, and the clash is
+reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
+:meth:`ProtocolBase.register_protocol <pcapkit.protocols.protocol.ProtocolBase.register_protocol>`,
+which the wrapper calls, replaces it. A built-in meeting its own descriptor there is no
+clash. :file:`tests/protocols/test_protocol_registry_2763_unit.py` fails on a shipped
+protocol class with no entry, or on an entry naming another module or class.
 
 :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk` is the
 shape for a parser map:
@@ -861,7 +885,8 @@ shape for a parser map:
 every protocol class for such a map, and fails on one that no wrapper's tag names
 unless its ``EXCUSED`` table gives the reason. It fails as well on a map whose owner
 defines no ``register*`` classmethod of its own, unless its ``INHERITED`` table names
-the one typed for that map's keys.
+the one typed for that map's keys, and its ``NAMED`` table holds the classmethod named
+otherwise than for its map.
 
 **A protocol's table from a code to the layout read under it is such a map as well, and
 each layout is a concrete schema.** Ruled in review of :pr:`2657` (:issue:`2576`): the

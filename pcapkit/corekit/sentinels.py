@@ -599,7 +599,8 @@ class MissingType(Sentinel):
         return False
 
 
-#: MissingType: Default for reading :data:`pcapkit.protocols.__proto__` in
+#: MissingType: Default for reading :attr:`ProtocolBase.__registry__
+#: <pcapkit.protocols.protocol.ProtocolBase.__registry__>` in
 #: :mod:`pcapkit.foundation.registry.protocols.protocol`, recorded as what a code
 #: registration displaced when the name was new, so that handing the code back
 #: removes the name rather than restoring an entry. Private by documentation

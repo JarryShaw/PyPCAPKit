@@ -203,6 +203,11 @@ Internal Definitions
 
    .. automethod:: __init_subclass__
 
+   .. autoattribute:: __registry__
+      :no-value:
+   .. automethod:: register_protocol
+   .. automethod:: get_protocol
+
    :class:`Protocol` inherits the other members of this class, and they are
    documented under it above; each group below links to its entries.
 
@@ -344,6 +349,8 @@ Internal Definitions
 .. autoclass:: pcapkit.protocols.protocol.ProtocolMeta
    :no-members:
    :show-inheritance:
+
+   .. autoproperty:: registry
 
 .. autodata:: pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS
    :no-value:

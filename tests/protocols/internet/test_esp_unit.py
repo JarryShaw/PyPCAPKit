@@ -441,7 +441,7 @@ class ESPProtocolTests(unittest.TestCase):
 
         self.assertIn('ESP', pcapkit.__all__)
         self.assertIs(pcapkit.ESP, ESP)
-        self.assertIs(pcapkit.protocols.__proto__['ESP'], ESP)
+        self.assertIs(pcapkit.protocols.protocol.ProtocolBase.get_protocol('ESP'), ESP)
 
     ##########################################################################
     # Without SA context.

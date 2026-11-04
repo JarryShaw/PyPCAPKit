@@ -36,6 +36,7 @@ import shutil
 import string
 import struct
 import textwrap
+import threading
 import types
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
@@ -468,9 +469,29 @@ def _sibling_model(cls: 'Type[ProtocolBase]', role: 'str') -> 'Any':
 class ProtocolMeta(abc.ABCMeta):
     """Metaclass of :class:`ProtocolBase`, and so of every protocol class.
 
-    It adds no behaviour of its own over :class:`abc.ABCMeta`.
+    Over :class:`abc.ABCMeta`, it adds the class property :attr:`registry`.
 
     """
+
+    @property
+    def registry(cls) -> 'types.MappingProxyType[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]':
+        """Read-only view of the by-name protocol registry.
+
+        It is :attr:`ProtocolBase.__registry__`, with each entry as stored: a
+        built-in protocol is the :class:`~pcapkit.corekit.module.ModuleDescriptor`
+        naming it, so reading the view imports nothing. Look a class up with
+        :meth:`ProtocolBase.get_protocol`, which resolves a descriptor.
+
+        Note:
+            It is one map, not a per-class one, so every protocol class reads
+            the same entries, and the view shows each later registration. It
+            is defined on this metaclass, so it is a class attribute and
+            **not** an instance one.
+
+        .. versionadded:: 1.6.0
+
+        """
+        return types.MappingProxyType(ProtocolBase.__registry__)
 
 
 class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
@@ -541,6 +562,94 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: a new one without resolving it (:issue:`1504`).
     _shipped_proto: 'types.MappingProxyType[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
         types.MappingProxyType({})
+
+    #: Protocol registry by name, holding each protocol class under its
+    #: upper-cased class name, ``'IPV4'`` for :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`.
+    #: Each built-in protocol is a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+    #: here, so the map names every one before any is imported, and
+    #: :meth:`get_protocol` imports a class only when it resolves its entry
+    #: (:issue:`2763`). :meth:`Protocol.__init_subclass__` adds each concrete
+    #: :class:`Protocol` subclass as it is defined, :meth:`register_protocol`
+    #: replaces an entry, and :attr:`ProtocolMeta.registry` is a read-only view.
+    #:
+    #: .. versionadded:: 1.6.0
+    __registry__: 'dict[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = {
+        'AH': ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH'),
+        'ARP': ModuleDescriptor('pcapkit.protocols.link.arp.protocol', 'ARP'),
+        'C_TAG': ModuleDescriptor('pcapkit.protocols.link.c_tag.protocol', 'C_Tag'),
+        'DCCP': ModuleDescriptor('pcapkit.protocols.transport.dccp.protocol', 'DCCP'),
+        'DRARP': ModuleDescriptor('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
+        'DTLS': ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
+        'ESP': ModuleDescriptor('pcapkit.protocols.internet.esp.protocol', 'ESP'),
+        'ETHERNET': ModuleDescriptor('pcapkit.protocols.link.ethernet.protocol', 'Ethernet'),
+        'FRAD': ModuleDescriptor('pcapkit.protocols.link.frad.protocol', 'FRAD'),
+        'FRAME': ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+        'FTP': ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+        'FTP_DATA': ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
+        'GRE': ModuleDescriptor('pcapkit.protocols.link.gre.protocol', 'GRE'),
+        'HEADER': ModuleDescriptor('pcapkit.protocols.misc.pcap.header.protocol', 'Header'),
+        'HIP': ModuleDescriptor('pcapkit.protocols.internet.hip.protocol', 'HIP'),
+        'HOPOPT': ModuleDescriptor('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+        'HTTP': ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
+        'HTTPV1': ModuleDescriptor('pcapkit.protocols.application.httpv1.protocol', 'HTTPv1'),
+        'HTTPV2': ModuleDescriptor('pcapkit.protocols.application.httpv2.protocol', 'HTTPv2'),
+        'ICMP': ModuleDescriptor('pcapkit.protocols.internet.icmp.protocol', 'ICMP'),
+        'ICMPV4': ModuleDescriptor('pcapkit.protocols.internet.icmpv4.protocol', 'ICMPv4'),
+        'ICMPV6': ModuleDescriptor('pcapkit.protocols.internet.icmpv6.protocol', 'ICMPv6'),
+        'IEEE802_11': ModuleDescriptor('pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11'),
+        'IGMP': ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol', 'IGMP'),
+        'IGMPV1': ModuleDescriptor('pcapkit.protocols.internet.igmpv1.protocol', 'IGMPv1'),
+        'IGMPV2': ModuleDescriptor('pcapkit.protocols.internet.igmpv2.protocol', 'IGMPv2'),
+        'IGMPV3': ModuleDescriptor('pcapkit.protocols.internet.igmpv3.protocol', 'IGMPv3'),
+        'INARP': ModuleDescriptor('pcapkit.protocols.link.inarp.protocol', 'InARP'),
+        'IP': ModuleDescriptor('pcapkit.protocols.internet.ip.protocol', 'IP'),
+        'IPSEC': ModuleDescriptor('pcapkit.protocols.internet.ipsec.protocol', 'IPsec'),
+        'IPV4': ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
+        'IPV6': ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+        'IPV6_EXT': ModuleDescriptor('pcapkit.protocols.internet.ipv6_ext.protocol', 'IPv6_Ext'),
+        'IPV6_FRAG': ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag.protocol', 'IPv6_Frag'),
+        'IPV6_OPTS': ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
+        'IPV6_ROUTE': ModuleDescriptor('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route'),
+        'IPX': ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol', 'IPX'),
+        'IP_PSEUDO': ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo'),
+        'L2TP': ModuleDescriptor('pcapkit.protocols.link.l2tp.protocol', 'L2TP'),
+        'L2TPV2': ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
+        'LINUXSLL': ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
+        'LINUXSLL1': ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1'),
+        'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
+        'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
+        'MH': ModuleDescriptor('pcapkit.protocols.internet.mh.protocol', 'MH'),
+        'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
+        'NGAP': ModuleDescriptor('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
+        'NOPAYLOAD': ModuleDescriptor('pcapkit.protocols.misc.no_payload.protocol', 'NoPayload'),
+        'OSPF': ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
+        'PCAPNG': ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
+        'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+        'RARP': ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
+        'RAW': ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+        'SCTP': ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),
+        'SSL': ModuleDescriptor('pcapkit.protocols.application.ssl.protocol', 'SSL'),
+        'SSLV2': ModuleDescriptor('pcapkit.protocols.application.sslv2.protocol', 'SSLv2'),
+        'SSLV3': ModuleDescriptor('pcapkit.protocols.application.sslv3.protocol', 'SSLv3'),
+        'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
+        'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
+        'TLS': ModuleDescriptor('pcapkit.protocols.application.tls.protocol', 'TLS'),
+        'UDP': ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'),
+        'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),
+    }
+
+    #: Read-only copy of :attr:`__registry__` as shipped, which
+    #: :meth:`register_protocol` reads to put a built-in's descriptor back
+    #: rather than its class, as :attr:`_shipped_proto` serves
+    #: :meth:`register` (:issue:`1504`).
+    _shipped_registry: 'types.MappingProxyType[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
+        types.MappingProxyType(dict(__registry__))
+
+    #: Serialises :meth:`get_protocol`'s resolution of a descriptor. Two threads
+    #: importing protocol modules from different points can deadlock, one
+    #: holding a package and the other a module inside it, so a first import is
+    #: made by one thread at a time (:issue:`2763`).
+    _registry_lock: 'threading.RLock' = threading.RLock()
 
     #: Construction keywords this protocol consumes out of ``**kwargs`` instead
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
@@ -1073,8 +1182,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            protocol class itself, and the protocol names in upper case
            obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
         3. If ``value`` is :obj:`str`, the method will attempt to search for
-           the existing registered protocol class from
-           :data:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
+           the existing registered protocol class with
+           :meth:`ProtocolBase.get_protocol` and follow **step 2**; otherwise,
            return the value in upper case alone.
 
         Args:
@@ -1085,13 +1194,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             comp = (value, *(name.upper() for name in value.id()))
         elif isinstance(value, ProtocolBase):
             comp = (type(value), *(name.upper() for name in value.id()))
+        elif (proto := ProtocolBase.get_protocol(value)) is not None:
+            comp = (proto, *(name.upper() for name in proto.id()))
         else:
-            from pcapkit.protocols import __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel # isort: skip
-
-            if (proto := protocols_registry.get(value.upper())) is not None:
-                comp = (proto, *(name.upper() for name in proto.id()))
-            else:
-                comp = (value.upper(),)
+            comp = (value.upper(),)
         return comp
 
     @classmethod
@@ -1179,6 +1285,101 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {entry!r}', RegistryWarning)
         cls.__proto__[code] = entry
+
+    @classmethod
+    def register_protocol(cls, protocol: 'Type[ProtocolBase]') -> 'None':
+        """Register a protocol class in :attr:`__registry__`, replacing what its name holds.
+
+        The key is ``protocol.__name__.upper()``. Defining a concrete
+        :class:`Protocol` subclass registers it already, but keeps an entry its
+        name holds, so this is how to replace one, or to register a class that
+        derives :class:`ProtocolBase` alone.
+
+        Arguments:
+            protocol: :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If the name holds a
+                different class, naming it and its replacement, and their ids
+                where the two read the same. A
+                :class:`~pcapkit.corekit.module.ModuleDescriptor` entry is
+                resolved to compare, so registering the class it names is silent
+                and leaves the descriptor in place.
+
+        Note:
+            A built-in protocol is stored as the descriptor it shipped as, per
+            :attr:`_shipped_registry`, rather than as its class, so undoing an
+            override leaves the entry as shipped, to be imported on lookup.
+
+        .. versionadded:: 1.6.0
+
+        """
+        if not isinstance(protocol, type):
+            raise RegistryError(f'protocol must be a class, not {protocol!r}')
+        if not issubclass(protocol, ProtocolBase):
+            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
+
+        name = protocol.__name__.upper()
+        incumbent = ProtocolBase.get_protocol(name)
+        if incumbent is protocol:
+            return
+        if incumbent is not None:
+            incumbent_repr, protocol_repr = repr(incumbent), repr(protocol)
+            if incumbent_repr == protocol_repr:
+                # NOTE: #710: two distinct classes whose repr() -- module plus
+                # qualname -- coincide, e.g. a factory building a fresh class of
+                # the same name on every call; id() is what tells them apart.
+                incumbent_repr = f'{incumbent_repr} (id={id(incumbent):#x})'
+                protocol_repr = f'{protocol_repr} (id={id(protocol):#x})'
+            warn(f'protocol {name} already registered, overwriting {incumbent_repr} '
+                 f'with {protocol_repr}', RegistryWarning)
+        shipped = ProtocolBase._shipped_registry.get(name)
+        if isinstance(shipped, ModuleDescriptor) and \
+                (shipped.module, shipped.name) == (protocol.__module__, protocol.__name__):
+            ProtocolBase.__registry__[name] = shipped
+        else:
+            ProtocolBase.__registry__[name] = protocol
+
+    @overload  # pragma: no cover
+    @classmethod
+    def get_protocol(cls, name: 'str') -> 'Optional[Type[ProtocolBase]]': ...
+    @overload  # pragma: no cover
+    @classmethod
+    def get_protocol(cls, name: 'str', default: '_VT') -> 'Type[ProtocolBase] | _VT': ...
+
+    @classmethod
+    def get_protocol(cls, name: 'str', default: 'Any' = None) -> 'Any':
+        """Look a protocol class up in :attr:`__registry__` by name.
+
+        Arguments:
+            name: protocol name, in any case: ``'ipv4'`` finds
+                :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`
+            default: what to return where no entry has the name
+
+        Returns:
+            The class registered under ``name.upper()``, imported where its entry
+            is a :class:`~pcapkit.corekit.module.ModuleDescriptor`, or
+            ``default``. The entry is left as it is, so a descriptor is resolved
+            again on each lookup and follows a reloaded module.
+
+        Raises:
+            pcapkit.utilities.exceptions.ProtocolError: If a descriptor names a
+                class its module does not define.
+
+        .. versionadded:: 1.6.0
+
+        """
+        entry = ProtocolBase.__registry__.get(name.upper())
+        if entry is None:
+            return default
+        if isinstance(entry, ModuleDescriptor):
+            with ProtocolBase._registry_lock:
+                return entry.klass
+        return entry
 
     @classmethod
     def from_schema(cls, schema: '_ST | dict[str, Any]') -> 'Self':
@@ -3065,7 +3266,7 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
 
        The built-in protocol families derive from :class:`ProtocolBase`, so a
        built-in protocol is not an instance of this class, where every one
-       was; and a subclass is registered in :data:`pcapkit.protocols.__proto__`
+       was; and a subclass is registered in ``pcapkit.protocols.__proto__``
        when it is defined.
 
     """
@@ -3102,19 +3303,47 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
             :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.
             An explicit ``schema`` or ``data`` keyword is used as given.
 
-        This method also registers the subclass to the protocol registry,
-        i.e., :attr:`pcapkit.protocols.__proto__`. That registration is
-        unconditional -- it is the name-keyed identity registry, unrelated to
-        the ``code`` keyword -- whereas ``code``'s next-layer dispatch
-        registration is opt-in; see
-        :meth:`ProtocolBase.__init_subclass__` for the latter.
+        This method also names a concrete subclass in the by-name registry,
+        :attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
+        under its upper-cased class name, once
+        :meth:`ProtocolBase.__init_subclass__` has accepted its ``code``,
+        whereas ``code``'s next-layer dispatch registration is opt-in. An
+        abstract subclass, as :func:`inspect.isabstract` reports it, is not
+        named, and nor is a class deriving :class:`ProtocolBase` without this
+        class, as every built-in protocol does. A name already holding another
+        entry keeps it, and the clash is reported as a
+        :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
+        :meth:`ProtocolBase.register_protocol
+        <pcapkit.protocols.protocol.ProtocolBase.register_protocol>` replaces an
+        entry. A class meeting the :class:`~pcapkit.corekit.module.ModuleDescriptor`
+        that names its own module and name is no clash, and the descriptor
+        stays.
 
         See Also:
             For more information on the registry, please refer to
-            :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`.
+            :meth:`ProtocolBase.register_protocol <pcapkit.protocols.protocol.ProtocolBase.register_protocol>`.
+
+        .. versionchanged:: 1.6.0
+
+           An abstract subclass is not registered, and a name already holding
+           an entry keeps it, where every subclass was registered over it
+           (:issue:`2763`).
 
         """
-        from pcapkit.foundation.registry.protocols import register_protocol
-        register_protocol(cls)
+        super().__init_subclass__(schema, data, code, *args, **kwargs)
 
-        return super().__init_subclass__(schema, data, code, *args, **kwargs)
+        # NOTE: #2763: a concrete class names itself in the by-name registry
+        # once its ``code`` is accepted, so a refused one names nothing, and
+        # keeps off a name already held. A class meeting the descriptor naming
+        # its own module and name leaves it, to be resolved on lookup.
+        if not inspect.isabstract(cls):
+            name = cls.__name__.upper()
+            incumbent = ProtocolBase.__registry__.setdefault(name, cls)
+            if incumbent is not cls and not (isinstance(incumbent, ModuleDescriptor)
+                                             and incumbent == (cls.__module__, cls.__name__)):
+                incumbent_repr, protocol_repr = repr(incumbent), repr(cls)
+                if incumbent_repr == protocol_repr:  # #710: tell same-named classes apart
+                    incumbent_repr = f'{incumbent_repr} (id={id(incumbent):#x})'
+                    protocol_repr = f'{protocol_repr} (id={id(cls):#x})'
+                warn(f'protocol {name} already registered, keeping {incumbent_repr} '
+                     f'over {protocol_repr}', RegistryWarning)

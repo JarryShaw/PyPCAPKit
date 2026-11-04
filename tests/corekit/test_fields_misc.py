@@ -422,8 +422,8 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
     """Resolving :class:`~pcapkit.corekit.fields.misc.PayloadField`'s ``protocol``
     from a name, per `#787 <https://github.com/JarryShaw/PyPCAPKit/issues/787>`__.
 
-    :data:`pcapkit.protocols.__proto__` is keyed on ``__name__.upper()``, both
-    where it is seeded and in
+    The by-name registry, now ``ProtocolBase.__registry__``, is keyed on
+    ``__name__.upper()``, both where it is seeded and in
     :func:`~pcapkit.foundation.registry.protocols.register_protocol`. The setter
     looked the name up as given, so anything not already upper-cased missed --
     and a miss is indistinguishable from an unparsed payload, because

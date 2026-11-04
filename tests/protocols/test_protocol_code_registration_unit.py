@@ -471,13 +471,13 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def _assert_rejected_unchanged(self, call: 'Any') -> None:
-        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.protocols.transport.sctp.protocol import SCTP
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
@@ -485,16 +485,17 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
 
         tables = {klass.__name__: klass.__proto__
                   for klass in (Link, Radiotap, Internet, IPX, Frame, PCAPNG, TCP, UDP, SCTP)}
-        tables['pcapkit.protocols'] = protocol_registry
+        tables['ProtocolBase.__registry__'] = ProtocolBase.__registry__
         before = {name: dict(table) for name, table in tables.items()}
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')
                 with self.assertRaises(RegistryError):
                     call()
+            # NOTE: the by-name registry too: a class whose ``code`` is refused
+            # is never defined, so it names nothing (#2763).
             for name, table in tables.items():
-                if name != 'pcapkit.protocols':
-                    self.assertEqual(dict(table), before[name], f'{name}.__proto__ changed')
+                self.assertEqual(dict(table), before[name], f'{name} changed')
         finally:
             for name, table in tables.items():
                 table.clear()

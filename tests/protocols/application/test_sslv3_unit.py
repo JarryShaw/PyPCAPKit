@@ -70,7 +70,7 @@ class SSLv3ModuleTests(unittest.TestCase):
             with self.subTest(package=package.__name__):
                 self.assertIs(package.SSLv3, SSLv3)
                 self.assertIn('SSLv3', package.__all__)
-        self.assertIs(pcapkit.protocols.__proto__['SSLV3'], SSLv3)
+        self.assertIs(pcapkit.protocols.protocol.ProtocolBase.get_protocol('SSLV3'), SSLv3)
 
     def test_parsed_tls_keeps_its_dynamic_sslv3_alias(self) -> None:
         """Dispatch binds TLS alone; legacy version ``0x0300`` reports ``SSLv3``."""
