@@ -527,7 +527,12 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
     """The page's bases-per-header table against the declarations themselves."""
 
     def setUp(self) -> 'None':
-        import pcapkit.protocols.internet  # noqa: F401  # populates __subclasses__
+        import pcapkit.protocols.internet as internet
+
+        # NOTE: the package imports each protocol on first use (#2730), so reach
+        # every one, which populates __subclasses__.
+        for name in internet.__all__:
+            getattr(internet, name)
 
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext

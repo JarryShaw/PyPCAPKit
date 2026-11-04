@@ -21,7 +21,6 @@ from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
-from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -80,6 +79,9 @@ class TraceFlowMeta(abc.ABCMeta):
         """Protocol of current object."""
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
+        # NOTE: read here, not on import, which would build it and import every protocol (#2730).
+        from pcapkit.protocols import \
+            __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
         return protocol_registry.get(cls.name.upper(), Raw)
 
     @property
