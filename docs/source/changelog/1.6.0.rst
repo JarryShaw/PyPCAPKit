@@ -188,7 +188,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   included, and a Report's header schema cut inside the Additional Data past
   its records packs back as captured (:issue:`2686`, :issue:`2687`,
   :pr:`2701`); no group record past the cut is read, however the Report is
-  framed (:issue:`2756`, :pr:`2758`). A Report parsed on its own sizes its
+  framed (:issue:`2756`, :pr:`2758`), and no source address past it either, in
+  a Query or a group record. A Query's data model carries ``num_sources``,
+  which ``make()`` takes, so one cut inside its sources keeps the count it
+  declared and one whose sources are edited recounts them (:issue:`2760`,
+  :pr:`2766`). A Report parsed on its own sizes its
   group records by its record count, so one cut before the records it counts
   reads ``TRUNCATED``, as it does behind IPv4, holding the records captured
   and none made up, and a count no IP payload could carry raises
@@ -306,7 +310,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :class:`~pcapkit.protocols.misc.raw.protocol.Raw` with the rest of the datagram
   (:issue:`2535`, :pr:`2603`). The content, handshake and extension types are
   :mod:`pcapkit.const.tls`, crawled from IANA (:issue:`2495`, :issue:`2514`,
-  :pr:`2503`, :pr:`2595`).
+  :pr:`2503`, :pr:`2595`). Each record, an SSLv2 one TLS adopts and a DTLS 1.3
+  unified-header or ``tls12_cid`` record included, rebuilds from its
+  ``to_dict()`` as from its data model (:issue:`2762`, :pr:`2764`).
 
 * **Added** -- :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, a dissector
   for SSL version 2 (draft-hickman-netscape-ssl-00), whose record layer shares
@@ -915,7 +921,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Changed** -- protocol class bodies are reordered to the member-order
   convention, with no change in behaviour, and a project test guards the
   order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
-  :pr:`2539`, :pr:`2541`, :pr:`2613`).
+  :pr:`2539`, :pr:`2541`, :pr:`2613`), including a registry's readers and
+  makers in its enumeration's order, the helpers nothing reaches last, and
+  the registry maps in enumeration order (:pr:`2765`).
 
 * **Changed** -- the house conventions record that a protocol class takes its
   package's name, one to a package (:issue:`2529`, :pr:`2542`); that a
@@ -943,7 +951,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   request's review is cited (:issue:`2557`, :issue:`2563`, :pr:`2599`). The
   test conventions record that a test class whose tests each need a fresh
   import purges in ``setUp``, with a comment saying why, rather than importing
-  once per class (:issue:`2562`, :pr:`2611`). Where a registry's primary source
+  once per class (:issue:`2562`, :pr:`2611`), and that a round trip gives back
+  the values its parse read as well as the octets (:issue:`2761`,
+  :pr:`2767`). Where a registry's primary source
   is paywalled, the const-vendor pairing accepts a pinned secondary revision as
   a crawler's ``DATA`` once its values are cross-checked against independent
   implementations (:issue:`2575`, :pr:`2607`). A context variable more than one
@@ -1117,9 +1127,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :exc:`~pcapkit.utilities.exceptions.FieldValueError` for consuming nothing
   (:issue:`2686`, :pr:`2701`). No item that would start past the captured
   octets is read, so a cut list holds no zero item the capture never held
-  (:issue:`2756`, :pr:`2758`). The fill is of schema objects rather than zero
-  octets, so :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`
-  bounds it from its first octet, with neither the free band of
+  (:issue:`2756`, :pr:`2758`). A list of plain values ends with the data too,
+  inside a zero-filled schema item as well, the value the cut lands inside
+  read with its missing octets as zeros, where 1.5.x read as many values as
+  its length left room for, those past the cut as zeros: a Type 0 Routing
+  header cut after the first of its three addresses listed ``2001:db8::1``,
+  ``::`` and ``::`` (:issue:`2760`, :pr:`2766`). The fill is of schema objects
+  rather than zero octets, so
+  :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` bounds it from its
+  first octet, with neither the free band of
   :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` nor a one-off
   allowance, the zeros left unread going back to the budget, and a cut list
   declaring more than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is
@@ -1246,6 +1262,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   a cut header leaves no octets is ``Raw`` without a dispatch on the code the
   cut left as zeros, and carries no ``error``, where 1.5.x's carried the failed
   dispatch's, as ``Field padding resolved to a negative length; template='-20s'``.
+  A cut header rebuilt on its own reads back the values its parse read, its
+  Reserved octets, option area and length among them, rather than those its
+  maker filled in past the cut (:issue:`2761`, :pr:`2767`).
 
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
