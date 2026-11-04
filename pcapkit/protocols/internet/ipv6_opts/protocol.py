@@ -272,8 +272,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             Enum_Option.CALIPSO:                    'calipso',  # [RFC 5570]
             Enum_Option.SMF_DPD:                    'smf_dpd',  # [RFC 6621]
             Enum_Option.PDM:                        'pdm',      # [RFC 8250] 10
-            Enum_Option.Quick_Start:                'qs',       # [RFC 4782][RFC Errata 2034] 6
             Enum_Option.RPL_Option_0x23:            'rpl',      # [RFC 9008]
+            Enum_Option.Quick_Start:                'qs',       # [RFC 4782][RFC Errata 2034] 6
             Enum_Option.RPL_Option_0x63:            'rpl',      # [RFC 6553]
             Enum_Option.MPL_Option:                 'mpl',      # [RFC 7731]
             Enum_Option.ILNP_Nonce:                 'ilnp',     # [RFC 6744]
@@ -558,56 +558,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             'payload': cls._make_payload(data),
             'len': data.length // 8 - 1 if data.get('__short_read__') is not None else None,
         }
-
-    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
-        """Read option type field.
-
-        Arguments:
-            kind (int): option kind value
-
-        Returns:
-            Extracted IPv6-Opts option type field information (unknown option
-            action and change flag), see [:rfc:`8200#section-4.2`].
-
-        """
-        bin_ = bin(kind)[2:].zfill(8)
-        return int(bin_[:2], base=2), bool(int(bin_[2], base=2))
-
-    @staticmethod
-    def _ipv6_opts_option_length(schema_len: 'int') -> 'int':
-        """Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.
-
-        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
-        (what each ``Schema_*Option.len`` here holds) counts *"the length of
-        the Option Data field of this option, in octets"* -- i.e. it
-        excludes the Option Type and Opt Data Len fields themselves, so the
-        whole option, which is what every ``_read_opt_*`` below reports back
-        as the parsed option's own ``.length``, is two octets more. This is
-        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
-        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
-        one helper so the arithmetic has a single home. Do NOT drop the
-        ``+ 2``.
-
-        Section 4.2 is the citation because it defines the TLV option format and
-        contains the sentence quoted above. IPv6-Opts itself is the Destination
-        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but
-        says nothing about their internal length arithmetic. Section 4.3 is the
-        Hop-by-Hop Options header, a different header from the one this class
-        implements.
-
-        Note that only the *stored-length* read-side call sites are
-        collected here -- most ``_make_opt_*`` methods recompute the wire
-        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed
-        ``.length`` back, so they have nothing to unify against this helper.
-
-        Args:
-            schema_len: raw ``Opt Data Len`` field value, as read off the wire.
-
-        Returns:
-            Whole-option length, in octets, including the Type and Opt Data Len fields.
-
-        """
-        return schema_len + 2
 
     def _read_ipv6_opts(self, length: 'int') -> 'Option':
         """Read IPv6-Opts options.
@@ -1127,6 +1077,57 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
+    def _read_opt_rpl(self, schema: 'Schema_RPLOption', *, options: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
+        """Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.
+
+        Structure of IPv6-Opts RPL option [:rfc:`6553`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |  Option Type  |  Opt Data Len |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                         (sub-TLVs)                            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when
+        unrecognised, are kept as raw octets in ``sub_tlvs``.
+
+        Args:
+            schema: parsed parameter schema
+            options: extracted IPv6-Opts options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is less than ``4``.
+
+        """
+        if schema.len < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+
+        opt = Data_RPLOption(
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
+            length=self._ipv6_opts_option_length(schema.len),
+            flags=Data_RPLFlags(
+                down=bool(schema.flags['down']),
+                rank_err=bool(schema.flags['rank_err']),
+                fwd_err=bool(schema.flags['fwd_err']),
+                reserved=schema.flags['reserved'],
+            ),
+            id=schema.id,
+            rank=schema.rank,
+            sub_tlvs=schema.sub_tlvs,
+        )
+        return opt
+
     def _read_opt_qs(self, schema: 'Schema_QuickStartOption', *, options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Quick Start option.
 
@@ -1216,57 +1217,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
-        return opt
-
-    def _read_opt_rpl(self, schema: 'Schema_RPLOption', *, options: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
-        """Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.
-
-        Structure of IPv6-Opts RPL option [:rfc:`6553`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                           |  Option Type  |  Opt Data Len |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                         (sub-TLVs)                            |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when
-        unrecognised, are kept as raw octets in ``sub_tlvs``.
-
-        Args:
-            schema: parsed parameter schema
-            options: extracted IPv6-Opts options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If ``schema.len`` is less than ``4``.
-
-        """
-        if schema.len < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
-        opt = Data_RPLOption(
-            type=schema.type,
-            action=Enum_OptionAction.get(schema.type >> 6),
-            change=bool(schema.type & 0b00100000),
-            length=self._ipv6_opts_option_length(schema.len),
-            flags=Data_RPLFlags(
-                down=bool(schema.flags['down']),
-                rank_err=bool(schema.flags['rank_err']),
-                fwd_err=bool(schema.flags['fwd_err']),
-                reserved=schema.flags['reserved'],
-            ),
-            id=schema.id,
-            rank=schema.rank,
-            sub_tlvs=schema.sub_tlvs,
-        )
         return opt
 
     def _read_opt_mpl(self, schema: 'Schema_MPLOption', *, options: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
@@ -1532,45 +1482,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             seq=schema.seq,
         )
         return opt
-
-    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
-        """Make the padding options needed to align the header to 8 octets.
-
-        Args:
-            offset: Number of octets emitted so far, **counting the two octets
-                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as
-                well as every option already in the list.
-
-        Returns:
-            Tuple of the padding option schemas and the number of octets they
-            occupy.
-
-        Note:
-            It is the *whole* extension header, fixed part included, that has to
-            be a multiple of 8 octets [:rfc:`8200#section-4.6`] -- which is why
-            the alignment is computed from ``offset`` rather than from the
-            length of the option that has just been emitted. Aligning each
-            option to 8 octets on its own leaves the options area a multiple of
-            8 octets long, whereas :meth:`read` sizes it as
-            ``hdr_ext_len * 8 + 6`` -- two short of a multiple of 8 -- so the
-            header would declare 2 octets fewer than it carried.
-
-            A ``PadN`` option spends two octets on its own type and
-            ``Opt Data Len`` fields before any padding data, so occupying
-            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.
-            One octet is padded with a ``Pad1`` option instead, that being the
-            only form which can occupy a single octet. Two octets are one
-            ``PadN`` with an ``Opt Data Len`` of ``0``, not two ``Pad1``:
-            :rfc:`8200#section-4.2` says a ``PadN`` should be used rather than
-            multiple ``Pad1`` options.
-
-        """
-        pad_len = pad_length(offset, 8)
-        if pad_len == 0:
-            return [], 0
-        if pad_len == 1:
-            return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
-        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
 
     def _make_opt_none(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
                        data: 'bytes' = b'',
@@ -1959,6 +1870,66 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                                      name='PDM delta time last sent'),
         )
 
+    def _make_opt_rpl(self, code: 'Enum_Option', opt: 'Optional[Data_RPLOption]' = None, *,
+                      down: 'bool' = False,
+                      rank_err: 'bool' = False,
+                      fwd_err: 'bool' = False,
+                      id: 'int' = 0,
+                      rank: 'int' = 0,
+                      reserved: 'int' = 0,
+                      sub_tlvs: 'bytes' = b'',
+                      **kwargs: 'Any') -> 'Schema_RPLOption':
+        """Make IPv6-Opts RPL option.
+
+        Args:
+            code: option type value
+            opt: option data
+            down: down flag
+            rank_err: rank error flag
+            fwd_err: forwarding error flag
+            id: RPL instance ID
+            rank: sender rank
+            reserved: reserved flag bits, i.e. the low five bits of the flags octet
+            sub_tlvs: sub-TLVs, as raw octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved``, ``id`` or ``rank`` does not fit its
+                field, or ``sub_tlvs`` does not fit in the option.
+
+        """
+        if opt is not None:
+            down = opt.flags.down
+            rank_err = opt.flags.rank_err
+            fwd_err = opt.flags.fwd_err
+            reserved = opt.flags.reserved
+            id = opt.id
+            rank = opt.rank
+            sub_tlvs = opt.sub_tlvs
+
+        reserved = self._make_uint(reserved, bits=5, name='RPL reserved flags')
+        id = self._make_uint(id, bits=8, name='RPL instance ID')
+        rank = self._make_uint(rank, bits=16, name='RPL sender rank')
+        if len(sub_tlvs) > 251:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] too long RPL sub-TLVs: {len(sub_tlvs)}')
+
+        return Schema_RPLOption(
+            type=code,
+            len=4 + len(sub_tlvs),
+            flags={
+                'down': down,
+                'rank_err': rank_err,
+                'fwd_err': fwd_err,
+                'reserved': reserved,
+            },
+            id=id,
+            rank=rank,
+            sub_tlvs=sub_tlvs,
+        )
+
     def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption | Data_UnassignedOption]' = None, *,  # pylint: disable=line-too-long
                      func: 'Enum_QSFunction | int' = Enum_QSFunction.Quick_Start_Request,
                      rate: 'int' = 0,
@@ -2042,66 +2013,6 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
         data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
         return self._make_opt_none(code, data=data)
-
-    def _make_opt_rpl(self, code: 'Enum_Option', opt: 'Optional[Data_RPLOption]' = None, *,
-                      down: 'bool' = False,
-                      rank_err: 'bool' = False,
-                      fwd_err: 'bool' = False,
-                      id: 'int' = 0,
-                      rank: 'int' = 0,
-                      reserved: 'int' = 0,
-                      sub_tlvs: 'bytes' = b'',
-                      **kwargs: 'Any') -> 'Schema_RPLOption':
-        """Make IPv6-Opts RPL option.
-
-        Args:
-            code: option type value
-            opt: option data
-            down: down flag
-            rank_err: rank error flag
-            fwd_err: forwarding error flag
-            id: RPL instance ID
-            rank: sender rank
-            reserved: reserved flag bits, i.e. the low five bits of the flags octet
-            sub_tlvs: sub-TLVs, as raw octets
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``reserved``, ``id`` or ``rank`` does not fit its
-                field, or ``sub_tlvs`` does not fit in the option.
-
-        """
-        if opt is not None:
-            down = opt.flags.down
-            rank_err = opt.flags.rank_err
-            fwd_err = opt.flags.fwd_err
-            reserved = opt.flags.reserved
-            id = opt.id
-            rank = opt.rank
-            sub_tlvs = opt.sub_tlvs
-
-        reserved = self._make_uint(reserved, bits=5, name='RPL reserved flags')
-        id = self._make_uint(id, bits=8, name='RPL instance ID')
-        rank = self._make_uint(rank, bits=16, name='RPL sender rank')
-        if len(sub_tlvs) > 251:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] too long RPL sub-TLVs: {len(sub_tlvs)}')
-
-        return Schema_RPLOption(
-            type=code,
-            len=4 + len(sub_tlvs),
-            flags={
-                'down': down,
-                'rank_err': rank_err,
-                'fwd_err': fwd_err,
-                'reserved': reserved,
-            },
-            id=id,
-            rank=rank,
-            sub_tlvs=sub_tlvs,
-        )
 
     def _make_opt_mpl(self, code: 'Enum_Option', opt: 'Optional[Data_MPLOption]' = None, *,
                       seed_type: 'Optional[Enum_SeedID | int]' = None,
@@ -2355,3 +2266,92 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             },
             seq=self._make_uint(seq, bits=16, name='DFF sequence number'),
         )
+
+    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
+        """Read option type field.
+
+        Arguments:
+            kind (int): option kind value
+
+        Returns:
+            Extracted IPv6-Opts option type field information (unknown option
+            action and change flag), see [:rfc:`8200#section-4.2`].
+
+        """
+        bin_ = bin(kind)[2:].zfill(8)
+        return int(bin_[:2], base=2), bool(int(bin_[2], base=2))
+
+    @staticmethod
+    def _ipv6_opts_option_length(schema_len: 'int') -> 'int':
+        """Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.
+
+        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
+        (what each ``Schema_*Option.len`` here holds) counts *"the length of
+        the Option Data field of this option, in octets"* -- i.e. it
+        excludes the Option Type and Opt Data Len fields themselves, so the
+        whole option, which is what every ``_read_opt_*`` below reports back
+        as the parsed option's own ``.length``, is two octets more. This is
+        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
+        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
+        one helper so the arithmetic has a single home. Do NOT drop the
+        ``+ 2``.
+
+        Section 4.2 is the citation because it defines the TLV option format and
+        contains the sentence quoted above. IPv6-Opts itself is the Destination
+        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but
+        says nothing about their internal length arithmetic. Section 4.3 is the
+        Hop-by-Hop Options header, a different header from the one this class
+        implements.
+
+        Note that only the *stored-length* read-side call sites are
+        collected here -- most ``_make_opt_*`` methods recompute the wire
+        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed
+        ``.length`` back, so they have nothing to unify against this helper.
+
+        Args:
+            schema_len: raw ``Opt Data Len`` field value, as read off the wire.
+
+        Returns:
+            Whole-option length, in octets, including the Type and Opt Data Len fields.
+
+        """
+        return schema_len + 2
+
+    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
+        """Make the padding options needed to align the header to 8 octets.
+
+        Args:
+            offset: Number of octets emitted so far, **counting the two octets
+                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as
+                well as every option already in the list.
+
+        Returns:
+            Tuple of the padding option schemas and the number of octets they
+            occupy.
+
+        Note:
+            It is the *whole* extension header, fixed part included, that has to
+            be a multiple of 8 octets [:rfc:`8200#section-4.6`] -- which is why
+            the alignment is computed from ``offset`` rather than from the
+            length of the option that has just been emitted. Aligning each
+            option to 8 octets on its own leaves the options area a multiple of
+            8 octets long, whereas :meth:`read` sizes it as
+            ``hdr_ext_len * 8 + 6`` -- two short of a multiple of 8 -- so the
+            header would declare 2 octets fewer than it carried.
+
+            A ``PadN`` option spends two octets on its own type and
+            ``Opt Data Len`` fields before any padding data, so occupying
+            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.
+            One octet is padded with a ``Pad1`` option instead, that being the
+            only form which can occupy a single octet. Two octets are one
+            ``PadN`` with an ``Opt Data Len`` of ``0``, not two ``Pad1``:
+            :rfc:`8200#section-4.2` says a ``PadN`` should be used rather than
+            multiple ``Pad1`` options.
+
+        """
+        pad_len = pad_length(offset, 8)
+        if pad_len == 0:
+            return [], 0
+        if pad_len == 1:
+            return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
+        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]

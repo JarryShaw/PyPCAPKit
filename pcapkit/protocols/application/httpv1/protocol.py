@@ -345,33 +345,6 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             'raw_header': getattr(data, 'raw_header', ()),
         }
 
-    def _decode_text(self, text: 'bytes') -> 'tuple[str, Optional[str]]':
-        """Decode start-line text, recording how to encode it back.
-
-        The text is decoded by :meth:`self.decode
-        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
-        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by
-        default -- the detected charset is returned with it, or ``'latin-1'``
-        (decoding again) if that does not reproduce ``text`` either, so that the
-        original octets survive a rebuild.
-
-        Args:
-            text: Raw request URI or status message.
-
-        Returns:
-            The decoded text and the charset to encode it with, the latter
-            :obj:`None` for UTF-8.
-
-        """
-        value = self.decode(text)
-        for charset in (None, detect(text)):
-            try:
-                if value.encode(charset or 'utf-8') == text:
-                    return value, charset
-            except (LookupError, UnicodeError):
-                pass
-        return text.decode('latin-1'), 'latin-1'
-
     def _read_http_header(self, header: 'bytes') -> 'tuple[Data_Header, OrderedMultiDict[str, str]]':
         """Read HTTP/1.* header.
 
@@ -640,3 +613,30 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
         if len(item) != 2:
             raise ProtocolError('HTTP: invalid format')
         return self.decode(item[0].strip()), self.decode(item[1].strip())
+
+    def _decode_text(self, text: 'bytes') -> 'tuple[str, Optional[str]]':
+        """Decode start-line text, recording how to encode it back.
+
+        The text is decoded by :meth:`self.decode
+        <pcapkit.protocols.protocol.Protocol.decode>`. Where the result does
+        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by
+        default -- the detected charset is returned with it, or ``'latin-1'``
+        (decoding again) if that does not reproduce ``text`` either, so that the
+        original octets survive a rebuild.
+
+        Args:
+            text: Raw request URI or status message.
+
+        Returns:
+            The decoded text and the charset to encode it with, the latter
+            :obj:`None` for UTF-8.
+
+        """
+        value = self.decode(text)
+        for charset in (None, detect(text)):
+            try:
+                if value.encode(charset or 'utf-8') == text:
+                    return value, charset
+            except (LookupError, UnicodeError):
+                pass
+        return text.decode('latin-1'), 'latin-1'

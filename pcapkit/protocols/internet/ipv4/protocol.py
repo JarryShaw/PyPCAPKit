@@ -273,18 +273,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         {
             Enum_OptionNumber.EOOL:   'eool',    # [RFC 791] 0
             Enum_OptionNumber.NOP:    'nop',     # [RFC 791] 1
-            Enum_OptionNumber.SEC:    'sec',     # [RFC 1108] 130
-            Enum_OptionNumber.LSR:    'lsr',     # [RFC 791] 131
-            Enum_OptionNumber.TS:     'ts',      # [RFC 791] 68
-            Enum_OptionNumber.E_SEC:  'e_sec',   # [RFC 1108] 133
             Enum_OptionNumber.RR:     'rr',      # [RFC 791] 7
-            Enum_OptionNumber.SID:    'sid',     # [RFC 791][RFC 6814] 136
-            Enum_OptionNumber.SSR:    'ssr',     # [RFC 791] 137
             Enum_OptionNumber.MTUP:   'mtup',    # [RFC 1063][RFC 1191] 11
             Enum_OptionNumber.MTUR:   'mtur',    # [RFC 1063][RFC 1191] 12
-            Enum_OptionNumber.TR:     'tr',      # [RFC 1393][RFC 6814] 82
-            Enum_OptionNumber.RTRALT: 'rtralt',  # [RFC 2113] 148
             Enum_OptionNumber.QS:     'qs',      # [RFC 4782] 25
+            Enum_OptionNumber.TS:     'ts',      # [RFC 791] 68
+            Enum_OptionNumber.TR:     'tr',      # [RFC 1393][RFC 6814] 82
+            Enum_OptionNumber.SEC:    'sec',     # [RFC 1108] 130
+            Enum_OptionNumber.LSR:    'lsr',     # [RFC 791] 131
+            Enum_OptionNumber.E_SEC:  'e_sec',   # [RFC 1108] 133
+            Enum_OptionNumber.SID:    'sid',     # [RFC 791][RFC 6814] 136
+            Enum_OptionNumber.SSR:    'ssr',     # [RFC 791] 137
+            Enum_OptionNumber.RTRALT: 'rtralt',  # [RFC 2113] 148
         },
     )  # type: DefaultDict[Enum_OptionNumber | int, str | tuple[OptionParser, OptionConstructor]]
 
@@ -785,39 +785,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'trailer': data.get('trailer', b''),
         }
 
-    def _read_ipv4_addr(self) -> 'IPv4Address':
-        """Read IP address.
-
-        Returns:
-            Parsed IP address.
-
-        """
-        _byte = self._read_fileng(4)
-        # _addr = '.'.join([str(_) for _ in _byte])
-        # return _addr
-        return ipaddress.ip_address(_byte)  # type: ignore[return-value]
-
-    def _read_ipv4_opt_type(self, code: 'int') -> 'Data_OptionType':
-        """Read option type field.
-
-        Arguments:
-            code: option kind value
-
-        Returns:
-            Extracted IPv4 option type, as an object of the option flag (copied
-            flag), option class, and option number.
-
-        """
-        oflg = bool(code >> 7)
-        ocls = Enum_OptionClass.get((code >> 5) & 0b11)
-        onum = code & 0b11111
-
-        return Data_OptionType.from_dict({
-            'change': oflg,
-            'class': ocls,
-            'number': onum,
-        })
-
     def _read_ipv4_options(self, length: 'int') -> 'Option':
         """Read IPv4 option list.
 
@@ -1066,6 +1033,288 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
         return opt
 
+    def _read_opt_rr(self, schema: 'Schema_RROption', *, options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
+        """Read IPv4 Record Route (``RR``) option.
+
+        Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+---------//--------+
+           |00000111| length | pointer|     route data    |
+           +--------+--------+--------+---------//--------+
+             Type=7
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If option is malformed.
+
+        """
+        if schema.length < 3 or (schema.length - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+        if schema.pointer < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
+
+        opt = Data_RROption(
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
+            length=schema.length,
+            pointer=schema.pointer,
+            route=tuple(schema.route[:(schema.pointer - 4) // 4]),
+            remaining=tuple(schema.route[(schema.pointer - 4) // 4:]),
+        )
+        return opt
+
+    def _read_opt_mtup(self, schema: 'Schema_MTUPOption', *, options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
+        """Read IPv4 MTU Probe (``MTUP``) option.
+
+        Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |00001011|00000100|   2 octet value |
+           +--------+--------+--------+--------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+
+        opt = Data_MTUPOption(
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
+            length=schema.length,
+            mtu=schema.mtu,
+        )
+        return opt
+
+    def _read_opt_mtur(self, schema: 'Schema_MTUROption', *, options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
+        """Read IPv4 MTU Reply (``MTUR``) option.
+
+        Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |00001100|00000100|   2 octet value |
+           +--------+--------+--------+--------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+
+        opt = Data_MTUROption(
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
+            length=schema.length,
+            mtu=schema.mtu,
+        )
+        return opt
+
+    def _read_opt_qs(self, schema: 'Schema_QSOption', *, options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
+        """Read IPv4 Quick Start (``QS``) option.
+
+        Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
+
+        * A Quick-Start Request
+
+          .. code-block:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
+             |               |               | 0000  |Request|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * Report of Approved Rate
+
+          .. code-block:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
+             |               |               | 1000  | Report|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the option is malformed.
+
+        Note:
+            An option whose QS function is neither of the two above has no
+            defined layout, so the schema keeps it as an unassigned option and
+            it is parsed as one, see :meth:`_read_opt_unassigned`. That
+            dispatch is by the schema's own class, decided from the octets a
+            file read hands it; a
+            :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartRequestOption`
+            or :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartReportOption`
+            built directly with an unassigned ``func`` reaches this method
+            regardless, which is why it still raises below rather than
+            returning early.
+
+        """
+        if isinstance(schema, Schema_UnassignedOption):
+            return self._read_opt_unassigned(schema, options=options)  # type: ignore[return-value]
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+
+        func = Enum_QSFunction.get(schema.flags['func'])
+        if func == Enum_QSFunction.Quick_Start_Request:
+            schema_req = cast('Schema_QuickStartRequestOption', schema)
+
+            opt = Data_QuickStartRequestOption(
+                code=schema.type,
+                type=self._read_ipv4_opt_type(schema.type),
+                length=schema_req.length,
+                func=func,
+                rate=self._read_qs_rate(schema_req.flags['rate']),
+                ttl=datetime.timedelta(seconds=schema_req.ttl),
+                nonce=schema_req.nonce['nonce'],
+                reserved=schema_req.nonce['reserved'],
+            )  # type: Data_QSOption
+        elif func == Enum_QSFunction.Report_of_Approved_Rate:
+            schema_rep = cast('Schema_QuickStartReportOption', schema)
+
+            opt = Data_QuickStartReportOption(
+                code=schema.type,
+                type=self._read_ipv4_opt_type(schema.type),
+                length=schema_rep.length,
+                func=func,
+                rate=self._read_qs_rate(schema_rep.flags['rate']),
+                unused=schema_rep.reserved,
+                nonce=schema_rep.nonce['nonce'],
+                reserved=schema_rep.nonce['reserved'],
+            )
+        else:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
+        return opt
+
+    def _read_opt_ts(self, schema: 'Schema_TSOption', *, options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
+        """Read IPv4 Time Stamp (``TS``) option.
+
+        Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |01000100| length | pointer|oflw|flg|
+           +--------+--------+--------+--------+
+           |         internet address          |
+           +--------+--------+--------+--------+
+           |             timestamp             |
+           +--------+--------+--------+--------+
+           |                 .                 |
+                             .
+                             .
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the option is malformed.
+
+        """
+        if schema.length > 40 or schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+        if schema.pointer < 5:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
+
+        opt = Data_TSOption(
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
+            length=schema.length,
+            pointer=schema.pointer,
+            overflow=schema.flags['oflw'],
+            flag=schema.ts_flag,
+            timestamp=schema.timestamp,
+            remaining=schema.remaining,
+            remainder=schema.remainder,
+        )
+        return opt
+
+    def _read_opt_tr(self, schema: 'Schema_TROption', *, options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
+        """Read IPv4 Traceroute (``TR``) option.
+
+        Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
+
+        .. code-block:: text
+
+            0               8              16              24
+           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
+           |F| C |  Number |    Length     |          ID Number            |
+           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
+           |      Outbound Hop Count       |       Return Hop Count        |
+           +---------------+---------------+---------------+---------------+
+           |                     Originator IP Address                     |
+           +---------------+---------------+---------------+---------------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``12``.
+
+        """
+        if schema.length != 12:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
+
+        opt = Data_TROption.from_dict({
+            'code': schema.type,
+            'type': self._read_ipv4_opt_type(schema.type),
+            'length': schema.length,
+            'id': schema.id,
+            'outbound': schema.out,
+            'return': schema.ret,
+            'originator': schema.origin,
+        })
+        return opt
+
     def _read_opt_sec(self, schema: 'Schema_SECOption', *, options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
         """Read IPv4 Security (``SEC``) option.
 
@@ -1169,53 +1418,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
         return opt
 
-    def _read_opt_ts(self, schema: 'Schema_TSOption', *, options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
-        """Read IPv4 Time Stamp (``TS``) option.
-
-        Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
-
-        .. code-block:: text
-
-           +--------+--------+--------+--------+
-           |01000100| length | pointer|oflw|flg|
-           +--------+--------+--------+--------+
-           |         internet address          |
-           +--------+--------+--------+--------+
-           |             timestamp             |
-           +--------+--------+--------+--------+
-           |                 .                 |
-                             .
-                             .
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If the option is malformed.
-
-        """
-        if schema.length > 40 or schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-        if schema.pointer < 5:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
-
-        opt = Data_TSOption(
-            code=schema.type,
-            type=self._read_ipv4_opt_type(schema.type),
-            length=schema.length,
-            pointer=schema.pointer,
-            overflow=schema.flags['oflw'],
-            flag=schema.ts_flag,
-            timestamp=schema.timestamp,
-            remaining=schema.remaining,
-            remainder=schema.remainder,
-        )
-        return opt
-
     def _read_opt_e_sec(self, schema: 'Schema_ESECOption', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
         """Read IPv4 Extended Security (``E-SEC``) option.
 
@@ -1250,44 +1452,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length=schema.length,
             format=schema.format,
             info=schema.info,
-        )
-        return opt
-
-    def _read_opt_rr(self, schema: 'Schema_RROption', *, options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
-        """Read IPv4 Record Route (``RR``) option.
-
-        Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
-
-        .. code-block:: text
-
-           +--------+--------+--------+---------//--------+
-           |00000111| length | pointer|     route data    |
-           +--------+--------+--------+---------//--------+
-             Type=7
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If option is malformed.
-
-        """
-        if schema.length < 3 or (schema.length - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-        if schema.pointer < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
-
-        opt = Data_RROption(
-            code=schema.type,
-            type=self._read_ipv4_opt_type(schema.type),
-            length=schema.length,
-            pointer=schema.pointer,
-            route=tuple(schema.route[:(schema.pointer - 4) // 4]),
-            remaining=tuple(schema.route[(schema.pointer - 4) // 4:]),
         )
         return opt
 
@@ -1363,113 +1527,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         )
         return opt
 
-    def _read_opt_mtup(self, schema: 'Schema_MTUPOption', *, options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
-        """Read IPv4 MTU Probe (``MTUP``) option.
-
-        Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
-
-        .. code-block:: text
-
-           +--------+--------+--------+--------+
-           |00001011|00000100|   2 octet value |
-           +--------+--------+--------+--------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4``.
-
-        """
-        if schema.length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
-        opt = Data_MTUPOption(
-            code=schema.type,
-            type=self._read_ipv4_opt_type(schema.type),
-            length=schema.length,
-            mtu=schema.mtu,
-        )
-        return opt
-
-    def _read_opt_mtur(self, schema: 'Schema_MTUROption', *, options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
-        """Read IPv4 MTU Reply (``MTUR``) option.
-
-        Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
-
-        .. code-block:: text
-
-           +--------+--------+--------+--------+
-           |00001100|00000100|   2 octet value |
-           +--------+--------+--------+--------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4``.
-
-        """
-        if schema.length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
-        opt = Data_MTUROption(
-            code=schema.type,
-            type=self._read_ipv4_opt_type(schema.type),
-            length=schema.length,
-            mtu=schema.mtu,
-        )
-        return opt
-
-    def _read_opt_tr(self, schema: 'Schema_TROption', *, options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
-        """Read IPv4 Traceroute (``TR``) option.
-
-        Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
-
-        .. code-block:: text
-
-            0               8              16              24
-           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
-           |F| C |  Number |    Length     |          ID Number            |
-           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
-           |      Outbound Hop Count       |       Return Hop Count        |
-           +---------------+---------------+---------------+---------------+
-           |                     Originator IP Address                     |
-           +---------------+---------------+---------------+---------------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``12``.
-
-        """
-        if schema.length != 12:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
-        opt = Data_TROption.from_dict({
-            'code': schema.type,
-            'type': self._read_ipv4_opt_type(schema.type),
-            'length': schema.length,
-            'id': schema.id,
-            'outbound': schema.out,
-            'return': schema.ret,
-            'originator': schema.origin,
-        })
-        return opt
-
     def _read_opt_rtralt(self, schema: 'Schema_RTRALTOption', *, options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
         """Read IPv4 Router Alert (``RTRALT``) option.
 
@@ -1501,96 +1558,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length=schema.length,
             alert=schema.alert,
         )
-        return opt
-
-    def _read_opt_qs(self, schema: 'Schema_QSOption', *, options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
-        """Read IPv4 Quick Start (``QS``) option.
-
-        Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
-
-        * A Quick-Start Request
-
-          .. code-block:: text
-
-              0                   1                   2                   3
-              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
-             |               |               | 0000  |Request|               |
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             |                        QS Nonce                           | R |
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        * Report of Approved Rate
-
-          .. code-block:: text
-
-              0                   1                   2                   3
-              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
-             |               |               | 1000  | Report|               |
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             |                        QS Nonce                           | R |
-             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted IPv4 options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If the option is malformed.
-
-        Note:
-            An option whose QS function is neither of the two above has no
-            defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, see :meth:`_read_opt_unassigned`. That
-            dispatch is by the schema's own class, decided from the octets a
-            file read hands it; a
-            :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartRequestOption`
-            or :class:`~pcapkit.protocols.internet.ipv4.schema.QuickStartReportOption`
-            built directly with an unassigned ``func`` reaches this method
-            regardless, which is why it still raises below rather than
-            returning early.
-
-        """
-        if isinstance(schema, Schema_UnassignedOption):
-            return self._read_opt_unassigned(schema, options=options)  # type: ignore[return-value]
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
-
-        func = Enum_QSFunction.get(schema.flags['func'])
-        if func == Enum_QSFunction.Quick_Start_Request:
-            schema_req = cast('Schema_QuickStartRequestOption', schema)
-
-            opt = Data_QuickStartRequestOption(
-                code=schema.type,
-                type=self._read_ipv4_opt_type(schema.type),
-                length=schema_req.length,
-                func=func,
-                rate=self._read_qs_rate(schema_req.flags['rate']),
-                ttl=datetime.timedelta(seconds=schema_req.ttl),
-                nonce=schema_req.nonce['nonce'],
-                reserved=schema_req.nonce['reserved'],
-            )  # type: Data_QSOption
-        elif func == Enum_QSFunction.Report_of_Approved_Rate:
-            schema_rep = cast('Schema_QuickStartReportOption', schema)
-
-            opt = Data_QuickStartReportOption(
-                code=schema.type,
-                type=self._read_ipv4_opt_type(schema.type),
-                length=schema_rep.length,
-                func=func,
-                rate=self._read_qs_rate(schema_rep.flags['rate']),
-                unused=schema_rep.reserved,
-                nonce=schema_rep.nonce['nonce'],
-                reserved=schema_rep.nonce['reserved'],
-            )
-        else:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
 
     def _make_opt_unassigned(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_UnassignedOption]' = None, *,
@@ -1651,6 +1618,374 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         return Schema_NOPOption(
             type=kind,
             length=1,
+        )
+
+    def _make_opt_rr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_RROption]' = None, *,
+                     counts: 'int' = 10,  # reasonable default
+                     route: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
+                     remaining: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
+                     **kwargs: 'Any') -> 'Schema_RROption':
+        """Make IPv4 Record Route (``RR``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            counts: maximum number of addresses to record
+            route: list of IPv4 addresses as recorded routes, i.e. the
+                address slots before the pointer
+            remaining: list of IPv4 addresses for the address slots at or beyond
+                the pointer; the slots left over up to ``counts`` are zero
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``counts`` is not a number of slots the
+                one-octet length can count.
+
+        """
+        if option is not None:
+            slots = list(option.route or ())  # type: list[IPv4Address | str | bytes | int]
+            slots += getattr(option, 'remaining', ())
+            pointer = option.pointer
+            length = option.length
+        else:
+            route = [] if route is None else route
+            # NOTE: 63 slots fill the one-octet length: 3 + 4 * 63 = 255.
+            counts = self._make_uint(counts, bits=6, name='address count')
+            length = 3 + counts * 4
+            pointer = 4 + min(len(route), counts) * 4
+
+            # NOTE: Every address slot of the option is written, the empty ones
+            # as ``0.0.0.0``.
+            slots = (list(route[:counts]) + list(remaining or ()))[:counts]
+            slots += [0] * (counts - len(slots))
+
+        return Schema_RROption(
+            type=kind,
+            length=length,
+            pointer=pointer,
+            route=slots,
+        )
+
+    def _make_opt_mtup(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_MTUPOption]' = None, *,
+                       mtu: 'int' = 0,
+                       **kwargs: 'Any') -> 'Schema_MTUPOption':
+        """Make IPv4 MTU Probe (``MTUP``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            mtu: MTU value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``mtu`` does not fit in two octets.
+
+        """
+        if option is not None:
+            mtu = option.mtu
+
+        return Schema_MTUPOption(
+            type=kind,
+            length=4,
+            mtu=self._make_uint(mtu, bits=16, name='MTU'),
+        )
+
+    def _make_opt_mtur(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_MTUROption]' = None, *,
+                       mtu: 'int' = 0,
+                       **kwargs: 'Any') -> 'Schema_MTUROption':
+        """Make IPv4 MTU Reply (``MTUR``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            mtu: MTU value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``mtu`` does not fit in two octets.
+
+        """
+        if option is not None:
+            mtu = option.mtu
+
+        return Schema_MTUROption(
+            type=kind,
+            length=4,
+            mtu=self._make_uint(mtu, bits=16, name='MTU'),
+        )
+
+    def _make_opt_qs(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption | Data_UnassignedOption]' = None, *,
+                     func: 'Enum_QSFunction | int' = Enum_QSFunction.Quick_Start_Request,
+                     rate: 'int' = 0,
+                     ttl: 'timedelta | int' = 0,
+                     unused: 'int' = 0,
+                     nonce: 'int' = 0,
+                     reserved: 'int' = 0,
+                     **kwargs: 'Any') -> 'Schema_QSOption | Schema_UnassignedOption':
+        """Make IPv4 Quick-Start (``QS``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            func: QS function type
+            rate: rate (in kbps), rounded down to the nearest rate the
+                four-bit rate code carries (:rfc:`4782#section-3.1`)
+            ttl: time to live (in seconds)
+            unused: the not-used fourth octet of a Report of Approved Rate
+            nonce: nonce value
+            reserved: reserved bits (``R``) after the nonce
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema. An unassigned option schema if ``option``
+            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`,
+            or if ``func`` is neither of the assigned functions, in which case
+            the option takes the eight-octet layout of a Quick-Start Request.
+
+        Raises:
+            ProtocolError: If ``func`` is a name, a :obj:`bool`, or a member
+                or code that does not fit in four bits, the rate code cannot
+                carry ``rate``, or ``ttl``, ``unused``, ``nonce`` or
+                ``reserved`` does not fit its field.
+
+        """
+        if isinstance(option, Data_UnassignedOption):
+            return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, option))
+        if option is not None:
+            func = option.func
+            rate = option.rate
+            ttl = getattr(option, 'ttl', 0)
+            unused = getattr(option, 'unused', 0)
+            nonce = option.nonce
+            reserved = getattr(option, 'reserved', 0)
+        func_enum = self._make_index(func, Enum_QSFunction, bits=4, name='QS function')
+        rate_val = self._make_qs_rate(rate)
+        ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+        nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
+        reserved = self._make_uint(reserved, bits=2, name='Quick-Start reserved')
+
+        if func_enum == Enum_QSFunction.Quick_Start_Request:
+            return Schema_QuickStartRequestOption(
+                type=kind,
+                length=8,
+                flags={
+                    'func': func_enum,
+                    'rate': rate_val,
+                },
+                ttl=self._make_uint(ttl_value, bits=8, name='Quick-Start TTL'),
+                nonce={
+                    'nonce': nonce,
+                    'reserved': reserved,
+                },
+            )
+        if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
+            return Schema_QuickStartReportOption(
+                type=kind,
+                length=8,
+                flags={
+                    'func': func_enum,
+                    'rate': rate_val,
+                },
+                reserved=self._make_uint(unused, bits=8, name='Quick-Start not-used octet'),
+                nonce={
+                    'nonce': nonce,
+                    'reserved': reserved,
+                },
+            )
+        func_val = int(func_enum)
+        ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
+        data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
+        return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, data=data))
+
+    def _make_opt_ts(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TSOption]' = None, *,
+                     counts: 'Optional[int]' = None,
+                     overflow: 'int' = 0,
+                     timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address | str | int, int | timedelta]]' = None,
+                     remaining: 'Optional[list[int]]' = None,
+                     **kwargs: 'Any') -> 'Schema_TSOption':
+        """Make IPv4 Timestamp (``TS``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            counts: maximum number of timestamps to record, at most nine for
+                a :obj:`list` of timestamps and four for a :obj:`dict`, which
+                fill the option's 40 octets (:rfc:`791#section-3.1`);
+                :data:`None` is five, or four for a :obj:`dict`
+            overflow: overflow count, i.e. the number of modules that could not
+                register a timestamp (:rfc:`791#section-3.1`)
+            timestamp: list of timestamps, i.e. the slots before the pointer, or
+                a mapping of the addresses to their timestamps; an address may
+                be anything :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
+                accepts for IPv4; :data:`None` is an empty list
+            remaining: raw 32-bit words for the slots at or beyond the pointer;
+                the slots left over up to ``counts`` are zero
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``option`` is not given and ``timestamp`` is
+                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`, or
+                ``counts`` is not a non-negative :obj:`int` the option has
+                room for; or if ``overflow`` does not fit in four bits, or a
+                timestamp or a word of ``remaining`` in 32 bits.
+            FieldValueError: If an address is a :obj:`bool` or is not a valid
+                IPv4 address.
+
+        """
+        if option is not None:
+            ts_list = []  # type: list[int]
+            if isinstance(option.timestamp, tuple):
+                for ts in option.timestamp:
+                    # NOTE: An integer is the raw 32-bit field, written as
+                    # is: a set high-order bit marks a non-standard time value.
+                    if not isinstance(ts, int):
+                        ts = ts // datetime.timedelta(milliseconds=1)
+                        if ts.bit_length() > 31:
+                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                            ts = ts | 0x80000000
+                    ts_list.append(ts)
+            else:
+                for ip, ts in option.timestamp.items(True):
+                    ts_list.append(int(parse_ip_address(ip, f'{self.alias}: [OptNo {kind}] timestamp address',
+                                                        version=4)))
+                    if not isinstance(ts, int):
+                        ts = ts // datetime.timedelta(milliseconds=1)
+                        if ts.bit_length() > 31:
+                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                            ts = ts | 0x80000000
+                    ts_list.append(ts)
+
+            ts_list += getattr(option, 'remaining', ())
+            remainder = getattr(option, 'remainder', b'')  # type: bytes
+            length = option.length
+            pointer = option.pointer
+            overflow = option.overflow
+            flag = option.flag
+        else:
+            ts_list = []
+            remainder = b''
+            if timestamp is None:
+                timestamp = []
+            # NOTE: The option is 40 octets at most (RFC 791): nine timestamps or
+            # four address pairs. Not _make_uint, as that bound is no field width.
+            room = 4 if isinstance(timestamp, dict) else 9
+            if counts is None:
+                counts = min(5, room)
+            if isinstance(counts, bool) or not isinstance(counts, int) or not 0 <= counts <= room:
+                raise ProtocolError(f'{self.alias}: invalid timestamp count: {counts!r}')
+            if isinstance(timestamp, list):
+                flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
+                length = 4 + counts * 4
+
+                for index, ts in enumerate(timestamp):
+                    if index >= counts:
+                        warn(f'{self.alias}: [OptNo {kind}] too many timestamps: {len(timestamp)}', ProtocolWarning)
+                        break
+
+                    if not isinstance(ts, int):
+                        ts = ts // datetime.timedelta(milliseconds=1)
+                        if ts.bit_length() > 31:
+                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                            ts = ts | 0x80000000
+                    ts_list.append(ts)
+            elif isinstance(timestamp, dict):
+                flag = Enum_TSFlag.IP_with_Timestamp  # type: ignore[assignment]
+                length = 4 + counts * 8
+
+                for index, (addr, ts) in enumerate(timestamp.items()):
+                    if index >= counts:
+                        warn(f'{self.alias}: [OptNo {kind}] too many timestamps: {len(timestamp)}', ProtocolWarning)
+                        break
+
+                    ts_list.append(int(parse_ip_address(addr, f'{self.alias}: [OptNo {kind}] timestamp address',
+                                                          version=4)))
+                    if not isinstance(ts, int):
+                        ts = ts // datetime.timedelta(milliseconds=1)
+                        if ts.bit_length() > 31:
+                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                            ts = ts | 0x80000000
+                    if ts == 0:
+                        flag = Enum_TSFlag.Prespecified_IP_with_Timestamp  # type: ignore[assignment]
+                    ts_list.append(ts)
+            else:
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: '
+                                    f'must be a list or a dict, not {timestamp!r}')
+            pointer = 5 + len(ts_list) * 4
+
+            # NOTE: Every slot of the option is written, the empty ones as zero.
+            slots = (length - 4) // 4
+            ts_list = (ts_list + list(remaining or ()))[:slots]
+            ts_list += [0] * (slots - len(ts_list))
+
+        # NOTE: ``ts_data`` is the field on
+        # :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`; ``data`` is
+        # the attribute its ``post_process`` *derives* from ``ts_data``. Passing
+        # ``data`` would drop every timestamp, since :meth:`Schema.__update__
+        # <pcapkit.protocols.schema.Schema.__update__>` only warns
+        # ``UnknownFieldWarning`` for an unknown name, leaving ``ts_data`` bound
+        # to its class-level ``ListField`` for ``post_process`` to iterate.
+        return Schema_TSOption(
+            type=kind,
+            length=length,
+            pointer=pointer,
+            flags={
+                'oflw': self._make_uint(overflow, bits=4, name='timestamp overflow count'),
+                'flag': flag,
+            },
+            ts_data=[self._make_uint(word, bits=32, name='timestamp slot') for word in ts_list],
+            remainder=remainder,
+        )
+
+    def _make_opt_tr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TROption]' = None, *,
+                     id: 'int' = 0,
+                     out: 'int' = 0,
+                     ret: 'int' = 0,
+                     origin: 'IPv4Address | str | bytes | int' = '127.0.0.1',
+                     **kwargs: 'Any') -> 'Schema_TROption':
+        """Make IPv4 Traceroute (``TR``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            id: ID number
+            out: outbound hop count
+            ret: return hop count
+            origin: originator IP address
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``id``, ``out`` or ``ret`` does not fit in two
+                octets.
+
+        """
+        if option is not None:
+            id = option.id
+            out = option.outbound
+            ret = option['return']
+            origin = option.originator
+
+        return Schema_TROption(
+            type=kind,
+            length=12,
+            id=self._make_uint(id, bits=16, name='traceroute ID number'),
+            out=self._make_uint(out, bits=16, name='traceroute outbound hop count'),
+            ret=self._make_uint(ret, bits=16, name='traceroute return hop count'),
+            origin=origin,
         )
 
     def _make_opt_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_SECOption]' = None, *,
@@ -1811,148 +2146,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             route=slots,
         )
 
-    def _make_opt_ts(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TSOption]' = None, *,
-                     counts: 'Optional[int]' = None,
-                     overflow: 'int' = 0,
-                     timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address | str | int, int | timedelta]]' = None,
-                     remaining: 'Optional[list[int]]' = None,
-                     **kwargs: 'Any') -> 'Schema_TSOption':
-        """Make IPv4 Timestamp (``TS``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            counts: maximum number of timestamps to record, at most nine for
-                a :obj:`list` of timestamps and four for a :obj:`dict`, which
-                fill the option's 40 octets (:rfc:`791#section-3.1`);
-                :data:`None` is five, or four for a :obj:`dict`
-            overflow: overflow count, i.e. the number of modules that could not
-                register a timestamp (:rfc:`791#section-3.1`)
-            timestamp: list of timestamps, i.e. the slots before the pointer, or
-                a mapping of the addresses to their timestamps; an address may
-                be anything :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
-                accepts for IPv4; :data:`None` is an empty list
-            remaining: raw 32-bit words for the slots at or beyond the pointer;
-                the slots left over up to ``counts`` are zero
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``option`` is not given and ``timestamp`` is
-                neither :data:`None`, a :obj:`list`, nor a :obj:`dict`, or
-                ``counts`` is not a non-negative :obj:`int` the option has
-                room for; or if ``overflow`` does not fit in four bits, or a
-                timestamp or a word of ``remaining`` in 32 bits.
-            FieldValueError: If an address is a :obj:`bool` or is not a valid
-                IPv4 address.
-
-        """
-        if option is not None:
-            ts_list = []  # type: list[int]
-            if isinstance(option.timestamp, tuple):
-                for ts in option.timestamp:
-                    # NOTE: An integer is the raw 32-bit field, written as
-                    # is: a set high-order bit marks a non-standard time value.
-                    if not isinstance(ts, int):
-                        ts = ts // datetime.timedelta(milliseconds=1)
-                        if ts.bit_length() > 31:
-                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
-                            ts = ts | 0x80000000
-                    ts_list.append(ts)
-            else:
-                for ip, ts in option.timestamp.items(True):
-                    ts_list.append(int(parse_ip_address(ip, f'{self.alias}: [OptNo {kind}] timestamp address',
-                                                        version=4)))
-                    if not isinstance(ts, int):
-                        ts = ts // datetime.timedelta(milliseconds=1)
-                        if ts.bit_length() > 31:
-                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
-                            ts = ts | 0x80000000
-                    ts_list.append(ts)
-
-            ts_list += getattr(option, 'remaining', ())
-            remainder = getattr(option, 'remainder', b'')  # type: bytes
-            length = option.length
-            pointer = option.pointer
-            overflow = option.overflow
-            flag = option.flag
-        else:
-            ts_list = []
-            remainder = b''
-            if timestamp is None:
-                timestamp = []
-            # NOTE: The option is 40 octets at most (RFC 791): nine timestamps or
-            # four address pairs. Not _make_uint, as that bound is no field width.
-            room = 4 if isinstance(timestamp, dict) else 9
-            if counts is None:
-                counts = min(5, room)
-            if isinstance(counts, bool) or not isinstance(counts, int) or not 0 <= counts <= room:
-                raise ProtocolError(f'{self.alias}: invalid timestamp count: {counts!r}')
-            if isinstance(timestamp, list):
-                flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
-                length = 4 + counts * 4
-
-                for index, ts in enumerate(timestamp):
-                    if index >= counts:
-                        warn(f'{self.alias}: [OptNo {kind}] too many timestamps: {len(timestamp)}', ProtocolWarning)
-                        break
-
-                    if not isinstance(ts, int):
-                        ts = ts // datetime.timedelta(milliseconds=1)
-                        if ts.bit_length() > 31:
-                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
-                            ts = ts | 0x80000000
-                    ts_list.append(ts)
-            elif isinstance(timestamp, dict):
-                flag = Enum_TSFlag.IP_with_Timestamp  # type: ignore[assignment]
-                length = 4 + counts * 8
-
-                for index, (addr, ts) in enumerate(timestamp.items()):
-                    if index >= counts:
-                        warn(f'{self.alias}: [OptNo {kind}] too many timestamps: {len(timestamp)}', ProtocolWarning)
-                        break
-
-                    ts_list.append(int(parse_ip_address(addr, f'{self.alias}: [OptNo {kind}] timestamp address',
-                                                          version=4)))
-                    if not isinstance(ts, int):
-                        ts = ts // datetime.timedelta(milliseconds=1)
-                        if ts.bit_length() > 31:
-                            warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
-                            ts = ts | 0x80000000
-                    if ts == 0:
-                        flag = Enum_TSFlag.Prespecified_IP_with_Timestamp  # type: ignore[assignment]
-                    ts_list.append(ts)
-            else:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: '
-                                    f'must be a list or a dict, not {timestamp!r}')
-            pointer = 5 + len(ts_list) * 4
-
-            # NOTE: Every slot of the option is written, the empty ones as zero.
-            slots = (length - 4) // 4
-            ts_list = (ts_list + list(remaining or ()))[:slots]
-            ts_list += [0] * (slots - len(ts_list))
-
-        # NOTE: ``ts_data`` is the field on
-        # :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`; ``data`` is
-        # the attribute its ``post_process`` *derives* from ``ts_data``. Passing
-        # ``data`` would drop every timestamp, since :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.Schema.__update__>` only warns
-        # ``UnknownFieldWarning`` for an unknown name, leaving ``ts_data`` bound
-        # to its class-level ``ListField`` for ``post_process`` to iterate.
-        return Schema_TSOption(
-            type=kind,
-            length=length,
-            pointer=pointer,
-            flags={
-                'oflw': self._make_uint(overflow, bits=4, name='timestamp overflow count'),
-                'flag': flag,
-            },
-            ts_data=[self._make_uint(word, bits=32, name='timestamp slot') for word in ts_list],
-            remainder=remainder,
-        )
-
     def _make_opt_e_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_ESECOption]' = None, *,
                        format: 'int' = 0,
                        info: 'Optional[bytes]' = None,
@@ -1985,55 +2178,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             length=length,
             format=self._make_uint(format, bits=8, name='E-SEC format code'),
             info=info,
-        )
-
-    def _make_opt_rr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_RROption]' = None, *,
-                     counts: 'int' = 10,  # reasonable default
-                     route: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
-                     remaining: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
-                     **kwargs: 'Any') -> 'Schema_RROption':
-        """Make IPv4 Record Route (``RR``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            counts: maximum number of addresses to record
-            route: list of IPv4 addresses as recorded routes, i.e. the
-                address slots before the pointer
-            remaining: list of IPv4 addresses for the address slots at or beyond
-                the pointer; the slots left over up to ``counts`` are zero
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``counts`` is not a number of slots the
-                one-octet length can count.
-
-        """
-        if option is not None:
-            slots = list(option.route or ())  # type: list[IPv4Address | str | bytes | int]
-            slots += getattr(option, 'remaining', ())
-            pointer = option.pointer
-            length = option.length
-        else:
-            route = [] if route is None else route
-            # NOTE: 63 slots fill the one-octet length: 3 + 4 * 63 = 255.
-            counts = self._make_uint(counts, bits=6, name='address count')
-            length = 3 + counts * 4
-            pointer = 4 + min(len(route), counts) * 4
-
-            # NOTE: Every address slot of the option is written, the empty ones
-            # as ``0.0.0.0``.
-            slots = (list(route[:counts]) + list(remaining or ()))[:counts]
-            slots += [0] * (counts - len(slots))
-
-        return Schema_RROption(
-            type=kind,
-            length=length,
-            pointer=pointer,
-            route=slots,
         )
 
     def _make_opt_sid(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_SIDOption]' = None, *,
@@ -2112,100 +2256,6 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             route=slots,
         )
 
-    def _make_opt_mtup(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_MTUPOption]' = None, *,
-                       mtu: 'int' = 0,
-                       **kwargs: 'Any') -> 'Schema_MTUPOption':
-        """Make IPv4 MTU Probe (``MTUP``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            mtu: MTU value
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``mtu`` does not fit in two octets.
-
-        """
-        if option is not None:
-            mtu = option.mtu
-
-        return Schema_MTUPOption(
-            type=kind,
-            length=4,
-            mtu=self._make_uint(mtu, bits=16, name='MTU'),
-        )
-
-    def _make_opt_mtur(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_MTUROption]' = None, *,
-                       mtu: 'int' = 0,
-                       **kwargs: 'Any') -> 'Schema_MTUROption':
-        """Make IPv4 MTU Reply (``MTUR``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            mtu: MTU value
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``mtu`` does not fit in two octets.
-
-        """
-        if option is not None:
-            mtu = option.mtu
-
-        return Schema_MTUROption(
-            type=kind,
-            length=4,
-            mtu=self._make_uint(mtu, bits=16, name='MTU'),
-        )
-
-    def _make_opt_tr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TROption]' = None, *,
-                     id: 'int' = 0,
-                     out: 'int' = 0,
-                     ret: 'int' = 0,
-                     origin: 'IPv4Address | str | bytes | int' = '127.0.0.1',
-                     **kwargs: 'Any') -> 'Schema_TROption':
-        """Make IPv4 Traceroute (``TR``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            id: ID number
-            out: outbound hop count
-            ret: return hop count
-            origin: originator IP address
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``id``, ``out`` or ``ret`` does not fit in two
-                octets.
-
-        """
-        if option is not None:
-            id = option.id
-            out = option.outbound
-            ret = option['return']
-            origin = option.originator
-
-        return Schema_TROption(
-            type=kind,
-            length=12,
-            id=self._make_uint(id, bits=16, name='traceroute ID number'),
-            out=self._make_uint(out, bits=16, name='traceroute outbound hop count'),
-            ret=self._make_uint(ret, bits=16, name='traceroute return hop count'),
-            origin=origin,
-        )
-
     def _make_opt_rtralt(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_RTRALTOption]' = None, *,
                          alert: 'Enum_RouterAlert | int' = Enum_RouterAlert.Aggregated_Reservation_Nesting_Level_0,
                          **kwargs: 'Any') -> 'Schema_RTRALTOption':
@@ -2234,85 +2284,35 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             alert=alert_val,
         )
 
-    def _make_opt_qs(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption | Data_UnassignedOption]' = None, *,
-                     func: 'Enum_QSFunction | int' = Enum_QSFunction.Quick_Start_Request,
-                     rate: 'int' = 0,
-                     ttl: 'timedelta | int' = 0,
-                     unused: 'int' = 0,
-                     nonce: 'int' = 0,
-                     reserved: 'int' = 0,
-                     **kwargs: 'Any') -> 'Schema_QSOption | Schema_UnassignedOption':
-        """Make IPv4 Quick-Start (``QS``) option.
-
-        Args:
-            kind: option type code
-            option: option data
-            func: QS function type
-            rate: rate (in kbps), rounded down to the nearest rate the
-                four-bit rate code carries (:rfc:`4782#section-3.1`)
-            ttl: time to live (in seconds)
-            unused: the not-used fourth octet of a Report of Approved Rate
-            nonce: nonce value
-            reserved: reserved bits (``R``) after the nonce
-            **kwargs: arbitrary keyword arguments
+    def _read_ipv4_addr(self) -> 'IPv4Address':
+        """Read IP address.
 
         Returns:
-            Constructed option schema. An unassigned option schema if ``option``
-            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`,
-            or if ``func`` is neither of the assigned functions, in which case
-            the option takes the eight-octet layout of a Quick-Start Request.
-
-        Raises:
-            ProtocolError: If ``func`` is a name, a :obj:`bool`, or a member
-                or code that does not fit in four bits, the rate code cannot
-                carry ``rate``, or ``ttl``, ``unused``, ``nonce`` or
-                ``reserved`` does not fit its field.
+            Parsed IP address.
 
         """
-        if isinstance(option, Data_UnassignedOption):
-            return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, option))
-        if option is not None:
-            func = option.func
-            rate = option.rate
-            ttl = getattr(option, 'ttl', 0)
-            unused = getattr(option, 'unused', 0)
-            nonce = option.nonce
-            reserved = getattr(option, 'reserved', 0)
-        func_enum = self._make_index(func, Enum_QSFunction, bits=4, name='QS function')
-        rate_val = self._make_qs_rate(rate)
-        ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
-        nonce = self._make_uint(nonce, bits=30, name='Quick-Start nonce')
-        reserved = self._make_uint(reserved, bits=2, name='Quick-Start reserved')
+        _byte = self._read_fileng(4)
+        # _addr = '.'.join([str(_) for _ in _byte])
+        # return _addr
+        return ipaddress.ip_address(_byte)  # type: ignore[return-value]
 
-        if func_enum == Enum_QSFunction.Quick_Start_Request:
-            return Schema_QuickStartRequestOption(
-                type=kind,
-                length=8,
-                flags={
-                    'func': func_enum,
-                    'rate': rate_val,
-                },
-                ttl=self._make_uint(ttl_value, bits=8, name='Quick-Start TTL'),
-                nonce={
-                    'nonce': nonce,
-                    'reserved': reserved,
-                },
-            )
-        if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
-            return Schema_QuickStartReportOption(
-                type=kind,
-                length=8,
-                flags={
-                    'func': func_enum,
-                    'rate': rate_val,
-                },
-                reserved=self._make_uint(unused, bits=8, name='Quick-Start not-used octet'),
-                nonce={
-                    'nonce': nonce,
-                    'reserved': reserved,
-                },
-            )
-        func_val = int(func_enum)
-        ttl_value = self._make_uint(ttl_value, bits=8, name='Quick-Start TTL')
-        data = bytes([(func_val << 4) | rate_val, ttl_value]) + ((nonce << 2) | reserved).to_bytes(4, 'big')
-        return cast('Schema_UnassignedOption', self._make_opt_unassigned(kind, data=data))
+    def _read_ipv4_opt_type(self, code: 'int') -> 'Data_OptionType':
+        """Read option type field.
+
+        Arguments:
+            code: option kind value
+
+        Returns:
+            Extracted IPv4 option type, as an object of the option flag (copied
+            flag), option class, and option number.
+
+        """
+        oflg = bool(code >> 7)
+        ocls = Enum_OptionClass.get((code >> 5) & 0b11)
+        onum = code & 0b11111
+
+        return Data_OptionType.from_dict({
+            'change': oflg,
+            'class': ocls,
+            'number': onum,
+        })

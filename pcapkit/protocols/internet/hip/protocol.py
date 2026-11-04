@@ -513,8 +513,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Enum_Parameter.HIP_MAC_2:              'hip_mac_2',               # [RFC 7401] 61569
             Enum_Parameter.HIP_SIGNATURE_2:        'hip_signature_2',         # [RFC 7401] 61633
             Enum_Parameter.HIP_SIGNATURE:          'hip_signature',           # [RFC 7401] 61697
-            Enum_Parameter.ECHO_REQUEST_UNSIGNED:  'echo_request_unsigned',   # [RFC 7401] 63661
             Enum_Parameter.ECHO_RESPONSE_UNSIGNED: 'echo_response_unsigned',  # [RFC 7401] 63425
+            Enum_Parameter.ECHO_REQUEST_UNSIGNED:  'echo_request_unsigned',   # [RFC 7401] 63661
             Enum_Parameter.RELAY_FROM:             'relay_from',              # [RFC 5770] 63998
             Enum_Parameter.RELAY_TO:               'relay_to',                # [RFC 5770] 64002
             Enum_Parameter.OVERLAY_TTL:            'overlay_ttl',             # [RFC 6079] 64011
@@ -1325,28 +1325,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return puzzle
 
-    @staticmethod
-    def _read_puzzle_lifetime(octet: 'int') -> 'Optional[timedelta]':
-        """Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.
-
-        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``
-        seconds. The result is informational only: :meth:`_make_param_puzzle`
-        writes back the octet itself, since :class:`~datetime.timedelta` rounds
-        octets below ``12`` to zero and cannot hold those of ``79`` and above.
-
-        Args:
-            octet: the ``Lifetime`` octet
-
-        Returns:
-            The lifetime, or :obj:`None` if it exceeds
-            :attr:`datetime.timedelta.max`.
-
-        """
-        try:
-            return datetime.timedelta(seconds=2 ** (octet - 32))
-        except OverflowError:
-            return None
-
     def _read_param_solution(self, schema: 'Schema_SolutionParameter', *, version: 'int',
                              options: 'Parameter') -> 'Data_SolutionParameter':  # pylint: disable=unused-argument
         """Read HIP ``SOLUTION`` parameter.
@@ -2028,116 +2006,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             opaque=schema.opaque,
         )
         return echo_request_signed
-
-    @staticmethod
-    def _read_registration_lifetime(octet: 'int') -> 'timedelta':
-        """Decode a registration ``Lifetime`` octet into a duration.
-
-        :rfc:`8003#section-4.1` encodes the registration lifetimes of
-        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the
-        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used
-        to request and grant cancellation, and any other value stands for
-        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds
-        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which
-        :class:`~datetime.timedelta` holds, so -- unlike
-        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is
-        never :obj:`None`.
-
-        Reading the octet as a count of seconds instead reported every duration
-        wrongly: an octet of ``64``, which is one second, read as 64 seconds.
-        See :issue:`2281`.
-
-        Args:
-            octet: the ``Lifetime`` octet
-
-        Returns:
-            The lifetime.
-
-        """
-        if not octet:
-            return datetime.timedelta(0)
-        return datetime.timedelta(seconds=2 ** ((octet - 64) / 8))
-
-    @staticmethod
-    def _make_registration_lifetime(code: 'Enum_Parameter', version: 'int',
-                                    lifetime: 'timedelta | int | float') -> 'int':
-        """Encode a registration ``Lifetime`` octet.
-
-        The inverse of :meth:`_read_registration_lifetime`, rounding down to the
-        nearest representable octet as :meth:`_make_puzzle_lifetime` does for
-        ``PUZZLE``. A duration of zero is the one exact case:
-        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.
-
-        Args:
-            code: parameter code
-            version: HIP protocol version
-            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
-                seconds
-
-        Returns:
-            The ``Lifetime`` octet.
-
-        Raises:
-            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a
-                non-negative and finite duration, or encodes to a value the
-                one-octet field cannot hold.
-
-        """
-        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
-        # for ``int`` would send a plain ``float`` down the timedelta branch and
-        # escape an :exc:`AttributeError`.
-        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
-
-        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
-                or not 0 <= seconds < math.inf):
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds!r} is not a non-negative number of seconds')
-        # Zero is the RFC's own special case, so it is encoded rather than
-        # rejected -- which is where this parts company with
-        # ``_make_puzzle_lifetime``, whose field has no such value. Written as a
-        # truth test rather than ``== 0`` because ``seconds`` may be a float.
-        if not seconds:
-            return 0
-
-        octet = math.floor(math.log2(seconds) * 8 + 64)
-
-        # NOTE: Not _make_uint, so that the message names the seconds given, and
-        # since the octet 0 is reserved for a zero duration.
-        if not 1 <= octet <= 0xFF:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds} seconds encodes to {octet}, outside the '
-                                'one-octet Lifetime field')
-        return octet
-
-    def _make_lifetime_octet(self, code: 'Enum_Parameter', version: 'int',
-                             exponent: 'Optional[int]',
-                             lifetime: 'timedelta | int | float') -> 'int':
-        """Resolve a registration ``Lifetime`` octet from either input form.
-
-        An explicit ``exponent`` is the octet and wins, as a parsed parameter's
-        is; otherwise ``lifetime`` is a duration and
-        :meth:`_make_registration_lifetime` encodes it. Shared by the
-        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet
-        appears.
-
-        Args:
-            code: parameter code
-            version: HIP protocol version
-            exponent: the ``Lifetime`` octet itself, if any
-            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
-                seconds
-
-        Returns:
-            The ``Lifetime`` octet.
-
-        Raises:
-            ProtocolError: If ``exponent`` does not fit one octet, or
-                ``lifetime`` cannot be encoded.
-
-        """
-        if exponent is None:
-            return self._make_registration_lifetime(code, version, lifetime)
-        return self._make_uint(exponent, bits=8, name='lifetime', alias=f'HIPv{version}')
 
     def _read_param_reg_info(self, schema: 'Schema_RegInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
@@ -2915,39 +2783,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return hip_signature
 
-    def _read_param_echo_request_unsigned(self, schema: 'Schema_EchoRequestUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
-                                          options: 'Parameter') -> 'Data_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
-        """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
-
-        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |             Type              |             Length            |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                 Opaque data (variable length)                 |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            schema: parsed parameter schema
-            version: HIP protocol version
-            options: parsed HIP parameters
-
-        Returns:
-            Parsed parameter data.
-
-        """
-        echo_request_unsigned = Data_EchoRequestUnsignedParameter(
-            type=schema.type,
-            critical=bool(schema.type & 0b1),
-            length=parameter_total_len(schema.len),
-            opaque=schema.opaque,
-        )
-        return echo_request_unsigned
-
     def _read_param_echo_response_unsigned(self, schema: 'Schema_EchoResponseUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                            options: 'Parameter') -> 'Data_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
@@ -2980,6 +2815,39 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             opaque=schema.opaque,
         )
         return echo_response_unsigned
+
+    def _read_param_echo_request_unsigned(self, schema: 'Schema_EchoRequestUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'Data_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
+
+        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        echo_request_unsigned = Data_EchoRequestUnsignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            opaque=schema.opaque,
+        )
+        return echo_request_unsigned
 
     def _read_param_relay_from(self, schema: 'Schema_RelayFromParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_RelayFromParameter':  # pylint: disable=unused-argument
@@ -3343,36 +3211,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         )
         return relay_hmac
 
-    def _make_hip_param_data(self, meth: 'ParameterConstructor', code: 'Enum_Parameter',
-                             param: 'Data_Parameter', *,
-                             version: 'int') -> 'Schema_Parameter':
-        """Make a HIP parameter from the data model its reader produced.
-
-        The parsed parameter goes to ``meth`` **positionally**. Expanding it as
-        keyword arguments instead would drop every field whose constructor
-        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in
-        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as
-        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).
-
-        Args:
-            meth: Parameter constructor.
-            code: Parameter code.
-            param: Parsed parameter data model.
-            version: HIP protocol version.
-
-        Returns:
-            HIP parameter schema.
-
-        .. versionadded:: 1.5.0
-
-        """
-        data = meth(code, param, version=version)
-        # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
-        padding = getattr(param, 'padding', None)
-        if isinstance(padding, bytes) and 'padding' in data.__fields__:
-            data.padding = padding
-        return data
-
     def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
                                version: 'int',
                                contents: 'bytes' = b'',
@@ -3633,139 +3471,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             len=sum(8 + locator['len'] * 4 for locator in locators),
             locators=locators,
         )
-
-    @staticmethod
-    def _make_puzzle_lifetime(code: 'Enum_Parameter', version: 'int',
-                              lifetime: 'timedelta | int | float') -> 'int':
-        """Encode a ``PUZZLE`` ``Lifetime`` octet.
-
-        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``
-        seconds -- and the ``PUZZLE`` section is the only place either RFC defines
-        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to
-        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
-        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.
-
-        Args:
-            code: parameter code
-            version: HIP protocol version
-            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
-                seconds
-
-        Returns:
-            The ``Lifetime`` octet.
-
-        Raises:
-            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive
-                and finite duration, or encodes to a value the one-octet field
-                cannot hold.
-
-        """
-        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
-        # for ``int`` would send a plain ``float`` down the timedelta branch and
-        # escape an :exc:`AttributeError`.
-        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
-
-        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and
-        # ``math.floor`` one at infinity or NaN. Neither is a
-        # :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape
-        # the library's error handling with a message naming neither HIP nor
-        # the field.
-        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
-                or not 0 < seconds < math.inf):
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds!r} is not a positive number of seconds')
-
-        octet = math.floor(math.log2(seconds) + 32)
-
-        # NOTE: Not _make_uint, so that the message names the seconds given
-        # rather than only the octet they encode to.
-        if not 0 <= octet <= 0xFF:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
-                                f'{seconds} seconds encodes to {octet}, outside the '
-                                'one-octet Lifetime field')
-        return octet
-
-    def _make_puzzle_field_width(self, code: 'Enum_Parameter', version: 'int',
-                                 rhash_len: 'Optional[int]', *values: 'int') -> 'int':
-        """Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.
-
-        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``
-        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where
-        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm
-        (:rfc:`7401#section-2.3`). The width is therefore a property of the
-        association, not of the number that happens to be in the field, and it is
-        resolved here in that order of authority:
-
-        1. an explicit ``rhash_len`` argument;
-        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and
-           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both
-           ``Length`` values as literally 12 and 20;
-        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by
-           the callers below;
-        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up
-           to whole octets.
-
-        Only case 4 can lose a leading zero octet, and it is the only case where the
-        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
-        declaring it. Using it unconditionally would re-serialise a
-        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,
-        parameters this library's own reader rejects.
-
-        Things this deliberately does *not* reject, each of which looks like an
-        oversight and is not:
-
-        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
-          zero-length output, so no conformant packet carries one -- but it is what
-          case 4 yields for the default ``random=0``, and it is what a
-          ``Length = 4`` parameter parses back to. Rejecting it would turn a
-          degenerate-but-self-consistent case into a failure for callers that pass
-          no value at all.
-        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is
-          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and
-          :meth:`_read_param_solution`, whose guards are likewise written as
-          ``version == 1`` rather than as an exhaustive check, so the reader and the
-          builder agree. Validating the version belongs with :meth:`make`'s public
-          signature, not here.
-
-        Args:
-            code: parameter code
-            version: HIP protocol version
-            rhash_len: declared field width in bits, if any
-            *values: the field values that must fit
-
-        Returns:
-            The width of one field, in octets.
-
-        Raises:
-            ProtocolError: If the declared width is not an :obj:`int`, is a
-                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,
-                contradicts the protocol version, is not a whole number of
-                octets, or is too narrow for ``values``.
-
-        """
-        # NOTE: A value that is not an int is sized as nothing here, and the
-        # caller's _make_uint refuses it.
-        bits = max((value.bit_length() for value in values if isinstance(value, int)), default=0)
-
-        if rhash_len is not None:
-            # NOTE: In bits, of a field whose octets a two-octet Length counts.
-            rhash_len = self._make_uint(rhash_len, bits=16 + 3, name='RHASH_len', alias=f'HIPv{version}')
-        if version == 1:
-            if rhash_len is not None and rhash_len != 64:
-                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
-                                    f'HIPv1 fixes the field at 64 bits, got {rhash_len}')
-            rhash_len = 64
-        elif rhash_len is None:
-            rhash_len = 8 * math.ceil(bits / 8)
-
-        if rhash_len < 0 or rhash_len % 8:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
-                                f'RHASH_len must be a non-negative whole number of '
-                                f'octets, got {rhash_len} bits')
-        if bits > rhash_len:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
-                                f'a {bits}-bit value does not fit a {rhash_len}-bit field')
-        return rhash_len // 8
 
     def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Optional[Data_PuzzleParameter]' = None, *,  # pylint: disable=unused-argument
                            version: 'int',
@@ -5034,61 +4739,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             mic=mic,
         )
 
-    def _make_identifier_width(self, code: 'Enum_Parameter', version: 'int',
-                               id_len: 'Optional[int]', identifier: 'int') -> 'int':
-        """Resolve the on-wire width of an opaque ``Identifier`` field.
-
-        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
-        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of
-        the Identifier, in octets" over an otherwise opaque value, so the width
-        is a property of the identifier as issued and not of the number that
-        happens to be in it. It is resolved here in that order of authority:
-
-        1. an explicit ``id_len`` argument, which is what a parsed parameter
-           carries on :attr:`TransactionIDParameter.id_len
-           <pcapkit.protocols.internet.hip.data.TransactionIDParameter.id_len>`;
-        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up
-           to whole octets.
-
-        Only case 2 can lose a leading zero octet, and it is the only case
-        where the width is genuinely unknowable -- a from-scratch build with
-        nothing declaring it. Using it unconditionally re-serialised a
-        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),
-        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``
-        against :issue:`653`.
-
-        A width of ``0`` is accepted rather than rejected: it is what case 2
-        yields for the default identifier of ``0``, and what a ``Length = 0``
-        parameter parses back to, so refusing it would fail callers that pass no
-        value at all.
-
-        Args:
-            code: parameter code
-            version: HIP protocol version
-            id_len: declared field width in octets, if any
-            identifier: the identifier that must fit
-
-        Returns:
-            The width of the ``Identifier`` field, in octets.
-
-        Raises:
-            ProtocolError: If ``identifier`` is negative or needs more octets
-                than the 2-octet ``Length`` field can count, or the declared
-                width is negative, too narrow for ``identifier``, or beyond
-                what that field can hold.
-
-        """
-        identifier = self._make_uint(identifier, bits=0xFFFF * 8, name='identifier',
-                                     alias=f'HIPv{version}')
-        if id_len is None:
-            return self._uint_size(identifier)
-
-        id_len = self._make_uint(id_len, bits=16, name='identifier width', alias=f'HIPv{version}')
-        if identifier.bit_length() > id_len * 8:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
-                                f'{id_len} octets cannot hold {identifier!r}')
-        return id_len
-
     def _make_param_transaction_id(self, code: 'Enum_Parameter', param: 'Optional[Data_TransactionIDParameter]' = None, *,  # pylint: disable=unused-argument
                                    version: 'int',
                                    id: 'int' = 0,
@@ -5382,32 +5032,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             signature=signature,
         )
 
-    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
-                                          version: 'int',
-                                          opaque: 'bytes' = b'',
-                                          **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
-        """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
-
-        Args:
-            code: parameter code
-            param: parameter data
-            version: HIP protocol version
-            opaque: opaque data
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            HIP parameter schema.
-
-        """
-        if param is not None:
-            opaque = param.opaque
-
-        return Schema_EchoRequestUnsignedParameter(
-            type=code,
-            len=len(opaque),
-            opaque=opaque,
-        )
-
     def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoResponseUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
                                            version: 'int',
                                            opaque: 'bytes' = b'',
@@ -5429,6 +5053,32 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             opaque = param.opaque
 
         return Schema_EchoResponseUnsignedParameter(
+            type=code,
+            len=len(opaque),
+            opaque=opaque,
+        )
+
+    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                          version: 'int',
+                                          opaque: 'bytes' = b'',
+                                          **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
+        """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            opaque = param.opaque
+
+        return Schema_EchoRequestUnsignedParameter(
             type=code,
             len=len(opaque),
             opaque=opaque,
@@ -5729,3 +5379,353 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             len=len(hmac),
             hmac=hmac,
         )
+
+    @staticmethod
+    def _read_puzzle_lifetime(octet: 'int') -> 'Optional[timedelta]':
+        """Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.
+
+        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``
+        seconds. The result is informational only: :meth:`_make_param_puzzle`
+        writes back the octet itself, since :class:`~datetime.timedelta` rounds
+        octets below ``12`` to zero and cannot hold those of ``79`` and above.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime, or :obj:`None` if it exceeds
+            :attr:`datetime.timedelta.max`.
+
+        """
+        try:
+            return datetime.timedelta(seconds=2 ** (octet - 32))
+        except OverflowError:
+            return None
+
+    @staticmethod
+    def _read_registration_lifetime(octet: 'int') -> 'timedelta':
+        """Decode a registration ``Lifetime`` octet into a duration.
+
+        :rfc:`8003#section-4.1` encodes the registration lifetimes of
+        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the
+        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used
+        to request and grant cancellation, and any other value stands for
+        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds
+        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which
+        :class:`~datetime.timedelta` holds, so -- unlike
+        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is
+        never :obj:`None`.
+
+        Reading the octet as a count of seconds instead reported every duration
+        wrongly: an octet of ``64``, which is one second, read as 64 seconds.
+        See :issue:`2281`.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime.
+
+        """
+        if not octet:
+            return datetime.timedelta(0)
+        return datetime.timedelta(seconds=2 ** ((octet - 64) / 8))
+
+    @staticmethod
+    def _make_registration_lifetime(code: 'Enum_Parameter', version: 'int',
+                                    lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a registration ``Lifetime`` octet.
+
+        The inverse of :meth:`_read_registration_lifetime`, rounding down to the
+        nearest representable octet as :meth:`_make_puzzle_lifetime` does for
+        ``PUZZLE``. A duration of zero is the one exact case:
+        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a
+                non-negative and finite duration, or encodes to a value the
+                one-octet field cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 <= seconds < math.inf):
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds!r} is not a non-negative number of seconds')
+        # Zero is the RFC's own special case, so it is encoded rather than
+        # rejected -- which is where this parts company with
+        # ``_make_puzzle_lifetime``, whose field has no such value. Written as a
+        # truth test rather than ``== 0`` because ``seconds`` may be a float.
+        if not seconds:
+            return 0
+
+        octet = math.floor(math.log2(seconds) * 8 + 64)
+
+        # NOTE: Not _make_uint, so that the message names the seconds given, and
+        # since the octet 0 is reserved for a zero duration.
+        if not 1 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    def _make_lifetime_octet(self, code: 'Enum_Parameter', version: 'int',
+                             exponent: 'Optional[int]',
+                             lifetime: 'timedelta | int | float') -> 'int':
+        """Resolve a registration ``Lifetime`` octet from either input form.
+
+        An explicit ``exponent`` is the octet and wins, as a parsed parameter's
+        is; otherwise ``lifetime`` is a duration and
+        :meth:`_make_registration_lifetime` encodes it. Shared by the
+        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet
+        appears.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            exponent: the ``Lifetime`` octet itself, if any
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded.
+
+        """
+        if exponent is None:
+            return self._make_registration_lifetime(code, version, lifetime)
+        return self._make_uint(exponent, bits=8, name='lifetime', alias=f'HIPv{version}')
+
+    def _make_hip_param_data(self, meth: 'ParameterConstructor', code: 'Enum_Parameter',
+                             param: 'Data_Parameter', *,
+                             version: 'int') -> 'Schema_Parameter':
+        """Make a HIP parameter from the data model its reader produced.
+
+        The parsed parameter goes to ``meth`` **positionally**. Expanding it as
+        keyword arguments instead would drop every field whose constructor
+        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in
+        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as
+        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).
+
+        Args:
+            meth: Parameter constructor.
+            code: Parameter code.
+            param: Parsed parameter data model.
+            version: HIP protocol version.
+
+        Returns:
+            HIP parameter schema.
+
+        .. versionadded:: 1.5.0
+
+        """
+        data = meth(code, param, version=version)
+        # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
+        padding = getattr(param, 'padding', None)
+        if isinstance(padding, bytes) and 'padding' in data.__fields__:
+            data.padding = padding
+        return data
+
+    @staticmethod
+    def _make_puzzle_lifetime(code: 'Enum_Parameter', version: 'int',
+                              lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a ``PUZZLE`` ``Lifetime`` octet.
+
+        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``
+        seconds -- and the ``PUZZLE`` section is the only place either RFC defines
+        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to
+        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
+        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive
+                and finite duration, or encodes to a value the one-octet field
+                cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and
+        # ``math.floor`` one at infinity or NaN. Neither is a
+        # :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape
+        # the library's error handling with a message naming neither HIP nor
+        # the field.
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 < seconds < math.inf):
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds!r} is not a positive number of seconds')
+
+        octet = math.floor(math.log2(seconds) + 32)
+
+        # NOTE: Not _make_uint, so that the message names the seconds given
+        # rather than only the octet they encode to.
+        if not 0 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    def _make_puzzle_field_width(self, code: 'Enum_Parameter', version: 'int',
+                                 rhash_len: 'Optional[int]', *values: 'int') -> 'int':
+        """Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.
+
+        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``
+        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where
+        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm
+        (:rfc:`7401#section-2.3`). The width is therefore a property of the
+        association, not of the number that happens to be in the field, and it is
+        resolved here in that order of authority:
+
+        1. an explicit ``rhash_len`` argument;
+        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and
+           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both
+           ``Length`` values as literally 12 and 20;
+        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by
+           the callers below;
+        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 4 can lose a leading zero octet, and it is the only case where the
+        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
+        declaring it. Using it unconditionally would re-serialise a
+        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,
+        parameters this library's own reader rejects.
+
+        Things this deliberately does *not* reject, each of which looks like an
+        oversight and is not:
+
+        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
+          zero-length output, so no conformant packet carries one -- but it is what
+          case 4 yields for the default ``random=0``, and it is what a
+          ``Length = 4`` parameter parses back to. Rejecting it would turn a
+          degenerate-but-self-consistent case into a failure for callers that pass
+          no value at all.
+        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is
+          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and
+          :meth:`_read_param_solution`, whose guards are likewise written as
+          ``version == 1`` rather than as an exhaustive check, so the reader and the
+          builder agree. Validating the version belongs with :meth:`make`'s public
+          signature, not here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            rhash_len: declared field width in bits, if any
+            *values: the field values that must fit
+
+        Returns:
+            The width of one field, in octets.
+
+        Raises:
+            ProtocolError: If the declared width is not an :obj:`int`, is a
+                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,
+                contradicts the protocol version, is not a whole number of
+                octets, or is too narrow for ``values``.
+
+        """
+        # NOTE: A value that is not an int is sized as nothing here, and the
+        # caller's _make_uint refuses it.
+        bits = max((value.bit_length() for value in values if isinstance(value, int)), default=0)
+
+        if rhash_len is not None:
+            # NOTE: In bits, of a field whose octets a two-octet Length counts.
+            rhash_len = self._make_uint(rhash_len, bits=16 + 3, name='RHASH_len', alias=f'HIPv{version}')
+        if version == 1:
+            if rhash_len is not None and rhash_len != 64:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                    f'HIPv1 fixes the field at 64 bits, got {rhash_len}')
+            rhash_len = 64
+        elif rhash_len is None:
+            rhash_len = 8 * math.ceil(bits / 8)
+
+        if rhash_len < 0 or rhash_len % 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'RHASH_len must be a non-negative whole number of '
+                                f'octets, got {rhash_len} bits')
+        if bits > rhash_len:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'a {bits}-bit value does not fit a {rhash_len}-bit field')
+        return rhash_len // 8
+
+    def _make_identifier_width(self, code: 'Enum_Parameter', version: 'int',
+                               id_len: 'Optional[int]', identifier: 'int') -> 'int':
+        """Resolve the on-wire width of an opaque ``Identifier`` field.
+
+        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
+        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of
+        the Identifier, in octets" over an otherwise opaque value, so the width
+        is a property of the identifier as issued and not of the number that
+        happens to be in it. It is resolved here in that order of authority:
+
+        1. an explicit ``id_len`` argument, which is what a parsed parameter
+           carries on :attr:`TransactionIDParameter.id_len
+           <pcapkit.protocols.internet.hip.data.TransactionIDParameter.id_len>`;
+        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 2 can lose a leading zero octet, and it is the only case
+        where the width is genuinely unknowable -- a from-scratch build with
+        nothing declaring it. Using it unconditionally re-serialised a
+        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),
+        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``
+        against :issue:`653`.
+
+        A width of ``0`` is accepted rather than rejected: it is what case 2
+        yields for the default identifier of ``0``, and what a ``Length = 0``
+        parameter parses back to, so refusing it would fail callers that pass no
+        value at all.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            id_len: declared field width in octets, if any
+            identifier: the identifier that must fit
+
+        Returns:
+            The width of the ``Identifier`` field, in octets.
+
+        Raises:
+            ProtocolError: If ``identifier`` is negative or needs more octets
+                than the 2-octet ``Length`` field can count, or the declared
+                width is negative, too narrow for ``identifier``, or beyond
+                what that field can hold.
+
+        """
+        identifier = self._make_uint(identifier, bits=0xFFFF * 8, name='identifier',
+                                     alias=f'HIPv{version}')
+        if id_len is None:
+            return self._uint_size(identifier)
+
+        id_len = self._make_uint(id_len, bits=16, name='identifier width', alias=f'HIPv{version}')
+        if identifier.bit_length() > id_len * 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
+                                f'{id_len} octets cannot hold {identifier!r}')
+        return id_len

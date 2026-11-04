@@ -471,59 +471,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'trailer': data.get('trailer', b''),
         }
 
-    @staticmethod
-    def _exthdr_key(alias: 'str') -> 'str':
-        """Key an extension header's info is written under in :class:`Data_IPv6`.
-
-        Args:
-            alias: :attr:`~pcapkit.protocols.protocol.Protocol.alias` of
-                the extension header's parser.
-
-        Returns:
-            The key; :meth:`str.lstrip` strips a character *set*, which every
-            parser's alias is chosen to suit.
-
-        """
-        return alias.lstrip('IPv6-').lower()
-
-    @staticmethod
-    def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':
-        """Whether a Fragment header's info is that of a first fragment.
-
-        Args:
-            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict
-                <pcapkit.corekit.infoclass.Info.to_dict>`
-
-        Returns:
-            :data:`True` at a Fragment Offset of zero.
-
-        """
-        return info.get('offset') == 0
-
-    def _read_ip_hextet(self) -> 'tuple[int, int, int]':
-        """Read the first four octets of IPv6.
-
-        Returns:
-            Parsed data of those four octets: version number, traffic class
-            and flow label.
-
-        """
-        _htet = self._read_fileng(4).hex()
-        _vers = int(_htet[0], base=16)      # version number (6)
-        _tcls = int(_htet[1:3], base=16)    # traffic class
-        _flow = int(_htet[3:], base=16)     # flow label
-
-        return (_vers, _tcls, _flow)
-
-    def _read_ip_addr(self) -> 'IPv6Address':
-        """Read IP address.
-
-        Returns:
-            Parsed IP address.
-
-        """
-        return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
-
     def _decode_next_layer(self, ipv6: 'Data_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
@@ -700,6 +647,59 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                                                   payload=payload)
         finally:
             frame_depth.reset(token)
+
+    @staticmethod
+    def _exthdr_key(alias: 'str') -> 'str':
+        """Key an extension header's info is written under in :class:`Data_IPv6`.
+
+        Args:
+            alias: :attr:`~pcapkit.protocols.protocol.Protocol.alias` of
+                the extension header's parser.
+
+        Returns:
+            The key; :meth:`str.lstrip` strips a character *set*, which every
+            parser's alias is chosen to suit.
+
+        """
+        return alias.lstrip('IPv6-').lower()
+
+    @staticmethod
+    def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':
+        """Whether a Fragment header's info is that of a first fragment.
+
+        Args:
+            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict
+                <pcapkit.corekit.infoclass.Info.to_dict>`
+
+        Returns:
+            :data:`True` at a Fragment Offset of zero.
+
+        """
+        return info.get('offset') == 0
+
+    def _read_ip_hextet(self) -> 'tuple[int, int, int]':
+        """Read the first four octets of IPv6.
+
+        Returns:
+            Parsed data of those four octets: version number, traffic class
+            and flow label.
+
+        """
+        _htet = self._read_fileng(4).hex()
+        _vers = int(_htet[0], base=16)      # version number (6)
+        _tcls = int(_htet[1:3], base=16)    # traffic class
+        _flow = int(_htet[3:], base=16)     # flow label
+
+        return (_vers, _tcls, _flow)
+
+    def _read_ip_addr(self) -> 'IPv6Address':
+        """Read IP address.
+
+        Returns:
+            Parsed IP address.
+
+        """
+        return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ

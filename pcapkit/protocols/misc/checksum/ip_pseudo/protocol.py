@@ -410,36 +410,6 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
                                     'parsed; give src')
         return src
 
-    @staticmethod
-    def _walk(ip: 'IPv6') -> 'tuple[Enum_TransType, int]':
-        """Walk the extension headers of an IPv6 layer up to its upper layer.
-
-        A Mobility Header or HIP (:rfc:`6275#section-6.1.1`, :rfc:`7401#section-5.1.1`)
-        is the upper layer itself, and an Encapsulating Security Payload
-        (:rfc:`4303`) ends the walk, its upper layer being encrypted.
-
-        Args:
-            ip: IPv6 layer.
-
-        Returns:
-            The code the walk stopped on, and the octets of the headers ahead of
-            it. The code is an extension header's if ``ip`` did not parse that
-            header: a malformed one (:issue:`2477`), one past the header limit,
-            or one not captured, or cut short by the capture (:issue:`2694`).
-
-        """
-        code, before = ip.info.next, 0
-        for _, header in ip.extension_headers.items(multi=True):
-            if code in _TERMINAL_HEADERS or code == Enum_TransType.ESP:
-                break
-            # NOTE: A header the capture cut short is its schema's short read
-            # (#2694), and as unwalked as one not captured at all.
-            if header.info.get('__short_read__') is not None:
-                break
-            before += header.length
-            code = header.info.next
-        return code, before
-
     def _destination(self, ip: 'IPv4 | IPv6') -> 'IPv4Address | IPv6Address':
         """Read the pseudo-header destination address from an IP layer.
 
@@ -509,6 +479,78 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         """
         return self._upper(ip)[0]
 
+    def _upper_length(self, ip: 'IPv4 | IPv6', *, from_layer: 'bool' = True) -> 'int':
+        """Read the upper-layer packet length from an IP layer.
+
+        Args:
+            ip: IPv4 or IPv6 layer.
+            from_layer: Whether the upper layer is the one ``ip`` carries,
+                rather than one given by the caller.
+
+        Returns:
+            The Length field of a UDP header that is present, else the length
+            past the IP header and extension headers.
+
+        Raises:
+            ProtocolError: If ``ip`` is a fragment, ends at an unparsed header,
+                or has a zero Payload Length and no Jumbo Payload option.
+
+        """
+        if isinstance(ip, IPv4):
+            info4 = ip.info
+            if info4.offset or info4.flags.mf:
+                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
+            protocol, before = self._upper(ip)
+            return self._udp_length(ip, protocol, info4.hdr_len + before,
+                                    info4.len - info4.hdr_len - before, from_layer)
+
+        protocol, before = self._upper(ip)
+        info = ip.info
+        for frag in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Frag):  # type: ignore[arg-type]
+            if frag.info.offset or frag.info.mf:
+                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
+
+        extent = info.payload
+        if not extent:
+            jumbo = jumbo_payload_length(info.next, ip.data[IPV6_HEADER_LEN:])
+            if jumbo is None:
+                raise ProtocolError(f'{self.alias}: Payload Length 0 and no Jumbo Payload '
+                                    'option; give upper_length')
+            extent = jumbo
+        # NOTE: ``info.hdr_len`` ends at the first Fragment header, so headers
+        # after it are not counted; the fixed header plus ``before`` is the offset.
+        return self._udp_length(ip, protocol, IPV6_HEADER_LEN + before, extent - before, from_layer)
+
+    @staticmethod
+    def _walk(ip: 'IPv6') -> 'tuple[Enum_TransType, int]':
+        """Walk the extension headers of an IPv6 layer up to its upper layer.
+
+        A Mobility Header or HIP (:rfc:`6275#section-6.1.1`, :rfc:`7401#section-5.1.1`)
+        is the upper layer itself, and an Encapsulating Security Payload
+        (:rfc:`4303`) ends the walk, its upper layer being encrypted.
+
+        Args:
+            ip: IPv6 layer.
+
+        Returns:
+            The code the walk stopped on, and the octets of the headers ahead of
+            it. The code is an extension header's if ``ip`` did not parse that
+            header: a malformed one (:issue:`2477`), one past the header limit,
+            or one not captured, or cut short by the capture (:issue:`2694`).
+
+        """
+        code, before = ip.info.next, 0
+        for _, header in ip.extension_headers.items(multi=True):
+            if code in _TERMINAL_HEADERS or code == Enum_TransType.ESP:
+                break
+            # NOTE: A header the capture cut short is its schema's short read
+            # (#2694), and as unwalked as one not captured at all.
+            if header.info.get('__short_read__') is not None:
+                break
+            before += header.length
+            code = header.info.next
+        return code, before
+
     def _upper(self, ip: 'IPv4 | IPv6') -> 'tuple[Enum_TransType, int]':
         """Read the upper-layer protocol and the octets of the headers ahead of it.
 
@@ -563,48 +605,6 @@ class IP_Pseudo(ProtocolBase[Data_IP_Pseudo, Schema_IP_Pseudo],
         except ValueError:
             return False
         return True
-
-    def _upper_length(self, ip: 'IPv4 | IPv6', *, from_layer: 'bool' = True) -> 'int':
-        """Read the upper-layer packet length from an IP layer.
-
-        Args:
-            ip: IPv4 or IPv6 layer.
-            from_layer: Whether the upper layer is the one ``ip`` carries,
-                rather than one given by the caller.
-
-        Returns:
-            The Length field of a UDP header that is present, else the length
-            past the IP header and extension headers.
-
-        Raises:
-            ProtocolError: If ``ip`` is a fragment, ends at an unparsed header,
-                or has a zero Payload Length and no Jumbo Payload option.
-
-        """
-        if isinstance(ip, IPv4):
-            info4 = ip.info
-            if info4.offset or info4.flags.mf:
-                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
-            protocol, before = self._upper(ip)
-            return self._udp_length(ip, protocol, info4.hdr_len + before,
-                                    info4.len - info4.hdr_len - before, from_layer)
-
-        protocol, before = self._upper(ip)
-        info = ip.info
-        for frag in ip.extension_headers.getlist(Enum_ExtensionHeader.IPv6_Frag):  # type: ignore[arg-type]
-            if frag.info.offset or frag.info.mf:
-                raise ProtocolError(f'{self.alias}: {ip.alias} fragment; give upper_length')
-
-        extent = info.payload
-        if not extent:
-            jumbo = jumbo_payload_length(info.next, ip.data[IPV6_HEADER_LEN:])
-            if jumbo is None:
-                raise ProtocolError(f'{self.alias}: Payload Length 0 and no Jumbo Payload '
-                                    'option; give upper_length')
-            extent = jumbo
-        # NOTE: ``info.hdr_len`` ends at the first Fragment header, so headers
-        # after it are not counted; the fixed header plus ``before`` is the offset.
-        return self._udp_length(ip, protocol, IPV6_HEADER_LEN + before, extent - before, from_layer)
 
     def _udp_length(self, ip: 'IPv4 | IPv6', protocol: 'int', hdr_len: 'int', length: 'int',
                     from_layer: 'bool') -> 'int':

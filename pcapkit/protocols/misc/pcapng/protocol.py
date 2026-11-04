@@ -836,17 +836,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     __block__ = collections.defaultdict(
         lambda: 'unknown',
         {
-            Enum_BlockType.Section_Header_Block: 'shb',
             Enum_BlockType.Interface_Description_Block: 'idb',
-            Enum_BlockType.Enhanced_Packet_Block: 'epb',
+            Enum_BlockType.Packet_Block: 'packet',
             Enum_BlockType.Simple_Packet_Block: 'spb',
             Enum_BlockType.Name_Resolution_Block: 'nrb',
             Enum_BlockType.Interface_Statistics_Block: 'isb',
+            Enum_BlockType.Enhanced_Packet_Block: 'epb',
             Enum_BlockType.systemd_Journal_Export_Block: 'systemd',
             Enum_BlockType.Decryption_Secrets_Block: 'dsb',
             Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 'cb',
+            Enum_BlockType.Section_Header_Block: 'shb',
             Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 'cb',
-            Enum_BlockType.Packet_Block: 'packet',
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
 
@@ -925,8 +925,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         {
             Enum_SecretsType.TLS_Key_Log: 'tls',
             Enum_SecretsType.WireGuard_Key_Log: 'wireguard',
-            Enum_SecretsType.ZigBee_NWK_Key: 'zigbee_nwk',
             Enum_SecretsType.ZigBee_APS_Key: 'zigbee_aps',
+            Enum_SecretsType.ZigBee_NWK_Key: 'zigbee_nwk',
         },
     )  # type: DefaultDict[Enum_SecretsType | int, str | tuple[SecretsParser, SecretsConstructor]]
 
@@ -1700,67 +1700,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             'block': data,
         }
 
-    def _check_block_floor(self, length: 'Optional[int]') -> 'None':
-        """Reject a tail too short to hold any block at all.
-
-        Args:
-            length: Length of packet data, as the caller declared it, or
-                :obj:`None` to measure what is left in
-                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
-
-        Raises:
-            StreamEOFError: If fewer than twelve octets are left to read.
-
-        A PCAP-NG block is twelve octets at its smallest -- Block Type, Block
-        Total Length and the trailing copy of it, over an empty body -- which is
-        what :meth:`__length_hint__` reports. A tail shorter than that is not a
-        block, so parsing one out of it can only invent fields from
-        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`'s
-        zero padding, and once the four octets of :attr:`PCAPNG.type
-        <pcapkit.protocols.misc.pcapng.schema.PCAPNG.type>` have been padded out
-        of nothing ``__length__`` is negative -- which
-        :func:`~pcapkit.protocols.misc.pcapng.schema.pcapng_block_selector` hands
-        to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where
-        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of :issue:`678`.
-
-        Reporting the end of the stream instead is what keeps the :issue:`431` accommodation:
-        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an
-        :exc:`EOFError`, which :meth:`Extractor.record_frames
-        <pcapkit.foundation.extraction.Extractor.record_frames>` already catches
-        to stop with the frames read so far, so -- unlike a refusal inside
-        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
-        which has no catch point above it and would abort the whole extraction --
-        this costs no frame that was actually in the file. It is the same signal
-        :func:`~pcapkit.corekit.decorators.prepare` raises for a *derived*
-        remainder of exactly zero; a remainder of one, two or three octets
-        passes that check and is caught here instead.
-
-        Note:
-            This runs on both of :meth:`unpack`'s paths. On the parsing path the
-            tail is what the file has left to read; on the construction path it is
-            the octets of a block handed to :meth:`make` as raw :obj:`bytes`, which
-            :meth:`unpack` parses off the buffer :meth:`pack` has just filled
-            (:issue:`2354`) -- a caller's octets are no more trustworthy than a
-            file's. Octets too short for this floor are therefore refused here
-            rather than by :meth:`read`'s own Block Total Length check, which sees
-            only what gets past the floor and so names an impossible *declared*
-            length, never a tail too short to declare one.
-
-            Measuring an undeclared length needs the stream to seek, and nothing
-            guards that here because :meth:`__post_init__` has already called
-            :meth:`~io.IOBase.tell` on it to record ``_seek_set``: a stream that
-            could not seek never reaches this method.
-
-        """
-        if length is None:
-            current = self._file.tell()
-            length = self._file.seek(0, io.SEEK_END) - current
-            self._file.seek(current, io.SEEK_SET)
-
-        if length < GENERIC_BLOCK_MINIMUM:
-            raise StreamEOFError(f'PCAP-NG: block truncated: {length} octet(s) left, '
-                                 f'fewer than the {GENERIC_BLOCK_MINIMUM} a block needs', quiet=True)
-
     def _read_block_short(self, schema: 'Schema_EnhancedPacketBlock | Schema_PacketBlock | Schema_UnknownBlock', *,
                           header: 'Schema_PCAPNG') -> 'Data_EnhancedPacketBlock | Data_PacketBlock':
         """Read a PCAP-NG EPB or packet block (obsolete) shorter than its fixed fields.
@@ -1964,504 +1903,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             body=body,
         )
 
-    def _get_payload(self) -> 'bytes':
-        """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.
-
-        Returns:
-            Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>` as :obj:`bytes`.
-
-        See Also:
-            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
-
-        Note:
-            A packet block kept as captured has no payload (see
-            :meth:`_read_block_short`).
-
-        """
-        if isinstance(self.__header__.block, Schema_UnknownBlock):
-            return b''
-        return self.__header__.block.get_payload()
-
-    @staticmethod
-    def _get_payload_name(block: 'Schema_BlockType | bytes') -> 'Optional[str]':
-        """Get the name of the field carrying a block's captured packet octets.
-
-        Args:
-            block: Parsed block schema.
-
-        Returns:
-            The name of the block schema's payload field, or :obj:`None` when the
-            block declares none -- which is every block type outside
-            :attr:`PACKET_TYPES <PCAPNG.PACKET_TYPES>`, and also a block whose
-            body was handed over as raw :obj:`bytes` at construction time rather
-            than as a schema.
-
-        """
-        name = getattr(block, '__payload__', None)
-        if name is None or name not in getattr(block, '__fields__', {}):
-            return None
-        return name
-
-    @staticmethod
-    def _get_local_timezone() -> 'timezone':
-        """Get local timezone.
-
-        Warning:
-            Not used when reconstructing a block timestamp, and must not be:
-            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the
-            *reading* host's zone into it makes one file parse to different
-            instants on different machines.
-            :meth:`self._get_timezone <_get_timezone>` returns
-            :attr:`datetime.timezone.utc` instead when the capture names no
-            ``if_tzone``.
-
-            It also answers for *today* rather than for the capture's own
-            instant -- ``America/New_York`` reports ``-04:00`` all year, so a
-            December timestamp would get EDT's offset and not EST's -- which is
-            a second reason it cannot stand in for a capture's timezone.
-
-        """
-        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-        if tzinfo is None:
-            return datetime.timezone.utc
-        return cast('timezone', tzinfo)
-
-    def _get_interface(self, interface_id: 'int') -> 'Data_InterfaceDescriptionBlock':
-        """Interface description that ``interface_id`` names.
-
-        Args:
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Interface Description Block (IDB) of the current section that
-            ``interface_id`` identifies.
-
-        Raises:
-            FormatError: If the current section describes no such interface.
-
-        Note:
-            The PCAP-NG specification requires a block's interface ID to name an
-            Interface Description Block of the block's own section, so an ID that
-            names none is a malformed file rather than a programming error --
-            hence :exc:`~pcapkit.utilities.exceptions.FormatError` rather than
-            the bare :exc:`IndexError` that indexing the list would raise.
-
-        """
-        interfaces = self._ctx.interfaces
-        if not 0 <= interface_id < len(interfaces):
-            tag = self.INTERFACE_ID_BLOCK_TAGS.get(self._type, f'Block {self._type}')
-            raise FormatError(f'PCAP-NG: [{tag}] invalid interface ID: {interface_id}')
-        return interfaces[interface_id]
-
-    def _get_resolution(self, interface_id: 'int' = 0) -> 'int':
-        """Timestamp resolution of the current block, in units per second.
-
-        Args:
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Timestamp resolution of the current block, in units per second.
-
-        """
-        if self._ctx is None:
-            warn(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'",
-                 AttributeWarning, stacklevel=stacklevel())
-            return DEFAULT_RESOLUTION
-
-        options = self._get_interface(interface_id).options
-        tsresol = cast('Optional[Data_IF_TSResolOption]',
-                       options.get(Enum_OptionType.if_tsresol))
-        if tsresol is None:
-            return DEFAULT_RESOLUTION
-        return tsresol.resolution
-
-    def _get_offset(self, interface_id: 'int' = 0) -> 'int':
-        """Timestamp offset of the current block, in seconds.
-
-        Args:
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Timestamp offset of the current block, in seconds.
-
-        """
-        if self._ctx is None:
-            warn(f"'{self.__class__.__name__}' object has no attribute '_get_offset'",
-                 AttributeWarning, stacklevel=stacklevel())
-            return 0
-
-        options = self._get_interface(interface_id).options
-        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
-                        options.get(Enum_OptionType.if_tsoffset))
-        if tsoffset is None:
-            return 0
-        return tsoffset.offset
-
-    def _get_timezone(self, interface_id: 'int' = 0) -> 'timezone':
-        """Timezone of the current block.
-
-        Args:
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Timezone of the current block.
-
-        """
-        # NOTE: UTC, not the host's timezone, is the default in both branches
-        # below. A capture carries no timezone of its own unless it says so, and
-        # draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,
-        # defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC
-        # with no timezone term at all, so substituting the *reading* machine's
-        # zone would make the same file parse to different instants on different
-        # hosts. ``_get_resolution``
-        # and ``_get_offset`` fall back to the format's own defaults in this
-        # situation; this is the matching one.
-        if self._ctx is None:
-            warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
-                 AttributeWarning, stacklevel=stacklevel())
-            return datetime.timezone.utc
-
-        options = self._get_interface(interface_id).options
-        tzone = cast('Optional[Data_IF_TZoneOption]',
-                     options.get(Enum_OptionType.if_tzone))
-        # an ``if_tzone`` kept as captured (a :class:`~datetime.timedelta` of 24
-        # hours or more) names no zone a datetime can be rendered in
-        if tzone is None or not isinstance(tzone.timezone, datetime.timezone):
-            return datetime.timezone.utc
-        return tzone.timezone
-
-    def _get_linktype(self, interface_id: 'int' = 0) -> 'Enum_LinkType':
-        """Data link layer protocol type.
-
-        Args:
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Data link layer protocol type.
-
-        Raises:
-            UnsupportedCall: If current block is not a valid packet block, i.e.,
-                EPB, SPB or obsolete Packet Block.
-
-        """
-        if self._ctx is None or self._type not in self.PACKET_TYPES:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_linktype'")
-        return self._get_interface(interface_id).linktype
-
-    def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int', *,
-                        interface_id: 'int' = 0) -> 'tuple[dt_type, Decimal]':
-        """Read timestamp.
-
-        Args:
-            timestamp_high: Higher 32-bit integer value of timestamp.
-            timestamp_low: Lower 32-bit integer value of timestamp.
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Tuple of timestamp in :class:`~datetime.datetime` object with
-            timezone information and :class:`decimal.Decimal` object since
-            UNIX-Epoch in UTC timezone.
-
-        """
-        tzone = self._get_timezone(interface_id)
-
-        timestamp_raw = (timestamp_high << 32) | timestamp_low
-        with localcontext(prec=64):
-            # NOTE: This is the UTC epoch the docstring above promises, with no
-            # ``tzone.utcoffset(None)`` added. The block
-            # timestamp is an offset from the UNIX epoch, so it is
-            # timezone-independent by definition (draft-ietf-opsawg-pcapng-02
-            # section 4.3, Enhanced Packet Block, spells out the arithmetic and
-            # has no timezone term), and the same draft's section 4.2, Interface
-            # Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"
-            # and of ``if_tsoffset`` that it is "not intended to be used as an
-            # offset between local time and UTC". A shifted epoch would also
-            # contradict ``ts_datetime`` below, which is built from the
-            # unshifted value.
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
-                self._get_offset(interface_id)
-
-        ts_ratio = timestamp_epoch.as_integer_ratio()
-        try:
-            # NOTE: ``tzone`` survives only here, as the zone the instant is
-            # *rendered* in -- which is all a ``tzinfo`` can affect on an aware
-            # datetime. It never moves the instant itself. Not the stdlib's
-            # ``fromtimestamp``, whose range is the C library's: Windows' takes
-            # nothing before 1970 or after 3000 (#2099).
-            ts_datetime = fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
-        # an epoch past what ``datetime`` or a 64-bit ``time_t`` holds, e.g.
-        # from an extreme ``if_tsoffset``, raises one of these
-        except (ValueError, OverflowError, OSError):
-            warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
-                 ProtocolWarning, stacklevel=stacklevel())
-            ts_datetime = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
-
-        return (ts_datetime, timestamp_epoch)
-
-    @staticmethod
-    def _block_area(block: 'Data_PCAPNG', name: 'str') -> 'Any':
-        """Option or record area of a parsed block, for its ``make``.
-
-        Args:
-            block: Block data model.
-            name: ``'options'`` or ``'records'``.
-
-        Returns:
-            The area's octets if :meth:`read` kept it as captured, as
-            ``<name>_raw``; otherwise the parsed ``<name>``.
-
-        """
-        return getattr(block, f'{name}_raw', getattr(block, name))
-
-    @staticmethod
-    def _read_padding(schema: 'Schema', data: 'Any', name: 'str' = 'padding',
-                      key: 'Optional[str]' = None, *, nonzero: 'bool' = True) -> 'None':
-        """Keep a padding field of a parsed schema on its data model.
-
-        Args:
-            schema: Parsed block, option or record schema.
-            data: Its data model, updated in place.
-            name: Name of the padding field on ``schema``.
-            key: Name to keep it as on ``data``; defaults to ``name``.
-            nonzero: Keep the octets only when they are not all zeros -- the
-                form a fresh build writes -- rather than whenever there are any.
-
-        The octets are kept as ``key`` only when there is something a rebuild
-        would otherwise lose, so the data model of well-formed input gains no
-        key (:issue:`1437`). :meth:`_make_padding` writes them back.
-
-        """
-        padding = schema.__dict__.get(name)
-        if isinstance(padding, bytes) and (any(padding) if nonzero else padding):
-            data.__update__([(key or name, padding)])
-
-    @staticmethod
-    def _make_padding(schema: '_S', source: 'Any', name: 'str' = 'padding',
-                      key: 'Optional[str]' = None) -> '_S':
-        """Write the padding octets :meth:`_read_padding` kept back onto a schema.
-
-        Args:
-            schema: Constructed block, option or record schema, updated in place.
-            source: Data model or keyword arguments it was made from, if any.
-            name: Name of the padding field on ``schema``.
-            key: Name the octets are kept as on ``source``; defaults to ``name``.
-
-        Returns:
-            The ``schema`` given. Without kept octets its padding stays zeros.
-
-        """
-        if source is None or isinstance(schema, bytes):
-            return schema
-        padding = source.get(key or name)
-        if isinstance(padding, (bytes, bytearray)) and name in schema.__fields__:
-            setattr(schema, name, bytes(padding))
-        return schema
-
-    def _make_options_trailer(self, block: 'Optional[Data_PCAPNG]',
-                              options: 'list[Schema_Option | bytes]') -> 'int':
-        """Append the octets a parsed block held past its ``opt_endofopt``.
-
-        Args:
-            block: Block data model, if any.
-            options: Constructed options, extended in place.
-
-        Returns:
-            Number of octets appended.
-
-        An option area ends at its ``opt_endofopt`` and the octets after it are
-        read as padding. :meth:`_read_padding` keeps them as ``padding_opts``,
-        and they are written back after the options, verbatim (:issue:`1437`).
-
-        """
-        trailer = block.get('padding_opts') if block is not None else None
-        if not isinstance(trailer, bytes) or not trailer:
-            return 0
-        options.append(trailer)
-        return len(trailer)
-
-    @classmethod
-    def _make_packet_data(cls, block: 'Data_PCAPNG') -> 'bytes | ProtocolBase':
-        """Create the packet data of an EPB, SPB or PB from its data model.
-
-        Args:
-            block: Block data model.
-
-        Returns:
-            The captured packet octets the block was parsed from, as
-            :attr:`~pcapkit.protocols.data.Protocol.packet` holds them,
-            cut to the block's ``captured_len``; or, for a data model that
-            carries none, the payload rebuilt from its decoded next layer.
-
-        Note:
-            The cut is what keeps a block with ``captured_len`` of zero intact:
-            its ``packet`` can hold octets past the payload (:issue:`1275`), and
-            writing those back would grow the block.
-
-            The fallback is lossy. A next layer rebuilt from its own data model
-            drops anything it did not decode, such as Ethernet pad octets, so
-            the block it yields can be shorter than its ``captured_len`` says.
-
-        """
-        packet = block.get('packet')
-        if isinstance(packet, bytes):
-            return packet[:block.captured_len]
-        return cls._make_payload(block)
-
-    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, *,
-                        interface_id: 'int' = 0) -> 'tuple[int, int]':
-        """Make timestamp.
-
-        Args:
-            timestamp: Timestamp in seconds since UNIX-Epoch, in UTC, i.e. as
-                :meth:`self._read_timestamp <_read_timestamp>` returns it.
-            interface_id: Interface ID that the current block associates with.
-
-        Returns:
-            Tuple of timestamp in higher and lower 32-bit integer value,
-            scaled by the interface's ``if_tsresol`` and shifted by its
-            ``if_tsoffset``.
-
-        Notes:
-            No timezone conversion happens here, and none should: the field this
-            builds is defined as an offset from the UNIX epoch, and the read
-            side applies no timezone shift for it to mirror.
-
-            Which clock a defaulted ``timestamp`` is read to follows the
-            resolution of the interface ``interface_id`` names, not
-            :attr:`self.nanosecond <nanosecond>`. That property resolves its
-            interface through the parsed data model, which a block being made
-            has not got, so reading it here would make a ``make`` that names
-            no ``timestamp`` -- of an Enhanced Packet Block, an obsolete
-            Packet Block or an Interface Statistics Block -- raise
-            :exc:`AttributeError` on ``_info`` (:issue:`2362`).
-
-        .. versionchanged:: 1.5.0
-
-           A defaulted ``timestamp`` no longer reads
-           :attr:`self.nanosecond <nanosecond>`, so it no longer requires a
-           parsed data model (:issue:`2362`).
-
-        """
-        with localcontext(prec=64):
-            resolution = self._get_resolution(interface_id)
-            if timestamp is None:
-                if resolution > RESOLUTION[False]:
-                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
-                else:
-                    timestamp = decimal.Decimal(time.time())
-            else:
-                if isinstance(timestamp, datetime.datetime):
-                    timestamp = totimestamp(timestamp)
-                timestamp = decimal.Decimal(timestamp)
-
-            ts_info = int(
-                (timestamp - self._get_offset(interface_id)) * resolution
-            )
-        return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
-
-    def _make_mac_addr(self, addr: 'str | bytes | bytearray', *, size: 'Optional[int]' = 6,
-                       name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
-        """Make a MAC address, or an EUI-64 one with ``size=8``.
-
-        Args:
-            addr: MAC or EUI address.
-            size: Octets in the address, as for :meth:`Protocol._make_mac_addr
-                <pcapkit.protocols.protocol.Protocol._make_mac_addr>`.
-            name: Name of the address, for the error message.
-            alias: Prefix of the error message, ``'PCAP-NG'`` by default.
-
-        Returns:
-            The address packed as ``size`` octets, 6 by default.
-
-        Raises:
-            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
-                or :class:`bytearray` (a :obj:`bool` included), or is not a
-                ``:``- or ``-``-separated *hex* encoded address of ``size``
-                octets.
-
-        """
-        prefix = 'PCAP-NG' if alias is None else alias
-        return super()._make_mac_addr(addr, size=size, name=name, alias=prefix)
-
-    def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ
-        r"""Decode next layer protocol.
-
-        Arguments:
-            dict\_: info buffer
-            proto: next layer protocol index
-            length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
-
-        Returns:
-            Current protocol with packet extracted.
-
-        Notes:
-            We added a new key ``__next_type__`` to ``dict_`` to store the
-            next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. :meth:`Info.to_dict
-            <pcapkit.corekit.infoclass.Info.to_dict>` carries both, and the
-            dumpers leave them out.
-
-            We also added a new key ``protocols`` to ``dict_`` to store the
-            protocol chain of the current packet (frame).
-
-            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so
-            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).
-
-        """
-        proto = self._dispatch_linktype(proto, length)
-        next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
-        info, chain = next_.info, next_.protochain
-
-        # make next layer protocol name
-        layer = next_.info_name
-        # proto = next_.__class__.__name__
-
-        # write info and protocol chain into dict
-        dict_.__update__({
-            layer: info,
-            'protocols': chain.chain if chain else '',
-            '__next_type__': type(next_),
-            '__next_name__': layer,
-        })
-        self._next = next_  # pylint: disable=attribute-defined-outside-init
-        self._protos = chain  # pylint: disable=attribute-defined-outside-init
-        return dict_
-
-    def _dispatch_linktype(self, proto: 'Optional[int]', length: 'Optional[int]' = None) -> 'Optional[int]':
-        """Link type a packet block's data is dispatched under.
-
-        Arguments:
-            proto: link type of the interface the block was captured on
-            length: valid (*non-padding*) length
-
-        Returns:
-            For :attr:`LinkType.RAW <pcapkit.const.reg.linktype.LinkType.RAW>`
-            data whose first octet carries IP version 4 or 6,
-            :attr:`LinkType.IPV4 <pcapkit.const.reg.linktype.LinkType.IPV4>` or
-            :attr:`LinkType.IPV6 <pcapkit.const.reg.linktype.LinkType.IPV6>`;
-            otherwise ``proto``.
-
-        Note:
-            As :meth:`Frame._dispatch_linktype
-            <pcapkit.protocols.misc.pcap.frame.protocol.Frame._dispatch_linktype>` does
-            for PCAP: ``LINKTYPE_RAW`` (101) data is IPv4 or IPv6 by its version
-            nibble, an entry registered under ``RAW`` itself is used as it
-            stands, and data of any other version is kept as
-            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`1502`).
-
-        """
-        if proto != Enum_LinkType.RAW or Enum_LinkType.RAW in self.__proto__:
-            return proto
-        data = self._get_payload()[:length]
-        version = data[0] >> 4 if data else None
-        if version == 4:
-            return Enum_LinkType.IPV4
-        if version == 6:
-            return Enum_LinkType.IPV6
-        return proto
-
     def _read_block_unknown(self, schema: 'Schema_UnknownBlock', *,
                             header: 'Schema_PCAPNG') -> 'Data_UnknownBlock':
         """Read unknown PCAP-NG block.
@@ -2479,60 +1920,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length=schema.length,
             body=schema.body,
         )
-        return data
-
-    def _read_block_shb(self, schema: 'Schema_SectionHeaderBlock', *,
-                        header: 'Schema_PCAPNG') -> 'Data_SectionHeaderBlock':
-        """Read PCAP-NG section header block (SHB).
-
-        Structure of Section Header Block:
-
-        .. code-block:: text
-
-               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            0 |                   Block Type = 0x0A0D0D0A                     |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            4 |                      Block Total Length                       |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            8 |                      Byte-Order Magic                         |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           12 |          Major Version        |         Minor Version         |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           16 |                                                               |
-              |                          Section Length                       |
-              |                                                               |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           24 /                                                               /
-              /                      Options (variable)                       /
-              /                                                               /
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              |                      Block Total Length                       |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            schema: Parsed block schema.
-            header: Parsed PCAP-NG header schema.
-
-        Returns:
-            Parsed packet data.
-
-        """
-        self._byte = schema.byteorder
-
-        data = Data_SectionHeaderBlock(
-            type=header.type,
-            length=schema.length,
-            byteorder=schema.byteorder,
-            version=VersionInfo(
-                major=schema.major,
-                minor=schema.minor,
-            ),
-            section_length=schema.section_length,
-            options=self._read_pcapng_options(schema.options),
-        )
-        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
-        self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
     def _read_block_idb(self, schema: 'Schema_InterfaceDescriptionBlock', *,
@@ -2582,22 +1969,22 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
-    def _read_block_epb(self, schema: 'Schema_EnhancedPacketBlock', *,
-                        header: 'Schema_PCAPNG') -> 'Data_EnhancedPacketBlock':
-        """Read PCAP-NG enhanced packet block (EPB).
+    def _read_block_packet(self, schema: 'Schema_PacketBlock', *,
+                           header: 'Schema_PCAPNG') -> 'Data_PacketBlock':
+        """Read PCAP-NG packet block (obsolete).
 
-        Structure of Enhanced Packet Block:
+        Structure of Packet Block:
 
         .. code-block:: text
 
                                    1                   2                   3
                0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            0 |                    Block Type = 0x00000006                    |
+            0 |                    Block Type = 0x00000002                    |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             4 |                      Block Total Length                       |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            8 |                         Interface ID                          |
+            8 |         Interface ID          |          Drops Count          |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            12 |                        Timestamp (High)                       |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2627,19 +2014,23 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         """
+        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
+             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
+
         timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
                                                           interface_id=schema.interface_id)
 
-        data = Data_EnhancedPacketBlock(
+        data = Data_PacketBlock(
             type=header.type,
             length=schema.length,
             section_number=self._sect,
             number=self._fnum,
             interface_id=schema.interface_id,
+            drop_count=schema.drop_count,
             timestamp=timestamp,
             timestamp_epoch=timestamp_epoch,
-            captured_len=schema.captured_len,
-            original_len=schema.original_len,
+            captured_len=schema.captured_length,
+            original_len=schema.original_length,
             options=self._read_pcapng_options(schema.options),
         )
         # NOTE: The padding of the packet data to 32 bits, if it is not all
@@ -2650,15 +2041,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         # NOTE: A captured length running past the block is kept as declared,
         # and the packet data is the octets the block holds (#1405).
-        if schema.captured_len > len(schema.packet_data):
-            warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_len} runs past '
+        if schema.captured_length > len(schema.packet_data):
+            warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_length} runs past '
                  f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
         # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
         token = frame_length.set((data.captured_len, data.original_len))
         try:
             return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
-                                           schema.captured_len)  # type: ignore[return-value]
+                                           schema.captured_length)  # type: ignore[return-value]
         finally:
             frame_length.reset(token)
 
@@ -2831,6 +2222,86 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
+    def _read_block_epb(self, schema: 'Schema_EnhancedPacketBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_EnhancedPacketBlock':
+        """Read PCAP-NG enhanced packet block (EPB).
+
+        Structure of Enhanced Packet Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000006                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                         Interface ID                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                        Timestamp (High)                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                        Timestamp (Low)                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           20 |                    Captured Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           24 |                    Original Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           28 /                                                               /
+              /                          Packet Data                          /
+              /              variable length, padded to 32 bits               /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=schema.interface_id)
+
+        data = Data_EnhancedPacketBlock(
+            type=header.type,
+            length=schema.length,
+            section_number=self._sect,
+            number=self._fnum,
+            interface_id=schema.interface_id,
+            timestamp=timestamp,
+            timestamp_epoch=timestamp_epoch,
+            captured_len=schema.captured_len,
+            original_len=schema.original_len,
+            options=self._read_pcapng_options(schema.options),
+        )
+        # NOTE: The padding of the packet data to 32 bits, if it is not all
+        # zeros (#1437).
+        self._read_padding(schema, data, 'padding_data')
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
+        self._read_padding(schema, data, 'padding_opts', 'padding_opts', nonzero=False)
+
+        # NOTE: A captured length running past the block is kept as declared,
+        # and the packet data is the octets the block holds (#1405).
+        if schema.captured_len > len(schema.packet_data):
+            warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_len} runs past '
+                 f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
+                 ProtocolWarning, stacklevel=stacklevel())
+        # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
+        token = frame_length.set((data.captured_len, data.original_len))
+        try:
+            return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
+                                           schema.captured_len)  # type: ignore[return-value]
+        finally:
+            frame_length.reset(token)
+
     def _read_block_systemd(self, schema: 'Schema_SystemdJournalExportBlock', *,
                             header: 'Schema_PCAPNG') -> 'Data_SystemdJournalExportBlock':
         """Read PCAP-NG :manpage:`systemd(1)` journal export block.
@@ -2987,37 +2458,29 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
         return data
 
-    def _read_block_packet(self, schema: 'Schema_PacketBlock', *,
-                           header: 'Schema_PCAPNG') -> 'Data_PacketBlock':
-        """Read PCAP-NG packet block (obsolete).
+    def _read_block_shb(self, schema: 'Schema_SectionHeaderBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_SectionHeaderBlock':
+        """Read PCAP-NG section header block (SHB).
 
-        Structure of Packet Block:
+        Structure of Section Header Block:
 
         .. code-block:: text
 
-                                   1                   2                   3
                0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            0 |                    Block Type = 0x00000002                    |
+            0 |                   Block Type = 0x0A0D0D0A                     |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             4 |                      Block Total Length                       |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            8 |         Interface ID          |          Drops Count          |
+            8 |                      Byte-Order Magic                         |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           12 |                        Timestamp (High)                       |
+           12 |          Major Version        |         Minor Version         |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           16 |                        Timestamp (Low)                        |
+           16 |                                                               |
+              |                          Section Length                       |
+              |                                                               |
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           20 |                    Captured Packet Length                     |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           24 |                    Original Packet Length                     |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           28 /                                                               /
-              /                          Packet Data                          /
-              /              variable length, padded to 32 bits               /
-              /                                                               /
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              /                                                               /
+           24 /                                                               /
               /                      Options (variable)                       /
               /                                                               /
               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -3032,103 +2495,22 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         """
-        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
-             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
+        self._byte = schema.byteorder
 
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
-                                                          interface_id=schema.interface_id)
-
-        data = Data_PacketBlock(
+        data = Data_SectionHeaderBlock(
             type=header.type,
             length=schema.length,
-            section_number=self._sect,
-            number=self._fnum,
-            interface_id=schema.interface_id,
-            drop_count=schema.drop_count,
-            timestamp=timestamp,
-            timestamp_epoch=timestamp_epoch,
-            captured_len=schema.captured_length,
-            original_len=schema.original_length,
+            byteorder=schema.byteorder,
+            version=VersionInfo(
+                major=schema.major,
+                minor=schema.minor,
+            ),
+            section_length=schema.section_length,
             options=self._read_pcapng_options(schema.options),
         )
-        # NOTE: The padding of the packet data to 32 bits, if it is not all
-        # zeros (#1437).
-        self._read_padding(schema, data, 'padding_data')
         # NOTE: The octets after ``opt_endofopt``, if any (#1437).
-        self._read_padding(schema, data, 'padding_opts', 'padding_opts', nonzero=False)
-
-        # NOTE: A captured length running past the block is kept as declared,
-        # and the packet data is the octets the block holds (#1405).
-        if schema.captured_length > len(schema.packet_data):
-            warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_length} runs past '
-                 f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
-                 ProtocolWarning, stacklevel=stacklevel())
-        # NOTE: The layers below are told both lengths, as a PCAP frame tells them (#2653).
-        token = frame_length.set((data.captured_len, data.original_len))
-        try:
-            return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
-                                           schema.captured_length)  # type: ignore[return-value]
-        finally:
-            frame_length.reset(token)
-
-    def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
-        """Read PCAP-NG options.
-
-        Structure of PCAP-NG option:
-
-        .. code-block:: text
-
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |      Option Code              |         Option Length         |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                       Option Value                            /
-           /              variable length, padded to 32 bits               /
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                                                               /
-           /                 . . . other options . . .                     /
-           /                                                               /
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |   Option Code == opt_endofopt |   Option Length == 0          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            options_schema: Parsed PCAP-NG options.
-
-        Returns:
-            Parsed PCAP-NG options data.
-
-        """
-        options = OrderedMultiDict()  # type: Option
-
-        # an area kept as captured holds no options to read
-        if any(isinstance(schema, bytes) for schema in options_schema):
-            return options
-
-        for schema in options_schema:
-            type = schema.type
-            name = self._lookup_registry(self.__option__, _option_key(type))
-
-            if isinstance(name, str):
-                meth_name = f'_read_option_{name}'
-                meth = cast('OptionParser',
-                            getattr(self, meth_name, self._read_option_unknown))
-            else:
-                meth = name[0]
-            data = meth(schema, options=options)
-            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
-            self._read_padding(schema, data)
-
-            # record option data
-            options.add(type, data)
-            self._opt[type] += 1
-
-            # break when ``opt_endofopt`` is reached
-            if type == Enum_OptionType.opt_endofopt:
-                break
-
-        return options
+        self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
+        return data
 
     def _read_option_unknown(self, schema: 'Schema_UnknownOption', *,
                              options: 'Option') -> 'Data_UnknownOption':
@@ -4207,45 +3589,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
         return option
 
-    def _read_nrb_records(self, records_schema: 'list[Schema_NameResolutionRecord]') -> 'Record':
-        """Read PCAP-NG name resolution records.
-
-        Args:
-            records_schema: Parsed name resolution records.
-
-        Returns:
-            Parsed PCAP-NG name resolution records data.
-
-        """
-        records = OrderedMultiDict()  # type: Record
-
-        # an area kept as captured holds no records to read
-        if any(isinstance(schema, bytes) for schema in records_schema):
-            return records
-
-        for schema in records_schema:
-            type = schema.type
-            name = self._lookup_registry(self.__record__, type)
-
-            if isinstance(name, str):
-                meth_name = f'_read_record_{name}'
-                meth = cast('RecordParser',
-                            getattr(self, meth_name, self._read_record_unknown))
-            else:
-                meth = name[0]
-            data = meth(schema, records=records)
-            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
-            self._read_padding(schema, data)
-
-            # record name resolution record data
-            records.add(type, data)
-
-            # break when ``nrb_record_end`` is reached
-            if type == Enum_RecordType.nrb_record_end:
-                break
-
-        return records
-
     def _read_record_unknown(self, schema: 'Schema_UnknownRecord', *,
                              records: 'Record') -> 'Data_UnknownRecord':
         """Read PCAP-NG unknown name resolution records.
@@ -4387,57 +3730,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         secrets.__update__(data=schema.data)
         return secrets
 
-    def _read_secrets_zigbee_nwk(self, schema: 'Schema_ZigBeeNWKKey', *,
-                                 block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeNWKKey':
-        """Read PCAP-NG ZigBee NWK Key secrets.
-
-        Structure of ZigBee NWK Key secrets:
-
-        .. code-block:: text
-
-              0                   1                   2                   3
-              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-              +---------------------------------------------------------------+
-            0 |                   Block Type = 0x0000000A                     |
-              +---------------------------------------------------------------+
-            4 |                      Block Total Length                       |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            8 |                  Secrets Type = 0x5a4e574b                    |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           12 |                         Secrets Length                        |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           16 |                            AES-128                            |
-              |                            NWK Key                            |
-              |                          (16 octets)                          |
-              |                           (128 bits)                          |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           32 |          PAN ID               |           padding (0)         |
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           36 /                                                               /
-              /                       Options (variable)                      /
-              /                                                               /
-              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              /                       Block Total Length                      /
-              +---------------------------------------------------------------+
-
-        Args:
-            schema: Parsed secret schema.
-            block: Parsed PCAP-NG decryption secrets block.
-
-        Returns:
-            Parsed decryption secrets data.
-
-        """
-        secrets = Data_ZigBeeNWKKey(
-            nwk_key=schema.key,
-            pan_id=schema.panid,
-        )
-        # NOTE: the octets as the block holds them are kept as well, since a
-        # Secrets Length may declare fewer or more than the key's fixed width,
-        # and a rebuild writes them back verbatim (#1986).
-        secrets.__update__(data=bytes(schema))
-        return secrets
-
     def _read_secrets_zigbee_aps(self, schema: 'Schema_ZigBeeAPSKey', *,
                                  block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeAPSKey':
         """Read PCAP-NG ZigBee APS Key secrets.
@@ -4490,6 +3782,57 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         secrets.__update__(data=bytes(schema))
         return secrets
 
+    def _read_secrets_zigbee_nwk(self, schema: 'Schema_ZigBeeNWKKey', *,
+                                 block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeNWKKey':
+        """Read PCAP-NG ZigBee NWK Key secrets.
+
+        Structure of ZigBee NWK Key secrets:
+
+        .. code-block:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +---------------------------------------------------------------+
+            0 |                   Block Type = 0x0000000A                     |
+              +---------------------------------------------------------------+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                  Secrets Type = 0x5a4e574b                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                         Secrets Length                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                            AES-128                            |
+              |                            NWK Key                            |
+              |                          (16 octets)                          |
+              |                           (128 bits)                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           32 |          PAN ID               |           padding (0)         |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           36 /                                                               /
+              /                       Options (variable)                      /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                       Block Total Length                      /
+              +---------------------------------------------------------------+
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        Returns:
+            Parsed decryption secrets data.
+
+        """
+        secrets = Data_ZigBeeNWKKey(
+            nwk_key=schema.key,
+            pan_id=schema.panid,
+        )
+        # NOTE: the octets as the block holds them are kept as well, since a
+        # Secrets Length may declare fewer or more than the key's fixed width,
+        # and a rebuild writes them back verbatim (#1986).
+        secrets.__update__(data=bytes(schema))
+        return secrets
+
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
                             **kwargs: 'Any') -> 'Schema_UnknownBlock':
@@ -4516,84 +3859,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length=length,
             body=data,
             length2=length,
-        )
-
-    def _make_block_shb(self, block: 'Optional[Data_SectionHeaderBlock]' = None, *,
-                        version: 'tuple[int, int] | VersionInfo' = (1, 0),
-                        major_version: 'Optional[int]' = None,
-                        minor_version: 'Optional[int]' = None,
-                        section_length: 'int' = -1,
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
-                        byteorder: 'Literal["big", "little"]' = sys.byteorder,
-                        **kwargs: 'Any') -> 'Schema_SectionHeaderBlock':
-        """Make PCAP-NG section header block (SHB).
-
-        Args:
-            block: Block data model.
-            version: Version information.
-            major_version: Major version number.
-            minor_version: Minor version number.
-            section_length: Section length, ``-1`` (or ``0xFFFFFFFFFFFFFFFF``)
-                for "not specified".
-            options: Block options.
-            byteorder: Byte order of the section; a parsed block keeps its own.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed block schema.
-
-        Raises:
-            ProtocolError: If ``section_length`` is not an :obj:`int` (a
-                :obj:`bool` included), or is outside ``-2 ** 63`` to
-                ``2 ** 64 - 1``.
-
-        .. versionchanged:: 1.6.0
-
-           ``section_length`` is checked by
-           :meth:`~pcapkit.protocols.protocol.Protocol._make_sint`, so a value
-           outside the 64-bit field in either spelling, a :obj:`bool` or a
-           non-integer raises
-           :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than being
-           written masked or failing to pack; ``-1`` and
-           ``0xFFFFFFFFFFFFFFFF`` still write the same octets
-           (:issue:`2614`).
-
-        """
-        if block is not None:
-            byteorder = block.byteorder
-        self._byte = byteorder
-
-        if block is not None and hasattr(block, 'block_raw'):
-            return self._make_block_short(block)  # type: ignore[return-value]
-        if block is not None:
-            major_version = block.version.major
-            minor_version = block.version.minor
-            section_length = block.section_length
-            options = self._block_area(block, 'options')
-        else:
-            if major_version is None:
-                major_version = version[0]
-            if minor_version is None:
-                minor_version = version[1]
-        # NOTE: the field is signed and the specification spells "not specified"
-        # both -1 and 0xFFFFFFFFFFFFFFFF, so both spellings are accepted and the
-        # field packs them to the same octets; any other value is refused (#2617).
-        self._make_sint(section_length, bits=64, name='[SHB] section_length', alias='PCAP-NG', allow_unsigned=True)
-
-        if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='opt')
-        else:
-            options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
-
-        return Schema_SectionHeaderBlock(
-            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
-            magic=BYTE_ORDER_MAGIC,
-            major=major_version,
-            minor=minor_version,
-            section_length=section_length,
-            options=options_value,
-            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
         )
 
     def _make_block_idb(self, block: 'Optional[Data_InterfaceDescriptionBlock]' = None, *,
@@ -4662,19 +3927,21 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block],
         ), block, 'reserved')
 
-    def _make_block_epb(self, block: 'Optional[Data_EnhancedPacketBlock]' = None, *,
-                        interface_id: 'int' = 0,
-                        timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
-                        captured_len: 'Optional[int]' = None,
-                        original_len: 'Optional[int]' = None,
-                        packet_data: 'bytes | ProtocolBase | Schema' = b'',
-                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
-                        **kwargs: 'Any') -> 'Schema_EnhancedPacketBlock':
-        """Make PCAP-NG enhanced packet block (EPB).
+    def _make_block_packet(self, block: 'Optional[Data_PacketBlock]' = None, *,
+                           interface_id: 'int' = 0,
+                           drop_count: 'int' = 0,
+                           timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
+                           captured_len: 'Optional[int]' = None,
+                           original_len: 'Optional[int]' = None,
+                           packet_data: 'bytes | ProtocolBase | Schema' = b'',
+                           options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                           **kwargs: 'Any') -> 'Schema_PacketBlock':
+        """Make PCAP-NG packet block (obsolete).
 
         Args:
             block: Block data model.
             interface_id: Interface ID.
+            drop_count: Drops count, ``0xFFFF`` for "not available".
             timestamp: Packet timestamp.
             captured_len: Captured length.
             original_len: Original length.
@@ -4685,16 +3952,33 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Returns:
             Constructed block schema.
 
+        Raises:
+            ProtocolError: If ``drop_count`` is not an :obj:`int` (a
+                :obj:`bool` included), or is outside ``0`` to ``0xFFFF``.
+
+        .. versionchanged:: 1.6.0
+
+           ``drop_count`` is checked by
+           :meth:`~pcapkit.protocols.protocol.Protocol._make_uint`, so a value
+           the 16-bit field cannot hold, ``-1`` included, or a :obj:`bool`
+           raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+           than being written masked (:issue:`2614`).
+
         """
+        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
+             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
+
         if block is not None and hasattr(block, 'block_raw'):
             return self._make_block_short(block)  # type: ignore[return-value]
         if block is not None:
             interface_id = block.interface_id
+            drop_count = block.drop_count
             timestamp = block.timestamp_epoch
             captured_len = block.captured_len
             original_len = block.original_len
             packet_data = self._make_packet_data(block)
             options = self._block_area(block, 'options')
+        drop_count = self._make_uint(drop_count, bits=16, name='[PB] drop_count', alias='PCAP-NG')
 
         timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
         if captured_len is None:
@@ -4714,21 +3998,22 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         packet_len = len(packet_data) + pad_length(len(packet_data), 4)
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='epb')
+            options_value, total_length = self._make_pcapng_options(options, namespace='pack')
         else:
             options_value, total_length = [], 0
         total_length += self._make_options_trailer(block, options_value)
 
-        return self._make_padding(Schema_EnhancedPacketBlock(
-            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
+        return self._make_padding(Schema_PacketBlock(
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
             interface_id=interface_id,
+            drop_count=drop_count,
             timestamp_high=timestamp_high,
             timestamp_low=timestamp_low,
-            captured_len=captured_len,
-            original_len=original_len,
+            captured_length=captured_len,
+            original_length=original_len,
             packet_data=packet_data,
             options=options_value,
-            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
         ), block, 'padding_data')
 
     def _make_block_spb(self, block: 'Optional[Data_SimplePacketBlock]' = None, *,
@@ -4855,6 +4140,75 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block],
         )
+
+    def _make_block_epb(self, block: 'Optional[Data_EnhancedPacketBlock]' = None, *,
+                        interface_id: 'int' = 0,
+                        timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
+                        captured_len: 'Optional[int]' = None,
+                        original_len: 'Optional[int]' = None,
+                        packet_data: 'bytes | ProtocolBase | Schema' = b'',
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                        **kwargs: 'Any') -> 'Schema_EnhancedPacketBlock':
+        """Make PCAP-NG enhanced packet block (EPB).
+
+        Args:
+            block: Block data model.
+            interface_id: Interface ID.
+            timestamp: Packet timestamp.
+            captured_len: Captured length.
+            original_len: Original length.
+            packet_data: Payload of the block.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None and hasattr(block, 'block_raw'):
+            return self._make_block_short(block)  # type: ignore[return-value]
+        if block is not None:
+            interface_id = block.interface_id
+            timestamp = block.timestamp_epoch
+            captured_len = block.captured_len
+            original_len = block.original_len
+            packet_data = self._make_packet_data(block)
+            options = self._block_area(block, 'options')
+
+        timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
+        if captured_len is None:
+            if self._ctx is None:
+                snaplen = 0xFFFF_FFFF_FFFF_FFFF
+            else:
+                # a snaplen of zero means no limit
+                snaplen = self._get_interface(interface_id).snaplen or 0xFFFF_FFFF_FFFF_FFFF
+            captured_len = min(len(packet_data), snaplen)
+        if original_len is None:
+            original_len = len(packet_data)
+        # NOTE: Packet Data holds exactly Captured Packet Length octets, so a
+        # packet longer than that -- e.g. than the interface's snaplen -- is cut
+        # to it rather than written out whole behind a clipped length.
+        if len(packet_data) > captured_len:
+            packet_data = bytes(packet_data)[:captured_len]
+        packet_len = len(packet_data) + pad_length(len(packet_data), 4)
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='epb')
+        else:
+            options_value, total_length = [], 0
+        total_length += self._make_options_trailer(block, options_value)
+
+        return self._make_padding(Schema_EnhancedPacketBlock(
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
+            interface_id=interface_id,
+            timestamp_high=timestamp_high,
+            timestamp_low=timestamp_low,
+            captured_len=captured_len,
+            original_len=original_len,
+            packet_data=packet_data,
+            options=options_value,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
+        ), block, 'padding_data')
 
     def _make_block_systemd(self, block: 'Optional[Data_SystemdJournalExportBlock]' = None, *,
                             entries: 'Optional[list[OrderedMultiDict[str, str | bytes]] | bytes]' = None,
@@ -5052,203 +4406,83 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length2=len(cb_data) + minimum,
         )
 
-    def _make_block_packet(self, block: 'Optional[Data_PacketBlock]' = None, *,
-                           interface_id: 'int' = 0,
-                           drop_count: 'int' = 0,
-                           timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
-                           captured_len: 'Optional[int]' = None,
-                           original_len: 'Optional[int]' = None,
-                           packet_data: 'bytes | ProtocolBase | Schema' = b'',
-                           options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
-                           **kwargs: 'Any') -> 'Schema_PacketBlock':
-        """Make PCAP-NG packet block (obsolete).
+    def _make_block_shb(self, block: 'Optional[Data_SectionHeaderBlock]' = None, *,
+                        version: 'tuple[int, int] | VersionInfo' = (1, 0),
+                        major_version: 'Optional[int]' = None,
+                        minor_version: 'Optional[int]' = None,
+                        section_length: 'int' = -1,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                        byteorder: 'Literal["big", "little"]' = sys.byteorder,
+                        **kwargs: 'Any') -> 'Schema_SectionHeaderBlock':
+        """Make PCAP-NG section header block (SHB).
 
         Args:
             block: Block data model.
-            interface_id: Interface ID.
-            drop_count: Drops count, ``0xFFFF`` for "not available".
-            timestamp: Packet timestamp.
-            captured_len: Captured length.
-            original_len: Original length.
-            packet_data: Payload of the block.
+            version: Version information.
+            major_version: Major version number.
+            minor_version: Minor version number.
+            section_length: Section length, ``-1`` (or ``0xFFFFFFFFFFFFFFFF``)
+                for "not specified".
             options: Block options.
+            byteorder: Byte order of the section; a parsed block keeps its own.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed block schema.
 
         Raises:
-            ProtocolError: If ``drop_count`` is not an :obj:`int` (a
-                :obj:`bool` included), or is outside ``0`` to ``0xFFFF``.
+            ProtocolError: If ``section_length`` is not an :obj:`int` (a
+                :obj:`bool` included), or is outside ``-2 ** 63`` to
+                ``2 ** 64 - 1``.
 
         .. versionchanged:: 1.6.0
 
-           ``drop_count`` is checked by
-           :meth:`~pcapkit.protocols.protocol.Protocol._make_uint`, so a value
-           the 16-bit field cannot hold, ``-1`` included, or a :obj:`bool`
-           raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
-           than being written masked (:issue:`2614`).
+           ``section_length`` is checked by
+           :meth:`~pcapkit.protocols.protocol.Protocol._make_sint`, so a value
+           outside the 64-bit field in either spelling, a :obj:`bool` or a
+           non-integer raises
+           :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than being
+           written masked or failing to pack; ``-1`` and
+           ``0xFFFFFFFFFFFFFFFF`` still write the same octets
+           (:issue:`2614`).
 
         """
-        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
-             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
+        if block is not None:
+            byteorder = block.byteorder
+        self._byte = byteorder
 
         if block is not None and hasattr(block, 'block_raw'):
             return self._make_block_short(block)  # type: ignore[return-value]
         if block is not None:
-            interface_id = block.interface_id
-            drop_count = block.drop_count
-            timestamp = block.timestamp_epoch
-            captured_len = block.captured_len
-            original_len = block.original_len
-            packet_data = self._make_packet_data(block)
+            major_version = block.version.major
+            minor_version = block.version.minor
+            section_length = block.section_length
             options = self._block_area(block, 'options')
-        drop_count = self._make_uint(drop_count, bits=16, name='[PB] drop_count', alias='PCAP-NG')
-
-        timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
-        if captured_len is None:
-            if self._ctx is None:
-                snaplen = 0xFFFF_FFFF_FFFF_FFFF
-            else:
-                # a snaplen of zero means no limit
-                snaplen = self._get_interface(interface_id).snaplen or 0xFFFF_FFFF_FFFF_FFFF
-            captured_len = min(len(packet_data), snaplen)
-        if original_len is None:
-            original_len = len(packet_data)
-        # NOTE: Packet Data holds exactly Captured Packet Length octets, so a
-        # packet longer than that -- e.g. than the interface's snaplen -- is cut
-        # to it rather than written out whole behind a clipped length.
-        if len(packet_data) > captured_len:
-            packet_data = bytes(packet_data)[:captured_len]
-        packet_len = len(packet_data) + pad_length(len(packet_data), 4)
+        else:
+            if major_version is None:
+                major_version = version[0]
+            if minor_version is None:
+                minor_version = version[1]
+        # NOTE: the field is signed and the specification spells "not specified"
+        # both -1 and 0xFFFFFFFFFFFFFFFF, so both spellings are accepted and the
+        # field packs them to the same octets; any other value is refused (#2617).
+        self._make_sint(section_length, bits=64, name='[SHB] section_length', alias='PCAP-NG', allow_unsigned=True)
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options, namespace='pack')
+            options_value, total_length = self._make_pcapng_options(options, namespace='opt')
         else:
             options_value, total_length = [], 0
         total_length += self._make_options_trailer(block, options_value)
 
-        return self._make_padding(Schema_PacketBlock(
-            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
-            interface_id=interface_id,
-            drop_count=drop_count,
-            timestamp_high=timestamp_high,
-            timestamp_low=timestamp_low,
-            captured_length=captured_len,
-            original_length=original_len,
-            packet_data=packet_data,
+        return Schema_SectionHeaderBlock(
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
+            magic=BYTE_ORDER_MAGIC,
+            major=major_version,
+            minor=minor_version,
+            section_length=section_length,
             options=options_value,
-            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
-        ), block, 'padding_data')
-
-    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes] | bytes',  # pylint: disable=line-too-long
-                             namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
-        """Make options for PCAP-NG.
-
-        Args:
-            options: PCAP-NG options. An option's code is a member, kept as
-                given, or an :class:`int`, resolved in ``namespace``.
-            namespace: Namespace of options.
-
-        Returns:
-            Tuple of options and total length of options.
-
-        Raises:
-            ProtocolError: If an option's code is a name, a :obj:`bool`, or a
-                code the 16-bit option code field cannot carry
-                (:issue:`2594`), or if an option given as raw octets is
-                shorter than that field (:issue:`2723`).
-
-        """
-        # an option area kept as captured is written back verbatim
-        if isinstance(options, bytes):
-            return [options], len(options)
-
-        has_endofopt = False
-        total_length = 0
-        if isinstance(options, list):
-            options_list = []  # type: list[Schema_Option | bytes]
-            for schema in options:
-                if isinstance(schema, bytes):
-                    # NOTE: Octets short of the code field would read as code 0
-                    # and be taken for an opt_endofopt (#2723).
-                    if len(schema) < 2:
-                        raise ProtocolError(f'PCAP-NG: invalid option: {schema!r} holds no whole option code')
-                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
-                                               namespace=namespace)
-                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
-                        has_endofopt = True
-                        continue
-
-                    data = schema  # type: Schema_Option | bytes
-                    data_len = len(data)
-                elif isinstance(schema, Schema):
-                    code = schema.type
-                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
-                        has_endofopt = True
-                        continue
-
-                    data = schema
-                    data_len = len(schema.pack())
-                else:
-                    kind, args = cast('tuple[Enum_OptionType | int, dict[str, Any]]', schema)
-                    # NOTE: a member is a str, which ``_make_index`` refuses, and a code is
-                    # resolved in the block's namespace, as a raw option's is.
-                    code = kind if isinstance(kind, Enum_OptionType) else Enum_OptionType.get(
-                        self._make_uint(kind, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
-                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
-                        has_endofopt = True
-                        continue
-
-                    name = self._lookup_registry(self.__option__, _option_key(code))
-                    if isinstance(name, str):
-                        meth_name = f'_make_option_{name}'
-                        meth = cast('OptionConstructor',
-                                    getattr(self, meth_name, self._make_option_unknown))
-                    else:
-                        meth = name[1]
-
-                    data = self._make_padding(meth(code, **args), args)
-                    data_len = len(data.pack())
-
-                options_list.append(data)
-                total_length += data_len
-                self._opt[code] += 1
-
-            if has_endofopt:
-                opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
-                total_length += len(opt_endofopt.pack())
-                options_list.append(opt_endofopt)
-            return options_list, total_length
-
-        options_list = []
-        for key, option in options.items(multi=True):
-            code = key if isinstance(key, Enum_OptionType) else Enum_OptionType.get(
-                self._make_uint(key, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
-            if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
-                has_endofopt = True
-                continue
-
-            name = self._lookup_registry(self.__option__, _option_key(code))
-            if isinstance(name, str):
-                meth_name = f'_make_option_{name}'
-                meth = cast('OptionConstructor',
-                            getattr(self, meth_name, self._make_option_unknown))
-            else:
-                meth = name[1]
-
-            data = self._make_padding(meth(code, option), option)
-            data_len = len(data.pack())
-
-            options_list.append(data)
-            total_length += data_len
-            self._opt[code] += 1
-
-        if has_endofopt:
-            opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
-            total_length += len(opt_endofopt.pack())
-            options_list.append(opt_endofopt)
-        return options_list, total_length
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
+        )
 
     def _make_option_unknown(self, type: 'Enum_OptionType', option: 'Optional[Data_UnknownOption]' = None, *,
                              data: 'bytes' = b'',
@@ -6629,105 +5863,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data=hash,
         )
 
-    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType | int, dict[str, Any]] | bytes] | bytes') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':  # pylint: disable=line-too-long
-        """Make name resolution records for PCAP-NG.
-
-        Args:
-            records: PCAP-NG name resolution records.
-
-        Returns:
-            Tuple of name resolution records and total length of the records.
-
-        Raises:
-            ProtocolError: If a record's type is a name, a :obj:`bool`, or a
-                code the 16-bit record type field cannot carry
-                (:issue:`2594`), or if a record given as raw octets is shorter
-                than that field (:issue:`2723`).
-
-        """
-        # a record area kept as captured is written back verbatim
-        if isinstance(records, bytes):
-            return [records], len(records)
-
-        has_record_end = False
-        total_length = 0
-        if isinstance(records, list):
-            records_list = []  # type: list[Schema_NameResolutionRecord | bytes]
-            for schema in records:
-                if isinstance(schema, bytes):
-                    # NOTE: Octets short of the type field would read as type 0
-                    # and be taken for an nrb_record_end (#2723).
-                    if len(schema) < 2:
-                        raise ProtocolError(f'PCAP-NG: invalid record: {schema!r} holds no whole record type')
-                    code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
-                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
-                        has_record_end = True
-                        continue
-
-                    data = schema  # type: Schema_NameResolutionRecord | bytes
-                    data_len = len(data)
-                elif isinstance(schema, Schema):
-                    code = schema.type
-                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
-                        has_record_end = True
-                        continue
-
-                    data = schema
-                    data_len = len(schema.pack())
-                else:
-                    kind, args = cast('tuple[Enum_RecordType | int, dict[str, Any]]', schema)
-                    code = self._make_index(kind, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
-                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
-                        has_record_end = True
-                        continue
-
-                    name = self._lookup_registry(self.__record__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_record_{name}'
-                        meth = cast('RecordConstructor',
-                                    getattr(self, meth_name, self._make_record_unknown))
-                    else:
-                        meth = name[1]
-
-                    data = self._make_padding(meth(code, **args), args)
-                    data_len = len(data.pack())
-
-                records_list.append(data)
-                total_length += data_len
-
-            if has_record_end:
-                nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
-                total_length += len(nrb_record_end.pack())
-                records_list.append(nrb_record_end)
-            return records_list, total_length
-
-        records_list = []
-        for key, record in records.items(multi=True):
-            code = self._make_index(key, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
-            if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
-                has_record_end = True
-                continue
-
-            name = self._lookup_registry(self.__record__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_record_{name}'
-                meth = cast('RecordConstructor',
-                            getattr(self, meth_name, self._make_record_unknown))
-            else:
-                meth = name[1]
-
-            data = self._make_padding(meth(code, record), record)
-            data_len = len(data.pack())
-
-            records_list.append(data)
-            total_length += data_len
-
-        if has_record_end:
-            nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
-            total_length += len(nrb_record_end.pack())
-            records_list.append(nrb_record_end)
-        return records_list, total_length
-
     def _make_record_unknown(self, type: 'Enum_RecordType', record: 'Optional[Data_UnknownRecord]' = None, *,
                              data: 'bytes' = b'',
                              **kwargs: 'Any') -> 'Schema_UnknownRecord':
@@ -6956,57 +6091,6 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data=''.join(lines),
         )
 
-    def _make_secrets_zigbee_nwk(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeNWKKey]' = None, *,
-                                 nwk_key: 'bytes' = bytes(16),
-                                 pan_id: 'int' = 0,
-                                 data: 'Optional[bytes]' = None,
-                                 **kwargs: 'Any') -> 'Schema_ZigBeeNWKKey':
-        """Make PCAP-NG ZigBee NWK Key secrets.
-
-        Args:
-            type: Secrets type.
-            secrets: Secrets data model. The Secrets Data octets it was parsed
-                from, if any, are written back verbatim, so that a key shorter
-                or longer than its fixed width rebuilds as captured
-                (:issue:`1986`); otherwise its fields are. On a parsed model
-                the octets win, so an edit to its fields alone is silently
-                ignored.
-            nwk_key: NWK key, 16 octets.
-            pan_id: PAN ID.
-            data: Secrets Data octets, written back verbatim in place of
-                ``nwk_key`` and ``pan_id``, as the octets of ``secrets`` are.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed secrets schema.
-
-        Raises:
-            ProtocolError: If ``nwk_key`` is not 16 octets.
-
-        .. versionchanged:: 1.6.0
-
-           * Takes the Secrets Data octets as ``data``, so that the :obj:`dict`
-             of a parsed model rebuilds the key as captured, as the model itself
-             does, rather than as its zero-filled fields (:issue:`2698`).
-           * ``nwk_key`` of any other width, empty included, raises
-             :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than
-             being padded or cut to the 16-octet key, and defaults to 16 zero
-             octets where it defaulted to empty (:issue:`2676`).
-
-        """
-        if secrets is not None:
-            data = secrets.get('data')
-        if isinstance(data, bytes):
-            return zigbee_key_held(Schema_ZigBeeNWKKey, data)
-        if secrets is not None:
-            nwk_key = secrets.nwk_key
-            pan_id = secrets.pan_id
-
-        return Schema_ZigBeeNWKKey(
-            key=self._make_octets(nwk_key, size=16, name='[ZigBee NWK Key] key', alias='PCAP-NG'),
-            panid=pan_id,
-        )
-
     def _make_secrets_zigbee_aps(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeAPSKey]' = None, *,
                                  aps_key: 'bytes' = bytes(16),
                                  pan_id: 'int' = 0,
@@ -7058,3 +6142,919 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             addr_high=short_address >> 16,
             addr_low=short_address & 0xFFFF,
         )
+
+    def _make_secrets_zigbee_nwk(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeNWKKey]' = None, *,
+                                 nwk_key: 'bytes' = bytes(16),
+                                 pan_id: 'int' = 0,
+                                 data: 'Optional[bytes]' = None,
+                                 **kwargs: 'Any') -> 'Schema_ZigBeeNWKKey':
+        """Make PCAP-NG ZigBee NWK Key secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model. The Secrets Data octets it was parsed
+                from, if any, are written back verbatim, so that a key shorter
+                or longer than its fixed width rebuilds as captured
+                (:issue:`1986`); otherwise its fields are. On a parsed model
+                the octets win, so an edit to its fields alone is silently
+                ignored.
+            nwk_key: NWK key, 16 octets.
+            pan_id: PAN ID.
+            data: Secrets Data octets, written back verbatim in place of
+                ``nwk_key`` and ``pan_id``, as the octets of ``secrets`` are.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        Raises:
+            ProtocolError: If ``nwk_key`` is not 16 octets.
+
+        .. versionchanged:: 1.6.0
+
+           * Takes the Secrets Data octets as ``data``, so that the :obj:`dict`
+             of a parsed model rebuilds the key as captured, as the model itself
+             does, rather than as its zero-filled fields (:issue:`2698`).
+           * ``nwk_key`` of any other width, empty included, raises
+             :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than
+             being padded or cut to the 16-octet key, and defaults to 16 zero
+             octets where it defaulted to empty (:issue:`2676`).
+
+        """
+        if secrets is not None:
+            data = secrets.get('data')
+        if isinstance(data, bytes):
+            return zigbee_key_held(Schema_ZigBeeNWKKey, data)
+        if secrets is not None:
+            nwk_key = secrets.nwk_key
+            pan_id = secrets.pan_id
+
+        return Schema_ZigBeeNWKKey(
+            key=self._make_octets(nwk_key, size=16, name='[ZigBee NWK Key] key', alias='PCAP-NG'),
+            panid=pan_id,
+        )
+
+    def _check_block_floor(self, length: 'Optional[int]') -> 'None':
+        """Reject a tail too short to hold any block at all.
+
+        Args:
+            length: Length of packet data, as the caller declared it, or
+                :obj:`None` to measure what is left in
+                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+
+        Raises:
+            StreamEOFError: If fewer than twelve octets are left to read.
+
+        A PCAP-NG block is twelve octets at its smallest -- Block Type, Block
+        Total Length and the trailing copy of it, over an empty body -- which is
+        what :meth:`__length_hint__` reports. A tail shorter than that is not a
+        block, so parsing one out of it can only invent fields from
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`'s
+        zero padding, and once the four octets of :attr:`PCAPNG.type
+        <pcapkit.protocols.misc.pcapng.schema.PCAPNG.type>` have been padded out
+        of nothing ``__length__`` is negative -- which
+        :func:`~pcapkit.protocols.misc.pcapng.schema.pcapng_block_selector` hands
+        to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where
+        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of :issue:`678`.
+
+        Reporting the end of the stream instead is what keeps the :issue:`431` accommodation:
+        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an
+        :exc:`EOFError`, which :meth:`Extractor.record_frames
+        <pcapkit.foundation.extraction.Extractor.record_frames>` already catches
+        to stop with the frames read so far, so -- unlike a refusal inside
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
+        which has no catch point above it and would abort the whole extraction --
+        this costs no frame that was actually in the file. It is the same signal
+        :func:`~pcapkit.corekit.decorators.prepare` raises for a *derived*
+        remainder of exactly zero; a remainder of one, two or three octets
+        passes that check and is caught here instead.
+
+        Note:
+            This runs on both of :meth:`unpack`'s paths. On the parsing path the
+            tail is what the file has left to read; on the construction path it is
+            the octets of a block handed to :meth:`make` as raw :obj:`bytes`, which
+            :meth:`unpack` parses off the buffer :meth:`pack` has just filled
+            (:issue:`2354`) -- a caller's octets are no more trustworthy than a
+            file's. Octets too short for this floor are therefore refused here
+            rather than by :meth:`read`'s own Block Total Length check, which sees
+            only what gets past the floor and so names an impossible *declared*
+            length, never a tail too short to declare one.
+
+            Measuring an undeclared length needs the stream to seek, and nothing
+            guards that here because :meth:`__post_init__` has already called
+            :meth:`~io.IOBase.tell` on it to record ``_seek_set``: a stream that
+            could not seek never reaches this method.
+
+        """
+        if length is None:
+            current = self._file.tell()
+            length = self._file.seek(0, io.SEEK_END) - current
+            self._file.seek(current, io.SEEK_SET)
+
+        if length < GENERIC_BLOCK_MINIMUM:
+            raise StreamEOFError(f'PCAP-NG: block truncated: {length} octet(s) left, '
+                                 f'fewer than the {GENERIC_BLOCK_MINIMUM} a block needs', quiet=True)
+
+    def _get_payload(self) -> 'bytes':
+        """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.
+
+        Returns:
+            Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>` as :obj:`bytes`.
+
+        See Also:
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
+
+        Note:
+            A packet block kept as captured has no payload (see
+            :meth:`_read_block_short`).
+
+        """
+        if isinstance(self.__header__.block, Schema_UnknownBlock):
+            return b''
+        return self.__header__.block.get_payload()
+
+    @staticmethod
+    def _get_payload_name(block: 'Schema_BlockType | bytes') -> 'Optional[str]':
+        """Get the name of the field carrying a block's captured packet octets.
+
+        Args:
+            block: Parsed block schema.
+
+        Returns:
+            The name of the block schema's payload field, or :obj:`None` when the
+            block declares none -- which is every block type outside
+            :attr:`PACKET_TYPES <PCAPNG.PACKET_TYPES>`, and also a block whose
+            body was handed over as raw :obj:`bytes` at construction time rather
+            than as a schema.
+
+        """
+        name = getattr(block, '__payload__', None)
+        if name is None or name not in getattr(block, '__fields__', {}):
+            return None
+        return name
+
+    @staticmethod
+    def _get_local_timezone() -> 'timezone':
+        """Get local timezone.
+
+        Warning:
+            Not used when reconstructing a block timestamp, and must not be:
+            a PCAP-NG timestamp is an offset from the UNIX epoch, so mixing the
+            *reading* host's zone into it makes one file parse to different
+            instants on different machines.
+            :meth:`self._get_timezone <_get_timezone>` returns
+            :attr:`datetime.timezone.utc` instead when the capture names no
+            ``if_tzone``.
+
+            It also answers for *today* rather than for the capture's own
+            instant -- ``America/New_York`` reports ``-04:00`` all year, so a
+            December timestamp would get EDT's offset and not EST's -- which is
+            a second reason it cannot stand in for a capture's timezone.
+
+        """
+        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        if tzinfo is None:
+            return datetime.timezone.utc
+        return cast('timezone', tzinfo)
+
+    def _get_interface(self, interface_id: 'int') -> 'Data_InterfaceDescriptionBlock':
+        """Interface description that ``interface_id`` names.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Interface Description Block (IDB) of the current section that
+            ``interface_id`` identifies.
+
+        Raises:
+            FormatError: If the current section describes no such interface.
+
+        Note:
+            The PCAP-NG specification requires a block's interface ID to name an
+            Interface Description Block of the block's own section, so an ID that
+            names none is a malformed file rather than a programming error --
+            hence :exc:`~pcapkit.utilities.exceptions.FormatError` rather than
+            the bare :exc:`IndexError` that indexing the list would raise.
+
+        """
+        interfaces = self._ctx.interfaces
+        if not 0 <= interface_id < len(interfaces):
+            tag = self.INTERFACE_ID_BLOCK_TAGS.get(self._type, f'Block {self._type}')
+            raise FormatError(f'PCAP-NG: [{tag}] invalid interface ID: {interface_id}')
+        return interfaces[interface_id]
+
+    def _get_resolution(self, interface_id: 'int' = 0) -> 'int':
+        """Timestamp resolution of the current block, in units per second.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timestamp resolution of the current block, in units per second.
+
+        """
+        if self._ctx is None:
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return DEFAULT_RESOLUTION
+
+        options = self._get_interface(interface_id).options
+        tsresol = cast('Optional[Data_IF_TSResolOption]',
+                       options.get(Enum_OptionType.if_tsresol))
+        if tsresol is None:
+            return DEFAULT_RESOLUTION
+        return tsresol.resolution
+
+    def _get_offset(self, interface_id: 'int' = 0) -> 'int':
+        """Timestamp offset of the current block, in seconds.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timestamp offset of the current block, in seconds.
+
+        """
+        if self._ctx is None:
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_offset'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return 0
+
+        options = self._get_interface(interface_id).options
+        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
+                        options.get(Enum_OptionType.if_tsoffset))
+        if tsoffset is None:
+            return 0
+        return tsoffset.offset
+
+    def _get_timezone(self, interface_id: 'int' = 0) -> 'timezone':
+        """Timezone of the current block.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timezone of the current block.
+
+        """
+        # NOTE: UTC, not the host's timezone, is the default in both branches
+        # below. A capture carries no timezone of its own unless it says so, and
+        # draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,
+        # defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC
+        # with no timezone term at all, so substituting the *reading* machine's
+        # zone would make the same file parse to different instants on different
+        # hosts. ``_get_resolution``
+        # and ``_get_offset`` fall back to the format's own defaults in this
+        # situation; this is the matching one.
+        if self._ctx is None:
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return datetime.timezone.utc
+
+        options = self._get_interface(interface_id).options
+        tzone = cast('Optional[Data_IF_TZoneOption]',
+                     options.get(Enum_OptionType.if_tzone))
+        # an ``if_tzone`` kept as captured (a :class:`~datetime.timedelta` of 24
+        # hours or more) names no zone a datetime can be rendered in
+        if tzone is None or not isinstance(tzone.timezone, datetime.timezone):
+            return datetime.timezone.utc
+        return tzone.timezone
+
+    def _get_linktype(self, interface_id: 'int' = 0) -> 'Enum_LinkType':
+        """Data link layer protocol type.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Data link layer protocol type.
+
+        Raises:
+            UnsupportedCall: If current block is not a valid packet block, i.e.,
+                EPB, SPB or obsolete Packet Block.
+
+        """
+        if self._ctx is None or self._type not in self.PACKET_TYPES:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_linktype'")
+        return self._get_interface(interface_id).linktype
+
+    def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int', *,
+                        interface_id: 'int' = 0) -> 'tuple[dt_type, Decimal]':
+        """Read timestamp.
+
+        Args:
+            timestamp_high: Higher 32-bit integer value of timestamp.
+            timestamp_low: Lower 32-bit integer value of timestamp.
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Tuple of timestamp in :class:`~datetime.datetime` object with
+            timezone information and :class:`decimal.Decimal` object since
+            UNIX-Epoch in UTC timezone.
+
+        """
+        tzone = self._get_timezone(interface_id)
+
+        timestamp_raw = (timestamp_high << 32) | timestamp_low
+        with localcontext(prec=64):
+            # NOTE: This is the UTC epoch the docstring above promises, with no
+            # ``tzone.utcoffset(None)`` added. The block
+            # timestamp is an offset from the UNIX epoch, so it is
+            # timezone-independent by definition (draft-ietf-opsawg-pcapng-02
+            # section 4.3, Enhanced Packet Block, spells out the arithmetic and
+            # has no timezone term), and the same draft's section 4.2, Interface
+            # Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"
+            # and of ``if_tsoffset`` that it is "not intended to be used as an
+            # offset between local time and UTC". A shifted epoch would also
+            # contradict ``ts_datetime`` below, which is built from the
+            # unshifted value.
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
+                self._get_offset(interface_id)
+
+        ts_ratio = timestamp_epoch.as_integer_ratio()
+        try:
+            # NOTE: ``tzone`` survives only here, as the zone the instant is
+            # *rendered* in -- which is all a ``tzinfo`` can affect on an aware
+            # datetime. It never moves the instant itself. Not the stdlib's
+            # ``fromtimestamp``, whose range is the C library's: Windows' takes
+            # nothing before 1970 or after 3000 (#2099).
+            ts_datetime = fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
+        # an epoch past what ``datetime`` or a 64-bit ``time_t`` holds, e.g.
+        # from an extreme ``if_tsoffset``, raises one of these
+        except (ValueError, OverflowError, OSError):
+            warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
+                 ProtocolWarning, stacklevel=stacklevel())
+            ts_datetime = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
+
+        return (ts_datetime, timestamp_epoch)
+
+    @staticmethod
+    def _block_area(block: 'Data_PCAPNG', name: 'str') -> 'Any':
+        """Option or record area of a parsed block, for its ``make``.
+
+        Args:
+            block: Block data model.
+            name: ``'options'`` or ``'records'``.
+
+        Returns:
+            The area's octets if :meth:`read` kept it as captured, as
+            ``<name>_raw``; otherwise the parsed ``<name>``.
+
+        """
+        return getattr(block, f'{name}_raw', getattr(block, name))
+
+    @staticmethod
+    def _read_padding(schema: 'Schema', data: 'Any', name: 'str' = 'padding',
+                      key: 'Optional[str]' = None, *, nonzero: 'bool' = True) -> 'None':
+        """Keep a padding field of a parsed schema on its data model.
+
+        Args:
+            schema: Parsed block, option or record schema.
+            data: Its data model, updated in place.
+            name: Name of the padding field on ``schema``.
+            key: Name to keep it as on ``data``; defaults to ``name``.
+            nonzero: Keep the octets only when they are not all zeros -- the
+                form a fresh build writes -- rather than whenever there are any.
+
+        The octets are kept as ``key`` only when there is something a rebuild
+        would otherwise lose, so the data model of well-formed input gains no
+        key (:issue:`1437`). :meth:`_make_padding` writes them back.
+
+        """
+        padding = schema.__dict__.get(name)
+        if isinstance(padding, bytes) and (any(padding) if nonzero else padding):
+            data.__update__([(key or name, padding)])
+
+    @staticmethod
+    def _make_padding(schema: '_S', source: 'Any', name: 'str' = 'padding',
+                      key: 'Optional[str]' = None) -> '_S':
+        """Write the padding octets :meth:`_read_padding` kept back onto a schema.
+
+        Args:
+            schema: Constructed block, option or record schema, updated in place.
+            source: Data model or keyword arguments it was made from, if any.
+            name: Name of the padding field on ``schema``.
+            key: Name the octets are kept as on ``source``; defaults to ``name``.
+
+        Returns:
+            The ``schema`` given. Without kept octets its padding stays zeros.
+
+        """
+        if source is None or isinstance(schema, bytes):
+            return schema
+        padding = source.get(key or name)
+        if isinstance(padding, (bytes, bytearray)) and name in schema.__fields__:
+            setattr(schema, name, bytes(padding))
+        return schema
+
+    def _make_options_trailer(self, block: 'Optional[Data_PCAPNG]',
+                              options: 'list[Schema_Option | bytes]') -> 'int':
+        """Append the octets a parsed block held past its ``opt_endofopt``.
+
+        Args:
+            block: Block data model, if any.
+            options: Constructed options, extended in place.
+
+        Returns:
+            Number of octets appended.
+
+        An option area ends at its ``opt_endofopt`` and the octets after it are
+        read as padding. :meth:`_read_padding` keeps them as ``padding_opts``,
+        and they are written back after the options, verbatim (:issue:`1437`).
+
+        """
+        trailer = block.get('padding_opts') if block is not None else None
+        if not isinstance(trailer, bytes) or not trailer:
+            return 0
+        options.append(trailer)
+        return len(trailer)
+
+    @classmethod
+    def _make_packet_data(cls, block: 'Data_PCAPNG') -> 'bytes | ProtocolBase':
+        """Create the packet data of an EPB, SPB or PB from its data model.
+
+        Args:
+            block: Block data model.
+
+        Returns:
+            The captured packet octets the block was parsed from, as
+            :attr:`~pcapkit.protocols.data.Protocol.packet` holds them,
+            cut to the block's ``captured_len``; or, for a data model that
+            carries none, the payload rebuilt from its decoded next layer.
+
+        Note:
+            The cut is what keeps a block with ``captured_len`` of zero intact:
+            its ``packet`` can hold octets past the payload (:issue:`1275`), and
+            writing those back would grow the block.
+
+            The fallback is lossy. A next layer rebuilt from its own data model
+            drops anything it did not decode, such as Ethernet pad octets, so
+            the block it yields can be shorter than its ``captured_len`` says.
+
+        """
+        packet = block.get('packet')
+        if isinstance(packet, bytes):
+            return packet[:block.captured_len]
+        return cls._make_payload(block)
+
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, *,
+                        interface_id: 'int' = 0) -> 'tuple[int, int]':
+        """Make timestamp.
+
+        Args:
+            timestamp: Timestamp in seconds since UNIX-Epoch, in UTC, i.e. as
+                :meth:`self._read_timestamp <_read_timestamp>` returns it.
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Tuple of timestamp in higher and lower 32-bit integer value,
+            scaled by the interface's ``if_tsresol`` and shifted by its
+            ``if_tsoffset``.
+
+        Notes:
+            No timezone conversion happens here, and none should: the field this
+            builds is defined as an offset from the UNIX epoch, and the read
+            side applies no timezone shift for it to mirror.
+
+            Which clock a defaulted ``timestamp`` is read to follows the
+            resolution of the interface ``interface_id`` names, not
+            :attr:`self.nanosecond <nanosecond>`. That property resolves its
+            interface through the parsed data model, which a block being made
+            has not got, so reading it here would make a ``make`` that names
+            no ``timestamp`` -- of an Enhanced Packet Block, an obsolete
+            Packet Block or an Interface Statistics Block -- raise
+            :exc:`AttributeError` on ``_info`` (:issue:`2362`).
+
+        .. versionchanged:: 1.5.0
+
+           A defaulted ``timestamp`` no longer reads
+           :attr:`self.nanosecond <nanosecond>`, so it no longer requires a
+           parsed data model (:issue:`2362`).
+
+        """
+        with localcontext(prec=64):
+            resolution = self._get_resolution(interface_id)
+            if timestamp is None:
+                if resolution > RESOLUTION[False]:
+                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+                else:
+                    timestamp = decimal.Decimal(time.time())
+            else:
+                if isinstance(timestamp, datetime.datetime):
+                    timestamp = totimestamp(timestamp)
+                timestamp = decimal.Decimal(timestamp)
+
+            ts_info = int(
+                (timestamp - self._get_offset(interface_id)) * resolution
+            )
+        return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
+
+    def _make_mac_addr(self, addr: 'str | bytes | bytearray', *, size: 'Optional[int]' = 6,
+                       name: 'str' = 'MAC address', alias: 'Optional[str]' = None) -> 'bytes':
+        """Make a MAC address, or an EUI-64 one with ``size=8``.
+
+        Args:
+            addr: MAC or EUI address.
+            size: Octets in the address, as for :meth:`Protocol._make_mac_addr
+                <pcapkit.protocols.protocol.Protocol._make_mac_addr>`.
+            name: Name of the address, for the error message.
+            alias: Prefix of the error message, ``'PCAP-NG'`` by default.
+
+        Returns:
+            The address packed as ``size`` octets, 6 by default.
+
+        Raises:
+            ProtocolError: If ``addr`` is not a :class:`str`, :class:`bytes`
+                or :class:`bytearray` (a :obj:`bool` included), or is not a
+                ``:``- or ``-``-separated *hex* encoded address of ``size``
+                octets.
+
+        """
+        prefix = 'PCAP-NG' if alias is None else alias
+        return super()._make_mac_addr(addr, size=size, name=name, alias=prefix)
+
+    def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ
+        r"""Decode next layer protocol.
+
+        Arguments:
+            dict\_: info buffer
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Current protocol with packet extracted.
+
+        Notes:
+            We added a new key ``__next_type__`` to ``dict_`` to store the
+            next layer protocol type, and a new key ``__next_name__`` to
+            store the next layer protocol name. :meth:`Info.to_dict
+            <pcapkit.corekit.infoclass.Info.to_dict>` carries both, and the
+            dumpers leave them out.
+
+            We also added a new key ``protocols`` to ``dict_`` to store the
+            protocol chain of the current packet (frame).
+
+            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so
+            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).
+
+        """
+        proto = self._dispatch_linktype(proto, length)
+        next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
+        info, chain = next_.info, next_.protochain
+
+        # make next layer protocol name
+        layer = next_.info_name
+        # proto = next_.__class__.__name__
+
+        # write info and protocol chain into dict
+        dict_.__update__({
+            layer: info,
+            'protocols': chain.chain if chain else '',
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
+        self._next = next_  # pylint: disable=attribute-defined-outside-init
+        self._protos = chain  # pylint: disable=attribute-defined-outside-init
+        return dict_
+
+    def _dispatch_linktype(self, proto: 'Optional[int]', length: 'Optional[int]' = None) -> 'Optional[int]':
+        """Link type a packet block's data is dispatched under.
+
+        Arguments:
+            proto: link type of the interface the block was captured on
+            length: valid (*non-padding*) length
+
+        Returns:
+            For :attr:`LinkType.RAW <pcapkit.const.reg.linktype.LinkType.RAW>`
+            data whose first octet carries IP version 4 or 6,
+            :attr:`LinkType.IPV4 <pcapkit.const.reg.linktype.LinkType.IPV4>` or
+            :attr:`LinkType.IPV6 <pcapkit.const.reg.linktype.LinkType.IPV6>`;
+            otherwise ``proto``.
+
+        Note:
+            As :meth:`Frame._dispatch_linktype
+            <pcapkit.protocols.misc.pcap.frame.protocol.Frame._dispatch_linktype>` does
+            for PCAP: ``LINKTYPE_RAW`` (101) data is IPv4 or IPv6 by its version
+            nibble, an entry registered under ``RAW`` itself is used as it
+            stands, and data of any other version is kept as
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`1502`).
+
+        """
+        if proto != Enum_LinkType.RAW or Enum_LinkType.RAW in self.__proto__:
+            return proto
+        data = self._get_payload()[:length]
+        version = data[0] >> 4 if data else None
+        if version == 4:
+            return Enum_LinkType.IPV4
+        if version == 6:
+            return Enum_LinkType.IPV6
+        return proto
+
+    def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
+        """Read PCAP-NG options.
+
+        Structure of PCAP-NG option:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      Option Code              |         Option Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                       Option Value                            /
+           /              variable length, padded to 32 bits               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                                               /
+           /                 . . . other options . . .                     /
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Option Code == opt_endofopt |   Option Length == 0          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            options_schema: Parsed PCAP-NG options.
+
+        Returns:
+            Parsed PCAP-NG options data.
+
+        """
+        options = OrderedMultiDict()  # type: Option
+
+        # an area kept as captured holds no options to read
+        if any(isinstance(schema, bytes) for schema in options_schema):
+            return options
+
+        for schema in options_schema:
+            type = schema.type
+            name = self._lookup_registry(self.__option__, _option_key(type))
+
+            if isinstance(name, str):
+                meth_name = f'_read_option_{name}'
+                meth = cast('OptionParser',
+                            getattr(self, meth_name, self._read_option_unknown))
+            else:
+                meth = name[0]
+            data = meth(schema, options=options)
+            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
+            self._read_padding(schema, data)
+
+            # record option data
+            options.add(type, data)
+            self._opt[type] += 1
+
+            # break when ``opt_endofopt`` is reached
+            if type == Enum_OptionType.opt_endofopt:
+                break
+
+        return options
+
+    def _read_nrb_records(self, records_schema: 'list[Schema_NameResolutionRecord]') -> 'Record':
+        """Read PCAP-NG name resolution records.
+
+        Args:
+            records_schema: Parsed name resolution records.
+
+        Returns:
+            Parsed PCAP-NG name resolution records data.
+
+        """
+        records = OrderedMultiDict()  # type: Record
+
+        # an area kept as captured holds no records to read
+        if any(isinstance(schema, bytes) for schema in records_schema):
+            return records
+
+        for schema in records_schema:
+            type = schema.type
+            name = self._lookup_registry(self.__record__, type)
+
+            if isinstance(name, str):
+                meth_name = f'_read_record_{name}'
+                meth = cast('RecordParser',
+                            getattr(self, meth_name, self._read_record_unknown))
+            else:
+                meth = name[0]
+            data = meth(schema, records=records)
+            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
+            self._read_padding(schema, data)
+
+            # record name resolution record data
+            records.add(type, data)
+
+            # break when ``nrb_record_end`` is reached
+            if type == Enum_RecordType.nrb_record_end:
+                break
+
+        return records
+
+    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType | int, dict[str, Any]] | bytes] | bytes',  # pylint: disable=line-too-long
+                             namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for PCAP-NG.
+
+        Args:
+            options: PCAP-NG options. An option's code is a member, kept as
+                given, or an :class:`int`, resolved in ``namespace``.
+            namespace: Namespace of options.
+
+        Returns:
+            Tuple of options and total length of options.
+
+        Raises:
+            ProtocolError: If an option's code is a name, a :obj:`bool`, or a
+                code the 16-bit option code field cannot carry
+                (:issue:`2594`), or if an option given as raw octets is
+                shorter than that field (:issue:`2723`).
+
+        """
+        # an option area kept as captured is written back verbatim
+        if isinstance(options, bytes):
+            return [options], len(options)
+
+        has_endofopt = False
+        total_length = 0
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    # NOTE: Octets short of the code field would read as code 0
+                    # and be taken for an opt_endofopt (#2723).
+                    if len(schema) < 2:
+                        raise ProtocolError(f'PCAP-NG: invalid option: {schema!r} holds no whole option code')
+                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
+                                               namespace=namespace)
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
+                        has_endofopt = True
+                        continue
+
+                    data = schema  # type: Schema_Option | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
+                        has_endofopt = True
+                        continue
+
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    kind, args = cast('tuple[Enum_OptionType | int, dict[str, Any]]', schema)
+                    # NOTE: a member is a str, which ``_make_index`` refuses, and a code is
+                    # resolved in the block's namespace, as a raw option's is.
+                    code = kind if isinstance(kind, Enum_OptionType) else Enum_OptionType.get(
+                        self._make_uint(kind, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
+                        has_endofopt = True
+                        continue
+
+                    name = self._lookup_registry(self.__option__, _option_key(code))
+                    if isinstance(name, str):
+                        meth_name = f'_make_option_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_option_unknown))
+                    else:
+                        meth = name[1]
+
+                    data = self._make_padding(meth(code, **args), args)
+                    data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+                self._opt[code] += 1
+
+            if has_endofopt:
+                opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
+                total_length += len(opt_endofopt.pack())
+                options_list.append(opt_endofopt)
+            return options_list, total_length
+
+        options_list = []
+        for key, option in options.items(multi=True):
+            code = key if isinstance(key, Enum_OptionType) else Enum_OptionType.get(
+                self._make_uint(key, bits=16, name='option code', alias='PCAP-NG'), namespace=namespace)
+            if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
+                has_endofopt = True
+                continue
+
+            name = self._lookup_registry(self.__option__, _option_key(code))
+            if isinstance(name, str):
+                meth_name = f'_make_option_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_option_unknown))
+            else:
+                meth = name[1]
+
+            data = self._make_padding(meth(code, option), option)
+            data_len = len(data.pack())
+
+            options_list.append(data)
+            total_length += data_len
+            self._opt[code] += 1
+
+        if has_endofopt:
+            opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
+            total_length += len(opt_endofopt.pack())
+            options_list.append(opt_endofopt)
+        return options_list, total_length
+
+    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType | int, dict[str, Any]] | bytes] | bytes') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':  # pylint: disable=line-too-long
+        """Make name resolution records for PCAP-NG.
+
+        Args:
+            records: PCAP-NG name resolution records.
+
+        Returns:
+            Tuple of name resolution records and total length of the records.
+
+        Raises:
+            ProtocolError: If a record's type is a name, a :obj:`bool`, or a
+                code the 16-bit record type field cannot carry
+                (:issue:`2594`), or if a record given as raw octets is shorter
+                than that field (:issue:`2723`).
+
+        """
+        # a record area kept as captured is written back verbatim
+        if isinstance(records, bytes):
+            return [records], len(records)
+
+        has_record_end = False
+        total_length = 0
+        if isinstance(records, list):
+            records_list = []  # type: list[Schema_NameResolutionRecord | bytes]
+            for schema in records:
+                if isinstance(schema, bytes):
+                    # NOTE: Octets short of the type field would read as type 0
+                    # and be taken for an nrb_record_end (#2723).
+                    if len(schema) < 2:
+                        raise ProtocolError(f'PCAP-NG: invalid record: {schema!r} holds no whole record type')
+                    code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
+                        has_record_end = True
+                        continue
+
+                    data = schema  # type: Schema_NameResolutionRecord | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
+                        has_record_end = True
+                        continue
+
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    kind, args = cast('tuple[Enum_RecordType | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
+                        has_record_end = True
+                        continue
+
+                    name = self._lookup_registry(self.__record__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_record_{name}'
+                        meth = cast('RecordConstructor',
+                                    getattr(self, meth_name, self._make_record_unknown))
+                    else:
+                        meth = name[1]
+
+                    data = self._make_padding(meth(code, **args), args)
+                    data_len = len(data.pack())
+
+                records_list.append(data)
+                total_length += data_len
+
+            if has_record_end:
+                nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
+                total_length += len(nrb_record_end.pack())
+                records_list.append(nrb_record_end)
+            return records_list, total_length
+
+        records_list = []
+        for key, record in records.items(multi=True):
+            code = self._make_index(key, Enum_RecordType, bits=16, name='record type', alias='PCAP-NG')
+            if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
+                has_record_end = True
+                continue
+
+            name = self._lookup_registry(self.__record__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_record_{name}'
+                meth = cast('RecordConstructor',
+                            getattr(self, meth_name, self._make_record_unknown))
+            else:
+                meth = name[1]
+
+            data = self._make_padding(meth(code, record), record)
+            data_len = len(data.pack())
+
+            records_list.append(data)
+            total_length += data_len
+
+        if has_record_end:
+            nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
+            total_length += len(nrb_record_end.pack())
+            records_list.append(nrb_record_end)
+        return records_list, total_length

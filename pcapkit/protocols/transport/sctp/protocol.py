@@ -992,23 +992,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             'trailer': data.get('trailer', b''),
         }
 
-    def _get_payload(self) -> 'bytes':
-        """Get payload of the packet.
-
-        SCTP has no payload field in its header schema -- user data travels
-        inside DATA chunks -- so this returns the user data of the *first* DATA
-        chunk found by :meth:`self.read <SCTP.read>`, which is also the chunk
-        whose payload protocol identifier selects the next layer. Should the
-        packet carry no DATA chunk, an empty :obj:`bytes` is returned and the
-        next layer resolves to
-        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`.
-
-        Returns:
-            Payload of the packet as :obj:`bytes`.
-
-        """
-        return self._payload
-
     def _read_sctp_chunks(self) -> 'Chunks':
         """Read SCTP chunk list.
 
@@ -1116,246 +1099,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         """
         return ProtocolBase._decode_next_layer(  # pylint: disable=protected-access
             self, dict_, proto, length, packet=packet)  # type: ignore[arg-type]
-
-    def _make_sctp_chunk(self, code: 'Enum_Chunk', chunk: 'Optional[Data_Chunk]' = None,
-                         **kwargs: 'Any') -> 'Schema_Chunk':
-        """Dispatch to the chunk constructor registered for ``code``.
-
-        Args:
-            code: SCTP chunk type.
-            chunk: Chunk data, if constructing from a parsed data model.
-            **kwargs: Arbitrary keyword arguments for the constructor.
-
-        Returns:
-            Constructed chunk schema.
-
-        """
-        name = self._lookup_registry(self.__chunk__, code)
-        if isinstance(name, str):
-            meth_name = f'_make_chunk_{name}'
-            meth = cast('ChunkConstructor',
-                        getattr(self, meth_name, self._make_chunk_donone))
-        else:
-            meth = name[1]
-        return _restore_padding(chunk, meth(code, chunk, **kwargs))
-
-    def _read_sctp_parameters(self, schemas: 'list[Schema_Parameter]') -> 'Parameters':
-        """Read SCTP chunk parameter list.
-
-        Args:
-            schemas: Parsed parameter schemas.
-
-        Returns:
-            Extracted SCTP chunk parameters.
-
-        """
-        parameters = OrderedMultiDict()  # type: Parameters
-
-        for schema in schemas:
-            code = schema.type
-            name = self._lookup_registry(self.__parameter__, code)
-
-            if isinstance(name, str):
-                meth_name = f'_read_param_{name}'
-                meth = cast('ParameterParser',
-                            getattr(self, meth_name, self._read_param_donone))
-            else:
-                meth = name[0]
-            parameters.add(code, _keep_padding(schema, meth(schema, parameters=parameters)))
-        return parameters
-
-    def _make_sctp_parameters(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters') -> 'list[Schema_Parameter | bytes]':  # pylint: disable=line-too-long
-        """Make chunk parameters for SCTP.
-
-        Args:
-            parameters: SCTP chunk parameters.
-
-        Returns:
-            Constructed parameter schemas.
-
-        Raises:
-            ProtocolError: If the type of a parameter, given in a ``(type,
-                kwargs)`` pair or as the key of a container, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if a parameter
-                given as raw octets is empty (:issue:`2723`).
-
-        """
-        parameters_list = []  # type: list[Schema_Parameter | bytes]
-
-        if isinstance(parameters, list):
-            for schema in parameters:
-                if isinstance(schema, bytes) and not schema:
-                    raise ProtocolError(f'{self.alias}: invalid parameter: {schema!r} holds no type field')
-                if isinstance(schema, (bytes, Schema)):
-                    parameters_list.append(schema)
-                else:
-                    kind, args = cast('tuple[Enum_Parameter | int, dict[str, Any]]', schema)
-                    code = self._make_index(kind, Enum_Parameter, bits=16, name='parameter type')
-                    parameters_list.append(self._make_sctp_parameter(code, None, **args))
-            return _last_item_only(parameters_list)
-
-        for key, parameter in parameters.items(multi=True):
-            code = self._make_index(key, Enum_Parameter, bits=16, name='parameter type')
-            parameters_list.append(self._make_sctp_parameter(code, parameter))
-        return _last_item_only(parameters_list)
-
-    def _make_sctp_parameter(self, code: 'Enum_Parameter', parameter: 'Optional[Data_Parameter]' = None,
-                             **kwargs: 'Any') -> 'Schema_Parameter':
-        """Dispatch to the parameter constructor registered for ``code``.
-
-        Args:
-            code: SCTP chunk parameter type.
-            parameter: Parameter data, if constructing from a parsed data model.
-            **kwargs: Arbitrary keyword arguments for the constructor.
-
-        Returns:
-            Constructed parameter schema.
-
-        """
-        name = self._lookup_registry(self.__parameter__, code)
-        if isinstance(name, str):
-            meth_name = f'_make_param_{name}'
-            meth = cast('ParameterConstructor',
-                        getattr(self, meth_name, self._make_param_donone))
-        else:
-            meth = name[1]
-        return _restore_padding(parameter, meth(code, parameter, **kwargs))
-
-    def _read_sctp_causes(self, schemas: 'list[Schema_ErrorCause]') -> 'Causes':
-        """Read SCTP error cause list.
-
-        Args:
-            schemas: Parsed error cause schemas.
-
-        Returns:
-            Extracted SCTP error causes.
-
-        """
-        causes = OrderedMultiDict()  # type: Causes
-
-        for schema in schemas:
-            code = schema.code
-            name = self._lookup_registry(self.__cause__, code)
-
-            if isinstance(name, str):
-                meth_name = f'_read_cause_{name}'
-                meth = cast('CauseParser',
-                            getattr(self, meth_name, self._read_cause_donone))
-            else:
-                meth = name[0]
-            causes.add(code, _keep_padding(schema, meth(schema, causes=causes)))
-        return causes
-
-    def _make_sctp_causes(self, causes: 'list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes') -> 'list[Schema_ErrorCause | bytes]':  # pylint: disable=line-too-long
-        """Make error causes for SCTP.
-
-        Args:
-            causes: SCTP error causes.
-
-        Returns:
-            Constructed error cause schemas.
-
-        Raises:
-            ProtocolError: If the code of an error cause, given in a ``(code,
-                kwargs)`` pair or as the key of a container, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if an error
-                cause given as raw octets is empty (:issue:`2723`).
-
-        """
-        causes_list = []  # type: list[Schema_ErrorCause | bytes]
-
-        if isinstance(causes, list):
-            for schema in causes:
-                if isinstance(schema, bytes) and not schema:
-                    raise ProtocolError(f'{self.alias}: invalid error cause: {schema!r} holds no code field')
-                if isinstance(schema, (bytes, Schema)):
-                    causes_list.append(schema)
-                else:
-                    kind, args = cast('tuple[Enum_CauseCode | int, dict[str, Any]]', schema)
-                    code = self._make_index(kind, Enum_CauseCode, bits=16, name='cause code')
-                    causes_list.append(self._make_sctp_cause(code, None, **args))
-            return _last_item_only(causes_list)
-
-        for key, cause in causes.items(multi=True):
-            code = self._make_index(key, Enum_CauseCode, bits=16, name='cause code')
-            causes_list.append(self._make_sctp_cause(code, cause))
-        return _last_item_only(causes_list)
-
-    def _make_sctp_cause(self, code: 'Enum_CauseCode', cause: 'Optional[Data_ErrorCause]' = None,
-                         **kwargs: 'Any') -> 'Schema_ErrorCause':
-        """Dispatch to the error cause constructor registered for ``code``.
-
-        Args:
-            code: SCTP error cause code.
-            cause: Cause data, if constructing from a parsed data model.
-            **kwargs: Arbitrary keyword arguments for the constructor.
-
-        Returns:
-            Constructed error cause schema.
-
-        """
-        name = self._lookup_registry(self.__cause__, code)
-        if isinstance(name, str):
-            meth_name = f'_make_cause_{name}'
-            meth = cast('CauseConstructor',
-                        getattr(self, meth_name, self._make_cause_donone))
-        else:
-            meth = name[1]
-        return _restore_padding(cause, meth(code, cause, **kwargs))
-
-    def _make_nested_length(self, base: 'int', items: 'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]',  # pylint: disable=line-too-long
-                            declared: 'Optional[int]' = None) -> 'int':
-        """Compute the length of a chunk carrying a nested parameter or error
-        cause list.
-
-        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of
-        every nested item except the last. The RFC also asks receivers to
-        accept a length that counts the last item's padding too, so a parsed
-        chunk declaring that longer form keeps it.
-
-        Args:
-            base: size of the chunk's fixed-length fields, including the
-                four-byte chunk header
-            items: constructed nested items; a raw :obj:`bytes` item is
-                counted as given
-            declared: chunk length declared by the parsed chunk being
-                rebuilt, if any
-
-        Returns:
-            Chunk length.
-
-        """
-        sizes = [len(item) if isinstance(item, bytes) else len(item.pack()) for item in items]
-        padded = base + sum(sizes)
-        if not items or isinstance(items[-1], bytes) or declared == padded:
-            return padded
-        return padded - max(sizes[-1] - items[-1].length, 0)
-
-    def _make_param_types(self, types: 'Optional[list[Enum_Parameter | int]]') -> 'list[Enum_Parameter]':
-        """Resolve a list of parameter types.
-
-        Shared by :meth:`_make_param_addrtypes` and
-        :meth:`_make_cause_missing_param`, whose ``types`` both list
-        parameter types.
-
-        Args:
-            types: parameter types, each given as a
-                :class:`~pcapkit.const.sctp.parameter.Parameter` member or an
-                :obj:`int` code
-
-        Returns:
-            The :class:`~pcapkit.const.sctp.parameter.Parameter` member each
-            item resolves to with ``get``, or the code itself where no member
-            holds it.
-
-        Raises:
-            ProtocolError: If an item is a :obj:`bool` (:issue:`2288`), a name,
-                any other non-:obj:`int`, or a code the 16-bit parameter type
-                field cannot carry (:issue:`2594`).
-
-        """
-        return [self._make_index(item, Enum_Parameter, bits=16, name='parameter type')
-                for item in types or []]
 
     def _read_chunk_donone(self, schema: 'Schema_UnknownChunk', *, chunks: 'Chunks') -> 'Data_UnknownChunk':  # pylint: disable=unused-argument
         """Read SCTP chunk of an unsupported type.
@@ -3955,3 +3698,260 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             length=self._make_uint(len(info) + 4, bits=16, name=f'[Cause {code}] length'),
             info=info,
         )
+
+    def _get_payload(self) -> 'bytes':
+        """Get payload of the packet.
+
+        SCTP has no payload field in its header schema -- user data travels
+        inside DATA chunks -- so this returns the user data of the *first* DATA
+        chunk found by :meth:`self.read <SCTP.read>`, which is also the chunk
+        whose payload protocol identifier selects the next layer. Should the
+        packet carry no DATA chunk, an empty :obj:`bytes` is returned and the
+        next layer resolves to
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`.
+
+        Returns:
+            Payload of the packet as :obj:`bytes`.
+
+        """
+        return self._payload
+
+    def _make_sctp_chunk(self, code: 'Enum_Chunk', chunk: 'Optional[Data_Chunk]' = None,
+                         **kwargs: 'Any') -> 'Schema_Chunk':
+        """Dispatch to the chunk constructor registered for ``code``.
+
+        Args:
+            code: SCTP chunk type.
+            chunk: Chunk data, if constructing from a parsed data model.
+            **kwargs: Arbitrary keyword arguments for the constructor.
+
+        Returns:
+            Constructed chunk schema.
+
+        """
+        name = self._lookup_registry(self.__chunk__, code)
+        if isinstance(name, str):
+            meth_name = f'_make_chunk_{name}'
+            meth = cast('ChunkConstructor',
+                        getattr(self, meth_name, self._make_chunk_donone))
+        else:
+            meth = name[1]
+        return _restore_padding(chunk, meth(code, chunk, **kwargs))
+
+    def _read_sctp_parameters(self, schemas: 'list[Schema_Parameter]') -> 'Parameters':
+        """Read SCTP chunk parameter list.
+
+        Args:
+            schemas: Parsed parameter schemas.
+
+        Returns:
+            Extracted SCTP chunk parameters.
+
+        """
+        parameters = OrderedMultiDict()  # type: Parameters
+
+        for schema in schemas:
+            code = schema.type
+            name = self._lookup_registry(self.__parameter__, code)
+
+            if isinstance(name, str):
+                meth_name = f'_read_param_{name}'
+                meth = cast('ParameterParser',
+                            getattr(self, meth_name, self._read_param_donone))
+            else:
+                meth = name[0]
+            parameters.add(code, _keep_padding(schema, meth(schema, parameters=parameters)))
+        return parameters
+
+    def _make_sctp_parameters(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters') -> 'list[Schema_Parameter | bytes]':  # pylint: disable=line-too-long
+        """Make chunk parameters for SCTP.
+
+        Args:
+            parameters: SCTP chunk parameters.
+
+        Returns:
+            Constructed parameter schemas.
+
+        Raises:
+            ProtocolError: If the type of a parameter, given in a ``(type,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if a parameter
+                given as raw octets is empty (:issue:`2723`).
+
+        """
+        parameters_list = []  # type: list[Schema_Parameter | bytes]
+
+        if isinstance(parameters, list):
+            for schema in parameters:
+                if isinstance(schema, bytes) and not schema:
+                    raise ProtocolError(f'{self.alias}: invalid parameter: {schema!r} holds no type field')
+                if isinstance(schema, (bytes, Schema)):
+                    parameters_list.append(schema)
+                else:
+                    kind, args = cast('tuple[Enum_Parameter | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Parameter, bits=16, name='parameter type')
+                    parameters_list.append(self._make_sctp_parameter(code, None, **args))
+            return _last_item_only(parameters_list)
+
+        for key, parameter in parameters.items(multi=True):
+            code = self._make_index(key, Enum_Parameter, bits=16, name='parameter type')
+            parameters_list.append(self._make_sctp_parameter(code, parameter))
+        return _last_item_only(parameters_list)
+
+    def _make_sctp_parameter(self, code: 'Enum_Parameter', parameter: 'Optional[Data_Parameter]' = None,
+                             **kwargs: 'Any') -> 'Schema_Parameter':
+        """Dispatch to the parameter constructor registered for ``code``.
+
+        Args:
+            code: SCTP chunk parameter type.
+            parameter: Parameter data, if constructing from a parsed data model.
+            **kwargs: Arbitrary keyword arguments for the constructor.
+
+        Returns:
+            Constructed parameter schema.
+
+        """
+        name = self._lookup_registry(self.__parameter__, code)
+        if isinstance(name, str):
+            meth_name = f'_make_param_{name}'
+            meth = cast('ParameterConstructor',
+                        getattr(self, meth_name, self._make_param_donone))
+        else:
+            meth = name[1]
+        return _restore_padding(parameter, meth(code, parameter, **kwargs))
+
+    def _read_sctp_causes(self, schemas: 'list[Schema_ErrorCause]') -> 'Causes':
+        """Read SCTP error cause list.
+
+        Args:
+            schemas: Parsed error cause schemas.
+
+        Returns:
+            Extracted SCTP error causes.
+
+        """
+        causes = OrderedMultiDict()  # type: Causes
+
+        for schema in schemas:
+            code = schema.code
+            name = self._lookup_registry(self.__cause__, code)
+
+            if isinstance(name, str):
+                meth_name = f'_read_cause_{name}'
+                meth = cast('CauseParser',
+                            getattr(self, meth_name, self._read_cause_donone))
+            else:
+                meth = name[0]
+            causes.add(code, _keep_padding(schema, meth(schema, causes=causes)))
+        return causes
+
+    def _make_sctp_causes(self, causes: 'list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes') -> 'list[Schema_ErrorCause | bytes]':  # pylint: disable=line-too-long
+        """Make error causes for SCTP.
+
+        Args:
+            causes: SCTP error causes.
+
+        Returns:
+            Constructed error cause schemas.
+
+        Raises:
+            ProtocolError: If the code of an error cause, given in a ``(code,
+                kwargs)`` pair or as the key of a container, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an error
+                cause given as raw octets is empty (:issue:`2723`).
+
+        """
+        causes_list = []  # type: list[Schema_ErrorCause | bytes]
+
+        if isinstance(causes, list):
+            for schema in causes:
+                if isinstance(schema, bytes) and not schema:
+                    raise ProtocolError(f'{self.alias}: invalid error cause: {schema!r} holds no code field')
+                if isinstance(schema, (bytes, Schema)):
+                    causes_list.append(schema)
+                else:
+                    kind, args = cast('tuple[Enum_CauseCode | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_CauseCode, bits=16, name='cause code')
+                    causes_list.append(self._make_sctp_cause(code, None, **args))
+            return _last_item_only(causes_list)
+
+        for key, cause in causes.items(multi=True):
+            code = self._make_index(key, Enum_CauseCode, bits=16, name='cause code')
+            causes_list.append(self._make_sctp_cause(code, cause))
+        return _last_item_only(causes_list)
+
+    def _make_sctp_cause(self, code: 'Enum_CauseCode', cause: 'Optional[Data_ErrorCause]' = None,
+                         **kwargs: 'Any') -> 'Schema_ErrorCause':
+        """Dispatch to the error cause constructor registered for ``code``.
+
+        Args:
+            code: SCTP error cause code.
+            cause: Cause data, if constructing from a parsed data model.
+            **kwargs: Arbitrary keyword arguments for the constructor.
+
+        Returns:
+            Constructed error cause schema.
+
+        """
+        name = self._lookup_registry(self.__cause__, code)
+        if isinstance(name, str):
+            meth_name = f'_make_cause_{name}'
+            meth = cast('CauseConstructor',
+                        getattr(self, meth_name, self._make_cause_donone))
+        else:
+            meth = name[1]
+        return _restore_padding(cause, meth(code, cause, **kwargs))
+
+    def _make_nested_length(self, base: 'int', items: 'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]',  # pylint: disable=line-too-long
+                            declared: 'Optional[int]' = None) -> 'int':
+        """Compute the length of a chunk carrying a nested parameter or error
+        cause list.
+
+        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of
+        every nested item except the last. The RFC also asks receivers to
+        accept a length that counts the last item's padding too, so a parsed
+        chunk declaring that longer form keeps it.
+
+        Args:
+            base: size of the chunk's fixed-length fields, including the
+                four-byte chunk header
+            items: constructed nested items; a raw :obj:`bytes` item is
+                counted as given
+            declared: chunk length declared by the parsed chunk being
+                rebuilt, if any
+
+        Returns:
+            Chunk length.
+
+        """
+        sizes = [len(item) if isinstance(item, bytes) else len(item.pack()) for item in items]
+        padded = base + sum(sizes)
+        if not items or isinstance(items[-1], bytes) or declared == padded:
+            return padded
+        return padded - max(sizes[-1] - items[-1].length, 0)
+
+    def _make_param_types(self, types: 'Optional[list[Enum_Parameter | int]]') -> 'list[Enum_Parameter]':
+        """Resolve a list of parameter types.
+
+        Shared by :meth:`_make_param_addrtypes` and
+        :meth:`_make_cause_missing_param`, whose ``types`` both list
+        parameter types.
+
+        Args:
+            types: parameter types, each given as a
+                :class:`~pcapkit.const.sctp.parameter.Parameter` member or an
+                :obj:`int` code
+
+        Returns:
+            The :class:`~pcapkit.const.sctp.parameter.Parameter` member each
+            item resolves to with ``get``, or the code itself where no member
+            holds it.
+
+        Raises:
+            ProtocolError: If an item is a :obj:`bool` (:issue:`2288`), a name,
+                any other non-:obj:`int`, or a code the 16-bit parameter type
+                field cannot carry (:issue:`2594`).
+
+        """
+        return [self._make_index(item, Enum_Parameter, bits=16, name='parameter type')
+                for item in types or []]

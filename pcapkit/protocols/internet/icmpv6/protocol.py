@@ -361,25 +361,6 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             'body': data,
         }
 
-    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
-        """Verify the checksum over the pseudo-header of the enclosing IP layer.
-
-        That layer calls this once parsed, see
-        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.
-
-        Args:
-            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
-
-        """
-        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
-
-        if pseudo is None:
-            status = ChecksumStatus.NO_PSEUDO_HEADER
-        else:
-            status = verify_checksum(self.alias, self._data, self._info.checksum,
-                                     length=pseudo.info.len, prefix=pseudo.data)
-        self._info.__update__(checksum_status=status)
-
     def _read_data_type_none(self, schema: 'Schema_Unknown', *, header: 'Schema_ICMPv6',
                              length: 'int') -> 'Data_Unknown':
         """Read ICMPv6 message of unknown type.
@@ -724,3 +705,22 @@ class ICMPv6(ICMP[Data_ICMPv6, Schema_ICMPv6],
             seq = message.seq
             data = message.data
         return Schema_Echo(id=id, seq=seq, data=data)
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.corekit.checksum.internet import ChecksumStatus, verify_checksum  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.checksum,
+                                     length=pseudo.info.len, prefix=pseudo.data)
+        self._info.__update__(checksum_status=status)

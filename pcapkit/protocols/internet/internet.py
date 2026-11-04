@@ -127,13 +127,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
             Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt.protocol',     'HOPOPT'),
-            Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol',       'IPv4'),
             Enum_TransType.ICMP:            ModuleDescriptor('pcapkit.protocols.internet.icmpv4.protocol',     'ICMPv4'),
+            Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol',       'IGMP'),
+            Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol',       'IPv4'),
             Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol',       'TCP'),
             Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp.protocol',       'UDP'),
             Enum_TransType.DCCP:            ModuleDescriptor('pcapkit.protocols.transport.dccp.protocol',      'DCCP'),
             Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol',       'IPv6'),
-            Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6.protocol',     'ICMPv6'),
             Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route'),
             Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag.protocol',  'IPv6_Frag'),
             # NOTE: a tunnel is placed by its payload, so GRE lives under ``protocols.link``;
@@ -141,13 +141,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Enum_TransType.GRE:             ModuleDescriptor('pcapkit.protocols.link.gre.protocol',            'GRE'),
             Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp.protocol',        'ESP'),
             Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah.protocol',         'AH'),
-            Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol',       'IGMP'),
+            Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6.protocol',     'ICMPv6'),
             Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw.protocol',            'Raw'),
             Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts.protocol',  'IPv6_Opts'),
-            Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',        'IPX'),
-            Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh.protocol',         'MH'),
-            Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip.protocol',        'HIP'),
-            Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol',      'SCTP'),
 
             # OSPF rides directly on IP, so IANA protocol number 89 is its only
             # dispatch point. The dissector nonetheless lives under
@@ -157,6 +153,11 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             # deliberately decoupled, see
             # :doc:`/contributing/conventions/protocol-layer-placement`.
             Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
+
+            Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',        'IPX'),
+            Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol',      'SCTP'),
+            Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh.protocol',         'MH'),
+            Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip.protocol',        'HIP'),
         },
     )
 
