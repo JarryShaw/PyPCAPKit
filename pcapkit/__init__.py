@@ -75,10 +75,12 @@ if os.path.exists(_extern):
 ###############################################################################
 
 import warnings
+from typing import TYPE_CHECKING
 
 import tbtrim
 
 from pcapkit.utilities.exceptions import BaseError
+from pcapkit.utilities.importlib import lazy_exports
 from pcapkit.utilities.logging import DEVMODE
 from pcapkit.utilities.warnings import DevModeWarning
 
@@ -93,7 +95,9 @@ else:
                          exception=BaseError, strict=False)
 
 from pcapkit.interface import *
-from pcapkit.protocols import *
+
+if TYPE_CHECKING:
+    from pcapkit.protocols import *
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # Interface Functions
@@ -134,3 +138,6 @@ __all__ = [
 
 #: version number
 __version__ = '1.5.1'
+
+# Protocols are imported the first time they are reached (#2730).
+__getattr__, __dir__ = lazy_exports(__name__, globals(), packages=('protocols',))

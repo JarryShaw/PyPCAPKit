@@ -25,7 +25,6 @@ from typing import TYPE_CHECKING
 import aenum
 
 from pcapkit.corekit.sentinels import MISSING
-from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
@@ -120,6 +119,10 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
        (:issue:`2529`).
 
     """
+    # NOTE: read here, not on import, which would build it and import every protocol (#2730).
+    from pcapkit.protocols import \
+        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
+
     if not isinstance(protocol, type):
         raise RegistryError(f'protocol must be a class, not {protocol!r}')
     if not issubclass(protocol, ProtocolBase):
@@ -230,6 +233,9 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
         target: The ``(destination, code)`` being registered over.
 
     """
+    from pcapkit.protocols import \
+        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
+
     lease = _CODE_LEASES.pop(target, None)
     if lease is None:
         return
@@ -274,6 +280,9 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
         *targets: The ``(destination, code)`` pairs it was registered at.
 
     """
+    from pcapkit.protocols import \
+        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
+
     name = protocol.__name__.upper()
     with _LEASE_LOCK:
         stack = _NAME_LEASES.get(name)

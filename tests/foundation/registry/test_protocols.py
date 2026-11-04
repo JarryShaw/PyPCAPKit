@@ -103,12 +103,12 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.application.http import protocol as http
         from pcapkit.protocols.application.application import Application
         from pcapkit.utilities.warnings import RegistryWarning
 
-        self._guard_registry(reg_protocol.protocol_registry, 'HTTP')
+        self._guard_registry(protocol_registry, 'HTTP')
 
         # Defining a Protocol subclass registers it, so this displaces the base.
         with warnings.catch_warnings():
@@ -120,7 +120,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertEqual(len(set(colliding)), 2)
         self.assertEqual({cls.__name__.upper() for cls in colliding}, {'HTTP'})
 
-        reg_protocol.protocol_registry['HTTP'] = http.HTTP
+        protocol_registry['HTTP'] = http.HTTP
 
         # Both directions, so the test is not pinned to one registration order.
         for incumbent, replacement in ((http.HTTP, custom), (custom, http.HTTP)):
@@ -132,7 +132,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                 # The overwrite still happens. The warning reports the
                 # collision, it does not resolve it -- resolving it is #514's
                 # business.
-                self.assertIs(reg_protocol.protocol_registry['HTTP'], replacement)
+                self.assertIs(protocol_registry['HTTP'], replacement)
 
                 messages = self._registry_warnings(caught, RegistryWarning)
                 self.assertEqual(len(messages), 1)
@@ -160,12 +160,12 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.protocol import Protocol
         from pcapkit.utilities.warnings import RegistryWarning
 
-        incumbent = reg_protocol.protocol_registry['HTTP']
-        self._guard_registry(reg_protocol.protocol_registry, 'HTTP')
+        incumbent = protocol_registry['HTTP']
+        self._guard_registry(protocol_registry, 'HTTP')
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -173,8 +173,8 @@ class ProtocolRegistryTests(unittest.TestCase):
             class HTTP(Protocol):
                 """A user protocol that happens to be named like the built-in."""
 
-        self.assertIs(reg_protocol.protocol_registry['HTTP'], HTTP)
-        self.assertIsNot(reg_protocol.protocol_registry['HTTP'], incumbent)
+        self.assertIs(protocol_registry['HTTP'], HTTP)
+        self.assertIsNot(protocol_registry['HTTP'], incumbent)
 
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
@@ -198,13 +198,13 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.warnings import RegistryWarning
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(protocol_registry, 'UNITPROTOCOL')
 
         for label in ('fresh-key', 'identical-repeat'):
             with self.subTest(case=label):
@@ -212,7 +212,7 @@ class ProtocolRegistryTests(unittest.TestCase):
                     warnings.simplefilter('always')
                     registry.register_protocol(UnitProtocol)
 
-                self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], UnitProtocol)
+                self.assertIs(protocol_registry['UNITPROTOCOL'], UnitProtocol)
                 self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
         # ... and the real call shape, through two wrapper registrars. Each ends
@@ -382,7 +382,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         """
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.utilities.warnings import RegistryWarning
 
         first = self._unit_protocol()
@@ -392,8 +392,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIsNot(first, second)
         self.assertEqual(repr(first), repr(second))
 
-        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
-        reg_protocol.protocol_registry['UNITPROTOCOL'] = first
+        self._guard_registry(protocol_registry, 'UNITPROTOCOL')
+        protocol_registry['UNITPROTOCOL'] = first
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -401,7 +401,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # The guard's firing condition: the overwrite happens and is
         # reported exactly once.
-        self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], second)
+        self.assertIs(protocol_registry['UNITPROTOCOL'], second)
         messages = self._registry_warnings(caught, RegistryWarning)
         self.assertEqual(len(messages), 1)
 
@@ -419,13 +419,13 @@ class ProtocolRegistryTests(unittest.TestCase):
 
     def test_register_protocol_validates_and_updates_registry(self) -> None:
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.utilities.exceptions import RegistryError
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(protocol_registry, 'UNITPROTOCOL')
         registry.register_protocol(UnitProtocol)
-        self.assertIs(reg_protocol.protocol_registry['UNITPROTOCOL'], UnitProtocol)
+        self.assertIs(protocol_registry['UNITPROTOCOL'], UnitProtocol)
 
         with self.assertRaises(RegistryError):
             registry.register_protocol(object)  # type: ignore[arg-type]
@@ -474,10 +474,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.foundation.registry.protocols import misc as reg_misc
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 
         UnitProtocol = self._unit_protocol()
-        self._guard_registry(reg_protocol.protocol_registry, 'UNITPROTOCOL')
+        self._guard_registry(protocol_registry, 'UNITPROTOCOL')
         raw_module = ('pcapkit.protocols.misc.raw.protocol', 'Raw')
 
         class_routes = [

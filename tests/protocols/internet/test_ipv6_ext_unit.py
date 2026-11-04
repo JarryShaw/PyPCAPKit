@@ -412,9 +412,12 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """Derived from the live hierarchy, so a new member cannot drift."""
         import inspect
 
-        import pcapkit.protocols  # noqa: F401  # pylint: disable=unused-import
+        import pcapkit.protocols.internet as internet
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
+        # NOTE: the package imports each protocol on first use (#2730).
+        for name in internet.__all__:
+            getattr(internet, name)
         members = [klass for klass in IPv6_Ext.__subclasses__() if not inspect.isabstract(klass)]
         self.assertCountEqual(IPv6_Ext.id(), [klass.__name__ for klass in members])
         for klass in members:
@@ -703,9 +706,13 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
     def _family(self) -> 'list[type]':
         """The discovered family, with every member module imported first."""
-        import pcapkit.protocols.internet  # noqa: F401  # populates __subclasses__
+        import pcapkit.protocols.internet as internet
         from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
+        # NOTE: the package imports each protocol on first use (#2730), so
+        # reach every one, which populates __subclasses__.
+        for name in internet.__all__:
+            getattr(internet, name)
         return self._subclasses(IPv6_Ext)
 
     @staticmethod

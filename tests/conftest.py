@@ -77,15 +77,17 @@ if TYPE_CHECKING:
 _pinned_snapshot = None  # type: Optional[dict[str, types.ModuleType]]
 
 #: What :func:`pytest_sessionstart` imports before the pin: the package, plus every
-#: module of :mod:`pcapkit.const`, whose packages import their enumerations on first
-#: use rather than with themselves -- the app-type registries for GitHub issue
-#: #1538, and every enumeration for #2729. Read off the tree rather than listed,
-#: so a module the crawlers add is warmed the day it lands. See that hook for why
-#: they cannot be left out.
+#: module of :mod:`pcapkit.const` and :mod:`pcapkit.protocols`, whose packages import
+#: what they export on first use rather than with themselves -- the app-type
+#: registries for GitHub issue #1538, every enumeration for #2729, and every protocol
+#: for #2730. Read off the tree rather than listed, so a module added is warmed the
+#: day it lands; the placeholder sources under ``NotImplemented/`` are no module
+#: anything imports. See that hook for why they cannot be left out.
 WARM_MODULES = ('pcapkit', *sorted(
     '.'.join(path.relative_to(ROOT).with_suffix('').parts[:-1] if path.name == '__init__.py'
              else path.relative_to(ROOT).with_suffix('').parts)
-    for path in (ROOT / 'pcapkit' / 'const').rglob('*.py')))
+    for package in ('const', 'protocols') for path in (ROOT / 'pcapkit' / package).rglob('*.py')
+    if 'NotImplemented' not in path.parts))
 
 
 def _pin_module_snapshot() -> None:
@@ -179,7 +181,9 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     :mod:`tests.project.test_conventions_doc_claims` counted both generations, and
     its registry count came out wrong on the 3.10-3.13 unit legs of PR #1560.
     Every :mod:`pcapkit.const` package binds what it imports on first use the same
-    way (#2729), so every module of it is warmed.
+    way (#2729), so every module of it is warmed, and so does every package above a
+    protocol's (#2730): a protocol class bound there would otherwise outlive its
+    module's entry, and fail to :mod:`pickle` against the next generation of it.
 
     Failure here is not an error. A checkout without the runtime dependencies
     installed cannot import the package at all -- which is a supported way to run

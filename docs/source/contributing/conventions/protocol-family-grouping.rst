@@ -456,6 +456,18 @@ these files with ``filter_files`` set, so one named on the command line is skipp
 too, and ``make isort`` skips every ``__init__.py`` besides. Ruled in review of
 :pr:`2753` (:issue:`2534`).
 
+**The packages above a protocol's package import it on first use**, ruled by the
+owner in session and recorded on :issue:`2730`. :mod:`pcapkit.protocols`, its
+layer packages, :mod:`~pcapkit.protocols.misc.pcap` and
+:mod:`~pcapkit.protocols.misc.checksum` name each protocol class under
+``if TYPE_CHECKING:`` and bind the ``__getattr__`` and ``__dir__`` that
+:func:`~pcapkit.utilities.importlib.lazy_exports` returns, as a :mod:`pcapkit.const`
+package does (:ref:`const-vendor-pairing`), and :mod:`pcapkit` re-exports
+:mod:`pcapkit.protocols` the same way. A protocol's own package keeps the imports
+above, since importing its ``protocol`` module imports its ``schema`` and ``data``
+anyway. :data:`pcapkit.protocols.__proto__` names every protocol class, so
+:mod:`pcapkit.protocols.registry` builds it when it is first reached.
+
 **A family's shared pieces live in the family base's package**, and its members
 import them (:issue:`2534`): :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag`
 and :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag` read the schema and data
