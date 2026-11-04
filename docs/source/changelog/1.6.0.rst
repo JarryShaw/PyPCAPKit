@@ -957,8 +957,9 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :pr:`2539`, :pr:`2541`, :pr:`2613`), including a registry's readers and
   makers in its enumeration's order, the helpers nothing reaches last, and
   the registry maps in enumeration order (:pr:`2765`). SCTP's readers precede
-  its makers, the protocol pages list members in source order, and PCAP-NG's
-  option schemas keep their namespaces alphabetically, so a clash
+  its makers; the protocol pages list members in source order, and a project
+  test keeps them so (:issue:`2780`); and PCAP-NG's option schemas keep their
+  namespaces alphabetically, so a clash
   ``Option.register`` reports names those it displaced in alphabetical order,
   ``'dsb', 'epb', 'if', ...`` for ``opt_comment``, where 1.5.x named them in
   its namespace map's order, ``'opt', 'if', 'epb', ...`` (:issue:`2772`,
