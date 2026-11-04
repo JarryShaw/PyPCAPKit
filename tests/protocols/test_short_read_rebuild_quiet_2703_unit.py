@@ -245,7 +245,7 @@ class ShortReadRebuildTests(unittest.TestCase):
                 with self.subTest(captured=count, path=path):
                     rebuilt, _ = self.parse(lambda: type(layer).from_data(data))  # pylint: disable=cell-var-from-loop
                     self.assertEqual(rebuilt.data, msg[:count])
-                    self.assertEqual({'__short_read__', '_uncaptured'} & set(vars(rebuilt)), set())
+                    self.assertNotIn('__short_read__', vars(rebuilt))
                     self.assertIsNone(rebuilt.__short_read__)
 
     def test_a_failed_rebuild_keeps_no_short_read_either(self) -> None:
@@ -274,7 +274,7 @@ class ShortReadRebuildTests(unittest.TestCase):
                 gre.from_data(data)
             with self.subTest(case=label, check='instance'):
                 self.assertEqual(len(built), 1)
-                self.assertEqual({'__short_read__', '_uncaptured'} & set(vars(built[0])), set())
+                self.assertNotIn('__short_read__', vars(built[0]))
                 self.assertIsNone(built[0].__short_read__)
 
 

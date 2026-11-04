@@ -705,25 +705,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     #: The ``__short_read__`` record of the data model :meth:`from_data` rebuilds
     #: this instance from. :meth:`pack` cuts the header it makes back to the
-    #: octets captured, and :meth:`__post_init__` reads them at the width the
-    #: header declares, so the rebuild is parsed and verified as its capture was
-    #: (:issue:`2703`). Set for the duration of that call alone, like
-    #: :attr:`__reconstructing__`; the class-level :data:`None` is what every
-    #: other code path sees.
+    #: octets captured, and :meth:`__post_init__` has :meth:`unpack` parse them
+    #: back at the width ``__short_width__`` records beside it, the one their
+    #: parse read them at, so the rebuild is parsed and verified as its capture
+    #: was (:issue:`2703`, :issue:`2761`). Set for the duration of that call
+    #: alone, like :attr:`__reconstructing__`; the class-level :data:`None` is
+    #: what every other code path sees.
     __short_read__: 'Optional[tuple[str, int]]' = None
-
-    #: How many octets of its header :meth:`pack` cut back by
-    #: :attr:`__short_read__`, which :meth:`__post_init__` adds back to the width
-    #: it reads the rebuild at. Set between those two calls alone.
-    _uncaptured: 'Optional[int]' = None
-
-    #: Whether the data model :meth:`from_data` rebuilds this instance from kept
-    #: a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` next layer past a header
-    #: the capture cut short, which only a parse reading the header short of its
-    #: width does. :meth:`_empty_next_layer` keeps it for the rebuild, read at that
-    #: width (:issue:`2717`). Set for the duration of that call alone, like
-    #: :attr:`__short_read__`.
-    _short_of_header: 'bool' = False
 
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
@@ -982,12 +970,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             return data
 
         # NOTE: Cut back before ``unpack`` reads and verifies it, at the width
-        # packed here, which ``__post_init__`` passes on (#2703).
+        # ``from_data`` passes on (#2703, #2761).
         header.__dict__['__short_read__'] = target.__short_read__
         header._cut_short_read()  # pylint: disable=protected-access
-        captured = bytes(header)
-        target._uncaptured = len(data) - len(captured)  # pylint: disable=protected-access
-        return captured
+        return bytes(header)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
@@ -1410,7 +1396,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         ``data`` may be the :obj:`dict` that :meth:`Info.to_dict
         <pcapkit.corekit.infoclass.Info.to_dict>` returns, which carries the
         metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
-        which the payload is dispatched on, ``__short_read__``, and, for
+        which the payload is dispatched on, ``__short_read__`` and
+        ``__short_width__``, and, for
         :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header
         chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
         too, or no payload (nor IPv6 extension header) is rebuilt and no short
@@ -1418,14 +1405,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         its other keys (:issue:`2003`).
 
         A header the capture cut short, as ``__short_read__`` records, is cut
-        back before it is read, and read at the width it declares, so the
-        rebuild parses and verifies the octets captured as the capture did
-        (:issue:`2703`), holding the values its parse read from them, not those
-        :meth:`make` fills in past the cut (:issue:`2761`). Inside a payload
-        :meth:`_make_payload` rebuilds, which gives only its octets, the header
-        made is read instead. It keeps the ``Raw`` next layer its data model holds,
-        which a parse reading the header short of that width leaves it
-        (:issue:`2717`).
+        back before it is read, and read at the width ``__short_width__``
+        records, the one its parse read it at, so the rebuild parses and
+        verifies the octets captured as the capture did (:issue:`2703`),
+        holding the values its parse read from them, not those :meth:`make`
+        fills in past the cut (:issue:`2761`), and the ``Raw`` next layer a
+        parse reading the header short of its width leaves it (:issue:`2717`).
+        Inside a payload :meth:`_make_payload` rebuilds, which gives only its
+        octets, the header made is read instead.
 
         Args:
             data: Protocol data.
@@ -1467,19 +1454,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).
         self.__reconstructing__ = True
         self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
-        # NOTE: A cut header kept a Raw next layer only where its parse read it short of
-        # its width, which the rebuild, read at that width, is told of (#2717).
-        if self.__short_read__ is not None:
-            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
-            next_type = data.get('__next_type__')
-            self._short_of_header = isinstance(next_type, type) and issubclass(next_type, Raw)
+        # NOTE: A cut header is read at the width its parse read it at, as recorded, so
+        # the rebuild holds the values and the next layer its parse did (#2717, #2761).
+        width = data.get('__short_width__')
+        if self.__short_read__ is not None and width is not None:
+            kwargs.setdefault('length', width)
         try:
             # initialize protocol instance
             self.__init__(**kwargs)  # type: ignore[misc]
         finally:
             del self.__reconstructing__
             del self.__short_read__
-            vars(self).pop('_short_of_header', None)
 
         return self
 
@@ -1706,14 +1691,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         if file is None:
             _data = self.pack(**kwargs)
-            # NOTE: A header rebuilt from a short read holds only what was captured,
-            # read at the width it declares, as a capture is at its parent's (#2703).
-            uncaptured = vars(self).pop('_uncaptured', None)
-            if uncaptured is not None and length is None:
-                length = len(_data) + uncaptured
-            # NOTE: Parsed back from the octets captured, not read from what ``make`` filled
-            # in past the cut (#2761); a payload ``_make_payload`` rebuilds gives its octets.
-            if uncaptured is not None and not rebuilding.get():
+            # NOTE: A header rebuilt from a short read holds only what was captured, parsed
+            # back at the width ``from_data`` passes, not read from what ``make`` filled in
+            # past the cut (#2703, #2761); a payload ``_make_payload`` rebuilds gives its octets.
+            if self.__short_read__ is not None and not rebuilding.get():
                 self.__header__ = None  # type: ignore[assignment]
         else:
             _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
@@ -3063,16 +3044,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             IPv6 extension header overrunning the payload (:issue:`2477`). Such a
             next layer is kept raw, not dispatched on a code the cut may have
             read as zeros (:issue:`1170`). :meth:`from_data` reads the rebuild of
-            a cut header at the width it declares (:issue:`2703`), which leaves
-            none, so the rebuild keeps ``Raw`` where its data model did, as
-            :attr:`_short_of_header` says (:issue:`2717`).
+            a cut header at the width its parse read it at, which leaves it the
+            same length, so the rebuild keeps ``Raw`` where its data model did
+            (:issue:`2717`, :issue:`2761`).
 
         .. versionadded:: 1.6.0
 
         """
         if file_ and length != 0:
             return None
-        if not file_ and (length < 0 or self._short_of_header):
+        if not file_ and length < 0:
             from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             return Raw
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel

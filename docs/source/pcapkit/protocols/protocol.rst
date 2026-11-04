@@ -120,8 +120,6 @@ Internal Definitions below.
    .. autoattribute:: _sigterm
    .. autoattribute:: __reconstructing__
    .. autoattribute:: __short_read__
-   .. autoattribute:: _uncaptured
-   .. autoattribute:: _short_of_header
    .. autoattribute:: _past_layer_limit
    .. autoattribute:: __data__
 
