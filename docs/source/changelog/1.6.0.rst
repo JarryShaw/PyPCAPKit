@@ -1292,6 +1292,18 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   Reserved octets and option area among them, rather than those its maker
   filled in past the cut (:issue:`2761`, :pr:`2767`).
 
+* **Fixed** -- a whole header rebuilt through ``from_data`` read back values
+  its parse had not. An IPv6 extension header parsed with ``extension=True``,
+  as IPv6 parses each header of its chain -- HOPOPT, IPv6-Route, IPv6-Frag,
+  IPv6-Opts, MH, AH or HIP -- was rebuilt without it, so its info gained
+  ``__next_type__``, ``__next_name__`` and ``nopayload``, and a Shim6 header
+  :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` parsed was
+  rebuilt with a ``protocol`` of :data:`None`. Each rebuilds in the mode its
+  parse used, and Shim6's keeps its ``protocol`` (:issue:`2768`, :pr:`2774`).
+  A TCP header rebuilt, or built by ``make()``, read its ``padding`` past the
+  End of Option List as empty, where its parse read the octets there; it reads
+  them from the octets, as IPv4 does (:issue:`2769`, :pr:`2775`).
+
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
   left out a field named like one of its builtin names, such as ``items``,
