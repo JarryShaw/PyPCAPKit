@@ -46,6 +46,12 @@ if TYPE_CHECKING:
 
 __all__ = ['UDP']
 
+#: The pseudo-header a payload's checksum is computed over in :meth:`UDP.make`,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
+
 
 class UDP(Transport[Data_UDP, Schema_UDP],
           schema=Schema_UDP, data=Data_UDP):
@@ -303,7 +309,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
                 self._checksum_pending = True
             else:
                 from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
-                from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                pseudo_header = _PSEUDO_HEADER.klass
 
                 # NOTE: Over the datagram the Length field gives, or all but the trailer
                 # for a jumbogram's zero one (RFC 2675); a computed zero is all ones.

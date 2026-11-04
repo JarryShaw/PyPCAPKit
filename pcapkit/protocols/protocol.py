@@ -36,7 +36,6 @@ import shutil
 import string
 import struct
 import textwrap
-import threading
 import types
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
@@ -649,12 +648,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :meth:`register` (:issue:`1504`).
     _shipped_registry: 'types.MappingProxyType[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
         types.MappingProxyType(dict(__registry__))
-
-    #: Serialises :meth:`get_protocol`'s resolution of a descriptor. Two threads
-    #: importing protocol modules from different points can deadlock, one
-    #: holding a package and the other a module inside it, so a first import is
-    #: made by one thread at a time (:issue:`2763`).
-    _registry_lock: 'threading.RLock' = threading.RLock()
 
     #: Construction keywords this protocol consumes out of ``**kwargs`` instead
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
@@ -1368,8 +1361,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if entry is None:
             return default
         if isinstance(entry, ModuleDescriptor):
-            with ProtocolBase._registry_lock:
-                return entry.klass
+            return entry.klass
         return entry
 
     @classmethod

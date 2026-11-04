@@ -113,6 +113,12 @@ if TYPE_CHECKING:
 
 __all__ = ['DCCP']
 
+#: The pseudo-header a payload's checksum is computed over in :meth:`DCCP.make`,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
+
 #: Longest a DCCP header can be -- a Data Offset of 255 words, :rfc:`4340#section-5`.
 DCCP_MAX_HEADER_LEN = 1020
 
@@ -465,7 +471,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
                 self._checksum_pending = True
             else:
                 from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
-                from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                pseudo_header = _PSEUDO_HEADER.klass
 
                 octets = schema.pack()
                 coverage = self._checksum_coverage(cscov, hdr_len, len(octets))

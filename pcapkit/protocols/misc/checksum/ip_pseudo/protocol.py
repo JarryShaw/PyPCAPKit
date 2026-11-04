@@ -61,6 +61,7 @@ from pcapkit.const.ipv4.option_number import OptionNumber as Enum_IPv4Option
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
@@ -80,7 +81,14 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.protocols.internet.ah.protocol import AH
+
 __all__ = ['IP_Pseudo', 'pseudo_header', 'verify_upper']
+
+#: The Authentication Header :func:`verify_upper` looks past to the upper layer,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_AH: 'ModuleDescriptor[AH]' = ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH')
 
 #: Extension headers that end the chain, as the upper layer -- the Mobility Header
 #: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).
@@ -666,11 +674,10 @@ def verify_upper(ip: 'IPv4 | IPv6') -> 'None':
         ip: Parsed IPv4 or IPv6 layer.
 
     """
-    from pcapkit.protocols.internet.ah.protocol import AH  # isort: skip # pylint: disable=import-outside-toplevel
-
+    ah = _AH.klass
     upper = ip.payload
     # NOTE: IPv6 walks an AH as an extension header; IPv4 carries it as its payload.
-    while isinstance(upper, AH):
+    while isinstance(upper, ah):
         upper = upper.payload
     verify = getattr(upper, '_verify_pseudo_checksum', None)
     if verify is None:

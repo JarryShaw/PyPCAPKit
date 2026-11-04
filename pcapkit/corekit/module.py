@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.importlib import import_lock
 
 __all__ = ['ModuleDescriptor']
 
@@ -83,6 +84,13 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             pre-reload class forever, and an instance of it fails
             :func:`isinstance` against the live one.
 
+            A first import, of a module not in :data:`sys.modules` yet, holds
+            :data:`~pcapkit.utilities.importlib.import_lock`, as the first imports
+            of :func:`~pcapkit.utilities.importlib.lazy_exports` do: threads
+            dispatching at once to protocols not imported yet otherwise deadlock
+            the import system (:issue:`2771`). A module already imported, or
+            part way through another thread's import, is read without it.
+
         """
         if self.name is NULL:
             # ``module`` is a ``str`` and the caller never named a class --
@@ -110,7 +118,11 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
                 # from the ``getattr`` below instead, with the same message.
                 pass
         try:
-            return getattr(importlib.import_module(self.module), name)
+            if self.module in sys.modules:
+                return getattr(importlib.import_module(self.module), name)
+            # NOTE: the lock lazy_exports holds, so racing first imports cannot deadlock (#2771).
+            with import_lock:
+                return getattr(importlib.import_module(self.module), name)
         except AttributeError as error:
             # GitHub issue #832: a ``register_*`` helper that builds a
             # descriptor from a bad class name fails here with a bare stdlib

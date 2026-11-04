@@ -169,6 +169,12 @@ if TYPE_CHECKING:
 
 __all__ = ['TCP']
 
+#: The pseudo-header a payload's checksum is computed over in :meth:`TCP.make`,
+#: resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_PSEUDO_HEADER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'pseudo_header')
+
 
 class TCP(Transport[Data_TCP, Schema_TCP],
           schema=Schema_TCP, data=Data_TCP):
@@ -776,7 +782,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 self._checksum_pending = True
             else:
                 from pcapkit.corekit.checksum.internet import compute_checksum  # isort: skip # pylint: disable=import-outside-toplevel
-                from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import pseudo_header  # isort: skip # pylint: disable=import-outside-toplevel
+                pseudo_header = _PSEUDO_HEADER.klass
                 octets = schema.pack()
                 schema.checksum = compute_checksum(octets, prefix=pseudo_header(pseudo, len(octets)))
         return schema

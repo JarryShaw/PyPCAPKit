@@ -56,6 +56,7 @@ from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.schema.ipaddress import parse_ip_address
 from pcapkit.corekit.schema.padding import pad_length
@@ -120,6 +121,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.internet.ipv4.data import Option as Data_Option
     from pcapkit.protocols.internet.ipv4.schema import Option as Schema_Option
+    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
@@ -128,6 +130,15 @@ if TYPE_CHECKING:
                                   KwArg(Any)], Schema_Option]
 
 __all__ = ['IPv4']
+
+#: The pseudo-header :meth:`IPv4.make` computes a payload's checksum over, and the
+#: check :meth:`IPv4.__post_init__` runs on the upper layer, resolved there rather
+#: than imported, so their first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_IP_PSEUDO: 'ModuleDescriptor[IP_Pseudo]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo')
+_VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'verify_upper')
 
 
 class IPv4(IP[Data_IPv4, Schema_IPv4],
@@ -617,7 +628,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # pseudo-header, unless a fragment, whose checksum covers the datagram (#2471).
         if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
                 and cast('ProtocolBase', payload).__index__() == proto and not (offset or mf)):
-            from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
+            IP_Pseudo = _IP_PSEUDO.klass  # pylint: disable=invalid-name
 
             # NOTE: The header is parsed back for a source route's destination,
             # quietly, as this layer parses it again (cf. rebuilding).
@@ -730,8 +741,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         """
         super().__post_init__(file, length, **kwargs)
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
-            verify_upper(self)
+            _VERIFY_UPPER.klass(self)
 
     ##########################################################################
     # Utilities.
