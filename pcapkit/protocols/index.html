@@ -1085,10 +1085,19 @@ nothing. So a field callback can tell a value the end of the data
 left as zero from one read, and leave such a value to the short
 read rather than refuse it. The key is cleared as unpacking starts,
 so a nested schema finds only its own.</p>
+<p>Fields running past <code class="docutils literal notranslate"><span class="pre">length</span></code> warn that <code class="docutils literal notranslate"><span class="pre">__length__</span></code> fell below
+zero, unless a <code class="docutils literal notranslate"><span class="pre">__data_end__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> says that
+<code class="docutils literal notranslate"><span class="pre">length</span></code> ends where the data does, as a
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> says of an
+item it counts. The fields past it are then the cut the short read
+records, and warn nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>). The key is cleared as
+unpacking starts too.</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>The field the data ends inside is given to the fields after it, as
-<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in <code class="docutils literal notranslate"><span class="pre">packet</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in <code class="docutils literal notranslate"><span class="pre">packet</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>), and a schema whose
+<code class="docutils literal notranslate"><span class="pre">length</span></code> ends with the data reads its fields past it as cut, not as
+a negative length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>).</p>
 </div>
 </dd></dl>
 

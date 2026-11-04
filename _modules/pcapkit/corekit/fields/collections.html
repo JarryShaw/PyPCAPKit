@@ -641,11 +641,15 @@
 <span class="sd">    A list whose octets hold fewer items than ``count`` ended with the data</span>
 <span class="sd">    before the rest, and reports them as :attr:`shortfall`, so that</span>
 <span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
-<span class="sd">    records the cut; the items absent are not made up.</span>
+<span class="sd">    records the cut; the items absent are not made up. A schema item it counts</span>
+<span class="sd">    is read with ``__data_end__`` in its packet, since its octets end where the</span>
+<span class="sd">    data does, so an item the data ends inside records the cut as its short</span>
+<span class="sd">    read rather than warn that its fields run past the length it was given.</span>
 
 <span class="sd">    .. versionchanged:: 1.6.0</span>
 
-<span class="sd">       Takes ``count`` (:issue:`2711`).</span>
+<span class="sd">       Takes ``count`` (:issue:`2711`), and reads a schema item it counts as</span>
+<span class="sd">       ending with the data (:issue:`2749`).</span>
 
 <span class="sd">    """</span>
 
@@ -872,7 +876,10 @@
             <span class="n">field</span> <span class="o">=</span> <span class="n">item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_schema</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+                <span class="c1"># NOTE: A counted list runs to the end of the data, so an item it counts</span>
+                <span class="c1"># running past the octets left is cut, not overrunning a length (#2749).</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">__data_end__</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="k">else</span> <span class="n">packet</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
                 <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">offset</span><span class="p">:</span>

@@ -1342,10 +1342,20 @@
 <span class="sd">            read rather than refuse it. The key is cleared as unpacking starts,</span>
 <span class="sd">            so a nested schema finds only its own.</span>
 
+<span class="sd">            Fields running past ``length`` warn that ``__length__`` fell below</span>
+<span class="sd">            zero, unless a ``__data_end__`` key in ``packet`` says that</span>
+<span class="sd">            ``length`` ends where the data does, as a</span>
+<span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` says of an</span>
+<span class="sd">            item it counts. The fields past it are then the cut the short read</span>
+<span class="sd">            records, and warn nothing (:issue:`2749`). The key is cleared as</span>
+<span class="sd">            unpacking starts too.</span>
+
 <span class="sd">        .. versionchanged:: 1.6.0</span>
 
 <span class="sd">           The field the data ends inside is given to the fields after it, as</span>
-<span class="sd">           ``__short_read__`` in ``packet`` (:issue:`2727`).</span>
+<span class="sd">           ``__short_read__`` in ``packet`` (:issue:`2727`), and a schema whose</span>
+<span class="sd">           ``length`` ends with the data reads its fields past it as cut, not as</span>
+<span class="sd">           a negative length (:issue:`2749`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
@@ -1357,6 +1367,9 @@
         <span class="c1"># NOTE: ``packet`` may be an enclosing schema's, copied into a nested</span>
         <span class="c1"># context, so its short read is not this schema's (#2727).</span>
         <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># NOTE: Fields running past a length that ends with the data are the cut its</span>
+        <span class="c1"># short read records, not an overrun (#2749).</span>
+        <span class="n">data_end</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__data_end__'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1489,7 +1502,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
 
-            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data_end</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'packet length &lt; 0: </span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">"__length__"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                      <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 

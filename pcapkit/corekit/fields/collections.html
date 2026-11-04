@@ -595,9 +595,13 @@ constant-length-field items in a protocol.</p>
 <p>A list whose octets hold fewer items than <code class="docutils literal notranslate"><span class="pre">count</span></code> ended with the data
 before the rest, and reports them as <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.shortfall" title="pcapkit.corekit.fields.collections.ListField.shortfall"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shortfall</span></code></a>, so that
 <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
-records the cut; the items absent are not made up.</p>
+records the cut; the items absent are not made up. A schema item it counts
+is read with <code class="docutils literal notranslate"><span class="pre">__data_end__</span></code> in its packet, since its octets end where the
+data does, so an item the data ends inside records the cut as its short
+read rather than warn that its fields run past the length it was given.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">count</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Takes <code class="docutils literal notranslate"><span class="pre">count</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>), and reads a schema item it counts as
+ending with the data (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>).</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.ListField.length">
