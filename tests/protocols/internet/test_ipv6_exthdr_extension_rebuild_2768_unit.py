@@ -10,12 +10,18 @@ of IPv6 alike.
 :meth:`Internet.from_data <pcapkit.protocols.internet.internet.Internet.from_data>`
 rebuilds a header whose data model holds no next layer with ``extension``.
 
+Shim6, which :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` parses,
+also lost the ``protocol`` its ``read`` takes from the ``alias`` keyword. Its
+``_make_data`` hands ``alias`` back, and its ``__keywords__`` lets the keyword
+through the construction check, which every member then accepts and drops.
+
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
 """
 
 import unittest
+import warnings
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
@@ -27,9 +33,8 @@ if TYPE_CHECKING:
 __tier__ = 'ALL'
 
 #: IPv6 Next Header code of each member of the family, as IANA's IPv6 Extension
-#: Header Types registry assigns it. IPv6 reaches ``IPv6_Ext`` only as Shim6 (140),
-#: whose code it hands over as ``alias``, which the rebuild does not replay
-#: (#2768), so ``IPv6_Ext`` is rebuilt here only standalone.
+#: Header Types registry assigns it; ``IPv6_Ext`` parses Shim6. IPv6 hands each
+#: header its code as ``alias``, and the standalone parses here do the same.
 CODES = {
     'HOPOPT': 0,
     'IPv6_Route': 43,
@@ -39,6 +44,7 @@ CODES = {
     'IPv6_Opts': 60,
     'MH': 135,
     'HIP': 139,
+    'IPv6_Ext': 140,
 }
 
 
@@ -73,21 +79,33 @@ class TestExtensionModeRebuild(unittest.TestCase):
         return klass(next=59, **extra).data
 
     def _assert_rebuilds(self, klass: 'Any', info: 'Any', data: bytes) -> None:
-        """``klass`` rebuilds ``info`` and ``data`` from ``info`` and its dict alike."""
+        """``klass`` rebuilds ``info`` and ``data`` from ``info`` and its dict alike.
+
+        A keyword ``_make_data`` returns that no signature declares is warned of
+        and fails the case too.
+
+        """
+        from pcapkit.utilities.warnings import UnknownFieldWarning
+
         for source, value in (('info', info), ('to_dict', info.to_dict())):
             with self.subTest(source=source):
-                rebuilt = klass.from_data(value)
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    rebuilt = klass.from_data(value)
+                self.assertEqual([str(item.message) for item in caught
+                                  if issubclass(item.category, UnknownFieldWarning)], [])
                 self.assertEqual(rebuilt.info, info)
                 self.assertEqual(rebuilt.data, data)
 
     def test_every_member_has_a_code(self) -> None:
-        self.assertEqual(set(self._family()) - {'IPv6_Ext'}, set(CODES))
+        self.assertEqual(set(self._family()), set(CODES))
 
     def test_standalone_header_rebuilds_its_info(self) -> None:
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
                 header = self._header(klass)
-                self._assert_rebuilds(klass, klass(header, extension=True).info, header)
+                parsed = klass(header, extension=True, alias=CODES[name])
+                self._assert_rebuilds(klass, parsed.info, header)
 
     def test_chain_header_rebuilds_its_info(self) -> None:
         from pcapkit.protocols.internet.ipv6.protocol import IPv6
@@ -106,15 +124,39 @@ class TestExtensionModeRebuild(unittest.TestCase):
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
                 header = self._header(klass)
-                parsed = klass(header)
+                parsed = klass(header, alias=CODES[name])
                 self.assertIn('__next_type__', parsed.info)
                 self._assert_rebuilds(klass, parsed.info, header)
 
     def test_keywords_override_the_replayed_mode(self) -> None:
         for name, klass in sorted(self._family().items()):
             with self.subTest(header=name):
-                parsed = klass(self._header(klass), extension=True)
+                parsed = klass(self._header(klass), extension=True, alias=CODES[name])
                 self.assertIn('__next_type__', klass.from_data(parsed.info, extension=False).info)
+
+    def test_shim6_keeps_its_protocol(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+
+        header = self._header(IPv6_Ext)
+        parsed = IPv6_Ext(header, extension=True, alias=CODES['IPv6_Ext'])  # type: Any
+        self.assertIs(parsed.info.protocol, ExtensionHeader.Shim6)
+        for source, value in (('info', parsed.info), ('to_dict', parsed.info.to_dict())):
+            with self.subTest(source=source):
+                self.assertIs(IPv6_Ext.from_data(value).info.protocol, ExtensionHeader.Shim6)
+
+    def test_a_member_accepts_and_drops_alias(self) -> None:
+        from pcapkit.utilities.warnings import UnknownFieldWarning
+
+        for name, klass in sorted(self._family().items()):
+            if name == 'IPv6_Ext':
+                continue
+            with self.subTest(header=name):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('error', UnknownFieldWarning)
+                    built = klass(next=59, alias=CODES['IPv6_Ext'])
+                self.assertEqual(built.data, self._header(klass))
+                self.assertEqual(built.info, klass(next=59).info)
 
 
 if __name__ == '__main__':
