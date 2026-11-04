@@ -326,20 +326,6 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             'trailer': data.get('trailer', b''),
         }
 
-    def _next_exthdr_depth(self, proto: 'Optional[int]', extension: 'bool' = False) -> 'int':  # pylint: disable=unused-argument
-        """Place the next layer in its chain of IPv6 extension headers.
-
-        Arguments:
-            proto: next layer IPX Packet Type
-            extension: if the next layer is parsed as an extension header
-
-        Returns:
-            Always ``0``: an IPX Packet Type is not an IP protocol number, so it
-            never names an IPv6 extension header (:issue:`2169`).
-
-        """
-        return 0
-
     def _read_ipx_address(self, addr: 'bytes') -> 'Data_Address':
         """Read IPX address field.
 
@@ -387,3 +373,17 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         return (bytes.fromhex(addr.network.replace(':', ''))
                 + bytes.fromhex(addr.node.replace('-', ''))
                 + int(addr.socket).to_bytes(2, 'big', signed=False))
+
+    def _next_exthdr_depth(self, proto: 'Optional[int]', extension: 'bool' = False) -> 'int':  # pylint: disable=unused-argument
+        """Place the next layer in its chain of IPv6 extension headers.
+
+        Arguments:
+            proto: next layer IPX Packet Type
+            extension: if the next layer is parsed as an extension header
+
+        Returns:
+            Always ``0``: an IPX Packet Type is not an IP protocol number, so it
+            never names an IPv6 extension header (:issue:`2169`).
+
+        """
+        return 0

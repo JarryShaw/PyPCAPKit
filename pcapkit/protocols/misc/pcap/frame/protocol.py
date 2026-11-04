@@ -588,36 +588,6 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             'packet': cls._make_payload(data),
         }
 
-    def _check_record_floor(self, length: 'Optional[int]') -> 'None':
-        """Refuse a tail too short to hold a record header.
-
-        Args:
-            length: Length of packet data, as the caller declared it, or
-                :obj:`None` to measure what is left in
-                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
-
-        Raises:
-            StreamEOFError: If fewer than sixteen octets are left to read.
-
-        A PCAP record header is sixteen octets, which is what
-        :meth:`__length_hint__` reports. A shorter tail is not a record, so
-        parsing one would only invent fields from zero padding. Reporting the
-        end of the stream instead lets :meth:`Extractor.record_frames
-        <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
-        frames read so far, as the PCAP-NG reader does for a truncated block
-        (:issue:`678`). See :issue:`1265`.
-
-        """
-        if length is None:
-            current = self._file.tell()
-            length = self._file.seek(0, io.SEEK_END) - current
-            self._file.seek(current, io.SEEK_SET)
-
-        if length < RECORD_HEADER_LEN:
-            raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
-                                 f'fewer than the {RECORD_HEADER_LEN} a record header needs',
-                                 quiet=True)
-
     def _decode_next_layer(self, dict_: 'Data_Frame', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
         r"""Decode next layer protocol.
@@ -696,6 +666,36 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             ts_usec = int((timestamp - ts_sec) * RESOLUTION[bool(nanosecond)])
 
         return ts_sec, ts_usec
+
+    def _check_record_floor(self, length: 'Optional[int]') -> 'None':
+        """Refuse a tail too short to hold a record header.
+
+        Args:
+            length: Length of packet data, as the caller declared it, or
+                :obj:`None` to measure what is left in
+                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+
+        Raises:
+            StreamEOFError: If fewer than sixteen octets are left to read.
+
+        A PCAP record header is sixteen octets, which is what
+        :meth:`__length_hint__` reports. A shorter tail is not a record, so
+        parsing one would only invent fields from zero padding. Reporting the
+        end of the stream instead lets :meth:`Extractor.record_frames
+        <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
+        frames read so far, as the PCAP-NG reader does for a truncated block
+        (:issue:`678`). See :issue:`1265`.
+
+        """
+        if length is None:
+            current = self._file.tell()
+            length = self._file.seek(0, io.SEEK_END) - current
+            self._file.seek(current, io.SEEK_SET)
+
+        if length < RECORD_HEADER_LEN:
+            raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
+                                 f'fewer than the {RECORD_HEADER_LEN} a record header needs',
+                                 quiet=True)
 
     def _dispatch_linktype(self, proto: 'Optional[int]', length: 'Optional[int]' = None) -> 'Optional[int]':
         """Link type a frame's data is dispatched under.

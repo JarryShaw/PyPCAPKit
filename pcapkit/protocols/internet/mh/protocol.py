@@ -1212,10 +1212,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Enum_Packet.Fast_Binding_Acknowledgment: 'fback',
             Enum_Packet.Fast_Neighbor_Advertisement: 'fna',
             Enum_Packet.Experimental_Mobility_Header: 'emh',
-            Enum_Packet.Handover_Initiate_Message: 'hi',
-            Enum_Packet.Handover_Acknowledge_Message: 'hack',
             Enum_Packet.Home_Agent_Switch_Message: 'has',
             Enum_Packet.Heartbeat_Message: 'hb',
+            Enum_Packet.Handover_Initiate_Message: 'hi',
+            Enum_Packet.Handover_Acknowledge_Message: 'hack',
             Enum_Packet.Binding_Revocation_Message: 'brm',
             Enum_Packet.Localized_Routing_Initiation: 'lri',
             Enum_Packet.Localized_Routing_Acknowledgment: 'lra',
@@ -1251,12 +1251,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Enum_Option.Permanent_Home_Keygen_Token: 'phkt',
             Enum_Option.Care_of_Test_Init: 'ct_init',
             Enum_Option.Care_of_Test: 'ct',
-            Enum_Option.Experimental_Mobility_Option: 'exp',
-            Enum_Option.Binding_Authorization_Data_for_FMIPv6: 'badf',
-            Enum_Option.Mobility_Header_IPv6_Address_Prefix: 'ipv6_ap',
             Enum_Option.DNS_UPDATE_TYPE: 'dns',
+            Enum_Option.Experimental_Mobility_Option: 'exp',
             Enum_Option.Vendor_Specific_Mobility_Option: 'vendor',
             Enum_Option.Service_Selection_Mobility_Option: 'service',
+            Enum_Option.Binding_Authorization_Data_for_FMIPv6: 'badf',
             Enum_Option.Home_Network_Prefix_Option: 'hnp',
             Enum_Option.Handoff_Indicator_Option: 'hi',
             Enum_Option.Access_Technology_Type_Option: 'att',
@@ -1269,6 +1268,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Enum_Option.NAT_Detection: 'nat',
             Enum_Option.IPv4_Care_of_Address: 'ipv4_coa',
             Enum_Option.GRE_Key_Option: 'gre',
+            Enum_Option.Mobility_Header_IPv6_Address_Prefix: 'ipv6_ap',
             Enum_Option.Binding_Identifier: 'bid',
             Enum_Option.IPv4_Home_Address_Request: 'ipv4_hoa_req',
             Enum_Option.IPv4_Home_Address_Reply: 'ipv4_hoa_rep',
@@ -1707,30 +1707,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             'data': data,
             'payload': cls._make_payload(data),
         }
-
-    @staticmethod
-    def _mh_message_length(header_len: 'int') -> 'int':
-        """Compute the total on-the-wire MH header length for a given ``Header Len``.
-
-        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the
-        Mobility Header, in units of 8 octets, excluding the first 8
-        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,
-        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``
-        below reports this value as the parsed message's own ``.length``,
-        which :meth:`~pcapkit.protocols.internet.mh.protocol.MH.read` subtracts from the
-        outer packet length to find the next layer's length. It is the inverse
-        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the
-        ``+ 1``: the units either side of it differ (octets vs. 8-octet
-        units), and dropping the offset silently reinterprets the field.
-
-        Args:
-            header_len: raw ``Header Len`` field value, as read off the wire.
-
-        Returns:
-            Total length, in octets, of the on-the-wire MH header.
-
-        """
-        return (header_len + 1) * 8
 
     def _pad_mh_message(self, data: 'Schema_Packet | bytes') -> 'Schema_Packet | bytes':
         """Pad an MH message so that the Mobility Header aligns to 8 octets.
@@ -2386,108 +2362,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_msg_hi(self, schema: 'Schema_HandoverInitiateMessage', *,
-                     header: 'Schema_MH') -> 'Data_HandoverInitiateMessage':
-        """Read MH handover initiate (HI) message type.
-
-        Structure of MH Handover Initiate Message [:rfc:`5568#section-6.2.1.1`,
-        :rfc:`5949#section-6.1.1`]:
-
-        .. code-block:: text
-
-                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                           |          Sequence #           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |S|U|P|F| Resv  |      Code     |                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
-           |                                                               |
-           .                        Mobility Options                       .
-           .                                                               .
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Note:
-            :rfc:`5568` defines only the ``S`` and ``U`` flags; the ``P`` and
-            ``F`` flags, and code values ``2`` and ``3``, are added by
-            :rfc:`5949#section-6.1.1`. All of these flags are registered in the IANA
-            *Handover Initiate Flags* registry, hence all are parsed here.
-
-        Args:
-            schema: Parsed message type schema.
-            header: Parsed MH header schema.
-
-        Returns:
-            Parsed message type data.
-
-        """
-        data = Data_HandoverInitiateMessage(
-            next=header.next,
-            length=self._mh_message_length(header.length),
-            type=header.type,
-            reserved=header.reserved,
-            chksum=header.chksum,
-            seq=schema.seq,
-            assign=bool(schema.flags['S']),
-            buffer=bool(schema.flags['U']),
-            proxy=bool(schema.flags['P']),
-            forward=bool(schema.flags['F']),
-            flags_reserved=schema.flags['reserved'],
-            code=schema.code,
-            options=self._read_mh_options(schema.options),
-        )
-        return data
-
-    def _read_msg_hack(self, schema: 'Schema_HandoverAcknowledgeMessage', *,
-                       header: 'Schema_MH') -> 'Data_HandoverAcknowledgeMessage':
-        """Read MH handover acknowledge (HAck) message type.
-
-        Structure of MH Handover Acknowledge Message [:rfc:`5568#section-6.2.1.2`,
-        :rfc:`5949#section-6.1.2`]:
-
-        .. code-block:: text
-
-                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                           |          Sequence #           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |U|P|F| Reserved|      Code     |                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
-           |                                                               |
-           .                        Mobility Options                       .
-           .                                                               .
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Note:
-            :rfc:`5568` reserves the whole first octet of the message data; the
-            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``,
-            ``6``, ``131`` and ``132``, are added by :rfc:`5949#section-6.1.2`.
-            All of these flags are registered in the IANA *Handover Acknowledge
-            Flags* registry, hence all are parsed here.
-
-        Args:
-            schema: Parsed message type schema.
-            header: Parsed MH header schema.
-
-        Returns:
-            Parsed message type data.
-
-        """
-        data = Data_HandoverAcknowledgeMessage(
-            next=header.next,
-            length=self._mh_message_length(header.length),
-            type=header.type,
-            reserved=header.reserved,
-            chksum=header.chksum,
-            seq=schema.seq,
-            buffer=bool(schema.flags['U']),
-            proxy=bool(schema.flags['P']),
-            forward=bool(schema.flags['F']),
-            flags_reserved=schema.flags['reserved'],
-            code=schema.code,
-            options=self._read_mh_options(schema.options),
-        )
-        return data
-
     def _read_msg_has(self, schema: 'Schema_HomeAgentSwitchMessage', *,
                       header: 'Schema_MH') -> 'Data_HomeAgentSwitchMessage':
         """Read MH home agent switch (HAS) message type.
@@ -2590,6 +2464,108 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             response=bool(schema.flags['R']),
             flags_reserved=schema.flags['reserved'],
             seq=schema.seq,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_hi(self, schema: 'Schema_HandoverInitiateMessage', *,
+                     header: 'Schema_MH') -> 'Data_HandoverInitiateMessage':
+        """Read MH handover initiate (HI) message type.
+
+        Structure of MH Handover Initiate Message [:rfc:`5568#section-6.2.1.1`,
+        :rfc:`5949#section-6.1.1`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |S|U|P|F| Resv  |      Code     |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
+           |                                                               |
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568` defines only the ``S`` and ``U`` flags; the ``P`` and
+            ``F`` flags, and code values ``2`` and ``3``, are added by
+            :rfc:`5949#section-6.1.1`. All of these flags are registered in the IANA
+            *Handover Initiate Flags* registry, hence all are parsed here.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HandoverInitiateMessage(
+            next=header.next,
+            length=self._mh_message_length(header.length),
+            type=header.type,
+            reserved=header.reserved,
+            chksum=header.chksum,
+            seq=schema.seq,
+            assign=bool(schema.flags['S']),
+            buffer=bool(schema.flags['U']),
+            proxy=bool(schema.flags['P']),
+            forward=bool(schema.flags['F']),
+            flags_reserved=schema.flags['reserved'],
+            code=schema.code,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_hack(self, schema: 'Schema_HandoverAcknowledgeMessage', *,
+                       header: 'Schema_MH') -> 'Data_HandoverAcknowledgeMessage':
+        """Read MH handover acknowledge (HAck) message type.
+
+        Structure of MH Handover Acknowledge Message [:rfc:`5568#section-6.2.1.2`,
+        :rfc:`5949#section-6.1.2`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |U|P|F| Reserved|      Code     |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               .
+           |                                                               |
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568` reserves the whole first octet of the message data; the
+            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``,
+            ``6``, ``131`` and ``132``, are added by :rfc:`5949#section-6.1.2`.
+            All of these flags are registered in the IANA *Handover Acknowledge
+            Flags* registry, hence all are parsed here.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HandoverAcknowledgeMessage(
+            next=header.next,
+            length=self._mh_message_length(header.length),
+            type=header.type,
+            reserved=header.reserved,
+            chksum=header.chksum,
+            seq=schema.seq,
+            buffer=bool(schema.flags['U']),
+            proxy=bool(schema.flags['P']),
+            forward=bool(schema.flags['F']),
+            flags_reserved=schema.flags['reserved'],
+            code=schema.code,
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -3000,127 +2976,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             options=self._read_mh_options(schema.options),
         )
         return data
-
-    @staticmethod
-    def _mh_option_length(schema_length: 'int') -> 'int':
-        """Compute an MH option's whole-option length from its on-the-wire ``Option Length``.
-
-        Per :rfc:`6275#section-6.2`, an MH option's ``Option Length`` field
-        (what each ``Schema_*Option.length`` here holds) counts *"the length
-        of the option, in octets, excluding the Option Type and Option
-        Length fields"* -- so the whole option, which is what every
-        ``_read_opt_*`` below reports back as the parsed option's own
-        ``.length``, is two octets more. The read-side call sites share this
-        helper so the arithmetic lives in one place. The exceptions are the
-        options whose ``Option Length`` is not that octet count: a ``Pad1``
-        option, which has no ``Option Length`` field at all (see the ``Note:``
-        on :meth:`_read_opt_pad` below), the BADF option, whose length leaves
-        out its SPI (see :meth:`_read_opt_badf`), and the multicast mobility
-        and acknowledgement options, whose length counts 32-bit words (see
-        :meth:`_read_opt_mcast`). Do NOT drop the ``+ 2``.
-
-        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
-        option, whose Option Type and Option Length are one octet each. It
-        is **not** a universal contract for everything this class parses:
-        a CGA extension's Extension Type and Extension Data Length are two
-        octets each [:rfc:`4581#section-2`], so those readers use
-        :meth:`_mh_extension_length` instead. Reusing this helper for them
-        would report every parsed CGA extension two octets short.
-
-        Note that only the *stored-length* read-side call sites are
-        collected here -- most ``_make_opt_*`` methods recompute the wire
-        ``Option Length`` from ``len(value)`` rather than reading a parsed
-        ``.length`` back, so they have nothing to unify against this helper.
-
-        Args:
-            schema_length: raw ``Option Length`` field value, as read off the wire.
-
-        Returns:
-            Whole-option length, in octets, including the Option Type and
-            Option Length fields.
-
-        """
-        return schema_length + 2
-
-    def _read_mh_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
-        """Read MH options.
-
-        Structure of MH option [:rfc:`6275`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |  Option Type  | Option Length |   Option Data...
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            options_schema: Parsed MH options.
-
-        Returns:
-            Parsed MH options data.
-
-        Raises:
-            ProtocolError: If an option read by a ``_read_opt_*`` method has fields
-                that do not take exactly the octets its ``Option Length`` declares
-                [:rfc:`6275#section-6.2.1`]. A parser registered as a callable
-                reports its own length, and is not checked. Or if the capture cut
-                an option short and its parser refuses the zeros it lacks, or its
-                maker does not write the octets captured back.
-
-        .. versionchanged:: 1.6.0
-
-           * Such an option is refused, rather than read from octets outside it
-             and rebuilt with the length its fields give (:issue:`2684`).
-           * An option the capture cut short is read, its missing octets as
-             zeros, if its maker writes the octets captured back
-             (:issue:`2694`).
-
-        """
-        options = OrderedMultiDict()  # type: Option
-
-        for schema in options_schema:
-            type = schema.type
-            name = self._lookup_registry(self.__option__, type)
-
-            if isinstance(name, str):
-                meth_name = f'_read_opt_{name}'
-                meth = cast('OptionParser',
-                            getattr(self, meth_name, self._read_opt_none))
-                maker = cast('OptionConstructor',
-                             getattr(self, f'_make_opt_{name}', self._make_opt_none))
-            else:
-                meth, maker = name
-
-            # NOTE: The capture cut this option short, as its short read records, so
-            # the octets it lacks read as zeros and it is short of its length. It
-            # stands if its parser takes those zeros and its maker writes the octets
-            # captured back (#2694); otherwise it is refused, as an option running
-            # past the data is (#1325).
-            if '__short_read__' in schema.__dict__:
-                try:
-                    with CaughtByCaller(BaseError):
-                        data = meth(schema, options=options)
-                        made = maker(type, data).pack()[:len(schema)]
-                except BaseError as error:
-                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short: {error}') from error
-                if made != bytes(schema):
-                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short does not '
-                                        'rebuild as captured')
-            else:
-                data = meth(schema, options=options)
-
-                # NOTE: Fields are read at their own widths, so a length they do not
-                # fill exactly reads octets not the option's, and rebuilds as another
-                # (#2684).
-                if isinstance(name, str) and len(schema) != data.length:
-                    raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
-
-            # record option data
-            options.add(type, data)
-
-        return options
 
     def _read_opt_none(self, schema: 'Schema_UnassignedOption', *,
                              options: 'Option') -> 'Data_UnassignedOption':
@@ -3760,147 +3615,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_opt_exp(self, schema: 'Schema_ExperimentalMobilityOption', *,
-                      options: 'Option') -> 'Data_ExperimentalMobilityOption':
-        """Read MH experimental mobility option.
-
-        Structure of MH Experimental Mobility option [:rfc:`5096#section-4`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |     Type      |    Length     |        Data .....
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            schema: Parsed option schema.
-            options: Parsed MH options.
-
-        Returns:
-            Constructed option data.
-
-        """
-        data = Data_ExperimentalMobilityOption(
-            type=schema.type,
-            length=self._mh_option_length(schema.length),
-            data=schema.data,
-        )
-        return data
-
-    def _read_opt_badf(self, schema: 'Schema_BADFOption', *,
-                       options: 'Option') -> 'Data_BADFOption':
-        """Read MH binding authorization data for FMIPv6 (BADF) option.
-
-        Structure of MH Binding Authorization Data for FMIPv6 option
-        [:rfc:`5568#section-6.4.5`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                           |   Type = 21   | Option Length |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                              SPI                              |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           +                                                               +
-           |                         Authenticator                         |
-           +                                                               +
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Note:
-            :rfc:`5568#section-6.4.5` defines the option length as *the length of
-            the Authenticator in bytes*, i.e. it does **not** cover the 4-byte
-            SPI, unlike every other mobility option, whose length covers all of
-            its option data. The wording is inherited from the :rfc:`6275`
-            binding authorization data option (type ``5``), which carries no SPI
-            and for which the two readings coincide. Because :rfc:`5568` also
-            requires this option to be the **last** mobility option present, the
-            discrepancy never has to be resolved in order to find the following
-            option, so the literal reading is used here and the reported
-            :attr:`~pcapkit.protocols.internet.mh.data.Option.length` accounts
-            for the extra 4 bytes.
-
-        Args:
-            schema: Parsed option schema.
-            options: Parsed MH options.
-
-        Returns:
-            Constructed option data.
-
-        """
-        if schema.length == 0:
-            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
-
-        data = Data_BADFOption(
-            type=schema.type,
-            length=schema.length + 6,  # 2 bytes for type & length, 4 bytes for SPI
-            spi=schema.spi,
-            data=schema.data,
-        )
-        return data
-
-    def _read_opt_ipv6_ap(self, schema: 'Schema_IPv6AddressPrefixOption', *,
-                          options: 'Option') -> 'Data_IPv6AddressPrefixOption':
-        """Read MH mobility header IPv6 address/prefix option.
-
-        Structure of MH Mobility Header IPv6 Address/Prefix option
-        [:rfc:`5568#section-6.4.2`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |     Type      |    Length     |  Option-Code  | Prefix Length |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +                     IPv6 Address/Prefix                       +
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        The option code identifies which address the option carries, see
-        :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`. It, too,
-        is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry
-        behind it, hence the enumeration is local to this module.
-
-        Note:
-            :rfc:`5568` prints the type as ``17``, which is the *neighbor
-            discovery* option type of its sibling in
-            :rfc:`5568#section-6.4.1`. Errata ID 1816 (verified) corrects it to
-            the IANA-assigned mobility option type ``34``, which is what this
-            handler is registered against.
-
-        Args:
-            schema: Parsed option schema.
-            options: Parsed MH options.
-
-        Returns:
-            Constructed option data.
-
-        """
-        if schema.length != 18:
-            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
-        if schema.prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
-
-        data = Data_IPv6AddressPrefixOption(
-            type=schema.type,
-            length=self._mh_option_length(schema.length),
-            code=IPv6AddressPrefixCode(schema.code),
-            prefix_length=schema.prefix_length,
-            address=schema.address,
-        )
-        return data
-
     def _read_opt_dns(self, schema: 'Schema_DNSUpdateOption', *,
                       options: 'Option') -> 'Data_DNSUpdateOption':
         """Read MH DNS-UPDATE-TYPE option.
@@ -3946,6 +3660,35 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             remove=bool(schema.flags['R']),
             reserved=schema.flags['reserved'],
             identity=schema.identity,
+        )
+        return data
+
+    def _read_opt_exp(self, schema: 'Schema_ExperimentalMobilityOption', *,
+                      options: 'Option') -> 'Data_ExperimentalMobilityOption':
+        """Read MH experimental mobility option.
+
+        Structure of MH Experimental Mobility option [:rfc:`5096#section-4`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Type      |    Length     |        Data .....
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        data = Data_ExperimentalMobilityOption(
+            type=schema.type,
+            length=self._mh_option_length(schema.length),
+            data=schema.data,
         )
         return data
 
@@ -4029,6 +3772,61 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             identifier=schema.identifier,
+        )
+        return data
+
+    def _read_opt_badf(self, schema: 'Schema_BADFOption', *,
+                       options: 'Option') -> 'Data_BADFOption':
+        """Read MH binding authorization data for FMIPv6 (BADF) option.
+
+        Structure of MH Binding Authorization Data for FMIPv6 option
+        [:rfc:`5568#section-6.4.5`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |   Type = 21   | Option Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                              SPI                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                         Authenticator                         |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            :rfc:`5568#section-6.4.5` defines the option length as *the length of
+            the Authenticator in bytes*, i.e. it does **not** cover the 4-byte
+            SPI, unlike every other mobility option, whose length covers all of
+            its option data. The wording is inherited from the :rfc:`6275`
+            binding authorization data option (type ``5``), which carries no SPI
+            and for which the two readings coincide. Because :rfc:`5568` also
+            requires this option to be the **last** mobility option present, the
+            discrepancy never has to be resolved in order to find the following
+            option, so the literal reading is used here and the reported
+            :attr:`~pcapkit.protocols.internet.mh.data.Option.length` accounts
+            for the extra 4 bytes.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length == 0:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_BADFOption(
+            type=schema.type,
+            length=schema.length + 6,  # 2 bytes for type & length, 4 bytes for SPI
+            spi=schema.spi,
+            data=schema.data,
         )
         return data
 
@@ -4559,6 +4357,63 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
+    def _read_opt_ipv6_ap(self, schema: 'Schema_IPv6AddressPrefixOption', *,
+                          options: 'Option') -> 'Data_IPv6AddressPrefixOption':
+        """Read MH mobility header IPv6 address/prefix option.
+
+        Structure of MH Mobility Header IPv6 Address/Prefix option
+        [:rfc:`5568#section-6.4.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Type      |    Length     |  Option-Code  | Prefix Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                     IPv6 Address/Prefix                       +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        The option code identifies which address the option carries, see
+        :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`. It, too,
+        is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry
+        behind it, hence the enumeration is local to this module.
+
+        Note:
+            :rfc:`5568` prints the type as ``17``, which is the *neighbor
+            discovery* option type of its sibling in
+            :rfc:`5568#section-6.4.1`. Errata ID 1816 (verified) corrects it to
+            the IANA-assigned mobility option type ``34``, which is what this
+            handler is registered against.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length != 18:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+        if schema.prefix_length > 128:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_IPv6AddressPrefixOption(
+            type=schema.type,
+            length=self._mh_option_length(schema.length),
+            code=IPv6AddressPrefixCode(schema.code),
+            prefix_length=schema.prefix_length,
+            address=schema.address,
+        )
+        return data
+
     def _read_opt_bid(self, schema: 'Schema_BindingIdentifierOption', *,
                       options: 'Option') -> 'Data_BindingIdentifierOption':
         """Read MH binding identifier (BID) option.
@@ -4998,117 +4853,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_fid_suboptions(
-        self, suboptions_schema: 'list[Schema_FlowIdentificationSuboption]',
-    ) -> 'FlowIDSuboption':
-        """Read MH flow identification sub-options.
-
-        Structure of MH flow identification sub-option [:rfc:`6089#section-4.2.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           | Sub-Opt Type  |Sub-Opt Length |   Sub-Option Data...
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        These are sub-options of one mobility option rather than mobility options
-        in their own right, so they are dispatched here rather than through
-        :attr:`self.__option__ <MH.__option__>`.
-
-        Note:
-            Dispatch is on the sub-option **type code** rather than on
-            ``isinstance`` of the schema class: the code is on the wire and the
-            registry keys on it, so it is the cheaper discriminator. A class test
-            would also be sound, since every
-            :class:`~pcapkit.protocols.schema.Schema` subclass carries its
-            own :class:`abc.ABCMeta` cache (:issue:`439`). The same reasoning
-            applies to :meth:`_read_ani_suboptions`,
-            :meth:`_read_qos_attributes`, :meth:`_read_lcmp_suboptions` and their
-            constructor counterparts.
-
-        Args:
-            suboptions_schema: Parsed sub-option schemas.
-
-        Returns:
-            Parsed sub-option data.
-
-        Raises:
-            ProtocolError: If a sub-option's fields do not take exactly the octets
-                its ``Sub-Opt Length`` declares [:rfc:`6089#section-4.2.1`], or a
-                target care-of address is neither IPv4 nor IPv6
-                [:rfc:`7109#section-6.2.2`], as the binding identifier option's
-                is refused.
-
-        .. versionchanged:: 1.6.0
-
-           Such a sub-option is refused, as a mobility option is by
-           :meth:`_read_mh_options`, rather than read from octets outside it or
-           left unable to rebuild (:issue:`2684`).
-
-        """
-        suboptions = OrderedMultiDict()  # type: FlowIDSuboption
-
-        for schema in suboptions_schema:
-            code = schema.type
-
-            if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
-                pad = cast('Schema_PadFlowIdentificationSuboption', schema)
-                size = 1 if code == Enum_FlowIDSuboption.Pad else self._mh_option_length(pad.length)
-                data = Data_PadFlowIdentificationSuboption(
-                    type=code,
-                    length=size,
-                    data=pad.data,
-                )  # type: Data_FlowIdentificationSuboption
-            elif code == Enum_FlowIDSuboption.BID_Reference:
-                bid_ref = cast('Schema_BIDReferenceSuboption', schema)
-                data = Data_BIDReferenceSuboption(
-                    type=code,
-                    length=self._mh_option_length(bid_ref.length),
-                    bid=tuple(bid_ref.bid),
-                )
-            elif code == Enum_FlowIDSuboption.Traffic_Selector:
-                selector = cast('Schema_TrafficSelectorSuboption', schema)
-                data = Data_TrafficSelectorSuboption(
-                    type=code,
-                    length=self._mh_option_length(selector.length),
-                    ts_format=selector.ts_format,
-                    reserved=selector.reserved,
-                    selector=selector.selector,
-                )
-            elif code == Enum_FlowIDSuboption.Flow_Binding_Action:
-                action = cast('Schema_FlowBindingActionSuboption', schema)
-                data = Data_FlowBindingActionSuboption(
-                    type=code,
-                    length=self._mh_option_length(action.length),
-                    reserved=action.reserved,
-                    action=action.action,
-                )
-            elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
-                target = cast('Schema_TargetCareofAddressSuboption', schema)
-                if target.length not in (6, 18):
-                    raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {target.length}')
-                data = Data_TargetCareofAddressSuboption(
-                    type=code,
-                    length=self._mh_option_length(target.length),
-                    reserved=target.reserved,
-                    address=target.address,
-                )
-            else:
-                unknown = cast('Schema_UnassignedFlowIdentificationSuboption', schema)
-                data = Data_UnassignedFlowIdentificationSuboption(
-                    type=code,
-                    length=self._mh_option_length(unknown.length),
-                    data=unknown.data,
-                )
-
-            if len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {schema.length}')
-            suboptions.add(code, data)
-
-        return suboptions
-
     def _read_opt_fid(self, schema: 'Schema_FlowIdentificationOption', *,
                       options: 'Option') -> 'Data_FlowIdentificationOption':
         """Read MH flow identification mobility option.
@@ -5409,122 +5153,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_ani_suboptions(
-        self, suboptions_schema: 'list[Schema_ANISuboption]',
-    ) -> 'ANISuboption':
-        """Read MH access network identifier sub-options.
-
-        Structure of MH access network identifier sub-option
-        [:rfc:`6757#section-3.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |    ANI Type   | ANI Length    |         Option Data           ~
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        The geo-location degrees of :rfc:`6757#section-3.1.2` are 24-bit
-        **two's-complement** fixed-point values with nine integer bits. A
-        :class:`~pcapkit.corekit.fields.strings.BitField` reads them unsigned, so
-        the sign is applied here by :meth:`_read_sint`, and both the decoded
-        degrees and the raw signed integers are recorded -- the latter so that
-        the exact wire value survives a round trip through the data model.
-
-        Note:
-            Dispatch is on the sub-option type code rather than on ``isinstance``
-            of the schema class, for the reason given in
-            :meth:`_read_fid_suboptions`.
-
-        Args:
-            suboptions_schema: Parsed sub-option schemas.
-
-        Returns:
-            Parsed sub-option data.
-
-        Raises:
-            ProtocolError: If a sub-option's fields do not take exactly the octets
-                its ``ANI Length`` declares [:rfc:`6757#section-3.1`].
-
-        .. versionchanged:: 1.6.0
-
-           Such a sub-option is refused, as a mobility option is by
-           :meth:`_read_mh_options` (:issue:`2684`).
-
-        """
-        suboptions = OrderedMultiDict()  # type: ANISuboption
-
-        for schema in suboptions_schema:
-            code = schema.type
-
-            if code == Enum_ANISuboption.Network_Identifier:
-                net = cast('Schema_ANINetworkIdentifierSuboption', schema)
-                data = Data_ANINetworkIdentifierSuboption(
-                    type=code,
-                    length=self._mh_option_length(net.length),
-                    utf8=bool(net.flags['E']),
-                    reserved=net.flags['reserved'],
-                    net_name=net.net_name,
-                    ap_name=net.ap_name,
-                )  # type: Data_ANISuboption
-            elif code == Enum_ANISuboption.Geo_Location:
-                geo = cast('Schema_ANIGeoLocationSuboption', schema)
-                raw_lat = self._read_sint(geo.location['latitude'], 24)
-                raw_lon = self._read_sint(geo.location['longitude'], 24)
-                data = Data_ANIGeoLocationSuboption(
-                    type=code,
-                    length=self._mh_option_length(geo.length),
-                    latitude=raw_lat / 2 ** 15,
-                    longitude=raw_lon / 2 ** 15,
-                    raw_latitude=raw_lat,
-                    raw_longitude=raw_lon,
-                )
-            elif code == Enum_ANISuboption.Operator_Identifier:
-                operator = cast('Schema_ANIOperatorIdentifierSuboption', schema)
-                data = Data_ANIOperatorIdentifierSuboption(
-                    type=code,
-                    length=self._mh_option_length(operator.length),
-                    op_id_type=operator.op_id_type,
-                    identifier=operator.identifier,
-                )
-            elif code == Enum_ANISuboption.Civic_Location:
-                civic = cast('Schema_ANICivicLocationSuboption', schema)
-                data = Data_ANICivicLocationSuboption(
-                    type=code,
-                    length=self._mh_option_length(civic.length),
-                    format=civic.format,
-                    reserved=civic.reserved,
-                    location=civic.location,
-                )
-            elif code == Enum_ANISuboption.MAG_Group_Identifier:
-                group = cast('Schema_ANIMAGGroupIdentifierSuboption', schema)
-                data = Data_ANIMAGGroupIdentifierSuboption(
-                    type=code,
-                    length=self._mh_option_length(group.length),
-                    group_id=group.group_id,
-                )
-            elif code == Enum_ANISuboption.ANI_Update_Timer:
-                timer = cast('Schema_ANIUpdateTimerSuboption', schema)
-                data = Data_ANIUpdateTimerSuboption(
-                    type=code,
-                    length=self._mh_option_length(timer.length),
-                    timer=datetime.timedelta(seconds=timer.timer * 4),
-                )
-            else:
-                unknown = cast('Schema_UnassignedANISuboption', schema)
-                data = Data_UnassignedANISuboption(
-                    type=code,
-                    length=self._mh_option_length(unknown.length),
-                    data=unknown.data,
-                )
-
-            if len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [ANI SubOpt {code}] invalid sub-option length: {schema.length}')
-            suboptions.add(code, data)
-
-        return suboptions
-
     def _read_opt_ani(self, schema: 'Schema_AccessNetworkIdentifierOption', *,
                       options: 'Option') -> 'Data_AccessNetworkIdentifierOption':
         """Read MH access network identifier option.
@@ -5819,118 +5447,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
         return data
 
-    def _read_qos_attributes(
-        self, attributes_schema: 'list[Schema_QoSAttribute]',
-    ) -> 'QoSAttribute':
-        """Read MH quality-of-service attributes.
-
-        Structure of MH quality-of-service attribute [:rfc:`7222#section-4.2`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |    Type       |     Length    |           Value               ~
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Note:
-            Every bit rate here is in **bits** per second [:rfc:`7222#section-4.2.1`],
-            not the kilobytes per second of the load information option's capacity
-            fields.
-
-            Dispatch is on the attribute type code rather than on ``isinstance`` of
-            the schema class, for the reason given in
-            :meth:`_read_fid_suboptions`.
-
-        Args:
-            attributes_schema: Parsed attribute schemas.
-
-        Returns:
-            Parsed attribute data.
-
-        Raises:
-            ProtocolError: If an attribute's fields do not take exactly the octets
-                its ``Length`` declares [:rfc:`7222#section-4.2`].
-
-        .. versionchanged:: 1.6.0
-
-           Such an attribute is refused, as a mobility option is by
-           :meth:`_read_mh_options` (:issue:`2684`).
-
-        """
-        attributes = OrderedMultiDict()  # type: QoSAttribute
-
-        for schema in attributes_schema:
-            code = schema.type
-
-            if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
-                        Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
-                session = cast('Schema_PerSessionBitRateAttribute', schema)
-                data = Data_PerSessionBitRateAttribute(
-                    type=code,
-                    length=self._mh_option_length(session.length),
-                    service=bool(session.flags['S']),
-                    exclude=bool(session.flags['E']),
-                    reserved=session.flags['reserved'],
-                    rate=session.rate,
-                )  # type: Data_QoSAttribute
-            elif code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
-                          Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
-                          Enum_QoSAttribute.Aggregate_Max_DL_Bit_Rate,
-                          Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
-                          Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
-                          Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
-                rate = cast('Schema_BitRateAttribute', schema)
-                data = Data_BitRateAttribute(
-                    type=code,
-                    length=self._mh_option_length(rate.length),
-                    reserved=rate.reserved,
-                    rate=rate.rate,
-                )
-            elif code == Enum_QoSAttribute.Allocation_Retention_Priority:
-                arp = cast('Schema_AllocationRetentionPriorityAttribute', schema)
-                data = Data_AllocationRetentionPriorityAttribute(
-                    type=code,
-                    length=self._mh_option_length(arp.length),
-                    reserved=arp.reserved,
-                    priority_level=arp.priority['PL'],
-                    preemption_capability=arp.priority['PC'],
-                    preemption_vulnerability=arp.priority['PV'],
-                )
-            elif code == Enum_QoSAttribute.QoS_Traffic_Selector:
-                selector = cast('Schema_QoSTrafficSelectorAttribute', schema)
-                data = Data_QoSTrafficSelectorAttribute(
-                    type=code,
-                    length=self._mh_option_length(selector.length),
-                    reserved=selector.reserved,
-                    ts_format=selector.ts_format,
-                    selector=selector.selector,
-                )
-            elif code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
-                vendor = cast('Schema_QoSVendorSpecificAttribute', schema)
-                data = Data_QoSVendorSpecificAttribute(
-                    type=code,
-                    length=self._mh_option_length(vendor.length),
-                    reserved=vendor.reserved,
-                    vendor=vendor.vendor,
-                    subtype=vendor.subtype,
-                    data=vendor.data,
-                )
-            else:
-                unknown = cast('Schema_UnassignedQoSAttribute', schema)
-                data = Data_UnassignedQoSAttribute(
-                    type=code,
-                    length=self._mh_option_length(unknown.length),
-                    data=unknown.data,
-                )
-
-            if len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [QoS Attr {code}] invalid attribute length: {schema.length}')
-            attributes.add(code, data)
-
-        return attributes
-
     def _read_opt_qos(self, schema: 'Schema_QualityOfServiceOption', *,
                       options: 'Option') -> 'Data_QualityOfServiceOption':
         """Read MH quality-of-service option.
@@ -6120,86 +5636,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data=schema.data,
         )
         return data
-
-    def _read_lcmp_suboptions(
-        self, suboptions_schema: 'list[Schema_LMAControlledMAGSuboption]',
-    ) -> 'LMAControlledMAGSuboption':
-        """Read MH LMA-controlled MAG parameters sub-options.
-
-        Structure of MH LMA-controlled MAG parameters sub-option
-        [:rfc:`8127#section-3.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |   LCMP Type   | LCMP Length   |       Sub-Option Data         ~
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Note:
-            Only the re-registration start time is in units of 4 seconds; every
-            other interval in these two sub-options is in whole seconds
-            [:rfc:`8127#section-3.1.1`, :rfc:`8127#section-3.1.2`].
-
-            Dispatch is on the sub-option type code rather than on ``isinstance``
-            of the schema class, for the reason given in
-            :meth:`_read_fid_suboptions`.
-
-        Args:
-            suboptions_schema: Parsed sub-option schemas.
-
-        Returns:
-            Parsed sub-option data.
-
-        Raises:
-            ProtocolError: If a sub-option's fields do not take exactly the octets
-                its ``LCMP Length`` declares [:rfc:`8127#section-3.1`].
-
-        .. versionchanged:: 1.6.0
-
-           Such a sub-option is refused, as a mobility option is by
-           :meth:`_read_mh_options` (:issue:`2684`).
-
-        """
-        suboptions = OrderedMultiDict()  # type: LMAControlledMAGSuboption
-
-        for schema in suboptions_schema:
-            code = schema.type
-
-            if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
-                rereg = cast('Schema_BindingReregistrationControlSuboption', schema)
-                data = Data_BindingReregistrationControlSuboption(
-                    type=code,
-                    length=self._mh_option_length(rereg.length),
-                    start_time=datetime.timedelta(seconds=rereg.start_time * 4),
-                    initial_retransmission=datetime.timedelta(
-                        seconds=rereg.initial_retransmission),
-                    max_retransmission=datetime.timedelta(seconds=rereg.max_retransmission),
-                )  # type: Data_LMAControlledMAGSuboption
-            elif code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
-                heartbeat = cast('Schema_HeartbeatControlSuboption', schema)
-                data = Data_HeartbeatControlSuboption(
-                    type=code,
-                    length=self._mh_option_length(heartbeat.length),
-                    interval=datetime.timedelta(seconds=heartbeat.interval),
-                    retransmission_delay=datetime.timedelta(
-                        seconds=heartbeat.retransmission_delay),
-                    max_retransmissions=heartbeat.max_retransmissions,
-                )
-            else:
-                unknown = cast('Schema_UnassignedLMAControlledMAGSuboption', schema)
-                data = Data_UnassignedLMAControlledMAGSuboption(
-                    type=code,
-                    length=self._mh_option_length(unknown.length),
-                    data=unknown.data,
-                )
-
-            if len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [LCMP SubOpt {code}] invalid sub-option length: {schema.length}')
-            suboptions.add(code, data)
-
-        return suboptions
 
     def _read_opt_lcmp(self, schema: 'Schema_LMAControlledMAGParametersOption', *,
                        options: 'Option') -> 'Data_LMAControlledMAGParametersOption':
@@ -6607,95 +6043,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lla=schema.lla,
         )
         return data
-
-    @staticmethod
-    def _mh_extension_length(schema_length: 'int') -> 'int':
-        """Compute a CGA extension's whole-structure length from its on-the-wire ``Extension Data Length``.
-
-        This is the CGA-extension counterpart of :meth:`_mh_option_length`, and
-        it deliberately adds ``4`` rather than ``2``. A CGA extension is **not**
-        an :rfc:`6275#section-6.2` mobility option: per :rfc:`4581#section-2`,
-        which defines the TLV format and formally updates :rfc:`3972`, its
-        ``Extension Type`` is a *"16-bit identifier of the type of the Extension
-        Field"* and its ``Extension Data Length`` a *"16-bit unsigned integer.
-        Length of the Extension Data field of this option, in octets"*. So the
-        fixed header is two 2-octet fields, not two 1-octet ones, and the whole
-        structure is ``4`` octets more than the stored length -- a fact
-        :rfc:`5535#section-5` states from the other direction for the one
-        non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of
-        the Extension in octets, not including the first 4 octets"*.
-
-        Passing these lengths through :meth:`_mh_option_length` would report
-        every parsed CGA extension two octets short: an 8-octet extension with
-        an ``Extension Data Length`` of ``4`` would come back as ``6``. The write
-        side is unaffected, since :meth:`_make_cga_extensions` measures
-        ``len(schema.pack())`` instead.
-
-        Args:
-            schema_length: raw ``Extension Data Length`` field value, as read off the wire.
-
-        Returns:
-            Whole-extension length, in octets, including the Extension Type and
-            Extension Data Length fields.
-
-        """
-        return schema_length + 4
-
-    def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
-        """Read CGA extensions.
-
-        Structure of CGA extensions [:rfc:`4581`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |         Extension Type        |   Extension Data Length       |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           ~                       Extension Data                          ~
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Args:
-            extensions_schema: Parsed CGA extensions.
-
-        Returns:
-            Parsed CGA extensions data.
-
-        Raises:
-            ProtocolError: If an extension read by a ``_read_ext_*`` method has
-                fields that do not take exactly the octets its ``Extension Data
-                Length`` declares [:rfc:`4581#section-2`]; a parser registered as
-                a callable is not checked.
-
-        .. versionchanged:: 1.6.0
-
-           Such an extension is refused, as a mobility option is by
-           :meth:`_read_mh_options` (:issue:`2684`).
-
-        """
-        extensions = OrderedMultiDict()  # type: Extension
-
-        for schema in extensions_schema:
-            type = schema.type
-            name = self._lookup_registry(self.__extension__, type)
-
-            if isinstance(name, str):
-                meth_name = f'_read_ext_{name}'
-                meth = cast('ExtensionParser',
-                            getattr(self, meth_name, self._read_ext_none))
-            else:
-                meth = name[0]
-            data = meth(schema, extensions=extensions)
-            if isinstance(name, str) and len(schema) != data.length:
-                raise ProtocolError(f'{self.alias}: [CGA Ext {type}] invalid extension length: {schema.length}')
-
-            # record extension data
-            extensions.add(type, data)
-
-        return extensions
 
     def _read_ext_none(self, schema: 'Schema_UnknownExtension', *,
                        extensions: 'Extension') -> 'Data_UnknownExtension':
@@ -7400,6 +6747,88 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             data=data,
         )
 
+    def _make_msg_has(self, message: 'Optional[Data_HomeAgentSwitchMessage]' = None, *,
+                      addresses: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                      msg_reserved: 'bytes' = b'\x00',
+                      **kwargs: 'Any') -> 'Schema_HomeAgentSwitchMessage':
+        """Make MH home agent switch (HAS) message type.
+
+        Args:
+            message: Message data model.
+            addresses: Alternate home agent addresses. An empty list is valid and
+                asks the mobile node to run home agent discovery.
+            options: Mobility options.
+            msg_reserved: The reserved octet of the message body as captured.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        Raises:
+            ProtocolError: If ``msg_reserved`` is not one octet.
+
+        """
+        if message is not None:
+            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00'),
+                                                 size=1, model=message, field='data', offset=1)
+            addresses = cast('list[IPv6Address | bytes | str | int]', list(message.addresses))
+            options = message.options
+        else:
+            addresses = addresses or []
+            options = options or []
+
+        return Schema_HomeAgentSwitchMessage(
+            count=len(addresses),
+            reserved=self._make_octets(msg_reserved, size=1, name='reserved octets'),
+            addresses=addresses,
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_hb(self, message: 'Optional[Data_HeartbeatMessage]' = None, *,
+                     unsolicited: 'bool' = False,
+                     response: 'bool' = False,
+                     seq: 'int' = 0,
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
+                     flags_reserved: 'int' = 0,
+                     **kwargs: 'Any') -> 'Schema_HeartbeatMessage':
+        """Make MH heartbeat message type.
+
+        Args:
+            message: Message data model.
+            unsolicited: Unsolicited flag.
+            response: Response flag; unset makes this a heartbeat request.
+            seq: Sequence number.
+            options: Mobility options.
+            flags_reserved: Reserved bits, i.e. the 14 bits before the ``U`` flag.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        Raises:
+            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
+
+        """
+        if message is not None:
+            unsolicited = message.unsolicited
+            response = message.response
+            flags_reserved = message.flags_reserved
+            seq = message.seq
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_HeartbeatMessage(
+            flags={
+                'U': unsolicited,
+                'R': response,
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits'),
+            },
+            seq=self._make_uint(seq, bits=32, name='sequence number'),
+            options=self._make_mh_options(options),
+        )
+
     def _make_msg_hi(self, message: 'Optional[Data_HandoverInitiateMessage]' = None, *,
                      seq: 'int' = 0,
                      assign: 'bool' = False,
@@ -7511,88 +6940,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 'reserved': self._make_uint(flags_reserved, bits=5, name='reserved bits'),
             },
             code=code_val,
-            options=self._make_mh_options(options),
-        )
-
-    def _make_msg_has(self, message: 'Optional[Data_HomeAgentSwitchMessage]' = None, *,
-                      addresses: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
-                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
-                      msg_reserved: 'bytes' = b'\x00',
-                      **kwargs: 'Any') -> 'Schema_HomeAgentSwitchMessage':
-        """Make MH home agent switch (HAS) message type.
-
-        Args:
-            message: Message data model.
-            addresses: Alternate home agent addresses. An empty list is valid and
-                asks the mobile node to run home agent discovery.
-            options: Mobility options.
-            msg_reserved: The reserved octet of the message body as captured.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed message type.
-
-        Raises:
-            ProtocolError: If ``msg_reserved`` is not one octet.
-
-        """
-        if message is not None:
-            msg_reserved = self._fill_short_read(getattr(message, 'msg_reserved', b'\x00'),
-                                                 size=1, model=message, field='data', offset=1)
-            addresses = cast('list[IPv6Address | bytes | str | int]', list(message.addresses))
-            options = message.options
-        else:
-            addresses = addresses or []
-            options = options or []
-
-        return Schema_HomeAgentSwitchMessage(
-            count=len(addresses),
-            reserved=self._make_octets(msg_reserved, size=1, name='reserved octets'),
-            addresses=addresses,
-            options=self._make_mh_options(options),
-        )
-
-    def _make_msg_hb(self, message: 'Optional[Data_HeartbeatMessage]' = None, *,
-                     unsolicited: 'bool' = False,
-                     response: 'bool' = False,
-                     seq: 'int' = 0,
-                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
-                     flags_reserved: 'int' = 0,
-                     **kwargs: 'Any') -> 'Schema_HeartbeatMessage':
-        """Make MH heartbeat message type.
-
-        Args:
-            message: Message data model.
-            unsolicited: Unsolicited flag.
-            response: Response flag; unset makes this a heartbeat request.
-            seq: Sequence number.
-            options: Mobility options.
-            flags_reserved: Reserved bits, i.e. the 14 bits before the ``U`` flag.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed message type.
-
-        Raises:
-            ProtocolError: If ``seq`` or ``flags_reserved`` does not fit its field.
-
-        """
-        if message is not None:
-            unsolicited = message.unsolicited
-            response = message.response
-            flags_reserved = message.flags_reserved
-            seq = message.seq
-            options = message.options
-        else:
-            options = options or []
-
-        return Schema_HeartbeatMessage(
-            flags={
-                'U': unsolicited,
-                'R': response,
-                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits'),
-            },
-            seq=self._make_uint(seq, bits=32, name='sequence number'),
             options=self._make_mh_options(options),
         )
 
@@ -7994,102 +7341,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             },
             options=self._make_mh_options(options),
         )
-
-    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
-        """Make the padding options needed to align the header to 8 octets.
-
-        Args:
-            offset: Number of octets emitted so far, **counting the six octets
-                of the fixed header** (``Payload Proto``, ``Header Len``,
-                ``MH Type``, ``Reserved`` and ``Checksum``) as well as the whole
-                message data.
-
-        Returns:
-            Tuple of the padding option schemas and the number of octets they
-            occupy.
-
-        Note:
-            The Mobility Header is a multiple of 8 octets and
-            :attr:`~pcapkit.protocols.internet.mh.schema.MH.length` counts those
-            units less one [:rfc:`6275#section-6.1.1`]. Its fixed part is
-            **six** octets, not the two of an IPv6 options header, so it is
-            ``len(data) + 6`` that has to be aligned -- which means the message
-            data is well formed only when it is 2 octets past a multiple of 8,
-            a different modulus from the one the extension headers use.
-
-            A ``PadN`` option spends two octets on its own type and
-            ``Option Length`` fields before any padding data, so occupying
-            ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.
-            One octet is padded with a ``Pad1`` option instead, that being the
-            only form which can occupy a single octet. Two octets are one
-            ``PadN`` with an ``Option Length`` of ``0``, not two ``Pad1``:
-            :rfc:`6275#section-6.2.2` says a ``PadN`` should be used rather than
-            multiple ``Pad1`` options.
-
-        """
-        pad_len = pad_length(offset, 8)
-        if pad_len == 0:
-            return [], 0
-        if pad_len == 1:
-            return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
-        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
-
-    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':  # pylint: disable=line-too-long
-        """Make options for MH.
-
-        Args:
-            options: MH options.
-
-        Returns:
-            Mobility options list.
-
-        Raises:
-            ProtocolError: If the type of an option, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if an option
-                given as raw octets is empty (:issue:`2723`).
-
-        """
-        if isinstance(options, list):
-            options_list = []  # type: list[Schema_Option | bytes]
-            for schema in options:
-                if isinstance(schema, bytes):
-                    if not schema:
-                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no type octet')
-                    code = Enum_Option.get(int.from_bytes(schema[0:1], 'big', signed=False))
-
-                    data = schema  # type: Schema_Option | bytes
-                elif isinstance(schema, Schema):
-                    data = schema
-                else:
-                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', schema)
-                    code = self._make_index(kind, Enum_Option, bits=8, name='option type')
-                    name = self._lookup_registry(self.__option__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_opt_{name}'
-                        meth = cast('OptionConstructor',
-                                    getattr(self, meth_name, self._make_opt_none))
-                    else:
-                        meth = name[1]
-                    data = meth(code, **args)
-
-                options_list.append(data)
-            return options_list
-
-        options_list = []
-        for key, option in options.items(multi=True):
-            code = self._make_index(key, Enum_Option, bits=8, name='option type')
-            name = self._lookup_registry(self.__option__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_opt_{name}'
-                meth = cast('OptionConstructor',
-                            getattr(self, meth_name, self._make_opt_none))
-            else:
-                meth = name[1]
-
-            data = meth(code, option)
-            options_list.append(data)
-        return options_list
 
     def _make_opt_none(self, type: 'Enum_Option', option: 'Optional[Data_UnassignedOption]' = None, *,
                              data: 'bytes' = b'',
@@ -8870,120 +8121,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             token=self._make_octets(token, size=8, name='token'),
         )
 
-    def _make_opt_exp(self, type: 'Enum_Option', option: 'Optional[Data_ExperimentalMobilityOption]' = None, *,
-                      data: 'bytes' = b'',
-                      **kwargs: 'Any') -> 'Schema_ExperimentalMobilityOption':
-        """Make MH experimental mobility option.
-
-        Args:
-            type: Option type.
-            option: Option data model.
-            data: Experimental data.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If the option is too long for its one-octet
-                ``Option Length``.
-
-        """
-        if option is not None:
-            data = option.data
-
-        return Schema_ExperimentalMobilityOption(
-            type=type,
-            length=self._make_uint(len(data), bits=8, name='Option Length'),
-            data=data,
-        )
-
-    def _make_opt_badf(self, type: 'Enum_Option', option: 'Optional[Data_BADFOption]' = None, *,
-                       spi: 'int' = 0,
-                       data: 'bytes' = b'',
-                       **kwargs: 'Any') -> 'Schema_BADFOption':
-        """Make MH binding authorization data for FMIPv6 (BADF) option.
-
-        Args:
-            type: Option type.
-            option: Option data model.
-            spi: Security parameter index.
-            data: Authenticator.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``data`` is empty, since the ``length`` field then
-                reads as ``0``, which :meth:`_read_opt_badf` rejects; or if
-                ``spi`` does not fit in four octets.
-                Also if the option is too long for its one-octet ``Option Length``.
-
-        Note:
-            The ``length`` field counts the authenticator only, excluding the
-            SPI, see :meth:`_read_opt_badf`.
-
-        """
-        if option is not None:
-            spi = option.spi
-            data = option.data
-
-        if not data:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: '
-                                f'must be at least one octet, not {data!r}')
-
-        return Schema_BADFOption(
-            type=type,
-            length=self._make_uint(len(data), bits=8, name='Option Length'),
-            spi=self._make_uint(spi, bits=32, name='SPI'),
-            data=data,
-        )
-
-    def _make_opt_ipv6_ap(self, type: 'Enum_Option', option: 'Optional[Data_IPv6AddressPrefixOption]' = None, *,
-                          code: 'IPv6AddressPrefixCode | int' = IPv6AddressPrefixCode.New_Care_of_Address,
-                          prefix_length: 'int' = 128,
-                          address: 'bytes | str | int | IPv6Address' = '::',
-                          **kwargs: 'Any') -> 'Schema_IPv6AddressPrefixOption':
-        """Make MH mobility header IPv6 address/prefix option.
-
-        Args:
-            type: Option type.
-            option: Option data model.
-            code: Option code, see
-                :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`.
-            prefix_length: Prefix length.
-            address: IPv6 address/prefix.
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
-                or longer than the address, or ``code`` is a name, a
-                :obj:`bool` or a code its field cannot carry.
-
-        """
-        if option is not None:
-            code_val = option.code
-            prefix_length = option.prefix_length
-            address = option.address
-        else:
-            code_val = self._make_index(code, IPv6AddressPrefixCode, bits=8, name='code')
-
-        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
-        if prefix_length > 128:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
-
-        return Schema_IPv6AddressPrefixOption(
-            type=type,
-            length=18,
-            code=code_val,
-            prefix_length=prefix_length,
-            address=address,
-        )
-
     def _make_opt_dns(self, type: 'Enum_Option', option: 'Optional[Data_DNSUpdateOption]' = None, *,
                       status: 'Enum_DNSStatusCode | int' = Enum_DNSStatusCode.DNS_update_performed,
                       remove: 'bool' = False,
@@ -9027,6 +8164,34 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             flags={'R': int(remove), 'reserved': self._make_uint(reserved, bits=7,
                                                                  name='reserved bits')},
             identity=identity,
+        )
+
+    def _make_opt_exp(self, type: 'Enum_Option', option: 'Optional[Data_ExperimentalMobilityOption]' = None, *,
+                      data: 'bytes' = b'',
+                      **kwargs: 'Any') -> 'Schema_ExperimentalMobilityOption':
+        """Make MH experimental mobility option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            data: Experimental data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If the option is too long for its one-octet
+                ``Option Length``.
+
+        """
+        if option is not None:
+            data = option.data
+
+        return Schema_ExperimentalMobilityOption(
+            type=type,
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
+            data=data,
         )
 
     def _make_opt_vendor(self, type: 'Enum_Option', option: 'Optional[Data_VendorSpecificOption]' = None, *,
@@ -9104,6 +8269,48 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=self._make_uint(len(encoded), bits=8, name='Option Length'),
             identifier=identifier,
+        )
+
+    def _make_opt_badf(self, type: 'Enum_Option', option: 'Optional[Data_BADFOption]' = None, *,
+                       spi: 'int' = 0,
+                       data: 'bytes' = b'',
+                       **kwargs: 'Any') -> 'Schema_BADFOption':
+        """Make MH binding authorization data for FMIPv6 (BADF) option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            spi: Security parameter index.
+            data: Authenticator.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``data`` is empty, since the ``length`` field then
+                reads as ``0``, which :meth:`_read_opt_badf` rejects; or if
+                ``spi`` does not fit in four octets.
+                Also if the option is too long for its one-octet ``Option Length``.
+
+        Note:
+            The ``length`` field counts the authenticator only, excluding the
+            SPI, see :meth:`_read_opt_badf`.
+
+        """
+        if option is not None:
+            spi = option.spi
+            data = option.data
+
+        if not data:
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid data: '
+                                f'must be at least one octet, not {data!r}')
+
+        return Schema_BADFOption(
+            type=type,
+            length=self._make_uint(len(data), bits=8, name='Option Length'),
+            spi=self._make_uint(spi, bits=32, name='SPI'),
+            data=data,
         )
 
     def _make_opt_hnp(self, type: 'Enum_Option', option: 'Optional[Data_HomeNetworkPrefixOption]' = None, *,
@@ -9560,6 +8767,50 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=2 if key is None else 6,
             reserved=self._make_octets(reserved, size=2, name='reserved octets'),
             key=None if key is None else self._make_uint(key, bits=32, name='GRE key'),
+        )
+
+    def _make_opt_ipv6_ap(self, type: 'Enum_Option', option: 'Optional[Data_IPv6AddressPrefixOption]' = None, *,
+                          code: 'IPv6AddressPrefixCode | int' = IPv6AddressPrefixCode.New_Care_of_Address,
+                          prefix_length: 'int' = 128,
+                          address: 'bytes | str | int | IPv6Address' = '::',
+                          **kwargs: 'Any') -> 'Schema_IPv6AddressPrefixOption':
+        """Make MH mobility header IPv6 address/prefix option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            code: Option code, see
+                :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`.
+            prefix_length: Prefix length.
+            address: IPv6 address/prefix.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``prefix_length`` is negative, a :obj:`bool`,
+                or longer than the address, or ``code`` is a name, a
+                :obj:`bool` or a code its field cannot carry.
+
+        """
+        if option is not None:
+            code_val = option.code
+            prefix_length = option.prefix_length
+            address = option.address
+        else:
+            code_val = self._make_index(code, IPv6AddressPrefixCode, bits=8, name='code')
+
+        prefix_length = self._make_uint(prefix_length, bits=8, name='prefix length')
+        if prefix_length > 128:
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid prefix length: {prefix_length}')
+
+        return Schema_IPv6AddressPrefixOption(
+            type=type,
+            length=18,
+            code=code_val,
+            prefix_length=prefix_length,
+            address=address,
         )
 
     def _make_opt_bid(self, type: 'Enum_Option', option: 'Optional[Data_BindingIdentifierOption]' = None, *,
@@ -10049,155 +9300,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             fid=fid,
         )
 
-    def _make_fid_suboptions(
-        self,
-        suboptions: 'FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
-    ) -> 'list[Schema_FlowIdentificationSuboption | bytes]':
-        """Make MH flow identification sub-options.
-
-        Args:
-            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
-                pairs, or raw octets.
-
-        Returns:
-            Sub-option schema list.
-
-        Raises:
-            ProtocolError: If the type of a sub-option, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if a
-                sub-option given as raw octets is empty (:issue:`2723`).
-
-        """
-        if isinstance(suboptions, list):
-            entries = []  # type: list[Schema_FlowIdentificationSuboption | bytes]
-            for item in suboptions:
-                if isinstance(item, bytes) and not item:
-                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
-                if isinstance(item, (bytes, Schema)):
-                    entries.append(cast('Schema_FlowIdentificationSuboption | bytes', item))
-                else:
-                    kind, args = cast('tuple[Enum_FlowIDSuboption | int, dict[str, Any]]', item)
-                    code = self._make_index(kind, Enum_FlowIDSuboption, bits=8, name='sub-option type')
-                    entries.append(self._make_fid_suboption(code, **args))
-            return entries
-
-        return [self._make_fid_suboption(
-                    self._make_index(key, Enum_FlowIDSuboption, bits=8, name='sub-option type'), option)
-                for key, option in suboptions.items(multi=True)]
-
-    def _make_fid_suboption(self, code: 'Enum_FlowIDSuboption',
-                            option: 'Optional[Data_FlowIdentificationSuboption]' = None,
-                            **kwargs: 'Any') -> 'Schema_FlowIdentificationSuboption':
-        """Make one MH flow identification sub-option.
-
-        Args:
-            code: Sub-option type.
-            option: Sub-option data model.
-            **kwargs: Sub-option fields, when no data model is given.
-
-        Returns:
-            Constructed sub-option schema.
-
-        Raises:
-            ProtocolError: If an entry of a ``BID_Reference`` sub-option's ``bid`` does
-                not fit its field, a ``ts_format`` or ``action`` is a name, a
-                :obj:`bool` or a code its field cannot carry, or a sub-option's
-                ``reserved`` is not as many octets as its field.
-
-        Note:
-            The data model parameter is named ``option`` rather than ``data``
-            to match :meth:`_make_opt_fid` and the rest of this module -- and
-            because ``data`` would **shadow a field**. The traffic selector and
-            unassigned sub-options both carry a field of their own called
-            ``data``, so a caller's ``data=`` would bind to the model parameter
-            instead of landing in ``**kwargs``, and the fallback that reads
-            ``data`` from ``**kwargs`` would never see it: the payload would be
-            silently dropped and the length written as though it were empty,
-            with no exception.
-
-            Dispatch is on ``code`` rather than on ``isinstance`` of the schema or
-            data class, for the reason given in :meth:`_read_fid_suboptions`.
-
-        """
-        if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
-            if code == Enum_FlowIDSuboption.Pad:
-                pad_len = 0
-            elif option is not None:
-                pad_len = option.length - 2
-            else:
-                pad_len = cast('int', kwargs.get('length', 0))
-            if option is not None:
-                pad_data = getattr(option, 'data', b'')
-            else:
-                pad_data = cast('bytes', kwargs.get('data', b''))
-            return Schema_PadFlowIdentificationSuboption(type=code, length=pad_len, data=pad_data)
-
-        if code == Enum_FlowIDSuboption.BID_Reference:
-            if option is not None:
-                bid = list(cast('Data_BIDReferenceSuboption', option).bid)
-            else:
-                bid = cast('list[int]', kwargs.get('bid') or [])
-            for item in bid:
-                self._make_uint(item, bits=16, name='binding identifier')
-            return Schema_BIDReferenceSuboption(type=code, length=len(bid) * 2, bid=bid)
-
-        if code == Enum_FlowIDSuboption.Traffic_Selector:
-            if option is not None:
-                selector_opt = cast('Data_TrafficSelectorSuboption', option)
-                ts_format = selector_opt.ts_format  # type: Enum_TrafficSelector | int
-                selector = selector_opt.selector
-                reserved = getattr(selector_opt, 'reserved', b'\x00')
-            else:
-                ts_format = self._make_index(
-                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
-                    Enum_TrafficSelector, bits=8, name='TS format')
-                selector = cast('bytes', kwargs.get('selector', b''))
-                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
-            return Schema_TrafficSelectorSuboption(
-                type=code, length=2 + len(selector),
-                ts_format=cast('Enum_TrafficSelector', ts_format),
-                reserved=self._make_octets(reserved, size=1, name='reserved octets'),
-                selector=selector)
-
-        if code == Enum_FlowIDSuboption.Flow_Binding_Action:
-            if option is not None:
-                action = cast('Data_FlowBindingActionSuboption',
-                              option).action  # type: Enum_FlowBindingAction | int
-                reserved = getattr(option, 'reserved', b'\x00')
-            else:
-                action = self._make_index(kwargs.get('action', Enum_FlowBindingAction.Add),
-                                          Enum_FlowBindingAction, bits=8, name='action')
-                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
-            return Schema_FlowBindingActionSuboption(
-                type=code, length=2, reserved=self._make_octets(reserved, size=1, name='reserved octets'),
-                action=cast('Enum_FlowBindingAction', action))
-
-        if code == Enum_FlowIDSuboption.Target_Care_of_Address:
-            if option is not None:
-                address = cast('Data_TargetCareofAddressSuboption', option).address  # type: Any
-                reserved = getattr(option, 'reserved', b'\x00\x00')
-            else:
-                address = kwargs.get('address', '::')
-                reserved = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            # NOTE: Through ``parse_ip_address`` because the sub-option length
-            # below is derived from the family here, ahead of the schema, so a
-            # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
-            # schema's guard, packing ``address=True`` as ``0506000000000001``.
-            addr = parse_ip_address(
-                address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
-            return Schema_TargetCareofAddressSuboption(
-                type=code, length=6 if addr.version == 4 else 18,
-                reserved=self._make_octets(reserved, size=2, name='reserved octets'),
-                address=addr)
-
-        if option is not None:
-            payload = cast('Data_UnassignedFlowIdentificationSuboption', option).data
-        else:
-            payload = cast('bytes', kwargs.get('data', b''))
-        return Schema_UnassignedFlowIdentificationSuboption(
-            type=code, length=len(payload), data=payload)
-
     def _make_opt_fid(self, type: 'Enum_Option', option: 'Optional[Data_FlowIdentificationOption]' = None, *,
                       fid: 'int' = 1,
                       fid_pri: 'int' = 1,
@@ -10473,161 +9575,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address=address,
         )
 
-    def _make_ani_suboptions(
-        self,
-        suboptions: 'ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption | int, dict[str, Any]] | bytes]',
-    ) -> 'list[Schema_ANISuboption | bytes]':
-        """Make MH access network identifier sub-options.
-
-        Args:
-            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
-                pairs, or raw octets.
-
-        Returns:
-            Sub-option schema list.
-
-        Raises:
-            ProtocolError: If the type of a sub-option, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if a
-                sub-option given as raw octets is empty (:issue:`2723`).
-
-        """
-        if isinstance(suboptions, list):
-            entries = []  # type: list[Schema_ANISuboption | bytes]
-            for item in suboptions:
-                if isinstance(item, bytes) and not item:
-                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
-                if isinstance(item, (bytes, Schema)):
-                    entries.append(cast('Schema_ANISuboption | bytes', item))
-                else:
-                    kind, args = cast('tuple[Enum_ANISuboption | int, dict[str, Any]]', item)
-                    code = self._make_index(kind, Enum_ANISuboption, bits=8, name='sub-option type')
-                    entries.append(self._make_ani_suboption(code, **args))
-            return entries
-
-        return [self._make_ani_suboption(
-                    self._make_index(key, Enum_ANISuboption, bits=8, name='sub-option type'), option)
-                for key, option in suboptions.items(multi=True)]
-
-    def _make_ani_suboption(self, code: 'Enum_ANISuboption',
-                            option: 'Optional[Data_ANISuboption]' = None,
-                            **kwargs: 'Any') -> 'Schema_ANISuboption':
-        """Make one MH access network identifier sub-option.
-
-        Args:
-            code: Sub-option type.
-            option: Sub-option data model.
-            **kwargs: Sub-option fields, when no data model is given.
-
-        Returns:
-            Constructed sub-option schema.
-
-        Raises:
-            ProtocolError: If a raw geo-location degree does not fit in 24
-                bits as two's complement, or a sub-option's ``reserved``,
-                ``format``, ``group_id`` or ``timer`` does not fit its field, or
-                ``op_id_type`` is a name, a :obj:`bool` or a code its field
-                cannot carry.
-
-        Note:
-            The geo-location degrees are re-encoded from the **raw** signed
-            integers rather than from the decoded floats, since a float cannot
-            always be converted back to the same 24-bit fixed-point value, and
-            :meth:`_make_sint` gives back the bits :meth:`_read_sint` read.
-
-            The data model parameter is named ``option`` rather than ``data`` so
-            that it cannot shadow a sub-option field of that name -- see
-            :meth:`_make_fid_suboption`. Dispatch is on ``code``
-            rather than on ``isinstance``, for the reason given in
-            :meth:`_read_fid_suboptions`.
-
-        """
-        if code == Enum_ANISuboption.Network_Identifier:
-            if option is not None:
-                net = cast('Data_ANINetworkIdentifierSuboption', option)
-                utf8, net_name, ap_name = net.utf8, net.net_name, net.ap_name
-                reserved = net.reserved
-            else:
-                utf8 = cast('bool', kwargs.get('utf8', False))
-                reserved = cast('int', kwargs.get('reserved', 0))
-                net_name = cast('bytes', kwargs.get('net_name', b''))
-                ap_name = cast('bytes', kwargs.get('ap_name', b''))
-            return Schema_ANINetworkIdentifierSuboption(
-                type=code, length=3 + len(net_name) + len(ap_name),
-                flags={'E': int(utf8), 'reserved': self._make_uint(reserved, bits=7,
-                                                                   name='reserved bits')},
-                net_name_len=len(net_name), net_name=net_name,
-                ap_name_len=len(ap_name), ap_name=ap_name)
-
-        if code == Enum_ANISuboption.Geo_Location:
-            if option is not None:
-                geo = cast('Data_ANIGeoLocationSuboption', option)
-                raw_lat, raw_lon = geo.raw_latitude, geo.raw_longitude
-            else:
-                raw_lat = cast('int', kwargs.get('raw_latitude', 0))
-                raw_lon = cast('int', kwargs.get('raw_longitude', 0))
-            return Schema_ANIGeoLocationSuboption(
-                type=code, length=6, location={
-                    'latitude': self._make_sint(raw_lat, bits=24, name='ANI geo-location latitude'),
-                    'longitude': self._make_sint(raw_lon, bits=24, name='ANI geo-location longitude'),
-                })
-
-        if code == Enum_ANISuboption.Operator_Identifier:
-            if option is not None:
-                operator = cast('Data_ANIOperatorIdentifierSuboption', option)
-                op_id_type = operator.op_id_type  # type: Enum_OperatorID | int
-                identifier = operator.identifier
-            else:
-                op_id_type = self._make_index(
-                    kwargs.get('op_id_type', Enum_OperatorID.Realm_of_the_Operator),
-                    Enum_OperatorID, bits=8, name='Op-ID type')
-                identifier = cast('bytes', kwargs.get('identifier', b''))
-            return Schema_ANIOperatorIdentifierSuboption(
-                type=code, length=1 + len(identifier),
-                op_id_type=cast('Enum_OperatorID', op_id_type), identifier=identifier)
-
-        if code == Enum_ANISuboption.Civic_Location:
-            if option is not None:
-                civic = cast('Data_ANICivicLocationSuboption', option)
-                fmt, location = civic.format, civic.location
-                octets = getattr(civic, 'reserved', b'\x00')
-            else:
-                fmt = cast('int', kwargs.get('format', 0))
-                location = cast('bytes', kwargs.get('location', b''))
-                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
-            return Schema_ANICivicLocationSuboption(
-                type=code, length=2 + len(location),
-                format=self._make_uint(fmt, bits=8, name='civic location format'),
-                reserved=self._make_octets(octets, size=1, name='reserved octets'),
-                location=location)
-
-        if code == Enum_ANISuboption.MAG_Group_Identifier:
-            if option is not None:
-                group_id = cast('Data_ANIMAGGroupIdentifierSuboption', option).group_id
-            else:
-                group_id = cast('int', kwargs.get('group_id', 0))
-            return Schema_ANIMAGGroupIdentifierSuboption(
-                type=code, length=2, group_id=self._make_uint(group_id, bits=16,
-                                                              name='MAG group identifier'))
-
-        if code == Enum_ANISuboption.ANI_Update_Timer:
-            if option is not None:
-                timer = math.ceil(cast('Data_ANIUpdateTimerSuboption',
-                                       option).timer.total_seconds() / 4)
-            else:
-                raw_timer = kwargs.get('timer', 0)
-                timer = raw_timer if isinstance(raw_timer, int) else math.ceil(
-                    raw_timer.total_seconds() / 4)
-            return Schema_ANIUpdateTimerSuboption(
-                type=code, length=2, timer=self._make_uint(timer, bits=16, name='ANI update timer'))
-
-        if option is not None:
-            payload = cast('Data_UnassignedANISuboption', option).data
-        else:
-            payload = cast('bytes', kwargs.get('data', b''))
-        return Schema_UnassignedANISuboption(type=code, length=len(payload), data=payload)
-
     def _make_opt_ani(self, type: 'Enum_Option', option: 'Optional[Data_AccessNetworkIdentifierOption]' = None, *,
                       suboptions: 'Optional[ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
                       **kwargs: 'Any') -> 'Schema_AccessNetworkIdentifierOption':
@@ -10881,168 +9828,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             context=context,
         )
 
-    def _make_qos_attributes(
-        self,
-        attributes: 'QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute | int, dict[str, Any]] | bytes]',
-    ) -> 'list[Schema_QoSAttribute | bytes]':
-        """Make MH quality-of-service attributes.
-
-        Args:
-            attributes: Attributes, as parsed data, schemas, ``(type, kwargs)``
-                pairs, or raw octets.
-
-        Returns:
-            Attribute schema list.
-
-        Raises:
-            ProtocolError: If the type of an attribute, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if an
-                attribute given as raw octets is empty (:issue:`2723`).
-
-        """
-        if isinstance(attributes, list):
-            entries = []  # type: list[Schema_QoSAttribute | bytes]
-            for item in attributes:
-                if isinstance(item, bytes) and not item:
-                    raise ProtocolError(f'{self.alias}: invalid attribute: {item!r} holds no type octet')
-                if isinstance(item, (bytes, Schema)):
-                    entries.append(cast('Schema_QoSAttribute | bytes', item))
-                else:
-                    kind, args = cast('tuple[Enum_QoSAttribute | int, dict[str, Any]]', item)
-                    code = self._make_index(kind, Enum_QoSAttribute, bits=8, name='attribute type')
-                    entries.append(self._make_qos_attribute(code, **args))
-            return entries
-
-        return [self._make_qos_attribute(
-                    self._make_index(key, Enum_QoSAttribute, bits=8, name='attribute type'), option)
-                for key, option in attributes.items(multi=True)]
-
-    def _make_qos_attribute(self, code: 'Enum_QoSAttribute',
-                            option: 'Optional[Data_QoSAttribute]' = None,
-                            **kwargs: 'Any') -> 'Schema_QoSAttribute':
-        """Make one MH quality-of-service attribute.
-
-        Args:
-            code: Attribute type.
-            option: Attribute data model.
-            **kwargs: Attribute fields, when no data model is given.
-
-        Returns:
-            Constructed attribute schema.
-
-        Raises:
-            ProtocolError: If a rate, priority, vendor or reserved value does not fit
-                its field, or ``ts_format`` is a name, a :obj:`bool` or a code its
-                field cannot carry.
-
-        Note:
-            The data model parameter is named ``option`` rather than ``data``
-            deliberately. The vendor-specific attribute of
-            :rfc:`7222#section-4.2.11` has a field of its own called ``data``, so
-            a parameter of that name would capture a caller's ``data=`` and leave
-            the ``kwargs.get('data')`` fallback empty, silently dropping the vendor
-            payload and writing the length as though it were empty. ``vendor`` and
-            ``subtype`` do not collide, so the loss would look like a partial
-            success rather than a bug.
-
-            Dispatch is on ``code`` rather than on ``isinstance``, for the reason
-            given in :meth:`_read_fid_suboptions`.
-
-        """
-        if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
-                    Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
-            if option is not None:
-                session = cast('Data_PerSessionBitRateAttribute', option)
-                service, exclude, rate = session.service, session.exclude, session.rate
-                reserved = session.reserved
-            else:
-                service = cast('bool', kwargs.get('service', False))
-                exclude = cast('bool', kwargs.get('exclude', False))
-                reserved = cast('int', kwargs.get('reserved', 0))
-                rate = cast('int', kwargs.get('rate', 0))
-            return Schema_PerSessionBitRateAttribute(
-                type=code, length=6,
-                flags={'S': int(service), 'E': int(exclude),
-                       'reserved': self._make_uint(reserved, bits=14, name='reserved bits')},
-                rate=self._make_uint(rate, bits=32, name='bit rate'))
-
-        if code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
-                    Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
-                    Enum_QoSAttribute.Aggregate_Max_DL_Bit_Rate,
-                    Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
-                    Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
-                    Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
-            if option is not None:
-                rate = cast('Data_BitRateAttribute', option).rate
-                octets = getattr(option, 'reserved', b'\x00\x00')
-            else:
-                rate = cast('int', kwargs.get('rate', 0))
-                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            return Schema_BitRateAttribute(type=code, length=6,
-                                           reserved=self._make_octets(octets, size=2, name='reserved octets'),
-                                           rate=self._make_uint(rate, bits=32, name='bit rate'))
-
-        if code == Enum_QoSAttribute.Allocation_Retention_Priority:
-            if option is not None:
-                arp = cast('Data_AllocationRetentionPriorityAttribute', option)
-                level = arp.priority_level
-                capability = arp.preemption_capability
-                vulnerability = arp.preemption_vulnerability
-                octets = getattr(arp, 'reserved', b'\x00')
-            else:
-                level = cast('int', kwargs.get('priority_level', 1))
-                capability = cast('int', kwargs.get('preemption_capability', 0))
-                vulnerability = cast('int', kwargs.get('preemption_vulnerability', 0))
-                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
-            return Schema_AllocationRetentionPriorityAttribute(
-                type=code, length=2, reserved=self._make_octets(octets, size=1, name='reserved octets'),
-                priority={
-                    'PL': self._make_uint(level, bits=4, name='priority level'),
-                    'PC': self._make_uint(capability, bits=2, name='preemption capability'),
-                    'PV': self._make_uint(vulnerability, bits=2, name='preemption vulnerability'),
-                })
-
-        if code == Enum_QoSAttribute.QoS_Traffic_Selector:
-            if option is not None:
-                ts_attr = cast('Data_QoSTrafficSelectorAttribute', option)
-                ts_format = ts_attr.ts_format  # type: Enum_TrafficSelector | int
-                selector = ts_attr.selector
-                octets = getattr(ts_attr, 'reserved', b'\x00')
-            else:
-                ts_format = self._make_index(
-                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
-                    Enum_TrafficSelector, bits=8, name='TS format')
-                selector = cast('bytes', kwargs.get('selector', b''))
-                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
-            return Schema_QoSTrafficSelectorAttribute(
-                type=code, length=2 + len(selector),
-                reserved=self._make_octets(octets, size=1, name='reserved octets'),
-                ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
-
-        if code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
-            if option is not None:
-                vendor_attr = cast('Data_QoSVendorSpecificAttribute', option)
-                vendor, subtype, payload = (vendor_attr.vendor, vendor_attr.subtype,
-                                            vendor_attr.data)
-                octets = getattr(vendor_attr, 'reserved', b'\x00\x00')
-            else:
-                vendor = cast('int', kwargs.get('vendor', 0))
-                subtype = cast('int', kwargs.get('subtype', 0))
-                payload = cast('bytes', kwargs.get('data', b''))
-                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
-            return Schema_QoSVendorSpecificAttribute(
-                type=code, length=7 + len(payload),
-                reserved=self._make_octets(octets, size=2, name='reserved octets'),
-                vendor=self._make_uint(vendor, bits=32, name='vendor ID'),
-                subtype=self._make_uint(subtype, bits=8, name='vendor subtype'), data=payload)
-
-        if option is not None:
-            payload = cast('Data_UnassignedQoSAttribute', option).data
-        else:
-            payload = cast('bytes', kwargs.get('data', b''))
-        return Schema_UnassignedQoSAttribute(type=code, length=len(payload), data=payload)
-
     def _make_opt_qos(self, type: 'Enum_Option', option: 'Optional[Data_QualityOfServiceOption]' = None, *,
                       sr_id: 'int' = 0,
                       dscp: 'int' = 0,
@@ -11237,128 +10022,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status=self._make_uint(status, bits=8, name='status'),
             data=data,
         )
-
-    def _make_lcmp_suboptions(
-        self,
-        suboptions: 'LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
-    ) -> 'list[Schema_LMAControlledMAGSuboption | bytes]':
-        """Make MH LMA-controlled MAG parameters sub-options.
-
-        Args:
-            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
-                pairs, or raw octets.
-
-        Returns:
-            Sub-option schema list.
-
-        Raises:
-            ProtocolError: If the type of a sub-option, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if a
-                sub-option given as raw octets is empty (:issue:`2723`).
-
-        """
-        if isinstance(suboptions, list):
-            entries = []  # type: list[Schema_LMAControlledMAGSuboption | bytes]
-            for item in suboptions:
-                if isinstance(item, bytes) and not item:
-                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
-                if isinstance(item, (bytes, Schema)):
-                    entries.append(cast('Schema_LMAControlledMAGSuboption | bytes', item))
-                else:
-                    kind, args = cast(
-                        'tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]]', item)
-                    code = self._make_index(kind, Enum_LMAControlledMAGSuboption, bits=8,
-                                            name='sub-option type')
-                    entries.append(self._make_lcmp_suboption(code, **args))
-            return entries
-
-        return [self._make_lcmp_suboption(
-                    self._make_index(key, Enum_LMAControlledMAGSuboption, bits=8,
-                                     name='sub-option type'), option)
-                for key, option in suboptions.items(multi=True)]
-
-    @staticmethod
-    def _seconds(value: 'int | timedelta', unit: 'int' = 1) -> 'int':
-        """Return an interval in wire units.
-
-        Args:
-            value: Interval, already in wire units when an :obj:`int`, or as a
-                :class:`~datetime.timedelta`.
-            unit: Number of seconds one wire unit stands for.
-
-        Returns:
-            The interval in wire units.
-
-        """
-        if isinstance(value, int):
-            return value
-        return math.ceil(value.total_seconds() / unit)
-
-    def _make_lcmp_suboption(self, code: 'Enum_LMAControlledMAGSuboption',
-                             option: 'Optional[Data_LMAControlledMAGSuboption]' = None,
-                             **kwargs: 'Any') -> 'Schema_LMAControlledMAGSuboption':
-        """Make one MH LMA-controlled MAG parameters sub-option.
-
-        Args:
-            code: Sub-option type.
-            option: Sub-option data model.
-            **kwargs: Sub-option fields, when no data model is given.
-
-        Returns:
-            Constructed sub-option schema.
-
-        Raises:
-            ProtocolError: If a timer or count does not fit its field.
-
-        Note:
-            The data model parameter is named ``option`` rather than ``data`` so
-            that it cannot shadow a sub-option field of that name -- see
-            :meth:`_make_fid_suboption`. Dispatch is on ``code``
-            rather than on ``isinstance``, for the reason given in
-            :meth:`_read_fid_suboptions`.
-
-        """
-        if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
-            if option is not None:
-                rereg = cast('Data_BindingReregistrationControlSuboption', option)
-                start = math.ceil(rereg.start_time.total_seconds() / 4)
-                initial = math.ceil(rereg.initial_retransmission.total_seconds())
-                maximum = math.ceil(rereg.max_retransmission.total_seconds())
-            else:
-                start = self._seconds(kwargs.get('start_time', 0), 4)
-                initial = self._seconds(kwargs.get('initial_retransmission', 0))
-                maximum = self._seconds(kwargs.get('max_retransmission', 0))
-            return Schema_BindingReregistrationControlSuboption(
-                type=code, length=6,
-                start_time=self._make_uint(start, bits=16, name='re-registration start time'),
-                initial_retransmission=self._make_uint(initial, bits=16,
-                                                       name='initial retransmission timer'),
-                max_retransmission=self._make_uint(maximum, bits=16,
-                                                   name='maximum retransmission timer'))
-
-        if code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
-            if option is not None:
-                heartbeat = cast('Data_HeartbeatControlSuboption', option)
-                interval = math.ceil(heartbeat.interval.total_seconds())
-                delay = math.ceil(heartbeat.retransmission_delay.total_seconds())
-                count = heartbeat.max_retransmissions
-            else:
-                interval = self._seconds(kwargs.get('interval', 0))
-                delay = self._seconds(kwargs.get('retransmission_delay', 0))
-                count = cast('int', kwargs.get('max_retransmissions', 0))
-            return Schema_HeartbeatControlSuboption(
-                type=code, length=6,
-                interval=self._make_uint(interval, bits=16, name='heartbeat interval'),
-                retransmission_delay=self._make_uint(delay, bits=16, name='retransmission delay'),
-                max_retransmissions=self._make_uint(count, bits=16, name='maximum retransmissions'))
-
-        if option is not None:
-            payload = cast('Data_UnassignedLMAControlledMAGSuboption', option).data
-        else:
-            payload = cast('bytes', kwargs.get('data', b''))
-        return Schema_UnassignedLMAControlledMAGSuboption(
-            type=code, length=len(payload), data=payload)
 
     def _make_opt_lcmp(self, type: 'Enum_Option', option: 'Optional[Data_LMAControlledMAGParametersOption]' = None, *,
                        suboptions: 'Optional[LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]] | bytes]]' = None,  # pylint: disable=line-too-long
@@ -11703,73 +10366,6 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             lla=lla,
         )
 
-    def _make_cga_extensions(self, extensions: 'Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension | int, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_CGAExtension | bytes], int]':  # pylint: disable=line-too-long
-        """Make CGA extensions for MH.
-
-        Args:
-            extensions: CGA extensions.
-
-        Returns:
-            Tuple of extensions and total length of extensions.
-
-        Raises:
-            ProtocolError: If the type of an extension, given in a ``(type,
-                kwargs)`` pair or as the key of parsed data, is a name, a
-                :obj:`bool` or a code its field cannot carry, or if an
-                extension given as raw octets is empty (:issue:`2723`).
-
-        """
-        total_length = 0
-        if isinstance(extensions, list):
-            extensions_list = []  # type: list[Schema_CGAExtension | bytes]
-            for schema in extensions:
-                if isinstance(schema, bytes):
-                    if not schema:
-                        raise ProtocolError(f'{self.alias}: invalid CGA extension: {schema!r} holds no type field')
-                    code = Enum_CGAExtension.get(int.from_bytes(schema[0:2], 'big', signed=False))
-
-                    data = schema  # type: Schema_CGAExtension | bytes
-                    data_len = len(data)
-                elif isinstance(schema, Schema):
-                    data = schema
-                    data_len = len(schema.pack())
-                else:
-                    kind, args = cast('tuple[Enum_CGAExtension | int, dict[str, Any]]', schema)
-                    code = self._make_index(kind, Enum_CGAExtension, bits=16,
-                                            name='extension type')
-                    name = self._lookup_registry(self.__extension__, code)
-                    if isinstance(name, str):
-                        meth_name = f'_make_ext_{name}'
-                        meth = cast('ExtensionConstructor',
-                                    getattr(self, meth_name, self._make_ext_none))
-                    else:
-                        meth = name[1]
-
-                    data = meth(code, **args)
-                    data_len = len(data.pack())
-
-                extensions_list.append(data)
-                total_length += data_len
-            return extensions_list, total_length
-
-        extensions_list = []
-        for key, extension in extensions.items(multi=True):
-            code = self._make_index(key, Enum_CGAExtension, bits=16, name='extension type')
-            name = self._lookup_registry(self.__extension__, code)
-            if isinstance(name, str):
-                meth_name = f'_make_ext_{name}'
-                meth = cast('ExtensionConstructor',
-                            getattr(self, meth_name, self._make_ext_none))
-            else:
-                meth = name[1]
-
-            data = meth(code, extension)
-            data_len = len(data.pack())
-
-            extensions_list.append(data)
-            total_length += data_len
-        return extensions_list, total_length
-
     def _make_ext_none(self, type: 'Enum_CGAExtension', option: 'Optional[Data_UnknownExtension]' = None, *,
                        data: 'bytes' = b'',
                        **kwargs: 'Any') -> 'Schema_UnknownExtension':
@@ -11872,3 +10468,1407 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=len(data),
             data=data,
         )
+
+    @staticmethod
+    def _mh_message_length(header_len: 'int') -> 'int':
+        """Compute the total on-the-wire MH header length for a given ``Header Len``.
+
+        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the
+        Mobility Header, in units of 8 octets, excluding the first 8
+        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,
+        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``
+        below reports this value as the parsed message's own ``.length``,
+        which :meth:`~pcapkit.protocols.internet.mh.protocol.MH.read` subtracts from the
+        outer packet length to find the next layer's length. It is the inverse
+        of :meth:`make`'s ``(len(data_val) + 6) // 8 - 1``. Do NOT drop the
+        ``+ 1``: the units either side of it differ (octets vs. 8-octet
+        units), and dropping the offset silently reinterprets the field.
+
+        Args:
+            header_len: raw ``Header Len`` field value, as read off the wire.
+
+        Returns:
+            Total length, in octets, of the on-the-wire MH header.
+
+        """
+        return (header_len + 1) * 8
+
+    @staticmethod
+    def _mh_option_length(schema_length: 'int') -> 'int':
+        """Compute an MH option's whole-option length from its on-the-wire ``Option Length``.
+
+        Per :rfc:`6275#section-6.2`, an MH option's ``Option Length`` field
+        (what each ``Schema_*Option.length`` here holds) counts *"the length
+        of the option, in octets, excluding the Option Type and Option
+        Length fields"* -- so the whole option, which is what every
+        ``_read_opt_*`` below reports back as the parsed option's own
+        ``.length``, is two octets more. The read-side call sites share this
+        helper so the arithmetic lives in one place. The exceptions are the
+        options whose ``Option Length`` is not that octet count: a ``Pad1``
+        option, which has no ``Option Length`` field at all (see the ``Note:``
+        on :meth:`_read_opt_pad` below), the BADF option, whose length leaves
+        out its SPI (see :meth:`_read_opt_badf`), and the multicast mobility
+        and acknowledgement options, whose length counts 32-bit words (see
+        :meth:`_read_opt_mcast`). Do NOT drop the ``+ 2``.
+
+        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
+        option, whose Option Type and Option Length are one octet each. It
+        is **not** a universal contract for everything this class parses:
+        a CGA extension's Extension Type and Extension Data Length are two
+        octets each [:rfc:`4581#section-2`], so those readers use
+        :meth:`_mh_extension_length` instead. Reusing this helper for them
+        would report every parsed CGA extension two octets short.
+
+        Note that only the *stored-length* read-side call sites are
+        collected here -- most ``_make_opt_*`` methods recompute the wire
+        ``Option Length`` from ``len(value)`` rather than reading a parsed
+        ``.length`` back, so they have nothing to unify against this helper.
+
+        Args:
+            schema_length: raw ``Option Length`` field value, as read off the wire.
+
+        Returns:
+            Whole-option length, in octets, including the Option Type and
+            Option Length fields.
+
+        """
+        return schema_length + 2
+
+    def _read_mh_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
+        """Read MH options.
+
+        Structure of MH option [:rfc:`6275`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Option Type  | Option Length |   Option Data...
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            options_schema: Parsed MH options.
+
+        Returns:
+            Parsed MH options data.
+
+        Raises:
+            ProtocolError: If an option read by a ``_read_opt_*`` method has fields
+                that do not take exactly the octets its ``Option Length`` declares
+                [:rfc:`6275#section-6.2.1`]. A parser registered as a callable
+                reports its own length, and is not checked. Or if the capture cut
+                an option short and its parser refuses the zeros it lacks, or its
+                maker does not write the octets captured back.
+
+        .. versionchanged:: 1.6.0
+
+           * Such an option is refused, rather than read from octets outside it
+             and rebuilt with the length its fields give (:issue:`2684`).
+           * An option the capture cut short is read, its missing octets as
+             zeros, if its maker writes the octets captured back
+             (:issue:`2694`).
+
+        """
+        options = OrderedMultiDict()  # type: Option
+
+        for schema in options_schema:
+            type = schema.type
+            name = self._lookup_registry(self.__option__, type)
+
+            if isinstance(name, str):
+                meth_name = f'_read_opt_{name}'
+                meth = cast('OptionParser',
+                            getattr(self, meth_name, self._read_opt_none))
+                maker = cast('OptionConstructor',
+                             getattr(self, f'_make_opt_{name}', self._make_opt_none))
+            else:
+                meth, maker = name
+
+            # NOTE: The capture cut this option short, as its short read records, so
+            # the octets it lacks read as zeros and it is short of its length. It
+            # stands if its parser takes those zeros and its maker writes the octets
+            # captured back (#2694); otherwise it is refused, as an option running
+            # past the data is (#1325).
+            if '__short_read__' in schema.__dict__:
+                try:
+                    with CaughtByCaller(BaseError):
+                        data = meth(schema, options=options)
+                        made = maker(type, data).pack()[:len(schema)]
+                except BaseError as error:
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short: {error}') from error
+                if made != bytes(schema):
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] option cut short does not '
+                                        'rebuild as captured')
+            else:
+                data = meth(schema, options=options)
+
+                # NOTE: Fields are read at their own widths, so a length they do not
+                # fill exactly reads octets not the option's, and rebuilds as another
+                # (#2684).
+                if isinstance(name, str) and len(schema) != data.length:
+                    raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid option length: {schema.length}')
+
+            # record option data
+            options.add(type, data)
+
+        return options
+
+    def _read_fid_suboptions(
+        self, suboptions_schema: 'list[Schema_FlowIdentificationSuboption]',
+    ) -> 'FlowIDSuboption':
+        """Read MH flow identification sub-options.
+
+        Structure of MH flow identification sub-option [:rfc:`6089#section-4.2.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Sub-Opt Type  |Sub-Opt Length |   Sub-Option Data...
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        These are sub-options of one mobility option rather than mobility options
+        in their own right, so they are dispatched here rather than through
+        :attr:`self.__option__ <MH.__option__>`.
+
+        Note:
+            Dispatch is on the sub-option **type code** rather than on
+            ``isinstance`` of the schema class: the code is on the wire and the
+            registry keys on it, so it is the cheaper discriminator. A class test
+            would also be sound, since every
+            :class:`~pcapkit.protocols.schema.Schema` subclass carries its
+            own :class:`abc.ABCMeta` cache (:issue:`439`). The same reasoning
+            applies to :meth:`_read_ani_suboptions`,
+            :meth:`_read_qos_attributes`, :meth:`_read_lcmp_suboptions` and their
+            constructor counterparts.
+
+        Args:
+            suboptions_schema: Parsed sub-option schemas.
+
+        Returns:
+            Parsed sub-option data.
+
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``Sub-Opt Length`` declares [:rfc:`6089#section-4.2.1`], or a
+                target care-of address is neither IPv4 nor IPv6
+                [:rfc:`7109#section-6.2.2`], as the binding identifier option's
+                is refused.
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options`, rather than read from octets outside it or
+           left unable to rebuild (:issue:`2684`).
+
+        """
+        suboptions = OrderedMultiDict()  # type: FlowIDSuboption
+
+        for schema in suboptions_schema:
+            code = schema.type
+
+            if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
+                pad = cast('Schema_PadFlowIdentificationSuboption', schema)
+                size = 1 if code == Enum_FlowIDSuboption.Pad else self._mh_option_length(pad.length)
+                data = Data_PadFlowIdentificationSuboption(
+                    type=code,
+                    length=size,
+                    data=pad.data,
+                )  # type: Data_FlowIdentificationSuboption
+            elif code == Enum_FlowIDSuboption.BID_Reference:
+                bid_ref = cast('Schema_BIDReferenceSuboption', schema)
+                data = Data_BIDReferenceSuboption(
+                    type=code,
+                    length=self._mh_option_length(bid_ref.length),
+                    bid=tuple(bid_ref.bid),
+                )
+            elif code == Enum_FlowIDSuboption.Traffic_Selector:
+                selector = cast('Schema_TrafficSelectorSuboption', schema)
+                data = Data_TrafficSelectorSuboption(
+                    type=code,
+                    length=self._mh_option_length(selector.length),
+                    ts_format=selector.ts_format,
+                    reserved=selector.reserved,
+                    selector=selector.selector,
+                )
+            elif code == Enum_FlowIDSuboption.Flow_Binding_Action:
+                action = cast('Schema_FlowBindingActionSuboption', schema)
+                data = Data_FlowBindingActionSuboption(
+                    type=code,
+                    length=self._mh_option_length(action.length),
+                    reserved=action.reserved,
+                    action=action.action,
+                )
+            elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
+                target = cast('Schema_TargetCareofAddressSuboption', schema)
+                if target.length not in (6, 18):
+                    raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {target.length}')
+                data = Data_TargetCareofAddressSuboption(
+                    type=code,
+                    length=self._mh_option_length(target.length),
+                    reserved=target.reserved,
+                    address=target.address,
+                )
+            else:
+                unknown = cast('Schema_UnassignedFlowIdentificationSuboption', schema)
+                data = Data_UnassignedFlowIdentificationSuboption(
+                    type=code,
+                    length=self._mh_option_length(unknown.length),
+                    data=unknown.data,
+                )
+
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [FID SubOpt {code}] invalid sub-option length: {schema.length}')
+            suboptions.add(code, data)
+
+        return suboptions
+
+    def _read_ani_suboptions(
+        self, suboptions_schema: 'list[Schema_ANISuboption]',
+    ) -> 'ANISuboption':
+        """Read MH access network identifier sub-options.
+
+        Structure of MH access network identifier sub-option
+        [:rfc:`6757#section-3.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    ANI Type   | ANI Length    |         Option Data           ~
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        The geo-location degrees of :rfc:`6757#section-3.1.2` are 24-bit
+        **two's-complement** fixed-point values with nine integer bits. A
+        :class:`~pcapkit.corekit.fields.strings.BitField` reads them unsigned, so
+        the sign is applied here by :meth:`_read_sint`, and both the decoded
+        degrees and the raw signed integers are recorded -- the latter so that
+        the exact wire value survives a round trip through the data model.
+
+        Note:
+            Dispatch is on the sub-option type code rather than on ``isinstance``
+            of the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
+        Args:
+            suboptions_schema: Parsed sub-option schemas.
+
+        Returns:
+            Parsed sub-option data.
+
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``ANI Length`` declares [:rfc:`6757#section-3.1`].
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
+        """
+        suboptions = OrderedMultiDict()  # type: ANISuboption
+
+        for schema in suboptions_schema:
+            code = schema.type
+
+            if code == Enum_ANISuboption.Network_Identifier:
+                net = cast('Schema_ANINetworkIdentifierSuboption', schema)
+                data = Data_ANINetworkIdentifierSuboption(
+                    type=code,
+                    length=self._mh_option_length(net.length),
+                    utf8=bool(net.flags['E']),
+                    reserved=net.flags['reserved'],
+                    net_name=net.net_name,
+                    ap_name=net.ap_name,
+                )  # type: Data_ANISuboption
+            elif code == Enum_ANISuboption.Geo_Location:
+                geo = cast('Schema_ANIGeoLocationSuboption', schema)
+                raw_lat = self._read_sint(geo.location['latitude'], 24)
+                raw_lon = self._read_sint(geo.location['longitude'], 24)
+                data = Data_ANIGeoLocationSuboption(
+                    type=code,
+                    length=self._mh_option_length(geo.length),
+                    latitude=raw_lat / 2 ** 15,
+                    longitude=raw_lon / 2 ** 15,
+                    raw_latitude=raw_lat,
+                    raw_longitude=raw_lon,
+                )
+            elif code == Enum_ANISuboption.Operator_Identifier:
+                operator = cast('Schema_ANIOperatorIdentifierSuboption', schema)
+                data = Data_ANIOperatorIdentifierSuboption(
+                    type=code,
+                    length=self._mh_option_length(operator.length),
+                    op_id_type=operator.op_id_type,
+                    identifier=operator.identifier,
+                )
+            elif code == Enum_ANISuboption.Civic_Location:
+                civic = cast('Schema_ANICivicLocationSuboption', schema)
+                data = Data_ANICivicLocationSuboption(
+                    type=code,
+                    length=self._mh_option_length(civic.length),
+                    format=civic.format,
+                    reserved=civic.reserved,
+                    location=civic.location,
+                )
+            elif code == Enum_ANISuboption.MAG_Group_Identifier:
+                group = cast('Schema_ANIMAGGroupIdentifierSuboption', schema)
+                data = Data_ANIMAGGroupIdentifierSuboption(
+                    type=code,
+                    length=self._mh_option_length(group.length),
+                    group_id=group.group_id,
+                )
+            elif code == Enum_ANISuboption.ANI_Update_Timer:
+                timer = cast('Schema_ANIUpdateTimerSuboption', schema)
+                data = Data_ANIUpdateTimerSuboption(
+                    type=code,
+                    length=self._mh_option_length(timer.length),
+                    timer=datetime.timedelta(seconds=timer.timer * 4),
+                )
+            else:
+                unknown = cast('Schema_UnassignedANISuboption', schema)
+                data = Data_UnassignedANISuboption(
+                    type=code,
+                    length=self._mh_option_length(unknown.length),
+                    data=unknown.data,
+                )
+
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [ANI SubOpt {code}] invalid sub-option length: {schema.length}')
+            suboptions.add(code, data)
+
+        return suboptions
+
+    def _read_qos_attributes(
+        self, attributes_schema: 'list[Schema_QoSAttribute]',
+    ) -> 'QoSAttribute':
+        """Read MH quality-of-service attributes.
+
+        Structure of MH quality-of-service attribute [:rfc:`7222#section-4.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    Type       |     Length    |           Value               ~
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            Every bit rate here is in **bits** per second [:rfc:`7222#section-4.2.1`],
+            not the kilobytes per second of the load information option's capacity
+            fields.
+
+            Dispatch is on the attribute type code rather than on ``isinstance`` of
+            the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
+        Args:
+            attributes_schema: Parsed attribute schemas.
+
+        Returns:
+            Parsed attribute data.
+
+        Raises:
+            ProtocolError: If an attribute's fields do not take exactly the octets
+                its ``Length`` declares [:rfc:`7222#section-4.2`].
+
+        .. versionchanged:: 1.6.0
+
+           Such an attribute is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
+        """
+        attributes = OrderedMultiDict()  # type: QoSAttribute
+
+        for schema in attributes_schema:
+            code = schema.type
+
+            if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
+                        Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
+                session = cast('Schema_PerSessionBitRateAttribute', schema)
+                data = Data_PerSessionBitRateAttribute(
+                    type=code,
+                    length=self._mh_option_length(session.length),
+                    service=bool(session.flags['S']),
+                    exclude=bool(session.flags['E']),
+                    reserved=session.flags['reserved'],
+                    rate=session.rate,
+                )  # type: Data_QoSAttribute
+            elif code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
+                          Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
+                          Enum_QoSAttribute.Aggregate_Max_DL_Bit_Rate,
+                          Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
+                          Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
+                          Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
+                rate = cast('Schema_BitRateAttribute', schema)
+                data = Data_BitRateAttribute(
+                    type=code,
+                    length=self._mh_option_length(rate.length),
+                    reserved=rate.reserved,
+                    rate=rate.rate,
+                )
+            elif code == Enum_QoSAttribute.Allocation_Retention_Priority:
+                arp = cast('Schema_AllocationRetentionPriorityAttribute', schema)
+                data = Data_AllocationRetentionPriorityAttribute(
+                    type=code,
+                    length=self._mh_option_length(arp.length),
+                    reserved=arp.reserved,
+                    priority_level=arp.priority['PL'],
+                    preemption_capability=arp.priority['PC'],
+                    preemption_vulnerability=arp.priority['PV'],
+                )
+            elif code == Enum_QoSAttribute.QoS_Traffic_Selector:
+                selector = cast('Schema_QoSTrafficSelectorAttribute', schema)
+                data = Data_QoSTrafficSelectorAttribute(
+                    type=code,
+                    length=self._mh_option_length(selector.length),
+                    reserved=selector.reserved,
+                    ts_format=selector.ts_format,
+                    selector=selector.selector,
+                )
+            elif code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
+                vendor = cast('Schema_QoSVendorSpecificAttribute', schema)
+                data = Data_QoSVendorSpecificAttribute(
+                    type=code,
+                    length=self._mh_option_length(vendor.length),
+                    reserved=vendor.reserved,
+                    vendor=vendor.vendor,
+                    subtype=vendor.subtype,
+                    data=vendor.data,
+                )
+            else:
+                unknown = cast('Schema_UnassignedQoSAttribute', schema)
+                data = Data_UnassignedQoSAttribute(
+                    type=code,
+                    length=self._mh_option_length(unknown.length),
+                    data=unknown.data,
+                )
+
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [QoS Attr {code}] invalid attribute length: {schema.length}')
+            attributes.add(code, data)
+
+        return attributes
+
+    def _read_lcmp_suboptions(
+        self, suboptions_schema: 'list[Schema_LMAControlledMAGSuboption]',
+    ) -> 'LMAControlledMAGSuboption':
+        """Read MH LMA-controlled MAG parameters sub-options.
+
+        Structure of MH LMA-controlled MAG parameters sub-option
+        [:rfc:`8127#section-3.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   LCMP Type   | LCMP Length   |       Sub-Option Data         ~
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Note:
+            Only the re-registration start time is in units of 4 seconds; every
+            other interval in these two sub-options is in whole seconds
+            [:rfc:`8127#section-3.1.1`, :rfc:`8127#section-3.1.2`].
+
+            Dispatch is on the sub-option type code rather than on ``isinstance``
+            of the schema class, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
+        Args:
+            suboptions_schema: Parsed sub-option schemas.
+
+        Returns:
+            Parsed sub-option data.
+
+        Raises:
+            ProtocolError: If a sub-option's fields do not take exactly the octets
+                its ``LCMP Length`` declares [:rfc:`8127#section-3.1`].
+
+        .. versionchanged:: 1.6.0
+
+           Such a sub-option is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
+        """
+        suboptions = OrderedMultiDict()  # type: LMAControlledMAGSuboption
+
+        for schema in suboptions_schema:
+            code = schema.type
+
+            if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
+                rereg = cast('Schema_BindingReregistrationControlSuboption', schema)
+                data = Data_BindingReregistrationControlSuboption(
+                    type=code,
+                    length=self._mh_option_length(rereg.length),
+                    start_time=datetime.timedelta(seconds=rereg.start_time * 4),
+                    initial_retransmission=datetime.timedelta(
+                        seconds=rereg.initial_retransmission),
+                    max_retransmission=datetime.timedelta(seconds=rereg.max_retransmission),
+                )  # type: Data_LMAControlledMAGSuboption
+            elif code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
+                heartbeat = cast('Schema_HeartbeatControlSuboption', schema)
+                data = Data_HeartbeatControlSuboption(
+                    type=code,
+                    length=self._mh_option_length(heartbeat.length),
+                    interval=datetime.timedelta(seconds=heartbeat.interval),
+                    retransmission_delay=datetime.timedelta(
+                        seconds=heartbeat.retransmission_delay),
+                    max_retransmissions=heartbeat.max_retransmissions,
+                )
+            else:
+                unknown = cast('Schema_UnassignedLMAControlledMAGSuboption', schema)
+                data = Data_UnassignedLMAControlledMAGSuboption(
+                    type=code,
+                    length=self._mh_option_length(unknown.length),
+                    data=unknown.data,
+                )
+
+            if len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [LCMP SubOpt {code}] invalid sub-option length: {schema.length}')
+            suboptions.add(code, data)
+
+        return suboptions
+
+    @staticmethod
+    def _mh_extension_length(schema_length: 'int') -> 'int':
+        """Compute a CGA extension's whole-structure length from its on-the-wire ``Extension Data Length``.
+
+        This is the CGA-extension counterpart of :meth:`_mh_option_length`, and
+        it deliberately adds ``4`` rather than ``2``. A CGA extension is **not**
+        an :rfc:`6275#section-6.2` mobility option: per :rfc:`4581#section-2`,
+        which defines the TLV format and formally updates :rfc:`3972`, its
+        ``Extension Type`` is a *"16-bit identifier of the type of the Extension
+        Field"* and its ``Extension Data Length`` a *"16-bit unsigned integer.
+        Length of the Extension Data field of this option, in octets"*. So the
+        fixed header is two 2-octet fields, not two 1-octet ones, and the whole
+        structure is ``4`` octets more than the stored length -- a fact
+        :rfc:`5535#section-5` states from the other direction for the one
+        non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of
+        the Extension in octets, not including the first 4 octets"*.
+
+        Passing these lengths through :meth:`_mh_option_length` would report
+        every parsed CGA extension two octets short: an 8-octet extension with
+        an ``Extension Data Length`` of ``4`` would come back as ``6``. The write
+        side is unaffected, since :meth:`_make_cga_extensions` measures
+        ``len(schema.pack())`` instead.
+
+        Args:
+            schema_length: raw ``Extension Data Length`` field value, as read off the wire.
+
+        Returns:
+            Whole-extension length, in octets, including the Extension Type and
+            Extension Data Length fields.
+
+        """
+        return schema_length + 4
+
+    def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
+        """Read CGA extensions.
+
+        Structure of CGA extensions [:rfc:`4581`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Extension Type        |   Extension Data Length       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           ~                       Extension Data                          ~
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            extensions_schema: Parsed CGA extensions.
+
+        Returns:
+            Parsed CGA extensions data.
+
+        Raises:
+            ProtocolError: If an extension read by a ``_read_ext_*`` method has
+                fields that do not take exactly the octets its ``Extension Data
+                Length`` declares [:rfc:`4581#section-2`]; a parser registered as
+                a callable is not checked.
+
+        .. versionchanged:: 1.6.0
+
+           Such an extension is refused, as a mobility option is by
+           :meth:`_read_mh_options` (:issue:`2684`).
+
+        """
+        extensions = OrderedMultiDict()  # type: Extension
+
+        for schema in extensions_schema:
+            type = schema.type
+            name = self._lookup_registry(self.__extension__, type)
+
+            if isinstance(name, str):
+                meth_name = f'_read_ext_{name}'
+                meth = cast('ExtensionParser',
+                            getattr(self, meth_name, self._read_ext_none))
+            else:
+                meth = name[0]
+            data = meth(schema, extensions=extensions)
+            if isinstance(name, str) and len(schema) != data.length:
+                raise ProtocolError(f'{self.alias}: [CGA Ext {type}] invalid extension length: {schema.length}')
+
+            # record extension data
+            extensions.add(type, data)
+
+        return extensions
+
+    def _make_pad_options(self, offset: 'int') -> 'tuple[list[Schema_PadOption], int]':
+        """Make the padding options needed to align the header to 8 octets.
+
+        Args:
+            offset: Number of octets emitted so far, **counting the six octets
+                of the fixed header** (``Payload Proto``, ``Header Len``,
+                ``MH Type``, ``Reserved`` and ``Checksum``) as well as the whole
+                message data.
+
+        Returns:
+            Tuple of the padding option schemas and the number of octets they
+            occupy.
+
+        Note:
+            The Mobility Header is a multiple of 8 octets and
+            :attr:`~pcapkit.protocols.internet.mh.schema.MH.length` counts those
+            units less one [:rfc:`6275#section-6.1.1`]. Its fixed part is
+            **six** octets, not the two of an IPv6 options header, so it is
+            ``len(data) + 6`` that has to be aligned -- which means the message
+            data is well formed only when it is 2 octets past a multiple of 8,
+            a different modulus from the one the extension headers use.
+
+            A ``PadN`` option spends two octets on its own type and
+            ``Option Length`` fields before any padding data, so occupying
+            ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.
+            One octet is padded with a ``Pad1`` option instead, that being the
+            only form which can occupy a single octet. Two octets are one
+            ``PadN`` with an ``Option Length`` of ``0``, not two ``Pad1``:
+            :rfc:`6275#section-6.2.2` says a ``PadN`` should be used rather than
+            multiple ``Pad1`` options.
+
+        """
+        pad_len = pad_length(offset, 8)
+        if pad_len == 0:
+            return [], 0
+        if pad_len == 1:
+            return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
+        return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
+
+    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option | int, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':  # pylint: disable=line-too-long
+        """Make options for MH.
+
+        Args:
+            options: MH options.
+
+        Returns:
+            Mobility options list.
+
+        Raises:
+            ProtocolError: If the type of an option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an option
+                given as raw octets is empty (:issue:`2723`).
+
+        """
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no type octet')
+                    code = Enum_Option.get(int.from_bytes(schema[0:1], 'big', signed=False))
+
+                    data = schema  # type: Schema_Option | bytes
+                elif isinstance(schema, Schema):
+                    data = schema
+                else:
+                    kind, args = cast('tuple[Enum_Option | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_Option, bits=8, name='option type')
+                    name = self._lookup_registry(self.__option__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_opt_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_opt_none))
+                    else:
+                        meth = name[1]
+                    data = meth(code, **args)
+
+                options_list.append(data)
+            return options_list
+
+        options_list = []
+        for key, option in options.items(multi=True):
+            code = self._make_index(key, Enum_Option, bits=8, name='option type')
+            name = self._lookup_registry(self.__option__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_opt_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_opt_none))
+            else:
+                meth = name[1]
+
+            data = meth(code, option)
+            options_list.append(data)
+        return options_list
+
+    def _make_fid_suboptions(
+        self,
+        suboptions: 'FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
+    ) -> 'list[Schema_FlowIdentificationSuboption | bytes]':
+        """Make MH flow identification sub-options.
+
+        Args:
+            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
+                pairs, or raw octets.
+
+        Returns:
+            Sub-option schema list.
+
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
+
+        """
+        if isinstance(suboptions, list):
+            entries = []  # type: list[Schema_FlowIdentificationSuboption | bytes]
+            for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
+                if isinstance(item, (bytes, Schema)):
+                    entries.append(cast('Schema_FlowIdentificationSuboption | bytes', item))
+                else:
+                    kind, args = cast('tuple[Enum_FlowIDSuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_FlowIDSuboption, bits=8, name='sub-option type')
+                    entries.append(self._make_fid_suboption(code, **args))
+            return entries
+
+        return [self._make_fid_suboption(
+                    self._make_index(key, Enum_FlowIDSuboption, bits=8, name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
+
+    def _make_fid_suboption(self, code: 'Enum_FlowIDSuboption',
+                            option: 'Optional[Data_FlowIdentificationSuboption]' = None,
+                            **kwargs: 'Any') -> 'Schema_FlowIdentificationSuboption':
+        """Make one MH flow identification sub-option.
+
+        Args:
+            code: Sub-option type.
+            option: Sub-option data model.
+            **kwargs: Sub-option fields, when no data model is given.
+
+        Returns:
+            Constructed sub-option schema.
+
+        Raises:
+            ProtocolError: If an entry of a ``BID_Reference`` sub-option's ``bid`` does
+                not fit its field, a ``ts_format`` or ``action`` is a name, a
+                :obj:`bool` or a code its field cannot carry, or a sub-option's
+                ``reserved`` is not as many octets as its field.
+
+        Note:
+            The data model parameter is named ``option`` rather than ``data``
+            to match :meth:`_make_opt_fid` and the rest of this module -- and
+            because ``data`` would **shadow a field**. The traffic selector and
+            unassigned sub-options both carry a field of their own called
+            ``data``, so a caller's ``data=`` would bind to the model parameter
+            instead of landing in ``**kwargs``, and the fallback that reads
+            ``data`` from ``**kwargs`` would never see it: the payload would be
+            silently dropped and the length written as though it were empty,
+            with no exception.
+
+            Dispatch is on ``code`` rather than on ``isinstance`` of the schema or
+            data class, for the reason given in :meth:`_read_fid_suboptions`.
+
+        """
+        if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
+            if code == Enum_FlowIDSuboption.Pad:
+                pad_len = 0
+            elif option is not None:
+                pad_len = option.length - 2
+            else:
+                pad_len = cast('int', kwargs.get('length', 0))
+            if option is not None:
+                pad_data = getattr(option, 'data', b'')
+            else:
+                pad_data = cast('bytes', kwargs.get('data', b''))
+            return Schema_PadFlowIdentificationSuboption(type=code, length=pad_len, data=pad_data)
+
+        if code == Enum_FlowIDSuboption.BID_Reference:
+            if option is not None:
+                bid = list(cast('Data_BIDReferenceSuboption', option).bid)
+            else:
+                bid = cast('list[int]', kwargs.get('bid') or [])
+            for item in bid:
+                self._make_uint(item, bits=16, name='binding identifier')
+            return Schema_BIDReferenceSuboption(type=code, length=len(bid) * 2, bid=bid)
+
+        if code == Enum_FlowIDSuboption.Traffic_Selector:
+            if option is not None:
+                selector_opt = cast('Data_TrafficSelectorSuboption', option)
+                ts_format = selector_opt.ts_format  # type: Enum_TrafficSelector | int
+                selector = selector_opt.selector
+                reserved = getattr(selector_opt, 'reserved', b'\x00')
+            else:
+                ts_format = self._make_index(
+                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
+                    Enum_TrafficSelector, bits=8, name='TS format')
+                selector = cast('bytes', kwargs.get('selector', b''))
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
+            return Schema_TrafficSelectorSuboption(
+                type=code, length=2 + len(selector),
+                ts_format=cast('Enum_TrafficSelector', ts_format),
+                reserved=self._make_octets(reserved, size=1, name='reserved octets'),
+                selector=selector)
+
+        if code == Enum_FlowIDSuboption.Flow_Binding_Action:
+            if option is not None:
+                action = cast('Data_FlowBindingActionSuboption',
+                              option).action  # type: Enum_FlowBindingAction | int
+                reserved = getattr(option, 'reserved', b'\x00')
+            else:
+                action = self._make_index(kwargs.get('action', Enum_FlowBindingAction.Add),
+                                          Enum_FlowBindingAction, bits=8, name='action')
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
+            return Schema_FlowBindingActionSuboption(
+                type=code, length=2, reserved=self._make_octets(reserved, size=1, name='reserved octets'),
+                action=cast('Enum_FlowBindingAction', action))
+
+        if code == Enum_FlowIDSuboption.Target_Care_of_Address:
+            if option is not None:
+                address = cast('Data_TargetCareofAddressSuboption', option).address  # type: Any
+                reserved = getattr(option, 'reserved', b'\x00\x00')
+            else:
+                address = kwargs.get('address', '::')
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
+            # NOTE: Through ``parse_ip_address`` because the sub-option length
+            # below is derived from the family here, ahead of the schema, so a
+            # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
+            # schema's guard, packing ``address=True`` as ``0506000000000001``.
+            addr = parse_ip_address(
+                address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
+            return Schema_TargetCareofAddressSuboption(
+                type=code, length=6 if addr.version == 4 else 18,
+                reserved=self._make_octets(reserved, size=2, name='reserved octets'),
+                address=addr)
+
+        if option is not None:
+            payload = cast('Data_UnassignedFlowIdentificationSuboption', option).data
+        else:
+            payload = cast('bytes', kwargs.get('data', b''))
+        return Schema_UnassignedFlowIdentificationSuboption(
+            type=code, length=len(payload), data=payload)
+
+    def _make_ani_suboptions(
+        self,
+        suboptions: 'ANISuboption | list[Schema_ANISuboption | tuple[Enum_ANISuboption | int, dict[str, Any]] | bytes]',
+    ) -> 'list[Schema_ANISuboption | bytes]':
+        """Make MH access network identifier sub-options.
+
+        Args:
+            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
+                pairs, or raw octets.
+
+        Returns:
+            Sub-option schema list.
+
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
+
+        """
+        if isinstance(suboptions, list):
+            entries = []  # type: list[Schema_ANISuboption | bytes]
+            for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
+                if isinstance(item, (bytes, Schema)):
+                    entries.append(cast('Schema_ANISuboption | bytes', item))
+                else:
+                    kind, args = cast('tuple[Enum_ANISuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_ANISuboption, bits=8, name='sub-option type')
+                    entries.append(self._make_ani_suboption(code, **args))
+            return entries
+
+        return [self._make_ani_suboption(
+                    self._make_index(key, Enum_ANISuboption, bits=8, name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
+
+    def _make_ani_suboption(self, code: 'Enum_ANISuboption',
+                            option: 'Optional[Data_ANISuboption]' = None,
+                            **kwargs: 'Any') -> 'Schema_ANISuboption':
+        """Make one MH access network identifier sub-option.
+
+        Args:
+            code: Sub-option type.
+            option: Sub-option data model.
+            **kwargs: Sub-option fields, when no data model is given.
+
+        Returns:
+            Constructed sub-option schema.
+
+        Raises:
+            ProtocolError: If a raw geo-location degree does not fit in 24
+                bits as two's complement, or a sub-option's ``reserved``,
+                ``format``, ``group_id`` or ``timer`` does not fit its field, or
+                ``op_id_type`` is a name, a :obj:`bool` or a code its field
+                cannot carry.
+
+        Note:
+            The geo-location degrees are re-encoded from the **raw** signed
+            integers rather than from the decoded floats, since a float cannot
+            always be converted back to the same 24-bit fixed-point value, and
+            :meth:`_make_sint` gives back the bits :meth:`_read_sint` read.
+
+            The data model parameter is named ``option`` rather than ``data`` so
+            that it cannot shadow a sub-option field of that name -- see
+            :meth:`_make_fid_suboption`. Dispatch is on ``code``
+            rather than on ``isinstance``, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
+        """
+        if code == Enum_ANISuboption.Network_Identifier:
+            if option is not None:
+                net = cast('Data_ANINetworkIdentifierSuboption', option)
+                utf8, net_name, ap_name = net.utf8, net.net_name, net.ap_name
+                reserved = net.reserved
+            else:
+                utf8 = cast('bool', kwargs.get('utf8', False))
+                reserved = cast('int', kwargs.get('reserved', 0))
+                net_name = cast('bytes', kwargs.get('net_name', b''))
+                ap_name = cast('bytes', kwargs.get('ap_name', b''))
+            return Schema_ANINetworkIdentifierSuboption(
+                type=code, length=3 + len(net_name) + len(ap_name),
+                flags={'E': int(utf8), 'reserved': self._make_uint(reserved, bits=7,
+                                                                   name='reserved bits')},
+                net_name_len=len(net_name), net_name=net_name,
+                ap_name_len=len(ap_name), ap_name=ap_name)
+
+        if code == Enum_ANISuboption.Geo_Location:
+            if option is not None:
+                geo = cast('Data_ANIGeoLocationSuboption', option)
+                raw_lat, raw_lon = geo.raw_latitude, geo.raw_longitude
+            else:
+                raw_lat = cast('int', kwargs.get('raw_latitude', 0))
+                raw_lon = cast('int', kwargs.get('raw_longitude', 0))
+            return Schema_ANIGeoLocationSuboption(
+                type=code, length=6, location={
+                    'latitude': self._make_sint(raw_lat, bits=24, name='ANI geo-location latitude'),
+                    'longitude': self._make_sint(raw_lon, bits=24, name='ANI geo-location longitude'),
+                })
+
+        if code == Enum_ANISuboption.Operator_Identifier:
+            if option is not None:
+                operator = cast('Data_ANIOperatorIdentifierSuboption', option)
+                op_id_type = operator.op_id_type  # type: Enum_OperatorID | int
+                identifier = operator.identifier
+            else:
+                op_id_type = self._make_index(
+                    kwargs.get('op_id_type', Enum_OperatorID.Realm_of_the_Operator),
+                    Enum_OperatorID, bits=8, name='Op-ID type')
+                identifier = cast('bytes', kwargs.get('identifier', b''))
+            return Schema_ANIOperatorIdentifierSuboption(
+                type=code, length=1 + len(identifier),
+                op_id_type=cast('Enum_OperatorID', op_id_type), identifier=identifier)
+
+        if code == Enum_ANISuboption.Civic_Location:
+            if option is not None:
+                civic = cast('Data_ANICivicLocationSuboption', option)
+                fmt, location = civic.format, civic.location
+                octets = getattr(civic, 'reserved', b'\x00')
+            else:
+                fmt = cast('int', kwargs.get('format', 0))
+                location = cast('bytes', kwargs.get('location', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
+            return Schema_ANICivicLocationSuboption(
+                type=code, length=2 + len(location),
+                format=self._make_uint(fmt, bits=8, name='civic location format'),
+                reserved=self._make_octets(octets, size=1, name='reserved octets'),
+                location=location)
+
+        if code == Enum_ANISuboption.MAG_Group_Identifier:
+            if option is not None:
+                group_id = cast('Data_ANIMAGGroupIdentifierSuboption', option).group_id
+            else:
+                group_id = cast('int', kwargs.get('group_id', 0))
+            return Schema_ANIMAGGroupIdentifierSuboption(
+                type=code, length=2, group_id=self._make_uint(group_id, bits=16,
+                                                              name='MAG group identifier'))
+
+        if code == Enum_ANISuboption.ANI_Update_Timer:
+            if option is not None:
+                timer = math.ceil(cast('Data_ANIUpdateTimerSuboption',
+                                       option).timer.total_seconds() / 4)
+            else:
+                raw_timer = kwargs.get('timer', 0)
+                timer = raw_timer if isinstance(raw_timer, int) else math.ceil(
+                    raw_timer.total_seconds() / 4)
+            return Schema_ANIUpdateTimerSuboption(
+                type=code, length=2, timer=self._make_uint(timer, bits=16, name='ANI update timer'))
+
+        if option is not None:
+            payload = cast('Data_UnassignedANISuboption', option).data
+        else:
+            payload = cast('bytes', kwargs.get('data', b''))
+        return Schema_UnassignedANISuboption(type=code, length=len(payload), data=payload)
+
+    def _make_qos_attributes(
+        self,
+        attributes: 'QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute | int, dict[str, Any]] | bytes]',
+    ) -> 'list[Schema_QoSAttribute | bytes]':
+        """Make MH quality-of-service attributes.
+
+        Args:
+            attributes: Attributes, as parsed data, schemas, ``(type, kwargs)``
+                pairs, or raw octets.
+
+        Returns:
+            Attribute schema list.
+
+        Raises:
+            ProtocolError: If the type of an attribute, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an
+                attribute given as raw octets is empty (:issue:`2723`).
+
+        """
+        if isinstance(attributes, list):
+            entries = []  # type: list[Schema_QoSAttribute | bytes]
+            for item in attributes:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid attribute: {item!r} holds no type octet')
+                if isinstance(item, (bytes, Schema)):
+                    entries.append(cast('Schema_QoSAttribute | bytes', item))
+                else:
+                    kind, args = cast('tuple[Enum_QoSAttribute | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_QoSAttribute, bits=8, name='attribute type')
+                    entries.append(self._make_qos_attribute(code, **args))
+            return entries
+
+        return [self._make_qos_attribute(
+                    self._make_index(key, Enum_QoSAttribute, bits=8, name='attribute type'), option)
+                for key, option in attributes.items(multi=True)]
+
+    def _make_qos_attribute(self, code: 'Enum_QoSAttribute',
+                            option: 'Optional[Data_QoSAttribute]' = None,
+                            **kwargs: 'Any') -> 'Schema_QoSAttribute':
+        """Make one MH quality-of-service attribute.
+
+        Args:
+            code: Attribute type.
+            option: Attribute data model.
+            **kwargs: Attribute fields, when no data model is given.
+
+        Returns:
+            Constructed attribute schema.
+
+        Raises:
+            ProtocolError: If a rate, priority, vendor or reserved value does not fit
+                its field, or ``ts_format`` is a name, a :obj:`bool` or a code its
+                field cannot carry.
+
+        Note:
+            The data model parameter is named ``option`` rather than ``data``
+            deliberately. The vendor-specific attribute of
+            :rfc:`7222#section-4.2.11` has a field of its own called ``data``, so
+            a parameter of that name would capture a caller's ``data=`` and leave
+            the ``kwargs.get('data')`` fallback empty, silently dropping the vendor
+            payload and writing the length as though it were empty. ``vendor`` and
+            ``subtype`` do not collide, so the loss would look like a partial
+            success rather than a bug.
+
+            Dispatch is on ``code`` rather than on ``isinstance``, for the reason
+            given in :meth:`_read_fid_suboptions`.
+
+        """
+        if code in (Enum_QoSAttribute.Per_Session_Agg_Max_DL_Bit_Rate,
+                    Enum_QoSAttribute.Per_Session_Agg_Max_UL_Bit_Rate):
+            if option is not None:
+                session = cast('Data_PerSessionBitRateAttribute', option)
+                service, exclude, rate = session.service, session.exclude, session.rate
+                reserved = session.reserved
+            else:
+                service = cast('bool', kwargs.get('service', False))
+                exclude = cast('bool', kwargs.get('exclude', False))
+                reserved = cast('int', kwargs.get('reserved', 0))
+                rate = cast('int', kwargs.get('rate', 0))
+            return Schema_PerSessionBitRateAttribute(
+                type=code, length=6,
+                flags={'S': int(service), 'E': int(exclude),
+                       'reserved': self._make_uint(reserved, bits=14, name='reserved bits')},
+                rate=self._make_uint(rate, bits=32, name='bit rate'))
+
+        if code in (Enum_QoSAttribute.Per_MN_Agg_Max_DL_Bit_Rate,
+                    Enum_QoSAttribute.Per_MN_Agg_Max_UL_Bit_Rate,
+                    Enum_QoSAttribute.Aggregate_Max_DL_Bit_Rate,
+                    Enum_QoSAttribute.Aggregate_Max_UL_Bit_Rate,
+                    Enum_QoSAttribute.Guaranteed_DL_Bit_Rate,
+                    Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
+            if option is not None:
+                rate = cast('Data_BitRateAttribute', option).rate
+                octets = getattr(option, 'reserved', b'\x00\x00')
+            else:
+                rate = cast('int', kwargs.get('rate', 0))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
+            return Schema_BitRateAttribute(type=code, length=6,
+                                           reserved=self._make_octets(octets, size=2, name='reserved octets'),
+                                           rate=self._make_uint(rate, bits=32, name='bit rate'))
+
+        if code == Enum_QoSAttribute.Allocation_Retention_Priority:
+            if option is not None:
+                arp = cast('Data_AllocationRetentionPriorityAttribute', option)
+                level = arp.priority_level
+                capability = arp.preemption_capability
+                vulnerability = arp.preemption_vulnerability
+                octets = getattr(arp, 'reserved', b'\x00')
+            else:
+                level = cast('int', kwargs.get('priority_level', 1))
+                capability = cast('int', kwargs.get('preemption_capability', 0))
+                vulnerability = cast('int', kwargs.get('preemption_vulnerability', 0))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
+            return Schema_AllocationRetentionPriorityAttribute(
+                type=code, length=2, reserved=self._make_octets(octets, size=1, name='reserved octets'),
+                priority={
+                    'PL': self._make_uint(level, bits=4, name='priority level'),
+                    'PC': self._make_uint(capability, bits=2, name='preemption capability'),
+                    'PV': self._make_uint(vulnerability, bits=2, name='preemption vulnerability'),
+                })
+
+        if code == Enum_QoSAttribute.QoS_Traffic_Selector:
+            if option is not None:
+                ts_attr = cast('Data_QoSTrafficSelectorAttribute', option)
+                ts_format = ts_attr.ts_format  # type: Enum_TrafficSelector | int
+                selector = ts_attr.selector
+                octets = getattr(ts_attr, 'reserved', b'\x00')
+            else:
+                ts_format = self._make_index(
+                    kwargs.get('ts_format', Enum_TrafficSelector.IPv6_Binary_Traffic_Selector),
+                    Enum_TrafficSelector, bits=8, name='TS format')
+                selector = cast('bytes', kwargs.get('selector', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
+            return Schema_QoSTrafficSelectorAttribute(
+                type=code, length=2 + len(selector),
+                reserved=self._make_octets(octets, size=1, name='reserved octets'),
+                ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
+
+        if code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
+            if option is not None:
+                vendor_attr = cast('Data_QoSVendorSpecificAttribute', option)
+                vendor, subtype, payload = (vendor_attr.vendor, vendor_attr.subtype,
+                                            vendor_attr.data)
+                octets = getattr(vendor_attr, 'reserved', b'\x00\x00')
+            else:
+                vendor = cast('int', kwargs.get('vendor', 0))
+                subtype = cast('int', kwargs.get('subtype', 0))
+                payload = cast('bytes', kwargs.get('data', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
+            return Schema_QoSVendorSpecificAttribute(
+                type=code, length=7 + len(payload),
+                reserved=self._make_octets(octets, size=2, name='reserved octets'),
+                vendor=self._make_uint(vendor, bits=32, name='vendor ID'),
+                subtype=self._make_uint(subtype, bits=8, name='vendor subtype'), data=payload)
+
+        if option is not None:
+            payload = cast('Data_UnassignedQoSAttribute', option).data
+        else:
+            payload = cast('bytes', kwargs.get('data', b''))
+        return Schema_UnassignedQoSAttribute(type=code, length=len(payload), data=payload)
+
+    def _make_lcmp_suboptions(
+        self,
+        suboptions: 'LMAControlledMAGSuboption | list[Schema_LMAControlledMAGSuboption | tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]] | bytes]',  # pylint: disable=line-too-long
+    ) -> 'list[Schema_LMAControlledMAGSuboption | bytes]':
+        """Make MH LMA-controlled MAG parameters sub-options.
+
+        Args:
+            suboptions: Sub-options, as parsed data, schemas, ``(type, kwargs)``
+                pairs, or raw octets.
+
+        Returns:
+            Sub-option schema list.
+
+        Raises:
+            ProtocolError: If the type of a sub-option, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if a
+                sub-option given as raw octets is empty (:issue:`2723`).
+
+        """
+        if isinstance(suboptions, list):
+            entries = []  # type: list[Schema_LMAControlledMAGSuboption | bytes]
+            for item in suboptions:
+                if isinstance(item, bytes) and not item:
+                    raise ProtocolError(f'{self.alias}: invalid sub-option: {item!r} holds no type octet')
+                if isinstance(item, (bytes, Schema)):
+                    entries.append(cast('Schema_LMAControlledMAGSuboption | bytes', item))
+                else:
+                    kind, args = cast(
+                        'tuple[Enum_LMAControlledMAGSuboption | int, dict[str, Any]]', item)
+                    code = self._make_index(kind, Enum_LMAControlledMAGSuboption, bits=8,
+                                            name='sub-option type')
+                    entries.append(self._make_lcmp_suboption(code, **args))
+            return entries
+
+        return [self._make_lcmp_suboption(
+                    self._make_index(key, Enum_LMAControlledMAGSuboption, bits=8,
+                                     name='sub-option type'), option)
+                for key, option in suboptions.items(multi=True)]
+
+    @staticmethod
+    def _seconds(value: 'int | timedelta', unit: 'int' = 1) -> 'int':
+        """Return an interval in wire units.
+
+        Args:
+            value: Interval, already in wire units when an :obj:`int`, or as a
+                :class:`~datetime.timedelta`.
+            unit: Number of seconds one wire unit stands for.
+
+        Returns:
+            The interval in wire units.
+
+        """
+        if isinstance(value, int):
+            return value
+        return math.ceil(value.total_seconds() / unit)
+
+    def _make_lcmp_suboption(self, code: 'Enum_LMAControlledMAGSuboption',
+                             option: 'Optional[Data_LMAControlledMAGSuboption]' = None,
+                             **kwargs: 'Any') -> 'Schema_LMAControlledMAGSuboption':
+        """Make one MH LMA-controlled MAG parameters sub-option.
+
+        Args:
+            code: Sub-option type.
+            option: Sub-option data model.
+            **kwargs: Sub-option fields, when no data model is given.
+
+        Returns:
+            Constructed sub-option schema.
+
+        Raises:
+            ProtocolError: If a timer or count does not fit its field.
+
+        Note:
+            The data model parameter is named ``option`` rather than ``data`` so
+            that it cannot shadow a sub-option field of that name -- see
+            :meth:`_make_fid_suboption`. Dispatch is on ``code``
+            rather than on ``isinstance``, for the reason given in
+            :meth:`_read_fid_suboptions`.
+
+        """
+        if code == Enum_LMAControlledMAGSuboption.Binding_Re_registration_Control:
+            if option is not None:
+                rereg = cast('Data_BindingReregistrationControlSuboption', option)
+                start = math.ceil(rereg.start_time.total_seconds() / 4)
+                initial = math.ceil(rereg.initial_retransmission.total_seconds())
+                maximum = math.ceil(rereg.max_retransmission.total_seconds())
+            else:
+                start = self._seconds(kwargs.get('start_time', 0), 4)
+                initial = self._seconds(kwargs.get('initial_retransmission', 0))
+                maximum = self._seconds(kwargs.get('max_retransmission', 0))
+            return Schema_BindingReregistrationControlSuboption(
+                type=code, length=6,
+                start_time=self._make_uint(start, bits=16, name='re-registration start time'),
+                initial_retransmission=self._make_uint(initial, bits=16,
+                                                       name='initial retransmission timer'),
+                max_retransmission=self._make_uint(maximum, bits=16,
+                                                   name='maximum retransmission timer'))
+
+        if code == Enum_LMAControlledMAGSuboption.Heartbeat_Control:
+            if option is not None:
+                heartbeat = cast('Data_HeartbeatControlSuboption', option)
+                interval = math.ceil(heartbeat.interval.total_seconds())
+                delay = math.ceil(heartbeat.retransmission_delay.total_seconds())
+                count = heartbeat.max_retransmissions
+            else:
+                interval = self._seconds(kwargs.get('interval', 0))
+                delay = self._seconds(kwargs.get('retransmission_delay', 0))
+                count = cast('int', kwargs.get('max_retransmissions', 0))
+            return Schema_HeartbeatControlSuboption(
+                type=code, length=6,
+                interval=self._make_uint(interval, bits=16, name='heartbeat interval'),
+                retransmission_delay=self._make_uint(delay, bits=16, name='retransmission delay'),
+                max_retransmissions=self._make_uint(count, bits=16, name='maximum retransmissions'))
+
+        if option is not None:
+            payload = cast('Data_UnassignedLMAControlledMAGSuboption', option).data
+        else:
+            payload = cast('bytes', kwargs.get('data', b''))
+        return Schema_UnassignedLMAControlledMAGSuboption(
+            type=code, length=len(payload), data=payload)
+
+    def _make_cga_extensions(self, extensions: 'Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension | int, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_CGAExtension | bytes], int]':  # pylint: disable=line-too-long
+        """Make CGA extensions for MH.
+
+        Args:
+            extensions: CGA extensions.
+
+        Returns:
+            Tuple of extensions and total length of extensions.
+
+        Raises:
+            ProtocolError: If the type of an extension, given in a ``(type,
+                kwargs)`` pair or as the key of parsed data, is a name, a
+                :obj:`bool` or a code its field cannot carry, or if an
+                extension given as raw octets is empty (:issue:`2723`).
+
+        """
+        total_length = 0
+        if isinstance(extensions, list):
+            extensions_list = []  # type: list[Schema_CGAExtension | bytes]
+            for schema in extensions:
+                if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'{self.alias}: invalid CGA extension: {schema!r} holds no type field')
+                    code = Enum_CGAExtension.get(int.from_bytes(schema[0:2], 'big', signed=False))
+
+                    data = schema  # type: Schema_CGAExtension | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    kind, args = cast('tuple[Enum_CGAExtension | int, dict[str, Any]]', schema)
+                    code = self._make_index(kind, Enum_CGAExtension, bits=16,
+                                            name='extension type')
+                    name = self._lookup_registry(self.__extension__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_ext_{name}'
+                        meth = cast('ExtensionConstructor',
+                                    getattr(self, meth_name, self._make_ext_none))
+                    else:
+                        meth = name[1]
+
+                    data = meth(code, **args)
+                    data_len = len(data.pack())
+
+                extensions_list.append(data)
+                total_length += data_len
+            return extensions_list, total_length
+
+        extensions_list = []
+        for key, extension in extensions.items(multi=True):
+            code = self._make_index(key, Enum_CGAExtension, bits=16, name='extension type')
+            name = self._lookup_registry(self.__extension__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_ext_{name}'
+                meth = cast('ExtensionConstructor',
+                            getattr(self, meth_name, self._make_ext_none))
+            else:
+                meth = name[1]
+
+            data = meth(code, extension)
+            data_len = len(data.pack())
+
+            extensions_list.append(data)
+            total_length += data_len
+        return extensions_list, total_length

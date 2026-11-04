@@ -81,9 +81,11 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
+            Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
             Enum_EtherType.Address_Resolution_Protocol:         ModuleDescriptor('pcapkit.protocols.link.arp.protocol',      'ARP'),
             Enum_EtherType.Reverse_Address_Resolution_Protocol:
                 ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
+
             # The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks
             # them -- the service tag's own next-EtherType is what selects the
             # customer tag -- so the two coexist in one frame rather than
@@ -93,14 +95,13 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             # :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
             Enum_EtherType.Customer_VLAN_Tag_Type:
                 ModuleDescriptor('pcapkit.protocols.link.c_tag.protocol', 'C_Tag'),
-            Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
-                ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
-
-            Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
-            Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
 
             # see https://en.wikipedia.org/wiki/EtherType#Values
             0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',  'IPX'),
+
+            Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+            Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier:
+                ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
         },
     )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 

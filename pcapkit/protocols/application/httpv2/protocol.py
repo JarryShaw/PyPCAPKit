@@ -668,23 +668,6 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             return len(frame.fragment)
         return len(frame.pack())
 
-    @staticmethod
-    def _read_http_flags(schema: 'Schema_FrameType') -> 'Data_Flags':
-        """Read the flags of an HTTP/2 frame type that defines none.
-
-        Args:
-            schema: Parsed frame schema.
-
-        Returns:
-            Flags with the raw flags octet as ``__value__``.
-
-        """
-        flags = Data_Flags()
-        flags.__update__({
-            '__value__': schema.__flags__,
-        })
-        return flags
-
     def _read_http_none(self, schema: 'Schema_UnassignedFrame', *,
                         header: 'Schema_HTTP') -> 'Data_UnassignedFrame':
         """Read HTTP packet with unassigned type.
@@ -1691,6 +1674,23 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         return Schema_ContinuationFrame(
             fragment=fragment,
         ), flags
+
+    @staticmethod
+    def _read_http_flags(schema: 'Schema_FrameType') -> 'Data_Flags':
+        """Read the flags of an HTTP/2 frame type that defines none.
+
+        Args:
+            schema: Parsed frame schema.
+
+        Returns:
+            Flags with the raw flags octet as ``__value__``.
+
+        """
+        flags = Data_Flags()
+        flags.__update__({
+            '__value__': schema.__flags__,
+        })
+        return flags
 
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
                            packet: 'Optional[dict[str, Any]]' = None) -> 'ProtocolBase':

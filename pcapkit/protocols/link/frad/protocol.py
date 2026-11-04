@@ -90,8 +90,8 @@ class FRAD(Link[Data_FRAD, Schema_FRAD],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
-            0xCC: ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
             0x8E: ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+            0xCC: ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
         },
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
