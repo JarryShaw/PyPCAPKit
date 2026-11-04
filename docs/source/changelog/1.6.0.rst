@@ -879,7 +879,15 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   (:issue:`2729`, :pr:`2735`). Each package's ``__all__``, ``dir()`` and
   members are as in 1.5.x. The SCTP and DCCP application-type registries load
   on first use, as TCP's and UDP's did in 1.5.x, where importing
-  :mod:`pcapkit.const` loaded both.
+  :mod:`pcapkit.const` loaded both. So do :mod:`pcapkit.protocols`, its layer
+  packages, :mod:`~pcapkit.protocols.misc.pcap` and
+  :mod:`~pcapkit.protocols.misc.checksum`, each importing a protocol's package
+  when its class is first reached, and :mod:`pcapkit` its protocol classes,
+  while a protocol's own package imports its modules with itself
+  (:issue:`2730`, :pr:`2757`). :data:`pcapkit.protocols.__proto__` is built by
+  :mod:`pcapkit.protocols.registry` when first read, and ``dir(pcapkit)``
+  lists no incidental names, where 1.5.x listed ``os``, ``sys``, ``ROOT``,
+  ``warnings`` and ``tbtrim``.
 
 * **Changed** -- :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`'s chunk makers
   refuse flags that are not one octet, and its Invalid Stream Identifier cause
@@ -989,7 +997,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``protocol``, ``schema`` and ``data`` modules, whose ``__init__.py`` exports
   its protocol class and binds its schema and data classes as ``Schema_*``
   and ``Data_*`` outside ``__all__``, which a ``[tool.isort]`` section keeps
-  isort off (:issue:`2534`, :pr:`2753`).
+  isort off (:issue:`2534`, :pr:`2753`), and the packages above it import it
+  on first use through ``lazy_exports`` (:issue:`2730`, :pr:`2757`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``
