@@ -25,7 +25,7 @@ Each registrar runs in these variants, where they apply:
 and the comparison is split in two, so that two root causes cannot hide behind
 one another: ``dispatch`` covers the tables the registrar names -- the
 ``__proto__`` it targets, the option and schema registries, the extractor and
-flow-tracing tables -- and ``names`` covers :data:`pcapkit.protocols.__proto__`,
+flow-tracing tables -- and ``names`` covers ``ProtocolBase.__registry__``,
 the by-name registry the protocol registrars all funnel into.
 
 The scope is the public registrars in
@@ -239,9 +239,9 @@ def _tables() -> 'dict[str, dict[Any, Any]]':
     """Every registry a public registrar writes, by name, as live objects."""
     from pcapkit.foundation.extraction import Extractor
     from pcapkit.foundation.traceflow import TraceFlow
-    from pcapkit.protocols import __proto__ as names
+    from pcapkit.protocols.protocol import ProtocolBase
 
-    tables = {'names': names}  # type: dict[str, dict[Any, Any]]
+    tables = {'names': ProtocolBase.__registry__}  # type: dict[str, dict[Any, Any]]
     for label, path in DISPATCH.items():
         tables[f'{label}.__proto__'] = resolve(path).__proto__
     for registrar in METHOD_REGISTRARS:
@@ -391,12 +391,12 @@ def _steps(label: 'str') -> 'list[Callable[[], None]]':
     head, variant, _ = label.split('/')
     if head == 'register_protocol':
         from pcapkit.foundation.registry import register_protocol
-        from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.application.application import Application
+        from pcapkit.protocols.protocol import ProtocolBase
 
-        shipped = names['HTTP']
+        shipped = ProtocolBase.get_protocol('HTTP')
         # No shipped class shares HTTP's name since #2529, so a user class named
-        # like it displaces the entry; defining it registers it.
+        # like it displaces the entry; it is abstract, so defining it names nothing.
         custom = type('HTTP', (Application,), {'__module__': __name__})
         return [lambda: register_protocol(custom), lambda: register_protocol(shipped)]
     name, _, member = head.partition(':')

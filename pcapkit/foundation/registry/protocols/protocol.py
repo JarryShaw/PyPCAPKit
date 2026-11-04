@@ -6,7 +6,8 @@
 
 This module provides the protocol registries the per-layer modules beside it
 build on: :func:`register_protocol` for the by-name registry
-:data:`pcapkit.protocols.__proto__`, :func:`register_protocol_code` for the
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
+:func:`register_protocol_code` for the
 next-layer registries a ``code`` names, and the validation and by-name
 bookkeeping every registrar shares.
 
@@ -19,16 +20,17 @@ bookkeeping every registrar shares.
 """
 import collections.abc
 import enum
+import sys
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import aenum
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import MISSING
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
-from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, Iterator, Optional, Type
@@ -43,19 +45,25 @@ __all__ = [
 logger = get_logger(__name__)
 
 
-# NOTE: pcapkit.protocols.__proto__
+# NOTE: pcapkit.protocols.protocol.ProtocolBase.__registry__
 def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     """Register a protocol class.
 
     The protocol class must be a subclass of
     :class:`~pcapkit.protocols.protocol.ProtocolBase`, and will be registered to
-    the :data:`pcapkit.protocols.__proto__` registry.
+    the by-name registry :attr:`ProtocolBase.__registry__
+    <pcapkit.protocols.protocol.ProtocolBase.__registry__>` through
+    :meth:`ProtocolBase.register_protocol
+    <pcapkit.protocols.protocol.ProtocolBase.register_protocol>`, replacing the
+    entry its name holds.
 
     The registry is keyed on ``protocol.__name__.upper()``, which nothing makes
     unique: two protocol classes of the same name, such as a user's class
-    named after a shipped one, compete for one key. Registering one of them
-    replaces whichever was there, and the replacement is observable through
-    every reader of the registry, e.g. :meth:`Protocol.expand_comp
+    named after a shipped one, compete for one key. Defining the second as a
+    :class:`~pcapkit.protocols.protocol.Protocol` subclass keeps the first, and
+    registering it here replaces whichever was there, and the
+    replacement is observable through every reader of the registry, e.g.
+    :meth:`Protocol.expand_comp
     <pcapkit.protocols.protocol.Protocol.expand_comp>`, which resolves a
     bare protocol name through it. Per :issue:`675` the overwrite is reported,
     matching :meth:`Protocol.register
@@ -80,6 +88,8 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     filter would then hide the name collision this warning exists to
     surface. The sibling ``register`` methods across the package, each keyed on a
     caller-supplied ``code``, apply the same identity criterion (:issue:`718`).
+    A built-in's :class:`~pcapkit.corekit.module.ModuleDescriptor` entry is
+    the class it names for that criterion.
 
     Making the key itself unique would resolve the collision rather than
     merely reporting it, but it is a registry-format change that the bare-name
@@ -116,43 +126,44 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`, so registering
        one keeps its own key and no longer displaces
        :class:`~pcapkit.protocols.application.http.protocol.HTTP` under ``'HTTP'``
-       (:issue:`2529`).
+       (:issue:`2529`). The registry is
+       :attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
+       written by :meth:`ProtocolBase.register_protocol
+       <pcapkit.protocols.protocol.ProtocolBase.register_protocol>`, where it was
+       ``pcapkit.protocols.__proto__`` (:issue:`2763`).
 
     """
-    # NOTE: read here, not on import, which would build it and import every protocol (#2730).
-    from pcapkit.protocols import \
-        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
-
     if not isinstance(protocol, type):
         raise RegistryError(f'protocol must be a class, not {protocol!r}')
     if not issubclass(protocol, ProtocolBase):
         raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
-    name = protocol.__name__.upper()
-    incumbent = protocol_registry.get(name)
-    if incumbent is not None and incumbent is not protocol:
-        incumbent_repr, protocol_repr = repr(incumbent), repr(protocol)
-        if incumbent_repr == protocol_repr:
-            # #710: two *distinct* objects whose repr() -- for an ordinary
-            # class, its module plus qualname -- happens to coincide, e.g. a
-            # factory that builds a fresh closure-local class of the same
-            # name on every call. Appending __module__/__qualname__ would not
-            # help here: that is exactly what the coinciding repr() already
-            # renders, so both sides would still print identically. id() is
-            # the fallback that actually differs, so it is only added in this
-            # branch -- the common case, two genuinely different classes,
-            # keeps the plain repr() and stays free of the extra noise.
-            incumbent_repr = f'{incumbent_repr} (id={id(incumbent):#x})'
-            protocol_repr = f'{protocol_repr} (id={id(protocol):#x})'
-        warn(f'protocol {name} already registered, overwriting {incumbent_repr} '
-             f'with {protocol_repr}', RegistryWarning)
-
-    protocol_registry[name] = protocol
+    ProtocolBase.register_protocol(protocol)
     logger.debug('registered protocol: %s', protocol.__name__)
 
 
+def _denotes(entry: 'Any', protocol: 'Any') -> 'bool':
+    """Whether a by-name registry ``entry`` is ``protocol``, or a descriptor naming it.
+
+    A :class:`~pcapkit.corekit.module.ModuleDescriptor` names the class its
+    module binds under its name, read off :data:`sys.modules` rather than
+    imported: a class that is defined has its module loaded already.
+
+    Args:
+        entry: Registry entry, a displaced one included.
+        protocol: Protocol class.
+
+    """
+    if entry is protocol:
+        return True
+    if isinstance(entry, ModuleDescriptor):
+        module = sys.modules.get(entry.module)
+        return module is not None and getattr(module, cast('str', entry.name), None) is protocol
+    return False
+
+
 class _NameLease:
-    """A :data:`pcapkit.protocols.__proto__` entry a code registration put there.
+    """A by-name registry entry a code registration put there.
 
     Each code registrar below ends by naming its class in the by-name registry,
     and :mod:`pcapkit.foundation.registry` has no ``unregister``: a code is
@@ -172,7 +183,7 @@ class _NameLease:
     __slots__ = ('name', 'protocol', 'displaced', 'codes')
 
     def __init__(self, name: 'str', protocol: 'Type[ProtocolBase]', displaced: 'Any') -> 'None':
-        #: The key written in :data:`pcapkit.protocols.__proto__`.
+        #: The key written in the by-name registry.
         self.name = name
         #: The class written under it.
         self.protocol = protocol
@@ -233,9 +244,7 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
         target: The ``(destination, code)`` being registered over.
 
     """
-    from pcapkit.protocols import \
-        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
-
+    protocol_registry = ProtocolBase.__registry__
     lease = _CODE_LEASES.pop(target, None)
     if lease is None:
         return
@@ -250,11 +259,11 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
     del stack[index]
     if index < len(stack):
         above = stack[index]
-        if above.displaced is lease.protocol:
+        if _denotes(above.displaced, lease.protocol):
             above.displaced = lease.displaced
-            if above.displaced is above.protocol:
+            if _denotes(above.displaced, above.protocol):
                 _fold_lease(stack, index)
-    elif protocol_registry.get(lease.name) is lease.protocol:
+    elif _denotes(protocol_registry.get(lease.name), lease.protocol):
         if lease.displaced is MISSING:
             protocol_registry.pop(lease.name, None)
         else:
@@ -265,28 +274,27 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
 
 
 def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]') -> 'None':
-    """Name ``protocol`` in :data:`pcapkit.protocols.__proto__` for ``targets``.
+    """Name ``protocol`` in the by-name registry for ``targets``.
 
     The tail of every code registrar: :func:`register_protocol`, preceded by
     releasing whatever each target code held before, and followed by a lease
     when the write changed the name, so that registering the code back undoes
-    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined
-    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or
-    registered directly -- is not leased, so no restore takes it away; one
-    showing it through a lease extends that lease to ``targets``.
+    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, named
+    when its concrete :class:`~pcapkit.protocols.protocol.Protocol` subclass was
+    defined, or registered directly -- is not
+    leased, so no restore takes it away; one showing it through a lease
+    extends that lease to ``targets``.
 
     Args:
         protocol: Protocol class just registered -- and so validated -- at ``targets``.
         *targets: The ``(destination, code)`` pairs it was registered at.
 
     """
-    from pcapkit.protocols import \
-        __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
-
+    protocol_registry = ProtocolBase.__registry__
     name = protocol.__name__.upper()
     with _LEASE_LOCK:
         stack = _NAME_LEASES.get(name)
-        if stack and stack[-1].protocol is protocol and protocol_registry.get(name) is protocol:
+        if stack and stack[-1].protocol is protocol and _denotes(protocol_registry.get(name), protocol):
             current = stack[-1]  # type: Optional[_NameLease]
         else:
             current = None
@@ -296,11 +304,11 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
 
         incumbent = protocol_registry.get(name, MISSING)
         register_protocol(protocol)
-        if protocol_registry.get(name) is not protocol:
+        if not _denotes(protocol_registry.get(name), protocol):
             return
 
         stack = _NAME_LEASES.get(name)
-        if incumbent is not protocol:
+        if not _denotes(incumbent, protocol):
             lease = _NameLease(name, protocol, incumbent)
             _NAME_LEASES.setdefault(name, []).append(lease)
         elif stack and stack[-1].protocol is protocol:

@@ -242,8 +242,8 @@ class NGAPUnitTests(unittest.TestCase):
 
         self.assertIs(pcapkit.NGAP, NGAP)
         self.assertIs(ApplicationNGAP, NGAP)
-        self.assertIn('NGAP', pcapkit.protocols.__proto__)
-        self.assertIs(pcapkit.protocols.__proto__['NGAP'], NGAP)
+        self.assertIn('NGAP', pcapkit.protocols.protocol.ProtocolBase.__registry__)
+        self.assertIs(pcapkit.protocols.protocol.ProtocolBase.get_protocol('NGAP'), NGAP)
         self.assertIsNot(DataNGAP, NGAP)
         self.assertIsNot(SchemaNGAP, NGAP)
 

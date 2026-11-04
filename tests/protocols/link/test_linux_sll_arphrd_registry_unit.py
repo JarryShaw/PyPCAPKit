@@ -61,11 +61,12 @@ class LinuxSLLRegistryTests(unittest.TestCase):
     def _snapshot(self):  # type: ignore[no-untyped-def]
         """Every registry the registrars here write, to put back after a test."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.protocols.link.netlink.protocol import Netlink
+        from pcapkit.protocols.protocol import ProtocolBase
 
+        names = ProtocolBase.__registry__
         tables = (LinuxSLL.__proto__, FRAD.__proto__, Netlink.__proto__, names,
                   reg_protocol._CODE_LEASES, reg_protocol._NAME_LEASES)
         copies = [dict(table) for table in tables]

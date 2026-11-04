@@ -85,10 +85,10 @@ class TestLinuxSLLSelector(unittest.TestCase):
             LinuxSLL.__index__()
 
     def test_registered_in_the_name_registry(self) -> None:
-        from pcapkit.protocols import __proto__ as registry
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.protocol import ProtocolBase
 
-        self.assertIs(registry.get('LINUXSLL'), LinuxSLL)
+        self.assertIs(ProtocolBase.get_protocol('LINUXSLL'), LinuxSLL)
 
     def test_family_name_selects_either_version(self) -> None:
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL

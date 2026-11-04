@@ -311,9 +311,10 @@ class TestRadiotap(unittest.TestCase):
     def _snapshot(self) -> None:
         """Put back every registry ``register_radiotap`` writes after the test."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.protocol import ProtocolBase
 
+        names = ProtocolBase.__registry__
         tables = (Radiotap.__proto__, names, reg_protocol._CODE_LEASES, reg_protocol._NAME_LEASES)
         copies = [dict(table) for table in tables]
 

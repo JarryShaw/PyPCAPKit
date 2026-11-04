@@ -291,7 +291,8 @@ A parsed RARP takes ``DRARP`` as its alias for operation 5, and
 ``__index__`` of RARP.
 
 A family-inclusive member is selected by any sibling's registry key (a key of
-``pcapkit.protocols.__proto__``), because each expands to the shared family name
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`),
+because each expands to the shared family name
 (:ref:`below <protocol-family-selectors>`). A narrow member is selected by its own name
 and by the key of each family whose ``id()`` lists it: ``HTTPv1`` and ``HTTPv2`` by
 ``HTTP``, and ``AH`` and ``ESP`` by ``IPsec`` and by ``IPv6_Ext`` where IPv4 carries
@@ -465,8 +466,10 @@ layer packages, :mod:`~pcapkit.protocols.misc.pcap` and
 package does (:ref:`const-vendor-pairing`), and :mod:`pcapkit` re-exports
 :mod:`pcapkit.protocols` the same way. A protocol's own package keeps the imports
 above, since importing its ``protocol`` module imports its ``schema`` and ``data``
-anyway. :data:`pcapkit.protocols.__proto__` names every protocol class, so
-:mod:`pcapkit.protocols.registry` builds it when it is first reached.
+anyway. The by-name registry,
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
+names each built-in protocol by a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+rather than by its class, so it imports none of them (:issue:`2763`).
 
 **A family's shared pieces live in the family base's package**, and its members
 import them (:issue:`2534`): :class:`~pcapkit.protocols.link.c_tag.protocol.C_Tag`

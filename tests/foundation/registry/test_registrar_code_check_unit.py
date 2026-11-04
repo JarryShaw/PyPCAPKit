@@ -9,7 +9,7 @@ with :exc:`~pcapkit.utilities.exceptions.RegistryError` before it touches
 anything.
 
 Every case snapshots each registry the registrars here write -- the dispatch and
-method tables, the schema tables, :data:`pcapkit.protocols.__proto__` and the
+method tables, the schema tables, ``ProtocolBase.__registry__`` and the
 name leases -- calls the registrar with an otherwise valid argument list, and
 compares every registry with the snapshot. The registrars that take a plain
 ``int`` (``NUMBER_REGISTRARS``) accept the ``int``, but still reject
@@ -168,9 +168,9 @@ class RegistrarCodeCheckTests(unittest.TestCase):
     def _registries(self, classes: 'tuple[type, ...]') -> 'dict[tuple[str, str], dict]':
         """Every dict-valued class attribute of ``classes``, plus the module-wide registries."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.protocol import ProtocolBase
 
-        found = {('pcapkit.protocols', '__proto__'): protocol_registry,
+        found = {('ProtocolBase', '__registry__'): ProtocolBase.__registry__,
                  ('registrars', '_CODE_LEASES'): reg_protocol._CODE_LEASES}
         for cls in classes:
             for attr, value in vars(cls).items():
