@@ -73,30 +73,43 @@ class _Blocker:
         return None
 
 
+#: Marks a module absent from :data:`sys.modules` before a helper ran: the
+#: shipped modules import lazily, so whether one is loaded depends on test order.
+_ABSENT = object()
+
+
+def _put_back(name: 'str', saved: 'object') -> 'None':
+    """Restore ``sys.modules[name]`` to ``saved``, or drop it if it was absent."""
+    if saved is _ABSENT:
+        sys.modules.pop(name, None)
+    else:
+        sys.modules[name] = saved  # type: ignore[assignment]
+
+
 @contextlib.contextmanager
 def _unimported(name: 'str'):  # type: ignore[no-untyped-def]
     """Run the block with ``name`` absent from :data:`sys.modules` and unimportable."""
-    saved = sys.modules.pop(name)
+    saved = sys.modules.pop(name, _ABSENT)
     blocker = _Blocker(name)
     sys.meta_path.insert(0, blocker)
     try:
         yield blocker
     finally:
         sys.meta_path.remove(blocker)
-        sys.modules[name] = saved
+        _put_back(name, saved)
 
 
 @contextlib.contextmanager
 def _stand_in(name: 'str', **attrs):  # type: ignore[no-untyped-def]
     """Run the block with ``name`` in :data:`sys.modules` replaced by a stub module."""
-    saved = sys.modules[name]
+    saved = sys.modules.get(name, _ABSENT)
     stub = types.ModuleType(name)
     stub.__dict__.update(attrs)
     sys.modules[name] = stub
     try:
         yield stub
     finally:
-        sys.modules[name] = saved
+        _put_back(name, saved)
 
 
 class TestRestoreShippedDescriptor(unittest.TestCase):
