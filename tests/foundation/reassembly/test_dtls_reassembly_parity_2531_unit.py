@@ -159,16 +159,16 @@ class ProtocolTypeTests(unittest.TestCase):
 
     def test_the_protocol_survives_a_registry_without_it(self) -> None:
         """With no ``'DTLS'`` registered, a name lookup would answer ``Raw``."""
-        import pcapkit.protocols
         from pcapkit.protocols.application.dtls.protocol import DTLS
+        from pcapkit.protocols.protocol import ProtocolBase
 
         for container, write in CONTAINERS:
             with self.subTest(container=container):
                 extractor = _extract(self, write([_frame(record) for record in COMPLETE]),
                                      reassembly=True, ip=True, tcp=True, dtls=True)
-                with mock.patch.dict(pcapkit.protocols.__proto__):
+                with mock.patch.dict(ProtocolBase.__registry__):
                     for name in ('IPV4', 'TCP', 'DTLS'):
-                        del pcapkit.protocols.__proto__[name]
+                        del ProtocolBase.__registry__[name]
                     for name in ('ipv4', 'tcp', 'dtls'):
                         engine = getattr(extractor._reasm, name)
                         self.assertIs(engine.protocol, type(engine).__protocol_type__, name)

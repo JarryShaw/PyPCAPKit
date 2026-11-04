@@ -309,7 +309,7 @@ class RegistrationGateTests(unittest.TestCase):
         #: ``(label, base, public, keyword, registry accessor)`` per suite,
         #: resolved fresh in :meth:`setUp` rather than carried as a class
         #: attribute -- see this method's own docstring. The protocols suite is
-        #: absent on purpose: its name registry is ``pcapkit.protocols.__proto__``
+        #: absent on purpose: its name registry is ``ProtocolBase.__registry__``
         #: and its hook takes no registration keyword of this shape, so it is
         #: covered by :meth:`test_library_classes_are_not_descendants_of_the_public_class`
         #: and by ``tests/protocols/`` instead.

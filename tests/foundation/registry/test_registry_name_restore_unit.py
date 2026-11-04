@@ -3,7 +3,7 @@
 
 Every code registrar in :mod:`pcapkit.foundation.registry.protocols` --
 ``register_tcp``, ``register_linktype`` and the rest -- ends by naming the class
-it registered in :data:`pcapkit.protocols.__proto__`. Guards against registering
+it registered in ``ProtocolBase.__registry__``. Guards against registering
 the shipped entry back restoring the code but never the name:
 ``register_tcp(80, Custom)`` then ``register_tcp(80, shipped)`` leaving
 ``'CUSTOM'`` behind for good, and a custom class named like a built-in leaving
@@ -36,17 +36,18 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TestRegistryNameRestore(unittest.TestCase):
-    """Restoring a code leaves :data:`pcapkit.protocols.__proto__` as it found it."""
+    """Restoring a code leaves ``ProtocolBase.__registry__`` as it found it."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-        from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.protocols.transport.udp.protocol import UDP
 
+        names = ProtocolBase.__registry__
         self.tables = (names, TCP.__proto__, UDP.__proto__, Frame.__proto__, PCAPNG.__proto__)
         self.saved = [dict(table) for table in self.tables]
         self.addCleanup(self._reset)
@@ -62,6 +63,13 @@ class TestRegistryNameRestore(unittest.TestCase):
         from pcapkit.protocols.application.application import Application
 
         return type(name, (Application,), {'__module__': __name__})
+
+    @staticmethod
+    def _shown(entry: 'Any') -> 'Any':
+        """The class a by-name entry shows: a built-in's descriptor shows the class it names."""
+        from pcapkit.corekit.module import ModuleDescriptor
+
+        return entry.klass if isinstance(entry, ModuleDescriptor) else entry
 
     def _call(self, register: 'Any', *args: 'Any') -> None:
         with warnings.catch_warnings():
@@ -113,7 +121,7 @@ class TestRegistryNameRestore(unittest.TestCase):
         self._call(register_tcp, 80, custom)
         self.assertIs(self.names['IPV4'], custom)
         self._call(register_tcp, 80, shipped)
-        self.assertIs(self.names['IPV4'], IPv4)
+        self.assertIs(self._shown(self.names['IPV4']), IPv4)
         self.assert_names_as_found()
 
     def test_a_name_stays_while_another_code_still_holds_it(self) -> None:
@@ -157,7 +165,11 @@ class TestRegistryNameRestore(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.protocol import TCP
 
         shipped = TCP.__proto__[80]
-        defined = type('Defined', (Protocol,), {'__module__': __name__})  # named by definition
+        # A concrete Protocol subclass, so named by definition.
+        defined = type('Defined', (Protocol,), {
+            '__module__': __name__, 'name': 'Defined', 'length': 0,
+            'read': lambda self, length=None, **kwargs: None, 'make': lambda self, **kwargs: None,
+            '__index__': classmethod(lambda cls: None)})
         explicit = self._custom('Explicit')
         register_protocol(explicit)
         self.before = dict(self.names)
@@ -187,7 +199,7 @@ class TestRegistryNameRestore(unittest.TestCase):
                           if issubclass(item.category, RegistryWarning)], [])
         self.assertIs(self.names['HTTP'], custom)
         self._call(register_tcp, 80, shipped)
-        self.assertIs(self.names['HTTP'], HTTP)
+        self.assertIs(self._shown(self.names['HTTP']), HTTP)
         self.assert_names_as_found()
 
     def test_a_built_in_over_its_own_shadow_is_undone_in_either_order(self) -> None:
@@ -211,9 +223,9 @@ class TestRegistryNameRestore(unittest.TestCase):
                 self._reset()
                 self._call(register_tcp, 80, custom)
                 self._call(register_tcp, 8080, IPv4)
-                self.assertIs(self.names['IPV4'], IPv4)
+                self.assertIs(self._shown(self.names['IPV4']), IPv4)
                 self._call(register_tcp, order[0], {80: s80, 8080: s8080}[order[0]])
-                self.assertIs(self.names['IPV4'], custom if order[0] == 8080 else IPv4)
+                self.assertIs(self._shown(self.names['IPV4']), custom if order[0] == 8080 else IPv4)
                 self._call(register_tcp, order[1], {80: s80, 8080: s8080}[order[1]])
                 self.assert_names_as_found()
 
@@ -282,7 +294,7 @@ class TestRegistryNameRestore(unittest.TestCase):
                     held[op[1]] = (step, shipped[op[1]].klass)
                 wrong = [f'step {step}, {name}: {self.names.get(name)!r}, expected '
                          f'{expected(held, name)!r}' for name in sorted(watched | set(self.names))
-                         if self.names.get(name) is not expected(held, name)]
+                         if self._shown(self.names.get(name)) is not self._shown(expected(held, name))]
                 if wrong:
                     failures.append((ops[:step], wrong[0]))
                     break

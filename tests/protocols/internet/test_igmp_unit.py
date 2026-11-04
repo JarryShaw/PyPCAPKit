@@ -1703,7 +1703,7 @@ class IGMPSelectorTests(unittest.TestCase):
         alike: ``'IGMP'`` reaches every version, a version key only its own --
         ``'IGMPv1'`` through its registry key, since no ``id()`` carries it.
         The protochain also compares each alias, which here is the same name."""
-        from pcapkit.protocols import __proto__ as registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
         for name, (packet, version) in {**IGMP_PACKETS, **IGMPV3_PACKETS}.items():
@@ -1711,7 +1711,7 @@ class IGMPSelectorTests(unittest.TestCase):
             self.assertIsInstance(layer, igmp_class(version))
             for selector in self.SELECTORS:
                 expected = selector in ('IGMP', version)
-                for key in (selector, registry[selector.upper()]):
+                for key in (selector, ProtocolBase.get_protocol(selector)):
                     with self.subTest(packet=name, selector=key):
                         self.assertIs(key in layer, expected)
                         self.assertIs(key in frame, expected)

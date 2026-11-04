@@ -264,9 +264,10 @@ class PayloadField(FieldBase[_TP]):
         """Set payload protocol.
 
         Arguments:
-            protocol: Payload protocol. A :obj:`str` is resolved against the
-                :data:`pcapkit.protocols.__proto__` registry, case-insensitively,
-                and an unresolved name leaves the payload as
+            protocol: Payload protocol. A :obj:`str` is resolved with
+                :meth:`ProtocolBase.get_protocol
+                <pcapkit.protocols.protocol.ProtocolBase.get_protocol>`,
+                case-insensitively, and an unresolved name leaves the payload as
                 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
         Warns:
@@ -275,18 +276,17 @@ class PayloadField(FieldBase[_TP]):
 
         """
         if isinstance(protocol, str):
-            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.protocol import \
+                ProtocolBase  # pylint: disable=import-outside-toplevel
 
-            # NOTE: The registry is keyed on the upper-cased class name, both
-            # when it is seeded (the loop over ``__all__`` in
-            # :mod:`pcapkit.protocols`) and when
-            # ``pcapkit.foundation.registry.protocols.protocol.register_protocol`` adds to
-            # it, so a name looked up in any other case would miss every time --
-            # and a miss leaves ``_protocol`` as :obj:`None`, which the property
-            # above resolves to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So
+            # NOTE: The registry is keyed on the upper-cased class name, and the
+            # getter upper-cases the name it is given, so a name in any other
+            # case still resolves -- where a miss leaves ``_protocol`` as
+            # :obj:`None`, which the property above resolves to
+            # :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So
             # ``PayloadField(protocol='http')`` would yield a raw payload instead
             # of HTTP, with nothing to say so (#787).
-            resolved = __proto__.get(protocol.upper())
+            resolved = ProtocolBase.get_protocol(protocol)
 
             # NOTE: Warned rather than left silent, and warned rather than
             # raised. Unlike the registry lookups that dispatch on a code read

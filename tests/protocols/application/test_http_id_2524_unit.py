@@ -93,7 +93,7 @@ class HTTPIdTests(unittest.TestCase):
         class and by its own version's name or key, and miss it by the other
         version's. An exact version such as ``'HTTP/1.1'`` is in no ``id()``, so
         only the protochain's alias match finds it."""
-        from pcapkit.protocols import __proto__ as registry
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.utilities.exceptions import ProtocolNotFound
 
         _, HTTPv1, HTTPv2 = self.classes()
@@ -104,8 +104,8 @@ class HTTPIdTests(unittest.TestCase):
             self.assertIs(type(layer), members[version])
             for selector in SELECTORS:
                 keys = [selector, selector.lower()]
-                if selector.upper() in registry:
-                    keys.append(registry[selector.upper()])
+                if (klass := ProtocolBase.get_protocol(selector)) is not None:
+                    keys.append(klass)
                 for key in keys:
                     with self.subTest(version=version, selector=key):
                         if selects(selector, version):

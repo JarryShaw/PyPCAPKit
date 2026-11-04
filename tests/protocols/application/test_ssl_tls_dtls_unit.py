@@ -1272,11 +1272,11 @@ class ExportTests(unittest.TestCase):
 
     def test_registered_in_the_protocol_registry(self) -> None:
         import pcapkit.protocols
+        from pcapkit.protocols.protocol import ProtocolBase
 
         for name in self.NAMES:
             with self.subTest(name=name):
-                self.assertIs(pcapkit.protocols.__proto__[name.upper()],
-                              getattr(pcapkit.protocols, name))
+                self.assertIs(ProtocolBase.get_protocol(name), getattr(pcapkit.protocols, name))
 
     def test_string_lookup_matches_a_parsed_record(self) -> None:
         """``'SSL' in pkt`` agrees with ``SSL in pkt``, the name being registered."""

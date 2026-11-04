@@ -5,9 +5,10 @@
 :mod:`pcapkit.protocols.misc.checksum` name each protocol class only under
 :data:`~typing.TYPE_CHECKING` and import it through
 :func:`pcapkit.utilities.importlib.lazy_exports`. :mod:`pcapkit` re-exports
-:mod:`pcapkit.protocols` the same way, and :data:`pcapkit.protocols.__proto__` is
-built by :mod:`pcapkit.protocols.registry` the first time it is reached. A protocol's
-own package keeps its literal imports, which the #2534 layout tests pin.
+:mod:`pcapkit.protocols` the same way, and the by-name registry,
+``ProtocolBase.__registry__``, names each built-in by a descriptor rather than by its
+class (#2763). A protocol's own package keeps its literal imports, which the #2534
+layout tests pin.
 
 * :class:`LazyPackageSweepTests` holds each such package, read off the tree, to what
   its eager import did: every export resolves to what its import names, ``import *``
@@ -160,19 +161,17 @@ class LazyPackageSweepTests(unittest.TestCase):
     def test_dir_lists_what_an_eager_import_bound(self) -> 'None':
         # NOTE: the eager import bound every submodule its imports name, and any
         # other one already imported; the first are listed whether imported or
-        # not, as they are not on a cold import. ``registry`` is where
-        # ``__proto__`` comes from, which ``dir()`` lists as the eager import did.
+        # not, as they are not on a cold import.
         for package in PACKAGES:
             module = importlib.import_module(package)
             named = {source[len(package) + 1:].split('.')[0] for (source, _, _) in declared(package).values()
                      if source.startswith(f'{package}.')}
             submodules = named | {name for (name, value) in vars(module).items()
                                   if isinstance(value, types.ModuleType) and value.__name__ == f'{package}.{name}'}
-            extra = {'__proto__', 'registry'} if package == 'pcapkit.protocols' else set()
             with self.subTest(package=package):
                 self.assertTrue(named)
                 self.assertEqual(dir(module), sorted({*import_system_names(module), '__all__', *module.__all__,
-                                                      *BASES.get(package, ()), *submodules, *extra}))
+                                                      *BASES.get(package, ()), *submodules}))
                 for helper in ('TYPE_CHECKING', 'lazy_exports', '__getattr__', '__dir__'):
                     self.assertIn(helper, vars(module))
                     self.assertNotIn(helper, dir(module))
@@ -230,22 +229,26 @@ class ColdImportTests(unittest.TestCase):
     """What a cold ``import pcapkit`` leaves unimported, and what reaches it later."""
 
     def test_import_pcapkit_binds_no_protocol_class(self) -> 'None':
-        """No package holds a protocol class, nor the registry, until it is reached."""
+        """No package holds a protocol class until it is reached, nor the by-name registry one."""
         out = run_child(f'''
             import importlib
             import pcapkit.protocols
+            from pcapkit.corekit.module import ModuleDescriptor
+            from pcapkit.protocols.protocol import ProtocolBase
             bound = {{}}
             for package in {PACKAGES!r}:
                 module = importlib.import_module(package)
                 bound[package] = sorted(name for name in module.__all__ if name in vars(module))
             emit(bound=bound, top=sorted(name for name in pcapkit.protocols.__all__ if name in vars(pcapkit)),
-                 registry=['__proto__' in vars(pcapkit.protocols), 'pcapkit.protocols.registry' in sys.modules],
+                 registry=['__proto__' in vars(pcapkit.protocols),
+                           sorted(name for name, entry in ProtocolBase.__registry__.items()
+                                  if not isinstance(entry, ModuleDescriptor))],
                  loaded=loaded('pcapkit.protocols.link.ethernet', 'pcapkit.protocols.link.s_tag',
                                'pcapkit.protocols.internet.igmp', 'pcapkit.protocols.application.ngap'))
         ''')
         self.assertEqual(out['bound'], {package: sorted(EAGER.get(package, ())) for package in PACKAGES})
         self.assertEqual(out['top'], [])
-        self.assertEqual(out['registry'], [False, False])
+        self.assertEqual(out['registry'], [False, []])
         self.assertEqual(out['loaded'], [])
 
     def test_reaching_a_name_imports_its_package(self) -> 'None':
@@ -266,15 +269,18 @@ class ColdImportTests(unittest.TestCase):
         """IPv4 dispatches protocol number 2 to IGMP, which picks IGMPv2, neither imported yet."""
         out = run_child('''
             from pcapkit.protocols.internet.ipv4.protocol import IPv4
+            from pcapkit.protocols.protocol import ProtocolBase
             before = loaded('pcapkit.protocols.internet.igmp', 'pcapkit.protocols.internet.igmpv2')
+            names = dict(ProtocolBase.__registry__)
             packet = IPv4(io.BytesIO(ipv4(2, IGMP)), 20 + len(IGMP))
             emit(before=before, chain=str(packet.protochain), layer=type(packet.payload).__module__,
-                 registry='pcapkit.protocols.registry' in sys.modules)
+                 registry=sorted(name for name in set(names) | set(ProtocolBase.__registry__)
+                                 if ProtocolBase.__registry__.get(name) is not names.get(name)))
         ''')
         self.assertEqual(out['before'], [])
         self.assertEqual(out['chain'], 'IPv4:IGMPv2')
         self.assertEqual(out['layer'], 'pcapkit.protocols.internet.igmpv2.protocol')
-        self.assertFalse(out['registry'], 'dispatching a next layer read the name registry')
+        self.assertEqual(out['registry'], [], 'dispatching a next layer wrote the name registry')
 
     def test_a_registration_made_on_import_is_found_by_a_dissector(self) -> 'None':
         """Shim6's entry exists after a bare ``import pcapkit``, so IPv6 parses it as ``IPv6_Ext``."""
@@ -297,60 +303,77 @@ class ColdImportTests(unittest.TestCase):
         self.assertEqual(out['chain'], 'IPv6:IPv6-Ext:UDP:Raw')
 
     def test_a_selector_reaches_a_class_not_yet_imported(self) -> 'None':
-        """``'S_Tag' in`` a C-Tag frame expands through the registry, which imports S_Tag."""
+        """``'S_Tag' in`` a C-Tag frame expands through the registry, which imports S_Tag alone."""
         out = run_child('''
             Ethernet = pcapkit.protocols.link.Ethernet
             tag = bytes([0x81, 0x00, 0x00, 0x01, 0x08, 0x00])
             udp = struct.pack('>HHHH', 1, 2, 8, 0)
             raw = bytes([0xff] * 6) + bytes(range(6)) + tag + ipv4(17, udp)
             frame = Ethernet(io.BytesIO(raw), len(raw))
-            before = loaded('pcapkit.protocols.link.s_tag', 'pcapkit.protocols.registry')
+            watched = ('pcapkit.protocols.link.s_tag', 'pcapkit.protocols.application.ngap')
+            before = loaded(*watched)
             emit(before=before, chain=str(frame.protochain), selected=['S_Tag' in frame, 'C_Tag' in frame],
-                 after=loaded('pcapkit.protocols.link.s_tag', 'pcapkit.protocols.registry'))
+                 after=loaded(*watched))
         ''')
         self.assertEqual(out['before'], [])
         self.assertEqual(out['chain'], 'Ethernet:802.1Q:IPv4:UDP')
         self.assertEqual(out['selected'], [True, True])
-        self.assertEqual(out['after'], ['pcapkit.protocols.link.s_tag', 'pcapkit.protocols.registry'])
+        self.assertEqual(out['after'], ['pcapkit.protocols.link.s_tag'])
 
     def test_the_registry_is_whole_when_first_read(self) -> 'None':
         out = run_child('''
             import pcapkit.protocols as protocols
             from pcapkit.protocols.protocol import ProtocolBase
-            before = ['__proto__' in vars(protocols), loaded('pcapkit.protocols.registry')]
-            from pcapkit.protocols import __proto__ as registry
+            registry = ProtocolBase.__registry__
+            keys = sorted(registry)
             names = [name for name in protocols.__all__ if isinstance(getattr(protocols, name), type)
                      and issubclass(getattr(protocols, name), ProtocolBase)]
-            emit(before=before, keys=sorted(registry), names=sorted(name.upper() for name in names),
-                 values=all(registry[name.upper()] is getattr(protocols, name) for name in names),
-                 same=[registry is protocols.__proto__, registry is vars(protocols)['__proto__'],
-                       registry is sys.modules['pcapkit.protocols.registry'].__proto__])
+            emit(keys=keys, names=sorted(name.upper() for name in names),
+                 values=all(ProtocolBase.get_protocol(name) is getattr(protocols, name) for name in names),
+                 gone=[hasattr(protocols, '__proto__'), '__proto__' in vars(protocols)])
         ''')
-        self.assertEqual(out['before'], [False, []])
         self.assertIn('IPV4', out['keys'])
         self.assertEqual(out['keys'], out['names'])
         self.assertTrue(out['values'])
-        self.assertEqual(out['same'], [True] * 3)
+        self.assertEqual(out['gone'], [False, False])
 
     def test_a_user_protocol_meets_the_shipped_name_before_any_read(self) -> 'None':
-        """Defining a :class:`~pcapkit.protocols.protocol.Protocol` subclass first still warns on a shipped name."""
+        """Defining a concrete subclass first still warns on a shipped name, which it keeps."""
         out = run_child('''
-            from pcapkit.protocols.protocol import Protocol
+            from pcapkit.protocols.protocol import Protocol, ProtocolBase
             from pcapkit.utilities.warnings import RegistryWarning
-            before = loaded('pcapkit.protocols.link.ethernet', 'pcapkit.protocols.registry')
+            before = loaded('pcapkit.protocols.link.ethernet')
             with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter('always')
 
                 class Ethernet(Protocol):
                     """A user protocol named like the shipped one."""
 
-            emit(before=before, messages=[str(w.message) for w in caught if issubclass(w.category, RegistryWarning)],
-                 registered=pcapkit.protocols.__proto__['ETHERNET'] is Ethernet)
+                    name = 'User Ethernet'
+                    length = 0
+
+                    def read(self, length=None, **kwargs):
+                        return None
+
+                    def make(self, **kwargs):
+                        return None
+
+                    @classmethod
+                    def __index__(cls):
+                        return None
+
+            during = loaded('pcapkit.protocols.link.ethernet')
+            shipped = ProtocolBase.get_protocol('ETHERNET')
+            emit(before=before, during=during,
+                 messages=[str(w.message) for w in caught if issubclass(w.category, RegistryWarning)],
+                 kept=f'{shipped.__module__}.{shipped.__qualname__}')
         ''')
         self.assertEqual(out['before'], [])
+        self.assertEqual(out['during'], [])
         self.assertEqual(len(out['messages']), 1, out['messages'])
-        self.assertIn('pcapkit.protocols.link.ethernet.protocol.Ethernet', out['messages'][0])
-        self.assertTrue(out['registered'])
+        self.assertIn("ModuleDescriptor(module='pcapkit.protocols.link.ethernet.protocol', name='Ethernet')",
+                      out['messages'][0])
+        self.assertEqual(out['kept'], 'pcapkit.protocols.link.ethernet.protocol.Ethernet')
 
     def test_a_pickle_loads_where_its_class_is_not_yet_imported(self) -> 'None':
         dumped = run_child('''

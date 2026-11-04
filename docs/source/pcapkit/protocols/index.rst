@@ -196,19 +196,24 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 Protocol Registry
 -----------------
 
-.. module:: pcapkit.protocols.registry
+The registry of protocol classes by name is
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`.
+:attr:`ProtocolMeta.registry <pcapkit.protocols.protocol.ProtocolMeta.registry>` reads it
+as ``AnyProtocol.registry``, a read-only view importing nothing, and
+:meth:`ProtocolBase.get_protocol <pcapkit.protocols.protocol.ProtocolBase.get_protocol>`
+looks a name up in it and returns the class.
 
-.. autodata:: pcapkit.protocols.__proto__
-   :no-value:
+.. versionremoved:: 1.6.0
 
-   :mod:`pcapkit.protocols.registry` builds it the first time it is reached, and
-   imports every protocol class :mod:`pcapkit.protocols` exports to do so
-   (:issue:`2730`).
+   ``pcapkit.protocols.__proto__``, with no alias: read
+   :attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`
+   through :meth:`ProtocolBase.get_protocol
+   <pcapkit.protocols.protocol.ProtocolBase.get_protocol>` instead (:issue:`2763`).
 
-   .. seealso::
+.. seealso::
 
-      Please refer to :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`
-      for more information.
+   Please refer to :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`
+   for more information.
 
 Header Schema
 -------------

@@ -16,9 +16,10 @@ table is checked in both directions: an excused map that gains a wrapper, or
 stops existing, fails too.
 
 The classmethod is the owning class's own -- ``register`` for ``__proto__``,
-``register_<kind>`` for ``__<kind>__`` -- unless ``INHERITED`` names the one it
-inherits and why that one is typed for exactly the map's keys, the owner's
-option 2 on #2511. That table is checked in both directions as well.
+``register_<kind>`` for ``__<kind>__``, or the name ``NAMED`` gives -- unless
+``INHERITED`` names the one it inherits and why that one is typed for exactly the
+map's keys, the owner's option 2 on #2511. Those tables are checked in both
+directions as well.
 
 The behaviour of the wrappers and classmethods #2511 added is pinned at the end:
 each writes the owning class's map and warns in its own key's terms, and
@@ -58,6 +59,12 @@ INHERITED = {
         ('pcapkit.protocols.transport.transport.Transport.register', 'typed for the port the map is keyed by'),
 }
 
+#: ``map path -> (its classmethod, why the name is not register_<kind>)``.
+NAMED = {
+    'pcapkit.protocols.protocol.ProtocolBase.__registry__':
+        ('register_protocol', 'named for the protocol class it registers, ruled on #2763'),
+}
+
 #: A wrapper's tag: one or more map paths on the comment line above its ``def``.
 TAG = re.compile(r'^# NOTE: (?P<paths>\S.*)\ndef (?P<name>register_\w+)\(', re.MULTILINE)
 
@@ -94,6 +101,8 @@ def _maps() -> 'dict[str, type]':
 
 def _classmethod_name(path: 'str') -> 'str':
     """The ``register*`` classmethod writing the map at ``path``."""
+    if path in NAMED:
+        return NAMED[path][0]
     kind = path.rpartition('.')[2][2:-2]
     return 'register' if kind == 'proto' else f'register_{kind}'
 
@@ -165,6 +174,9 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
                     missing.append(f'{owner.__name__}.{name}')
         self.assertEqual(missing, [], 'a map owner inherits a register* classmethod INHERITED does not name')
         self.assertEqual(sorted(set(INHERITED) - set(maps)), [], 'an inherited map no longer exists')
+        self.assertEqual(sorted(set(NAMED) - set(maps)), [], 'a named map no longer exists')
+        self.assertEqual(sorted(set(NAMED) & (set(INHERITED) | set(EXCUSED))), [],
+                         'a named map is inherited or excused')
         self.assertEqual(sorted(set(INHERITED) & set(EXCUSED)), [], 'a map is both inherited and excused')
 
     def test_ipx_loopback_and_sctp_wrappers_write_the_owning_class_map(self) -> None:
@@ -232,10 +244,12 @@ class RegistryWrapperCoverageTests(unittest.TestCase):
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols import __proto__ as names
         from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.protocol import ProtocolBase
         from pcapkit.protocols.transport.udp.protocol import UDP
+
+        names = ProtocolBase.__registry__
 
         udp = bytes.fromhex('0035' '0035' '0008' '0000')
         ipx = b'\xff\xff' + (30 + len(udp)).to_bytes(2, 'big') + b'\x00\x11' + bytes(24) + udp
