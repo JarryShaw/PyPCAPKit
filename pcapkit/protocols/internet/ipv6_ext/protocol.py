@@ -241,6 +241,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
          code that does not fit in one octet raises
          :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
          being handed to the schema unchecked (:issue:`2594`).
+       * :meth:`from_data` keeps :attr:`protocol`, handing :meth:`read` the
+         ``alias`` its parse took, rather than rebuilding it as :data:`None`
+         (:issue:`2768`).
 
     """
 
@@ -249,6 +252,12 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     #: only by this class itself. Without the marker, a subclass whose ``make``
     #: does not declare them would accept and then drop them (:issue:`2286`).
     __own_make_keywords__ = True
+
+    #: :meth:`read` takes ``alias`` out of ``**kwargs`` by name, and
+    #: :meth:`_make_data` hands it back, so a rebuild keeps the :attr:`protocol`
+    #: its parse resolved (:issue:`2768`). Every subclass accepts it as well,
+    #: and drops it, as it does while parsing.
+    __keywords__ = frozenset({'alias'})
 
     ##########################################################################
     # Properties.
@@ -555,9 +564,12 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             Nothing calls a protocol's ``make`` positionally; ``__init__``
             spreads ``**kwargs`` into it.
 
-            ``read`` needs none of this: its ``alias``/``error`` only arrive on
-            the *parse* path, which ``__init__`` exempts from the construction
-            check.
+            ``read`` needs none of this for ``error``: it arrives on the
+            *parse* path alone, which ``__init__`` exempts from the
+            construction check. ``alias`` arrives on a rebuild too, from
+            :meth:`_make_data`, so this class lists it in
+            :attr:`~pcapkit.protocols.protocol.Protocol.__keywords__`
+            (:issue:`2768`).
 
         """
         # NOTE: The schema keeps everything after the two fixed octets as one
@@ -688,7 +700,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Emits the ``Hdr Ext Len`` octet and the body as they were read, so
         the rebuild is byte-exact whichever per-protocol length rule
         :meth:`read` applied, and also for an overrun, where ``data.next`` is
-        :data:`None` and ``data.declared_next`` keeps the octet.
+        :data:`None` and ``data.declared_next`` keeps the octet. Hands
+        :meth:`read` the ``protocol`` it resolved as ``alias``, which picks
+        that rule and the identity again (:issue:`2768`).
 
         Args:
             data: protocol data
@@ -702,6 +716,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             'len': data.len,
             'data': data.data,
             'payload': cls._make_payload(data),
+            'alias': data.protocol,
         }
 
 

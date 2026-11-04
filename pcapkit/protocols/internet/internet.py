@@ -240,6 +240,10 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
+        An IPv6 extension header parsed alone always holds a next layer in its
+        data model, so one whose data model holds none is rebuilt with
+        ``extension``, unless ``kwargs`` give it.
+
         Args:
             data: Protocol data.
             **kwargs: Construction keywords, as for :meth:`Protocol.from_data
@@ -249,7 +253,17 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Protocol instance, cut back to what was captured when the header
             it was parsed from was cut short (:issue:`1458`).
 
+        .. versionchanged:: 1.6.0
+
+           Such a header is rebuilt with ``extension``, rather than with a next
+           layer its parse did not hold (:issue:`2768`).
+
         """
+        # NOTE: Parsed with ``extension``, every header but ESP leaves its next layer
+        # to the IPv6 header walking it; ESP's data model is the same either way (#2768).
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+        if issubclass(cls, IPv6_Ext) and data.get('__next_type__') is None:
+            kwargs.setdefault('extension', True)
         return replay_short_read(super().from_data(data, **kwargs), data)
 
     ##########################################################################
