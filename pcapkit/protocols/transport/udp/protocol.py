@@ -121,7 +121,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # :class:`pcapkit.protocols.application.http.protocol.HTTP`, as TCP's table
             # does. See the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
-            8080: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
+
+            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version
+            # implemented, so the concrete class is bound rather than the
+            # abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)
+            # stays unbound because that version has no class; once it has,
+            # it takes 115 and this entry becomes a version switch on the Ver
+            # nibble. See pcapkit.protocols.link.l2tp.protocol.
+            1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
 
             # CoAP over DTLS (RFC 7252) is bound here, but it is not the only
             # fixed port a DTLS-borne protocol is registered at -- IANA also
@@ -132,13 +139,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # pcapkit.protocols.application.dtls.protocol.
             5684: ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
 
-            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version
-            # implemented, so the concrete class is bound rather than the
-            # abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)
-            # stays unbound because that version has no class; once it has,
-            # it takes 115 and this entry becomes a version switch on the Ver
-            # nibble. See pcapkit.protocols.link.l2tp.protocol.
-            1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
+            8080: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
         },
     )
 

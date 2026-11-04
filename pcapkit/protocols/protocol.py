@@ -850,7 +850,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             short, cuts the header back to the octets captured, through its own
             ``__short_read__`` and :meth:`Schema._cut_short_read
             <pcapkit.protocols.schema.Schema._cut_short_read>`, and
-            returns only those (:issue:`2703`).
+            returns only those (:issue:`2703`). :meth:`__post_init__` then
+            drops that header, so that :meth:`unpack` parses the octets back
+            and the rebuild holds the values its parse read, not those
+            :meth:`make` filled in past the cut (:issue:`2761`).
 
         .. versionchanged:: 1.5.0
 
@@ -901,6 +904,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             cannot consume. The header is then replaced by the parsed one
             (:issue:`1312`).
 
+            A header :meth:`from_data` rebuilds from a short read is parsed
+            from the octets captured instead, as quietly as the header made
+            was read, and given the ``__short_read__`` of its data model before
+            :meth:`read` reads it, as the record of a cut those octets may not
+            show (:issue:`2761`).
+
         Raises:
             ProtocolError: If the made header holds raw items and its packed
                 octets do not parse, either as a schema or by :meth:`read`.
@@ -915,7 +924,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         packet = kwargs.get('__packet__', {})  # packet data
-        if cast('Optional[_ST]', self.__header__) is None:
+        if cast('Optional[_ST]', self.__header__) is None and self.__short_read__ is not None:
+            # NOTE: A rebuilt short read is parsed as quietly as its made header was read,
+            # and keeps the record of a cut its octets may not show (#2711, #2761).
+            with hold_warnings() as held:
+                held.discard = True
+                header = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
+            header.__dict__['__short_read__'] = self.__short_read__
+            self.__header__ = header
+        elif cast('Optional[_ST]', self.__header__) is None:
             self.__header__ = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         elif self._make_raw and _holds_raw(self.__header__):
             # NOTE: A schema may accept octets that :meth:`read` then rejects,
@@ -1202,7 +1219,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         A header the capture cut short, as ``__short_read__`` records, is cut
         back before it is read, and read at the width it declares, so the
         rebuild parses and verifies the octets captured as the capture did
-        (:issue:`2703`). It keeps the ``Raw`` next layer its data model holds,
+        (:issue:`2703`), holding the values its parse read from them, not those
+        :meth:`make` fills in past the cut (:issue:`2761`). Inside a payload
+        :meth:`_make_payload` rebuilds, which gives only its octets, the header
+        made is read instead. It keeps the ``Raw`` next layer its data model holds,
         which a parse reading the header short of that width leaves it
         (:issue:`2717`).
 
@@ -1490,6 +1510,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             uncaptured = vars(self).pop('_uncaptured', None)
             if uncaptured is not None and length is None:
                 length = len(_data) + uncaptured
+            # NOTE: Parsed back from the octets captured, not read from what ``make`` filled
+            # in past the cut (#2761); a payload ``_make_payload`` rebuilds gives its octets.
+            if uncaptured is not None and not rebuilding.get():
+                self.__header__ = None  # type: ignore[assignment]
         else:
             _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
 

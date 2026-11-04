@@ -18,7 +18,8 @@ Round-Trip Invariants
 
 **A round trip either reproduces its input exactly or is a recorded defect.** There is
 no tolerance in between: a cycle that comes back with different octets is a bug, even
-when both halves are internally consistent.
+when both halves are internally consistent, and so is one whose parsed values differ:
+``from_data(info).info`` equals ``info``, for a cut header too (:issue:`2761`).
 
 Coverage is **enumerated from the registries rather than hand-picked**, so a code
 registered tomorrow gets a case tomorrow. The registry-driven suites that carry a

@@ -882,29 +882,6 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'payload': cls._make_payload(data),
         }
 
-    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
-        """Verify the checksum over the pseudo-header of the enclosing IP layer.
-
-        That layer calls this once parsed, see
-        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`. A zero
-        checksum, or the pseudo-header's sum alone, is what checksum offload
-        leaves on the sending host, and is
-        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`.
-
-        Args:
-            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
-
-        """
-        from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
-            ChecksumStatus, partial_checksum, verify_checksum)
-
-        if pseudo is None:
-            status = ChecksumStatus.NO_PSEUDO_HEADER
-        else:
-            status = verify_checksum(self.alias, self._data, self._info.checksum, length=pseudo.info.len,
-                                     prefix=pseudo.data, offload=(b'\x00\x00', partial_checksum(pseudo.data)))
-        self._info.__update__(checksum_status=status)
-
     def _read_tcp_options(self, size: 'int') -> 'Option':
         """Read TCP option list.
 
@@ -1881,146 +1858,6 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if Enum_Flags.SYN not in self._flags and Enum_Flags.ACK in self._flags:  # MP_JOIN-ACK
             return self._read_join_ack(schema, options=options)  # type: ignore[arg-type]
         raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] {schema.subtype}: invalid flags combination')
-
-    def _read_join_syn(self, schema: 'Schema_MPTCPJoinSYN', *, options: 'Option') -> 'Data_MPTCPJoinSYN':  # pylint: disable=unused-argument
-        """Read Join Connection option for Initial SYN.
-
-        Structure of ``MP_JOIN-SYN`` [:rfc:`8684`, section 3.2, figure 5]:
-
-        .. code-block:: text
-
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----+-+---------------+
-           |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
-           +---------------+---------------+-------+-----+-+---------------+
-           |                   Receiver's Token (32 bits)                  |
-           +---------------------------------------------------------------+
-           |                Sender's Random Number (32 bits)               |
-           +---------------------------------------------------------------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted TCP options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If length is **NOT** ``12``.
-
-        """
-        if schema.length != 12:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
-
-        data = Data_MPTCPJoinSYN(
-            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
-            length=schema.length,
-            subtype=schema.subtype,
-            connection=Enum_Flags.SYN,  # type: ignore[arg-type]
-            reserved=schema.test['reserved'],
-            backup=bool(schema.test['backup']),
-            addr_id=schema.addr_id,
-            token=schema.token,
-            nonce=schema.nonce,
-        )
-        return data
-
-    def _read_join_synack(self, schema: 'Schema_MPTCPJoinSYNACK', options: 'Option') -> 'Data_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
-        """Read Join Connection option for Responding SYN/ACK.
-
-        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`8684`, section 3.2, figure 6]:
-
-        .. code-block:: text
-
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----+-+---------------+
-           |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
-           +---------------+---------------+-------+-----+-+---------------+
-           |                                                               |
-           |                Sender's Truncated HMAC (64 bits)              |
-           |                                                               |
-           +---------------------------------------------------------------+
-           |                Sender's Random Number (32 bits)               |
-           +---------------------------------------------------------------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted TCP options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If length is **NOT** ``16``.
-
-        Note:
-            The accepted length is ``16``, as in the figure above (:rfc:`8684`
-            section 3.2 figure 6) and in what
-            :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPJoinSYNACK`
-            packs and unpacks: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1)
-            + ``Address ID`` (1) + the truncated HMAC (8) + the random number (4).
-
-        """
-        if schema.length != 16:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
-
-        data = Data_MPTCPJoinSYNACK(
-            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
-            length=schema.length,
-            subtype=schema.subtype,
-            connection=Enum_Flags.SYN | Enum_Flags.ACK,  # type: ignore[arg-type]
-            reserved=schema.test['reserved'],
-            backup=bool(schema.test['backup']),
-            addr_id=schema.addr_id,
-            hmac=schema.hmac,
-            nonce=schema.nonce,
-        )
-        return data
-
-    def _read_join_ack(self, schema: 'Schema_MPTCPJoinACK', *, options: 'Option') -> 'Data_MPTCPJoinACK':  # pylint: disable=unused-argument
-        """Read Join Connection option for Third ACK.
-
-        Structure of ``MP_JOIN-ACK`` [:rfc:`8684`, section 3.2, figure 7]:
-
-        .. code-block:: text
-
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----------------------+
-           |     Kind      |  Length = 24  |Subtype|      (reserved)       |
-           +---------------+---------------+-------+-----------------------+
-           |                                                               |
-           |                                                               |
-           |                   Sender's HMAC (160 bits)                    |
-           |                                                               |
-           |                                                               |
-           +---------------------------------------------------------------+
-
-        Arguments:
-            schema: parsed option schema
-            options: extracted TCP options
-
-        Returns:
-            Parsed option data.
-
-        Raises:
-            ProtocolError: If length is **NOT** ``24``.
-
-        """
-        if schema.length != 24:
-            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
-
-        data = Data_MPTCPJoinACK(
-            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
-            length=schema.length,
-            subtype=schema.subtype,
-            connection=Enum_Flags.ACK,  # type: ignore[arg-type]
-            reserved=schema.test['reserved'],
-            hmac=schema.hmac,
-        )
-        return data
 
     def _read_mptcp_dss(self, schema: 'Schema_MPTCPDSS', *, options: 'Option') -> 'Data_MPTCPDSS':  # pylint: disable=unused-argument
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
@@ -3193,149 +3030,6 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             return self._make_join_ack(subtype, opt, **kwargs)  # type: ignore[arg-type]
         raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid flags combination')
 
-    def _make_join_syn(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYN]' = None, *,
-                       reserved: 'int' = 0,
-                       backup: 'bool' = False,
-                       addr_id: 'int' = 0,
-                       token: 'int' = 0,
-                       nonce: 'int' = 0,
-                       **kwargs: 'Any') -> 'Schema_MPTCPJoinSYN':
-        """Make multipath TCP join SYN option.
-
-        Args:
-            subtype: MPTCP subtype
-            opt: option data
-            reserved: reserved bits
-            backup: backup flag
-            addr_id: address ID
-            token: receiver's token
-            nonce: sender's random number
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If a field does not fit its width.
-
-        """
-        if opt is not None:
-            reserved = opt.reserved
-            backup = opt.backup
-            addr_id = opt.addr_id
-            token = opt.token
-            nonce = opt.nonce
-
-        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
-        return Schema_MPTCPJoinSYN(
-            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=12,
-            test={
-                'subtype': subtype.value,
-                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
-                'backup': backup,
-            },
-            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
-            token=self._make_uint(token, bits=32, name=f'{where} token'),
-            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
-        )
-
-    def _make_join_synack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYNACK]' = None, *,
-                          reserved: 'int' = 0,
-                          backup: 'bool' = False,
-                          addr_id: 'int' = 0,
-                          hmac: 'bytes' = bytes(8),
-                          nonce: 'int' = 0,
-                          **kwargs: 'Any') -> 'Schema_MPTCPJoinSYNACK':
-        """Make multipath TCP join SYN/ACK option.
-
-        Args:
-            subtype: MPTCP subtype
-            opt: option data
-            reserved: reserved bits
-            backup: backup flag
-            addr_id: address ID
-            hmac: sender's truncated HMAC
-            nonce: sender's random number
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If a field does not fit its width, or ``hmac`` is
-                not eight octets.
-
-        """
-        if opt is not None:
-            reserved = opt.reserved
-            backup = opt.backup
-            addr_id = opt.addr_id
-            # NOTE: ``hmac`` must be carried over here, or reconstructing a
-            # parsed MP_JOIN-SYN/ACK would substitute the ``bytes(8)`` default
-            # for the truncated HMAC that was on the wire.
-            hmac = opt.hmac
-            nonce = opt.nonce
-
-        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
-        return Schema_MPTCPJoinSYNACK(
-            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the
-            # SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +
-            # ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random
-            # number (32 bits, 4). The SYN form of figure 5 is 12, since it
-            # carries a 4-octet token where this one carries an 8-octet HMAC.
-            length=16,
-            test={
-                'subtype': subtype.value,
-                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
-                'backup': backup,
-            },
-            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
-            hmac=self._make_octets(hmac, size=8, name=f'{where} hmac'),
-            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
-        )
-
-    def _make_join_ack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinACK]' = None, *,
-                       reserved: 'int' = 0,
-                       hmac: 'bytes' = bytes(20),
-                       **kwargs: 'Any') -> 'Schema_MPTCPJoinACK':
-        """Make multipath TCP join ACK option.
-
-        Args:
-            subtype: MPTCP subtype
-            opt: option data
-            reserved: reserved bits
-            hmac: sender's HMAC
-            **kwargs: arbitrary keyword arguments
-
-        Returns:
-            Constructed option schema.
-
-        Raises:
-            ProtocolError: If ``reserved`` does not fit 12 bits, or ``hmac`` is
-                not 20 octets.
-
-        """
-        if opt is not None:
-            reserved = opt.reserved
-            hmac = opt.hmac
-
-        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
-        return Schema_MPTCPJoinACK(
-            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the
-            # ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,
-            # being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,
-            # 20). ``_read_join_ack``'s guard requires the same 24.
-            length=24,
-            test={
-                'subtype': subtype.value,
-                'reserved': self._make_uint(reserved, bits=12, name=f'{where} reserved'),
-            },
-            hmac=self._make_octets(hmac, size=20, name=f'{where} hmac'),
-        )
-
     def _make_mptcp_dss(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPDSS]' = None, *,
                         reserved: 'int' = 0,
                         data_fin: 'bool' = False,
@@ -3712,4 +3406,310 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=code,
             length=2 + (len(cookie) if cookie is not None else 0),
             cookie=cookie,
+        )
+
+    def _verify_pseudo_checksum(self, pseudo: 'Optional[IP_Pseudo]') -> 'None':
+        """Verify the checksum over the pseudo-header of the enclosing IP layer.
+
+        That layer calls this once parsed, see
+        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`. A zero
+        checksum, or the pseudo-header's sum alone, is what checksum offload
+        leaves on the sending host, and is
+        :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED`.
+
+        Args:
+            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.
+
+        """
+        from pcapkit.corekit.checksum.internet import (  # isort: skip # pylint: disable=import-outside-toplevel
+            ChecksumStatus, partial_checksum, verify_checksum)
+
+        if pseudo is None:
+            status = ChecksumStatus.NO_PSEUDO_HEADER
+        else:
+            status = verify_checksum(self.alias, self._data, self._info.checksum, length=pseudo.info.len,
+                                     prefix=pseudo.data, offload=(b'\x00\x00', partial_checksum(pseudo.data)))
+        self._info.__update__(checksum_status=status)
+
+    def _read_join_syn(self, schema: 'Schema_MPTCPJoinSYN', *, options: 'Option') -> 'Data_MPTCPJoinSYN':  # pylint: disable=unused-argument
+        """Read Join Connection option for Initial SYN.
+
+        Structure of ``MP_JOIN-SYN`` [:rfc:`8684`, section 3.2, figure 5]:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                   Receiver's Token (32 bits)                  |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``12``.
+
+        """
+        if schema.length != 12:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
+
+        data = Data_MPTCPJoinSYN(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=schema.length,
+            subtype=schema.subtype,
+            connection=Enum_Flags.SYN,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
+            backup=bool(schema.test['backup']),
+            addr_id=schema.addr_id,
+            token=schema.token,
+            nonce=schema.nonce,
+        )
+        return data
+
+    def _read_join_synack(self, schema: 'Schema_MPTCPJoinSYNACK', options: 'Option') -> 'Data_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
+        """Read Join Connection option for Responding SYN/ACK.
+
+        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`8684`, section 3.2, figure 6]:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                                                               |
+           |                Sender's Truncated HMAC (64 bits)              |
+           |                                                               |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``16``.
+
+        Note:
+            The accepted length is ``16``, as in the figure above (:rfc:`8684`
+            section 3.2 figure 6) and in what
+            :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPJoinSYNACK`
+            packs and unpacks: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1)
+            + ``Address ID`` (1) + the truncated HMAC (8) + the random number (4).
+
+        """
+        if schema.length != 16:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
+
+        data = Data_MPTCPJoinSYNACK(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=schema.length,
+            subtype=schema.subtype,
+            connection=Enum_Flags.SYN | Enum_Flags.ACK,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
+            backup=bool(schema.test['backup']),
+            addr_id=schema.addr_id,
+            hmac=schema.hmac,
+            nonce=schema.nonce,
+        )
+        return data
+
+    def _read_join_ack(self, schema: 'Schema_MPTCPJoinACK', *, options: 'Option') -> 'Data_MPTCPJoinACK':  # pylint: disable=unused-argument
+        """Read Join Connection option for Third ACK.
+
+        Structure of ``MP_JOIN-ACK`` [:rfc:`8684`, section 3.2, figure 7]:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |  Length = 24  |Subtype|      (reserved)       |
+           +---------------+---------------+-------+-----------------------+
+           |                                                               |
+           |                                                               |
+           |                   Sender's HMAC (160 bits)                    |
+           |                                                               |
+           |                                                               |
+           +---------------------------------------------------------------+
+
+        Arguments:
+            schema: parsed option schema
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``24``.
+
+        """
+        if schema.length != 24:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
+
+        data = Data_MPTCPJoinACK(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=schema.length,
+            subtype=schema.subtype,
+            connection=Enum_Flags.ACK,  # type: ignore[arg-type]
+            reserved=schema.test['reserved'],
+            hmac=schema.hmac,
+        )
+        return data
+
+    def _make_join_syn(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYN]' = None, *,
+                       reserved: 'int' = 0,
+                       backup: 'bool' = False,
+                       addr_id: 'int' = 0,
+                       token: 'int' = 0,
+                       nonce: 'int' = 0,
+                       **kwargs: 'Any') -> 'Schema_MPTCPJoinSYN':
+        """Make multipath TCP join SYN option.
+
+        Args:
+            subtype: MPTCP subtype
+            opt: option data
+            reserved: reserved bits
+            backup: backup flag
+            addr_id: address ID
+            token: receiver's token
+            nonce: sender's random number
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If a field does not fit its width.
+
+        """
+        if opt is not None:
+            reserved = opt.reserved
+            backup = opt.backup
+            addr_id = opt.addr_id
+            token = opt.token
+            nonce = opt.nonce
+
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
+        return Schema_MPTCPJoinSYN(
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
+            length=12,
+            test={
+                'subtype': subtype.value,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
+                'backup': backup,
+            },
+            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
+            token=self._make_uint(token, bits=32, name=f'{where} token'),
+            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
+        )
+
+    def _make_join_synack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYNACK]' = None, *,
+                          reserved: 'int' = 0,
+                          backup: 'bool' = False,
+                          addr_id: 'int' = 0,
+                          hmac: 'bytes' = bytes(8),
+                          nonce: 'int' = 0,
+                          **kwargs: 'Any') -> 'Schema_MPTCPJoinSYNACK':
+        """Make multipath TCP join SYN/ACK option.
+
+        Args:
+            subtype: MPTCP subtype
+            opt: option data
+            reserved: reserved bits
+            backup: backup flag
+            addr_id: address ID
+            hmac: sender's truncated HMAC
+            nonce: sender's random number
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If a field does not fit its width, or ``hmac`` is
+                not eight octets.
+
+        """
+        if opt is not None:
+            reserved = opt.reserved
+            backup = opt.backup
+            addr_id = opt.addr_id
+            # NOTE: ``hmac`` must be carried over here, or reconstructing a
+            # parsed MP_JOIN-SYN/ACK would substitute the ``bytes(8)`` default
+            # for the truncated HMAC that was on the wire.
+            hmac = opt.hmac
+            nonce = opt.nonce
+
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
+        return Schema_MPTCPJoinSYNACK(
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
+            # NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the
+            # SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +
+            # ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random
+            # number (32 bits, 4). The SYN form of figure 5 is 12, since it
+            # carries a 4-octet token where this one carries an 8-octet HMAC.
+            length=16,
+            test={
+                'subtype': subtype.value,
+                'reserved': self._make_uint(reserved, bits=3, name=f'{where} reserved'),
+                'backup': backup,
+            },
+            addr_id=self._make_uint(addr_id, bits=8, name=f'{where} addr_id'),
+            hmac=self._make_octets(hmac, size=8, name=f'{where} hmac'),
+            nonce=self._make_uint(nonce, bits=32, name=f'{where} nonce'),
+        )
+
+    def _make_join_ack(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinACK]' = None, *,
+                       reserved: 'int' = 0,
+                       hmac: 'bytes' = bytes(20),
+                       **kwargs: 'Any') -> 'Schema_MPTCPJoinACK':
+        """Make multipath TCP join ACK option.
+
+        Args:
+            subtype: MPTCP subtype
+            opt: option data
+            reserved: reserved bits
+            hmac: sender's HMAC
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``reserved`` does not fit 12 bits, or ``hmac`` is
+                not 20 octets.
+
+        """
+        if opt is not None:
+            reserved = opt.reserved
+            hmac = opt.hmac
+
+        where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
+        return Schema_MPTCPJoinACK(
+            kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
+            # NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the
+            # ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,
+            # being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,
+            # 20). ``_read_join_ack``'s guard requires the same 24.
+            length=24,
+            test={
+                'subtype': subtype.value,
+                'reserved': self._make_uint(reserved, bits=12, name=f'{where} reserved'),
+            },
+            hmac=self._make_octets(hmac, size=20, name=f'{where} hmac'),
         )

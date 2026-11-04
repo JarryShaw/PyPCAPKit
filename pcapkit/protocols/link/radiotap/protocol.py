@@ -2150,7 +2150,9 @@ class Radiotap(Link[Data_Radiotap, Schema_Radiotap],
         # what it is given; the refusal is handled here, so it is quiet.
         with CaughtByCaller(FieldValueError):
             try:
-                schema = cast('Schema', field_schema.unpack(octets, length, None))  # type: ignore[call-arg,misc]
+                # NOTE: The octets left off are zeros of the item, so its lists read on (#2655, #2760).
+                schema = cast('Schema', field_schema.unpack(octets, length,  # type: ignore[call-arg,misc]
+                                                            {'__zero_tail__': True}))
             except FieldValueError:
                 return data
         if layout is None:

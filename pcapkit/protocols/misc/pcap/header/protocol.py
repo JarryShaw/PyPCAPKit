@@ -346,24 +346,6 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             'network': data.network,
         }
 
-    def _read_protos(self, size: int) -> 'Enum_LinkType':
-        """Read next layer protocol type.
-
-        Reads ``size`` octets as an unsigned integer in the file's byte order
-        (:attr:`byteorder`), falling back to little-endian before :meth:`read`
-        has set it (:issue:`2312`).
-
-        Arguments:
-            size: buffer size
-
-        Returns:
-            Link layer protocol enumeration.
-
-        """
-        _byte = self._read_unpack(size, lilendian=getattr(self, '_byte', 'little') == 'little')
-        _prot = Enum_LinkType.get(_byte)
-        return _prot
-
     def _make_magic(self, byteorder: 'Literal["big", "little"]' = sys.byteorder,
                     lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
                     nanosecond: bool = False) -> 'tuple[bytes, bool]':
@@ -391,3 +373,21 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         magic_number = _DECLARED_MAGIC[(byteorder, nanosecond)]
         return magic_number, (byteorder == 'little')
+
+    def _read_protos(self, size: int) -> 'Enum_LinkType':
+        """Read next layer protocol type.
+
+        Reads ``size`` octets as an unsigned integer in the file's byte order
+        (:attr:`byteorder`), falling back to little-endian before :meth:`read`
+        has set it (:issue:`2312`).
+
+        Arguments:
+            size: buffer size
+
+        Returns:
+            Link layer protocol enumeration.
+
+        """
+        _byte = self._read_unpack(size, lilendian=getattr(self, '_byte', 'little') == 'little')
+        _prot = Enum_LinkType.get(_byte)
+        return _prot

@@ -13,11 +13,21 @@ against :data:`RULES`:
 * ``helpers`` -- rule b: the utilities the bodies of ``read()`` and ``make()`` name
   keep the order of first use, each reader directly followed by its maker. A
   registry fallback, the default of a ``getattr()`` or ``.get()`` there, is a
-  specific reader rather than a helper (#2490).
+  specific reader rather than a helper (#2490);
+* ``specific`` -- rule c: the readers and makers of each method registry follow the
+  helpers, its readers before its makers, each set opening with the registry's
+  default and then in the registry's order;
+* ``unreached`` -- subgroup d: every utility that ``read()``, ``make()`` and the
+  registries do not reach comes after all those they do;
+* ``registry`` -- a registry map's entries are in the order of their keys' values:
+  an enum member's value, or an :class:`int` key's own.
 
-Rule c, the enum-value order of the specific readers and makers, and subgroup d,
-the last place of every helper ``read()``, ``make()`` and the registries do not
-reach, are checked once their PRs land.
+A method registry is a class-level dunder map, other than ``__proto__``, whose
+:obj:`str` values name the ``_read_*`` and ``_make_*`` methods an f-string in the
+class builds. Ordered by value, a registry also orders rule c by enum value, as the
+page asks. A key the audit cannot value, such as the call that builds each key of
+``PCAPNG.__option__``, leaves its map out of ``registry``, and rule c then follows
+the registry's own order, as the page asks where there is no enum.
 
 A class that breaks a rule is an entry in :data:`KNOWN_EXCEPTIONS`, with the rules
 it breaks and the issue or PR whose reorder removes it. The table is checked in
@@ -25,12 +35,16 @@ both directions, as ``test-coverage.rst`` asks of its tables: a new violation fa
 and so does an entry naming a class or a rule that does not exist, or a rule its
 class no longer breaks, so a reorder deletes its entry in the same change.
 
-This module is unit-tier: it parses source and imports nothing it scans.
+This module is unit-tier: it parses source and imports nothing it scans. To value
+an enum key it imports the :mod:`pcapkit.const` module the scanned module imports
+the enum from.
 
 """
 from __future__ import annotations
 
 import ast
+import enum
+import importlib
 import unittest
 from typing import TYPE_CHECKING
 
@@ -38,7 +52,10 @@ from tests._tiers import ROOT
 
 if TYPE_CHECKING:
     import pathlib
-    from typing import Iterator
+    from typing import Any, Callable, Iterator, Optional
+
+    #: Resolves a name in a scanned module to the object it imports, else :data:`None`.
+    Lookup = Callable[[str], Optional[Any]]
 
 #: Test tier (#1958): parses every protocol module for a question about the tree,
 #: which does not differ by interpreter.
@@ -62,6 +79,9 @@ RULES = {
     'data': '_make_data() is the first utility',
     'pair': 'each _read_xxx() comes before its _make_xxx()',
     'helpers': 'the helpers read() and make() name, in first-use order, each reader then its maker',
+    'specific': "after the helpers, each registry's readers then its makers, default first, in registry order",
+    'unreached': 'the utilities read(), make() and the registries do not reach come last',
+    'registry': "a registry map's entries in the order of their keys' enum or int values",
 }
 
 #: Classes that break the order, as ``qualified name: (rules, remover)``: the
@@ -173,8 +193,141 @@ def helpers(cls: 'ast.ClassDef', utilities: 'list[str]') -> 'list[str]':
     return order
 
 
-def audit(cls: 'ast.ClassDef') -> 'dict[str, str]':
-    """The rules ``cls`` breaks, as ``kind: detail``; empty when it keeps the order."""
+def maps(cls: 'ast.ClassDef') -> 'Iterator[tuple[str, ast.Dict, Optional[str]]]':
+    """Every class-level dunder map literal of ``cls``, as ``(name, entries, default)``.
+
+    The map is a :obj:`dict` display, or a call such as a
+    :class:`~collections.defaultdict` holding one; ``default`` is the :obj:`str` its
+    ``lambda`` factory returns, else :data:`None`.
+
+    """
+    for stmt in cls.body:
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1:
+            target, value = stmt.targets[0], stmt.value  # type: ast.expr, Optional[ast.expr]
+        elif isinstance(stmt, ast.AnnAssign):
+            target, value = stmt.target, stmt.value
+        else:
+            continue
+        if not isinstance(target, ast.Name) or not _is_dunder(target.id):
+            continue
+        default = None
+        if isinstance(value, ast.Call):
+            factory = value.args[0] if value.args else None
+            if isinstance(factory, ast.Lambda) and isinstance(factory.body, ast.Constant) \
+                    and isinstance(factory.body.value, str):
+                default = factory.body.value
+            value = next((arg for arg in value.args if isinstance(arg, ast.Dict)), None)
+        if isinstance(value, ast.Dict):
+            yield target.id, value, default
+
+
+def _prefixes(cls: 'ast.ClassDef') -> 'set[str]':
+    """What follows ``_read_`` or ``_make_`` in each f-string of ``cls`` naming a method."""
+    found = set()  # type: set[str]
+    for node in ast.walk(cls):
+        if isinstance(node, ast.JoinedStr) and len(node.values) > 1 \
+                and isinstance(node.values[0], ast.Constant) and isinstance(node.values[1], ast.FormattedValue):
+            head = node.values[0].value
+            if isinstance(head, str) and _stem(head) is not None:
+                found.add(head[6:])
+    return found
+
+
+def registries(cls: 'ast.ClassDef', utilities: 'list[str]') -> 'list[tuple[str, str, list[str]]]':
+    """The method registries of ``cls``, as ``(map, prefix, stems)``.
+
+    ``stems`` opens with the registry's default, the ``lambda`` factory's value or the
+    stem of the ``getattr()`` fallback, and follows with the stems of its entries in
+    their order. ``prefix`` is the f-string prefix that names the most of them.
+
+    """
+    prefixes = _prefixes(cls)
+    fallbacks = _fallbacks(cls, set(utilities))
+    found = []  # type: list[tuple[str, str, list[str]]]
+    for name, node, default in maps(cls):
+        if name == '__proto__':
+            continue
+        values = [value.value for value in node.values
+                  if isinstance(value, ast.Constant) and isinstance(value.value, str)]
+        hits = {prefix: sum(1 for value in values if _method(utilities, '_read_', prefix, value)
+                            or _method(utilities, '_make_', prefix, value)) for prefix in prefixes}
+        prefix = max(sorted(hits), key=hits.__getitem__, default=None)
+        if prefix is None or not hits[prefix]:
+            continue
+        if default is None:
+            default = next((fallback[6 + len(prefix):] for fallback in sorted(fallbacks)
+                            if _stem(fallback) is not None and fallback[6:].startswith(prefix)), None)
+        stems = [default] if default is not None else []
+        found.append((name, prefix, list(dict.fromkeys(stems + values))))
+    return found
+
+
+def _method(utilities: 'list[str]', kind: 'str', prefix: 'str', stem: 'str') -> 'Optional[str]':
+    """The utility ``kind + prefix + stem`` names, as written or lower-cased, else :data:`None`."""
+    for name in (f'{kind}{prefix}{stem}', f'{kind}{prefix}{stem.lower()}'):
+        if name in utilities:
+            return name
+    return None
+
+
+def specific(cls: 'ast.ClassDef', utilities: 'list[str]') -> 'list[tuple[str, list[str]]]':
+    """Rule c's sets of ``cls``: each registry's readers, then its makers, in the order asked.
+
+    Each set is ``(label, members)``, and ``members`` keeps the registry's order:
+    the default first, then each entry's stem, a stem shared by several entries at
+    its first.
+
+    """
+    sets = []  # type: list[tuple[str, list[str]]]
+    for name, prefix, stems in registries(cls, utilities):
+        for kind in ('_read_', '_make_'):
+            found = (_method(utilities, kind, prefix, stem) for stem in stems)
+            sets.append((f'{name} {kind}{prefix}*', list(dict.fromkeys(member for member in found if member))))
+    return sets
+
+
+def _key_value(key: 'Optional[ast.expr]', lookup: 'Optional[Lookup]') -> 'Optional[int]':
+    """The value a registry key orders by: an :class:`int` literal, or an enum member's value.
+
+    :data:`None` for a key of any other shape, which no rule on the page orders.
+
+    """
+    if isinstance(key, ast.Constant) and isinstance(key.value, int) and not isinstance(key.value, bool):
+        return key.value
+    if isinstance(key, ast.Attribute) and isinstance(key.value, ast.Name) and lookup is not None:
+        owner = lookup(key.value.id)
+        if owner is None:
+            raise LookupError(f'{key.value.id} is not imported from pcapkit.const')
+        member = getattr(owner, key.attr)
+        if not isinstance(member, enum.Enum):
+            raise TypeError(f'{key.value.id}.{key.attr} is not an enum member')
+        return int(member)
+    return None
+
+
+def module_lookup(path: 'pathlib.Path') -> 'Lookup':
+    """Resolve each name ``path`` imports from :mod:`pcapkit.const` at its top level."""
+    tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    names = {alias.asname or alias.name: (stmt.module, alias.name)
+             for stmt in tree.body if isinstance(stmt, ast.ImportFrom) and stmt.module
+             and stmt.module.startswith('pcapkit.const.') for alias in stmt.names}
+
+    def lookup(name: 'str') -> 'Optional[Any]':
+        if name not in names:
+            return None
+        module, attr = names[name]
+        return getattr(importlib.import_module(module), attr)
+
+    return lookup
+
+
+def audit(cls: 'ast.ClassDef', lookup: 'Optional[Lookup]' = None) -> 'dict[str, str]':
+    """The rules ``cls`` breaks, as ``kind: detail``; empty when it keeps the order.
+
+    ``lookup`` resolves the names a registry key takes its enum from; without it,
+    only :class:`int` keys are valued.
+
+    """
     order = members(cls)
     findings = {}  # type: dict[str, str]
     highest = 0
@@ -204,7 +357,47 @@ def audit(cls: 'ast.ClassDef') -> 'dict[str, str]':
             if name.startswith('_read_') and maker in expected and position[maker] != position[name] + 1:
                 findings['helpers'] = f'{name} and {maker} split by {utilities[position[name] + 1]}'
                 break
+
+    sets = specific(cls, utilities)
+    registry = {member for _, names in sets for member in names}
+    for fallback in _fallbacks(cls, set(utilities)):
+        stem = _stem(fallback)
+        registry.update([fallback] if stem is None else
+                        (name for name in (f'_read_{stem}', f'_make_{stem}') if name in position))
+    for label, names in sets:
+        actual = [name for name in utilities if name in names]
+        if actual != names:
+            findings.setdefault('specific', f'{label}: expected {names}, found {actual}')
+    for (label, readers), (_, makers) in zip(sets[::2], sets[1::2]):
+        if readers and makers and position[readers[-1]] > position[makers[0]]:
+            findings.setdefault('specific', f'{label}: {makers[0]} before {readers[-1]}')
+    helper = [name for name in expected if name not in registry]
+    first = min((position[name] for name in registry), default=None)
+    if helper and first is not None and position[helper[-1]] > first:
+        findings.setdefault('specific', f'{utilities[first]} before the helper {helper[-1]}')
+
+    reached = {'_make_data', *expected, *registry}
+    last = max((position[name] for name in reached if name in position), default=0)
+    early = [name for name in utilities[:last] if name not in reached]
+    if early:
+        findings['unreached'] = f'{early[0]} before {utilities[last]}'
+
+    for name, node, _ in maps(cls):
+        if name != '__proto__' and name not in {label.split()[0] for label, _ in sets}:
+            continue
+        keys = [key for key in node.keys if key is not None]
+        values = [_key_value(key, lookup) for key in keys]
+        if len(keys) == len(node.keys) and None not in values and values != sorted(values):
+            out = next(index for index in range(1, len(values)) if values[index] < values[index - 1])
+            findings.setdefault('registry', f'{name}: {_key_text(keys[out])} after {_key_text(keys[out - 1])}')
     return findings
+
+
+def _key_text(key: 'ast.expr') -> 'str':
+    """A valued registry key as written: ``Enum.MEMBER``, or the :class:`int` literal."""
+    if isinstance(key, ast.Attribute) and isinstance(key.value, ast.Name):
+        return f'{key.value.id}.{key.attr}'
+    return repr(getattr(key, 'value', key))
 
 
 def protocol_modules(root: 'pathlib.Path' = PROTOCOLS) -> 'Iterator[pathlib.Path]':
@@ -232,7 +425,7 @@ def classes(path: 'pathlib.Path', root: 'pathlib.Path' = ROOT) -> 'Iterator[tupl
 
 def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, dict[str, str]]':
     """Every class under ``root``'s protocol package, mapped to what :func:`audit` finds."""
-    return {name: audit(node)
+    return {name: audit(node, module_lookup(path))
             for path in protocol_modules(root / 'pcapkit' / 'protocols')
             for name, node in classes(path, root)}
 
@@ -240,14 +433,20 @@ def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, dict[str, str]]':
 class TestAudit(unittest.TestCase):
     """The audit finds each rule broken in a planted class body, and nothing in a sound one."""
 
-    #: A class body in the order: ``_make_data()``, a helper pair and a registry fallback.
+    #: A class body in the order: ``_make_data()``, a helper pair, a registry
+    #: fallback, a method registry's readers and makers, and a helper nothing reaches.
     SOUND = '''
 class Sound:
+    __option__ = collections.defaultdict(lambda: 'unknown', {
+        E.ALPHA: 'alpha',
+        E.BETA: 'beta',
+    })
     @property
     def name(self): ...
     def read(self):
         self._read_addr()
         getattr(self, 'x', self._read_unknown)
+        getattr(self, f'_read_opt_{name}')
     def make(self):
         self._make_addr()
     def __index__(self): ...
@@ -257,28 +456,66 @@ class Sound:
     def _make_addr(self): ...
     def _read_unknown(self): ...
     def _make_unknown(self): ...
+    def _read_opt_unknown(self): ...
+    def _read_opt_alpha(self): ...
+    def _read_opt_beta(self): ...
+    def _make_opt_unknown(self): ...
+    def _make_opt_alpha(self): ...
+    def _make_opt_beta(self): ...
+    def _decode_text(self): ...
 '''
+
+    class Code(enum.IntEnum):
+        """The enum :attr:`SOUND`'s registry is keyed by."""
+
+        ALPHA = 1
+        BETA = 2
 
     def check(self, source: 'str') -> 'dict[str, str]':
         node = ast.parse(source).body[0]
         assert isinstance(node, ast.ClassDef)
-        return audit(node)
+        return audit(node, {'E': self.Code}.get)
 
     def test_a_sound_class_has_no_finding(self) -> 'None':
         self.assertEqual(self.check(self.SOUND), {})
 
     def test_each_rule_is_found(self) -> 'None':
+        readers = '    def _read_opt_alpha(self): ...\n    def _read_opt_beta(self): ...\n'
         planted = {
             'group': self.SOUND.replace('    def __index__(self): ...\n', '') + '    def __index__(self): ...\n',
             'data': self.SOUND.replace('    @classmethod\n    def _make_data(cls, data): ...\n', '')
             + '    @classmethod\n    def _make_data(cls, data): ...\n',
             'pair': self.SOUND.replace('    def _read_unknown(self): ...\n', '') + '    def _read_unknown(self): ...\n',
             'helpers': self.SOUND.replace('    def _make_addr(self): ...\n', '') + '    def _make_addr(self): ...\n',
+            'specific': self.SOUND.replace(readers, ''.join(reversed(readers.splitlines(keepends=True)))),
+            'unreached': self.SOUND.replace('    def _decode_text(self): ...\n', '').replace(
+                '    def _read_addr(self): ...\n', '    def _decode_text(self): ...\n    def _read_addr(self): ...\n'),
+            'registry': self.SOUND.replace("        E.ALPHA: 'alpha',\n        E.BETA: 'beta',\n",
+                                           "        E.BETA: 'alpha',\n        E.ALPHA: 'beta',\n"),
         }
         self.assertEqual(sorted(planted), sorted(RULES))
         for kind, source in planted.items():
             with self.subTest(rule=kind):
+                self.assertNotEqual(source, self.SOUND)
                 self.assertIn(kind, self.check(source))
+        # Each of the checks for rule c, subgroup d and the registry order fires alone.
+        for kind in ('specific', 'unreached', 'registry'):
+            with self.subTest(alone=kind):
+                self.assertEqual(sorted(self.check(planted[kind])), [kind])
+
+    def test_the_specific_sets(self) -> 'None':
+        node = ast.parse(self.SOUND).body[0]
+        assert isinstance(node, ast.ClassDef)
+        utilities = [name for name, group in members(node) if group == 3]
+        self.assertEqual(specific(node, utilities), [
+            ('__option__ _read_opt_*', ['_read_opt_unknown', '_read_opt_alpha', '_read_opt_beta']),
+            ('__option__ _make_opt_*', ['_make_opt_unknown', '_make_opt_alpha', '_make_opt_beta']),
+        ])
+
+    def test_a_computed_key_is_not_valued(self) -> 'None':
+        source = self.SOUND.replace("        E.ALPHA: 'alpha',\n        E.BETA: 'beta',\n",
+                                    "        key(E.BETA): 'alpha',\n        key(E.ALPHA): 'beta',\n")
+        self.assertEqual(self.check(source), {})
 
     def test_a_fallback_is_not_a_helper(self) -> 'None':
         node = ast.parse(self.SOUND).body[0]
@@ -323,6 +560,38 @@ class TestMemberOrder(unittest.TestCase):
         pairs = ['_read_addr_resolve', '_make_addr_resolve', '_read_proto_resolve', '_make_proto_resolve']
         self.assertEqual(helpers(node, utilities), pairs)
         self.assertEqual(utilities, ['_make_data', *pairs])
+
+    def test_the_reference_registries_are_checked(self) -> 'None':
+        # Every key of these maps is valued, so the registry rule orders them.
+        cases = {
+            ('internet/internet.py', 'Internet'): {'__proto__'},
+            ('internet/ipv4/protocol.py', 'IPv4'): {'__option__'},
+            ('link/link.py', 'Link'): {'__proto__'},
+            ('transport/tcp/protocol.py', 'TCP'): {'__proto__', '__option__', '__mp_option__'},
+            ('transport/udp/protocol.py', 'UDP'): {'__proto__'},
+        }
+        for (rel, name), expected in cases.items():
+            with self.subTest(cls=name):
+                path = PROTOCOLS / rel
+                node = next(node for qual, node in classes(path) if qual.endswith(f'.{name}'))
+                found = {label: [_key_value(key, module_lookup(path)) for key in entries.keys]
+                         for label, entries, _ in maps(node)}
+                self.assertLessEqual(expected, set(found))
+                for label in expected:
+                    self.assertNotIn(None, found[label], label)
+                    self.assertEqual(found[label], sorted(found[label]), label)
+
+    def test_the_page_examples(self) -> 'None':
+        # Rule c: _read_opt_unassigned() opens the readers of IPv4.
+        path = PROTOCOLS / 'internet' / 'ipv4' / 'protocol.py'
+        node = dict(classes(path))['pcapkit.protocols.internet.ipv4.protocol.IPv4']
+        utilities = [member for member, group in members(node) if group == 3]
+        readers = dict(specific(node, utilities))['__option__ _read_opt_*']
+        self.assertEqual(readers[0], '_read_opt_unassigned')
+        # Subgroup d: _decode_text() of HTTPv1, which only a helper calls, is the last utility.
+        path = PROTOCOLS / 'application' / 'httpv1' / 'protocol.py'
+        node = dict(classes(path))['pcapkit.protocols.application.httpv1.protocol.HTTPv1']
+        self.assertEqual([member for member, group in members(node) if group == 3][-1], '_decode_text')
 
     def test_every_exception_is_still_broken(self) -> 'None':
         stale = sorted(f'{name} [{kind}] ({remover})'

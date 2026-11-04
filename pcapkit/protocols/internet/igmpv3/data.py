@@ -86,6 +86,10 @@ class Query(IGMPv3):
     #: Querier's Query Interval, in seconds, decoded from :attr:`qqic` by the
     #: same formula as :attr:`max_resp_time` (:rfc:`3376#section-4.1.7`).
     qqi: 'int'
+    #: Number of source addresses, as received on the wire
+    #: (:rfc:`3376#section-4.1.8`); more than :attr:`sources` holds where the
+    #: data ends inside them.
+    num_sources: 'int'
     #: Source addresses being queried (:rfc:`3376#section-4.1.9`); an empty
     #: :obj:`tuple` for a General or Group-Specific Query.
     sources: 'tuple[IPv4Address, ...]'
@@ -94,7 +98,7 @@ class Query(IGMPv3):
         def __init__(self, version: 'Literal[3]', type: 'Enum_Type', length: 'int', max_resp_code: 'int',
                      max_resp_time: 'int', checksum: 'bytes', group: 'IPv4Address',
                      resv: 'int', s_flag: 'bool', qrv: 'int', qqic: 'int', qqi: 'int',
-                     sources: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+                     num_sources: 'int', sources: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final

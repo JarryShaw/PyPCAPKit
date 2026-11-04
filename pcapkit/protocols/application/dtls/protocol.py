@@ -787,8 +787,16 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         Returns:
             Key-value pairs for protocol construction.
 
+        Note:
+            Dispatches on the fields of ``data`` rather than on its class, since
+            :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
+            reads a :obj:`dict` as the legacy data model (:issue:`2762`): a
+            ``tls12_cid`` record by its content type, and a unified header by
+            ``sequence_long``, its ``S`` bit, which no other record has.
+
         """
-        if isinstance(data, Data_DTLSCIDCiphertext):
+        if data.get('content_type') == Enum_ContentType.tls12_cid:
+            data = cast('Data_DTLSCIDCiphertext', data)
             return {
                 'content_type': data.content_type,
                 'version': data.version,
@@ -798,7 +806,8 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 'content': data.content,
                 'payload': cls._make_payload(data),
             }
-        if isinstance(data, Data_DTLSCiphertext):
+        if 'sequence_long' in data:
+            data = cast('Data_DTLSCiphertext', data)
             return {
                 'ciphertext': True,
                 'epoch': data.epoch,
@@ -809,6 +818,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
                 'content': data.content,
                 'payload': cls._make_payload(data),
             }
+        data = cast('Data_DTLS', data)
         return {
             'content_type': data.content_type,
             'version': data.version,

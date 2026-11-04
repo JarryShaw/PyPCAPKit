@@ -50,8 +50,12 @@ by key where there is no enum.
 
 **The guard.** :file:`tests/project/test_protocol_member_order_2490_unit.py` holds
 every protocol class to the groups, ``_make_data()`` first, each ``_read_xxx()``
-before its ``_make_xxx()``, and subgroup b, with a table of known exceptions
-(:issue:`2490`).
+before its ``_make_xxx()``, subgroups b, c and d, and the order of the registry
+maps, with a table of known exceptions (:issue:`2490`). It values a key that is an
+enum member or an :class:`int`; a map with a key of another shape, such as the
+computed keys of
+:attr:`PCAPNG.__option__ <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__>`,
+it leaves in its own order, which rule c then follows.
 
 Example
 ~~~~~~~

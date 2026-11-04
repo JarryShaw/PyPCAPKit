@@ -421,53 +421,6 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             'trailer': data.get('trailer', b''),
         }
 
-    def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':
-        """Read router and area IDs.
-
-        Args:
-            id: ID bytes.
-
-        Returns:
-            Parsed IDs as an IPv4 address.
-
-        """
-        #_byte = self._read_fileng(4)
-        #_addr = '.'.join(str(_) for _ in _byte)
-        return ipaddress.ip_address(id)  # type: ignore[return-value]
-
-    def _make_id_numbers(self, id: 'IPv4Address | str | bytes | bytearray') -> 'bytes':
-        """Make router and area IDs.
-
-        Args:
-            id: ID.
-
-        Returns:
-            ID bytes.
-
-        Raises:
-            FieldValueError: If ``id`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
-
-        Notes:
-            Latent rather than live: nothing in this module calls this method
-            (:meth:`make` builds ``router_id``/``area_id`` straight from its
-            own arguments), so the only caller is a unit test. It is routed
-            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
-            anyway, so that a future caller passing a :obj:`bool` gets
-            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a
-            silent ``0.0.0.1``.
-
-            The description below uses :attr:`self.__class__.__name__
-            <type.__name__>` rather than :attr:`self.alias
-            <pcapkit.protocols.protocol.Protocol.alias>`, because ``alias``
-            here reads ``self._version``, which :meth:`read` only assigns
-            from the wire -- unavailable to a construction-only instance that
-            never went through :meth:`read`.
-
-        """
-        return cast('IPv4Address', parse_ip_address(
-            id, f'{self.__class__.__name__}: invalid ID', version=4)).packed
-
     def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~pcapkit.protocols.application.ospf.data.OSPF.autype` is ``2``.
@@ -546,3 +499,50 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             except KeyError as exc:
                 raise ProtocolError(f'OSPF: missing {exc} in auth_data: {auth_data!r}') from None
         raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')
+
+    def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':
+        """Read router and area IDs.
+
+        Args:
+            id: ID bytes.
+
+        Returns:
+            Parsed IDs as an IPv4 address.
+
+        """
+        #_byte = self._read_fileng(4)
+        #_addr = '.'.join(str(_) for _ in _byte)
+        return ipaddress.ip_address(id)  # type: ignore[return-value]
+
+    def _make_id_numbers(self, id: 'IPv4Address | str | bytes | bytearray') -> 'bytes':
+        """Make router and area IDs.
+
+        Args:
+            id: ID.
+
+        Returns:
+            ID bytes.
+
+        Raises:
+            FieldValueError: If ``id`` is a :obj:`bool` (see
+                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).
+
+        Notes:
+            Latent rather than live: nothing in this module calls this method
+            (:meth:`make` builds ``router_id``/``area_id`` straight from its
+            own arguments), so the only caller is a unit test. It is routed
+            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`
+            anyway, so that a future caller passing a :obj:`bool` gets
+            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a
+            silent ``0.0.0.1``.
+
+            The description below uses :attr:`self.__class__.__name__
+            <type.__name__>` rather than :attr:`self.alias
+            <pcapkit.protocols.protocol.Protocol.alias>`, because ``alias``
+            here reads ``self._version``, which :meth:`read` only assigns
+            from the wire -- unavailable to a construction-only instance that
+            never went through :meth:`read`.
+
+        """
+        return cast('IPv4Address', parse_ip_address(
+            id, f'{self.__class__.__name__}: invalid ID', version=4)).packed

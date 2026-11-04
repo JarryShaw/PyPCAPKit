@@ -805,6 +805,32 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
 
         raise ProtocolError('HTTP: unknown version')
 
+    @staticmethod
+    def _member_of_version(version: 'Any') -> 'Type[HTTP]':
+        """The member a ``version`` of ``1`` or ``2`` names.
+
+        Args:
+            version: Version of HTTP.
+
+        Returns:
+            :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or
+            :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`.
+
+        Raises:
+            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a
+                :obj:`bool` or a :obj:`float` is refused even where it equals one.
+
+        """
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if isinstance(version, int) and not isinstance(version, bool):
+            if version == 1:
+                return HTTPv1
+            if version == 2:
+                return HTTPv2
+        raise ProtocolError(f'HTTP: invalid version: {version!r}')
+
     @classmethod
     def _dispatch_version(cls, data: 'bytes', length: 'int') -> 'Type[ProtocolBase]':
         """Pick the class that parses the HTTP message at the start of ``data``.
@@ -860,29 +886,3 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         if _test_http2_frame(data):
             return HTTPv2
         return Raw
-
-    @staticmethod
-    def _member_of_version(version: 'Any') -> 'Type[HTTP]':
-        """The member a ``version`` of ``1`` or ``2`` names.
-
-        Args:
-            version: Version of HTTP.
-
-        Returns:
-            :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or
-            :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`.
-
-        Raises:
-            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a
-                :obj:`bool` or a :obj:`float` is refused even where it equals one.
-
-        """
-        from pcapkit.protocols.application.httpv1.protocol import HTTPv1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.application.httpv2.protocol import HTTPv2  # isort: skip # pylint: disable=import-outside-toplevel
-
-        if isinstance(version, int) and not isinstance(version, bool):
-            if version == 1:
-                return HTTPv1
-            if version == 2:
-                return HTTPv2
-        raise ProtocolError(f'HTTP: invalid version: {version!r}')
