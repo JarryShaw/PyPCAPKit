@@ -213,15 +213,18 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                 consumes nothing from ``buffer``, or if schema items short of the
                 field's length cannot be zero-filled.
 
-        When ``buffer`` falls short of the field's length, schema items are read
-        from its octets zero-filled to that length, as
+        When ``buffer`` falls short of the field's length, the schema item it
+        ends inside is read as though its missing octets were zeros, as
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
-        reads any other field, so the items cover the length declared.
+        reads any other field, and the list ends with that item: none is read
+        from the zeros past it, which hold no octet of the data.
 
         .. versionchanged:: 1.6.0
 
-           Schema items short of the field's length are zero-filled to it, where
-           an item past the data was refused as consuming nothing (:issue:`2686`).
+           A list of schema items the data ends inside ends with the data, the
+           item it ends inside read with its missing octets as zeros, where an
+           item past the data was refused as consuming nothing (:issue:`2686`,
+           :issue:`2756`).
 
         """
         length = self._length
@@ -267,16 +270,20 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             file.seek(start, io.SEEK_SET)
             if present < length:
                 with _zero_filled_items(self.name, length, file.read()) as filled:
-                    return self._unpack_items(io.BytesIO(filled), packet, is_schema)
+                    return self._unpack_items(filled, packet, is_schema, present)
         return self._unpack_items(file, packet, is_schema)
 
-    def _unpack_items(self, file: 'IO[bytes]', packet: 'dict[str, Any]', is_schema: 'bool') -> 'list[_TL]':
+    def _unpack_items(self, file: 'IO[bytes]', packet: 'dict[str, Any]', is_schema: 'bool',
+                      present: 'int' = -1) -> 'list[_TL]':
         """Unpack the field's items from ``file``.
 
         Args:
             file: Stream the items are read from.
             packet: Packet data.
             is_schema: Whether the items are schemas.
+            present: Octets of ``file`` the data holds, past which it holds the
+                zeros :meth:`unpack` filled it with; negative where it holds
+                no zeros.
 
         Returns:
             Unpacked items.
@@ -293,8 +300,9 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # which is what it read, but the schema branch sizes it by ``len(data)``,
         # which is only what the schema *recorded*. A schema that reads nothing
         # records nothing, so ``length -= len(data)`` makes no progress and the
-        # loop spins forever. The zero-fill in ``unpack`` gives every item octets,
-        # but an item schema may still consume none of them. Remembering where the
+        # loop spins forever. The zero-fill in ``unpack`` gives the item the data
+        # ends inside octets to read, and every item before it reads octets of the
+        # data, but an item schema may still consume none of them. Remembering where the
         # previous item ended is what bounds the iteration count, since it does
         # not depend on what the schema reports. Cf. #431, which is the same
         # defect in the ``OptionField`` subclass.
@@ -308,6 +316,10 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
         temp = []  # type: list[_TL]
         while length > 0:
+            # NOTE: An item starting past the octets present would be made of the zero-fill alone,
+            # one the capture never held, so the list ends with the data (#2756).
+            if 0 <= present <= offset - start:
+                break
             field = item_type(packet)
 
             if is_schema:

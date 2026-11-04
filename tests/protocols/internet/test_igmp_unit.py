@@ -1227,8 +1227,8 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
 
     def test_report_cut_inside_a_source_list(self) -> None:
         """Cut inside the first record's second source: the source reads as far
-        as it was captured, and the second record the count declares reads as
-        zeros, as a zero-filled record of no sources (#2686)."""
+        as it was captured, and the second record the count declares, of which
+        no octet was captured, is not made up of zeros (#2756)."""
         from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
@@ -1243,7 +1243,7 @@ class IGMPv3TruncatedReportTests(unittest.TestCase):
         self.assertEqual(
             [(int(record.record_type), str(record.multicast_address), tuple(map(str, record.sources)))
              for record in igmp.info.records],
-            [(1, '239.1.1.1', ('10.0.0.1', '10.0.0.0')), (0, '0.0.0.0', ())],
+            [(1, '239.1.1.1', ('10.0.0.1', '10.0.0.0'))],
         )
         self.assertIsInstance(igmp.payload, NoPayload)
         self.assert_rebuilds(cut, parsed)
