@@ -400,8 +400,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             extension: if is extension header, see :meth:`_next_exthdr_depth`
 
         Returns:
-            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if there is
-            nothing to parse; :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if the
+            The class :meth:`~pcapkit.protocols.protocol.Protocol._empty_next_layer`
+            gives if there is nothing to parse;
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if the
             parse stops at this layer, or the next layer is an IPv6 extension
             header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the
             class registered for ``proto``. Paired with it, the keywords that
@@ -415,9 +416,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 layer is inside a payload being rebuilt (:issue:`1619`).
 
         """
-        if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
-            return NoPayload, {}
+        empty = self._empty_next_layer(file_, length)
+        if empty is not None:
+            return empty, {}
         if self._sigterm:
             from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             return Raw, {}

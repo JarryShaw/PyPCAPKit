@@ -23,6 +23,7 @@
 import abc
 import contextlib
 import contextvars
+import io
 import re
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
@@ -120,14 +121,15 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
 
 
 @contextlib.contextmanager
-def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[bytes]':
+def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[IO[bytes]]':
     """Zero-fill the octets of a list of schema items to its declared width.
 
     :meth:`FieldBase.unpack` reads a field the data ends inside as though its
     missing octets were zeros, and :meth:`ListField.unpack
-    <pcapkit.corekit.fields.collections.ListField.unpack>` gives a list of
-    schema items the same reading here, so its items cover the width it
-    declares (:issue:`2686`). The items are read inside the block.
+    <pcapkit.corekit.fields.collections.ListField.unpack>` gives the schema
+    item the data ends inside the same reading here (:issue:`2686`). The items
+    are read inside the block, and none from the zeros past that item, which
+    hold no octet of the data (:issue:`2756`).
 
     Args:
         name: Field name.
@@ -135,7 +137,8 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[b
         data: Octets actually present, fewer than ``length``.
 
     Yields:
-        ``data``, zero-filled to ``length``.
+        A stream of ``data``, zero-filled to ``length``. The zeros left unread
+        past where the stream ends up are not counted as octets read.
 
     Raises:
         FieldValueError: If ``length`` is past
@@ -157,8 +160,8 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[b
         ledger = [0, 0]
         _zero_pad_ledger.set(ledger)
 
-    # NOTE: The fill is made-up schema objects, not zeros, so it gets no free band or one-off
-    # allowance: a 15-octet SETTINGS frame declaring 65,532 octets made 10,922 pairs in 7.5 MB.
+    # NOTE: The fill makes up the rest of the item the data ends inside, a schema object, not
+    # zeros, so it gets no free band or one-off allowance (#2686); past that item it makes none.
     padding = length - len(data)
     shortfall, ratio = config.MAX_ZERO_PAD_SHORTFALL, config.ZERO_PAD_BUDGET_RATIO
     if shortfall != -1:
@@ -174,14 +177,17 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[b
         ledger[1] += padding
 
     # NOTE: The items credit the zeros they read as octets supplied, so they are taken off in
-    # advance; items that fail credit an unknown share, so the octets read go back as they were.
+    # advance and those left unread given back (#2756); items that fail credit an unknown share,
+    # so the octets read go back as they were.
     read = ledger[0]
     ledger[0] -= padding
+    filled = io.BytesIO(data + bytes(padding))
     try:
-        yield data + bytes(padding)
+        yield filled
     except BaseException:
         ledger[0] = read
         raise
+    ledger[0] += length - max(filled.tell(), len(data))
 
 
 #: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative

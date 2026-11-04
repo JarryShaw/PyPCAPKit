@@ -368,9 +368,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
 
         if TYPE_CHECKING:
             protocol: 'Type[ProtocolBase]'
-        if not min(length, len(file_)):
-            from pcapkit.protocols.misc.no_payload.protocol import \
-                NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        empty = self._empty_next_layer(file_, length)
+        if empty is not None:
+            protocol = empty
         elif self._sigterm:
             from pcapkit.protocols.misc.raw.protocol import \
                 Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel

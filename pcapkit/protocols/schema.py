@@ -759,10 +759,20 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             read rather than refuse it. The key is cleared as unpacking starts,
             so a nested schema finds only its own.
 
+            Fields running past ``length`` warn that ``__length__`` fell below
+            zero, unless a ``__data_end__`` key in ``packet`` says that
+            ``length`` ends where the data does, as a
+            :class:`~pcapkit.corekit.fields.collections.ListField` says of an
+            item it counts. The fields past it are then the cut the short read
+            records, and warn nothing (:issue:`2749`). The key is cleared as
+            unpacking starts too.
+
         .. versionchanged:: 1.6.0
 
            The field the data ends inside is given to the fields after it, as
-           ``__short_read__`` in ``packet`` (:issue:`2727`).
+           ``__short_read__`` in ``packet`` (:issue:`2727`), and a schema whose
+           ``length`` ends with the data reads its fields past it as cut, not as
+           a negative length (:issue:`2749`).
 
         """
         # force cast arg type since decorator changed their signatures
@@ -774,6 +784,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         # NOTE: ``packet`` may be an enclosing schema's, copied into a nested
         # context, so its short read is not this schema's (#2727).
         packet.pop('__short_read__', None)
+        # NOTE: Fields running past a length that ends with the data are the cut its
+        # short read records, not an overrun (#2749).
+        data_end = packet.pop('__data_end__', False)
 
         self = cls.__new__(cls)
         for field in self.__fields__.values():
@@ -906,7 +919,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                     self._note_short_read(field.name, length, byte, packet)
                 packet['__length__'] -= length
 
-            if packet['__length__'] < 0:
+            if packet['__length__'] < 0 and not data_end:
                 warn(f'packet length < 0: {packet["__length__"]}',
                      SchemaWarning, stacklevel=stacklevel())
 
