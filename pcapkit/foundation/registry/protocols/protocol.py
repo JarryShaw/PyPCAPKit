@@ -234,13 +234,12 @@ def _fold_lease(stack: 'list[_NameLease]', index: 'int') -> 'None':
 def _release_name(target: 'tuple[type, Any]') -> 'None':
     """Hand back the lease ``target``'s registration held.
 
-    Once no code holds the lease, it leaves its name's stack. On top, it
-    registers the class it displaced back with :func:`register_protocol`, as a
-    code is restored by registering the entry it displaced, or removes a new
-    name -- unless the name was written by other means since, in which case
-    that write stands.
-    Buried, it hands what it displaced to the lease above, if that lease
-    displaced it.
+    Once no code holds the lease, it leaves its name's stack. A lease on top
+    undoes its write, unless the name was written by other means since. A new
+    name is removed. A displaced class is registered back with
+    :func:`register_protocol`, the path a code's restore takes, so it warns as
+    the code's restore does (:issue:`2773`). A buried lease hands what it
+    displaced to the lease above, if that lease displaced it.
 
     Args:
         target: The ``(destination, code)`` being registered over.
