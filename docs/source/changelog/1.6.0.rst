@@ -184,15 +184,18 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   and rebuilds as captured, whether parsed on its own or carried by IPv4, and
   IGMPv3's ``make()`` takes ``num_group_records``, from the record count to
   ``0xFFFF`` (:issue:`2650`, :issue:`2660`, :pr:`2662`, :pr:`2672`). The
-  octets it lacks read as zeros, the group records included, and a Report's
-  header schema cut inside the Additional Data past its records packs back as
-  captured (:issue:`2686`, :issue:`2687`, :pr:`2701`). A Report parsed on its
-  own sizes its group records by its record count, so one cut before the
-  records it counts reads ``TRUNCATED``, as it does behind IPv4, holding the
-  records captured and none made up, and a count no IP payload could carry
-  raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2711`,
-  :pr:`2738`). Any other message, a 9- to
-  11-octet Query included, is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+  octets it lacks read as zeros, in the group record the cut lands inside
+  included, and a Report's header schema cut inside the Additional Data past
+  its records packs back as captured (:issue:`2686`, :issue:`2687`,
+  :pr:`2701`); no group record past the cut is read, however the Report is
+  framed (:issue:`2756`, :pr:`2758`). A Report parsed on its own sizes its
+  group records by its record count, so one cut before the records it counts
+  reads ``TRUNCATED``, as it does behind IPv4, holding the records captured
+  and none made up, and a count no IP payload could carry raises
+  :exc:`~pcapkit.utilities.exceptions.ProtocolError` (:issue:`2711`,
+  :pr:`2738`); one cut inside a counted record reads quietly (:issue:`2749`,
+  :pr:`2755`). Any other message, a 9- to 11-octet Query included, is kept as
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
   IGMPv1 takes the plain ``IGMP`` of :rfc:`1112` as its ``id()`` and alias, and
   IGMPv2's and IGMPv3's ``id()`` are their own names alone, ``('IGMPv2',)`` and
   ``('IGMPv3',)``; the base's is ``('IGMP', 'IGMPv2', 'IGMPv3')``, each
@@ -1097,22 +1100,26 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :issue:`2487`, :pr:`2486`, :pr:`2488`).
 
 * **Fixed** -- :meth:`ListField.unpack <pcapkit.corekit.fields.collections.ListField.unpack>`
-  reads a list of schema items the data ends inside zero-filled to its length,
+  reads a list of schema items the data ends inside up to the end of the
+  data, the item the cut lands inside read with its missing octets as zeros,
   as :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
   reads any other field, so a schema cut inside one packs back as captured,
   where the first item past the data raised
   :exc:`~pcapkit.utilities.exceptions.FieldValueError` for consuming nothing
-  (:issue:`2686`, :pr:`2701`). Each item filled is a schema object rather than
-  a zero octet, so :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`
-  bounds the fill from its first octet, with neither the free band of
+  (:issue:`2686`, :pr:`2701`). No item that would start past the captured
+  octets is read, so a cut list holds no zero item the capture never held
+  (:issue:`2756`, :pr:`2758`). The fill is of schema objects rather than zero
+  octets, so :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`
+  bounds it from its first octet, with neither the free band of
   :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` nor a one-off
-  allowance, and a cut list declaring more than
-  :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is refused. If the
-  items then fail, the fill stays charged, as a field's does, and the octets
-  it counted as read are given back (:issue:`2705`, :pr:`2706`). A
-  ``ListField`` given a ``count`` reports a list whose octets hold fewer items
-  than it counts as a short read, the absent items never made up
-  (:issue:`2711`, :pr:`2738`). A TCP
+  allowance, the zeros left unread going back to the budget, and a cut list
+  declaring more than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is
+  refused. If the items then fail, the fill stays charged, as a field's does,
+  and the octets it counted as read are given back (:issue:`2705`,
+  :pr:`2706`). A ``ListField`` given a ``count`` reports a list whose octets
+  hold fewer items than it counts as a short read, the absent items never
+  made up (:issue:`2711`, :pr:`2738`), and reads an item it counts that the
+  data ends inside as a quiet short read (:issue:`2749`, :pr:`2755`). A TCP
   ``SACK`` option running past the data raises
   :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
   ``Field options has an option that runs past the end of the data: <Option.SACK: 5> ...``,
@@ -1122,9 +1129,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
 * **Fixed** -- an HTTP/2 ``SETTINGS`` frame the capture cut short inside its
   settings raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from
   the list of settings, so a segment carrying one was kept as
-  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. It parses, with the octets its
-  settings lack read as zeros, as a cut ``DATA`` frame's data is, and rebuilds
-  as captured (:issue:`2659`, :issue:`2686`, :pr:`2666`, :pr:`2701`). A frame
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. It parses, the setting the
+  cut lands inside read with its missing octets as zeros, as a cut ``DATA``
+  frame's data is, and no setting past it, and rebuilds as captured
+  (:issue:`2659`, :issue:`2686`, :pr:`2666`, :pr:`2701`), at its declared
+  Length, or at one recomputed from its settings once they are edited
+  (:issue:`2756`, :pr:`2758`). A frame
   of any type the capture cut short after the connection preface rebuilds as
   captured too, where ``from_data`` gave the preface's first octets, as many
   as were captured of the frame (:issue:`2665`, :pr:`2675`).
@@ -1216,6 +1226,17 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   the payload length it declares as its ``__short_read__``, where 1.5.x
   recorded none, and so do Ethernet, GRE, ICMP, IGMP and a TSO IPv4 layer for
   a cut at the end of their frame.
+
+* **Fixed** -- a header the capture cut short parsed with a ``Raw`` next layer
+  but rebuilt through ``from_data`` with a ``NoPayload`` one, from the same
+  octets: in 1.5.x an ``Ethernet`` header cut inside its type field parsed as
+  ``Ethernet:Raw`` and rebuilt as ``Ethernet:NoPayload``, as did ARP's
+  family, AH, HIP, the IPv6 extension headers, MH, VLAN, L2TPv2 and Loopback.
+  The rebuild keeps the next layer the parse had, GRE's, FRAD's and the Linux
+  cooked-capture headers' included (:issue:`2717`, :pr:`2759`). A next layer
+  a cut header leaves no octets is ``Raw`` without a dispatch on the code the
+  cut left as zeros, and carries no ``error``, where 1.5.x's carried the failed
+  dispatch's, as ``Field padding resolved to a negative length; template='-20s'``.
 
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
