@@ -326,7 +326,10 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
 
         An SSLv2 record that :meth:`unpack` adopted from port 443 is rebuilt as
         the SSLv2 record it was parsed from, since TLS's record layout cannot
-        carry its 2- or 3-octet header.
+        carry its 2- or 3-octet header. Its :obj:`dict`, as :meth:`Info.to_dict
+        <pcapkit.corekit.infoclass.Info.to_dict>` exports it, carries no data
+        model, so it is told apart by the ``two_byte_header`` that records the
+        header's form, a field no TLS record has (:issue:`2762`).
 
         Args:
             data: Protocol data.
@@ -338,7 +341,7 @@ class TLS(SSL[Data_TLS, Schema_TLS], schema=Schema_TLS, data=Data_TLS):
             for an SSLv2 record, otherwise a TLS instance.
 
         """
-        if isinstance(data, SSLv2_Data):
+        if isinstance(data, SSLv2_Data) or 'two_byte_header' in data:
             return SSLv2.from_data(data, **kwargs)
         return super().from_data(data, **kwargs)
 
