@@ -28,7 +28,7 @@ The Order
       by the enum value order of the corresponding code, or by the registry's order
       where there is no enum. A registry fallback that ``read()`` or ``make()``
       names directly, such as ``_read_msg_unknown()`` in
-      :class:`~pcapkit.protocols.internet.mh.MH`, does not count either: it is a
+      :class:`~pcapkit.protocols.internet.mh.protocol.MH`, does not count either: it is a
       specific reader, ruled on :issue:`2490`. Each helper's
       ``_read_`` and ``_make_`` methods stay together, with the reader first:
       ``_read_addr_resolve()`` then ``_make_addr_resolve()``.
@@ -36,12 +36,12 @@ The Order
       all ``_read_*()`` before all ``_make_*()``. Each set opens with the registry's
       default, its fallback for a code with no entry of its own, as
       ``_read_opt_unassigned()`` opens the readers of
-      :class:`~pcapkit.protocols.internet.ipv4.IPv4`; the rest follow the enum value
+      :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`; the rest follow the enum value
       of the code or type each handles, not alphabetical order. Ruled on
       :issue:`2490`.
    d. **Other helpers.** Every helper that ``read()``, ``make()`` and the registries
       do not reach goes last, including one that only another helper calls, such as
-      ``_decode_text()`` in :class:`~pcapkit.protocols.application.httpv1.HTTPv1`.
+      ``_decode_text()`` in :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`.
       Ruled on :issue:`2490`.
 
 **Registry maps.** The registry maps themselves (``__proto__``, ``__option__``,
@@ -56,7 +56,7 @@ before its ``_make_xxx()``, and subgroup b, with a table of known exceptions
 Example
 ~~~~~~~
 
-The utilities of :class:`~pcapkit.protocols.link.arp.ARP`, reduced to its member
+The utilities of :class:`~pcapkit.protocols.link.arp.protocol.ARP`, reduced to its member
 names. ``read()`` resolves a hardware address before a protocol address, so the
 hardware pair comes first:
 
@@ -83,10 +83,10 @@ hardware pair comes first:
 The Reference
 ~~~~~~~~~~~~~
 
-:class:`~pcapkit.protocols.link.arp.ARP` is the reference for the utilities
+:class:`~pcapkit.protocols.link.arp.protocol.ARP` is the reference for the utilities
 order. Its utilities are ``_make_data()`` and the helpers that ``read()`` and
 ``make()`` name, and nothing else, and there is more than one helper, so the
 first-use order of subgroup b shows as well as each reader preceding its maker.
 Chosen on :issue:`2614`, when the MAC address pair of
-:class:`~pcapkit.protocols.link.ethernet.Ethernet`, the reference before it,
+:class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`, the reference before it,
 moved to the base class.

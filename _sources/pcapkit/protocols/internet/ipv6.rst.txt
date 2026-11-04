@@ -2,9 +2,17 @@ IPv6 - Internet Protocol Version 6
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv6
+.. module:: pcapkit.protocols.internet.ipv6.protocol
 
-:mod:`pcapkit.protocols.internet.ipv6` contains
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN`` and
+   ``pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET``, with no alias: they are
+   in this module, and :mod:`pcapkit.protocols.internet.ipv6` exports the protocol class
+   alone (:issue:`2534`).
+
+:mod:`pcapkit.protocols.internet.ipv6.protocol` contains
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` only,
 which implements the extractor for Internet Protocol
 version 6 (IPv6) [*]_, whose structure is described
 as below:
@@ -22,7 +30,7 @@ Octets      Bits        Name                    Description
   24        192   ``ipv6.dst``                Destination Address
 ======= ========= ===================== =======================================
 
-.. autoclass:: pcapkit.protocols.internet.ipv6.IPv6
+.. autoclass:: pcapkit.protocols.internet.ipv6.protocol.IPv6
    :no-members:
    :show-inheritance:
 
@@ -52,30 +60,35 @@ Octets      Bits        Name                    Description
 Protocol Constants
 ------------------
 
-.. autodata:: pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN
+.. autodata:: pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN
 
-.. autodata:: pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET
+.. autodata:: pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipv6
+.. module:: pcapkit.protocols.internet.ipv6.schema
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipv6``, with no alias: the module moved here
+   (:issue:`2534`).
 
 .. versionremoved:: 1.6.0
 
    ``pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length``, now
    :func:`pcapkit.corekit.schema.jumbogram.jumbo_payload_length` (:issue:`2674`).
 
-.. autodata:: pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH
+.. autodata:: pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6.IPv6
+.. autoclass:: pcapkit.protocols.internet.ipv6.schema.IPv6
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6.IPv6Hextet
+.. autoclass:: pcapkit.protocols.internet.ipv6.schema.IPv6Hextet
    :members:
    :show-inheritance:
 
@@ -97,14 +110,19 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6.jumbogram_error
+.. autofunction:: pcapkit.protocols.internet.ipv6.schema.jumbogram_error
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipv6
+.. module:: pcapkit.protocols.internet.ipv6.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6.IPv6
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ipv6``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv6.data.IPv6
    :members:
    :show-inheritance:
 

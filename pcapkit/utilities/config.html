@@ -738,9 +738,9 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 layer the frame record carries, usually its link layer; a protocol
 constructed from its own octets is not counted itself, so the count starts at
 the first layer it dissects. IPv6 extension headers are layers like any
-other, whether <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> walks them or
+other, whether <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> walks them or
 each dissects the next. What follows the last layer is kept as
-<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>, unless it would have been
 left raw anyway or there is nothing left.</p>
 <p>Each layer dissects the next from inside its own parse, so without the bound
@@ -766,10 +766,10 @@ does the end of a chain of extension headers, which
 another with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>),
 <span class="target" id="index-21"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
 <p>The walk stops there, and what follows the last of them is kept as
-<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
 chain follows IPv6, which walks it in a loop
-(<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>), or another
+(<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>), or another
 layer such as IPv4, where each header dissects the next one itself
 (<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>). Behind
 IPv4, the <code class="docutils literal notranslate"><span class="pre">scapy</span></code> toolkit steps over at most this many in the octets to find
@@ -904,7 +904,7 @@ will still perform for a field whose declared length outruns its buffer.</p>
 itself treats a capture’s declared snapshot length as corrupt or
 byte-order-swapped rather than real – and it is the same figure this
 package’s own PCAP writer defaults <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> to
-(<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header.make" title="pcapkit.protocols.misc.pcap.header.Header.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.Header.make()</span></code></a>). No single field
+(<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header.make" title="pcapkit.protocols.misc.pcap.header.protocol.Header.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.protocol.Header.make()</span></code></a>). No single field
 within one captured packet is legitimately larger than the largest packet
 libpcap itself is willing to believe, so nothing this library parses
 should ever declare a length past it.</p>
@@ -947,8 +947,8 @@ many fields, so it leaves the <em>sum</em> unbounded: a declared length just und
 ceiling is honoured however often it is declared. Measured for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>, 200
 minimal PCAP-NG Decryption Secrets Blocks – 4,800 wire octets, each block
 declaring <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> of 262,142 against two supplied octets through
-<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data" title="pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UnknownSecrets.data</span></code></a>
-(<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/schema/misc/pcapng.py</span></code>) – retained 50.0 MiB, an amplification of 10,922x
+<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.UnknownSecrets.data" title="pcapkit.protocols.misc.pcapng.schema.UnknownSecrets.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UnknownSecrets.data</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/misc/pcapng/schema.py</span></code>) – retained 50.0 MiB, an amplification of 10,922x
 per block. Every individual field was under the ceiling, so nothing refused any of them.</p>
 <p>The sum therefore wants a budget, and this is the figure that makes one
 <em>safe</em>. A budget on its own is not: a capture cut short by its snapshot length

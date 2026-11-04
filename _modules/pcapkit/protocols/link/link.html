@@ -560,14 +560,14 @@
 <span class="sd">:mod:`pcapkit.protocols.link.link` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.link.Link`,</span>
 <span class="sd">which is a base class for link layer protocols, e.g.</span>
-<span class="sd">:class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.inarp.InARP`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.ethernet.Ethernet`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.frad.FRAD`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.l2tp.L2TP`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.loopback.Loopback`,</span>
-<span class="sd">:class:`~pcapkit.protocols.link.radiotap.Radiotap` and</span>
-<span class="sd">:class:`~pcapkit.protocols.link.vlan.VLAN`.</span>
+<span class="sd">:class:`~pcapkit.protocols.link.arp.protocol.ARP`/:class:`~pcapkit.protocols.link.inarp.protocol.InARP`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.frad.protocol.FRAD`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` and</span>
+<span class="sd">:class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -604,19 +604,19 @@
 <span class="sd">       * - Index</span>
 <span class="sd">         - Protocol</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol`</span>
-<span class="sd">         - :class:`pcapkit.protocols.link.arp.ARP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.arp.protocol.ARP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.rarp.RARP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.rarp.protocol.RARP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`</span>
-<span class="sd">         - :class:`pcapkit.protocols.link.c_tag.C_Tag`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.c_tag.protocol.C_Tag`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier`</span>
-<span class="sd">         - :class:`pcapkit.protocols.link.s_tag.S_Tag`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.s_tag.protocol.S_Tag`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.IPv4`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.protocol.IPv4`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.IPv6`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.protocol.IPv6`</span>
 <span class="sd">       * - 0x8137</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipx.IPX`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipx.protocol.IPX`</span>
 
 <span class="sd">    """</span>
 
@@ -633,28 +633,28 @@
     <span class="c1">#: :meth:`self._import_next_layer</span>
     <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Address_Resolution_Protocol</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.arp'</span><span class="p">,</span>      <span class="s1">'ARP'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Address_Resolution_Protocol</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.arp.protocol'</span><span class="p">,</span>      <span class="s1">'ARP'</span><span class="p">),</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span><span class="p">:</span>
-                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.rarp'</span><span class="p">,</span> <span class="s1">'RARP'</span><span class="p">),</span>
+                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.rarp.protocol'</span><span class="p">,</span> <span class="s1">'RARP'</span><span class="p">),</span>
             <span class="c1"># The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks</span>
             <span class="c1"># them -- the service tag's own next-EtherType is what selects the</span>
             <span class="c1"># customer tag -- so the two coexist in one frame rather than</span>
             <span class="c1"># competing. They are separate classes only to keep their</span>
             <span class="c1"># ``info_name`` apart in the parsed output; the tag layout itself is</span>
             <span class="c1"># identical, and both share the code in</span>
-            <span class="c1"># :class:`~pcapkit.protocols.link.vlan.VLAN`.</span>
+            <span class="c1"># :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Customer_VLAN_Tag_Type</span><span class="p">:</span>
-                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.c_tag'</span><span class="p">,</span> <span class="s1">'C_Tag'</span><span class="p">),</span>
+                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.c_tag.protocol'</span><span class="p">,</span> <span class="s1">'C_Tag'</span><span class="p">),</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">IEEE_Std_802_1Q_Service_VLAN_tag_identifier</span><span class="p">:</span>
-                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.s_tag'</span><span class="p">,</span> <span class="s1">'S_Tag'</span><span class="p">),</span>
+                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.s_tag.protocol'</span><span class="p">,</span> <span class="s1">'S_Tag'</span><span class="p">),</span>
 
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4.protocol'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6.protocol'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
 
             <span class="c1"># see https://en.wikipedia.org/wiki/EtherType#Values</span>
-            <span class="mh">0x8137</span><span class="p">:</span>                                             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx'</span><span class="p">,</span>  <span class="s1">'IPX'</span><span class="p">),</span>
+            <span class="mh">0x8137</span><span class="p">:</span>                                             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx.protocol'</span><span class="p">,</span>  <span class="s1">'IPX'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
@@ -664,9 +664,9 @@
     <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
     <span class="c1">#: ``code=`` key is checked exactly as</span>
     <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype` checks</span>
-    <span class="c1">#: its own -- :class:`~pcapkit.protocols.link.ethernet.Ethernet`, which shares</span>
+    <span class="c1">#: its own -- :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`, which shares</span>
     <span class="c1">#: this registry, is therefore checked as :class:`Link` is, while</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.link.loopback.Loopback`, which keeps one of its</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, which keeps one of its</span>
     <span class="c1">#: own, declares its own pairing or none at all (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_EtherType</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 

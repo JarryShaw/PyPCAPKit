@@ -568,9 +568,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">DumperBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibIntEnum</span>
@@ -580,8 +580,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PCAPIO'</span><span class="p">,</span>
@@ -753,7 +753,7 @@
         <span class="c1">#: struct.Struct: Packer for the record header preceding each frame, in the</span>
         <span class="c1">#: byte order of the global header just written. Taken from</span>
         <span class="c1">#: :attr:`self._ghdr &lt;_ghdr&gt;` rather than from the ``byteorder`` argument</span>
-        <span class="c1">#: because :class:`~pcapkit.protocols.misc.pcap.header.Header` is what</span>
+        <span class="c1">#: because :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` is what</span>
         <span class="c1">#: validates and normalises it.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span> <span class="o">=</span> <span class="n">_RECORD_HEADER</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">byteorder</span><span class="p">]</span>
 
@@ -780,7 +780,7 @@
 <span class="sd">            :meth:`self._make_timestamp &lt;_make_timestamp&gt;`), and the octets are</span>
 <span class="sd">            exactly ``value.packet``. So this writes them directly, rather than</span>
 <span class="sd">            handing them to</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose constructor</span>
 <span class="sd">            packs the record and then **dissects it again** through the whole</span>
 <span class="sd">            protocol stack to arrive at bytes it was given. That round trip</span>
 <span class="sd">            measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,</span>
@@ -848,7 +848,7 @@
 <span class="sd">            ``time_epoch`` at this file's -- microseconds times 1000, or</span>
 <span class="sd">            nanoseconds divided by 1000 and **truncated** rather than rounded.</span>
 <span class="sd">            That is how :func:`~pcapkit.toolkit.pcapng.block2frame` and</span>
-<span class="sd">            :meth:`Frame.make &lt;pcapkit.protocols.misc.pcap.frame.Frame.make&gt;`</span>
+<span class="sd">            :meth:`Frame.make &lt;pcapkit.protocols.misc.pcap.frame.protocol.Frame.make&gt;`</span>
 <span class="sd">            reduce a timestamp to a fraction, and how libpcap scales a</span>
 <span class="sd">            nanosecond file down (``sf-pcap.c``). It also keeps the second:</span>
 <span class="sd">            999,999,999 ns truncates to 999,999 us, where rounding would reach</span>

@@ -1,11 +1,11 @@
-====================================================================
-:class:`~pcapkit.protocols.application.ngap.NGAP` Vendor Crawlers
-====================================================================
+=============================================================================
+:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` Vendor Crawlers
+=============================================================================
 
 .. module:: pcapkit.vendor.ngap
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.ngap.NGAP` implementations. Available
+:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

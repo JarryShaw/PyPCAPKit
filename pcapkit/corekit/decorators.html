@@ -624,8 +624,8 @@ the decorated function.</p>
 </div>
 <p>This decorator calls the decorated function. Should any exception be
 raised, it re-parses the current layer’s payload as
-<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – or as
-<a class="reference internal" href="../protocols/misc/no_payload.html#pcapkit.protocols.misc.no_payload.NoPayload" title="pcapkit.protocols.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, if the error is an
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> – or as
+<a class="reference internal" href="../protocols/misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, if the error is an
 end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a> – whose
 <code class="docutils literal notranslate"><span class="pre">error</span></code> is the exception’s message.</p>
 <p>The decorated call runs inside a
@@ -693,25 +693,25 @@ other error (<a class="extlink-issue reference external" href="https://github.co
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>This decorator function is designed for decorating the
-<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>
 <em>class method</em>.</p>
 </div>
 <p>This decorator will revise the parameter list provided to the original
-<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> method
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> method
 and extract necessary information based on the given parameters, then provide
 the revised version of parameter list to the original method.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The decorated function should have the following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'typing.Type[pcapkit.protocols.schema.schema.Schema]'</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'typing.Type[pcapkit.protocols.schema.Schema]'</span><span class="p">,</span>
      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | typing.IO[bytes]'</span><span class="p">,</span>
      <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
-     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.schema.schema.Schema'</span>
+     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.schema.Schema'</span>
 </pre></div>
 </div>
 <p>No further positional or keyword arguments are read from – or
 forwarded to – the decorated function. <a class="reference internal" href="#pcapkit.corekit.decorators.prepare" title="pcapkit.corekit.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> is applied only to
-<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>,
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>,
 whose real signature has exactly these parameters, and nothing
 calls it with more. Rather than discard extras silently (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/454">#454</a>),
 the wrapper raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> for an extra positional argument or
@@ -720,7 +720,7 @@ arguments would.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema.Schema.unpack()</span></code></a></p>
+<p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.Schema.unpack()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -754,7 +754,7 @@ decorator function.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.decorators.R_prepare">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.decorators.</span></span><span class="sig-name descname"><span class="pre">R_prepare</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">pcapkit.protocols.schema.schema.Schema</span></a></span><a class="headerlink" href="#pcapkit.corekit.decorators.R_prepare" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.decorators.</span></span><span class="sig-name descname"><span class="pre">R_prepare</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">pcapkit.protocols.schema.Schema</span></a></span><a class="headerlink" href="#pcapkit.corekit.decorators.R_prepare" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>

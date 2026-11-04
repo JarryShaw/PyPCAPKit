@@ -721,10 +721,10 @@ a deferred analysis dispatches on the named service rather than on a
 number. The resolution is <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport._make_port" title="pcapkit.protocols.transport.transport.Transport._make_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport._make_port</span></code></a>, so it
 is the one the maker path uses and cannot drift from it. See
 <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP._make_ports" title="pcapkit.foundation.reassembly.tcp.TCP._make_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ports()</span></code></a> for why it is reached through
-<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>.</p>
 <p>For a <em>registered</em> port that is the very member
-<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.src" title="pcapkit.protocols.transport.tcp.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> reads off
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.src" title="pcapkit.protocols.transport.tcp.protocol.TCP.src"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.src</span></code></a> reads off
 a parsed header. For an unassigned one the two are <strong>equal but not
 identical</strong>, and not even equally named: the parse path builds its
 member through <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField._unregistered_member</span></code></a>,
@@ -764,8 +764,8 @@ registry, and <code class="docutils literal notranslate"><span class="pre">type(
 with – measured, for a registered port and an unassigned one alike.
 <a class="reference internal" href="../../protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport.analyze" title="pcapkit.protocols.transport.transport.Transport.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.analyze</span></code></a> keeps the
 base in its own signature, since it is the one method
-<a class="reference internal" href="../../protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
-<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> share, and each of
+<a class="reference internal" href="../../protocols/transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> and
+<a class="reference internal" href="../../protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> share, and each of
 them would name a different registry.</p>
 </dd>
 </dl>
@@ -792,7 +792,7 @@ either way; what <code class="docutils literal notranslate"><span class="pre">_m
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The resolution is reached through
-<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than through
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.protocol</span></code>,
 which is what <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> reads the analyser itself off. That is
 deliberate: <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> is an extension point, and an
@@ -816,7 +816,7 @@ the analyser.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__">
-<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__protocol_type__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.transport.tcp.protocol.TCP'&gt;</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.__protocol_type__" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 

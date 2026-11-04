@@ -569,8 +569,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
                                                   <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -591,12 +591,12 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSOffsetOption</span> <span class="k">as</span> <span class="n">Data_IF_TSOffsetOption</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSResolOption</span> <span class="k">as</span> <span class="n">Data_IF_TSResolOption</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSOffsetOption</span> <span class="k">as</span> <span class="n">Data_IF_TSOffsetOption</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSResolOption</span> <span class="k">as</span> <span class="n">Data_IF_TSResolOption</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">InterfaceDescriptionBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceDescriptionBlock</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">SectionHeaderBlock</span> <span class="k">as</span> <span class="n">Data_SectionHeaderBlock</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimplePacketBlock</span> <span class="k">as</span> <span class="n">Data_SimplePacketBlock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">SectionHeaderBlock</span> <span class="k">as</span> <span class="n">Data_SectionHeaderBlock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimplePacketBlock</span> <span class="k">as</span> <span class="n">Data_SimplePacketBlock</span>
 
     <span class="n">Reader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">PCAPReader</span><span class="p">,</span> <span class="s1">'PCAPNGReader'</span><span class="p">]</span>
 
@@ -659,7 +659,7 @@
 <span class="c1">#: either byte order, spelled once rather than per block read.</span>
 <span class="n">_SHB_TYPE_OCTETS</span> <span class="o">=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
 
-<span class="c1">#: :data:`~pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC` as a</span>
+<span class="c1">#: :data:`~pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC` as a</span>
 <span class="c1">#: little-endian section writes it, spelled once rather than per block read.</span>
 <span class="n">_LITTLE_BYTE_ORDER_OCTETS</span> <span class="o">=</span> <span class="n">BYTE_ORDER_MAGIC</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">)</span>
 
@@ -673,7 +673,7 @@
 <span class="sd">    Block (IDB) of a file, and applies its link type and timestamp resolution</span>
 <span class="sd">    to every packet (:issue:`1379`). This reader walks the blocks itself</span>
 <span class="sd">    instead: it parses each Section Header Block and IDB with :mod:`pcapkit`'s</span>
-<span class="sd">    own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, keeps the interfaces</span>
+<span class="sd">    own :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, keeps the interfaces</span>
 <span class="sd">    of the current section, and resolves every packet's link type,</span>
 <span class="sd">    ``if_tsresol`` and ``if_tsoffset`` from the interface it names. Packet</span>
 <span class="sd">    blocks are still decoded by `DPKT`_.</span>
@@ -681,7 +681,7 @@
 <span class="sd">    It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet</span>
 <span class="sd">    Blocks, and skips every other block. ``dpkt.pcapng.Reader`` skips the</span>
 <span class="sd">    Simple Packet Block too, and `DPKT`_ has no type for one, so that block is</span>
-<span class="sd">    parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well</span>
+<span class="sd">    parsed with :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` as well</span>
 <span class="sd">    (:issue:`1520`).</span>
 
 <span class="sd">    Args:</span>
@@ -717,7 +717,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[float, bytes]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read blocks until the next packet block, and yield its timestamp and data."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
@@ -799,7 +799,7 @@
         <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">tsoffset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tsoffset</span><span class="o">.</span><span class="n">offset</span>
 
         <span class="c1"># same arithmetic as :meth:`PCAPNG._read_timestamp</span>
-        <span class="c1"># &lt;pcapkit.protocols.misc.pcapng.PCAPNG._read_timestamp&gt;`</span>
+        <span class="c1"># &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG._read_timestamp&gt;`</span>
         <span class="n">ticks</span> <span class="o">=</span> <span class="p">(</span><span class="n">pkt</span><span class="o">.</span><span class="n">ts_high</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">pkt</span><span class="o">.</span><span class="n">ts_low</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span> <span class="o">+</span> <span class="n">offset</span>
@@ -812,7 +812,7 @@
 <span class="w">        </span><span class="sd">"""Decode a Simple Packet Block, against the section's first interface.</span>
 
 <span class="sd">        `DPKT`_ has no type for this block, so it is parsed by</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`: the packet data is</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`: the packet data is</span>
 <span class="sd">        ``min(original_len, snaplen)`` octets, with the snaplen of interface 0.</span>
 
 <span class="sd">        Args:</span>
@@ -829,7 +829,7 @@
 <span class="sd">                PCAP-NG specification).</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>  <span class="c1"># isort:skip</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
@@ -929,7 +929,7 @@
 <span class="w">    </span><span class="sd">"""A :class:`dpkt.loopback.Loopback` that reads the address family by link type.</span>
 
 <span class="sd">    It reads the address family in the byte order</span>
-<span class="sd">    :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for</span>
+<span class="sd">    :func:`~pcapkit.protocols.link.loopback.protocol.family_byteorder` gives for</span>
 <span class="sd">    ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for</span>
 <span class="sd">    ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30</span>
 <span class="sd">    (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or</span>
@@ -952,7 +952,7 @@
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>  <span class="c1"># isort:skip</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">layers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span> <span class="mi">24</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">28</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">30</span><span class="p">:</span> <span class="n">ip6</span><span class="p">}</span>
 

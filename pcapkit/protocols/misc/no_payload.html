@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/no_payload.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc.no_payload contains NoPayload only, which implements a Protocol like object whose payload is recursively NoPayload itself. Header Schemas: Data Models:" />
-<meta name="description" content="pcapkit.protocols.misc.no_payload contains NoPayload only, which implements a Protocol like object whose payload is recursively NoPayload itself. Header Schemas: Data Models:" />
+<meta property="og:description" content="pcapkit.protocols.misc.no_payload.protocol contains NoPayload only, which implements a Protocol like object whose payload is recursively NoPayload itself. Header Schemas: Data Models:" />
+<meta name="description" content="pcapkit.protocols.misc.no_payload.protocol contains NoPayload only, which implements a Protocol like object whose payload is recursively NoPayload itself. Header Schemas: Data Models:" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Checksums" href="checksum.html"><link rel="prev" title="Raw Packet Data" href="raw.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -568,11 +568,11 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.misc.no_payload">
 <span id="no-payload-packet"></span><h1>No-Payload Packet<a class="headerlink" href="#module-pcapkit.protocols.misc.no_payload" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.misc.no_payload" title="pcapkit.protocols.misc.no_payload"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.no_payload</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.misc.no_payload.NoPayload" title="pcapkit.protocols.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> only, which
+<p id="module-pcapkit.protocols.misc.no_payload.protocol"><a class="reference internal" href="#module-pcapkit.protocols.misc.no_payload.protocol" title="pcapkit.protocols.misc.no_payload.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.no_payload.protocol</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> only, which
 implements a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like
 object whose payload is recursively
-<a class="reference internal" href="#pcapkit.protocols.misc.no_payload.NoPayload" title="pcapkit.protocols.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> itself.</p>
+<a class="reference internal" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> itself.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.null</span></code>, with its data model and
 header schema, since a protocol class is named after its module
@@ -583,39 +583,39 @@ header schema, since a protocol class is named after its module
 <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.null</span></code>, with no alias (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2529">#2529</a>).</p>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.no_payload.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.misc.no_payload.NoPayload" title="pcapkit.protocols.data.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.misc.no_payload.NoPayload" title="pcapkit.protocols.schema.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.no_payload.protocol.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/protocol.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.misc.no_payload.data.NoPayload" title="pcapkit.protocols.misc.no_payload.data.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.misc.no_payload.schema.NoPayload" title="pcapkit.protocols.misc.no_payload.schema.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>]</p>
 <p>This class implements no-payload protocol.</p>
 <p>Its <code class="docutils literal notranslate"><span class="pre">payload</span></code> is the instance itself, so a <code class="docutils literal notranslate"><span class="pre">.payload</span></code> walk over it
 never terminates; bound any such loop, or walk the protocol chain of
 the enclosing packet instead.</p>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Null'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Null'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.length" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.length">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.protocol">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.15)"><span class="pre">NoReturn</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.protocol" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.protocol">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.15)"><span class="pre">NoReturn</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Name of next layer protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.misc.no_payload.NoPayload.protocol" title="pcapkit.protocols.misc.no_payload.NoPayload.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.protocol" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload.html#NoPayload.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.read" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/protocol.html#NoPayload.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read (parse) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -625,7 +625,7 @@ the enclosing packet instead.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.no_payload.NoPayload" title="pcapkit.protocols.data.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.misc.no_payload.data.NoPayload" title="pcapkit.protocols.misc.no_payload.data.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
@@ -634,15 +634,15 @@ the enclosing packet instead.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload.html#NoPayload.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.make" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/protocol.html#NoPayload.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.no_payload.NoPayload" title="pcapkit.protocols.schema.misc.no_payload.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.misc.no_payload.schema.NoPayload" title="pcapkit.protocols.misc.no_payload.schema.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet schema.</p>
@@ -651,8 +651,8 @@ the enclosing packet instead.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload.html#NoPayload.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.__post_init__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/protocol.html#NoPayload.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.__post_init__" title="Link to this definition">¶</a></dt>
 <dd><p>Post initialisation hook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
@@ -672,8 +672,8 @@ the enclosing packet instead.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.NoPayload.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload.html#NoPayload.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.NoPayload.__index__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.protocol.NoPayload.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/protocol.html#NoPayload.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.protocol.NoPayload.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -687,22 +687,22 @@ the enclosing packet instead.</p>
 
 </dd></dl>
 
-<section id="module-pcapkit.protocols.schema.misc.no_payload">
-<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.misc.no_payload" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.misc.no_payload.schema">
+<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.misc.no_payload.schema" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.no_payload.NoPayload">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.no_payload.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/no_payload.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.no_payload.NoPayload" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.schema.NoPayload">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.no_payload.schema.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/schema.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.schema.NoPayload" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Schema for empty payload.</p>
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.protocols.data.misc.no_payload">
-<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.misc.no_payload" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.misc.no_payload.data">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.misc.no_payload.data" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.no_payload.NoPayload">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.no_payload.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/no_payload.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.no_payload.NoPayload" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.no_payload.data.NoPayload">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.no_payload.data.</span></span><span class="sig-name descname"><span class="pre">NoPayload</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/no_payload/data.html#NoPayload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.no_payload.data.NoPayload" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>No-payload packet is an empty packet.</p>
 </dd></dl>
 
@@ -765,8 +765,8 @@ the enclosing packet instead.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">No-Payload Packet</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.no_payload">Header Schemas</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.misc.no_payload">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.no_payload.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.no_payload.data">Data Models</a></li>
 </ul>
 </li>
 </ul>

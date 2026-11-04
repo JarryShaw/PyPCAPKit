@@ -50,7 +50,7 @@ checksums through it, so it imports
 :mod:`pcapkit` only from ``corekit`` and ``utilities``, never from
 :mod:`pcapkit.protocols`; :file:`tests/corekit/test_checksum_import_boundary_2580_unit.py`
 checks that. What needs IPv4 and IPv6 stays beside
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`. The package holds one
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`. The package holds one
 module per checksum family, so a new family sits beside
 :mod:`~pcapkit.corekit.checksum.internet`.
 
@@ -69,14 +69,14 @@ of placing each by the questions above. So
 :func:`~pcapkit.corekit.schema.shortread.replay_short_read` in
 :mod:`pcapkit.corekit.schema.shortread`. :mod:`pcapkit.corekit.schema` is not the
 header schema framework, which stays :mod:`pcapkit.protocols.schema` and its
-:class:`~pcapkit.protocols.schema.schema.Schema`; it holds only the helpers shared
+:class:`~pcapkit.protocols.schema.Schema`; it holds only the helpers shared
 across the layer.
 
 **A capture cut belongs to the built-in short read of**
-:class:`~pcapkit.protocols.schema.schema.Schema`. :meth:`Schema.unpack
-<pcapkit.protocols.schema.schema.Schema.unpack>` records the field the data ends
+:class:`~pcapkit.protocols.schema.Schema`. :meth:`Schema.unpack
+<pcapkit.protocols.schema.Schema.unpack>` records the field the data ends
 inside, through ``_note_short_read``, as ``__short_read__``;
-:meth:`~pcapkit.protocols.schema.schema.Schema._cut_short_read` packs back only the
+:meth:`~pcapkit.protocols.schema.Schema._cut_short_read` packs back only the
 octets read; and :func:`~pcapkit.corekit.schema.shortread.keep_short_read` and
 :func:`~pcapkit.corekit.schema.shortread.replay_short_read` carry the record through
 ``info`` and cut a rebuild back by it. A protocol reads and rebuilds a cut header
@@ -85,12 +85,12 @@ clamped to the octets present, which hides the cut from the record. Ruled in rev
 of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
 
 A field callback tells a value the cut left as zero from one read through the same
-record: :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` gives
+record: :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` gives
 it to the fields after the one the data ends inside, as ``__short_read__`` in their
 packet. A callback that would refuse such a zero leaves it to the short read, and
 refuses a value read with a :exc:`~pcapkit.utilities.exceptions.ProtocolError`, as
 the ``Opt Data Len`` helpers of
-:mod:`pcapkit.protocols.schema.internet.ipv6_option` do (:issue:`2727`).
+:mod:`pcapkit.protocols.internet.ipv6_ext.schema` do (:issue:`2727`).
 
 **A helper in one protocol's own schema module moves there too once code outside that
 protocol uses it and it is generic enough to reuse**, so that another implementor can
@@ -99,9 +99,9 @@ find it; a helper only its own protocol calls stays beside the schema. Ruled on
 :func:`~pcapkit.corekit.schema.jumbogram.jumbo_payload_length`, which the IPv6
 pseudo-header and the Scapy toolkit read as well as IPv6 itself, is in
 :mod:`pcapkit.corekit.schema.jumbogram`, while
-:func:`~pcapkit.protocols.schema.internet.ipv6.jumbogram_error`, which only IPv6
-calls, stays in :mod:`pcapkit.protocols.schema.internet.ipv6`. The IPv6 option
-helpers in :mod:`pcapkit.protocols.schema.internet.ipv6_option` belong to the HOPOPT
+:func:`~pcapkit.protocols.internet.ipv6.schema.jumbogram_error`, which only IPv6
+calls, stays in :mod:`pcapkit.protocols.internet.ipv6.schema`. The IPv6 option
+helpers in :mod:`pcapkit.protocols.internet.ipv6_ext.schema` belong to the HOPOPT
 and IPv6-Opts headers that share them, and stay there too.
 
 The field modules and the protocols import these helpers, so a helper module imports
@@ -110,7 +110,7 @@ block; the package's ``__init__.py`` imports none of its modules, so a field mod
 loads only the group it asks for.
 :file:`tests/project/test_schema_helpers_boundary_2674_unit.py` fails on a helper
 module that does, on a module outside the layer that refers to a function defined in
-a field module or in :mod:`pcapkit.protocols.schema.schema`, and on a module outside
+a field module or in :mod:`pcapkit.protocols.schema`, and on a module outside
 a protocol that refers to a function defined in that protocol's schema module, by
 import or as an attribute of the module.
 

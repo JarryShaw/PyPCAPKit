@@ -625,7 +625,7 @@ arguments</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame" title="pcapkit.protocols.data.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span>) – content to be dumped</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.Frame" title="pcapkit.protocols.misc.pcap.frame.data.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span>) – content to be dumped</p></li>
 <li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – output file</p></li>
 <li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – name of current content block</p></li>
 </ul>
@@ -639,7 +639,7 @@ with the fraction in this file’s resolution (see
 <a class="reference internal" href="#pcapkit.dumpkit.pcap.PCAPIO._make_timestamp" title="pcapkit.dumpkit.pcap.PCAPIO._make_timestamp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._make_timestamp</span></code></a>), and the octets are
 exactly <code class="docutils literal notranslate"><span class="pre">value.packet</span></code>. So this writes them directly, rather than
 handing them to
-<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, whose constructor
+<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, whose constructor
 packs the record and then <strong>dissects it again</strong> through the whole
 protocol stack to arrive at bytes it was given. That round trip
 measured about 82% of the cost of a flow-traced extraction – <code class="docutils literal notranslate"><span class="pre">http.pcap</span></code>,
@@ -669,7 +669,7 @@ hold, and a reader would run off the end of the file (<a class="extlink-issue re
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.FrameInfo" title="pcapkit.protocols.data.misc.pcap.frame.FrameInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameInfo</span></code></a></span>) – the frame’s record header fields</p></li>
+<li><p><strong>frame_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.FrameInfo" title="pcapkit.protocols.misc.pcap.frame.data.FrameInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameInfo</span></code></a></span>) – the frame’s record header fields</p></li>
 <li><p><strong>time_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – the frame’s UNIX timestamp</p></li>
 </ul>
 </dd>
@@ -695,7 +695,7 @@ is the other resolution, the fraction is recomputed from
 <code class="docutils literal notranslate"><span class="pre">time_epoch</span></code> at this file’s – microseconds times 1000, or
 nanoseconds divided by 1000 and <strong>truncated</strong> rather than rounded.
 That is how <a class="reference internal" href="../toolkit/builtin.html#pcapkit.toolkit.pcapng.block2frame" title="pcapkit.toolkit.pcapng.block2frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">block2frame()</span></code></a> and
-<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.make" title="pcapkit.protocols.misc.pcap.frame.Frame.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.make</span></code></a>
+<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame.make" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.make</span></code></a>
 reduce a timestamp to a fraction, and how libpcap scales a
 nanosecond file down (<code class="docutils literal notranslate"><span class="pre">sf-pcap.c</span></code>). It also keeps the second:
 999,999,999 ns truncates to 999,999 us, where rounding would reach

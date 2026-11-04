@@ -575,13 +575,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.frad</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.frad.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.linux_sll</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinuxSLL</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loopback</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.netlink</span><span class="w"> </span><span class="kn">import</span> <span class="n">Netlink</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Radiotap</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.radiotap</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiotapField</span> <span class="k">as</span> <span class="n">Schema_Radiotap_Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.linux_sll.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinuxSLL</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loopback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.netlink.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Netlink</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Radiotap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">RadiotapField</span> <span class="k">as</span> <span class="n">Schema_Radiotap_Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -590,8 +590,9 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldConstructor</span> <span class="k">as</span> <span class="n">Radiotap_FieldConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldParser</span> <span class="k">as</span> <span class="n">Radiotap_FieldParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">FieldConstructor</span> <span class="k">as</span> <span class="n">Radiotap_FieldConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.radiotap.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldParser</span> <span class="k">as</span> <span class="n">Radiotap_FieldParser</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -664,7 +665,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.loopback.Loopback.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.loopback.protocol.Loopback.__proto__</span>
 <div class="viewcode-block" id="register_loopback">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_loopback">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_loopback</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -676,7 +677,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.loopback.Loopback.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.link.loopback.protocol.Loopback.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: BSD address family</span>
@@ -686,7 +687,7 @@
 
 <span class="sd">    Important:</span>
 <span class="sd">        Unlike :func:`register_ethertype`, ``code`` is an address family,</span>
-<span class="sd">        **not** an EtherType: :class:`~pcapkit.protocols.link.loopback.Loopback`</span>
+<span class="sd">        **not** an EtherType: :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`</span>
 <span class="sd">        keeps a registry of its own.</span>
 
 <span class="sd">    Raises:</span>
@@ -718,7 +719,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__</span>
 <div class="viewcode-block" id="register_arphrd">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_arphrd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_arphrd</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_ARPHRD'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -730,7 +731,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__` registry, so</span>
+<span class="sd">    :data:`pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__` registry, so</span>
 <span class="sd">    that a Linux "cooked" capture on that ``arphrd_type`` dispatches to it</span>
 <span class="sd">    instead of reading ``protocol_type`` as an EtherType.</span>
 
@@ -767,7 +768,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.frad.FRAD.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.frad.protocol.FRAD.__proto__</span>
 <div class="viewcode-block" id="register_frad">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_frad">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_frad</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -779,7 +780,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.frad.FRAD.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.link.frad.protocol.FRAD.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: NLPID, after resolving the ``0x00`` pad ahead of a SNAP header</span>
@@ -812,7 +813,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.netlink.Netlink.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.netlink.protocol.Netlink.__proto__</span>
 <div class="viewcode-block" id="register_netlink">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_netlink">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_netlink</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -824,7 +825,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.netlink.Netlink.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.link.netlink.protocol.Netlink.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: ``nlmsg_type`` of the dissected message</span>
@@ -857,7 +858,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.radiotap.Radiotap.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__</span>
 <div class="viewcode-block" id="register_radiotap">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_radiotap">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -869,9 +870,9 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.radiotap.Radiotap.__proto__` registry, keyed</span>
+<span class="sd">    :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__proto__` registry, keyed</span>
 <span class="sd">    by the link type of the frame a radiotap header precedes. Any link type is</span>
-<span class="sd">    accepted, but :meth:`Radiotap.read &lt;pcapkit.protocols.link.radiotap.Radiotap.read&gt;`</span>
+<span class="sd">    accepted, but :meth:`Radiotap.read &lt;pcapkit.protocols.link.radiotap.protocol.Radiotap.read&gt;`</span>
 <span class="sd">    consults :attr:`LinkType.IEEE802_11 &lt;pcapkit.const.reg.linktype.LinkType.IEEE802_11&gt;`</span>
 <span class="sd">    alone: registering that key replaces the 802.11 dissector, and an entry</span>
 <span class="sd">    under any other key is stored and never reached.</span>
@@ -903,7 +904,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.link.radiotap.Radiotap.__field__</span>
+<span class="c1"># NOTE: pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__</span>
 <div class="viewcode-block" id="register_radiotap_field">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_radiotap_field">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_radiotap_field</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Radiotap_FieldType'</span><span class="p">,</span>
@@ -912,23 +913,23 @@
 <span class="w">    </span><span class="sd">"""Register a radiotap field parser.</span>
 
 <span class="sd">    The function will register the given field parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.link.radiotap.Radiotap.__field__` registry. A</span>
+<span class="sd">    :data:`pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__` registry. A</span>
 <span class="sd">    field type is decoded once both it and the schema registry hold an entry</span>
 <span class="sd">    for it. A presence bit 28 to 30 follows rules of its own, as does a vendor</span>
 <span class="sd">    namespace TLV item, so an entry for one is stored and not reached there; a</span>
 <span class="sd">    type from 32 on is reached only as a TLV item.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.link.radiotap.Radiotap` field type as</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` field type as</span>
 <span class="sd">            in :class:`~pcapkit.const.radiotap.field_type.FieldType`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the field. A name names the</span>
 <span class="sd">            ``_read_field_*`` and ``_make_field_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_field_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the</span>
 <span class="sd">            field, whose fields are its subfields and whose ``__align__`` is its</span>
 <span class="sd">            alignment. It should be a subclass of</span>
-<span class="sd">            :class:`pcapkit.protocols.schema.link.radiotap.RadiotapField`.</span>
+<span class="sd">            :class:`pcapkit.protocols.link.radiotap.schema.RadiotapField`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a</span>

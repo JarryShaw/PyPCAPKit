@@ -574,27 +574,27 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">Protocol_IP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">Protocol_IP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP_DATA_OFFSET_OCTET</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP_DATA_OFFSET_OCTET</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Data_IPv4</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Data_IPv4</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'dtls_reassembly'</span><span class="p">,</span>
@@ -681,7 +681,7 @@
 <span class="sd">        the IP layer that carries it -- in a tunnel, the innermost</span>
 <span class="sd">        (:issue:`1581`). Otherwise, the fields of the fixed 20-octet TCP header</span>
 <span class="sd">        (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` the TCP parser rejected, of</span>
 <span class="sd">        protocol TCP, from a datagram that is not a later fragment, with at</span>
 <span class="sd">        least those 20 octets captured; else :data:`None`. A segment past</span>
 <span class="sd">        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` is kept raw</span>
@@ -691,7 +691,7 @@
 <span class="sd">        A capture snapped inside the TCP header leaves a Data Offset that runs</span>
 <span class="sd">        past the captured octets, and the TCP parser rejects such a header by</span>
 <span class="sd">        design (:issue:`1404`), so the segment arrives as</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.raw.Raw`. The ports, numbers and flags</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. The ports, numbers and flags</span>
 <span class="sd">        are all in the fixed header, so the segment still belongs to its flow,</span>
 <span class="sd">        as it does for |dpkt|_, :mod:`scapy` and Wireshark (:issue:`1518`).</span>
 <span class="sd">        The header and payload are then the captured octets either side of the</span>
@@ -765,8 +765,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame or PCAP-NG block.</span>
-<span class="sd">        version: :class:`~pcapkit.protocols.internet.ipv4.IPv4` or</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the layer to fetch.</span>
+<span class="sd">        version: :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` or</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the layer to fetch.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The first ``version`` layer, from the outside in, that is a fragment --</span>
@@ -804,8 +804,8 @@
 <span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
 <span class="sd">    A frame can be reassembled if it contains an IPv4 layer</span>
-<span class="sd">    (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and the **DF**</span>
-<span class="sd">    (:attr:`IPv4.flags.df &lt;pcapkit.protocols.data.internet.ipv4.Flags.df&gt;`) flag is</span>
+<span class="sd">    (:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`) and the **DF**</span>
+<span class="sd">    (:attr:`IPv4.flags.df &lt;pcapkit.protocols.internet.ipv4.data.Flags.df&gt;`) flag is</span>
 <span class="sd">    :data:`False`. In an IP-in-IP tunnel, the layer is the first that is a fragment</span>
 <span class="sd">    (see :func:`_fragment`).</span>
 
@@ -852,9 +852,9 @@
 <span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
 
 <span class="sd">    A frame can be reassembled if it contains an IPv6 layer</span>
-<span class="sd">    (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and an IPv6 Fragment header</span>
+<span class="sd">    (:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`) and an IPv6 Fragment header</span>
 <span class="sd">    (:rfc:`2460#section-4.5`, i.e.,</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`). In an IP-in-IP tunnel,</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`). In an IP-in-IP tunnel,</span>
 <span class="sd">    the layer is the first that has one (see :func:`_fragment`).</span>
 
 <span class="sd">    Args:</span>
@@ -877,7 +877,7 @@
         <span class="n">ipv6_frag_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Frag'</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>
 
         <span class="c1"># NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since</span>
-        <span class="c1"># :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
+        <span class="c1"># :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer&gt;`</span>
         <span class="c1"># adds each extension header's length before the Fragment-header check</span>
         <span class="c1"># breaks its loop. That is correct for a header length, but the</span>
         <span class="c1"># reassembled packet carries no Fragment header at all</span>
@@ -918,7 +918,7 @@
 <span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
 
 <span class="sd">    A frame can be reassembled if it contains a TCP layer</span>
-<span class="sd">    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the</span>
+<span class="sd">    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the</span>
 <span class="sd">    TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).</span>
 
 <span class="sd">    Args:</span>
@@ -975,7 +975,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        One record per fragmented handshake message in the frame's first</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.dtls.DTLS` layer, if UDP carries</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` layer, if UDP carries</span>
 <span class="sd">        it and it is a cleartext ``handshake`` record holding one; otherwise</span>
 <span class="sd">        :data:`None`. The buffer ID is the IP and UDP endpoints nearest above</span>
 <span class="sd">        the record, with its epoch (:rfc:`6347#section-4.1`).</span>
@@ -1030,10 +1030,10 @@
 <span class="w">    </span><span class="sd">"""Make data for DTLS handshake-message reassembly.</span>
 
 <span class="sd">    A frame can be reassembled if UDP carries a DTLS layer</span>
-<span class="sd">    (:class:`~pcapkit.protocols.application.dtls.DTLS`) whose cleartext</span>
+<span class="sd">    (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`) whose cleartext</span>
 <span class="sd">    ``handshake`` record holds a fragmented message</span>
 <span class="sd">    (:attr:`DTLSHandshake.is_fragmented</span>
-<span class="sd">    &lt;pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented&gt;`,</span>
+<span class="sd">    &lt;pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented&gt;`,</span>
 <span class="sd">    :rfc:`6347#section-4.2.3`). Only the frame's first record is read.</span>
 
 <span class="sd">    Args:</span>
@@ -1057,7 +1057,7 @@
 <span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    A frame can be traced if it contains a TCP layer</span>
-<span class="sd">    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the</span>
+<span class="sd">    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the</span>
 <span class="sd">    TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).</span>
 
 <span class="sd">    Args:</span>

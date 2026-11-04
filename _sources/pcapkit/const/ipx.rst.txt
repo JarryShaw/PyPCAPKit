@@ -1,11 +1,11 @@
-==================================================================
-:class:`~pcapkit.protocols.internet.ipx.IPX` Constant Enumerations
-==================================================================
+===========================================================================
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` Constant Enumerations
+===========================================================================
 
 .. module:: pcapkit.const.ipx
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.ipx.IPX` implementations. Available
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` implementations. Available
 enumerations include:
 
 .. list-table::

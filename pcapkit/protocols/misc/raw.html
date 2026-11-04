@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/raw.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc.raw contains Raw only, which implements an extractor for unknown protocols, and constructs a Protocol like object. Header Schemas: Data Models:" />
-<meta name="description" content="pcapkit.protocols.misc.raw contains Raw only, which implements an extractor for unknown protocols, and constructs a Protocol like object. Header Schemas: Data Models:" />
+<meta property="og:description" content="pcapkit.protocols.misc.raw.protocol contains Raw only, which implements an extractor for unknown protocols, and constructs a Protocol like object. Header Schemas: Data Models:" />
+<meta name="description" content="pcapkit.protocols.misc.raw.protocol contains Raw only, which implements an extractor for unknown protocols, and constructs a Protocol like object. Header Schemas: Data Models:" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="No-Payload Packet" href="no_payload.html"><link rel="prev" title="PCAP-NG File Format" href="pcapng.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -568,41 +568,41 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.misc.raw">
 <span id="raw-packet-data"></span><h1>Raw Packet Data<a class="headerlink" href="#module-pcapkit.protocols.misc.raw" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.misc.raw" title="pcapkit.protocols.misc.raw"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> only, which implements
+<p id="module-pcapkit.protocols.misc.raw.protocol"><a class="reference internal" href="#module-pcapkit.protocols.misc.raw.protocol" title="pcapkit.protocols.misc.raw.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw.protocol</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> only, which implements
 an extractor for unknown protocols, and constructs a
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like object.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.raw.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw" title="pcapkit.protocols.data.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.misc.raw.Raw" title="pcapkit.protocols.schema.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.raw.protocol.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>]</p>
 <p>This class implements universal unknown protocol.</p>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Unknown'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Unknown'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.length" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.length">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.protocol">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.15)"><span class="pre">NoReturn</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.protocol" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.protocol">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.15)"><span class="pre">NoReturn</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Name of next layer protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.protocol" title="pcapkit.protocols.misc.raw.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.misc.raw.protocol.Raw.protocol" title="pcapkit.protocols.misc.raw.protocol.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.read" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read raw packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -614,7 +614,7 @@ an extractor for unknown protocols, and constructs a
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw" title="pcapkit.protocols.data.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The parsed packet data.</p>
@@ -623,8 +623,8 @@ an extractor for unknown protocols, and constructs a
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.make" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make raw packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -634,7 +634,7 @@ an extractor for unknown protocols, and constructs a
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.misc.raw.Raw" title="pcapkit.protocols.schema.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet schema.</p>
@@ -643,12 +643,12 @@ an extractor for unknown protocols, and constructs a
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw._make_data" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw._make_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw" title="pcapkit.protocols.data.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span>) – protocol data</p>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></span>) – protocol data</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
@@ -660,8 +660,8 @@ an extractor for unknown protocols, and constructs a
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.__post_init__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.__post_init__" title="Link to this definition">¶</a></dt>
 <dd><p>Post initialisation hook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
@@ -688,13 +688,13 @@ or <a class="reference external" href="https://docs.python.org/3/builtins/consta
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For construction arguments, please refer to <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.make" title="pcapkit.protocols.misc.raw.Raw.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
+<p>For construction arguments, please refer to <a class="reference internal" href="#pcapkit.protocols.misc.raw.protocol.Raw.make" title="pcapkit.protocols.misc.raw.protocol.Raw.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.__index__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.protocol.Raw.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/protocol.html#Raw.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.protocol.Raw.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -708,28 +708,36 @@ or <a class="reference external" href="https://docs.python.org/3/builtins/consta
 
 </dd></dl>
 
-<section id="module-pcapkit.protocols.schema.misc.raw">
-<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.misc.raw" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.misc.raw.schema">
+<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.misc.raw.schema" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.raw</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.raw.Raw">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.raw.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/raw.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.raw.Raw" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.schema.Raw">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.raw.schema.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/schema.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.schema.Raw" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Schema for raw packet.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.raw.Raw.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">packet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.raw.Raw.packet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.schema.Raw.packet">
+<span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">packet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.schema.Raw.packet" title="Link to this definition">¶</a></dt>
 <dd><p>Packet data.</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.protocols.data.misc.raw">
-<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.misc.raw" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.misc.raw.data">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.misc.raw.data" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.misc.raw</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.misc.raw.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/raw.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.data.Raw">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.raw.data.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw/data.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.data.Raw" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>Raw packet is an unknown protocol.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.1.post8: </span><code class="docutils literal notranslate"><span class="pre">packet</span></code> is not a field of this class, so its constructor takes
@@ -738,14 +746,14 @@ or <a class="reference external" href="https://docs.python.org/3/builtins/consta
 the data model of every protocol it constructs.</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw.protocol">
-<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.protocol" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.data.Raw.protocol">
+<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.data.Raw.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Original enumeration of this protocol.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw.error">
-<span class="sig-name descname"><span class="pre">error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.error" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.data.Raw.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.raw.data.Raw.error" title="Link to this definition">¶</a></dt>
 <dd><p>Message saying why the packet data is kept raw, if any – that of the error its
 parse raised, or the dissection limit it is past.</p>
 </dd></dl>
@@ -811,8 +819,8 @@ parse raised, or the dissection limit it is past.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Raw Packet Data</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.raw">Header Schemas</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.misc.raw">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.raw.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.misc.raw.data">Data Models</a></li>
 </ul>
 </li>
 </ul>

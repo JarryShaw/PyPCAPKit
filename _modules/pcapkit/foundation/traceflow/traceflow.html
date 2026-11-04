@@ -574,7 +574,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -642,7 +642,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            Unlike :attr:`EnumSchema.registry</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.schema.EnumSchema.registry&gt;`, this is not</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.EnumSchema.registry&gt;`, this is not</span>
 <span class="sd">            a per-class mapping: every flow tracing registration lands in the</span>
 <span class="sd">            single :attr:`Extractor.__traceflow__</span>
 <span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;` table, so</span>
@@ -1127,7 +1127,7 @@
 <span class="sd">        ``protocol`` is given. This is what lets a subclass decline registration</span>
 <span class="sd">        rather than having to inherit :class:`TraceFlowBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
-<span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.EnumSchema.__init_subclass__&gt;`, which</span>
 <span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>

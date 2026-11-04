@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/ipv6.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.ipv6 contains IPv6 only, which implements the extractor for Internet Protocol version 6 (IPv6)*, whose structure is described as below:,,,, Octets, Bits, Name, Descriptio..." />
-<meta name="description" content="pcapkit.protocols.internet.ipv6 contains IPv6 only, which implements the extractor for Internet Protocol version 6 (IPv6)*, whose structure is described as below:,,,, Octets, Bits, Name, Descriptio..." />
+<meta property="og:description" content="pcapkit.protocols.internet.ipv6.protocol contains IPv6 only, which implements the extractor for Internet Protocol version 6 (IPv6)*, whose structure is described as below:,,,, Octets, Bits, Name, D..." />
+<meta name="description" content="pcapkit.protocols.internet.ipv6.protocol contains IPv6 only, which implements the extractor for Internet Protocol version 6 (IPv6)*, whose structure is described as below:,,,, Octets, Bits, Name, D..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPv6-Ext - IPv6 Extension Header" href="ipv6_ext.html"><link rel="prev" title="IPv4 - Internet Protocol Version 4" href="ipv4.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -568,8 +568,14 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.internet.ipv6">
 <span id="ipv6-internet-protocol-version-6"></span><h1>IPv6 - Internet Protocol Version 6<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> only,
+<div class="versionremoved" id="module-pcapkit.protocols.internet.ipv6.protocol">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET</span></code>, with no alias: they are
+in this module, and <a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a> exports the protocol class
+alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
+<p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6.protocol" title="pcapkit.protocols.internet.ipv6.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.protocol</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> only,
 which implements the extractor for Internet Protocol
 version 6 (IPv6) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
 as below:</p>
@@ -627,22 +633,22 @@ as below:</p>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6" title="pcapkit.protocols.schema.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.protocol.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6" title="pcapkit.protocols.internet.ipv6.schema.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>]</p>
 <p>This class implements Internet Protocol version 6.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span></p>
 <ul class="simple">
 <li><p>A Shim6 header, which has no dedicated parser, and an extension
 header other than ESP whose dedicated parser raises are parsed by
-<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>, so the rest
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>, so the rest
 of the chain is still walked (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>).</p></li>
 <li><p>A rebuild from
 <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet.from_data" title="pcapkit.protocols.internet.internet.Internet.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
 keeps the Payload Length a truncated capture declares
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1155">#1155</a>), and the octets past it as
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.trailer" title="pcapkit.protocols.internet.ipv6.schema.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1209">#1209</a>).</p></li>
 <li><p>Next Header codes 253 and 254 are parsed and rebuilt once
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1231">#1231</a>), and a cut extension header chain rebuilds byte for
@@ -653,10 +659,10 @@ byte (<a class="extlink-issue reference external" href="https://github.com/Jarry
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span></p>
 <ul class="simple">
 <li><p>An extension header whose dedicated parser raises is the upper
-layer, parsed once as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, and
+layer, parsed once as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, and
 the chain walk stops there, as <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4"><strong>RFC 8200 Section 4</strong></a> has a node
 discard such a packet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2477">#2477</a>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> of <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.IPv6.make" title="pcapkit.protocols.internet.ipv6.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> takes a member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code,
+<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> of <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="pcapkit.protocols.internet.ipv6.protocol.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> takes a member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code,
 resolved with the enumeration’s <code class="docutils literal notranslate"><span class="pre">get</span></code>; a name, a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, or a
 code that does not fit in one octet raises
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, rather than
@@ -669,53 +675,53 @@ writing a different value (<a class="extlink-issue reference external" href="htt
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">__generic_ext_codes__</span></code>, the extension headers whose dedicated
 parser raising fell back to
-<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2477">#2477</a>).</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">next_default</span></code>, <code class="docutils literal notranslate"><span class="pre">next_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">next_reversed</span></code>
-arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.IPv6.make" title="pcapkit.protocols.internet.ipv6.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>; resolve a name with
+arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="pcapkit.protocols.internet.ipv6.protocol.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>; resolve a name with
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resolve_index()</span></code></a> first
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p></li>
 </ul>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Protocol</span> <span class="pre">version</span> <span class="pre">6'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Protocol</span> <span class="pre">version</span> <span class="pre">6'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of corresponding protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">40</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.length" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.length">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">40</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of corresponding protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.protocol">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.protocol" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.protocol">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Name of next layer protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.src">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.src" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.src">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.src" title="Link to this definition">¶</a></dt>
 <dd><p>Source IP address.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.dst">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.dst" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.dst">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.dst" title="Link to this definition">¶</a></dt>
 <dd><p>Destination IP address.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.extension_headers">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extension_headers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><span class="pre">ExtensionHeader</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.extension_headers" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.extension_headers">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extension_headers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><span class="pre">ExtensionHeader</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.extension_headers" title="Link to this definition">¶</a></dt>
 <dd><p>IPv6 extension header records.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.id">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.id" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.id">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.id" title="Link to this definition">¶</a></dt>
 <dd><p>Index ID of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -728,8 +734,8 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.read" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read Internet Protocol version 6 (IPv6).</p>
 <p>Structure of IPv6 header [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
@@ -766,7 +772,7 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
@@ -774,14 +780,14 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the version is not 6, or if the packet is one of
     the errors <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-3"><strong>RFC 2675 Section 3</strong></a> has a receiver detect (see
-    <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.jumbogram_error" title="pcapkit.protocols.schema.internet.ipv6.jumbogram_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbogram_error()</span></code></a>).</p>
+    <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.jumbogram_error" title="pcapkit.protocols.internet.ipv6.schema.jumbogram_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbogram_error()</span></code></a>).</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traffic_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hop_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.make" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traffic_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransType.UDP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hop_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -796,14 +802,14 @@ arguments of <a class="reference internal" href="#pcapkit.protocols.internet.ipv
 computed from the payload when omitted, and zero (a jumbogram)
 if that exceeds 65,535 octets or the payload starts with a
 Hop-by-Hop Options header carrying a Jumbo Payload option.</p></li>
-<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload data.</p></li>
+<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload data.</p></li>
 <li><p><strong>trailer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Octets after the packet, outside the Payload Length, such
 as link-layer padding; written as is.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6" title="pcapkit.protocols.schema.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6" title="pcapkit.protocols.internet.ipv6.schema.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet data.</p>
@@ -820,8 +826,8 @@ shifts a positional <code class="docutils literal notranslate"><span class="pre"
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.unpack">
-<span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.unpack" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.unpack">
+<span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.unpack" title="Link to this definition">¶</a></dt>
 <dd><p>Unpack (parse) packet data.</p>
 <p>The Version field is checked before the header schema is parsed, so
 octets of another version are refused as such, rather than by whichever
@@ -834,7 +840,7 @@ field of this header they break first (<a class="extlink-issue reference externa
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
@@ -846,12 +852,12 @@ field of this header they break first (<a class="extlink-issue reference externa
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6._make_data" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6._make_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span>) – protocol data</p>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span>) – protocol data</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
@@ -863,20 +869,20 @@ field of this header they break first (<a class="extlink-issue reference externa
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer">
-<span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer">
+<span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="Link to this definition">¶</a></dt>
 <dd><p>Decode next layer extractor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ipv6</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span>) – info buffer</p></li>
+<li><p><strong>ipv6</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span>) – info buffer</p></li>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – next layer protocol index</p></li>
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – valid (<em>not padding</em>) length</p></li>
 <li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – packet info (passed from <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="pcapkit.protocols.internet.ipv6.data.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Current protocol with next layer extracted.</p>
@@ -890,8 +896,8 @@ field of this header they break first (<a class="extlink-issue reference externa
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6._import_next_layer">
-<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6._import_next_layer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer">
+<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer" title="Link to this definition">¶</a></dt>
 <dd><p>Import next layer extractor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -902,7 +908,7 @@ field of this header they break first (<a class="extlink-issue reference externa
 <li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">4</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="mi"><span class="pre">6</span></span></code></span>]</span>) – IP protocol version</p></li>
 <li><p><strong>extension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if is extension header</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – payload from packet. If not provided, will extract from
-<a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.get_payload" title="pcapkit.protocols.schema.schema.Schema.get_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__header__.get_payload</span></code></a></p></li>
+<a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema.get_payload" title="pcapkit.protocols.schema.Schema.get_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__header__.get_payload</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -917,15 +923,15 @@ field of this header they break first (<a class="extlink-issue reference externa
 <p>A header whose dedicated parser raises reaches the
 <a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> decorating this
 method, which substitutes plain
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. That carries no <code class="docutils literal notranslate"><span class="pre">next</span></code>,
-so <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>’s walk stops there, as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. That carries no <code class="docutils literal notranslate"><span class="pre">next</span></code>,
+so <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>’s walk stops there, as
 <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4"><strong>RFC 8200 Section 4</strong></a> has a node discard such a packet
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2477">#2477</a>). <code class="docutils literal notranslate"><span class="pre">253</span></code> and <code class="docutils literal notranslate"><span class="pre">254</span></code> have no dedicated parser and
-reach plain <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> with no
+reach plain <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> with no
 exception involved, which stops the walk the same way. A <code class="docutils literal notranslate"><span class="pre">Raw</span></code> the
 walk stopped on is then returned as the upper layer, not parsed
 again.
-<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>’s info always carries
+<a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>’s info always carries
 a <code class="docutils literal notranslate"><span class="pre">next</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> unless its payload was decrypted, since
 <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> encrypts the real value, so the walk ends after it.</p>
 <p>The upper layer past a walk cut at <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> is the
@@ -937,8 +943,8 @@ next extension header, and is kept raw with one
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.__index__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -951,12 +957,12 @@ next extension header, and is kept raw with one
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6.__post_init__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.__post_init__" title="Link to this definition">¶</a></dt>
 <dd><p>Post initialisation hook.</p>
 <p>Once parsed, the checksum of the upper layer is verified over this
 layer’s pseudo-header if <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.CHECKSUM_VERIFY" title="pcapkit.utilities.config.CHECKSUM_VERIFY"><code class="xref py py-data docutils literal notranslate"><span class="pre">CHECKSUM_VERIFY</span></code></a>
-is on, see <a class="reference internal" href="../misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.verify_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">verify_upper()</span></code></a>.</p>
+is on, see <a class="reference internal" href="../misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper"><code class="xref py py-func docutils literal notranslate"><span class="pre">verify_upper()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -971,13 +977,13 @@ is on, see <a class="reference internal" href="../misc/checksum.html#pcapkit.pro
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For construction arguments, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.IPv6.make" title="pcapkit.protocols.internet.ipv6.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
+<p>For construction arguments, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6.make" title="pcapkit.protocols.internet.ipv6.protocol.IPv6.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPv6._read_ip_hextet">
-<span class="sig-name descname"><span class="pre">_read_ip_hextet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6.html#IPv6._read_ip_hextet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPv6._read_ip_hextet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPv6._read_ip_hextet">
+<span class="sig-name descname"><span class="pre">_read_ip_hextet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/protocol.html#IPv6._read_ip_hextet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPv6._read_ip_hextet" title="Link to this definition">¶</a></dt>
 <dd><p>Read the first four octets of IPv6.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -995,8 +1001,8 @@ and flow label.</p>
 <section id="protocol-constants">
 <h2>Protocol Constants<a class="headerlink" href="#protocol-constants" title="Link to this heading">¶</a></h2>
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPV6_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.protocol.</span></span><span class="sig-name descname"><span class="pre">IPV6_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPV6_HEADER_LEN" title="Link to this definition">¶</a></dt>
 <dd><p>Length of the fixed IPv6 header, i.e. the offset of the first extension
 header, <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); it
 is fixed by the RFC, so it is never configurable.</p>
@@ -1006,8 +1012,8 @@ is fixed by the RFC, so it is never configurable.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPV6_NEXT_HEADER_OFFSET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.protocol.</span></span><span class="sig-name descname"><span class="pre">IPV6_NEXT_HEADER_OFFSET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.protocol.IPV6_NEXT_HEADER_OFFSET" title="Link to this definition">¶</a></dt>
 <dd><p>Offset of the Next Header field within the fixed IPv6 header,
 <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>).</p>
 <div class="versionadded">
@@ -1016,15 +1022,19 @@ is fixed by the RFC, so it is never configurable.</p>
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.protocols.schema.internet.ipv6">
-<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.internet.ipv6" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.internet.ipv6.schema">
+<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6.schema" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <div class="versionremoved">
 <p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length</span></code>, now
 <a class="reference internal" href="../../corekit/schema/jumbogram.html#pcapkit.corekit.schema.jumbogram.jumbo_payload_length" title="pcapkit.corekit.schema.jumbogram.jumbo_payload_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.corekit.schema.jumbogram.jumbo_payload_length()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
 </div>
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IP_MAX_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.schema.</span></span><span class="sig-name descname"><span class="pre">IP_MAX_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH" title="Link to this definition">¶</a></dt>
 <dd><p>The most octets a 16-bit IP length field declares, for IPv4’s Total Length
 the header included (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.1"><strong>RFC 791 Section 3.1</strong></a>) and for IPv6’s Payload Length
 the fixed header excluded (<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>); a longer IPv6 payload is
@@ -1038,17 +1048,17 @@ the RFCs, so it is never configurable.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hextet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.schema.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hextet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/schema.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for IPv6 packet.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>New field <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>, which keeps the octets captured past the
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>New field <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.trailer" title="pcapkit.protocols.internet.ipv6.schema.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>, which keeps the octets captured past the
 Payload Length rather than dropping them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1209">#1209</a>).</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.hextet">
-<span class="sig-name descname"><span class="pre">hextet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet" title="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet"><span class="pre">IPv6Hextet</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">hextet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.hextet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.hextet">
+<span class="sig-name descname"><span class="pre">hextet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6Hextet" title="pcapkit.protocols.internet.ipv6.schema.IPv6Hextet"><span class="pre">IPv6Hextet</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">hextet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.hextet" title="Link to this definition">¶</a></dt>
 <dd><p>Version, traffic class and flow label.</p>
 <p>The <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> namespace maps each
 subfield to a <code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">length_in_bits)</span></code> pair, <em>not</em> to
@@ -1060,67 +1070,67 @@ the low nibble of the label.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.length">
-<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.length" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">length&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.length" title="Link to this definition">¶</a></dt>
 <dd><p>Payload length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.next">
-<span class="sig-name descname"><span class="pre">next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">next&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.next" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.next">
+<span class="sig-name descname"><span class="pre">next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EnumField</span> <span class="pre">next&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.next" title="Link to this definition">¶</a></dt>
 <dd><p>Next header.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.limit">
-<span class="sig-name descname"><span class="pre">limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">limit&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.limit" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt8Field</span> <span class="pre">limit&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.limit" title="Link to this definition">¶</a></dt>
 <dd><p>Hop limit.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.src">
-<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">src&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.src" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.src">
+<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">src&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.src" title="Link to this definition">¶</a></dt>
 <dd><p>Source address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">dst&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.dst" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.dst">
+<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField</span> <span class="pre">dst&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.dst" title="Link to this definition">¶</a></dt>
 <dd><p>Destination address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.payload" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.payload">
+<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.payload" title="Link to this definition">¶</a></dt>
 <dd><p>Payload.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer">
-<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">trailer&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.trailer">
+<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">trailer&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.trailer" title="Link to this definition">¶</a></dt>
 <dd><p>Octets captured past the Payload Length (or a jumbogram’s Jumbo Payload
-Length, see <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.post_process" title="pcapkit.protocols.schema.internet.ipv6.IPv6.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>), such as Ethernet minimum-frame
-padding, see <a class="reference internal" href="ipv4.html#pcapkit.protocols.schema.internet.ipv4.IPv4.trailer" title="pcapkit.protocols.schema.internet.ipv4.IPv4.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.trailer</span></code></a>.</p>
+Length, see <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.post_process" title="pcapkit.protocols.internet.ipv6.schema.IPv6.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>), such as Ethernet minimum-frame
+padding, see <a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.schema.IPv4.trailer" title="pcapkit.protocols.internet.ipv4.schema.IPv4.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.trailer</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.post_process">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#IPv6.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.post_process" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/schema.html#IPv6.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.post_process" title="Link to this definition">¶</a></dt>
 <dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
 <p>A jumbogram [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>] declares a Payload Length of zero and
 carries its real length in a Jumbo Payload option instead, so the
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.payload" title="pcapkit.protocols.schema.internet.ipv6.IPv6.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> field reads nothing and every octet lands in
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. When
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.payload" title="pcapkit.protocols.internet.ipv6.schema.IPv6.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> field reads nothing and every octet lands in
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.trailer" title="pcapkit.protocols.internet.ipv6.schema.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. When
 <a class="reference internal" href="../../corekit/schema/jumbogram.html#pcapkit.corekit.schema.jumbogram.jumbo_payload_length" title="pcapkit.corekit.schema.jumbogram.jumbo_payload_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code></a> finds that option,
 the two are split again at the Jumbo Payload Length, and only the
-octets beyond it stay in <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. The octets themselves are
+octets beyond it stay in <a class="reference internal" href="#pcapkit.protocols.internet.ipv6.schema.IPv6.trailer" title="pcapkit.protocols.internet.ipv6.schema.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. The octets themselves are
 untouched, so the packed header is unchanged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Revised schema.</p>
@@ -1133,25 +1143,25 @@ untouched, so the packed header is unchanged.</p>
 <section id="type-stubs">
 <h3>Type Stubs<a class="headerlink" href="#type-stubs" title="Link to this heading">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6Hextet</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6Hextet">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.schema.</span></span><span class="sig-name descname"><span class="pre">IPv6Hextet</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6Hextet" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
 <p>Version, traffic class and flow label.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.version">
-<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.version" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.version" title="Link to this definition">¶</a></dt>
 <dd><p>Version.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.class">
-<span class="sig-name descname"><span class="pre">class</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.class" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.class">
+<span class="sig-name descname"><span class="pre">class</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.class" title="Link to this definition">¶</a></dt>
 <dd><p>Traffic class.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.label">
-<span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet.label" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.label">
+<span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.IPv6Hextet.label" title="Link to this definition">¶</a></dt>
 <dd><p>Flow label.</p>
 </dd></dl>
 
@@ -1161,8 +1171,8 @@ untouched, so the packed header is unchanged.</p>
 <section id="auxiliary-functions">
 <h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.jumbogram_error">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">jumbogram_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#jumbogram_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.jumbogram_error" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.schema.jumbogram_error">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.schema.</span></span><span class="sig-name descname"><span class="pre">jumbogram_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/schema.html#jumbogram_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.schema.jumbogram_error" title="Link to this definition">¶</a></dt>
 <dd><p>Name the error <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-3"><strong>RFC 2675 Section 3</strong></a> has a receiver detect in an IPv6 packet, if any.</p>
 <p>The four errors that section lists for a node that understands the Jumbo
 Payload option, each a packet the default engine rejects (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>):</p>
@@ -1197,12 +1207,16 @@ carrying the option, so a caller walks the chain only for those.</p></li>
 
 </section>
 </section>
-<section id="module-pcapkit.protocols.data.internet.ipv6">
-<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.ipv6" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.internet.ipv6.data">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6.data" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.internet.ipv6</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.data.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6/data.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>Data model for Internet Protocol version 6.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -1211,8 +1225,8 @@ carrying the option, so a caller walks the chain only for those.</p></li>
 to create an instance of this data model.</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.class">
-<span class="sig-name descname"><span class="pre">class</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.class" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.class">
+<span class="sig-name descname"><span class="pre">class</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.class" title="Link to this definition">¶</a></dt>
 <dd><p>Traffic class.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1222,74 +1236,74 @@ access it with <a class="reference external" href="https://docs.python.org/3/bui
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.version">
-<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.version" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.version" title="Link to this definition">¶</a></dt>
 <dd><p>Version.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.label">
-<span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.label" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.label">
+<span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.label" title="Link to this definition">¶</a></dt>
 <dd><p>Flow label.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.payload" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.payload">
+<span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.payload" title="Link to this definition">¶</a></dt>
 <dd><p>Payload length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.next">
-<span class="sig-name descname"><span class="pre">next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.next" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.next">
+<span class="sig-name descname"><span class="pre">next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.next" title="Link to this definition">¶</a></dt>
 <dd><p>Next header.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.limit">
-<span class="sig-name descname"><span class="pre">limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.limit" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.limit" title="Link to this definition">¶</a></dt>
 <dd><p>Hop limit.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.src">
-<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.src" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.src">
+<span class="sig-name descname"><span class="pre">src</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.src" title="Link to this definition">¶</a></dt>
 <dd><p>Source address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.dst" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.dst">
+<span class="sig-name descname"><span class="pre">dst</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><span class="pre">IPv6Address</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.dst" title="Link to this definition">¶</a></dt>
 <dd><p>Destination address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.fragment">
-<span class="sig-name descname"><span class="pre">fragment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Packet" title="pcapkit.protocols.data.protocol.Packet"><span class="pre">Packet</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.fragment" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.fragment">
+<span class="sig-name descname"><span class="pre">fragment</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Packet" title="pcapkit.protocols.data.Packet"><span class="pre">Packet</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.fragment" title="Link to this definition">¶</a></dt>
 <dd><p>Fragmented packet header &amp; payload (from IPv6-Frag header).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.protocol">
-<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.protocol" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.protocol">
+<span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Highest header protocol type (extension header excluded).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len">
-<span class="sig-name descname"><span class="pre">hdr_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.hdr_len">
+<span class="sig-name descname"><span class="pre">hdr_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.hdr_len" title="Link to this definition">¶</a></dt>
 <dd><p>Header length (including extension headers).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.raw_len">
-<span class="sig-name descname"><span class="pre">raw_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.raw_len" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.raw_len">
+<span class="sig-name descname"><span class="pre">raw_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.raw_len" title="Link to this definition">¶</a></dt>
 <dd><p>Raw payload length (excluding extension headers).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6.IPv6.trailer">
-<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6.IPv6.trailer" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.data.IPv6.trailer">
+<span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.data.IPv6.trailer" title="Link to this definition">¶</a></dt>
 <dd><p>Octets captured past the Payload Length – or, for a jumbogram,
 past the Jumbo Payload Length – present only when there are any.</p>
 </dd></dl>
@@ -1363,12 +1377,12 @@ past the Jumbo Payload Length – present only when there are any.</p>
             <ul>
 <li><a class="reference internal" href="#">IPv6 - Internet Protocol Version 6</a><ul>
 <li><a class="reference internal" href="#protocol-constants">Protocol Constants</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipv6">Header Schemas</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6.schema">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.ipv6">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6.data">Data Models</a></li>
 </ul>
 </li>
 </ul>

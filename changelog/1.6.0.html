@@ -572,51 +572,51 @@
 protocol pairs that wanted a shared abstract base, and the two that simply had
 no dissector at all.</p>
 <ul class="simple">
-<li><p><strong>Added</strong> – <a class="reference internal" href="../pcapkit/protocols/link/gre.html#pcapkit.protocols.link.gre.GRE" title="pcapkit.protocols.link.gre.GRE"><code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code></a>, a dissector for the
+<li><p><strong>Added</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code>, a dissector for the
 Generic Routing Encapsulation base header (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html"><strong>RFC 2784</strong></a>) plus the optional Key
 and Sequence Number extensions (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2890.html"><strong>RFC 2890</strong></a>).
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL" title="pcapkit.protocols.link.linux_sll.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dispatch to it for both
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code> dispatch to it for both
 the <code class="docutils literal notranslate"><span class="pre">ARPHRD_IPGRE</span></code> and <code class="docutils literal notranslate"><span class="pre">ARPHRD_IP6GRE</span></code> cases – the same GRE framing either
 way, the “IP”/”IP6” distinction being only which outer IP version the tunnel
 carries – instead of falling back to
-<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. The Protocol Type field dispatches
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>. The Protocol Type field dispatches
 onward as an EtherType, through the same family registry
 (<a class="reference internal" href="../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>)
 Ethernet, VLAN and LinuxSLL already share. One of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>’s five
 <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> follow-ups to get a dissector (<code class="docutils literal notranslate"><span class="pre">NETLINK</span></code> and <code class="docutils literal notranslate"><span class="pre">FRAD</span></code> are
 tracked separately on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2507">#2507</a> and <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2499">#2499</a>); <code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code>
-remains <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
-<li><p><strong>Added</strong> – <a class="reference internal" href="../pcapkit/protocols/link/netlink.html#pcapkit.protocols.link.netlink.Netlink" title="pcapkit.protocols.link.netlink.Netlink"><code class="xref py py-class docutils literal notranslate"><span class="pre">Netlink</span></code></a>, a dissector for
+remains <code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>.</p></li>
+<li><p><strong>Added</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Netlink</span></code>, a dissector for
 the fixed 16-octet <code class="docutils literal notranslate"><span class="pre">nlmsghdr</span></code> framing of Linux’s own kernel/userspace IPC
 transport (the kernel’s own <code class="docutils literal notranslate"><span class="pre">netlink(7)</span></code> man page; <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3549.html#section-2.3.2"><strong>RFC 3549 Section 2.3.2</strong></a>).
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL" title="pcapkit.protocols.link.linux_sll.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dispatch to it for the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code> dispatch to it for the
 <code class="docutils literal notranslate"><span class="pre">ARPHRD_NETLINK</span></code> case instead of falling back to
-<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. The byte order the header was written
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>. The byte order the header was written
 in is ambiguous – Netlink is kernel/userspace IPC, not wire format – and is
 guessed the way Wireshark’s own netlink dissector does, by
-<a class="reference internal" href="../pcapkit/protocols/link/netlink.html#pcapkit.protocols.link.netlink.nlmsg_byteorder" title="pcapkit.protocols.link.netlink.nlmsg_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlmsg_byteorder()</span></code></a>. Per-family message
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nlmsg_byteorder()</span></code>. Per-family message
 payloads (routing table entries and the like) and multiple messages packed into
 one capture are out of scope for this first cut; every message’s payload is kept
-as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, unconditionally. One of
+as <code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>, unconditionally. One of
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>’s five <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> follow-ups to get a dissector (<code class="docutils literal notranslate"><span class="pre">FRAD</span></code> is
 tracked separately on <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2499">#2499</a>); <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code>/<code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code> and
-<code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code> remain <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
-<li><p><strong>Added</strong> – <a class="reference internal" href="../pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.FRAD" title="pcapkit.protocols.link.frad.FRAD"><code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code></a>, a dissector for Frame
+<code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code> remain <code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>.</p></li>
+<li><p><strong>Added</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code>, a dissector for Frame
 Relay’s multiprotocol encapsulation (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2427.html"><strong>RFC 2427</strong></a>, obsoleting <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1490.html"><strong>RFC 1490</strong></a>).
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.LinuxSLL" title="pcapkit.protocols.link.linux_sll.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a>/
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dispatch to it for the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code>/
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code> dispatch to it for the
 <code class="docutils literal notranslate"><span class="pre">ARPHRD_FRAD</span></code> case instead of falling back to
-<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; the direct NLPID and SNAP-encapsulated
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>; the direct NLPID and SNAP-encapsulated
 forms both dispatch onward, to IPv4/IPv6 and (via the EtherType registry every
 Ethernet/VLAN/LinuxSLL frame shares) ARP among others. The first of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>’s
 five <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> follow-ups to get a dissector; the other four
 (<code class="docutils literal notranslate"><span class="pre">NETLINK</span></code>, <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code>/<code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code>, <code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code>) remain
-<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>.</p></li>
 </ul>
 </section>
 

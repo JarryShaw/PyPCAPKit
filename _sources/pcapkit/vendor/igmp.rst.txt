@@ -1,11 +1,11 @@
-==============================================================
-:class:`~pcapkit.protocols.internet.igmp.IGMP` Vendor Crawlers
-==============================================================
+=======================================================================
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` Vendor Crawlers
+=======================================================================
 
 .. module:: pcapkit.vendor.igmp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.igmp.IGMP` implementations. Available
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` implementations. Available
 vendor crawlers include:
 
 .. list-table::

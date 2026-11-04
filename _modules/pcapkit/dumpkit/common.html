@@ -584,7 +584,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span><span class="p">,</span> <span class="n">NullType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -702,7 +702,7 @@
 <span class="sd">        ``fmt`` is given. This is what lets a subclass decline registration</span>
 <span class="sd">        rather than having to inherit :class:`DumperBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
-<span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.EnumSchema.__init_subclass__&gt;`, which</span>
 <span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>

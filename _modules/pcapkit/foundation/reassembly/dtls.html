@@ -572,7 +572,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
                                                      <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">DTLS_Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">DTLS_Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -607,7 +607,7 @@
 <span class="sd">        decodes what it reassembles. A complete message's</span>
 <span class="sd">        :attr:`~pcapkit.foundation.reassembly.data.dtls.Datagram.packet` holds</span>
 <span class="sd">        the same decode, run on first read. Both call the protocol's</span>
-<span class="sd">        :meth:`~pcapkit.protocols.application.dtls.DTLS.analyze_handshake`; the</span>
+<span class="sd">        :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`; the</span>
 <span class="sd">        ``packet`` calls that of :attr:`__protocol_type__` (:issue:`2622`).</span>
 
 <span class="sd">    Example:</span>
@@ -632,7 +632,7 @@
     <span class="c1">#: Protocol of current reassembly object. An extension point -- a protocol</span>
     <span class="c1">#: named here need only define ``analyze_handshake``, with the signature of</span>
     <span class="c1">#: :meth:`DTLS.analyze_handshake</span>
-    <span class="c1">#: &lt;pcapkit.protocols.application.dtls.DTLS.analyze_handshake&gt;`, and is read</span>
+    <span class="c1">#: &lt;pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake&gt;`, and is read</span>
     <span class="c1">#: for it when a message completes, so one without it raises</span>
     <span class="c1">#: :exc:`AttributeError` there.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">DTLS_Protocol</span>

@@ -2,8 +2,6 @@ Application Layer
 =================
 
 .. module:: pcapkit.protocols.application
-.. module:: pcapkit.protocols.data.application
-.. module:: pcapkit.protocols.schema.application
 
 :mod:`pcapkit.protocols.application` is the collection of all protocols in
 application layer, with detailed implementation and methods. Layer is decided by

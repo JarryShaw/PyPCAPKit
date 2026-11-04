@@ -612,7 +612,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            Unlike :attr:`EnumSchema.registry</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.schema.EnumSchema.registry&gt;`, this is not</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.EnumSchema.registry&gt;`, this is not</span>
 <span class="sd">            a per-class mapping: every engine registration lands in the single</span>
 <span class="sd">            :attr:`Extractor.__engine__</span>
 <span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__engine__&gt;` table, so</span>
@@ -856,7 +856,7 @@
 <span class="sd">        ``engine`` is given. This is what lets a subclass decline registration</span>
 <span class="sd">        rather than having to inherit :class:`EngineBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
-<span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.EnumSchema.__init_subclass__&gt;`, which</span>
 <span class="sd">        guards on its own ``code`` keyword the same way.</span>
 
 <span class="sd">        Note:</span>

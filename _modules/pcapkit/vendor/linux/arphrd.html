@@ -583,7 +583,7 @@
 <span class="c1"># :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.</span>
 <span class="c1">#</span>
 <span class="c1"># pcapkit names only the ``ARPHRD_*`` values its Linux "cooked" capture</span>
-<span class="c1"># dissector (:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`) actually</span>
+<span class="c1"># dissector (:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`) actually</span>
 <span class="c1"># matches on, not every value the header defines. The rest of the ARP</span>
 <span class="c1"># hardware-type numbering is IANA's own</span>
 <span class="c1"># (:class:`~pcapkit.const.arp.hardware.Hardware`), which differs for most</span>
@@ -616,7 +616,7 @@
 
     <span class="c1">#: Destination of a bare ``ARPHRD`` member; see</span>
     <span class="c1">#: :attr:`~pcapkit.vendor.default.Vendor.PROTO_DEST`.</span>
-    <span class="n">PROTO_DEST</span> <span class="o">=</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.linux_sll'</span><span class="p">,</span> <span class="s1">'LinuxSLL'</span><span class="p">),)</span>
+    <span class="n">PROTO_DEST</span> <span class="o">=</span> <span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.linux_sll.protocol'</span><span class="p">,</span> <span class="s1">'LinuxSLL'</span><span class="p">),)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
 <span class="w">        </span><span class="sd">"""Fetch registry data.</span>

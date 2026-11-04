@@ -635,7 +635,7 @@ that band.</p></li>
 IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
 inside its 0-19 <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> band, unnamed); it is dropped, and value 0
 now resolves to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> like the rest of that band.
-<a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.SSL" title="pcapkit.protocols.application.ssl.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> never checked this member
+<a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> never checked this member
 by name – its wire-type allowlist already excluded value 0 by construction
 – so the sentinel’s removal is behaviourally a no-op there too.</p></li>
 <li><p>the committed <code class="docutils literal notranslate"><span class="pre">HandshakeType</span></code> cited RFC 5246, 6066 and 4680 for several

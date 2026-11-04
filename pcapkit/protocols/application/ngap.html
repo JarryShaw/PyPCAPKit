@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/ngap.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.ngap contains NGAP, which implements an extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the enumerations its data models report ..." />
-<meta name="description" content="pcapkit.protocols.application.ngap contains NGAP, which implements an extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the enumerations its data models report ..." />
+<meta property="og:description" content="pcapkit.protocols.application.ngap.protocol contains NGAP, which implements an extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the enumerations its data model..." />
+<meta name="description" content="pcapkit.protocols.application.ngap.protocol contains NGAP, which implements an extractor for the NG Application Protocol (NGAP)*, as specified in 3GPP TS 38.413, and the enumerations its data model..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="OSPF - Open Shortest Path First" href="ospf.html"><link rel="prev" title="FTP_DATA - FTP Data Channel" href="ftp_data.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -568,19 +568,30 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.application.ngap">
 <span id="ngap-ng-application-protocol"></span><h1>NGAP - NG Application Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.ngap" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>,
+<div class="versionremoved" id="module-pcapkit.protocols.application.ngap.protocol">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap._PYCRATE</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap._PDU_LOCK</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap.load_pycrate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap.PDUKind</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap.Criticality</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap._convert</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap._revert</span></code>, with no alias: they are in this
+module, and <a class="reference internal" href="#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap</span></code></a> exports the protocol class
+alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application.ngap.protocol" title="pcapkit.protocols.application.ngap.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap.protocol</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>,
 which implements an extractor for the NG Application Protocol
 (NGAP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, as specified in 3GPP TS 38.413, and the enumerations its
 data models report with:
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.PDUKind" title="pcapkit.protocols.application.ngap.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.PDUKind" title="pcapkit.protocols.application.ngap.protocol.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a>,
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="pcapkit.protocols.application.ngap.protocol.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a>,
 <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
 <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a>.</p>
 <p>NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk’s <em>payload protocol
-identifier</em> rather than by a port, so <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> is registered on
-<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> under
+identifier</em> rather than by a port, so <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> is registered on
+<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> under
 PPID 60
 (<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span></code></a>)
 and PPID 66
@@ -596,40 +607,40 @@ and none of its structure is visible until an ASN.1 decoder has run over it.</p>
 it; an NGAP payload simply degrades to the opaque payload path, exactly as an
 unregistered PPID would, because
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>, which
-<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> inherits, is wrapped in
+<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> inherits, is wrapped in
 <a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and falls back to
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP" title="pcapkit.protocols.data.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.application.ngap.NGAP" title="pcapkit.protocols.schema.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP" title="pcapkit.protocols.application.ngap.data.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.application.ngap.schema.NGAP" title="pcapkit.protocols.application.ngap.schema.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>]</p>
 <p>This class implements NG Application Protocol.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">procedure</span></code> and <code class="docutils literal notranslate"><span class="pre">criticality</span></code> of <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.make" title="pcapkit.protocols.application.ngap.NGAP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> take a member or an
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">procedure</span></code> and <code class="docutils literal notranslate"><span class="pre">criticality</span></code> of <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP.make" title="pcapkit.protocols.application.ngap.protocol.NGAP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> take a member or an
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> code, resolved with the enumeration’s <code class="docutils literal notranslate"><span class="pre">get</span></code>; a name or a
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>,
 where a name resolved to its member and a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> was taken as a
 code (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'NG</span> <span class="pre">Application</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'NG</span> <span class="pre">Application</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.length">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.length" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.length">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
 <p>NGAP prefixes its payload with nothing and carries no next layer, so the
 whole <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> <em>is</em> the header and this is its length. That is not
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.__length_hint__" title="pcapkit.protocols.application.ngap.NGAP.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__length_hint__</span></code></a>, which reports the
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP.__length_hint__" title="pcapkit.protocols.application.ngap.protocol.NGAP.__length_hint__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__length_hint__</span></code></a>, which reports the
 four-octet prefix common to every PDU rather than this PDU’s size.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.read" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read NG Application Protocol (NGAP).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -639,7 +650,7 @@ four-octet prefix common to every PDU rather than this PDU’s size.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP" title="pcapkit.protocols.data.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP" title="pcapkit.protocols.application.ngap.data.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
@@ -653,19 +664,19 @@ four-octet prefix common to every PDU rather than this PDU’s size.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PDUKind.INITIATING_MESSAGE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Criticality.reject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.make" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PDUKind.INITIATING_MESSAGE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Criticality.reject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.make" title="Link to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.PDUKind" title="pcapkit.protocols.application.ngap.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Which <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> alternative to construct.</p></li>
+<li><p><strong>kind</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.PDUKind" title="pcapkit.protocols.application.ngap.protocol.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Which <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> alternative to construct.</p></li>
 <li><p><strong>procedure</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Procedure code.</p></li>
-<li><p><strong>criticality</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Criticality of the procedure.</p></li>
+<li><p><strong>criticality</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="pcapkit.protocols.application.ngap.protocol.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Criticality of the procedure.</p></li>
 <li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Name of the message type, e.g. <code class="docutils literal notranslate"><span class="pre">NGSetupRequest</span></code>.</p></li>
 <li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Message body, either as
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Sequence" title="pcapkit.protocols.data.application.ngap.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a> from
-a previous <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.read" title="pcapkit.protocols.application.ngap.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> or as the plain Python value
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Sequence" title="pcapkit.protocols.application.ngap.data.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a> from
+a previous <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP.read" title="pcapkit.protocols.application.ngap.protocol.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> or as the plain Python value
 <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> expects.</p></li>
 <li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Pre-encoded <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>. When given, it is used verbatim and
 every other argument is ignored, which is also the only path
@@ -674,7 +685,7 @@ that does not need <a class="reference external" href="https://github.com/pycrat
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.schema.application.ngap.NGAP" title="pcapkit.protocols.schema.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.schema.NGAP" title="pcapkit.protocols.application.ngap.schema.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet data.</p>
@@ -691,8 +702,8 @@ that does not need <a class="reference external" href="https://github.com/pycrat
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.__length_hint__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.__length_hint__">
+<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.__length_hint__" title="Link to this definition">¶</a></dt>
 <dd><p>Return an estimated length for the object.</p>
 <p>Every <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> opens with the same four octets under aligned PER –
 the <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code> index, the procedure code, the criticality, and the
@@ -708,8 +719,8 @@ whose <code class="docutils literal notranslate"><span class="pre">protocolIEs</
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP.__index__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -720,7 +731,7 @@ whose <code class="docutils literal notranslate"><span class="pre">protocolIEs</
 port numbers: SCTP port 38412, the port of
 <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.sctp.SCTP.ng_control" title="pcapkit.const.reg.apptype.sctp.SCTP.ng_control"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.ng_control</span></code></a>
 as an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>.
-<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a>
+<a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a>
 dispatches by payload protocol identifier rather than by port, so
 this value keys no dispatch (<a class="reference internal" href="../../../contributing/conventions/registry-protocol.html#registry-protocol-index"><span class="std std-ref">The Registry Index</span></a>).</p>
 </dd>
@@ -732,12 +743,12 @@ this value keys no dispatch (<a class="reference internal" href="../../../contri
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.NGAP._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#NGAP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.NGAP._make_data" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP._make_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP" title="pcapkit.protocols.data.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span>) – protocol data</p>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP" title="pcapkit.protocols.application.ngap.data.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a></span>) – protocol data</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
@@ -773,16 +784,16 @@ objects <strong>structurally</strong>, by ASN.1 shape rather than by procedure:<
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEQUENCE</span></code> / <code class="docutils literal notranslate"><span class="pre">SET</span></code> (a dict)</p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Sequence" title="pcapkit.protocols.data.application.ngap.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Sequence" title="pcapkit.protocols.application.ngap.data.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEQUENCE</span> <span class="pre">OF</span></code> (a list)</p></td>
 <td><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CHOICE</span></code> / open type</p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Choice" title="pcapkit.protocols.data.application.ngap.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Choice" title="pcapkit.protocols.application.ngap.data.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BIT</span> <span class="pre">STRING</span></code></p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.BitString" title="pcapkit.protocols.data.application.ngap.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.BitString" title="pcapkit.protocols.application.ngap.data.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INTEGER</span></code>, <code class="docutils literal notranslate"><span class="pre">OCTET</span> <span class="pre">STRING</span></code>, <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code>, <code class="docutils literal notranslate"><span class="pre">BOOLEAN</span></code></p></td>
 <td><p>kept as <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p></td>
@@ -797,18 +808,18 @@ reported in the specification’s own shape rather than as a
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>-specific model. The fields worth reading at a glance – the PDU
 kind, procedure code, criticality, message type name and the IE list – are
 surfaced as first-class fields on
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP" title="pcapkit.protocols.data.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> regardless.</p>
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP" title="pcapkit.protocols.application.ngap.data.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> regardless.</p>
 </section>
 <section id="known-limitations">
 <h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>PPID 66 payloads are not decoded.</strong> NGAP over DTLS over SCTP wraps the
-<code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> in a DTLS record, and <a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> maps PPID 66 to
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> rather than
-through <a class="reference internal" href="dtls.html#pcapkit.protocols.application.dtls.DTLS" title="pcapkit.protocols.application.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, so the bytes
-reaching <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP.read" title="pcapkit.protocols.application.ngap.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NGAP.read()</span></code></a> are not an APER encoding. The PPID is
+<code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> in a DTLS record, and <a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> maps PPID 66 to
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> rather than
+through <a class="reference internal" href="dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, so the bytes
+reaching <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.NGAP.read" title="pcapkit.protocols.application.ngap.protocol.NGAP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NGAP.read()</span></code></a> are not an APER encoding. The PPID is
 registered so that it is <em>named</em> rather than anonymous; the payload itself
-degrades to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
+degrades to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p></li>
 <li><p><strong>The specification version is that of the installed decoder, not this
 package’s.</strong> The IE and procedure enumerations were generated from
 <code class="docutils literal notranslate"><span class="pre">NGAP_Constants</span></code> of <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> 0.8.1 (Release-18-era). A <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> that
@@ -828,8 +839,8 @@ encoding declares and cannot name the fields.</p></li>
 <section id="auxiliary-functions">
 <h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.load_pycrate">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">load_pycrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#load_pycrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.load_pycrate" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.load_pycrate">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">load_pycrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#load_pycrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.load_pycrate" title="Link to this definition">¶</a></dt>
 <dd><p>Load the optional <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -853,8 +864,8 @@ should pay for it.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap._convert">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">_convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#_convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap._convert" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol._convert">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">_convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#_convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol._convert" title="Link to this definition">¶</a></dt>
 <dd><p>Convert a <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> decoded value into <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> data models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -865,10 +876,10 @@ should pay for it.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The same tree, with mappings as
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Sequence" title="pcapkit.protocols.data.application.ngap.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code>
-pairs as <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Choice" title="pcapkit.protocols.data.application.ngap.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a>, and
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Sequence" title="pcapkit.protocols.application.ngap.data.Sequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code>
+pairs as <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Choice" title="pcapkit.protocols.application.ngap.data.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a>, and
 <code class="docutils literal notranslate"><span class="pre">BIT</span> <span class="pre">STRING</span></code> pairs as
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.BitString" title="pcapkit.protocols.data.application.ngap.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a>.</p>
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.BitString" title="pcapkit.protocols.application.ngap.data.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a>.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
@@ -883,12 +894,12 @@ shape rather than being mangled into one of these.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap._revert">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">_revert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#_revert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap._revert" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol._revert">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">_revert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#_revert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol._revert" title="Link to this definition">¶</a></dt>
 <dd><p>Convert <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> data models back into a <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – A node of a tree produced by <a class="reference internal" href="#pcapkit.protocols.application.ngap._convert" title="pcapkit.protocols.application.ngap._convert"><code class="xref py py-func docutils literal notranslate"><span class="pre">_convert()</span></code></a>, or the equivalent
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – A node of a tree produced by <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol._convert" title="pcapkit.protocols.application.ngap.protocol._convert"><code class="xref py py-func docutils literal notranslate"><span class="pre">_convert()</span></code></a>, or the equivalent
 plain Python value.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -900,8 +911,8 @@ plain Python value.</p>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Choice" title="pcapkit.protocols.data.application.ngap.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.BitString" title="pcapkit.protocols.data.application.ngap.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a> are tested
+<p><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Choice" title="pcapkit.protocols.application.ngap.data.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.BitString" title="pcapkit.protocols.application.ngap.data.BitString"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitString</span></code></a> are tested
 before <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, since they are
 subclasses of it and would otherwise be reverted to mappings.</p>
 </div>
@@ -911,8 +922,8 @@ subclasses of it and would otherwise be reverted to mappings.</p>
 <section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.PDUKind">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">PDUKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#PDUKind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.PDUKind" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.PDUKind">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">PDUKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#PDUKind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.PDUKind" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>Which alternative of the <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code> a PDU is.</p>
 <p>The values are spelled as the ASN.1 identifiers, so that a name decoded by
@@ -921,28 +932,28 @@ subclasses of it and would otherwise be reverted to mappings.</p>
 shared by every non-registry enumeration (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>). The class defines
 neither <code class="docutils literal notranslate"><span class="pre">get</span></code> nor <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> of its own.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.PDUKind.INITIATING_MESSAGE">
-<span class="sig-name descname"><span class="pre">INITIATING_MESSAGE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'initiatingMessage'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.PDUKind.INITIATING_MESSAGE" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.PDUKind.INITIATING_MESSAGE">
+<span class="sig-name descname"><span class="pre">INITIATING_MESSAGE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'initiatingMessage'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.PDUKind.INITIATING_MESSAGE" title="Link to this definition">¶</a></dt>
 <dd><p>A procedure’s request, or a class 2 procedure’s only message.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.PDUKind.SUCCESSFUL_OUTCOME">
-<span class="sig-name descname"><span class="pre">SUCCESSFUL_OUTCOME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'successfulOutcome'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.PDUKind.SUCCESSFUL_OUTCOME" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.PDUKind.SUCCESSFUL_OUTCOME">
+<span class="sig-name descname"><span class="pre">SUCCESSFUL_OUTCOME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'successfulOutcome'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.PDUKind.SUCCESSFUL_OUTCOME" title="Link to this definition">¶</a></dt>
 <dd><p>A class 1 procedure’s successful response.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.PDUKind.UNSUCCESSFUL_OUTCOME">
-<span class="sig-name descname"><span class="pre">UNSUCCESSFUL_OUTCOME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unsuccessfulOutcome'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.PDUKind.UNSUCCESSFUL_OUTCOME" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.PDUKind.UNSUCCESSFUL_OUTCOME">
+<span class="sig-name descname"><span class="pre">UNSUCCESSFUL_OUTCOME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unsuccessfulOutcome'</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.PDUKind.UNSUCCESSFUL_OUTCOME" title="Link to this definition">¶</a></dt>
 <dd><p>A class 1 procedure’s unsuccessful response.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">Criticality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#Criticality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.Criticality">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">Criticality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#Criticality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Criticality] What a receiver must do with an IE it does not understand.</p>
 <p>Members are named for the ASN.1 identifiers rather than upper-cased, so
@@ -959,36 +970,36 @@ by <a class="reference external" href="https://github.com/pycrate-org/pycrate"><
 <code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">99)</span></code> raises. A member-valued <code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through
 <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> and never through the constructor, so on this closed
 ASN.1 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> with no extension marker no path can mint a fourth
-value; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality._missing_" title="pcapkit.protocols.application.ngap.Criticality._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which refuses one outright.</p>
+value; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality._missing_" title="pcapkit.protocols.application.ngap.protocol.Criticality._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which refuses one outright.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality.reject">
-<span class="sig-name descname"><span class="pre">reject</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality.reject" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.Criticality.reject">
+<span class="sig-name descname"><span class="pre">reject</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.Criticality.reject" title="Link to this definition">¶</a></dt>
 <dd><p>Reject the whole message.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality.ignore">
-<span class="sig-name descname"><span class="pre">ignore</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality.ignore" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.Criticality.ignore">
+<span class="sig-name descname"><span class="pre">ignore</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.Criticality.ignore" title="Link to this definition">¶</a></dt>
 <dd><p>Ignore the IE and carry on.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality.notify">
-<span class="sig-name descname"><span class="pre">notify</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality.notify" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.Criticality.notify">
+<span class="sig-name descname"><span class="pre">notify</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.Criticality.notify" title="Link to this definition">¶</a></dt>
 <dd><p>Ignore the IE, carry on, and report it.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality._missing_">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap.html#Criticality._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality._missing_" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.Criticality._missing_">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#Criticality._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.Criticality._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – Always. <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a> is an <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> with no
-    extension marker, so a fourth value cannot be encoded and a
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – Always. <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="pcapkit.protocols.application.ngap.protocol.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a> is an <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code>
+    with no extension marker, so a fourth value cannot be encoded and a
     lookup for one is a bug rather than a newer specification.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1000,9 +1011,9 @@ value; see <a class="reference internal" href="#pcapkit.protocols.application.ng
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap._PYCRATE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">_PYCRATE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap._PYCRATE" title="Link to this definition">¶</a></dt>
-<dd><p>Cached <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> object; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.load_pycrate" title="pcapkit.protocols.application.ngap.load_pycrate"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_pycrate()</span></code></a>. <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol._PYCRATE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">_PYCRATE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol._PYCRATE" title="Link to this definition">¶</a></dt>
+<dd><p>Cached <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> object; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.load_pycrate" title="pcapkit.protocols.application.ngap.protocol.load_pycrate"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_pycrate()</span></code></a>. <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a>
 means the import has not been attempted yet, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> that it was
 attempted and <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> is not installed, and anything else is the loaded
 object. “Not installed” is kept apart from “not attempted” so that a capture
@@ -1010,9 +1021,9 @@ full of NGAP packets does not pay for a failing import on every frame.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap._PDU_LOCK">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">_PDU_LOCK</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap._PDU_LOCK" title="Link to this definition">¶</a></dt>
-<dd><p>Guards the module-level <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> object returned by <a class="reference internal" href="#pcapkit.protocols.application.ngap.load_pycrate" title="pcapkit.protocols.application.ngap.load_pycrate"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_pycrate()</span></code></a>.
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol._PDU_LOCK">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">_PDU_LOCK</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol._PDU_LOCK" title="Link to this definition">¶</a></dt>
+<dd><p>Guards the module-level <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> object returned by <a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.load_pycrate" title="pcapkit.protocols.application.ngap.protocol.load_pycrate"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_pycrate()</span></code></a>.
 That object is <em>stateful</em>: <code class="docutils literal notranslate"><span class="pre">from_aper</span></code> stores the decoded value on it
 and <code class="docutils literal notranslate"><span class="pre">get_val</span></code> hands back the decoder’s own containers rather than
 copies, so two decodes running concurrently through it would each see the
@@ -1021,12 +1032,16 @@ decode, for that second reason.</p>
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.protocols.schema.application.ngap">
-<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.application.ngap" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.application.ngap.schema">
+<span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.application.ngap.schema" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.ngap</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.ngap.NGAP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.application.ngap.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/application/ngap.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.application.ngap.NGAP" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.schema.NGAP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.schema.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/schema.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.schema.NGAP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
 <p>Header schema for NGAP packet.</p>
 <p>NGAP has no header of its own: an SCTP DATA chunk whose payload protocol
 identifier names NGAP carries exactly one aligned-PER-encoded <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>
@@ -1034,60 +1049,64 @@ and nothing else, so there is no length field to read and no framing to
 resolve. The whole payload is the encoding, and its structure only becomes
 visible once the ASN.1 decoder has run.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.application.ngap.NGAP.data">
-<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.application.ngap.NGAP.data" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.schema.NGAP.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.schema.NGAP.data" title="Link to this definition">¶</a></dt>
 <dd><p>Aligned PER encoding of one <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pcapkit.protocols.data.application.ngap">
-<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.application.ngap" title="Link to this heading">¶</a></h2>
+<section id="module-pcapkit.protocols.application.ngap.data">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.application.ngap.data" title="Link to this heading">¶</a></h2>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.data.application.ngap</span></code>, with no alias: the module moved here
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
+</div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.ngap.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/ngap.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.data.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/data.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.Protocol" title="pcapkit.protocols.data.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>Data model for NGAP protocol.</p>
 <p>The three <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> alternatives – <code class="docutils literal notranslate"><span class="pre">initiatingMessage</span></code>,
 <code class="docutils literal notranslate"><span class="pre">successfulOutcome</span></code> and <code class="docutils literal notranslate"><span class="pre">unsuccessfulOutcome</span></code> – carry an identical
-field set and are distinguished by <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP.kind" title="pcapkit.protocols.data.application.ngap.NGAP.kind"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> rather than by three
+field set and are distinguished by <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP.kind" title="pcapkit.protocols.application.ngap.data.NGAP.kind"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> rather than by three
 near-identical models.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.kind">
-<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.PDUKind" title="pcapkit.protocols.application.ngap.PDUKind"><span class="pre">PDUKind</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.kind" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.PDUKind" title="pcapkit.protocols.application.ngap.protocol.PDUKind"><span class="pre">PDUKind</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.kind" title="Link to this definition">¶</a></dt>
 <dd><p>Which of the three <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code> alternatives this is.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.procedure">
-<span class="sig-name descname"><span class="pre">procedure</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><span class="pre">ProcedureCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.procedure" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.procedure">
+<span class="sig-name descname"><span class="pre">procedure</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><span class="pre">ProcedureCode</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.procedure" title="Link to this definition">¶</a></dt>
 <dd><p>Procedure code.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.criticality">
-<span class="sig-name descname"><span class="pre">criticality</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><span class="pre">Criticality</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.criticality" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.criticality">
+<span class="sig-name descname"><span class="pre">criticality</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="pcapkit.protocols.application.ngap.protocol.Criticality"><span class="pre">Criticality</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.criticality" title="Link to this definition">¶</a></dt>
 <dd><p>Criticality of the procedure.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.message">
-<span class="sig-name descname"><span class="pre">message</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.message" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.message" title="Link to this definition">¶</a></dt>
 <dd><p>Name of the message type, e.g. <code class="docutils literal notranslate"><span class="pre">NGSetupRequest</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.ies">
-<span class="sig-name descname"><span class="pre">ies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.IE" title="pcapkit.protocols.data.application.ngap.IE"><span class="pre">IE</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.ies" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.ies">
+<span class="sig-name descname"><span class="pre">ies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.IE" title="pcapkit.protocols.application.ngap.data.IE"><span class="pre">IE</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.ies" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol IEs of the message, in the order they were encoded. Empty for
 the few messages that carry no <code class="docutils literal notranslate"><span class="pre">protocolIEs</span></code> field.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.NGAP.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.ngap.Sequence" title="pcapkit.protocols.data.application.ngap.Sequence"><span class="pre">Sequence</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.NGAP.value" title="Link to this definition">¶</a></dt>
-<dd><p>The message body, converted in full. <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.NGAP.ies" title="pcapkit.protocols.data.application.ngap.NGAP.ies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ies</span></code></a> is a flattened view of
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.NGAP.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.data.Sequence" title="pcapkit.protocols.application.ngap.data.Sequence"><span class="pre">Sequence</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.NGAP.value" title="Link to this definition">¶</a></dt>
+<dd><p>The message body, converted in full. <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP.ies" title="pcapkit.protocols.application.ngap.data.NGAP.ies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ies</span></code></a> is a flattened view of
 its <code class="docutils literal notranslate"><span class="pre">protocolIEs</span></code> field, so anything not surfaced above is reachable
 here.</p>
 </dd></dl>
@@ -1095,43 +1114,43 @@ here.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.IE">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.ngap.</span></span><span class="sig-name descname"><span class="pre">IE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/ngap.html#IE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.IE" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.IE">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.data.</span></span><span class="sig-name descname"><span class="pre">IE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criticality</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/data.html#IE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.IE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for one NGAP protocol information element.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.IE.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><span class="pre">ProtocolIE</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.IE.id" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.IE.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><span class="pre">ProtocolIE</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.IE.id" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol IE ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.IE.criticality">
-<span class="sig-name descname"><span class="pre">criticality</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><span class="pre">Criticality</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.IE.criticality" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.IE.criticality">
+<span class="sig-name descname"><span class="pre">criticality</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ngap.protocol.Criticality" title="pcapkit.protocols.application.ngap.protocol.Criticality"><span class="pre">Criticality</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.IE.criticality" title="Link to this definition">¶</a></dt>
 <dd><p>Criticality, i.e. what a receiver must do when it does not understand
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.IE.id" title="pcapkit.protocols.data.application.ngap.IE.id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">id</span></code></a>.</p>
+<a class="reference internal" href="#pcapkit.protocols.application.ngap.data.IE.id" title="pcapkit.protocols.application.ngap.data.IE.id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">id</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.IE.type">
-<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.IE.type" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.IE.type">
+<span class="sig-name descname"><span class="pre">type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.IE.type" title="Link to this definition">¶</a></dt>
 <dd><p>Name of the IE’s open type, as spelled in 3GPP TS 38.413. This is not
-always <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.IE.id" title="pcapkit.protocols.data.application.ngap.IE.id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">id</span></code></a>’s own spelling – IE 21 is <code class="docutils literal notranslate"><span class="pre">id-DefaultPagingDRX</span></code>
+always <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.IE.id" title="pcapkit.protocols.application.ngap.data.IE.id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">id</span></code></a>’s own spelling – IE 21 is <code class="docutils literal notranslate"><span class="pre">id-DefaultPagingDRX</span></code>
 but its value is keyed <code class="docutils literal notranslate"><span class="pre">PagingDRX</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.IE.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.IE.value" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.IE.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.IE.value" title="Link to this definition">¶</a></dt>
 <dd><p>Value of the IE.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.Choice">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.ngap.</span></span><span class="sig-name descname"><span class="pre">Choice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/ngap.html#Choice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.Choice" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.Choice">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.data.</span></span><span class="sig-name descname"><span class="pre">Choice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/data.html#Choice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.Choice" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for an ASN.1 <code class="docutils literal notranslate"><span class="pre">CHOICE</span></code> alternative or open type.</p>
 <p>Both the selected alternative’s name and its value are kept, since the name
 is the only thing that says <em>which</em> of the alternatives was sent – an
@@ -1139,46 +1158,46 @@ is the only thing that says <em>which</em> of the alternatives was sent – an
 <code class="docutils literal notranslate"><span class="pre">('globalNgENB-ID',</span> <span class="pre">...)</span></code> are otherwise indistinguishable once the value
 has been converted.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.Choice.name">
-<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.Choice.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.Choice.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.Choice.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of the selected alternative, as spelled in 3GPP TS 38.413.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.Choice.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.Choice.value" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.Choice.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.Choice.value" title="Link to this definition">¶</a></dt>
 <dd><p>Value of the selected alternative.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.BitString">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.ngap.</span></span><span class="sig-name descname"><span class="pre">BitString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/ngap.html#BitString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.BitString" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.BitString">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.data.</span></span><span class="sig-name descname"><span class="pre">BitString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/data.html#BitString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.BitString" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for an ASN.1 <code class="docutils literal notranslate"><span class="pre">BIT</span> <span class="pre">STRING</span></code>.</p>
 <p>A bit string is not a whole number of octets, so its length is carried
 alongside its value rather than being implied by it – <code class="docutils literal notranslate"><span class="pre">gNB-ID</span></code> is a
 22-to-32-bit field, and <code class="docutils literal notranslate"><span class="pre">(0x000102,</span> <span class="pre">24)</span></code> and <code class="docutils literal notranslate"><span class="pre">(0x000102,</span> <span class="pre">32)</span></code> are
 different identifiers.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.BitString.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.BitString.value" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.BitString.value">
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.BitString.value" title="Link to this definition">¶</a></dt>
 <dd><p>Bits, as a big-endian unsigned integer.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.BitString.length">
-<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.BitString.length" title="Link to this definition">¶</a></dt>
-<dd><p>Number of significant bits in <a class="reference internal" href="#pcapkit.protocols.data.application.ngap.BitString.value" title="pcapkit.protocols.data.application.ngap.BitString.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.BitString.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.BitString.length" title="Link to this definition">¶</a></dt>
+<dd><p>Number of significant bits in <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.BitString.value" title="pcapkit.protocols.application.ngap.data.BitString.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.application.ngap.Sequence">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.application.ngap.</span></span><span class="sig-name descname"><span class="pre">Sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/application/ngap.html#Sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.application.ngap.Sequence" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.data.Sequence">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.data.</span></span><span class="sig-name descname"><span class="pre">Sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/data.html#Sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.data.Sequence" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></p>
 <p>Data model for an ASN.1 <code class="docutils literal notranslate"><span class="pre">SEQUENCE</span></code>, <code class="docutils literal notranslate"><span class="pre">SET</span></code> or <code class="docutils literal notranslate"><span class="pre">SEQUENCE</span> <span class="pre">OF</span></code> member.</p>
 <p>Fields are whatever the specification names them, so this model carries no
 fixed annotations: it is populated from the decoded value tree. ASN.1
@@ -1258,8 +1277,8 @@ identifiers are hyphenated where Python identifiers cannot be, e.g.
 <li><a class="reference internal" href="#known-limitations">Known Limitations</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.application.ngap">Header Schemas</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.application.ngap">Data Models</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.application.ngap.schema">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.application.ngap.data">Data Models</a></li>
 </ul>
 </li>
 </ul>

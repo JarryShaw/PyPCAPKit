@@ -578,13 +578,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_BlockType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSBSecrets</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_DSBSecrets</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_BlockType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSBSecrets</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_DSBSecrets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">NameResolutionRecord</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_NameResolutionRecord</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -593,14 +593,15 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_BlockConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockParser</span> <span class="k">as</span> <span class="n">PCAPNG_BlockParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_OptionConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">PCAPNG_OptionParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_RecordConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordParser</span> <span class="k">as</span> <span class="n">PCAPNG_RecordParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsParser</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_BlockConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockParser</span> <span class="k">as</span> <span class="n">PCAPNG_BlockParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_OptionConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">PCAPNG_OptionParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_RecordConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordParser</span> <span class="k">as</span> <span class="n">PCAPNG_RecordParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">SecretsConstructor</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsParser</span> <span class="k">as</span> <span class="n">PCAPNG_SecretsParser</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -640,8 +641,8 @@
 <span class="sd">    The function will register the given protocol class to the</span>
 <span class="sd">    following registries:</span>
 
-<span class="sd">    - :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__`</span>
-<span class="sd">    - :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__`</span>
+<span class="sd">    - :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__`</span>
+<span class="sd">    - :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__`</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
@@ -684,7 +685,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__</span>
 <div class="viewcode-block" id="register_pcap">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcap">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -696,7 +697,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
@@ -731,7 +732,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__</span>
 <div class="viewcode-block" id="register_pcapng">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -743,7 +744,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
@@ -777,7 +778,7 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__block__</span>
 <div class="viewcode-block" id="register_pcapng_block">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng_block">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_block</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_BlockType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -785,17 +786,17 @@
 <span class="w">    </span><span class="sd">"""Register a block parser.</span>
 
 <span class="sd">    The function will register the given block parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__block__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__block__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.PCAPNG&gt;` block type</span>
+<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG&gt;` block type</span>
 <span class="sd">            code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the block. A name names the</span>
 <span class="sd">            ``_read_block_*`` and ``_make_block_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_block_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the block.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.BlockType`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.block_type.BlockType`</span>
@@ -814,7 +815,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__</span>
 <div class="viewcode-block" id="register_pcapng_option">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng_option">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_OptionType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -822,17 +823,17 @@
 <span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__option__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.PCAPNG&gt;` option type</span>
+<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG&gt;` option type</span>
 <span class="sd">            code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the option. A name names the</span>
 <span class="sd">            ``_read_option_*`` and ``_make_option_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_option_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.Option`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.option_type.OptionType`</span>
@@ -851,7 +852,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__record__</span>
 <div class="viewcode-block" id="register_pcapng_record">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng_record">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_record</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_RecordType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -859,17 +860,17 @@
 <span class="w">    </span><span class="sd">"""Register a name resolution record parser.</span>
 
 <span class="sd">    The function will register the given name resolution record parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__record__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__record__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.PCAPNG&gt;` name</span>
+<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG&gt;` name</span>
 <span class="sd">            resolution record type code as in :class:`~pcapkit.const.pcapng.record_type.RecordType`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the name resolution record. A name names the</span>
 <span class="sd">            ``_read_record_*`` and ``_make_record_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_record_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the name resolution record.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.NameResolutionRecord`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.record_type.RecordType`</span>
@@ -888,7 +889,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__</span>
+<span class="c1"># NOTE: pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__secrets__</span>
 <div class="viewcode-block" id="register_pcapng_secrets">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng_secrets">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'PCAPNG_SecretsType'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -896,17 +897,17 @@
 <span class="w">    </span><span class="sd">"""Register a decryption secrets parser.</span>
 
 <span class="sd">    The function will register the given decryption secrets parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__secrets__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.PCAPNG&gt;` decryption</span>
+<span class="sd">        code: :class:`PCAPNG &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG&gt;` decryption</span>
 <span class="sd">            secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the decryption secrets. A name names the</span>
 <span class="sd">            ``_read_secrets_*`` and ``_make_secrets_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_secrets_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the decryption secrets.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.misc.pcapng.schema.DSBSecrets`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`</span>

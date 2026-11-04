@@ -571,7 +571,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span>
                                                     <span class="n">DatagramID</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1242,8 +1242,8 @@
 <span class="sd">            :meth:`Transport.analyze</span>
 <span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport.analyze&gt;` keeps the</span>
 <span class="sd">            base in its own signature, since it is the one method</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` and</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each of</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each of</span>
 <span class="sd">            them would name a different registry.</span>
 
 <span class="sd">        Important:</span>
@@ -1269,7 +1269,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            The resolution is reached through</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through</span>
 <span class="sd">            :attr:`self.protocol</span>
 <span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`,</span>
 <span class="sd">            which is what :meth:`submit` reads the analyser itself off. That is</span>
@@ -1287,7 +1287,7 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``_make_port`` is protected, and reached from outside its own</span>
         <span class="c1"># class as :meth:`SCTP._decode_next_layer</span>
-        <span class="c1"># &lt;pcapkit.protocols.transport.sctp.SCTP._decode_next_layer&gt;` reaches</span>
+        <span class="c1"># &lt;pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer&gt;` reaches</span>
         <span class="c1"># ``ProtocolBase._decode_next_layer``. Duplicating it here instead would</span>
         <span class="c1"># put a second port normaliser beside the maker path's, free to drift</span>
         <span class="c1"># from it; it is idempotent, so a ``bufid`` that already holds a member</span>
@@ -1327,12 +1327,12 @@
 <span class="sd">            &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`, so it</span>
 <span class="sd">            is the one the maker path uses and cannot drift from it. See</span>
 <span class="sd">            :meth:`_make_ports` for why it is reached through</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` rather than through</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` rather than through</span>
 <span class="sd">            :attr:`self.protocol</span>
 <span class="sd">            &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.protocol&gt;`.</span>
 
 <span class="sd">            For a *registered* port that is the very member</span>
-<span class="sd">            :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.TCP.src&gt;` reads off</span>
+<span class="sd">            :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.protocol.TCP.src&gt;` reads off</span>
 <span class="sd">            a parsed header. For an unassigned one the two are **equal but not</span>
 <span class="sd">            identical**, and not even equally named: the parse path builds its</span>
 <span class="sd">            member through :meth:`EnumField._unregistered_member</span>

@@ -664,7 +664,7 @@ in hand; this postpones a <em>submit</em> over a reassembler’s buffers. The
 reassembly and flow tracing subpackages are siblings, and the flow tracer
 reaches the reassembler only lazily, when <code class="docutils literal notranslate"><span class="pre">analyse</span></code> asks for one, so the
 few lines are written in each rather than one importing the other – the
-same reason their <code class="docutils literal notranslate"><span class="pre">data/data.py</span></code> modules mirror each other instead of
+same reason their <code class="docutils literal notranslate"><span class="pre">data.py</span></code> modules mirror each other instead of
 merging.</p>
 </div>
 <dl class="field-list simple">
@@ -712,7 +712,7 @@ of the same name stay apart: <code class="docutils literal notranslate"><span cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mapping</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – The engine’s dissection of the frame.</p></li>
 <li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The frame’s captured octets.</p></li>
-<li><p><strong>frame_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.FrameInfo" title="pcapkit.protocols.data.misc.pcap.frame.FrameInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameInfo</span></code></a></span>) – The frame’s PCAP record header.</p></li>
+<li><p><strong>frame_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.FrameInfo" title="pcapkit.protocols.misc.pcap.frame.data.FrameInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameInfo</span></code></a></span>) – The frame’s PCAP record header.</p></li>
 <li><p><strong>time_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a></span>) – The frame’s exact UNIX timestamp.</p></li>
 </ul>
 </dd>
@@ -732,7 +732,7 @@ exports its keys, and drops the <code class="docutils literal notranslate"><span
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info">
-<span class="sig-name descname"><span class="pre">frame_info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.FrameInfo" title="pcapkit.protocols.data.misc.pcap.frame.FrameInfo"><span class="pre">FrameInfo</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">frame_info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.data.FrameInfo" title="pcapkit.protocols.misc.pcap.frame.data.FrameInfo"><span class="pre">FrameInfo</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.data.FrameRecord.frame_info" title="Link to this definition">¶</a></dt>
 <dd><p>The frame’s PCAP record header, with the fraction in the capture’s own
 resolution.</p>
 </dd></dl>

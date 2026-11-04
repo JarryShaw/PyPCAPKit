@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/link/l2tp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.link.l2tp contains L2TP only, an abstract base class for the Layer Two Tunnelling Protocol family*. The concrete versions live in modules of their own:,,, Version, Class, Specific..." />
-<meta name="description" content="pcapkit.protocols.link.l2tp contains L2TP only, an abstract base class for the Layer Two Tunnelling Protocol family*. The concrete versions live in modules of their own:,,, Version, Class, Specific..." />
+<meta property="og:description" content="pcapkit.protocols.link.l2tp.protocol contains L2TP only, an abstract base class for the Layer Two Tunnelling Protocol family*. The concrete versions live in modules of their own:,,, Version, Class,..." />
+<meta name="description" content="pcapkit.protocols.link.l2tp.protocol contains L2TP only, an abstract base class for the Layer Two Tunnelling Protocol family*. The concrete versions live in modules of their own:,,, Version, Class,..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="L2TPv2 - Layer Two Tunnelling Protocol Version 2" href="l2tpv2.html"><link rel="prev" title="IEEE 802.11 - Wireless LAN MAC Header" href="ieee802_11.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -568,8 +568,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.link.l2tp">
 <span id="l2tp-layer-two-tunnelling-protocol"></span><h1>L2TP - Layer Two Tunnelling Protocol<a class="headerlink" href="#module-pcapkit.protocols.link.l2tp" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> only, an abstract base class for the
+<p id="module-pcapkit.protocols.link.l2tp.protocol"><a class="reference internal" href="#module-pcapkit.protocols.link.l2tp.protocol" title="pcapkit.protocols.link.l2tp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp.protocol</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> only, an abstract base class for the
 Layer Two Tunnelling Protocol family <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>. The concrete versions live in modules
 of their own:</p>
 <div class="table-wrapper docutils container">
@@ -582,7 +582,7 @@ of their own:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>L2TPv2</p></td>
-<td><p><a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a></p></td>
+<td><p><a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a></p></td>
 <td><p><span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a></p></td>
 </tr>
 </tbody>
@@ -590,21 +590,21 @@ of their own:</p>
 </div>
 <p>Only L2TPv2 is implemented.</p>
 <p>The base deliberately parses no header, as
-<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> does for its family, because the
+<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> does for its family, because the
 versions do not share one. Only the first 16-bit word, with a version nibble at
 bits 12-15, is common to all of them; a base that parsed further would assume one
 version’s layout for every version.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">L2TP</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.data.Data" title="pcapkit.protocols.data.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.protocol.</span></span><span class="sig-name descname"><span class="pre">L2TP</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>]</p>
 <p>This class implements all protocols in L2TP family.</p>
 <ul class="simple">
 <li><p>Layer Two Tunnelling Protocol version 2
-(<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>]</p></li>
+(<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>]</p></li>
 </ul>
 <p>It is abstract for the same mechanical reason
-<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> is:
+<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> is:
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.name" title="pcapkit.protocols.protocol.Protocol.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> and
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> are both declared
 abstract by <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and neither is
@@ -612,27 +612,27 @@ defined here, so no instance of it exists. Bind a version, never this class.</p>
 <p>It dispatches on both paths, never giving an instance of this class
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>). The <code class="docutils literal notranslate"><span class="pre">version</span></code> field names the member; without it, octets
 give the one their version nibble names, and fields are refused.
-<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP.from_data" title="pcapkit.protocols.link.l2tp.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">version</span></code> of its data. See <a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP.__new__" title="pcapkit.protocols.link.l2tp.L2TP.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>.</p>
+<a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.from_data" title="pcapkit.protocols.link.l2tp.protocol.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">version</span></code> of its data. See <a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.__new__" title="pcapkit.protocols.link.l2tp.protocol.L2TP.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Became an abstract base for the family; its version-2 parsing moved to
-<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>.</p>
+<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>.</p>
 </div>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Constructing it and <a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP.from_data" title="pcapkit.protocols.link.l2tp.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> give
-<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, where they raised
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>Constructing it and <a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.from_data" title="pcapkit.protocols.link.l2tp.protocol.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> give
+<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, where they raised
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>. The <code class="docutils literal notranslate"><span class="pre">version</span></code> field names the member; without it,
 octets give the one their version nibble names, and fields are refused
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.info_name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">info_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'l2tp'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.info_name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP.info_name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">info_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'l2tp'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.info_name" title="Link to this definition">¶</a></dt>
 <dd><p>Key name of the <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a> dict.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.id">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.id" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP.id">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.id" title="Link to this definition">¶</a></dt>
 <dd><p>Index ID of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -640,7 +640,7 @@ octets give the one their version nibble names, and fields are refused
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Index ID of the protocol – the family name, then every version in
-it, as <a class="reference internal" href="vlan.html#pcapkit.protocols.link.vlan.VLAN.id" title="pcapkit.protocols.link.vlan.VLAN.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VLAN.id</span></code></a>
+it, as <a class="reference internal" href="vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN.id" title="pcapkit.protocols.link.vlan.protocol.VLAN.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VLAN.id</span></code></a>
 does for its own family. <code class="docutils literal notranslate"><span class="pre">L2F</span></code> and <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> join this tuple when
 they are implemented.</p>
 </dd>
@@ -648,8 +648,8 @@ they are implemented.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.from_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.from_data" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP.from_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.from_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create protocol instance from data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -672,8 +672,8 @@ they are implemented.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.__index__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.__index__" title="Link to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -691,8 +691,8 @@ own.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.__new__">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.__new__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.__new__" title="Link to this definition">¶</a></dt>
 <dd><p>Create the member a construction of this class describes.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">version</span></code> field names the member, on either path. Without it,
 parsing octets gives the member the version nibble, bits 12 to 15 of
@@ -708,7 +708,7 @@ arguments. A subclass of this class is created as itself.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>An uninitialised instance of the member.</p>
@@ -722,18 +722,18 @@ arguments. A subclass of this class is created as itself.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP._member_of_version">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP._member_of_version" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version" title="Link to this definition">¶</a></dt>
 <dd><p>The member that reads a <code class="docutils literal notranslate"><span class="pre">version</span></code> of the version nibble.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Version of L2TP.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> for <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<dd class="field-odd"><p><a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> for <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – For any other <code class="docutils literal notranslate"><span class="pre">version</span></code>, or one that is no
@@ -761,7 +761,7 @@ the value 1 “to permit detection of L2F packets should they arrive intermixed 
 L2TP packets”. L2F is a separate protocol with its own header, so it is to be
 implemented as <code class="docutils literal notranslate"><span class="pre">L2F</span></code>, the canonical name, with <code class="docutils literal notranslate"><span class="pre">L2TPv1</span></code> only as an alias in its
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a>. See
-<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2.id" title="pcapkit.protocols.link.l2tpv2.L2TPv2.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">L2TPv2.id</span></code></a> for
+<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.id" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">L2TPv2.id</span></code></a> for
 how a version-flavoured alias is spelled: canonical name first, alias second,
 since callers take element zero as canonical.</p>
 </section>
@@ -770,16 +770,16 @@ since callers take element zero as canonical.</p>
 <p>Constructing the base gives the member its <code class="docutils literal notranslate"><span class="pre">version</span></code> field names, from octets or
 from fields; without it, octets give the one their version nibble names, and fields
 are refused, since no field picks a member (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).
-<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP._member_of_version" title="pcapkit.protocols.link.l2tp.L2TP._member_of_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_member_of_version()</span></code></a> maps <code class="docutils literal notranslate"><span class="pre">2</span></code> to
-<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> and refuses any other version, for
+<a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version" title="pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_member_of_version()</span></code></a> maps <code class="docutils literal notranslate"><span class="pre">2</span></code> to
+<a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> and refuses any other version, for
 that field, for the nibble and for the data
-<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP.from_data" title="pcapkit.protocols.link.l2tp.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> is handed. UDP port 1701 binds
+<a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.from_data" title="pcapkit.protocols.link.l2tp.protocol.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> is handed. UDP port 1701 binds
 L2TPv2 itself, the only member. The switch is where a further member goes, and
 binding the port to the base through a hook making the same switch, as
-<a class="reference internal" href="../internet/igmp.html#pcapkit.protocols.internet.igmp.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP._dispatch</span></code></a> does for
+<a class="reference internal" href="../internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP._dispatch</span></code></a> does for
 IP protocol 2, needs no new registry. L2TP is the easier case beside
-<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>, whose
-<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a> has to <em>infer</em>
+<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>, whose
+<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a> has to <em>infer</em>
 the version, because HTTP’s wire format carries no version field, whereas L2TP
 states its version explicitly in those four bits.</p>
 <p class="rubric">Footnotes</p>

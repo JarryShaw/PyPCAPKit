@@ -566,7 +566,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Index</span> <span class="k">as</span> <span class="n">TCP_Index</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 
 
 <div class="viewcode-block" id="Deferred">
@@ -591,7 +591,7 @@
 <span class="sd">        reassembly and flow tracing subpackages are siblings, and the flow tracer</span>
 <span class="sd">        reaches the reassembler only lazily, when ``analyse`` asks for one, so the</span>
 <span class="sd">        few lines are written in each rather than one importing the other -- the</span>
-<span class="sd">        same reason their ``data/data.py`` modules mirror each other instead of</span>
+<span class="sd">        same reason their ``data.py`` modules mirror each other instead of</span>
 <span class="sd">        merging.</span>
 
 <span class="sd">    Args:</span>

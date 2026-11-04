@@ -558,9 +558,9 @@
 <span class="sd">.. module:: pcapkit.protocols.internet.internet</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
-<span class="sd">which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.AH`,</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6` and :class:`~pcapkit.protocols.internet.ipx.IPX`.</span>
+<span class="sd">which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.protocol.AH`,</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` and :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -586,7 +586,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Internet'</span><span class="p">]</span>
 
@@ -612,52 +612,52 @@
 <span class="sd">       * - Index</span>
 <span class="sd">         - Protocol</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.HOPOPT`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.hopopt.protocol.HOPOPT`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv4`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.IPv4`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.protocol.IPv4`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.ICMP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.icmpv4.ICMPv4`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.icmpv4.protocol.ICMPv4`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.TCP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.transport.tcp.TCP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.tcp.protocol.TCP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.UDP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.transport.udp.UDP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.udp.protocol.UDP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.DCCP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.transport.dccp.DCCP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.dccp.protocol.DCCP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.IPv6`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.protocol.IPv6`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_ICMP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.icmpv6.ICMPv6`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Route`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.GRE`</span>
-<span class="sd">         - :class:`pcapkit.protocols.link.gre.GRE`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.gre.protocol.GRE`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.ESP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.esp.ESP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.esp.protocol.ESP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ah.AH`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ah.protocol.AH`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IGMP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.igmp.IGMP`, which dispatches to</span>
-<span class="sd">           :class:`pcapkit.protocols.internet.igmpv1.IGMPv1`,</span>
-<span class="sd">           :class:`pcapkit.protocols.internet.igmpv2.IGMPv2` or</span>
-<span class="sd">           :class:`pcapkit.protocols.internet.igmpv3.IGMPv3`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.igmp.protocol.IGMP`, which dispatches to</span>
+<span class="sd">           :class:`pcapkit.protocols.internet.igmpv1.protocol.IGMPv1`,</span>
+<span class="sd">           :class:`pcapkit.protocols.internet.igmpv2.protocol.IGMPv2` or</span>
+<span class="sd">           :class:`pcapkit.protocols.internet.igmpv3.protocol.IGMPv3`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`</span>
-<span class="sd">         - :class:`pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">         - :class:`pcapkit.protocols.misc.raw.protocol.Raw`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPX_in_IP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipx.IPX`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipx.protocol.IPX`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.Mobility_Header`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.mh.MH`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.mh.protocol.MH`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.hip.HIP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.hip.protocol.HIP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.Shim6`</span>
-<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.transport.sctp.SCTP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.sctp.protocol.SCTP`</span>
 <span class="sd">       * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.ospf.OSPF`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -678,30 +678,30 @@
     <span class="c1">#: see :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hopopt'</span><span class="p">,</span>     <span class="s1">'HOPOPT'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4'</span><span class="p">,</span>       <span class="s1">'IPv4'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ICMP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.icmpv4'</span><span class="p">,</span>     <span class="s1">'ICMPv4'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.tcp'</span><span class="p">,</span>       <span class="s1">'TCP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.udp'</span><span class="p">,</span>       <span class="s1">'UDP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">DCCP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.dccp'</span><span class="p">,</span>      <span class="s1">'DCCP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6'</span><span class="p">,</span>       <span class="s1">'IPv6'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_ICMP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.icmpv6'</span><span class="p">,</span>     <span class="s1">'ICMPv6'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_route'</span><span class="p">,</span> <span class="s1">'IPv6_Route'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_frag'</span><span class="p">,</span>  <span class="s1">'IPv6_Frag'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>          <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hopopt.protocol'</span><span class="p">,</span>     <span class="s1">'HOPOPT'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4.protocol'</span><span class="p">,</span>       <span class="s1">'IPv4'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ICMP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.icmpv4.protocol'</span><span class="p">,</span>     <span class="s1">'ICMPv4'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.tcp.protocol'</span><span class="p">,</span>       <span class="s1">'TCP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.udp.protocol'</span><span class="p">,</span>       <span class="s1">'UDP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">DCCP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.dccp.protocol'</span><span class="p">,</span>      <span class="s1">'DCCP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6.protocol'</span><span class="p">,</span>       <span class="s1">'IPv6'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_ICMP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.icmpv6.protocol'</span><span class="p">,</span>     <span class="s1">'ICMPv6'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_route.protocol'</span><span class="p">,</span> <span class="s1">'IPv6_Route'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_frag.protocol'</span><span class="p">,</span>  <span class="s1">'IPv6_Frag'</span><span class="p">),</span>
             <span class="c1"># NOTE: a tunnel is placed by its payload, so GRE lives under ``protocols.link``;</span>
             <span class="c1"># see :doc:`/contributing/conventions/protocol-layer-placement`.</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">GRE</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.gre'</span><span class="p">,</span>            <span class="s1">'GRE'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ESP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.esp'</span><span class="p">,</span>        <span class="s1">'ESP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah'</span><span class="p">,</span>         <span class="s1">'AH'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IGMP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmp'</span><span class="p">,</span>       <span class="s1">'IGMP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx'</span><span class="p">,</span>        <span class="s1">'IPX'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.mh'</span><span class="p">,</span>         <span class="s1">'MH'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hip'</span><span class="p">,</span>        <span class="s1">'HIP'</span><span class="p">),</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">SCTP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.sctp'</span><span class="p">,</span>      <span class="s1">'SCTP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">GRE</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.gre.protocol'</span><span class="p">,</span>            <span class="s1">'GRE'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">ESP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.esp.protocol'</span><span class="p">,</span>        <span class="s1">'ESP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>              <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah.protocol'</span><span class="p">,</span>         <span class="s1">'AH'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IGMP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmp.protocol'</span><span class="p">,</span>       <span class="s1">'IGMP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts.protocol'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx.protocol'</span><span class="p">,</span>        <span class="s1">'IPX'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.mh.protocol'</span><span class="p">,</span>         <span class="s1">'MH'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">:</span>             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.hip.protocol'</span><span class="p">,</span>        <span class="s1">'HIP'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">SCTP</span><span class="p">:</span>            <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.transport.sctp.protocol'</span><span class="p">,</span>      <span class="s1">'SCTP'</span><span class="p">),</span>
 
             <span class="c1"># OSPF rides directly on IP, so IANA protocol number 89 is its only</span>
             <span class="c1"># dispatch point. The dissector nonetheless lives under</span>
@@ -710,7 +710,7 @@
             <span class="c1"># than forwarding packets -- the dispatch tier and the subpackage are</span>
             <span class="c1"># deliberately decoupled, see</span>
             <span class="c1"># :doc:`/contributing/conventions/protocol-layer-placement`.</span>
-            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">OSPFIGP</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ospf'</span><span class="p">,</span> <span class="s1">'OSPF'</span><span class="p">),</span>
+            <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">OSPFIGP</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ospf.protocol'</span><span class="p">,</span> <span class="s1">'OSPF'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -722,13 +722,13 @@
     <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype` checks</span>
     <span class="c1">#: its own -- a subclass sharing this registry is therefore checked as</span>
     <span class="c1">#: :class:`Internet` is (:issue:`2268`), while</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipx.IPX`, which keeps one of its own,</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps one of its own,</span>
     <span class="c1">#: declares its own pairing (:issue:`2511`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_TransType</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1">#: int: How many IPv6 extension headers in a row the next layer follows:</span>
     <span class="c1">#: this layer's place in such a chain, or how many headers</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, see</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` walked, else ``0``, see</span>
     <span class="c1">#: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.</span>
     <span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -835,7 +835,7 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            An IPv6 extension header is handed the rest of the datagram, but</span>
 <span class="sd">            parses only itself: its :attr:`info` holds no payload, and</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.IPv6` decodes what follows.</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` decodes what follows.</span>
 <span class="sd">            So :attr:`data` is cut down to the header's own :attr:`length`, and</span>
 <span class="sd">            ``from_data(info).data`` rebuilds it exactly (:issue:`1446`).</span>
 
@@ -882,9 +882,9 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            extension: if the next layer is parsed as an extension header by</span>
-<span class="sd">                :class:`~pcapkit.protocols.internet.ipv6.IPv6`'s walk, which</span>
+<span class="sd">                :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`'s walk, which</span>
 <span class="sd">                counts the chain itself, see :meth:`IPv6._decode_next_layer</span>
-<span class="sd">                &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
+<span class="sd">                &lt;pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            One more than :attr:`_exthdr_depth` if ``proto`` names an IPv6</span>
@@ -917,12 +917,12 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The parse tells an extension header by the protocol number naming</span>
 <span class="sd">            it, which a rebuild does not have, so this tells one by its class:</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` is the base</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` is the base</span>
 <span class="sd">            of every :class:`Internet` layer :attr:`__proto__` registers under</span>
 <span class="sd">            such a number.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">return</span> <span class="n">_exthdr_rebuilt</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">IPv6_Ext</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span></div>
 
 
@@ -971,8 +971,8 @@
 <span class="sd">            extension: if is extension header, see :meth:`_next_exthdr_depth`</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` if there is</span>
-<span class="sd">            nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if there is</span>
+<span class="sd">            nothing to parse; :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if the</span>
 <span class="sd">            parse stops at this layer, or the next layer is an IPv6 extension</span>
 <span class="sd">            header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the</span>
 <span class="sd">            class registered for ``proto``. Paired with it, the keywords that</span>
@@ -987,16 +987,16 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">,</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{}</span>
 
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_exthdr_depth</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
         <span class="n">limit</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">EXTENSION_HEADER_LIMIT</span>
         <span class="k">if</span> <span class="n">limit</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
             <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: a chain of IPv6 extension headers reached the limit of '</span>
                        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s1"> headers; the rest of the packet, from Next '</span>
@@ -1008,7 +1008,7 @@
                 <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="n">IGMPBase</span><span class="p">:</span>
@@ -1034,7 +1034,7 @@
 <span class="sd">            version: IP version</span>
 <span class="sd">            ipv6_exthdr: protocol chain of IPv6 extension headers</span>
 <span class="sd">            payload: payload from packet. If not provided, will extract from</span>
-<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.schema.Schema.get_payload&gt;`</span>
+<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.Schema.get_payload&gt;`</span>
 <span class="sd">            declared: whether this layer declares the length of its payload</span>
 
 <span class="sd">        Returns:</span>
@@ -1102,7 +1102,7 @@
 <span class="sd">            version: IP protocol version</span>
 <span class="sd">            extension: if is extension header</span>
 <span class="sd">            payload: payload from packet. If not provided, will extract from</span>
-<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.schema.Schema.get_payload&gt;`</span>
+<span class="sd">                :meth:`self.__header__.get_payload &lt;pcapkit.protocols.schema.Schema.get_payload&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of next layer.</span>
@@ -1110,7 +1110,7 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            An IPv6 extension header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a</span>
 <span class="sd">            row is not dissected: it and the rest of the packet are kept as</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one</span>
 <span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).</span>
 <span class="sd">            Each header dissects the next one from here, so the chain's depth</span>
 <span class="sd">            is handed to the next layer, see :meth:`_next_layer_class`.</span>

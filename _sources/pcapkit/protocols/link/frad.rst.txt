@@ -2,9 +2,10 @@ FRAD - Frame Relay Access Device
 =================================
 
 .. module:: pcapkit.protocols.link.frad
+.. module:: pcapkit.protocols.link.frad.protocol
 
-:mod:`pcapkit.protocols.link.frad` contains
-:class:`~pcapkit.protocols.link.frad.FRAD`
+:mod:`pcapkit.protocols.link.frad.protocol` contains
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD`
 only, which implements the extractor for Frame Relay's multiprotocol
 encapsulation [*]_, as seen on a ``LINKTYPE_FRELAY`` capture, or on a
 ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type`` is
@@ -25,7 +26,7 @@ When ``nlpid`` is the ``0x00`` pad, the NLPID follows it as ``frad.ext_nlpid``.
 An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
 3-octet OUI and a 2-octet PID, kept as ``frad.oui`` and ``frad.pid``.
 
-.. autoclass:: pcapkit.protocols.link.frad.FRAD
+.. autoclass:: pcapkit.protocols.link.frad.protocol.FRAD
    :no-members:
    :show-inheritance:
 
@@ -52,18 +53,18 @@ An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.frad
+.. module:: pcapkit.protocols.link.frad.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.frad.FRAD
+.. autoclass:: pcapkit.protocols.link.frad.schema.FRAD
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.frad
+.. module:: pcapkit.protocols.link.frad.data
 
-.. autoclass:: pcapkit.protocols.data.link.frad.FRAD
+.. autoclass:: pcapkit.protocols.link.frad.data.FRAD
    :members:
    :show-inheritance:
 

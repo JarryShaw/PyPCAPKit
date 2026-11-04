@@ -575,7 +575,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">_TL</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TL'</span><span class="p">,</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="s1">'FieldBase'</span><span class="p">,</span> <span class="s1">'bytes'</span><span class="p">)</span>
 <span class="n">_TS</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
@@ -588,7 +588,7 @@
 <span class="sd">        file: Stream to read from.</span>
 
 <span class="sd">    Only the ``read``, ``seek`` and ``tell`` calls that</span>
-<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` and</span>
+<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;` and</span>
 <span class="sd">    :meth:`OptionField.unpack` make are delegated.</span>
 
 <span class="sd">    """</span>
@@ -640,7 +640,7 @@
 
 <span class="sd">    A list whose octets hold fewer items than ``count`` ended with the data</span>
 <span class="sd">    before the rest, and reports them as :attr:`shortfall`, so that</span>
-<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">    records the cut; the items absent are not made up.</span>
 
 <span class="sd">    .. versionchanged:: 1.6.0</span>
@@ -739,8 +739,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
@@ -812,7 +811,7 @@
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead</span>
         <span class="c1"># of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from</span>
         <span class="c1"># :meth:`TCP._read_mode_sack</span>
-        <span class="c1"># &lt;pcapkit.protocols.transport.tcp.TCP._read_mode_sack&gt;`, depending on</span>
+        <span class="c1"># &lt;pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack&gt;`, depending on</span>
         <span class="c1"># unrelated things that ran earlier in the same process. Cf. #525.</span>
         <span class="c1"># Importing at module level, once, for the life of this module object,</span>
         <span class="c1"># closes that off: ``SchemaField`` then stays whatever class this</span>
@@ -943,7 +942,7 @@
 <span class="sd">        1. it is the base schema's **first** field, so that it is what sits at the</span>
 <span class="sd">           front of the option;</span>
 <span class="sd">        2. it is a :class:`~pcapkit.corekit.fields.numbers.NumberField`, so that</span>
-<span class="sd">           :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">           :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">           reads it through its ordinary per-field branch;</span>
 <span class="sd">        3. its length is a fixed integer rather than a callable, so that its width</span>
 <span class="sd">           does not depend on packet data the shortcut has not read.</span>
@@ -1049,7 +1048,7 @@
 <span class="sd">            If the option list ended before the specified size limit,</span>
 <span class="sd">            :attr:`self.option_padding &lt;OptionField.option_padding&gt;` is set</span>
 <span class="sd">            to the remaining length, which :meth:`Schema.unpack</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records in</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.Schema.unpack&gt;` records in</span>
 <span class="sd">            ``packet`` as ``__option_padding__`` so that the next fields can</span>
 <span class="sd">            be aware of it.</span>
 
@@ -1057,7 +1056,7 @@
 <span class="sd">            ends at the length the enclosing layer declares for it, so that an</span>
 <span class="sd">            area the data ends inside runs past that length rather than being</span>
 <span class="sd">            cut short by the capture, as</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.IPv6` tells the extension</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` tells the extension</span>
 <span class="sd">            headers it walks (:issue:`2694`). Absent, the data may end at a cut.</span>
 
 <span class="sd">        Raises:</span>
@@ -1082,7 +1081,7 @@
 <span class="sd">           Where the data ends inside the area, as a capture cut short leaves</span>
 <span class="sd">           it, the list ends with the data, and an option it ends inside is</span>
 <span class="sd">           kept if its fields fit the area, so :meth:`Schema.unpack</span>
-<span class="sd">           &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records the cut as</span>
+<span class="sd">           &lt;pcapkit.protocols.schema.Schema.unpack&gt;` records the cut as</span>
 <span class="sd">           a short read rather than either error being raised</span>
 <span class="sd">           (:issue:`2694`). See :meth:`_accepts_cut`, and ``__capture_cut__``</span>
 <span class="sd">           above.</span>
@@ -1131,7 +1130,7 @@
         <span class="c1"># ``examples/captures/profile.pcapng``.</span>
         <span class="c1">#</span>
         <span class="c1"># Reading the type field alone deliberately mirrors what</span>
-        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
         <span class="c1"># does for one field -- ``field(packet)``, read ``field.length`` octets,</span>
         <span class="c1"># then ``field.unpack(byte, packet.copy())`` -- rather than reaching for</span>
         <span class="c1"># :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both</span>
@@ -1283,8 +1282,8 @@
 <span class="sd">            (:issue:`1325`): padding cut short may be content the option's own</span>
 <span class="sd">            length declares, as a ``PadN`` option's is. A list whose items'</span>
 <span class="sd">            lengths leave out their trailing padding may override this, as</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.transport.sctp.PaddedOptionField`</span>
-<span class="sd">            does; :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.schema.PaddedOptionField`</span>
+<span class="sd">            does; :meth:`Schema.pack &lt;pcapkit.protocols.schema.Schema.pack&gt;`</span>
 <span class="sd">            then writes back only the octets read.</span>
 
 <span class="sd">        """</span>
@@ -1302,10 +1301,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :data:`True`, so that :meth:`unpack` keeps the option, as the short</span>
-<span class="sd">            read :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">            read :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">            records (:issue:`2694`). A list that keeps such an area as the octets</span>
 <span class="sd">            captured instead may override this, as</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField` does.</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcapng.schema.OptionAreaField` does.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="kc">True</span></div>

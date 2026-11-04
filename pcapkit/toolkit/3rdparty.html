@@ -1036,7 +1036,7 @@ carrying it goes (see <a class="reference internal" href="#pcapkit.toolkit.scapy
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The header, as many octets as the Data Offset counts, and the payload
 after it; or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if there are fewer than
-<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN" title="pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_MIN_HEADER_LEN</span></code></a>
+<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN" title="pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_MIN_HEADER_LEN</span></code></a>
 octets, the Data Offset counts fewer or more than were captured, or
 pcapkit’s own TCP parser rejects the options (see
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._default_accepts" title="pcapkit.toolkit.pypcapfile._default_accepts"><code class="xref py py-func docutils literal notranslate"><span class="pre">_default_accepts()</span></code></a>).</p>
@@ -2449,7 +2449,7 @@ short or rejected, <a class="reference internal" href="#pcapkit.toolkit.pypcapfi
 <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>
 follow in a row. An AH is <code class="docutils literal notranslate"><span class="pre">(Payload</span> <span class="pre">Length</span> <span class="pre">+</span> <span class="pre">2)</span> <span class="pre">*</span> <span class="pre">4</span></code> octets long
 (<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.2"><strong>RFC 4302 Section 2.2</strong></a>), and no shorter than
-<a class="reference internal" href="../protocols/internet/ah.html#pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN" title="pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">AH_HEADER_LEN</span></code></a>. Any other
+<a class="reference internal" href="../protocols/internet/ah.html#pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN" title="pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">AH_HEADER_LEN</span></code></a>. Any other
 is stepped over by the length <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._default_extension_header" title="pcapkit.toolkit.pypcapfile._default_extension_header"><code class="xref py py-func docutils literal notranslate"><span class="pre">_default_extension_header()</span></code></a> gives,
 so one it keeps though cut short leaves no octets after it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2695">#2695</a>).</p>

@@ -2,9 +2,10 @@ Linux "Cooked" Capture Encapsulation
 =====================================
 
 .. module:: pcapkit.protocols.link.linux_sll1
+.. module:: pcapkit.protocols.link.linux_sll1.protocol
 
-:mod:`pcapkit.protocols.link.linux_sll1` contains
-:class:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1`
+:mod:`pcapkit.protocols.link.linux_sll1.protocol` contains
+:class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1`
 only, which implements the extractor for the Linux "cooked" capture
 encapsulation [*]_ of ``LINKTYPE_LINUX_SLL`` -- the header every
 ``tcpdump -i any`` capture on Linux uses -- whose structure is described as
@@ -27,14 +28,14 @@ below:
    ====== ===== ============================== ================================
 
 Next-layer dispatch is shared with
-:class:`~pcapkit.protocols.link.linux_sll2.LinuxSLL2`; see
-:mod:`~pcapkit.protocols.link.linux_sll`. Its
-:meth:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1.id` is
+:class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2`; see
+:mod:`~pcapkit.protocols.link.linux_sll.protocol`. Its
+:meth:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1.id` is
 ``('LinuxSLL1',)``, and its
-:attr:`~pcapkit.protocols.link.linux_sll1.LinuxSLL1.alias` is ``'LINUX_SLL1'``;
+:attr:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1.alias` is ``'LINUX_SLL1'``;
 see :ref:`linux-sll-labels`.
 
-.. autoclass:: pcapkit.protocols.link.linux_sll1.LinuxSLL1
+.. autoclass:: pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1
    :no-members:
    :show-inheritance:
 
@@ -55,18 +56,18 @@ see :ref:`linux-sll-labels`.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.linux_sll1
+.. module:: pcapkit.protocols.link.linux_sll1.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.linux_sll1.LinuxSLL1
+.. autoclass:: pcapkit.protocols.link.linux_sll1.schema.LinuxSLL1
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.linux_sll1
+.. module:: pcapkit.protocols.link.linux_sll1.data
 
-.. autoclass:: pcapkit.protocols.data.link.linux_sll1.LinuxSLL1
+.. autoclass:: pcapkit.protocols.link.linux_sll1.data.LinuxSLL1
    :members:
    :show-inheritance:
 

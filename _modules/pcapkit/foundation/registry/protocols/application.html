@@ -571,19 +571,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">TLS_ExtensionType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_HTTP_FrameType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span> <span class="k">as</span> <span class="n">Schema_HTTP_FrameType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionConstructor</span> <span class="k">as</span> <span class="n">TLS_ExtensionConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionParser</span> <span class="k">as</span> <span class="n">TLS_ExtensionParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">ExtensionConstructor</span> <span class="k">as</span> <span class="n">TLS_ExtensionConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.ssl.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionParser</span> <span class="k">as</span> <span class="n">TLS_ExtensionParser</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'register_http_frame'</span><span class="p">,</span>
@@ -600,7 +602,7 @@
 <span class="c1">###############################################################################</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__</span>
+<span class="c1"># NOTE: pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__</span>
 <div class="viewcode-block" id="register_http_frame">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_http_frame">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_http_frame</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'HTTP_Frame'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -608,17 +610,17 @@
 <span class="w">    </span><span class="sd">"""Register a frame parser.</span>
 
 <span class="sd">    The function will register the given frame parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.HTTPv2&gt;` frame type</span>
+<span class="sd">        code: :class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2&gt;` frame type</span>
 <span class="sd">            code as in :class:`~pcapkit.const.http.frame.Frame`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the frame. A name names the</span>
 <span class="sd">            ``_read_http_*`` and ``_make_http_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_http_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the frame.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.application.httpv2.schema.FrameType`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.http.frame.Frame`</span>
@@ -637,7 +639,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.application.ssl.SSL.__extension__</span>
+<span class="c1"># NOTE: pcapkit.protocols.application.ssl.protocol.SSL.__extension__</span>
 <div class="viewcode-block" id="register_tls_extension">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.application.register_tls_extension">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tls_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TLS_ExtensionType'</span><span class="p">,</span>
@@ -645,9 +647,9 @@
 <span class="w">    </span><span class="sd">"""Register an extension parser.</span>
 
 <span class="sd">    The function will register the given extension parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.application.ssl.SSL.__extension__` registry, which</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.tls.TLS` and</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.dtls.DTLS` share.</span>
+<span class="sd">    :data:`pcapkit.protocols.application.ssl.protocol.SSL.__extension__` registry, which</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.tls.protocol.TLS` and</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` share.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        code: TLS/DTLS extension type as in</span>

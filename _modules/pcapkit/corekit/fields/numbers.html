@@ -1324,7 +1324,7 @@
 
 <span class="sd">            It would also make the "unknown" reader the formats require</span>
 <span class="sd">            unreachable for any genuinely unassigned code -- PCAP-NG's</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcapng.schema.UnknownBlock`, and the</span>
 <span class="sd">            ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --</span>
 <span class="sd">            because the lookup would fail before the dispatch that selects it.</span>
 <span class="sd">            PCAP-NG repeats a block's total length at both ends precisely so</span>
@@ -1464,7 +1464,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            Building a member this way, rather than as some other type</span>
 <span class="sd">            altogether, is why :meth:`PortEnumField.post_process` and</span>
-<span class="sd">            :meth:`OptionEnumField.post_process &lt;pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process&gt;`</span>
+<span class="sd">            :meth:`OptionEnumField.post_process &lt;pcapkit.protocols.misc.pcapng.schema.OptionEnumField.post_process&gt;`</span>
 <span class="sd">            need this rather than :meth:`_pseudo_member`:</span>
 <span class="sd">            the result answers ``isinstance(result, AppType)`` truthfully,</span>
 <span class="sd">            which :meth:`PortEnumField.pre_process` tests before reading</span>

@@ -580,7 +580,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
     <span class="n">_PB</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PB'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">ProtocolBase</span><span class="p">)</span>
 
@@ -596,15 +596,15 @@
 <span class="sd">        protocol: Protocol instance, just parsed.</span>
 
 <span class="sd">    Called by the layer base classes, and by the PCAP global</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`, once a parse is done.</span>
 <span class="sd">    When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``</span>
-<span class="sd">    record :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">    record :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">    made, so that :meth:`Protocol.from_data</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;` hands it to the rebuild,</span>
 <span class="sd">    whose :meth:`Protocol.pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;` cuts</span>
 <span class="sd">    the header back to what was captured before it is read (:issue:`1458`,</span>
 <span class="sd">    :issue:`2703`). The key is listed</span>
-<span class="sd">    in :attr:`Data.__included__ &lt;pcapkit.protocols.data.data.Data.__included__&gt;`,</span>
+<span class="sd">    in :attr:`Data.__included__ &lt;pcapkit.protocols.data.Data.__included__&gt;`,</span>
 <span class="sd">    so :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries it</span>
 <span class="sd">    and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for</span>
 <span class="sd">    a header that was captured whole.</span>
@@ -613,11 +613,11 @@
 <span class="sd">    :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a</span>
 <span class="sd">    layer whose message runs to the end of the frame records the cut too, on the</span>
 <span class="sd">    field it runs to the end in, through :meth:`Schema._note_short_read</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._note_short_read&gt;`, so its rebuild</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.Schema._note_short_read&gt;`, so its rebuild</span>
 <span class="sd">    reads as cut, as the layer did inside the frame (:issue:`2711`). A layer</span>
 <span class="sd">    whose own header declares where its message ends records none, whether the</span>
 <span class="sd">    cut falls at that end or past it; see :meth:`Schema._frame_end_field</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._frame_end_field&gt;`.</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.Schema._frame_end_field&gt;`.</span>
 
 <span class="sd">    """</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="s1">'__header__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
@@ -648,14 +648,14 @@
 <span class="sd">        ``protocol`` itself.</span>
 
 <span class="sd">    The layer base classes and the PCAP global</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.Header` call it on what</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` call it on what</span>
 <span class="sd">    :meth:`Protocol.from_data &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`</span>
 <span class="sd">    returns, which is cut back before it gets here: ``from_data`` hands the</span>
 <span class="sd">    construction the ``__short_read__`` record that :func:`keep_short_read`</span>
 <span class="sd">    left in ``data``, :meth:`Protocol.pack</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.pack&gt;` cuts the header it makes back</span>
 <span class="sd">    to the octets captured through :meth:`Schema._cut_short_read</span>
-<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._cut_short_read&gt;`, and</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.Schema._cut_short_read&gt;`, and</span>
 <span class="sd">    :meth:`Protocol.__post_init__</span>
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` has</span>
 <span class="sd">    :meth:`~pcapkit.protocols.protocol.Protocol.read` parse those octets at the</span>

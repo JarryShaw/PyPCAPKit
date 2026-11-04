@@ -314,7 +314,7 @@ in **zero** of them, and neither class carried an alias (``__members__`` 6 and 4
 docstrings to refer to. Offered the choice between merging the widened copies and
 deleting them in a follow-up, the owner ruled for deleting them outright. Both
 ``get`` methods and both suppressions went with it, and
-:mod:`pcapkit.protocols.internet.mh` defines no ``get`` at all.
+:mod:`pcapkit.protocols.internet.mh.protocol` defines no ``get`` at all.
 
 The one input where the copies **did** differ is why this matters beyond line count,
 and it is the trap for whoever writes the next override: the base branches on
@@ -473,8 +473,8 @@ subclass, every one of them under :mod:`pcapkit.const` and each either
 :class:`int`-valued (the flag registries among them) or ``aenum.StrEnum``-valued,
 plus every non-registry enumeration a runtime walk over both the :mod:`enum` and
 |aenum|_ flavours finds, nested classes included -- such as
-:class:`FrameType.Flags <pcapkit.protocols.schema.application.httpv2.FrameType.Flags>` in
-:mod:`pcapkit.protocols.schema.application.httpv2` and its concrete per-frame subclasses.
+:class:`FrameType.Flags <pcapkit.protocols.application.httpv2.schema.FrameType.Flags>` in
+:mod:`pcapkit.protocols.application.httpv2.schema` and its concrete per-frame subclasses.
 
 **The** :class:`int`\ **-valued tier is case-sensitive throughout, and the criterion
 is vacuous on it rather than merely unmet.** A registry whose values are numbers has
@@ -573,36 +573,36 @@ That leaves the classes with something to decide:
        ``a`` 18, ``p`` 16, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7,
        ``m [1]`` 2). Both tallies cover all 64 rows.
      - **open** -- see below
-   * - The :mod:`~pcapkit.protocols.internet.mh` and
-       :mod:`~pcapkit.protocols.application.ngap` helper enumerations
+   * - The :mod:`~pcapkit.protocols.internet.mh.protocol` and
+       :mod:`~pcapkit.protocols.application.ngap.protocol` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
-     - :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`,
-       :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`,
-       :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`,
-       :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`,
-       :class:`~pcapkit.protocols.application.ngap.Criticality` and
-       :class:`~pcapkit.protocols.application.ngap.PDUKind`. **All but**
-       :class:`~pcapkit.protocols.application.ngap.PDUKind` carry numeric codes, so the
+     - :class:`~pcapkit.protocols.internet.mh.protocol.FastBindingAcknowledgmentStatus`,
+       :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`,
+       :class:`~pcapkit.protocols.internet.mh.protocol.LMAAddressCode`,
+       :class:`~pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus`,
+       :class:`~pcapkit.protocols.application.ngap.protocol.Criticality` and
+       :class:`~pcapkit.protocols.application.ngap.protocol.PDUKind`. **All but**
+       :class:`~pcapkit.protocols.application.ngap.protocol.PDUKind` carry numeric codes, so the
        criterion is vacuous on them exactly as for the :class:`int` tier above;
-       :class:`~pcapkit.protocols.application.ngap.PDUKind`'s are :class:`str` ASN.1
+       :class:`~pcapkit.protocols.application.ngap.protocol.PDUKind`'s are :class:`str` ASN.1
        identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
        construction, so it lands the same way for a different reason. **None** of them
        defines a ``get`` of its own. Some did when this audit was taken --
-       :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus` and
-       :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`, for signature
+       :class:`~pcapkit.protocols.internet.mh.protocol.FastBindingAcknowledgmentStatus` and
+       :class:`~pcapkit.protocols.internet.mh.protocol.IPv6AddressPrefixCode`, for signature
        reasons (no ``default``, and an :class:`int`/:class:`str` dispatch) rather than for
        case -- and both were deleted as redundant rather than widened, on the ruling
        recorded in the section above and given in review of the widening itself; each
        inherits ``get`` from :class:`~pcapkit.corekit.enum.EnumLookup` unchanged.
-       :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` and
-       :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` never carried a
+       :class:`~pcapkit.protocols.internet.mh.protocol.LMAAddressCode` and
+       :class:`~pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus` never carried a
        ``get`` at all, so they had no string lookup to fold.
-       :class:`~pcapkit.protocols.application.ngap.Criticality` had one when this audit
+       :class:`~pcapkit.protocols.application.ngap.protocol.Criticality` had one when this audit
        was taken and inherits ``get`` unchanged: :issue:`877` re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and :issue:`923` retired the exception
        conversion that was the override's only remaining job.
      - **case-sensitive** -- conforms
-   * - :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel`
+   * - :class:`~pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel`
      - ``draft-tuexen-opsawg-pcapng``
      - The draft names the labels outright (*"The key type is one of
        LOCAL_STATIC_PRIVATE_KEY, ..."*) and, as for
@@ -613,13 +613,13 @@ That leaves the classes with something to decide:
      - --
      - Each is one of pcapkit's own discriminators and bit labels, with no registrar behind
        them at all -- :class:`~pcapkit.foundation.reassembly.data.data.Completion`,
-       :class:`ftp.Type <pcapkit.protocols.application.ftp.Type>`,
-       :class:`httpv1.Type <pcapkit.protocols.application.httpv1.Type>`,
+       :class:`ftp.Type <pcapkit.protocols.application.ftp.protocol.Type>`,
+       :class:`httpv1.Type <pcapkit.protocols.application.httpv1.protocol.Type>`,
        :class:`~pcapkit.corekit.infoclass.FinalisedState`,
-       :class:`~pcapkit.protocols.internet.esp.ESPStatus`,
-       :class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
-       :class:`~pcapkit.protocols.misc.pcapng.PacketReception`, and the httpv2
-       :class:`~pcapkit.protocols.schema.application.httpv2.FrameType.Flags`.
+       :class:`~pcapkit.protocols.internet.esp.protocol.ESPStatus`,
+       :class:`~pcapkit.protocols.misc.pcapng.protocol.PacketDirection`,
+       :class:`~pcapkit.protocols.misc.pcapng.protocol.PacketReception`, and the httpv2
+       :class:`~pcapkit.protocols.application.httpv2.schema.FrameType.Flags`.
      - **case-sensitive** -- nothing to cite, nothing to change
 
 Rows the audit deliberately left open rather than acting on, because each is
@@ -651,10 +651,10 @@ wider than a case fix:
 Some case folds live **outside** any registry's ``get``, and so escape this convention.
 Each is recorded here with its basis, or the lack of one:
 
-* :func:`~pcapkit.protocols.internet.esp._resolve` upper-cases its ``value`` before
+* :func:`~pcapkit.protocols.internet.esp.protocol._resolve` upper-cases its ``value`` before
   matching it against :class:`~pcapkit.const.esp.cipher.Cipher` and
   :class:`~pcapkit.const.esp.integrity.Integrity` member names, and
-  :meth:`IntegritySuite.get <pcapkit.protocols.internet.esp.IntegritySuite.get>`
+  :meth:`IntegritySuite.get <pcapkit.protocols.internet.esp.protocol.IntegritySuite.get>`
   upper-cases a name before handing it on. :rfc:`7296` states no comparison rule for
   IKEv2 transform names -- checked, it does not discuss case at all -- so these are
   conveniences with no citation behind them.
@@ -663,19 +663,19 @@ Each is recorded here with its basis, or the lack of one:
   :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s member names, so
   ``'TCP'`` names ``TransportProtocol.tcp``. Its basis is that class's row above,
   :rfc:`6335#section-8.1.1` by limb 2.
-* :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>` and
-  :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` upper-case the TCP
+* :meth:`TCP.read <pcapkit.protocols.transport.tcp.protocol.TCP.read>` and
+  :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` upper-case the TCP
   schema's flag keys, ``cwr`` to ``fin``, to look up
   :class:`~pcapkit.const.tcp.flags.Flags` members. Both spellings are pcapkit's own and
   the keys a fixed set, so no caller's text is folded and there is nothing to cite.
-* :meth:`TLSKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`
+* :meth:`TLSKeyLog.post_process <pcapkit.protocols.misc.pcapng.schema.TLSKeyLog.post_process>`
   and
-  :meth:`WireGuardKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.post_process>`
+  :meth:`WireGuardKeyLog.post_process <pcapkit.protocols.misc.pcapng.schema.WireGuardKeyLog.post_process>`
   upper-case a key log line's label before matching
   :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` or
-  :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel`, so ``client_random`` parses
+  :class:`~pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel`, so ``client_random`` parses
   as ``CLIENT_RANDOM``, and
-  :func:`~pcapkit.protocols.schema.misc.pcapng._malformed_line_message` folds the same
+  :func:`~pcapkit.protocols.misc.pcapng.schema._malformed_line_message` folds the same
   way to name a malformed line's label. No comparison rule backs them:
   :rfc:`9850#section-2` makes only the hexadecimal fields case-insensitive, and the rows
   above find none for either label set.
@@ -762,19 +762,19 @@ established ones carry. A map's registration comes in two parts:
    -- which writes it and warns when it displaces an entry. An inherited one counts
    only when it is typed and validated for exactly that map's keys, which the owner
    chose over an override on every class (:issue:`2511`). So
-   :class:`~pcapkit.protocols.transport.tcp.TCP` and
-   :class:`~pcapkit.protocols.transport.udp.UDP` keep
+   :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+   :class:`~pcapkit.protocols.transport.udp.protocol.UDP` keep
    :meth:`Transport.register <pcapkit.protocols.transport.transport.Transport.register>`,
    typed for the port their maps are keyed by. A class whose map takes other keys
-   overrides its parent's instead: :class:`~pcapkit.protocols.transport.sctp.SCTP` for
+   overrides its parent's instead: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` for
    payload protocol identifiers rather than ports;
-   :class:`~pcapkit.protocols.internet.ipx.IPX` for IPX packet types rather than the
+   :class:`~pcapkit.protocols.internet.ipx.protocol.IPX` for IPX packet types rather than the
    :class:`~pcapkit.const.reg.transtype.TransType`
    :meth:`Internet.register <pcapkit.protocols.internet.internet.Internet.register>`
-   takes; and :class:`~pcapkit.protocols.link.loopback.Loopback`,
-   :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`,
-   :class:`~pcapkit.protocols.link.frad.FRAD` and
-   :class:`~pcapkit.protocols.link.netlink.Netlink` for address families, ARPHRD types,
+   takes; and :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
+   :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`,
+   :class:`~pcapkit.protocols.link.frad.protocol.FRAD` and
+   :class:`~pcapkit.protocols.link.netlink.protocol.Netlink` for address families, ARPHRD types,
    NLPIDs and ``nlmsg_type`` values rather than the
    :class:`~pcapkit.const.reg.ethertype.EtherType`
    :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` takes.
@@ -831,8 +831,8 @@ depart from it:
   of the frame behind a radiotap header, and takes its owning protocol's name for the
   same reason.
 * :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype` takes
-  bare :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.TCP`'s
-  map, :class:`~pcapkit.protocols.transport.udp.UDP`'s or both, by transport, so no
+  bare :class:`int` keys, but writes :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`'s
+  map, :class:`~pcapkit.protocols.transport.udp.protocol.UDP`'s or both, by transport, so no
   one owner's name fits and it takes
   :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s.
 
@@ -846,7 +846,7 @@ shape for a parser map:
 
 .. code-block:: python
 
-   # NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__
+   # NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__
    def register_sctp_chunk(code, meth, *, schema=None):
        _check_code(code, SCTP_Chunk, SCTP)
        if isinstance(meth, str) and not hasattr(SCTP, f'_read_chunk_{meth}'):
@@ -867,15 +867,15 @@ the one typed for that map's keys.
 each layout is a concrete schema.** Ruled in review of :pr:`2657` (:issue:`2576`): the
 table is a class-level map on the protocol, with its ``register_<kind>`` classmethod and
 its wrapper, and never a dictionary at module level; each layout is a
-:class:`~pcapkit.protocols.schema.schema.Schema` subclass with typed fields, defined with
+:class:`~pcapkit.protocols.schema.Schema` subclass with typed fields, defined with
 the protocol's other schemas, and never built inside the map. Radiotap's field types are
 the example:
-:attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.Radiotap.__field__>` is
-written by :meth:`Radiotap.register_field <pcapkit.protocols.link.radiotap.Radiotap.register_field>`
+:attr:`Radiotap.__field__ <pcapkit.protocols.link.radiotap.protocol.Radiotap.__field__>` is
+written by :meth:`Radiotap.register_field <pcapkit.protocols.link.radiotap.protocol.Radiotap.register_field>`
 and :func:`~pcapkit.foundation.registry.protocols.link.register_radiotap_field`, in the
 shape of :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp_chunk`
 above, and each type's layout is a
-:class:`~pcapkit.protocols.schema.link.radiotap.RadiotapField` subclass, whose fields
+:class:`~pcapkit.protocols.link.radiotap.schema.RadiotapField` subclass, whose fields
 are the type's subfields and whose ``__align__`` is its alignment.
 
 .. _registry-protocol-make-fields:
@@ -925,34 +925,34 @@ The Registry Index
 :class:`~pcapkit.const.reg.transtype.TransType` **or**
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` **member wherever one names it**, ahead of
 any other registry's code, such as an :class:`~pcapkit.const.linux.arphrd.ARPHRD` type or an
-NLPID. Ruled on :issue:`2627`. So :class:`~pcapkit.protocols.link.radiotap.Radiotap` returns
+NLPID. Ruled on :issue:`2627`. So :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` returns
 ``LinkType.IEEE802_11_RADIOTAP`` rather than ``ARPHRD.IEEE80211_RADIOTAP``.
 
 * **An AppType value is returned as its port.** An
   :class:`~pcapkit.const.reg.apptype.apptype.AppType` member is a :class:`str`, and
   :func:`int` and :func:`operator.index` raise :exc:`TypeError` when ``__index__`` returns
   anything but an :class:`int`, so a class an AppType member names returns that member's
-  port: :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` returns 1701, ``int(UDP.l2tp)``.
-  :class:`~pcapkit.protocols.application.tls.TLS`, which
-  :class:`~pcapkit.protocols.application.sslv3.SSLv3` inherits, and
-  :class:`~pcapkit.protocols.application.dtls.DTLS` return the ports TCP and UDP dispatch
+  port: :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` returns 1701, ``int(UDP.l2tp)``.
+  :class:`~pcapkit.protocols.application.tls.protocol.TLS`, which
+  :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3` inherits, and
+  :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` return the ports TCP and UDP dispatch
   them at, 443 and 5684, although IANA registers those ports as ``https`` and ``coaps``,
   the protocols carried over them. Ruled on :issue:`2627`.
 * **Netlink keeps** ``ARPHRD.NETLINK``: ``LINKTYPE_NETLINK`` (253) names the SLL-framed
-  form, not the ``nlmsghdr`` :class:`~pcapkit.protocols.link.netlink.Netlink` reads. Ruled
+  form, not the ``nlmsghdr`` :class:`~pcapkit.protocols.link.netlink.protocol.Netlink` reads. Ruled
   on :issue:`2627`.
 * **The index keys no registration.** Every built-in ``__proto__`` entry spells out its key,
   so a class keeps its place in a secondary registry whatever its index:
-  :class:`~pcapkit.protocols.link.frad.FRAD` stays under ``ARPHRD.FRAD`` in
-  :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
+  :class:`~pcapkit.protocols.link.frad.protocol.FRAD` stays under ``ARPHRD.FRAD`` in
+  :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`.
 * **A class dispatched under several values returns one of them.**
-  :class:`~pcapkit.protocols.internet.ipv4.IPv4` and
-  :class:`~pcapkit.protocols.internet.ipv6.IPv6`, dispatched under LinkType 228 and 229,
+  :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` and
+  :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, dispatched under LinkType 228 and 229,
   EtherType 0x0800 and 0x86DD, and TransType 4 and 41, and
-  :class:`~pcapkit.protocols.internet.ipx.IPX`, under EtherType 0x8137 and TransType 111,
+  :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, under EtherType 0x8137 and TransType 111,
   keep the TransType value they returned in 1.5.x, so no shipped value changes.
-  :class:`~pcapkit.protocols.link.loopback.Loopback`, at LinkType 0 and 108, returns
-  ``LinkType.NULL``, 0, and :class:`~pcapkit.protocols.application.http.HTTP`, at TCP and
+  :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`, at LinkType 0 and 108, returns
+  ``LinkType.NULL``, 0, and :class:`~pcapkit.protocols.application.http.protocol.HTTP`, at TCP and
   UDP ports 80 and 8080, returns 80.
 * **An index is a reachability claim** wherever its enum declares ``__proto_dest__``.
   :file:`tests/protocols/test_dispatch_reachability_unit.py` requires the class in the
@@ -962,33 +962,33 @@ NLPID. Ruled on :issue:`2627`. So :class:`~pcapkit.protocols.link.radiotap.Radio
 * **No value, no index.** :class:`~pcapkit.protocols.link.link.Link`,
   :class:`~pcapkit.protocols.internet.internet.Internet` and
   :class:`~pcapkit.protocols.transport.transport.Transport`, and the
-  :class:`~pcapkit.protocols.internet.ip.IP`, :class:`~pcapkit.protocols.internet.ipsec.IPsec`
-  and :class:`~pcapkit.protocols.internet.icmp.ICMP` family bases, leave the abstract method
+  :class:`~pcapkit.protocols.internet.ip.protocol.IP`, :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`
+  and :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP` family bases, leave the abstract method
   unimplemented and return :obj:`None`. These raise:
 
-  - :class:`~pcapkit.protocols.link.vlan.VLAN`,
-    :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` and
-    :class:`~pcapkit.protocols.link.l2tp.L2TP`, abstract family bases nothing dispatches
+  - :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`,
+    :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` and
+    :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`, abstract family bases nothing dispatches
     to, whose members each carry a value of their own;
-  - :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, although
+  - :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`, although
     :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
     dispatches it at TransType 140, Shim6: one class parses Shim6 and any other
     :rfc:`6564`-format header registered to it, so its value differs per instance, and
     ``__index__`` is a class method;
   - :class:`~pcapkit.protocols.application.application.Application`, and the
-    :class:`~pcapkit.protocols.application.ssl.SSL` family base and
-    :class:`~pcapkit.protocols.application.sslv2.SSLv2`, which define no ``__index__`` and
+    :class:`~pcapkit.protocols.application.ssl.protocol.SSL` family base and
+    :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, which define no ``__index__`` and
     inherit its raise. Nothing dispatches to SSLv2: an SSLv2 record on TCP port 443 parses
     as a TLS layer adopting SSLv2's data;
-  - :class:`~pcapkit.protocols.misc.raw.Raw` and
-    :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the undissected octets and the
-    empty payload, and :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`, the
+  - :class:`~pcapkit.protocols.misc.raw.protocol.Raw` and
+    :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, the undissected octets and the
+    empty payload, and :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`, the
     checksum pseudo-header, which no registry value names. TransType 59, under which
     :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
     dispatches Raw, is IPv6-NoNxt, no next header;
-  - the PCAP :class:`~pcapkit.protocols.misc.pcap.header.Header` and
-    :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, and
-    :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, the capture file's own records. A PCAP
+  - the PCAP :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` and
+    :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, and
+    :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, the capture file's own records. A PCAP
     frame or PCAP-NG packet block instance returns its index number, an ordinal outside
     the rule.
 

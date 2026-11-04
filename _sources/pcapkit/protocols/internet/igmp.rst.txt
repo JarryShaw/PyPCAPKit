@@ -2,23 +2,24 @@ IGMP - Internet Group Management Protocol
 ==========================================
 
 .. module:: pcapkit.protocols.internet.igmp
+.. module:: pcapkit.protocols.internet.igmp.protocol
 
-:mod:`pcapkit.protocols.internet.igmp` contains
-:class:`~pcapkit.protocols.internet.igmp.IGMP`, the abstract base of the
+:mod:`pcapkit.protocols.internet.igmp.protocol` contains
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP`, the abstract base of the
 Internet Group Management Protocol (IGMP) [*]_ versions 1, 2 and 3. IGMPv1
 and IGMPv2 share the 8-octet structure below.
-:class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.IGMPv1>` and
-:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.IGMPv2>` set
-:attr:`~pcapkit.protocols.internet.igmp.IGMP.version` and reuse this schema and
+:class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.protocol.IGMPv1>` and
+:class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.protocol.IGMPv2>` set
+:attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.version` and reuse this schema and
 data model as-is; IGMPv3's wire format differs materially by message, so
-:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.IGMPv3>` carries its own
+:class:`IGMPv3 <pcapkit.protocols.internet.igmpv3.protocol.IGMPv3>` carries its own
 instead -- see :doc:`igmpv3`.
-:attr:`~pcapkit.protocols.internet.igmp.IGMP.alias` names the protocol each
+:attr:`~pcapkit.protocols.internet.igmp.protocol.IGMP.alias` names the protocol each
 message is read as: ``'IGMP'`` for IGMPv1, the name :rfc:`1112` gives it, and
 ``'IGMPv2'`` or ``'IGMPv3'`` for the others. Constructing the base gives the
 version class its ``version`` keyword names; without it, octets give the class
 the message classifies as, and fields are refused. Its
-:meth:`~pcapkit.protocols.internet.igmp.IGMP.from_data` gives the class the
+:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP.from_data` gives the class the
 ``version`` of its data names: every IGMP data model carries one, ``1``, ``2`` or
 ``3``, set by the class that read or built the message and on no octet, so an
 IGMPv1 and an IGMPv2 message read alike apart from it (:issue:`2574`).
@@ -35,7 +36,7 @@ Octets      Bits        Name                    Description
   4          32   ``igmpv1.group``          Group Address
 ======= ========= ========================= ===================================
 
-.. autoclass:: pcapkit.protocols.internet.igmp.IGMP
+.. autoclass:: pcapkit.protocols.internet.igmp.protocol.IGMP
    :no-members:
    :show-inheritance:
 
@@ -63,18 +64,18 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.igmp
+.. module:: pcapkit.protocols.internet.igmp.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.igmp.IGMP
+.. autoclass:: pcapkit.protocols.internet.igmp.schema.IGMP
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.igmp
+.. module:: pcapkit.protocols.internet.igmp.data
 
-.. autoclass:: pcapkit.protocols.data.internet.igmp.IGMP
+.. autoclass:: pcapkit.protocols.internet.igmp.data.IGMP
    :members:
    :show-inheritance:
 

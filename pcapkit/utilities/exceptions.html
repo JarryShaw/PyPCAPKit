@@ -596,7 +596,7 @@ code it calls but does not own, such as a generated <code class="docutils litera
 override, which cannot know to pass <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> itself (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1845">#1845</a>).
 <a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> runs the whole call to a next layer in
 such a block for <a class="reference internal" href="#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, so a refusal it
-keeps as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is recorded on that layer’s <code class="docutils literal notranslate"><span class="pre">error</span></code>
+keeps as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is recorded on that layer’s <code class="docutils literal notranslate"><span class="pre">error</span></code>
 alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2588">#2588</a>).</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>In 1.4.x, <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> logged at <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> instead of <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> rather
@@ -1072,8 +1072,8 @@ subclasses <a class="reference external" href="https://docs.python.org/3/builtin
 be more specific can catch this instead.</p>
 <p>A <em>declared</em> zero length – a nested schema legitimately sized to have
 nothing to read – is a different situation and does not raise this.</p>
-<p><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> and
-<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> raise it too, quietly, when
+<p><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> and
+<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> raise it too, quietly, when
 fewer octets are left than a record header or a block needs.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

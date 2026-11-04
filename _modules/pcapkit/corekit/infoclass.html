@@ -1275,7 +1275,7 @@
 <span class="sd">        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value is stored</span>
 <span class="sd">        as a :class:`MultiInfo` or :class:`OrderedMultiInfo` respectively, or</span>
 <span class="sd">        as the subclass of either that the key's annotation names, such as</span>
-<span class="sd">        :class:`~pcapkit.protocols.data.application.httpv2.Settings`.</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.httpv2.data.Settings`.</span>
 
 <span class="sd">        The rebuild is as unchecked as the rest of this method: a mapping whose</span>
 <span class="sd">        keys are not the nested class's own is accepted and becomes an instance</span>
@@ -1829,7 +1829,7 @@
 <span class="sd">    value it describes is a container, and :meth:`Info.from_dict` has nothing</span>
 <span class="sd">    to rebuild it from. A :class:`MultiInfo` or :class:`OrderedMultiInfo`</span>
 <span class="sd">    subclass is an :class:`Info` subclass too, so that :meth:`Info.from_dict`</span>
-<span class="sd">    restores e.g. :class:`~pcapkit.protocols.data.application.httpv2.Settings`</span>
+<span class="sd">    restores e.g. :class:`~pcapkit.protocols.application.httpv2.data.Settings`</span>
 <span class="sd">    from the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that</span>
 <span class="sd">    :meth:`Info.to_dict` writes it as.</span>
 
@@ -1923,7 +1923,7 @@
 <span class="sd">        :meth:`Info.from_dict` call stays one-way for the life of the process.</span>
 <span class="sd">        That is accepted rather than fixed: :meth:`Info.from_dict` runs per</span>
 <span class="sd">        parsed packet (see :meth:`IPv4.read</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`, which builds its ToS</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.read&gt;`, which builds its ToS</span>
 <span class="sd">        field with it), and</span>
 <span class="sd">        re-resolving the annotations on every call to catch a case that does</span>
 <span class="sd">        not arise in this package costs far more than it saves.</span>

@@ -568,7 +568,7 @@
 <span class="sd">   Constructing a protocol with a keyword that none of its signatures</span>
 <span class="sd">   declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`,</span>
 <span class="sd">   where it was discarded (:issue:`617`). A next layer captured shorter than</span>
-<span class="sd">   its header is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, where it</span>
+<span class="sd">   its header is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, where it</span>
 <span class="sd">   was parsed with zero-filled fields (:issue:`1170`).</span>
 
 <span class="sd">"""</span>
@@ -580,6 +580,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -601,13 +602,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABSENT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">schema_module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">Data_Raw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">Schema_Raw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
@@ -651,7 +648,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        :data:`True` if :obj:`bytes` sits anywhere inside a :obj:`list`,</span>
 <span class="sd">        :obj:`tuple`, :obj:`dict` or data model among ``value``, or a</span>
-<span class="sd">        :class:`~pcapkit.protocols.schema.schema.Schema` does anywhere. A</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.Schema` does anywhere. A</span>
 <span class="sd">        top-level :obj:`bytes` keyword (e.g. a payload) does not count. A data</span>
 <span class="sd">        model is looked into as a :obj:`dict` is, since a maker builds from its</span>
 <span class="sd">        fields as given, and a multi-mapping through every value of each key</span>
@@ -729,7 +726,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :data:`True` if, at some position both share, ``made`` holds</span>
-<span class="sd">        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.schema.Schema`.</span>
+<span class="sd">        :obj:`bytes` and ``parsed`` a :class:`~pcapkit.protocols.schema.Schema`.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">made</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -757,9 +754,9 @@
 <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;` reconstructs from.</span>
 <span class="c1">#: Refusing it would make ``from_data`` fail on any protocol whose ``make`` does</span>
 <span class="c1">#: not declare a ``packet``, starting with</span>
-<span class="c1">#: :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, the innermost layer of every</span>
+<span class="c1">#: :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, the innermost layer of every</span>
 <span class="c1">#: packet. It is also a real field name for some protocols --</span>
-<span class="c1">#: :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;` takes the HIP</span>
+<span class="c1">#: :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.protocol.HIP.make&gt;` takes the HIP</span>
 <span class="c1">#: packet *type* under it -- and listing it here does not change how it binds,</span>
 <span class="c1">#: only that it is never refused.</span>
 <span class="n">OUT_OF_BAND_KEYWORDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'_layer'</span><span class="p">,</span> <span class="s1">'_protocol'</span><span class="p">,</span> <span class="s1">'__context__'</span><span class="p">,</span>
@@ -806,11 +803,11 @@
 <span class="sd">    &lt;pcapkit.protocols.protocol.Protocol.__post_init__&gt;` hands one</span>
 <span class="sd">    ``**kwargs`` to both the construction and the parse of the packet it has just</span>
 <span class="sd">    constructed, so a keyword declared by ``read`` travels through ``make`` too.</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.hip.HIP` is the live example:</span>
-<span class="sd">    :meth:`HIP.read &lt;pcapkit.protocols.internet.hip.HIP.read&gt;` declares</span>
-<span class="sd">    ``extension``, :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.HIP.make&gt;`</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.hip.protocol.HIP` is the live example:</span>
+<span class="sd">    :meth:`HIP.read &lt;pcapkit.protocols.internet.hip.protocol.HIP.read&gt;` declares</span>
+<span class="sd">    ``extension``, :meth:`HIP.make &lt;pcapkit.protocols.internet.hip.protocol.HIP.make&gt;`</span>
 <span class="sd">    does not, and :meth:`HIP.__post_init__</span>
-<span class="sd">    &lt;pcapkit.protocols.internet.hip.HIP.__post_init__&gt;` forwards it to both.</span>
+<span class="sd">    &lt;pcapkit.protocols.internet.hip.protocol.HIP.__post_init__&gt;` forwards it to both.</span>
 
 <span class="sd">    The walk covers the whole MRO rather than the most derived override of each</span>
 <span class="sd">    method, so that a subclass declaring its own keyword and forwarding the rest</span>
@@ -841,10 +838,10 @@
             <span class="c1"># NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,</span>
             <span class="c1"># which is unioned down the MRO. It describes how the class that</span>
             <span class="c1"># declares it dispatches, not a property its subclasses share:</span>
-            <span class="c1"># :class:`~pcapkit.protocols.application.http.HTTP` cannot enumerate</span>
+            <span class="c1"># :class:`~pcapkit.protocols.application.http.protocol.HTTP` cannot enumerate</span>
             <span class="c1"># its keywords because it forwards them to whichever of</span>
-            <span class="c1"># :class:`HTTPv1 &lt;pcapkit.protocols.application.httpv1.HTTPv1&gt;` and</span>
-            <span class="c1"># :class:`HTTPv2 &lt;pcapkit.protocols.application.httpv2.HTTPv2&gt;` the</span>
+            <span class="c1"># :class:`HTTPv1 &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1&gt;` and</span>
+            <span class="c1"># :class:`HTTPv2 &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2&gt;` the</span>
             <span class="c1"># ``version`` names, but each of those declares its own in full, and</span>
             <span class="c1"># inheriting the opt-out would exempt the very classes that can be</span>
             <span class="c1"># checked. A subclass that dispatches in turn says so itself.</span>
@@ -952,7 +949,7 @@
     <span class="c1"># :mod:`pcapkit`, which is the ``from_data`` call the reader wants to be</span>
     <span class="c1"># pointed at, and it stays right if the frames between change, where a</span>
     <span class="c1"># hardcoded count would not. It is also what :meth:`Schema.__update__</span>
-    <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` passes for the</span>
+    <span class="c1"># &lt;pcapkit.protocols.schema.Schema.__update__&gt;` passes for the</span>
     <span class="c1"># warning this one is the counterpart of.</span>
     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">._make_data returned keyword(s) that no signature of '</span>
          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> declares, so they are discarded: </span><span class="si">{</span><span class="n">listed</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
@@ -968,7 +965,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Whether a next layer of ``klass`` parsed from ``captured`` octets may be</span>
-<span class="sd">        replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by</span>
+<span class="sd">        replaced with :class:`~pcapkit.protocols.misc.raw.protocol.Raw` by</span>
 <span class="sd">        :meth:`Protocol._parse_next_layer</span>
 <span class="sd">        &lt;pcapkit.protocols.protocol.Protocol._parse_next_layer&gt;`, and so has</span>
 <span class="sd">        its warnings held.</span>
@@ -984,6 +981,43 @@
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sibling_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``role`` class for a protocol class defined without one (:issue:`2534`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: The protocol class being defined.</span>
+<span class="sd">        role: ``'schema'`` or ``'data'``, the module to look in.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The class named after ``cls`` in the ``role`` module of the package whose</span>
+<span class="sd">        ``protocol`` module defines ``cls``, if there is one; otherwise</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.schema.Raw` or</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.data.Raw`.</span>
+
+<span class="sd">    """</span>
+    <span class="n">package</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'protocol'</span> <span class="ow">and</span> <span class="n">package</span> <span class="o">!=</span> <span class="vm">__name__</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">package</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s1">'</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">sibling</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">sibling</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">found</span>
+    <span class="c1"># NOTE: imported here rather than at the top: Raw's package is under</span>
+    <span class="c1"># pcapkit.protocols.misc, whose modules import this one (#2534).</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="s1">'schema'</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.schema</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">Raw</span> <span class="k">as</span> <span class="n">Schema_Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">return</span> <span class="n">Schema_Raw</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.data</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">Raw</span> <span class="k">as</span> <span class="n">Data_Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+    <span class="k">return</span> <span class="n">Data_Raw</span>
 
 
 <div class="viewcode-block" id="ProtocolMeta">
@@ -1047,9 +1081,9 @@
 
     <span class="c1">#: Layer of protocol, can be one of ``Link``, ``Internet``, ``Transport``</span>
     <span class="c1">#: and ``Application``. For example, the layer of</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.link.ethernet.Ethernet` is ``Link``. However,</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet` is ``Link``. However,</span>
     <span class="c1">#: certain protocols are not in any layer, such as</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and thus its layer is :obj:`None`.</span>
     <span class="n">__layer__</span><span class="p">:</span> <span class="s1">'Optional[Literal["Link", "Internet", "Transport", "Application"]]'</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#: Protocol index mapping for decoding the next layer; see</span>
@@ -1058,7 +1092,7 @@
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
     <span class="c1">#: module and class, or a :class:`ProtocolBase` subclass.</span>
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
-        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1">#: Read-only copy of :attr:`__proto__` as the class defining it shipped it,</span>
@@ -1070,7 +1104,7 @@
 
     <span class="c1">#: Construction keywords this protocol consumes out of ``**kwargs`` instead</span>
     <span class="c1">#: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in</span>
-    <span class="c1">#: :meth:`read` -- as :meth:`ESP.read &lt;pcapkit.protocols.internet.esp.ESP.read&gt;`</span>
+    <span class="c1">#: :meth:`read` -- as :meth:`ESP.read &lt;pcapkit.protocols.internet.esp.protocol.ESP.read&gt;`</span>
     <span class="c1">#: does with ``packet``.</span>
     <span class="c1">#: :func:`_declared_keywords` finds keywords by</span>
     <span class="c1">#: reading signatures, which cannot see such a name, so a protocol that</span>
@@ -1087,10 +1121,10 @@
     <span class="c1">#: :obj:`None` means the keywords cannot be enumerated and the check is</span>
     <span class="c1">#: skipped for this protocol. That is for a *dispatcher*, whose real signature</span>
     <span class="c1">#: belongs to a class chosen at call time:</span>
-    <span class="c1">#: :meth:`HTTP.make &lt;pcapkit.protocols.application.http.HTTP.make&gt;` declares</span>
+    <span class="c1">#: :meth:`HTTP.make &lt;pcapkit.protocols.application.http.protocol.HTTP.make&gt;` declares</span>
     <span class="c1">#: only ``version`` and forwards everything else to</span>
-    <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.HTTPv1.make&gt;` or</span>
-    <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTPv2.make&gt;`</span>
+    <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1.make&gt;` or</span>
+    <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2.make&gt;`</span>
     <span class="c1">#: depending on that value, so no set of names is right for it. Use it only</span>
     <span class="c1">#: for that shape, since a protocol that skips the check silently discards an</span>
     <span class="c1">#: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a</span>
@@ -1106,7 +1140,7 @@
     <span class="c1">#: that overrides ``make`` and forwards the rest to its parent keeps the</span>
     <span class="c1">#: parent's keywords. A base whose subclasses override ``make`` *without*</span>
     <span class="c1">#: forwarding sets this, so that its keywords are refused for them rather than</span>
-    <span class="c1">#: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
+    <span class="c1">#: accepted and dropped -- :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`</span>
     <span class="c1">#: does, for ``len`` and ``data`` (:issue:`2286`). Read from the defining</span>
     <span class="c1">#: class alone, so it is not inherited, and it leaves :attr:`__keywords__`</span>
     <span class="c1">#: and the other construction methods unaffected.</span>
@@ -1142,7 +1176,7 @@
     <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#: Whether this layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and so was kept as</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw` by :meth:`_parse_next_layer`</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.protocol.Raw` by :meth:`_parse_next_layer`</span>
     <span class="c1">#: without being parsed. Such a layer carries an ``error`` as one that</span>
     <span class="c1">#: failed to parse does, so this is what tells the two apart: what follows</span>
     <span class="c1">#: the limit is not to be read on (:issue:`1610`).</span>
@@ -1208,7 +1242,7 @@
 <span class="w">        </span><span class="sd">"""Protocol chain of current instance.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` has no chain and</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` has no chain and</span>
 <span class="sd">            narrows this to :obj:`None`; :meth:`_decode_next_layer` passes it</span>
 <span class="sd">            on as ``basis``, which</span>
 <span class="sd">            :class:`~pcapkit.corekit.protochain.ProtoChain` accepts.</span>
@@ -1232,8 +1266,8 @@
 <span class="sd">            A protocol laid out otherwise has to override this: one whose</span>
 <span class="sd">            :attr:`~length` counts something else, or one carrying a *trailer*</span>
 <span class="sd">            after the payload, gets a header that eats the payload and a payload</span>
-<span class="sd">            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` is the</span>
-<span class="sd">            example -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length`</span>
+<span class="sd">            of ``b''``. :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` is the</span>
+<span class="sd">            example -- its :attr:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length`</span>
 <span class="sd">            is the wire's Block Total Length and the captured octets sit ahead of</span>
 <span class="sd">            the option list and the trailing length field. The payload matters</span>
 <span class="sd">            because :meth:`Protocol.__init__` injects it into every parsed</span>
@@ -1342,7 +1376,7 @@
 <span class="sd">            ``SomeProtocol.make(...)`` on an instance obtained some other way --</span>
 <span class="sd">            ``object.__new__(cls).make(**kwargs)`` is the idiom, used by this</span>
 <span class="sd">            package's own tests and by :meth:`HTTP.make</span>
-<span class="sd">            &lt;pcapkit.protocols.application.http.HTTP.make&gt;` to reach its versioned</span>
+<span class="sd">            &lt;pcapkit.protocols.application.http.protocol.HTTP.make&gt;` to reach its versioned</span>
 <span class="sd">            implementation. Covering it would mean interposing on every ``make``</span>
 <span class="sd">            in the tree rather than on the one place their keywords converge, so</span>
 <span class="sd">            it is deliberately not done. Construct through the constructor to get</span>
@@ -1376,7 +1410,7 @@
 <span class="sd">            constructed, the header is made on a shallow copy of it (see</span>
 <span class="sd">            :meth:`_packing_target`), so :attr:`schema`, :attr:`info` and</span>
 <span class="sd">            anything :meth:`make` sets along the way, such as</span>
-<span class="sd">            :attr:`TCP.connection &lt;pcapkit.protocols.transport.tcp.TCP.connection&gt;`,</span>
+<span class="sd">            :attr:`TCP.connection &lt;pcapkit.protocols.transport.tcp.protocol.TCP.connection&gt;`,</span>
 <span class="sd">            still describe that packet. Only the call that</span>
 <span class="sd">            :meth:`__post_init__` makes to construct the instance keeps the</span>
 <span class="sd">            header made here, as the one :meth:`unpack` reads back.</span>
@@ -1384,7 +1418,7 @@
 <span class="sd">            That call, when :meth:`from_data` rebuilds a header the capture cut</span>
 <span class="sd">            short, cuts the header back to the octets captured, through its own</span>
 <span class="sd">            ``__short_read__`` and :meth:`Schema._cut_short_read</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.schema.Schema._cut_short_read&gt;`, and</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.Schema._cut_short_read&gt;`, and</span>
 <span class="sd">            returns only those (:issue:`2703`).</span>
 
 <span class="sd">        .. versionchanged:: 1.5.0</span>
@@ -1545,7 +1579,7 @@
 <span class="sd">        be passed on::</span>
 
 <span class="sd">           &gt;&gt;&gt; from pcapkit.const.reg.ethertype import EtherType</span>
-<span class="sd">           &gt;&gt;&gt; from pcapkit.protocols.link.ethernet import Ethernet</span>
+<span class="sd">           &gt;&gt;&gt; from pcapkit.protocols.link.ethernet.protocol import Ethernet</span>
 <span class="sd">           &gt;&gt;&gt; code = Ethernet.resolve_index('Address_Resolution_Protocol',</span>
 <span class="sd">           ...                               namespace=EtherType)</span>
 <span class="sd">           &gt;&gt;&gt; Ethernet(type=code).info.type</span>
@@ -1651,9 +1685,9 @@
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort: skip</span>
             <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
 
             <span class="c1"># log error</span>
@@ -1755,7 +1789,7 @@
 <span class="sd">        &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` returns, which carries the</span>
 <span class="sd">        metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,</span>
 <span class="sd">        which the payload is dispatched on, ``__short_read__``, and, for</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the extension header</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header</span>
 <span class="sd">        chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them</span>
 <span class="sd">        too, or no payload (nor IPv6 extension header) is rebuilt and no short</span>
 <span class="sd">        read is cut back, see :meth:`_make_payload`; nothing is guessed from</span>
@@ -1770,9 +1804,9 @@
 <span class="sd">            data: Protocol data.</span>
 <span class="sd">            **kwargs: Construction keywords that ``data`` does not carry, such as</span>
 <span class="sd">                the ``num`` and ``header`` of</span>
-<span class="sd">                :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, or the</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, or the</span>
 <span class="sd">                ``num``, ``sct`` and ``ctx`` of</span>
-<span class="sd">                :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`. They take</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`. They take</span>
 <span class="sd">                precedence over the keywords :meth:`_make_data` returns.</span>
 
 <span class="sd">        Returns:</span>
@@ -1992,7 +2026,7 @@
         <span class="c1"># keep its default -- ``TCP_BASE`` asking for ``seq=1``, which</span>
         <span class="c1"># ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning</span>
         <span class="c1"># (#617). The schema layer is not that permissive: :meth:`Schema.__update__</span>
-        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` warns</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.Schema.__update__&gt;` warns</span>
         <span class="c1"># :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it</span>
         <span class="c1"># does not know, and this closes the asymmetry from the other end.</span>
         <span class="c1">#</span>
@@ -2057,7 +2091,7 @@
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
-            <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
+            <span class="c1">#: pcapkit.protocols.data.Data: Parsed packet data.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span>
 
@@ -2100,12 +2134,15 @@
 <span class="sd">        &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            When ``schema`` and/or ``data`` is not specified, the method will first</span>
-<span class="sd">            try to find the corresponding class in the</span>
-<span class="sd">            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`</span>
-<span class="sd">            modules respectively. If the class is not found, the default</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and</span>
-<span class="sd">            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.</span>
+<span class="sd">            When ``schema`` and/or ``data`` is not specified, the method looks</span>
+<span class="sd">            for the class of the subclass's own name in the ``schema`` and</span>
+<span class="sd">            ``data`` modules beside the ``protocol`` module that defines it, as</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`</span>
+<span class="sd">            (:issue:`2534`). If there is none, the default</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.</span>
+<span class="sd">            An explicit ``schema`` or ``data`` keyword is used as given.</span>
 
 <span class="sd">        Dispatch registration is **opt-in**, like the ``engine=``/``protocol=``/</span>
 <span class="sd">        ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,</span>
@@ -2126,17 +2163,17 @@
 <span class="sd">          :class:`~pcapkit.const.reg.ethertype.EtherType` member always means</span>
 <span class="sd">          :class:`~pcapkit.protocols.link.link.Link`, and any</span>
 <span class="sd">          :class:`~pcapkit.const.reg.linktype.LinkType` member means *both*</span>
-<span class="sd">          :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**</span>
-<span class="sd">          :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`;</span>
+<span class="sd">          :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` **and**</span>
+<span class="sd">          :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`;</span>
 <span class="sd">        * a :class:`dict` mapping a destination class to a key, for a key</span>
 <span class="sd">          that cannot name its own destination -- a raw :class:`int` port,</span>
 <span class="sd">          for instance, is ambiguous between</span>
-<span class="sd">          :class:`~pcapkit.protocols.transport.tcp.TCP` and</span>
-<span class="sd">          :class:`~pcapkit.protocols.transport.udp.UDP`, and *must* use this</span>
+<span class="sd">          :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and</span>
+<span class="sd">          :class:`~pcapkit.protocols.transport.udp.protocol.UDP`, and *must* use this</span>
 <span class="sd">          form;</span>
 <span class="sd">        * an iterable mixing either of the above, to register the same class</span>
 <span class="sd">          into several registries from a single declaration -- e.g. a</span>
-<span class="sd">          :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both</span>
+<span class="sd">          :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable both</span>
 <span class="sd">          by its IP protocol number and by a UDP port.</span>
 
 <span class="sd">        The explicit mapping form is accepted even for a key whose type could</span>
@@ -2159,9 +2196,9 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_ST]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Schema_Raw</span><span class="p">))</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_ST]'</span><span class="p">,</span> <span class="n">_sibling_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'schema'</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_PT]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">Data_Raw</span><span class="p">))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_PT]'</span><span class="p">,</span> <span class="n">_sibling_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">))</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span>
@@ -2296,7 +2333,7 @@
                 <span class="k">return</span> <span class="bp">self</span>
 
         <span class="c1"># then check recursively</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> \
             <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
@@ -2332,7 +2369,7 @@
                 <span class="k">return</span> <span class="kc">True</span>
 
         <span class="c1"># then check recursively</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> \
             <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
@@ -2410,8 +2447,8 @@
 <span class="sd">        Note:</span>
 <span class="sd">            A :meth:`pack` override that does not call this one has to build</span>
 <span class="sd">            on this target too, as :meth:`Frame.pack</span>
-<span class="sd">            &lt;pcapkit.protocols.misc.pcap.frame.Frame.pack&gt;` and</span>
-<span class="sd">            :meth:`PCAPNG.pack &lt;pcapkit.protocols.misc.pcapng.PCAPNG.pack&gt;` do.</span>
+<span class="sd">            &lt;pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack&gt;` and</span>
+<span class="sd">            :meth:`PCAPNG.pack &lt;pcapkit.protocols.misc.pcapng.protocol.PCAPNG.pack&gt;` do.</span>
 <span class="sd">            The copy is shallow, so a :meth:`make` that mutates a container</span>
 <span class="sd">            in place still reaches the instance's.</span>
 
@@ -2511,7 +2548,7 @@
 <span class="sd">            Payload of :attr:`self.__header__ &lt;Protocol.__header__&gt;` as :obj:`bytes`.</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.</span>
+<span class="sd">            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span></div>
@@ -2862,7 +2899,7 @@
 <span class="sd">        * If ``discard`` is set as :data:`True`, returns the packet body (in</span>
 <span class="sd">          :obj:`bytes`) only.</span>
 <span class="sd">        * Otherwise, returns the header and payload data as</span>
-<span class="sd">          :class:`~pcapkit.protocols.data.protocol.Packet` object.</span>
+<span class="sd">          :class:`~pcapkit.protocols.data.Packet` object.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -3267,7 +3304,7 @@
 <span class="sd">        This method uses ``__next_type__`` and ``__next_name__`` to</span>
 <span class="sd">        determine the payload type and name. If either of them is missing or</span>
 <span class="sd">        :data:`None`, or ``data`` holds nothing under ``__next_name__``, a</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.no_payload.NoPayload` instance will be</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` instance will be</span>
 <span class="sd">        returned, exactly as for a protocol with no next layer. Otherwise, the</span>
 <span class="sd">        payload will be constructed by :meth:`Protocol.from_data</span>
 <span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`.</span>
@@ -3299,7 +3336,7 @@
         <span class="n">name</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_name__'</span><span class="p">))</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">))</span>
                 <span class="ow">or</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> \
                 <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
 
@@ -3366,7 +3403,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The class registered for ``proto``, or the fallback ``registry``</span>
-<span class="sd">            declares -- normally :class:`~pcapkit.protocols.misc.raw.Raw` -- when</span>
+<span class="sd">            declares -- normally :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- when</span>
 <span class="sd">            ``proto`` is not registered.</span>
 
 <span class="sd">        Important:</span>
@@ -3467,9 +3504,9 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
 
@@ -3492,16 +3529,16 @@
 <span class="sd">            **kwargs: keyword arguments for the next layer's constructor</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
 <span class="sd">            when fewer octets were captured than its header needs, or when it is</span>
 <span class="sd">            past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">            zero-fills a field the stream ends inside, so a header parsed from</span>
 <span class="sd">            too few octets is filled with values that were never on the wire, and</span>
 <span class="sd">            :meth:`from_data &lt;Protocol.from_data&gt;` rebuilds them (:issue:`1170`).</span>
-<span class="sd">            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            Such a payload is kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
 <span class="sd">            instead, as an unparseable one is.</span>
 
 <span class="sd">            The captured octets are the first ``length`` of ``file_``, or all of</span>
@@ -3512,7 +3549,7 @@
 <span class="sd">            header it parsed, :attr:`length</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.length&gt;` octets long, fits</span>
 <span class="sd">            in them anyway: for a variable-length header such as</span>
-<span class="sd">            :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` the hint is the longest</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` the hint is the longest</span>
 <span class="sd">            form rather than the shortest. A next layer that reports no hint is</span>
 <span class="sd">            kept as parsed.</span>
 
@@ -3536,7 +3573,7 @@
 
 <span class="sd">            A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:</span>
 <span class="sd">            it and the rest of the frame are kept as</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, marked</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, marked</span>
 <span class="sd">            :attr:`_past_layer_limit`, with one</span>
 <span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`).</span>
 
@@ -3547,8 +3584,8 @@
         <span class="n">depth</span> <span class="o">=</span> <span class="n">frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">limit</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">FRAME_LAYER_LIMIT</span>
         <span class="k">if</span> <span class="n">limit</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
             <span class="c1"># NOTE: Nothing is lost if the next layer is raw already, or empty.</span>
             <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Raw</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoPayload</span><span class="p">:</span>
@@ -3583,7 +3620,7 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">frame_depth</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">held</span><span class="o">.</span><span class="n">discard</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span></div>
 
@@ -3701,12 +3738,15 @@
 <span class="sd">        attributes of the subclass.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            When ``schema`` and/or ``data`` is not specified, the method will first</span>
-<span class="sd">            try to find the corresponding class in the</span>
-<span class="sd">            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`</span>
-<span class="sd">            modules respectively. If the class is not found, the default</span>
-<span class="sd">            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and</span>
-<span class="sd">            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.</span>
+<span class="sd">            When ``schema`` and/or ``data`` is not specified, the method looks</span>
+<span class="sd">            for the class of the subclass's own name in the ``schema`` and</span>
+<span class="sd">            ``data`` modules beside the ``protocol`` module that defines it, as</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` finds</span>
+<span class="sd">            :class:`~pcapkit.protocols.link.l2tp.schema.L2TP`</span>
+<span class="sd">            (:issue:`2534`). If there is none, the default</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.schema.Raw` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.data.Raw` classes will be used.</span>
+<span class="sd">            An explicit ``schema`` or ``data`` keyword is used as given.</span>
 
 <span class="sd">        This method also registers the subclass to the protocol registry,</span>
 <span class="sd">        i.e., :attr:`pcapkit.protocols.__proto__`. That registration is</span>

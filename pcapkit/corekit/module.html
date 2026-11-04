@@ -603,7 +603,7 @@ loaded yet. That matters because this property is on a <em>per-frame</em>
 dispatch path: <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._lookup_next_layer</span></code></a>
 deliberately writes no resolved class back, so every next layer
 lookup resolves its descriptor again – the one registered for the
-code, or the fallback for <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+code, or the fallback for <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
 when nobody registered it. An extraction of
 <code class="file docutils literal notranslate"><span class="pre">many_interfaces.pcapng</span></code> performs 296 resolutions, 48 of them
 fallbacks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>).

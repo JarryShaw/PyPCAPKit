@@ -581,16 +581,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_code</span><span class="p">,</span> <span class="n">_register_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.dccp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_DCCP_Option</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">Schema_SCTP_Chunk</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCause</span> <span class="k">as</span> <span class="n">Schema_SCTP_ErrorCause</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Schema_SCTP_Parameter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp</span><span class="w"> </span><span class="kn">import</span> <span class="n">DCCP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCTP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DCCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_DCCP_Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">SCTP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">Schema_SCTP_Chunk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCause</span> <span class="k">as</span> <span class="n">Schema_SCTP_ErrorCause</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Schema_SCTP_Parameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -601,18 +601,21 @@
         <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">SCTP_PayloadProtocolIdentifier</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">DCCP_OptionConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">DCCP_OptionParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">CauseConstructor</span> <span class="k">as</span> <span class="n">SCTP_CauseConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">CauseParser</span> <span class="k">as</span> <span class="n">SCTP_CauseParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkConstructor</span> <span class="k">as</span> <span class="n">SCTP_ChunkConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkParser</span> <span class="k">as</span> <span class="n">SCTP_ChunkParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterConstructor</span> <span class="k">as</span> <span class="n">SCTP_ParameterConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterParser</span> <span class="k">as</span> <span class="n">SCTP_ParameterParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPOptionConstructor</span> <span class="k">as</span> <span class="n">TCP_MPOptionConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPOptionParser</span> <span class="k">as</span> <span class="n">TCP_MPOptionParser</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">TCP_OptionConstructor</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">TCP_OptionParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">DCCP_OptionConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.dccp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">DCCP_OptionParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">CauseConstructor</span> <span class="k">as</span> <span class="n">SCTP_CauseConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">CauseParser</span> <span class="k">as</span> <span class="n">SCTP_CauseParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkConstructor</span> <span class="k">as</span> <span class="n">SCTP_ChunkConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChunkParser</span> <span class="k">as</span> <span class="n">SCTP_ChunkParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">ParameterConstructor</span> <span class="k">as</span> <span class="n">SCTP_ParameterConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.sctp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterParser</span> <span class="k">as</span> <span class="n">SCTP_ParameterParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> \
+        <span class="n">MPOptionConstructor</span> <span class="k">as</span> <span class="n">TCP_MPOptionConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPOptionParser</span> <span class="k">as</span> <span class="n">TCP_MPOptionParser</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionConstructor</span> <span class="k">as</span> <span class="n">TCP_OptionConstructor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">TCP_OptionParser</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'register_apptype'</span><span class="p">,</span>
@@ -654,8 +657,8 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` and/or</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
@@ -709,10 +712,10 @@
 <span class="sd">            :issue:`833`.</span>
 
 <span class="sd">    Important:</span>
-<span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**</span>
+<span class="sd">        :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` is deliberately **not**</span>
 <span class="sd">        one of the registries this writes to, so naming ``sctp`` here is an error</span>
 <span class="sd">        rather than a no-op. Its</span>
-<span class="sd">        :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is</span>
+<span class="sd">        :data:`~pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry is</span>
 <span class="sd">        keyed by the DATA chunk's payload protocol identifier rather than by</span>
 <span class="sd">        port number, so writing a port number into it would dispatch on a</span>
 <span class="sd">        number from the wrong registry. Use</span>
@@ -843,7 +846,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__proto__</span>
 <div class="viewcode-block" id="register_tcp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_tcp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -855,7 +858,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
@@ -886,7 +889,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__option__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__option__</span>
 <div class="viewcode-block" id="register_tcp_option">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_tcp_option">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TCP_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TCP_OptionParser, TCP_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -894,17 +897,17 @@
 <span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__option__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` option code as in</span>
 <span class="sd">            :class:`~pcapkit.const.tcp.option.Option`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the option. A name names the</span>
 <span class="sd">            ``_read_mode_*`` and ``_make_mode_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_mode_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.tcp.schema.Option`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.option.Option`</span>
@@ -923,7 +926,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__mp_option__</span>
 <div class="viewcode-block" id="register_tcp_mp_option">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_tcp_mp_option">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tcp_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TCP_MPTCPOption'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -931,17 +934,17 @@
 <span class="w">    </span><span class="sd">"""Register an MPTCP option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__mp_option__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in</span>
+<span class="sd">        code: Multipath :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` option code as in</span>
 <span class="sd">            :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the option. A name names the</span>
 <span class="sd">            ``_read_mptcp_*`` and ``_make_mptcp_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_mptcp_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.tcp.schema.MPTCP`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`</span>
@@ -966,7 +969,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.udp.UDP.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.udp.protocol.UDP.__proto__</span>
 <div class="viewcode-block" id="register_udp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_udp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -978,7 +981,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
@@ -1015,7 +1018,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__</span>
 <div class="viewcode-block" id="register_sctp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -1027,7 +1030,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.sctp.SCTP.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: payload protocol identifier (PPID), as in</span>
@@ -1064,7 +1067,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__</span>
 <div class="viewcode-block" id="register_sctp_chunk">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp_chunk">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp_chunk</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'SCTP_Chunk'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[SCTP_ChunkParser, SCTP_ChunkConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -1072,17 +1075,17 @@
 <span class="w">    </span><span class="sd">"""Register a chunk parser.</span>
 
 <span class="sd">    The function will register the given chunk parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.sctp.SCTP.__chunk__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk type as in</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` chunk type as in</span>
 <span class="sd">            :class:`~pcapkit.const.sctp.chunk.Chunk`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the chunk. A name names the</span>
 <span class="sd">            ``_read_chunk_*`` and ``_make_chunk_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_chunk_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the chunk.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Chunk`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the chunk.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.Chunk`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.chunk.Chunk`</span>
@@ -1103,7 +1106,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.SCTP.__parameter__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__parameter__</span>
 <div class="viewcode-block" id="register_sctp_parameter">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp_parameter">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'SCTP_Parameter'</span><span class="p">,</span>
@@ -1112,17 +1115,17 @@
 <span class="w">    </span><span class="sd">"""Register a chunk parameter parser.</span>
 
 <span class="sd">    The function will register the given chunk parameter parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.sctp.SCTP.__parameter__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__parameter__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk parameter type</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` chunk parameter type</span>
 <span class="sd">            as in :class:`~pcapkit.const.sctp.parameter.Parameter`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the parameter. A name names the</span>
 <span class="sd">            ``_read_param_*`` and ``_make_param_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_param_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Parameter`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the parameter.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.Parameter`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.parameter.Parameter`</span>
@@ -1143,7 +1146,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.SCTP.__cause__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__</span>
 <div class="viewcode-block" id="register_sctp_cause">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp_cause">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'SCTP_CauseCode'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[SCTP_CauseParser, SCTP_CauseConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -1151,17 +1154,17 @@
 <span class="w">    </span><span class="sd">"""Register an error cause parser.</span>
 
 <span class="sd">    The function will register the given error cause parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.sctp.SCTP.__cause__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` error cause code as</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` error cause code as</span>
 <span class="sd">            in :class:`~pcapkit.const.sctp.cause_code.CauseCode`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the cause. A name names the</span>
 <span class="sd">            ``_read_cause_*`` and ``_make_cause_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_cause_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the cause.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.ErrorCause`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the cause.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.ErrorCause`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.cause_code.CauseCode`</span>
@@ -1188,7 +1191,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.dccp.DCCP.__proto__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__</span>
 <div class="viewcode-block" id="register_dccp">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_dccp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
@@ -1200,7 +1203,7 @@
 <span class="sd">        should be ``{module}.{class_}``.</span>
 
 <span class="sd">    The function will register the given protocol class to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.dccp.DCCP.__proto__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__` registry.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        code: port number</span>
@@ -1233,7 +1236,7 @@
 
 
 
-<span class="c1"># NOTE: pcapkit.protocols.transport.dccp.DCCP.__option__</span>
+<span class="c1"># NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__option__</span>
 <div class="viewcode-block" id="register_dccp_option">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp_option">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_dccp_option</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'DCCP_Option'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[DCCP_OptionParser, DCCP_OptionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -1241,17 +1244,17 @@
 <span class="w">    </span><span class="sd">"""Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
-<span class="sd">    :data:`pcapkit.protocols.transport.dccp.DCCP.__option__` registry.</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__option__` registry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        code: :class:`~pcapkit.protocols.transport.dccp.DCCP` option type as in</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` option type as in</span>
 <span class="sd">            :class:`~pcapkit.const.dccp.option.Option`.</span>
 <span class="sd">        meth: Method name, or a ``(parser, constructor)`` pair of callables, to</span>
 <span class="sd">            parse and construct the option. A name names the</span>
 <span class="sd">            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name</span>
 <span class="sd">            an existing ``_read_opt_*`` one.</span>
-<span class="sd">        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.</span>
-<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.schema.transport.dccp.Option`.</span>
+<span class="sd">        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.</span>
+<span class="sd">            It should be a subclass of :class:`pcapkit.protocols.transport.dccp.schema.Option`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RegistryError: If ``code`` is not a :class:`~pcapkit.const.dccp.option.Option`</span>

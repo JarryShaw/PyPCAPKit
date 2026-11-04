@@ -593,7 +593,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ParamSpec</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
     <span class="n">P</span> <span class="o">=</span> <span class="n">ParamSpec</span><span class="p">(</span><span class="s1">'P'</span><span class="p">)</span>
     <span class="n">R_seekset</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'R_seekset'</span><span class="p">)</span>
@@ -664,8 +664,8 @@
 
 <span class="sd">    This decorator calls the decorated function. Should any exception be</span>
 <span class="sd">    raised, it re-parses the current layer's payload as</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` -- or as</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, if the error is an</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- or as</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, if the error is an</span>
 <span class="sd">    end-of-file :exc:`~pcapkit.utilities.exceptions.StructError` -- whose</span>
 <span class="sd">    ``error`` is the exception's message.</span>
 
@@ -753,9 +753,9 @@
                 <span class="n">beholding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
 
             <span class="c1"># NOTE: Keyed on the class, not on quietness: a quiet end-of-file StructError is still</span>
@@ -823,25 +823,25 @@
 
 <span class="sd">    Important:</span>
 <span class="sd">        This decorator function is designed for decorating the</span>
-<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`</span>
 <span class="sd">        *class method*.</span>
 
 <span class="sd">    This decorator will revise the parameter list provided to the original</span>
-<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` method</span>
+<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;` method</span>
 <span class="sd">    and extract necessary information based on the given parameters, then provide</span>
 <span class="sd">    the revised version of parameter list to the original method.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have the following signature::</span>
 
-<span class="sd">            func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',</span>
+<span class="sd">            func(cls: 'typing.Type[pcapkit.protocols.schema.Schema]',</span>
 <span class="sd">                 data: 'bytes | typing.IO[bytes]',</span>
 <span class="sd">                 length: 'Optional[int]',</span>
-<span class="sd">                 packet: 'Optional[dict[str, Any]]') -&gt; 'pcapkit.protocols.schema.schema.Schema'</span>
+<span class="sd">                 packet: 'Optional[dict[str, Any]]') -&gt; 'pcapkit.protocols.schema.Schema'</span>
 
 <span class="sd">        No further positional or keyword arguments are read from -- or</span>
 <span class="sd">        forwarded to -- the decorated function. :func:`prepare` is applied only to</span>
-<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`,</span>
+<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.Schema.unpack&gt;`,</span>
 <span class="sd">        whose real signature has exactly these parameters, and nothing</span>
 <span class="sd">        calls it with more. Rather than discard extras silently (:issue:`454`),</span>
 <span class="sd">        the wrapper raises :exc:`TypeError` for an extra positional argument or</span>
@@ -849,7 +849,7 @@
 <span class="sd">        arguments would.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`</span>
+<span class="sd">        :meth:`pcapkit.protocols.schema.Schema.unpack`</span>
 
 <span class="sd">    :param func: decorated function</span>
 <span class="sd">    :meta decorator:</span>
@@ -931,7 +931,7 @@
         <span class="c1"># the schema's own fields and therefore holding none of the enclosing</span>
         <span class="c1"># layer's, so it overwrites exactly the values ``post_process`` derived</span>
         <span class="c1"># from that context. It would discard, for one, the IPv6 source address</span>
-        <span class="c1"># that ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``</span>
+        <span class="c1"># that ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``</span>
         <span class="c1"># has just resolved: ``OptionField.unpack`` measures each parsed option</span>
         <span class="c1"># with ``len(data)``, which triggers the re-pack one option later.</span>
         <span class="c1">#</span>
@@ -942,7 +942,7 @@
         <span class="c1"># Guarded rather than assigned outright because ``post_process`` may hand</span>
         <span class="c1"># back something other than a schema: an implementation is free to return</span>
         <span class="c1"># a nested one instead of ``self``, as</span>
-        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` does, and the</span>
+        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, and the</span>
         <span class="c1"># decorator is also applied to stand-ins in the test suite that return</span>
         <span class="c1"># the packet mapping. Only a real schema carries the flag.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">):</span>

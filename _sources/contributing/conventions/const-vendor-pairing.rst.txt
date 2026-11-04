@@ -76,7 +76,7 @@ predated the crawler and had drifted from it in the ways cross-review of
   IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
   inside its 0-19 ``Unassigned`` band, unnamed); it is dropped, and value 0
   now resolves to ``Unassigned`` like the rest of that band.
-  :class:`~pcapkit.protocols.application.ssl.SSL` never checked this member
+  :class:`~pcapkit.protocols.application.ssl.protocol.SSL` never checked this member
   by name -- its wire-type allowlist already excluded value 0 by construction
   -- so the sentinel's removal is behaviourally a no-op there too.
 * the committed ``HandshakeType`` cited RFC 5246, 6066 and 4680 for several

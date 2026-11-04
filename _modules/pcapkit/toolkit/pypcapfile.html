@@ -604,13 +604,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6</span> <span class="k">as</span> <span class="n">Module_IPv6</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ah</span> <span class="k">as</span> <span class="n">Schema_AH_Module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv4</span> <span class="k">as</span> <span class="n">Schema_IPv4_Module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp</span> <span class="k">as</span> <span class="n">Schema_TCP_Module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ah</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">Schema_AH_Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">Schema_IPv4_Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">protocol</span> <span class="k">as</span> <span class="n">Module_IPv6</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">Schema_TCP_Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.contextvars</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -1136,7 +1136,7 @@
 <span class="sd">        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`</span>
 <span class="sd">        follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long</span>
 <span class="sd">        (:rfc:`4302#section-2.2`), and no shorter than</span>
-<span class="sd">        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`. Any other</span>
+<span class="sd">        :data:`~pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN`. Any other</span>
 <span class="sd">        is stepped over by the length :func:`_default_extension_header` gives,</span>
 <span class="sd">        so one it keeps though cut short leaves no octets after it</span>
 <span class="sd">        (:issue:`2695`).</span>

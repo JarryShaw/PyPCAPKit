@@ -1,14 +1,14 @@
-===============================================================
-:class:`~pcapkit.protocols.application.ssl.SSL` Vendor Crawlers
-===============================================================
+========================================================================
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL` Vendor Crawlers
+========================================================================
 
 .. module:: pcapkit.vendor.tls
 
 This module contains the vendor crawlers of the constant enumerations shared by
 the record-layer implementations under the
-:class:`~pcapkit.protocols.application.ssl.SSL` umbrella --
-:class:`~pcapkit.protocols.application.tls.TLS` (SSLv3 through TLS 1.3) and
-:class:`~pcapkit.protocols.application.dtls.DTLS`. Available vendor crawlers
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL` umbrella --
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` (SSLv3 through TLS 1.3) and
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`. Available vendor crawlers
 include:
 
 .. list-table::

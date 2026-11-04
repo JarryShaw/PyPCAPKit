@@ -567,9 +567,9 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.ipv6">
-<span id="ipv6-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ipv6" title="Link to this heading">¶</a></h1>
+<span id="ipv6-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ipv6" title="Link to this heading">¶</a></h1>
 <p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> implementations. Available
+<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> implementations. Available
 vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -629,7 +629,7 @@ citing <span class="target" id="index-1"></span><a class="rfc reference external
 issue for the reading of <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9801.html"><strong>RFC 9801</strong></a> that makes the omission look
 intentional rather than an erratum. So
 <a class="reference internal" href="../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> has no
-<code class="docutils literal notranslate"><span class="pre">BIT_EMU</span></code>, and the walk in <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a> does not
+<code class="docutils literal notranslate"><span class="pre">BIT_EMU</span></code>, and the walk in <a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a> does not
 depend on <code class="docutils literal notranslate"><span class="pre">ExtensionHeader(147)</span></code> resolving: its test
 (<code class="docutils literal notranslate"><span class="pre">tests.protocols.internet.test_ipv6_ext_unit.IPv6ExtUnitTests</span>
 <span class="pre">.test_unimplemented_terminal_code_stops_the_walk_not_the_packet</span></code>)

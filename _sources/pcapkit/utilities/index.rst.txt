@@ -76,9 +76,9 @@ later (:issue:`2051`).
    :func:`typing.final` from Python 3.11 on, and ``typing_extensions.final``
    below it. Both record ``__final__ = True`` on the decorated object at
    runtime, which :class:`~pcapkit.corekit.infoclass.Info` and
-   :class:`~pcapkit.protocols.schema.schema.Schema` read to refuse a class
+   :class:`~pcapkit.protocols.schema.Schema` read to refuse a class
    marked ``@final`` without :func:`~pcapkit.corekit.infoclass.info_final` or
-   :func:`~pcapkit.protocols.schema.schema.schema_final`. Plain
+   :func:`~pcapkit.protocols.schema.schema_final`. Plain
    :func:`typing.final` records nothing below 3.11 (gh-90500).
 
    .. versionchanged:: 1.5.0

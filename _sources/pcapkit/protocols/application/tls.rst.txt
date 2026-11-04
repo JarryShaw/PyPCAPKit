@@ -2,9 +2,10 @@ TLS/SSL - Transport Layer Security
 ========================================
 
 .. module:: pcapkit.protocols.application.tls
+.. module:: pcapkit.protocols.application.tls.protocol
 
-:mod:`pcapkit.protocols.application.tls` contains
-:class:`~pcapkit.protocols.application.tls.TLS` only, which implements an
+:mod:`pcapkit.protocols.application.tls.protocol` contains
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` only, which implements an
 extractor for the TLS/SSLv3+ record-layer family [*]_ -- SSLv3 (:rfc:`6101`),
 TLS 1.0 (:rfc:`2246`), TLS 1.1 (:rfc:`4346`), TLS 1.2 (:rfc:`5246`) and TLS
 1.3 (:rfc:`9846`, which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`,
@@ -15,21 +16,21 @@ Version Identification
 ----------------------
 
 The record layer is wire-identical across the family, so one
-:class:`~pcapkit.protocols.application.tls.TLS` class parses all of it and
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` class parses all of it and
 reports the version it identified through
-:attr:`~pcapkit.protocols.application.tls.TLS.alias` and
-:attr:`~pcapkit.protocols.application.tls.TLS.name`, set by
-:meth:`~pcapkit.protocols.application.tls.TLS.read` -- the same shape
-:class:`~pcapkit.protocols.link.arp.ARP` uses for RARP/DRARP/InARP.
-:meth:`~pcapkit.protocols.application.tls.TLS.id` stays ``('TLS',)``
+:attr:`~pcapkit.protocols.application.tls.protocol.TLS.alias` and
+:attr:`~pcapkit.protocols.application.tls.protocol.TLS.name`, set by
+:meth:`~pcapkit.protocols.application.tls.protocol.TLS.read` -- the same shape
+:class:`~pcapkit.protocols.link.arp.protocol.ARP` uses for RARP/DRARP/InARP.
+:meth:`~pcapkit.protocols.application.tls.protocol.TLS.id` stays ``('TLS',)``
 whatever the version.
 
 .. list-table::
    :header-rows: 1
 
    * - Legacy record version
-     - :attr:`~pcapkit.protocols.application.tls.TLS.alias`
-     - :attr:`~pcapkit.protocols.application.tls.TLS.name`
+     - :attr:`~pcapkit.protocols.application.tls.protocol.TLS.alias`
+     - :attr:`~pcapkit.protocols.application.tls.protocol.TLS.name`
    * - ``0x0300``
      - ``SSLv3``
      - ``Secure Sockets Layer version 3``
@@ -60,10 +61,10 @@ negotiated one. So in a TLS 1.3 connection, every record after the hellos
 carries ``0x0303`` and reads ``TLS 1.2``; and a TLS 1.2 ``ClientHello`` sent
 at record version ``0x0301`` reads ``TLS 1.0``.
 
-:class:`~pcapkit.protocols.application.sslv3.SSLv3` is for explicit
-construction only, mirroring :class:`~pcapkit.protocols.link.inarp.InARP`: it
-narrows :meth:`~pcapkit.protocols.application.sslv3.SSLv3.id` to ``('SSLv3',)``
-and inherits :meth:`~pcapkit.protocols.application.tls.TLS.read` unchanged,
+:class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3` is for explicit
+construction only, mirroring :class:`~pcapkit.protocols.link.inarp.protocol.InARP`: it
+narrows :meth:`~pcapkit.protocols.application.sslv3.protocol.SSLv3.id` to ``('SSLv3',)``
+and inherits :meth:`~pcapkit.protocols.application.tls.protocol.TLS.read` unchanged,
 so the alias still follows the wire. Dispatch never constructs one.
 
 Decoded Fields
@@ -71,13 +72,13 @@ Decoded Fields
 
 * The record header, always: it is never encrypted.
 * A **cleartext** ``handshake``, ``alert`` or ``change_cipher_spec`` record
-  (:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.SSL._tls_content_is_cleartext>`
+  (:meth:`SSL._tls_content_is_cleartext <pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext>`
   decides which are):
 
   * ``ClientHello``/``ServerHello`` down to their cipher suites, compression
     methods and extensions, and ``EncryptedExtensions`` down to its
     extensions; an extension's body decodes where
-    :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.SSL.__extension__>`
+    :attr:`SSL.__extension__ <pcapkit.protocols.application.ssl.protocol.SSL.__extension__>`
     registers a decoder for its type.
   * Every other handshake message at type and length only.
   * ``Alert`` and ``ChangeCipherSpec`` in full.
@@ -89,12 +90,12 @@ Records in One Segment
 ----------------------
 
 A whole record after the first in a TCP segment is dissected as a further
-:class:`~pcapkit.protocols.application.tls.TLS` layer, the previous record's
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` layer, the previous record's
 payload (:issue:`2517`): a ``ServerHello`` followed by a ``ChangeCipherSpec``
 reads ``TCP:TLS 1.3:TLS 1.2``. The exceptions:
 
 * A whole record that fails to decode becomes
-  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it,
   with no SSLv2 trial.
 * Octets that open no record -- an unsupported content type, a legacy
   version outside ``0x03xx``, or a header cut short -- stay raw, with no error.
@@ -107,7 +108,7 @@ Known Limitation
 ----------------
 
 **A record split across two TCP segments is not reassembled**, and decodes as
-:class:`~pcapkit.protocols.misc.raw.Raw`, as does the partial record a segment
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, as does the partial record a segment
 ends inside. A record may be up to 16 KiB against a typical 1460-octet MSS, so
 this is routine.
 
@@ -117,7 +118,7 @@ this is routine.
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.tls.TLS
+.. autoclass:: pcapkit.protocols.application.tls.protocol.TLS
    :no-members:
    :show-inheritance:
 
@@ -139,25 +140,25 @@ this is routine.
 Header Schema
 -------------
 
-.. module:: pcapkit.protocols.schema.application.tls
+.. module:: pcapkit.protocols.application.tls.schema
 
-.. autoclass:: pcapkit.protocols.schema.application.tls.TLS
+.. autoclass:: pcapkit.protocols.application.tls.schema.TLS
    :members:
    :show-inheritance:
 
 Data Model
 ----------
 
-.. currentmodule:: pcapkit.protocols.data.application.tls
+.. module:: pcapkit.protocols.application.tls.data
 
-.. autoclass:: pcapkit.protocols.data.application.tls.TLS
+.. autoclass:: pcapkit.protocols.application.tls.data.TLS
    :members:
    :show-inheritance:
 
 See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
 ``Handshake``, ``Extension`` and its decoded bodies, ``Alert`` and
 ``ChangeCipherSpec``, shared verbatim with
-:class:`~pcapkit.protocols.application.dtls.DTLS`.
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`.
 
 .. rubric:: Footnotes
 

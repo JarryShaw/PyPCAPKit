@@ -650,7 +650,7 @@
 <span class="sd">        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that</span>
 <span class="sd">        asymmetry is exactly what let this slip past :issue:`469`'s otherwise</span>
 <span class="sd">        equivalent guard for :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (cf.</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id&gt;` (cf.</span>
 <span class="sd">        :issue:`491`).</span>
 
 <span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
@@ -717,7 +717,7 @@
 
 <span class="sd">        Routing every one of them through here rather than giving each its own</span>
 <span class="sd">        :func:`isinstance` check is the whole point: :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` carries exactly</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id&gt;` carries exactly</span>
 <span class="sd">        such a check (:issue:`469`), and :issue:`491` is the same defect at</span>
 <span class="sd">        every site that lacks one. A guard that has to be remembered per call</span>
 <span class="sd">        site is a guard that will be forgotten at the next one.</span>
@@ -730,9 +730,9 @@
 <span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate</span>
 <span class="sd">        even though sibling guards for the same mistake --</span>
 <span class="sd">        :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` from :issue:`469`</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.protocol.MH._make_opt_mn_id&gt;` from :issue:`469`</span>
 <span class="sd">        and :class:`ESP's SecurityAssociation</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.esp.SecurityAssociation&gt;` from :issue:`491`</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.esp.protocol.SecurityAssociation&gt;` from :issue:`491`</span>
 <span class="sd">        -- raise the latter. The layer decides: this is a field-level</span>
 <span class="sd">        conversion, so it answers with what :meth:`_IPAddressField.pre_process</span>
 <span class="sd">        &lt;pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process&gt;`</span>

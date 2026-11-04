@@ -2,9 +2,17 @@ Ethernet Protocol
 =================
 
 .. module:: pcapkit.protocols.link.ethernet
+.. module:: pcapkit.protocols.link.ethernet.protocol
 
-:mod:`pcapkit.protocols.link.ethernet` contains
-:class:`~pcapkit.protocols.link.ethernet.Ethernet`
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.link.ethernet.PAT_MAC_ADDR``, with no alias:
+   :meth:`~pcapkit.protocols.protocol.Protocol._read_mac_addr` and
+   :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr` read and make the address
+   (:issue:`2614`).
+
+:mod:`pcapkit.protocols.link.ethernet.protocol` contains
+:class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`
 only, which implements the extractor for Ethernet
 Protocol [*]_, whose structure is described as
 below:
@@ -21,7 +29,7 @@ below:
    12        96 ``ethernet.type`` Protocol (Internet Layer)
    ====== ===== ================= =========================
 
-.. autoclass:: pcapkit.protocols.link.ethernet.Ethernet
+.. autoclass:: pcapkit.protocols.link.ethernet.protocol.Ethernet
    :no-members:
    :show-inheritance:
 
@@ -41,23 +49,33 @@ below:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.ethernet
+.. module:: pcapkit.protocols.link.ethernet.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.ethernet.Ethernet
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.link.ethernet``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.link.ethernet.schema.Ethernet
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.link.ethernet.callback_payload
+.. autofunction:: pcapkit.protocols.link.ethernet.schema.callback_payload
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.ethernet
+.. module:: pcapkit.protocols.link.ethernet.data
 
-.. autoclass:: pcapkit.protocols.data.link.ethernet.Ethernet
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.link.ethernet``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.link.ethernet.data.Ethernet
    :members:
    :show-inheritance:
 

@@ -1,11 +1,11 @@
-==================================================================
-:class:`~pcapkit.protocols.internet.esp.ESP` Constant Enumerations
-==================================================================
+===========================================================================
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP` Constant Enumerations
+===========================================================================
 
 .. module:: pcapkit.const.esp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.esp.ESP` implementations. Available
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP` implementations. Available
 enumerations include:
 
 .. list-table::
@@ -18,14 +18,14 @@ enumerations include:
 ESP has no algorithm registry of its own: an SA's algorithms are negotiated by
 IKEv2, so both enumerations are the corresponding IKEv2 *transform ID*
 sub-registries. They live here rather than under an ``ikev2`` package because
-:class:`~pcapkit.protocols.internet.esp.ESP` is the only thing in
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP` is the only thing in
 :mod:`pcapkit` that consumes them.
 
 Both enumerate every transform **IANA has registered**, which is a much larger
 set than :mod:`pcapkit` can apply. Which of them ESP actually implements is a
 separate question, answered by
-:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES`.
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES`.
 
 .. [*] https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml#ikev2-parameters-5
 .. [*] https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml#ikev2-parameters-7

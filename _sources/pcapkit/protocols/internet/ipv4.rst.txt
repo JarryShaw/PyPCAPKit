@@ -2,9 +2,10 @@ IPv4 - Internet Protocol Version 4
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipv4
+.. module:: pcapkit.protocols.internet.ipv4.protocol
 
-:mod:`pcapkit.protocols.internet.ipv4` contains
-:class:`~pcapkit.protocols.internet.ipv4.IPv4` only,
+:mod:`pcapkit.protocols.internet.ipv4.protocol` contains
+:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` only,
 which implements the extractor for Internet Protocol
 version 4 (IPv4) [*]_, whose structure is described
 as below:
@@ -33,7 +34,7 @@ Octets      Bits        Name                    Description
   20        160   ``ipv4.options``        IP Options (if IHL > ``5``)
 ======= ========= ======================= ============================================
 
-.. autoclass:: pcapkit.protocols.internet.ipv4.IPv4
+.. autoclass:: pcapkit.protocols.internet.ipv4.protocol.IPv4
    :no-members:
    :show-inheritance:
 
@@ -95,138 +96,148 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipv4
+.. module:: pcapkit.protocols.internet.ipv4.schema
 
-.. autodata:: pcapkit.protocols.schema.internet.ipv4.IPV4_HEADER_LEN
+.. versionremoved:: 1.6.0
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.IPv4
+   ``pcapkit.protocols.schema.internet.ipv4``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autodata:: pcapkit.protocols.internet.ipv4.schema.IPV4_HEADER_LEN
+
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.IPv4
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.Option
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.EOOLOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.EOOLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.NOPOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.NOPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.SECOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.SECOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.LSROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.LSROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.TSOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.TSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.ESECOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.ESECOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.RROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.RROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.SIDOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.SIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.SSROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.SSROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.MTUPOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.MTUPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.MTUROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.MTUROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.TROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.TROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.RTRALTOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.RTRALTOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4._QSOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema._QSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QSOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QuickStartRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QuickStartReportOption
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.VerIHLField
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.VerIHLField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.ToSField
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.ToSField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.Flags
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.TSFlags
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.TSFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QuickStartFlags
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QuickStartFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QSTestFlags
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QSTestFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv4.QSNonce
+.. autoclass:: pcapkit.protocols.internet.ipv4.schema.QSNonce
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv4.quick_start_option_length
+.. autofunction:: pcapkit.protocols.internet.ipv4.schema.quick_start_option_length
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector
+.. autofunction:: pcapkit.protocols.internet.ipv4.schema.quick_start_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipv4
+.. module:: pcapkit.protocols.internet.ipv4.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.IPv4
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ipv4``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.IPv4
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.ToSField
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.ToSField
    :members:
    :show-inheritance:
 
@@ -240,15 +251,15 @@ Data Models
          This field's name conflicts with the :keyword:`del` keyword, so
          access it with :func:`getattr` instead.
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.Flags
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.Option
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.OptionType
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.OptionType
    :members:
    :show-inheritance:
 
@@ -262,55 +273,55 @@ Data Models
          This field's name conflicts with the :keyword:`class` keyword, so
          access it with :func:`getattr` instead.
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.EOOLOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.EOOLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.NOPOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.NOPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.SECOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.SECOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.LSROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.LSROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.TSOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.TSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.ESECOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.ESECOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.RROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.RROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.SIDOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.SIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.SSROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.SSROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.MTUPOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.MTUPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.MTUROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.MTUROption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.TROption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.TROption
    :members:
    :show-inheritance:
 
@@ -324,19 +335,19 @@ Data Models
          This field's name conflicts with the :keyword:`return` keyword, so
          access it with :func:`getattr` instead.
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.RTRALTOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.RTRALTOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.QSOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.QSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.QuickStartRequestOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.QuickStartRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.QuickStartReportOption
+.. autoclass:: pcapkit.protocols.internet.ipv4.data.QuickStartReportOption
    :members:
    :show-inheritance:
 

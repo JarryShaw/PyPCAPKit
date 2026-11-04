@@ -591,7 +591,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">)</span>
 
@@ -963,7 +963,7 @@
 
 <span class="sd">        This method is to be called by the metaclass during class creation.</span>
 <span class="sd">        It is used to set the field name and update the field list, i.e.,</span>
-<span class="sd">        :attr:`Schema.__fields__ &lt;pcapkit.protocols.schema.schema.Schema.__fields__&gt;`</span>
+<span class="sd">        :attr:`Schema.__fields__ &lt;pcapkit.protocols.schema.Schema.__fields__&gt;`</span>
 <span class="sd">        mapping dictionary.</span>
 
 <span class="sd">        """</span>

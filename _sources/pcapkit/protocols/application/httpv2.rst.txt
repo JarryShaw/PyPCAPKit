@@ -2,9 +2,10 @@ HTTP/2 - Hypertext Transfer Protocol
 ====================================
 
 .. module:: pcapkit.protocols.application.httpv2
+.. module:: pcapkit.protocols.application.httpv2.protocol
 
-:mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
+:mod:`pcapkit.protocols.application.httpv2.protocol` contains
+:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`
 only, which implements an extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -24,14 +25,14 @@ Frames in One Segment
 ---------------------
 
 A whole frame after the first in a TCP segment is dissected as a further
-:class:`~pcapkit.protocols.application.httpv2.HTTPv2` layer, the previous
+:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` layer, the previous
 frame's payload (:issue:`2536`), as
-:class:`~pcapkit.protocols.application.tls.TLS` chains records: a ``SETTINGS``
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` chains records: a ``SETTINGS``
 frame followed by a ``WINDOW_UPDATE`` reads ``TCP:HTTP/2:HTTP/2``. The
 exceptions:
 
 * A whole frame that fails to decode becomes
-  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it,
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it,
   with the parser's ``error``.
 * A frame the segment ends inside, its header or its payload cut short, stays
   raw, with no error.
@@ -54,14 +55,14 @@ exceptions:
 .. versionremoved:: 1.6.0
 
    ``pcapkit.protocols.application.httpv2.HTTP``, with no alias. The
-   class is renamed :class:`~pcapkit.protocols.application.httpv2.HTTPv2`,
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`,
    after its module (:issue:`2529`).
 
 .. raw:: html
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.httpv2.HTTPv2
+.. autoclass:: pcapkit.protocols.application.httpv2.protocol.HTTPv2
    :no-members:
    :show-inheritance:
 
@@ -109,182 +110,192 @@ exceptions:
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.application.httpv2
+.. module:: pcapkit.protocols.application.httpv2.schema
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.application.httpv2``, with no alias: the module moved here
+   (:issue:`2534`).
 
 .. versionremoved:: 1.6.0
 
    ``pcapkit.protocols.schema.application.httpv2.HTTP``, with no alias. The
-   class is renamed :class:`~pcapkit.protocols.schema.application.httpv2.HTTPv2`,
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.schema.HTTPv2`,
    after its module (:issue:`2529`).
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.HTTPv2
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.HTTPv2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.FrameType
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.FrameType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.UnassignedFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.UnassignedFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.DataFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.DataFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.HeadersFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.HeadersFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.PriorityFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.PriorityFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.RSTStreamFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.RSTStreamFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingPair
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.SettingPair
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingsFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.SettingsFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.PushPromiseFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.PushPromiseFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.PingFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.PingFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.GoawayFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.GoawayFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.WindowUpdateFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.WindowUpdateFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.ContinuationFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.ContinuationFrame
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.FrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.FrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.StreamID
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.StreamID
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.StreamDependency
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.StreamDependency
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.httpv2.WindowSize
+.. autoclass:: pcapkit.protocols.application.httpv2.schema.WindowSize
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.application.httpv2.http_frame_selector
+.. autofunction:: pcapkit.protocols.application.httpv2.schema.http_frame_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.application.httpv2
+.. module:: pcapkit.protocols.application.httpv2.data
+
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.application.httpv2``, with no alias: the module moved here
+   (:issue:`2534`).
 
 .. versionremoved:: 1.6.0
 
    ``pcapkit.protocols.data.application.httpv2.HTTP``, with no alias. The
-   class is renamed :class:`~pcapkit.protocols.data.application.httpv2.HTTPv2`,
+   class is renamed :class:`~pcapkit.protocols.application.httpv2.data.HTTPv2`,
    after its module (:issue:`2529`).
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTPv2
+.. autoclass:: pcapkit.protocols.application.httpv2.data.HTTPv2
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.Flags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.UnassignedFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.UnassignedFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.DataFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.DataFrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.HeadersFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.HeadersFrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PriorityFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.PriorityFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.RSTStreamFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.RSTStreamFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.SettingsFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.Settings
+.. autoclass:: pcapkit.protocols.application.httpv2.data.Settings
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.SettingsFrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.PushPromiseFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.PushPromiseFrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.PingFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.PingFrameFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.GoawayFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.GoawayFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.WindowUpdateFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.WindowUpdateFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrame
+.. autoclass:: pcapkit.protocols.application.httpv2.data.ContinuationFrame
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags
+.. autoclass:: pcapkit.protocols.application.httpv2.data.ContinuationFrameFlags
    :members:
    :show-inheritance:
 

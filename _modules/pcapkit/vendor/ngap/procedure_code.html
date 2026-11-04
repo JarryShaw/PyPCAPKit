@@ -567,7 +567,7 @@
 <span class="sd">compiled ASN.1, at ``pycrate_asn1dir/NGAP.py``'s ``NGAP_Constants`` class (one</span>
 <span class="sd">``INT`` value object per ``id-&lt;Name&gt;`` constant, tagged with the ``ProcedureCode``</span>
 <span class="sd">or ``ProtocolIE-ID`` open type it belongs to) -- and it is the very same</span>
-<span class="sd">dependency :mod:`pcapkit.protocols.application.ngap` already needs installed to</span>
+<span class="sd">dependency :mod:`pcapkit.protocols.application.ngap.protocol` already needs installed to</span>
 <span class="sd">decode NGAP at all. So this crawler reads that already-installed package</span>
 <span class="sd">directly instead of fetching anything over the network: it leaves</span>
 <span class="sd">:attr:`~pcapkit.vendor.default.Vendor.LINK` at its :obj:`None` default, and</span>
@@ -578,7 +578,7 @@
 
 <span class="sd">:class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` is a genuinely open</span>
 <span class="sd">registry -- 3GPP keeps assigning new elementary procedures to TS 38.413 -- so,</span>
-<span class="sd">unlike the closed :mod:`pcapkit.protocols.internet.mh` enums GitHub issue :issue:`877`</span>
+<span class="sd">unlike the closed :mod:`pcapkit.protocols.internet.mh.protocol` enums GitHub issue :issue:`877`</span>
 <span class="sd">ruled on, an in-range value this crawler has not (yet) seen is not a bug to</span>
 <span class="sd">raise on: :meth:`~pcapkit.const.ngap.procedure_code.ProcedureCode._missing_`</span>
 <span class="sd">answers it with a throwaway, non-registering member instead (see</span>

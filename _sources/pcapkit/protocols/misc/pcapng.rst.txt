@@ -3,13 +3,26 @@ PCAP-NG File Format
 ===================
 
 .. module:: pcapkit.protocols.misc.pcapng
+.. module:: pcapkit.protocols.misc.pcapng.protocol
 
-:mod:`pcapkit.protocols.misc.pcapng` contains
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.misc.pcapng.PacketDirection``,
+   ``pcapkit.protocols.misc.pcapng.PacketReception`` and
+   ``pcapkit.protocols.misc.pcapng.WireGuardKeyLabel``, with no alias: they are in this
+   module, and :mod:`pcapkit.protocols.misc.pcapng` exports the protocol class alone
+   (:issue:`2534`). ``pcapkit.protocols.misc.pcapng.PAT_EUI_ADDR`` and
+   ``pcapkit.protocols.misc.pcapng.PAT_MAC_ADDR``, with no alias:
+   :meth:`~pcapkit.protocols.protocol.Protocol._read_mac_addr` and
+   :meth:`~pcapkit.protocols.protocol.Protocol._make_mac_addr` read and make the address
+   (:issue:`2614`).
+
+:mod:`pcapkit.protocols.misc.pcapng.protocol` contains
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`,
 which implements an extractor for PCAP-NG file format [*]_, and the
-:class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
-:class:`~pcapkit.protocols.misc.pcapng.PacketReception` and
-:class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PacketDirection`,
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PacketReception` and
+:class:`~pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel` enumerations.
 
 .. versionchanged:: 1.5.0
 
@@ -28,7 +41,7 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    raise :exc:`ValueError` (:issue:`678`); and ``timestamp_epoch`` is not
    shifted by the host's timezone (:issue:`361`).
 
-.. autoclass:: pcapkit.protocols.misc.pcapng.PCAPNG
+.. autoclass:: pcapkit.protocols.misc.pcapng.protocol.PCAPNG
    :no-members:
    :show-inheritance:
 
@@ -222,12 +235,12 @@ which implements an extractor for PCAP-NG file format [*]_, and the
 Auxiliary Data
 --------------
 
-.. autoclass:: pcapkit.protocols.misc.pcapng.PacketDirection
+.. autoclass:: pcapkit.protocols.misc.pcapng.protocol.PacketDirection
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.misc.pcapng.PacketReception
+.. autoclass:: pcapkit.protocols.misc.pcapng.protocol.PacketReception
    :members:
    :undoc-members:
    :show-inheritance:
@@ -243,7 +256,7 @@ IANA registry.
    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` instead
    (:issue:`886`, :issue:`1744`).
 
-.. autoclass:: pcapkit.protocols.misc.pcapng.WireGuardKeyLabel
+.. autoclass:: pcapkit.protocols.misc.pcapng.protocol.WireGuardKeyLabel
    :members:
    :undoc-members:
    :show-inheritance:
@@ -251,325 +264,330 @@ IANA registry.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.misc.pcapng
+.. module:: pcapkit.protocols.misc.pcapng.schema
 
-.. autodata:: pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC
+.. versionremoved:: 1.6.0
 
-.. autodata:: pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM
+   ``pcapkit.protocols.schema.misc.pcapng``, with no alias: the module moved here
+   (:issue:`2534`).
 
-.. autodata:: pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM
+.. autodata:: pcapkit.protocols.misc.pcapng.schema.BYTE_ORDER_MAGIC
+
+.. autodata:: pcapkit.protocols.misc.pcapng.schema.GENERIC_BLOCK_MINIMUM
+
+.. autodata:: pcapkit.protocols.misc.pcapng.schema.BLOCK_MINIMUM
    :no-value:
 
-.. autodata:: pcapkit.protocols.schema.misc.pcapng.DEFAULT_RESOLUTION
+.. autodata:: pcapkit.protocols.misc.pcapng.schema.DEFAULT_RESOLUTION
 
-.. autodata:: pcapkit.protocols.schema.misc.pcapng.PACKET_FLAGS
+.. autodata:: pcapkit.protocols.misc.pcapng.schema.PACKET_FLAGS
    :no-value:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.PCAPNG
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.PCAPNG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.BlockType
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.BlockType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.UnknownBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.UnknownBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.SectionHeaderBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.InterfaceDescriptionBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EnhancedPacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.SimplePacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.SimplePacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.NameResolutionBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.InterfaceStatisticsBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.InterfaceStatisticsBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.SystemdJournalExportBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.DecryptionSecretsBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.CustomBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.CustomBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.PacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.PacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.Option
    :members:
    :show-inheritance:
    :special-members: __enum__
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._OPT_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._OPT_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.UnknownOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.UnknownOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EndOfOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EndOfOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.CommentOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.CommentOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.CustomOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.CustomOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._IF_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._IF_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_NameOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_NameOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_DescriptionOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_DescriptionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_IPv4AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_IPv4AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_IPv6AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_IPv6AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_MACAddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_MACAddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_EUIAddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_EUIAddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_SpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_SpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_TSResolOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_TZoneOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_TZoneOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_FilterOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_FilterOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_OSOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_OSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_FCSLenOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_FCSLenOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_TSOffsetOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_TSOffsetOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_HardwareOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_HardwareOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_TxSpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_TxSpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IF_RxSpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IF_RxSpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._EPB_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._EPB_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_FlagsOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_FlagsOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_HashOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_HashOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_DropCountOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_DropCountOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_PacketIDOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_PacketIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_QueueOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_QueueOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPB_VerdictOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPB_VerdictOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._NS_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._NS_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.NS_DNSNameOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.NS_DNSNameOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.NS_DNSIP4AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.NS_DNSIP4AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.NS_DNSIP6AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.NS_DNSIP6AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._ISB_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._ISB_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_StartTimeOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_StartTimeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_EndTimeOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_EndTimeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_IFRecvOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_IFRecvOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_IFDropOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_IFDropOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_FilterAcceptOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_FilterAcceptOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_OSDropOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_OSDropOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ISB_UsrDelivOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ISB_UsrDelivOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng._PACK_Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema._PACK_Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.PACK_FlagsOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.PACK_FlagsOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.PACK_HashOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.PACK_HashOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.NameResolutionRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.UnknownRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.UnknownRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EndRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EndRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IPv4Record
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IPv4Record
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.IPv6Record
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.IPv6Record
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.DSBSecrets
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.DSBSecrets
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.UnknownSecrets
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.UnknownSecrets
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.TLSKeyLog
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.TLSKeyLog
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.WireGuardKeyLog
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ZigBeeNWKKey
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ZigBeeAPSKey
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.FlagsField
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.FlagsField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.OptionEnumField
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.OptionEnumField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.OptionAreaField
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.OptionAreaField
    :members:
    :show-inheritance:
 
 Type Stubs
 ----------
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ByteorderTest
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ByteorderTest
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.ResolutionData
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.ResolutionData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.EPBFlags
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.EPBFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.misc.pcapng.PACKFlags
+.. autoclass:: pcapkit.protocols.misc.pcapng.schema.PACKFlags
    :members:
    :show-inheritance:
 
@@ -581,277 +599,282 @@ The byte order of every block but the Section Header Block is read by
 shared with the PCAP frame header and documented in
 :mod:`pcapkit.corekit.schema.byteorder`.
 
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.shb_byteorder_callback
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.pcapng_block_selector
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.dsb_secrets_selector
 
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.nonnegative
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.held_body
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_option
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_area
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.captured_area
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.secrets_area
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_has_trailing
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_held
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng._spb_data_length
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng._cut_last_line
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng._malformed_line_message
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.nonnegative
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.held_body
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.bounded_option
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.bounded_area
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.captured_area
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.secrets_area
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.zigbee_key_has_trailing
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.zigbee_key_trailing
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema.zigbee_key_held
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema._spb_data_length
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema._cut_last_line
+.. autofunction:: pcapkit.protocols.misc.pcapng.schema._malformed_line_message
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.misc.pcapng
+.. module:: pcapkit.protocols.misc.pcapng.data
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.PCAPNG
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.misc.pcapng``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.PCAPNG
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.UnknownBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.UnknownBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.SectionHeaderBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.InterfaceDescriptionBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.SimplePacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.SimplePacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.NameResolutionBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.NameResolutionBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.InterfaceStatisticsBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.SystemdJournalExportBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.DecryptionSecretsBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.CustomBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.CustomBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.PacketBlock
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.PacketBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.Option
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.UnknownOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.UnknownOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EndOfOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EndOfOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.CommentOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.CommentOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.CustomOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.CustomOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_NameOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_NameOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_DescriptionOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_DescriptionOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_IPv4AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_IPv4AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_IPv6AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_IPv6AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_MACAddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_MACAddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_EUIAddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_EUIAddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_SpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_SpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_TSResolOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_TSResolOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_TZoneOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_TZoneOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_FilterOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_FilterOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_OSOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_OSOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_FCSLenOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_FCSLenOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_TSOffsetOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_TSOffsetOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_HardwareOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_HardwareOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_TxSpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_TxSpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IF_RxSpeedOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IF_RxSpeedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_FlagsOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_FlagsOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_HashOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_HashOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_DropCountOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_DropCountOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_PacketIDOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_PacketIDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_QueueOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_QueueOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EPB_VerdictOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EPB_VerdictOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.NS_DNSNameOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.NS_DNSNameOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.NS_DNSIP4AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.NS_DNSIP4AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.NS_DNSIP6AddrOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.NS_DNSIP6AddrOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_StartTimeOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_StartTimeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_EndTimeOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_EndTimeOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_IFRecvOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_IFRecvOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_IFDropOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_IFDropOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_FilterAcceptOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_FilterAcceptOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_OSDropOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_OSDropOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ISB_UsrDelivOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ISB_UsrDelivOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.PACK_FlagsOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.PACK_FlagsOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.PACK_HashOption
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.PACK_HashOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.NameResolutionRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.NameResolutionRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.UnknownRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.UnknownRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.EndRecord
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.EndRecord
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IPv4Record
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IPv4Record
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.IPv6Record
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.IPv6Record
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.DSBSecrets
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.DSBSecrets
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.UnknownSecrets
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.UnknownSecrets
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.TLSKeyLogEntries
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.TLSKeyLogEntries
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.TLSKeyLog
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.TLSKeyLog
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.WireGuardKeyLog
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.WireGuardKeyLog
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ZigBeeNWKKey
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey
+.. autoclass:: pcapkit.protocols.misc.pcapng.data.ZigBeeAPSKey
    :members:
    :show-inheritance:
 

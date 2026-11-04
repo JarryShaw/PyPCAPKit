@@ -707,7 +707,7 @@ resolves each packet’s link type, <code class="docutils literal notranslate"><
 the interface it names, in its own section (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1379">#1379</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> also skips Simple Packet Blocks, which <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> has no
 type for; <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> reads them
-through <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>
+through <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>
 and, since the block carries no timestamp, dates them 0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
 </div>
 <dl class="py class">
@@ -807,14 +807,14 @@ for more operational information.</p>
 Block (IDB) of a file, and applies its link type and timestamp resolution
 to every packet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1379">#1379</a>). This reader walks the blocks itself
 instead: it parses each Section Header Block and IDB with <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s
-own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>, keeps the interfaces
+own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>, keeps the interfaces
 of the current section, and resolves every packet’s link type,
 <code class="docutils literal notranslate"><span class="pre">if_tsresol</span></code> and <code class="docutils literal notranslate"><span class="pre">if_tsoffset</span></code> from the interface it names. Packet
 blocks are still decoded by <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>.</p>
 <p>It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet
 Blocks, and skips every other block. <code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> skips the
 Simple Packet Block too, and <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> has no type for one, so that block is
-parsed with <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> as well
+parsed with <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> as well
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

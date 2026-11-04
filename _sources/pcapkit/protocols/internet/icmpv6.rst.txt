@@ -2,9 +2,10 @@ ICMPv6 - Internet Control Message Protocol for IPv6
 =======================================================
 
 .. module:: pcapkit.protocols.internet.icmpv6
+.. module:: pcapkit.protocols.internet.icmpv6.protocol
 
-:mod:`pcapkit.protocols.internet.icmpv6` contains
-:class:`~pcapkit.protocols.internet.icmpv6.ICMPv6` only,
+:mod:`pcapkit.protocols.internet.icmpv6.protocol` contains
+:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` only,
 which implements extractor for Internet Control
 Message Protocol for IPv6 (ICMPv6) [*]_, whose structure
 is described as below:
@@ -18,7 +19,7 @@ Octets      Bits        Name                    Description
   4          32   ``icmpv6.data``           Message Body
 ======= ========= ======================= ===================================
 
-.. autoclass:: pcapkit.protocols.internet.icmpv6.ICMPv6
+.. autoclass:: pcapkit.protocols.internet.icmpv6.protocol.ICMPv6
    :no-members:
    :show-inheritance:
 
@@ -58,75 +59,75 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.icmpv6
+.. module:: pcapkit.protocols.internet.icmpv6.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.ICMPv6
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.ICMPv6
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.ICMPv6Type
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.ICMPv6Type
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.Unknown
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.DestinationUnreachable
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.DestinationUnreachable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.PacketTooBig
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.PacketTooBig
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.TimeExceeded
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.TimeExceeded
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.ParameterProblem
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.ParameterProblem
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.icmpv6.Echo
+.. autoclass:: pcapkit.protocols.internet.icmpv6.schema.Echo
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.icmpv6.icmpv6_data_selector
+.. autofunction:: pcapkit.protocols.internet.icmpv6.schema.icmpv6_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.icmpv6
+.. module:: pcapkit.protocols.internet.icmpv6.data
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.ICMPv6
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.ICMPv6
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.Unknown
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.Unknown
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.DestinationUnreachable
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.DestinationUnreachable
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.PacketTooBig
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.PacketTooBig
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.TimeExceeded
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.TimeExceeded
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.ParameterProblem
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.ParameterProblem
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.icmpv6.Echo
+.. autoclass:: pcapkit.protocols.internet.icmpv6.data.Echo
    :members:
    :show-inheritance:
 

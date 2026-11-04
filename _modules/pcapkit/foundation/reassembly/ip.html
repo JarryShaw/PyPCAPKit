@@ -576,14 +576,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
                                                    <span class="n">Deferred</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_MAX_LENGTH</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_MAX_LENGTH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">IP_Protocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">IP_Protocol</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP'</span><span class="p">]</span>
 
@@ -920,7 +920,7 @@
 <span class="sd">            received.</span>
 
 <span class="sd">        A datagram is no longer than</span>
-<span class="sd">        :data:`~pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH` with its header, as</span>
+<span class="sd">        :data:`~pcapkit.protocols.internet.ipv6.schema.IP_MAX_LENGTH` with its header, as</span>
 <span class="sd">        :meth:`_header_overhead` counts it: IPv4's Total Length counts the</span>
 <span class="sd">        whole header, and IPv6's Payload Length every header but the fixed one.</span>
 <span class="sd">        A longer datagram cannot be declared, so it is never complete, and</span>

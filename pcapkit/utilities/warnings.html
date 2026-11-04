@@ -596,7 +596,7 @@ category on the command line, noted below).</p></li>
 there are. Constructing a warning class is not an act of reporting one – it
 emits nothing and has no side effects.</p>
 <p>A next layer is parsed on trial, and replaced with
-<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when its header was not captured or its
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when its header was not captured or its
 parse raises. The trial’s warnings are held back by
 <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings" title="pcapkit.utilities.warnings.hold_warnings"><code class="xref py py-class docutils literal notranslate"><span class="pre">hold_warnings</span></code></a>: a replaced layer’s are dropped
 on each channel, since they describe a layer the result does not have, and a kept
@@ -675,7 +675,7 @@ it to an enclosing block. Under a filter turning warnings into errors, the
 error is then raised where the block that kept them is left – the end of
 the trial parse, inside the guard it was raised in when nothing was held.</p>
 <p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._parse_next_layer</span></code></a> uses this for the
-trial parse it replaces with <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when the
+trial parse it replaces with <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when the
 header was not captured, or that <a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>
 replaces when it raises: the warnings describe a layer the result does not
 have (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>).</p>

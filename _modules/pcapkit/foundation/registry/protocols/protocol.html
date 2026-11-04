@@ -646,7 +646,7 @@
 <span class="sd">    name as a plain string, and the ``protocol`` properties on</span>
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. The registry redesign of</span>
 <span class="sd">    :issue:`514` keeps this key, and its thread records the shared namespace as</span>
 <span class="sd">    a risk that design does not resolve, so the collision is reported here</span>
 <span class="sd">    rather than fixed.</span>
@@ -667,10 +667,10 @@
 <span class="sd">    .. versionchanged:: 1.6.0</span>
 
 <span class="sd">       The HTTP member classes are named</span>
-<span class="sd">       :class:`~pcapkit.protocols.application.httpv1.HTTPv1` and</span>
-<span class="sd">       :class:`~pcapkit.protocols.application.httpv2.HTTPv2`, so registering</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` and</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`, so registering</span>
 <span class="sd">       one keeps its own key and no longer displaces</span>
-<span class="sd">       :class:`~pcapkit.protocols.application.http.HTTP` under ``'HTTP'``</span>
+<span class="sd">       :class:`~pcapkit.protocols.application.http.protocol.HTTP` under ``'HTTP'``</span>
 <span class="sd">       (:issue:`2529`).</span>
 
 <span class="sd">    """</span>
@@ -939,21 +939,21 @@
 <span class="sd">      :class:`~pcapkit.const.reg.transtype.TransType` to</span>
 <span class="sd">      :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
 <span class="sd">      :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
-<span class="sd">      to :class:`~pcapkit.protocols.transport.sctp.SCTP`,</span>
+<span class="sd">      to :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`,</span>
 <span class="sd">      :class:`~pcapkit.const.linux.arphrd.ARPHRD` to</span>
-<span class="sd">      :class:`~pcapkit.protocols.link.linux_sll.LinuxSLL`, and</span>
+<span class="sd">      :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`, and</span>
 <span class="sd">      :class:`~pcapkit.const.reg.linktype.LinkType` to *both*</span>
-<span class="sd">      :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**</span>
-<span class="sd">      :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` **and**</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`; or</span>
 <span class="sd">    * a :class:`dict` mapping an explicit destination class to a key -- the</span>
 <span class="sd">      only form accepted for a bare :class:`int`, since e.g. a port number</span>
 <span class="sd">      does not say by itself whether it means</span>
-<span class="sd">      :class:`~pcapkit.protocols.transport.tcp.TCP` or</span>
-<span class="sd">      :class:`~pcapkit.protocols.transport.udp.UDP`;</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` or</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.udp.protocol.UDP`;</span>
 
 <span class="sd">    or an iterable of either, to register ``protocol`` into several</span>
 <span class="sd">    registries from one call -- e.g. a</span>
-<span class="sd">    :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both by its</span>
+<span class="sd">    :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` subclass reachable both by its</span>
 <span class="sd">    IP protocol number and by a UDP port:</span>
 
 <span class="sd">    .. code-block:: python</span>
@@ -966,13 +966,13 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        That example names ``L2TPv3``, which this package does not implement,</span>
-<span class="sd">        rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is</span>
+<span class="sd">        rather than :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`. It is</span>
 <span class="sd">        v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it</span>
 <span class="sd">        directly over IP on protocol 115 and §4.1.2 puts it over UDP on port</span>
-<span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.L2TPv2&gt;` answers on</span>
+<span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.protocol.L2TPv2&gt;` answers on</span>
 <span class="sd">        port 1701 only, and registering *it* at</span>
 <span class="sd">        :attr:`TransType.L2TP &lt;pcapkit.const.reg.transtype.TransType.L2TP&gt;` would point the</span>
-<span class="sd">        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.L2TP`</span>
+<span class="sd">        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`</span>
 <span class="sd">        and GitHub issue :issue:`548` for what that produced when measured.</span>
 
 <span class="sd">    Args:</span>
@@ -1006,7 +1006,7 @@
         <span class="c1"># NOTE: the pairing is read out of the owner's own ``vars()`` rather than</span>
         <span class="c1"># with ``getattr``, which walks the MRO and would hand a class keeping a</span>
         <span class="c1"># registry of its own its parent's pairing --</span>
-        <span class="c1"># :attr:`Loopback.__proto__ &lt;pcapkit.protocols.link.loopback.Loopback.__proto__&gt;`</span>
+        <span class="c1"># :attr:`Loopback.__proto__ &lt;pcapkit.protocols.link.loopback.protocol.Loopback.__proto__&gt;`</span>
         <span class="c1"># is keyed by address family rather than by EtherType, so inheriting</span>
         <span class="c1"># :class:`Link`'s would reject every key it does accept. A class is</span>
         <span class="c1"># checked against the registry it owns, or not at all.</span>

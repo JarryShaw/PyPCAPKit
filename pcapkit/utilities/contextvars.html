@@ -612,9 +612,9 @@ length of the frame being dissected, in octets, as its PCAP record or PCAP-NG
 packet block states them; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> outside a frame, and inside the payload
 of an <a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> layer that
 bounds it, which neither an IPv4 Total Length of 0 nor
-<a class="reference internal" href="../protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>). A frame
+<a class="reference internal" href="../protocols/internet/ah.html#pcapkit.protocols.internet.ah.protocol.AH" title="pcapkit.protocols.internet.ah.protocol.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2689">#2689</a>). A frame
 the capture cut short holds fewer octets than were on the wire, which a layer
-stating no length of its own, as <a class="reference internal" href="../protocols/link/gre.html#pcapkit.protocols.link.gre.GRE" title="pcapkit.protocols.link.gre.GRE"><code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code></a>,
+stating no length of its own, as <a class="reference internal" href="../protocols/link/gre.html#pcapkit.protocols.link.gre.protocol.GRE" title="pcapkit.protocols.link.gre.protocol.GRE"><code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code></a>,
 cannot tell from the octets it is handed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2653">#2653</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>

@@ -42,7 +42,7 @@ Type Variables
    :type: typing.Any
 
 .. data:: _TS
-   :type: pcapkit.protocols.schema.schema.Schema
+   :type: pcapkit.protocols.schema.Schema
 
 .. data:: _TP
    :type: pcapkit.protocols.protocol.ProtocolBase

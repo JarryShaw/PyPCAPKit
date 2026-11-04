@@ -562,7 +562,7 @@
 
 <span class="sd">Most protocols are self describing -- every length, offset and type that</span>
 <span class="sd">:mod:`pcapkit` needs to walk a packet is present in the packet itself. A</span>
-<span class="sd">few are not. :class:`~pcapkit.protocols.internet.esp.ESP` is the</span>
+<span class="sd">few are not. :class:`~pcapkit.protocols.internet.esp.protocol.ESP` is the</span>
 <span class="sd">motivating example: :rfc:`4303` deliberately leaves the payload length,</span>
 <span class="sd">the position of the ``Pad Length`` / ``Next Header`` trailer and the</span>
 <span class="sd">length of the ``Integrity Check Value`` to be derived from the Security</span>
@@ -584,7 +584,7 @@
 <span class="sd">    Decoding an ESP tunnel end to end::</span>
 
 <span class="sd">        &gt;&gt;&gt; import pcapkit</span>
-<span class="sd">        &gt;&gt;&gt; from pcapkit.protocols.internet.esp import (Cipher, ESPContext,</span>
+<span class="sd">        &gt;&gt;&gt; from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext,</span>
 <span class="sd">        ...                                            Integrity, SecurityAssociation)</span>
 <span class="sd">        &gt;&gt;&gt; sa = SecurityAssociation(</span>
 <span class="sd">        ...     spi=0x4321,</span>

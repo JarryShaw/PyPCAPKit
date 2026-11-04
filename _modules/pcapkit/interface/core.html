@@ -703,10 +703,10 @@
 <span class="sd">        context: caller supplied parsing context for protocols that need</span>
 <span class="sd">            information not carried on the wire, keyed by protocol index ID --</span>
 <span class="sd">            cf. :mod:`pcapkit.corekit.context`. The motivating case is</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.esp.protocol.ESP`, which needs the</span>
 <span class="sd">            Security Association to find the trailer and decrypt the payload::</span>
 
-<span class="sd">                &gt;&gt;&gt; from pcapkit.protocols.internet.esp import (Cipher, ESPContext,</span>
+<span class="sd">                &gt;&gt;&gt; from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext,</span>
 <span class="sd">                ...                                            SecurityAssociation)</span>
 <span class="sd">                &gt;&gt;&gt; sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,</span>
 <span class="sd">                ...                          encryption_key=key)</span>

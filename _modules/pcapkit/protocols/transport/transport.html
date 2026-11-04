@@ -559,9 +559,9 @@
 <span class="sd">:mod:`pcapkit.protocols.transport.transport` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.transport.transport.Transport`,</span>
 <span class="sd">which is a base class for transport layer protocols, e.g.</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.tcp.TCP`,</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.udp.UDP` and</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.sctp.SCTP`.</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.udp.protocol.UDP` and</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
@@ -660,8 +660,8 @@
 <span class="sd">                shipped descriptor that a restore puts back (:issue:`1504`).</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP` and</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` each define their own</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` each define their own</span>
 <span class="sd">            ``__proto__`` rather than sharing one on :class:`Transport`.</span>
 <span class="sd">            ``register_apptype`` reaches this method once per transport</span>
 <span class="sd">            protocol, each time on that protocol's own registry, so it cannot</span>
@@ -697,8 +697,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            ports: Source &amp; destination ports, as the application types</span>
 <span class="sd">                :meth:`_make_port` resolves them to -- what</span>
-<span class="sd">                :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.TCP.src&gt;` and</span>
-<span class="sd">                :attr:`TCP.dst &lt;pcapkit.protocols.transport.tcp.TCP.dst&gt;` read</span>
+<span class="sd">                :attr:`TCP.src &lt;pcapkit.protocols.transport.tcp.protocol.TCP.src&gt;` and</span>
+<span class="sd">                :attr:`TCP.dst &lt;pcapkit.protocols.transport.tcp.protocol.TCP.dst&gt;` read</span>
 <span class="sd">                off a parsed header, resolved the same way.</span>
 <span class="sd">            payload: Packet payload.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -710,9 +710,9 @@
 <span class="sd">        Important:</span>
 <span class="sd">            The annotation names the **base** registry rather than one</span>
 <span class="sd">            transport's own, because this is the single method</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.TCP`,</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.udp.UDP` and</span>
-<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.SCTP` share, and each</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each</span>
 <span class="sd">            resolves its ports in a different one --</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.tcp.TCP` for the first, and so</span>
 <span class="sd">            on. A caller that knows which transport it has gets the narrower</span>
@@ -739,7 +739,7 @@
 <span class="sd">            :exc:`AttributeError`, and unwrapping unconditionally would have</span>
 <span class="sd">            changed what anything *else* does here: :func:`int` of :obj:`None`</span>
 <span class="sd">            raises where the lookup falls back to</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, and :func:`int` of</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and :func:`int` of</span>
 <span class="sd">            ``'80'`` would dispatch a :class:`str` nobody registered.</span>
 
 <span class="sd">            Nothing is written back on a miss either way, so a payload on an</span>
@@ -767,9 +767,9 @@
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
             <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
 
             <span class="c1"># log error</span>
@@ -833,13 +833,13 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Resolve a family base the registry binds to the member that parses ``file_``.</span>
 
 <span class="sd">        The HTTP ports bind the family base</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.http.HTTP`, whose</span>
-<span class="sd">        :meth:`~pcapkit.protocols.application.http.HTTP._dispatch_version` picks</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.httpv1.HTTPv1` or</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.httpv2.HTTPv2` from the payload,</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose</span>
+<span class="sd">        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` picks</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the payload,</span>
 <span class="sd">        as :meth:`Internet._import_next_layer</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;` does</span>
-<span class="sd">        for :class:`~pcapkit.protocols.internet.igmp.IGMP` (:issue:`2524`).</span>
+<span class="sd">        for :class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` (:issue:`2524`).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            klass: next layer protocol class, as the registry binds it</span>
@@ -850,7 +850,7 @@
 <span class="sd">            The member for a family base, otherwise ``klass`` itself.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
         <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="n">HTTPBase</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">HTTPBase</span><span class="o">.</span><span class="n">_dispatch_version</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
@@ -950,14 +950,14 @@
 <span class="sd">            The port is forwarded **whether or not it is registered**:</span>
 <span class="sd">            :meth:`Protocol._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;` passes</span>
-<span class="sd">            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.protocol.Raw`</span>
 <span class="sd">            records it as :attr:`Data_Raw.protocol</span>
-<span class="sd">            &lt;pcapkit.protocols.data.misc.raw.Raw.protocol&gt;`. Dropping it would</span>
+<span class="sd">            &lt;pcapkit.protocols.misc.raw.data.Raw.protocol&gt;`. Dropping it would</span>
 <span class="sd">            make a payload on a port we do not decode indistinguishable from</span>
 <span class="sd">            one on port 22. The lower port is the one carried, for the same</span>
 <span class="sd">            reason it is the primary lookup key.</span>
 <span class="sd">            :meth:`SCTP._decode_next_layer</span>
-<span class="sd">            &lt;pcapkit.protocols.transport.sctp.SCTP._decode_next_layer&gt;` and</span>
+<span class="sd">            &lt;pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer&gt;` and</span>
 <span class="sd">            :meth:`Internet._import_next_layer</span>
 <span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`</span>
 <span class="sd">            behave the same way for an unregistered PPID and transport type.</span>

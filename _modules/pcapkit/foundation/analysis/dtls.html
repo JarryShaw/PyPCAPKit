@@ -561,20 +561,20 @@
 <span class="sd">DTLS handshake message that :class:`~pcapkit.foundation.reassembly.dtls.DTLS`</span>
 <span class="sd">reassembled (:rfc:`6347#section-4.2.3`). The decode itself is</span>
 <span class="sd">:meth:`DTLS.analyze_handshake</span>
-<span class="sd">&lt;pcapkit.protocols.application.dtls.DTLS.analyze_handshake&gt;` (:issue:`2622`).</span>
+<span class="sd">&lt;pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake&gt;` (:issue:`2622`).</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">DTLS_Datagram</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.dtls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSHandshake</span> <span class="k">as</span> <span class="n">Data_DTLSHandshake</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'dtls_handshake'</span><span class="p">]</span>
 
@@ -586,7 +586,7 @@
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.dtls.DTLS`.</span>
 
 <span class="sd">    The message is decoded by :meth:`DTLS.analyze_handshake</span>
-<span class="sd">    &lt;pcapkit.protocols.application.dtls.DTLS.analyze_handshake&gt;`, which reads</span>
+<span class="sd">    &lt;pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake&gt;`, which reads</span>
 <span class="sd">    it as if it had arrived unfragmented, ``fragment_offset`` 0 and</span>
 <span class="sd">    ``fragment_length`` its ``length`` (:rfc:`6347#section-4.2.3`). So a</span>
 <span class="sd">    ``ClientHello``, ``ServerHello`` or ``EncryptedExtensions`` body decodes</span>

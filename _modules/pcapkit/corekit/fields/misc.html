@@ -576,7 +576,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">_TC</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TC'</span><span class="p">)</span>
 <span class="n">_TS</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema'</span><span class="p">)</span>
@@ -839,7 +839,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[_TP]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Payload protocol."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
             <span class="k">return</span> <span class="n">Raw</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span>
 
@@ -851,7 +851,7 @@
 <span class="sd">            protocol: Payload protocol. A :obj:`str` is resolved against the</span>
 <span class="sd">                :data:`pcapkit.protocols.__proto__` registry, case-insensitively,</span>
 <span class="sd">                and an unresolved name leaves the payload as</span>
-<span class="sd">                :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``protocol`` names a</span>
@@ -867,7 +867,7 @@
             <span class="c1"># ``pcapkit.foundation.registry.protocols.protocol.register_protocol`` adds to</span>
             <span class="c1"># it, so a name looked up in any other case would miss every time --</span>
             <span class="c1"># and a miss leaves ``_protocol`` as :obj:`None`, which the property</span>
-            <span class="c1"># above resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So</span>
+            <span class="c1"># above resolves to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So</span>
             <span class="c1"># ``PayloadField(protocol='http')`` would yield a raw payload instead</span>
             <span class="c1"># of HTTP, with nothing to say so (#787).</span>
             <span class="n">resolved</span> <span class="o">=</span> <span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
@@ -875,7 +875,7 @@
             <span class="c1"># NOTE: Warned rather than left silent, and warned rather than</span>
             <span class="c1"># raised. Unlike the registry lookups that dispatch on a code read</span>
             <span class="c1"># off the wire -- where a miss is ordinary traffic and</span>
-            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` is the right answer --</span>
+            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the right answer --</span>
             <span class="c1"># this branch is reached only from a caller that named a protocol in</span>
             <span class="c1"># source, so a miss is a mistake in that name rather than a property</span>
             <span class="c1"># of the captured packet, and it is otherwise indistinguishable from</span>
@@ -904,7 +904,7 @@
         <span class="c1"># getter would hand that same string back, so</span>
         <span class="c1"># ``PayloadField(protocol='http')`` -- or ``protocol='HTTP'`` -- would</span>
         <span class="c1"># yield neither the protocol nor</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` but the string itself (#787).</span>
+        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw` but the string itself (#787).</span>
         <span class="c1"># The lookup the setter performs stays inside</span>
         <span class="c1"># its ``isinstance(protocol, str)`` branch, so a field declared in a</span>
         <span class="c1"># schema class body -- every in-library use, none of which names a</span>
@@ -961,8 +961,7 @@
                 <span class="k">raise</span> <span class="n">NoDefaultValue</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no default value.'</span><span class="p">)</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TP'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
@@ -1184,7 +1183,7 @@
 <span class="sd">        outer schema specifically rather than whichever schema happens to</span>
 <span class="sd">        declare a given field -- see</span>
 <span class="sd">        :func:`pcapkit.corekit.schema.byteorder.packet_byteorder` and</span>
-<span class="sd">        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`</span>
+<span class="sd">        :meth:`~pcapkit.protocols.misc.pcapng.schema.BlockType.post_process`</span>
 <span class="sd">        for why that distinction matters; both hand-roll this exact fallback</span>
 <span class="sd">        themselves rather than route through this function.</span>
 
@@ -1194,7 +1193,7 @@
 <span class="sd">        write ever touching the enclosing schema's own data, and without the</span>
 <span class="sd">        write silently disappearing either. That matters concretely rather</span>
 <span class="sd">        than hypothetically:</span>
-<span class="sd">        :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension` declares</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.mh.schema.CGAExtension` declares</span>
 <span class="sd">        its own ``length`` while the option enclosing it declares ``length``</span>
 <span class="sd">        too, so handing a nested schema the enclosing mapping itself would let</span>
 <span class="sd">        the inner ``length`` overwrite the outer one mid-pack.</span>
@@ -1215,14 +1214,14 @@
 <span class="sd">        :class:`~abc.ABCMeta`-based class. That also settles a suspicion,</span>
 <span class="sd">        raised on :issue:`439`, that a :class:`~collections.ChainMap` here</span>
 <span class="sd">        would corrupt the :class:`~abc.ABCMeta` cache :class:`Schema</span>
-<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclasses shared on CPython</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.Schema&gt;` subclasses shared on CPython</span>
 <span class="sd">        &lt;= 3.10. The suspicion is *probably* wrong, and this code cannot</span>
 <span class="sd">        test it: the cache keys on the **exact type queried**, so asking about a</span>
 <span class="sd">        :class:`~collections.ChainMap` instance caches lookups for</span>
 <span class="sd">        :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning</span>
 <span class="sd">        observed in :issue:`439` came from ordinary code asking</span>
 <span class="sd">        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` is</span>
-<span class="sd">        fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own</span>
+<span class="sd">        fixed directly -- every :class:`~pcapkit.protocols.schema.Schema` subclass gets its own</span>
 <span class="sd">        ``_abc_impl``. Against that, on CPython 3.10 choosing between a</span>
 <span class="sd">        ``ChainMap`` and a plain literal here was observed to flip</span>
 <span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
@@ -1345,12 +1344,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
 
-        <span class="c1"># NOTE: :meth:`Schema.to_dict &lt;pcapkit.protocols.schema.schema.Schema.to_dict&gt;`</span>
+        <span class="c1"># NOTE: :meth:`Schema.to_dict &lt;pcapkit.protocols.schema.Schema.to_dict&gt;`</span>
         <span class="c1"># flattens a nested schema into a plain mapping, so a schema rebuilt</span>
         <span class="c1"># through ``from_dict`` hands that mapping back here; turn it into the</span>
         <span class="c1"># declared schema before packing it.</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 

@@ -595,8 +595,8 @@
     <span class="c1">#: each, and :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`</span>
     <span class="c1">#: already registers into every one of them by hand.</span>
     <span class="n">PROTO_DEST</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcap.frame'</span><span class="p">,</span> <span class="s1">'Frame'</span><span class="p">),</span>
-        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcapng'</span><span class="p">,</span> <span class="s1">'PCAPNG'</span><span class="p">),</span>
+        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcap.frame.protocol'</span><span class="p">,</span> <span class="s1">'Frame'</span><span class="p">),</span>
+        <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.pcapng.protocol'</span><span class="p">,</span> <span class="s1">'PCAPNG'</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>

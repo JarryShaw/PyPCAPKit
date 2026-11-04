@@ -573,7 +573,7 @@ caller-supplied information that a protocol needs to parse a packet but that
 is <strong>not</strong> carried on the wire.</p>
 <p>Most protocols are self-describing: every length, offset and type needed to
 walk a packet is in the packet. A few are not, and
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> is the motivating example:
+<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> is the motivating example:
 <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> deliberately leaves the payload length, the position of the
 <code class="docutils literal notranslate"><span class="pre">Pad</span> <span class="pre">Length</span></code> / <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header</span></code> trailer and the length of the <code class="docutils literal notranslate"><span class="pre">Integrity</span>
 <span class="pre">Check</span> <span class="pre">Value</span></code> to the Security Association (SA), which is negotiated out of band
@@ -590,7 +590,7 @@ so that a protocol nested arbitrarily deep can reach it through
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._get_context</span></code></a>.</p>
 <p>Decoding an ESP tunnel end to end:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span>
 <span class="gp">... </span>                                           <span class="n">Integrity</span><span class="p">,</span> <span class="n">SecurityAssociation</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sa</span> <span class="o">=</span> <span class="n">SecurityAssociation</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">spi</span><span class="o">=</span><span class="mh">0x4321</span><span class="p">,</span>

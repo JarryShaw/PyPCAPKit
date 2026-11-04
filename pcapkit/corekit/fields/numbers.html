@@ -837,7 +837,7 @@ catch it. Left to propagate, one unassigned code would cost the
 whole extraction.</p>
 <p>It would also make the “unknown” reader the formats require
 unreachable for any genuinely unassigned code – PCAP-NG’s
-<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.UnknownBlock" title="pcapkit.protocols.schema.misc.pcapng.UnknownBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownBlock</span></code></a>, and the
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.UnknownBlock" title="pcapkit.protocols.misc.pcapng.schema.UnknownBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownBlock</span></code></a>, and the
 <code class="docutils literal notranslate"><span class="pre">unassigned</span></code> option readers of IPv4, TCP, HOPOPT, MH and HIP –
 because the lookup would fail before the dispatch that selects it.
 PCAP-NG repeats a block’s total length at both ends precisely so
@@ -939,7 +939,7 @@ drives, which this bypasses completely.</p>
 <p class="admonition-title">Note</p>
 <p>Building a member this way, rather than as some other type
 altogether, is why <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField.post_process" title="pcapkit.corekit.fields.numbers.PortEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.post_process()</span></code></a> and
-<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process" title="pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OptionEnumField.post_process</span></code></a>
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.OptionEnumField.post_process" title="pcapkit.protocols.misc.pcapng.schema.OptionEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OptionEnumField.post_process</span></code></a>
 need this rather than <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._pseudo_member" title="pcapkit.corekit.fields.numbers.EnumField._pseudo_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_pseudo_member()</span></code></a>:
 the result answers <code class="docutils literal notranslate"><span class="pre">isinstance(result,</span> <span class="pre">AppType)</span></code> truthfully,
 which <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField.pre_process" title="pcapkit.corekit.fields.numbers.PortEnumField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.pre_process()</span></code></a> tests before reading
