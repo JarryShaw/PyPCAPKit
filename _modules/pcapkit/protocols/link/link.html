@@ -635,9 +635,11 @@
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4.protocol'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Address_Resolution_Protocol</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.arp.protocol'</span><span class="p">,</span>      <span class="s1">'ARP'</span><span class="p">),</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span><span class="p">:</span>
                 <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.rarp.protocol'</span><span class="p">,</span> <span class="s1">'RARP'</span><span class="p">),</span>
+
             <span class="c1"># The 802.1Q customer tag and the 802.1ad service tag. Q-in-Q stacks</span>
             <span class="c1"># them -- the service tag's own next-EtherType is what selects the</span>
             <span class="c1"># customer tag -- so the two coexist in one frame rather than</span>
@@ -647,14 +649,13 @@
             <span class="c1"># :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.</span>
             <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Customer_VLAN_Tag_Type</span><span class="p">:</span>
                 <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.c_tag.protocol'</span><span class="p">,</span> <span class="s1">'C_Tag'</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">IEEE_Std_802_1Q_Service_VLAN_tag_identifier</span><span class="p">:</span>
-                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.s_tag.protocol'</span><span class="p">,</span> <span class="s1">'S_Tag'</span><span class="p">),</span>
-
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv4.protocol'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
-            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6.protocol'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
 
             <span class="c1"># see https://en.wikipedia.org/wiki/EtherType#Values</span>
             <span class="mh">0x8137</span><span class="p">:</span>                                             <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx.protocol'</span><span class="p">,</span>  <span class="s1">'IPX'</span><span class="p">),</span>
+
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6.protocol'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
+            <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">IEEE_Std_802_1Q_Service_VLAN_tag_identifier</span><span class="p">:</span>
+                <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.s_tag.protocol'</span><span class="p">,</span> <span class="s1">'S_Tag'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 

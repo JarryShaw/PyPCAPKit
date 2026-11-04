@@ -914,33 +914,6 @@
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, Optional[str]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Decode start-line text, recording how to encode it back.</span>
-
-<span class="sd">        The text is decoded by :meth:`self.decode</span>
-<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.decode&gt;`. Where the result does</span>
-<span class="sd">        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by</span>
-<span class="sd">        default -- the detected charset is returned with it, or ``'latin-1'``</span>
-<span class="sd">        (decoding again) if that does not reproduce ``text`` either, so that the</span>
-<span class="sd">        original octets survive a rebuild.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            text: Raw request URI or status message.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The decoded text and the charset to encode it with, the latter</span>
-<span class="sd">            :obj:`None` for UTF-8.</span>
-
-<span class="sd">        """</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">charset</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">detect</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="n">charset</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">LookupError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">):</span>
-                <span class="k">pass</span>
-        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'latin-1'</span><span class="p">),</span> <span class="s1">'latin-1'</span>
-
 <div class="viewcode-block" id="HTTPv1._read_http_header">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1._read_http_header">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Data_Header, OrderedMultiDict[str, str]]'</span><span class="p">:</span>
@@ -1214,7 +1187,34 @@
         <span class="n">item</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, Optional[str]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Decode start-line text, recording how to encode it back.</span>
+
+<span class="sd">        The text is decoded by :meth:`self.decode</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.decode&gt;`. Where the result does</span>
+<span class="sd">        not encode back to ``text`` as UTF-8 -- which :meth:`make` uses by</span>
+<span class="sd">        default -- the detected charset is returned with it, or ``'latin-1'``</span>
+<span class="sd">        (decoding again) if that does not reproduce ``text`` either, so that the</span>
+<span class="sd">        original octets survive a rebuild.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text: Raw request URI or status message.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The decoded text and the charset to encode it with, the latter</span>
+<span class="sd">            :obj:`None` for UTF-8.</span>
+
+<span class="sd">        """</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">charset</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">detect</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span> <span class="ow">or</span> <span class="s1">'utf-8'</span><span class="p">)</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="n">charset</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">LookupError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'latin-1'</span><span class="p">),</span> <span class="s1">'latin-1'</span></div>
 
 </pre></div>
         </article>

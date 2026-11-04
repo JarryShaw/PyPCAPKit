@@ -892,7 +892,10 @@
 
 <span class="sd">        An SSLv2 record that :meth:`unpack` adopted from port 443 is rebuilt as</span>
 <span class="sd">        the SSLv2 record it was parsed from, since TLS's record layout cannot</span>
-<span class="sd">        carry its 2- or 3-octet header.</span>
+<span class="sd">        carry its 2- or 3-octet header. Its :obj:`dict`, as :meth:`Info.to_dict</span>
+<span class="sd">        &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` exports it, carries no data</span>
+<span class="sd">        model, so it is told apart by the ``two_byte_header`` that records the</span>
+<span class="sd">        header's form, a field no TLS record has (:issue:`2762`).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol data.</span>
@@ -904,7 +907,7 @@
 <span class="sd">            for an SSLv2 record, otherwise a TLS instance.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">SSLv2_Data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">SSLv2_Data</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">'two_byte_header'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SSLv2</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

@@ -848,9 +848,10 @@
 <span class="w">        </span><span class="sd">"""Set payload protocol.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            protocol: Payload protocol. A :obj:`str` is resolved against the</span>
-<span class="sd">                :data:`pcapkit.protocols.__proto__` registry, case-insensitively,</span>
-<span class="sd">                and an unresolved name leaves the payload as</span>
+<span class="sd">            protocol: Payload protocol. A :obj:`str` is resolved with</span>
+<span class="sd">                :meth:`ProtocolBase.get_protocol</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.get_protocol&gt;`,</span>
+<span class="sd">                case-insensitively, and an unresolved name leaves the payload as</span>
 <span class="sd">                :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.</span>
 
 <span class="sd">        Warns:</span>
@@ -859,18 +860,17 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> \
+                <span class="n">ProtocolBase</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-            <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, both</span>
-            <span class="c1"># when it is seeded (the loop over ``__all__`` in</span>
-            <span class="c1"># :mod:`pcapkit.protocols`) and when</span>
-            <span class="c1"># ``pcapkit.foundation.registry.protocols.protocol.register_protocol`` adds to</span>
-            <span class="c1"># it, so a name looked up in any other case would miss every time --</span>
-            <span class="c1"># and a miss leaves ``_protocol`` as :obj:`None`, which the property</span>
-            <span class="c1"># above resolves to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So</span>
+            <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, and the</span>
+            <span class="c1"># getter upper-cases the name it is given, so a name in any other</span>
+            <span class="c1"># case still resolves -- where a miss leaves ``_protocol`` as</span>
+            <span class="c1"># :obj:`None`, which the property above resolves to</span>
+            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So</span>
             <span class="c1"># ``PayloadField(protocol='http')`` would yield a raw payload instead</span>
             <span class="c1"># of HTTP, with nothing to say so (#787).</span>
-            <span class="n">resolved</span> <span class="o">=</span> <span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">get_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
 
             <span class="c1"># NOTE: Warned rather than left silent, and warned rather than</span>
             <span class="c1"># raised. Unlike the registry lookups that dispatch on a code read</span>

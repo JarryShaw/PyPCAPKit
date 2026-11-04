@@ -2923,7 +2923,9 @@
         <span class="c1"># what it is given; the refusal is handled here, so it is quiet.</span>
         <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="n">FieldValueError</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema'</span><span class="p">,</span> <span class="n">field_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">octets</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+                <span class="c1"># NOTE: The octets left off are zeros of the item, so its lists read on (#2655, #2760).</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema'</span><span class="p">,</span> <span class="n">field_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">octets</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+                                                            <span class="p">{</span><span class="s1">'__zero_tail__'</span><span class="p">:</span> <span class="kc">True</span><span class="p">}))</span>
             <span class="k">except</span> <span class="n">FieldValueError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data</span>
         <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

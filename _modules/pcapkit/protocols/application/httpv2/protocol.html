@@ -1240,23 +1240,6 @@
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">fragment</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_flags</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FrameType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Flags'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read the flags of an HTTP/2 frame type that defines none.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schema: Parsed frame schema.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Flags with the raw flags octet as ``__value__``.</span>
-
-<span class="sd">        """</span>
-        <span class="n">flags</span> <span class="o">=</span> <span class="n">Data_Flags</span><span class="p">()</span>
-        <span class="n">flags</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
-        <span class="p">})</span>
-        <span class="k">return</span> <span class="n">flags</span>
-
 <div class="viewcode-block" id="HTTPv2._read_http_none">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2._read_http_none">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnassignedFrame'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -2329,6 +2312,23 @@
             <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">flags</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_http_flags</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_FrameType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Flags'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the flags of an HTTP/2 frame type that defines none.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed frame schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Flags with the raw flags octet as ``__value__``.</span>
+
+<span class="sd">        """</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">Data_Flags</span><span class="p">()</span>
+        <span class="n">flags</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
+            <span class="s1">'__value__'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">flags</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
                            <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>

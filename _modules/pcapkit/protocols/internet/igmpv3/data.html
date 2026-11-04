@@ -643,6 +643,10 @@
     <span class="c1">#: Querier's Query Interval, in seconds, decoded from :attr:`qqic` by the</span>
     <span class="c1">#: same formula as :attr:`max_resp_time` (:rfc:`3376#section-4.1.7`).</span>
     <span class="n">qqi</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Number of source addresses, as received on the wire</span>
+    <span class="c1">#: (:rfc:`3376#section-4.1.8`); more than :attr:`sources` holds where the</span>
+    <span class="c1">#: data ends inside them.</span>
+    <span class="n">num_sources</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Source addresses being queried (:rfc:`3376#section-4.1.9`); an empty</span>
     <span class="c1">#: :obj:`tuple` for a General or Group-Specific Query.</span>
     <span class="n">sources</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span>
@@ -651,7 +655,7 @@
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[3]'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Type'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">max_resp_code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">max_resp_time</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span>
                      <span class="n">resv</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">s_flag</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">qrv</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">qqic</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">qqi</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">sources</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
+                     <span class="n">num_sources</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="s1">'tuple[IPv4Address, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
 
 
 

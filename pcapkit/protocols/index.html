@@ -841,27 +841,24 @@ from given information. The class hierarchy of <a class="reference internal" hre
     click PCAPNG &quot;misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG&quot;
     click Header &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.header.protocol.Header&quot;
     click Frame &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame&quot;
-    </pre><section id="module-pcapkit.protocols.registry">
-<span id="protocol-registry"></span><h2>Protocol Registry<a class="headerlink" href="#module-pcapkit.protocols.registry" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.__proto__">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.</span></span><span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.__proto__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><em>ProtocolBase</em></a>]]</p>
-</dd>
-</dl>
-<p><a class="reference internal" href="#module-pcapkit.protocols.registry" title="pcapkit.protocols.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.registry</span></code></a> builds it the first time it is reached, and
-imports every protocol class <a class="reference internal" href="#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> exports to do so
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2730">#2730</a>).</p>
+    </pre><section id="protocol-registry">
+<h2>Protocol Registry<a class="headerlink" href="#protocol-registry" title="Link to this heading">¶</a></h2>
+<p>The registry of protocol classes by name is
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>.
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolMeta.registry" title="pcapkit.protocols.protocol.ProtocolMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolMeta.registry</span></code></a> reads it
+as <code class="docutils literal notranslate"><span class="pre">AnyProtocol.registry</span></code>, a read-only view importing nothing, and
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol</span></code></a>
+looks a name up in it and returns the class.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.6.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code>, with no alias: read
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>
+through <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol</span></code></a> instead (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>).</p>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Please refer to <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol()</span></code></a>
 for more information.</p>
 </div>
-</dd></dl>
-
 </section>
 <section id="module-pcapkit.protocols.schema">
 <span id="header-schema"></span><h2>Header Schema<a class="headerlink" href="#module-pcapkit.protocols.schema" title="Link to this heading">¶</a></h2>
@@ -1095,12 +1092,22 @@ zero, unless a <code class="docutils literal notranslate"><span class="pre">__da
 item it counts. The fields past it are then the cut the short read
 records, and warn nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>). The key is cleared as
 unpacking starts too.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">__data_present__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> says that <code class="docutils literal notranslate"><span class="pre">data</span></code> holds
+the data that many octets in, and past them the zeros a
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> of schema
+items filled it out with, as the list says of the item the data
+ends inside. The field a read crosses them in is given how many of
+its octets the data holds, under the same key, so that a list there
+ends with the data, as it does where the data itself ends
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>). The key is cleared as unpacking starts too.</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>The field the data ends inside is given to the fields after it, as
-<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in <code class="docutils literal notranslate"><span class="pre">packet</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>), and a schema whose
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> in <code class="docutils literal notranslate"><span class="pre">packet</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2727">#2727</a>), a schema whose
 <code class="docutils literal notranslate"><span class="pre">length</span></code> ends with the data reads its fields past it as cut, not as
-a negative length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>).</p>
+a negative length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>), and the field a read crosses the
+end of the data in, inside zeros filled out past it, is told where it
+ends (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>).</p>
 </div>
 </dd></dl>
 
@@ -1737,7 +1744,7 @@ for more information with the inserted names to be excluded.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Protocol Family</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.protocols.registry">Protocol Registry</a></li>
+<li><a class="reference internal" href="#protocol-registry">Protocol Registry</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema">Header Schema</a><ul>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>

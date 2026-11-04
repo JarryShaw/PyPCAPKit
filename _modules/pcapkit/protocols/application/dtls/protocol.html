@@ -1379,8 +1379,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            Dispatches on the fields of ``data`` rather than on its class, since</span>
+<span class="sd">            :meth:`Protocol.from_data &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`</span>
+<span class="sd">            reads a :obj:`dict` as the legacy data model (:issue:`2762`): a</span>
+<span class="sd">            ``tls12_cid`` record by its content type, and a unified header by</span>
+<span class="sd">            ``sequence_long``, its ``S`` bit, which no other record has.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_DTLSCIDCiphertext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'content_type'</span><span class="p">)</span> <span class="o">==</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">tls12_cid</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_DTLSCIDCiphertext'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span>
                 <span class="s1">'content_type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
@@ -1390,7 +1398,8 @@
                 <span class="s1">'content'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
                 <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="p">}</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_DTLSCiphertext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">'sequence_long'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_DTLSCiphertext'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">{</span>
                 <span class="s1">'ciphertext'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="s1">'epoch'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span>
@@ -1401,6 +1410,7 @@
                 <span class="s1">'content'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
                 <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="p">}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_DTLS'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'content_type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>

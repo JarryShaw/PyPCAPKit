@@ -1070,8 +1070,8 @@
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_MAC_2</span><span class="p">:</span>              <span class="s1">'hip_mac_2'</span><span class="p">,</span>               <span class="c1"># [RFC 7401] 61569</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE_2</span><span class="p">:</span>        <span class="s1">'hip_signature_2'</span><span class="p">,</span>         <span class="c1"># [RFC 7401] 61633</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_SIGNATURE</span><span class="p">:</span>          <span class="s1">'hip_signature'</span><span class="p">,</span>           <span class="c1"># [RFC 7401] 61697</span>
-            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_UNSIGNED</span><span class="p">:</span>  <span class="s1">'echo_request_unsigned'</span><span class="p">,</span>   <span class="c1"># [RFC 7401] 63661</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_RESPONSE_UNSIGNED</span><span class="p">:</span> <span class="s1">'echo_response_unsigned'</span><span class="p">,</span>  <span class="c1"># [RFC 7401] 63425</span>
+            <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ECHO_REQUEST_UNSIGNED</span><span class="p">:</span>  <span class="s1">'echo_request_unsigned'</span><span class="p">,</span>   <span class="c1"># [RFC 7401] 63661</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_FROM</span><span class="p">:</span>             <span class="s1">'relay_from'</span><span class="p">,</span>              <span class="c1"># [RFC 5770] 63998</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">RELAY_TO</span><span class="p">:</span>               <span class="s1">'relay_to'</span><span class="p">,</span>                <span class="c1"># [RFC 5770] 64002</span>
             <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">OVERLAY_TTL</span><span class="p">:</span>            <span class="s1">'overlay_ttl'</span><span class="p">,</span>             <span class="c1"># [RFC 6079] 64011</span>
@@ -1924,28 +1924,6 @@
         <span class="k">return</span> <span class="n">puzzle</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_puzzle_lifetime</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[timedelta]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.</span>
-
-<span class="sd">        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``</span>
-<span class="sd">        seconds. The result is informational only: :meth:`_make_param_puzzle`</span>
-<span class="sd">        writes back the octet itself, since :class:`~datetime.timedelta` rounds</span>
-<span class="sd">        octets below ``12`` to zero and cannot hold those of ``79`` and above.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            octet: the ``Lifetime`` octet</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The lifetime, or :obj:`None` if it exceeds</span>
-<span class="sd">            :attr:`datetime.timedelta.max`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">octet</span> <span class="o">-</span> <span class="mi">32</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
 <div class="viewcode-block" id="HIP._read_param_solution">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._read_param_solution">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SolutionParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2672,116 +2650,6 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_request_signed</span></div>
 
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_registration_lifetime</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'timedelta'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Decode a registration ``Lifetime`` octet into a duration.</span>
-
-<span class="sd">        :rfc:`8003#section-4.1` encodes the registration lifetimes of</span>
-<span class="sd">        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the</span>
-<span class="sd">        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used</span>
-<span class="sd">        to request and grant cancellation, and any other value stands for</span>
-<span class="sd">        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds</span>
-<span class="sd">        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which</span>
-<span class="sd">        :class:`~datetime.timedelta` holds, so -- unlike</span>
-<span class="sd">        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is</span>
-<span class="sd">        never :obj:`None`.</span>
-
-<span class="sd">        Reading the octet as a count of seconds instead reported every duration</span>
-<span class="sd">        wrongly: an octet of ``64``, which is one second, read as 64 seconds.</span>
-<span class="sd">        See :issue:`2281`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            octet: the ``Lifetime`` octet</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The lifetime.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">octet</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">((</span><span class="n">octet</span> <span class="o">-</span> <span class="mi">64</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_registration_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                                    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode a registration ``Lifetime`` octet.</span>
-
-<span class="sd">        The inverse of :meth:`_read_registration_lifetime`, rounding down to the</span>
-<span class="sd">        nearest representable octet as :meth:`_make_puzzle_lifetime` does for</span>
-<span class="sd">        ``PUZZLE``. A duration of zero is the one exact case:</span>
-<span class="sd">        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
-<span class="sd">                seconds</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The ``Lifetime`` octet.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a</span>
-<span class="sd">                non-negative and finite duration, or encodes to a value the</span>
-<span class="sd">                one-octet field cannot hold.</span>
-
-<span class="sd">        """</span>
-        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing</span>
-        <span class="c1"># for ``int`` would send a plain ``float`` down the timedelta branch and</span>
-        <span class="c1"># escape an :exc:`AttributeError`.</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
-                <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">!r}</span><span class="s1"> is not a non-negative number of seconds'</span><span class="p">)</span>
-        <span class="c1"># Zero is the RFC's own special case, so it is encoded rather than</span>
-        <span class="c1"># rejected -- which is where this parts company with</span>
-        <span class="c1"># ``_make_puzzle_lifetime``, whose field has no such value. Written as a</span>
-        <span class="c1"># truth test rather than ``== 0`` because ``seconds`` may be a float.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">seconds</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
-        <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">64</span><span class="p">)</span>
-
-        <span class="c1"># NOTE: Not _make_uint, so that the message names the seconds given, and</span>
-        <span class="c1"># since the octet 0 is reserved for a zero duration.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
-                                <span class="s1">'one-octet Lifetime field'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">octet</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_lifetime_octet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                             <span class="n">exponent</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
-                             <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve a registration ``Lifetime`` octet from either input form.</span>
-
-<span class="sd">        An explicit ``exponent`` is the octet and wins, as a parsed parameter's</span>
-<span class="sd">        is; otherwise ``lifetime`` is a duration and</span>
-<span class="sd">        :meth:`_make_registration_lifetime` encodes it. Shared by the</span>
-<span class="sd">        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet</span>
-<span class="sd">        appears.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            exponent: the ``Lifetime`` octet itself, if any</span>
-<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
-<span class="sd">                seconds</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The ``Lifetime`` octet.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``exponent`` does not fit one octet, or</span>
-<span class="sd">                ``lifetime`` cannot be encoded.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">exponent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_registration_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">exponent</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'lifetime'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HIP._read_param_reg_info">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_info">[docs]</a>
@@ -3616,42 +3484,6 @@
         <span class="k">return</span> <span class="n">hip_signature</span></div>
 
 
-<div class="viewcode-block" id="HIP._read_param_echo_request_unsigned">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_request_unsigned">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_echo_request_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EchoRequestUnsignedParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                          <span class="n">options</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EchoRequestUnsignedParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
-
-<span class="sd">        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |             Type              |             Length            |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                 Opaque data (variable length)                 |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            options: parsed HIP parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        """</span>
-        <span class="n">echo_request_unsigned</span> <span class="o">=</span> <span class="n">Data_EchoRequestUnsignedParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
-            <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">echo_request_unsigned</span></div>
-
-
 <div class="viewcode-block" id="HIP._read_param_echo_response_unsigned">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_response_unsigned">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_echo_response_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EchoResponseUnsignedParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -3686,6 +3518,42 @@
             <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_response_unsigned</span></div>
+
+
+<div class="viewcode-block" id="HIP._read_param_echo_request_unsigned">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_request_unsigned">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_echo_request_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EchoRequestUnsignedParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                                          <span class="n">options</span><span class="p">:</span> <span class="s1">'Parameter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EchoRequestUnsignedParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
+
+<span class="sd">        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |             Type              |             Length            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                 Opaque data (variable length)                 |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            options: parsed HIP parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">echo_request_unsigned</span> <span class="o">=</span> <span class="n">Data_EchoRequestUnsignedParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">echo_request_unsigned</span></div>
 
 
 <div class="viewcode-block" id="HIP._read_param_relay_from">
@@ -4074,39 +3942,6 @@
         <span class="k">return</span> <span class="n">relay_hmac</span></div>
 
 
-<div class="viewcode-block" id="HIP._make_hip_param_data">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_hip_param_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_hip_param_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'ParameterConstructor'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span>
-                             <span class="n">param</span><span class="p">:</span> <span class="s1">'Data_Parameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                             <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Parameter'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make a HIP parameter from the data model its reader produced.</span>
-
-<span class="sd">        The parsed parameter goes to ``meth`` **positionally**. Expanding it as</span>
-<span class="sd">        keyword arguments instead would drop every field whose constructor</span>
-<span class="sd">        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in</span>
-<span class="sd">        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as</span>
-<span class="sd">        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            meth: Parameter constructor.</span>
-<span class="sd">            code: Parameter code.</span>
-<span class="sd">            param: Parsed parameter data model.</span>
-<span class="sd">            version: HIP protocol version.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            HIP parameter schema.</span>
-
-<span class="sd">        .. versionadded:: 1.5.0</span>
-
-<span class="sd">        """</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
-        <span class="c1"># NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.</span>
-        <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'padding'</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
-        <span class="k">return</span> <span class="n">data</span></div>
-
-
 <div class="viewcode-block" id="HIP._make_param_unassigned">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_unassigned">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_unassigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_UnassignedParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -4379,139 +4214,6 @@
             <span class="n">locators</span><span class="o">=</span><span class="n">locators</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                              <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Encode a ``PUZZLE`` ``Lifetime`` octet.</span>
-
-<span class="sd">        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``</span>
-<span class="sd">        seconds -- and the ``PUZZLE`` section is the only place either RFC defines</span>
-<span class="sd">        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to</span>
-<span class="sd">        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is</span>
-<span class="sd">        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
-<span class="sd">                seconds</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The ``Lifetime`` octet.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive</span>
-<span class="sd">                and finite duration, or encodes to a value the one-octet field</span>
-<span class="sd">                cannot hold.</span>
-
-<span class="sd">        """</span>
-        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing</span>
-        <span class="c1"># for ``int`` would send a plain ``float`` down the timedelta branch and</span>
-        <span class="c1"># escape an :exc:`AttributeError`.</span>
-        <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
-
-        <span class="c1"># ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and</span>
-        <span class="c1"># ``math.floor`` one at infinity or NaN. Neither is a</span>
-        <span class="c1"># :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape</span>
-        <span class="c1"># the library's error handling with a message naming neither HIP nor</span>
-        <span class="c1"># the field.</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
-                <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">!r}</span><span class="s1"> is not a positive number of seconds'</span><span class="p">)</span>
-
-        <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
-
-        <span class="c1"># NOTE: Not _make_uint, so that the message names the seconds given</span>
-        <span class="c1"># rather than only the octet they encode to.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
-                                <span class="s1">'one-octet Lifetime field'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">octet</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_field_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                                 <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.</span>
-
-<span class="sd">        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``</span>
-<span class="sd">        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where</span>
-<span class="sd">        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm</span>
-<span class="sd">        (:rfc:`7401#section-2.3`). The width is therefore a property of the</span>
-<span class="sd">        association, not of the number that happens to be in the field, and it is</span>
-<span class="sd">        resolved here in that order of authority:</span>
-
-<span class="sd">        1. an explicit ``rhash_len`` argument;</span>
-<span class="sd">        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and</span>
-<span class="sd">           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both</span>
-<span class="sd">           ``Length`` values as literally 12 and 20;</span>
-<span class="sd">        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by</span>
-<span class="sd">           the callers below;</span>
-<span class="sd">        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up</span>
-<span class="sd">           to whole octets.</span>
-
-<span class="sd">        Only case 4 can lose a leading zero octet, and it is the only case where the</span>
-<span class="sd">        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing</span>
-<span class="sd">        declaring it. Using it unconditionally would re-serialise a</span>
-<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,</span>
-<span class="sd">        parameters this library's own reader rejects.</span>
-
-<span class="sd">        Things this deliberately does *not* reject, each of which looks like an</span>
-<span class="sd">        oversight and is not:</span>
-
-<span class="sd">        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a</span>
-<span class="sd">          zero-length output, so no conformant packet carries one -- but it is what</span>
-<span class="sd">          case 4 yields for the default ``random=0``, and it is what a</span>
-<span class="sd">          ``Length = 4`` parameter parses back to. Rejecting it would turn a</span>
-<span class="sd">          degenerate-but-self-consistent case into a failure for callers that pass</span>
-<span class="sd">          no value at all.</span>
-<span class="sd">        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is</span>
-<span class="sd">          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and</span>
-<span class="sd">          :meth:`_read_param_solution`, whose guards are likewise written as</span>
-<span class="sd">          ``version == 1`` rather than as an exhaustive check, so the reader and the</span>
-<span class="sd">          builder agree. Validating the version belongs with :meth:`make`'s public</span>
-<span class="sd">          signature, not here.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            rhash_len: declared field width in bits, if any</span>
-<span class="sd">            *values: the field values that must fit</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The width of one field, in octets.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the declared width is not an :obj:`int`, is a</span>
-<span class="sd">                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,</span>
-<span class="sd">                contradicts the protocol version, is not a whole number of</span>
-<span class="sd">                octets, or is too narrow for ``values``.</span>
-
-<span class="sd">        """</span>
-        <span class="c1"># NOTE: A value that is not an int is sized as nothing here, and the</span>
-        <span class="c1"># caller's _make_uint refuses it.</span>
-        <span class="n">bits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: In bits, of a field whose octets a two-octet Length counts.</span>
-            <span class="n">rhash_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">rhash_len</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RHASH_len'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rhash_len</span> <span class="o">!=</span> <span class="mi">64</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
-                                    <span class="sa">f</span><span class="s1">'HIPv1 fixes the field at 64 bits, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">64</span>
-        <span class="k">elif</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bits</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">rhash_len</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rhash_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
-                                <span class="sa">f</span><span class="s1">'RHASH_len must be a non-negative whole number of '</span>
-                                <span class="sa">f</span><span class="s1">'octets, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1"> bits'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bits</span> <span class="o">&gt;</span> <span class="n">rhash_len</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
-                                <span class="sa">f</span><span class="s1">'a </span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">-bit value does not fit a </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">-bit field'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">rhash_len</span> <span class="o">//</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="HIP._make_param_puzzle">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_puzzle">[docs]</a>
@@ -5861,61 +5563,6 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_identifier_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                               <span class="n">id_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve the on-wire width of an opaque ``Identifier`` field.</span>
-
-<span class="sd">        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``</span>
-<span class="sd">        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of</span>
-<span class="sd">        the Identifier, in octets" over an otherwise opaque value, so the width</span>
-<span class="sd">        is a property of the identifier as issued and not of the number that</span>
-<span class="sd">        happens to be in it. It is resolved here in that order of authority:</span>
-
-<span class="sd">        1. an explicit ``id_len`` argument, which is what a parsed parameter</span>
-<span class="sd">           carries on :attr:`TransactionIDParameter.id_len</span>
-<span class="sd">           &lt;pcapkit.protocols.internet.hip.data.TransactionIDParameter.id_len&gt;`;</span>
-<span class="sd">        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up</span>
-<span class="sd">           to whole octets.</span>
-
-<span class="sd">        Only case 2 can lose a leading zero octet, and it is the only case</span>
-<span class="sd">        where the width is genuinely unknowable -- a from-scratch build with</span>
-<span class="sd">        nothing declaring it. Using it unconditionally re-serialised a</span>
-<span class="sd">        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),</span>
-<span class="sd">        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``</span>
-<span class="sd">        against :issue:`653`.</span>
-
-<span class="sd">        A width of ``0`` is accepted rather than rejected: it is what case 2</span>
-<span class="sd">        yields for the default identifier of ``0``, and what a ``Length = 0``</span>
-<span class="sd">        parameter parses back to, so refusing it would fail callers that pass no</span>
-<span class="sd">        value at all.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            id_len: declared field width in octets, if any</span>
-<span class="sd">            identifier: the identifier that must fit</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The width of the ``Identifier`` field, in octets.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``identifier`` is negative or needs more octets</span>
-<span class="sd">                than the 2-octet ``Length`` field can count, or the declared</span>
-<span class="sd">                width is negative, too narrow for ``identifier``, or beyond</span>
-<span class="sd">                what that field can hold.</span>
-
-<span class="sd">        """</span>
-        <span class="n">identifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mh">0xFFFF</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'identifier'</span><span class="p">,</span>
-                                     <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">id_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uint_size</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
-
-        <span class="n">id_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">id_len</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'identifier width'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">id_len</span> <span class="o">*</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid identifier width: '</span>
-                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">id_len</span><span class="si">}</span><span class="s1"> octets cannot hold </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">id_len</span>
-
 <div class="viewcode-block" id="HIP._make_param_transaction_id">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_transaction_id">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_transaction_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_TransactionIDParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -6233,35 +5880,6 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="HIP._make_param_echo_request_unsigned">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_echo_request_unsigned">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_echo_request_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_EchoRequestUnsignedParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                                          <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                                          <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
-                                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_EchoRequestUnsignedParameter'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: parameter code</span>
-<span class="sd">            param: parameter data</span>
-<span class="sd">            version: HIP protocol version</span>
-<span class="sd">            opaque: opaque data</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            HIP parameter schema.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
-
-        <span class="k">return</span> <span class="n">Schema_EchoRequestUnsignedParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">opaque</span><span class="p">),</span>
-            <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="HIP._make_param_echo_response_unsigned">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_echo_response_unsigned">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_echo_response_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_EchoResponseUnsignedParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -6285,6 +5903,35 @@
             <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
 
         <span class="k">return</span> <span class="n">Schema_EchoResponseUnsignedParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">opaque</span><span class="p">),</span>
+            <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HIP._make_param_echo_request_unsigned">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_param_echo_request_unsigned">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_echo_request_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_EchoRequestUnsignedParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                                          <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                                          <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_EchoRequestUnsignedParameter'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            param: parameter data</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            opaque: opaque data</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            HIP parameter schema.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
+
+        <span class="k">return</span> <span class="n">Schema_EchoRequestUnsignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">opaque</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
@@ -6609,7 +6256,360 @@
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">hmac</span><span class="p">),</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span></div>
-</div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_puzzle_lifetime</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[timedelta]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.</span>
+
+<span class="sd">        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``</span>
+<span class="sd">        seconds. The result is informational only: :meth:`_make_param_puzzle`</span>
+<span class="sd">        writes back the octet itself, since :class:`~datetime.timedelta` rounds</span>
+<span class="sd">        octets below ``12`` to zero and cannot hold those of ``79`` and above.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            octet: the ``Lifetime`` octet</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The lifetime, or :obj:`None` if it exceeds</span>
+<span class="sd">            :attr:`datetime.timedelta.max`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">octet</span> <span class="o">-</span> <span class="mi">32</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_registration_lifetime</span><span class="p">(</span><span class="n">octet</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'timedelta'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Decode a registration ``Lifetime`` octet into a duration.</span>
+
+<span class="sd">        :rfc:`8003#section-4.1` encodes the registration lifetimes of</span>
+<span class="sd">        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the</span>
+<span class="sd">        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used</span>
+<span class="sd">        to request and grant cancellation, and any other value stands for</span>
+<span class="sd">        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds</span>
+<span class="sd">        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which</span>
+<span class="sd">        :class:`~datetime.timedelta` holds, so -- unlike</span>
+<span class="sd">        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is</span>
+<span class="sd">        never :obj:`None`.</span>
+
+<span class="sd">        Reading the octet as a count of seconds instead reported every duration</span>
+<span class="sd">        wrongly: an octet of ``64``, which is one second, read as 64 seconds.</span>
+<span class="sd">        See :issue:`2281`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            octet: the ``Lifetime`` octet</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The lifetime.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">octet</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">((</span><span class="n">octet</span> <span class="o">-</span> <span class="mi">64</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_registration_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                                    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a registration ``Lifetime`` octet.</span>
+
+<span class="sd">        The inverse of :meth:`_read_registration_lifetime`, rounding down to the</span>
+<span class="sd">        nearest representable octet as :meth:`_make_puzzle_lifetime` does for</span>
+<span class="sd">        ``PUZZLE``. A duration of zero is the one exact case:</span>
+<span class="sd">        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
+<span class="sd">                seconds</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``Lifetime`` octet.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a</span>
+<span class="sd">                non-negative and finite duration, or encodes to a value the</span>
+<span class="sd">                one-octet field cannot hold.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing</span>
+        <span class="c1"># for ``int`` would send a plain ``float`` down the timedelta branch and</span>
+        <span class="c1"># escape an :exc:`AttributeError`.</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">!r}</span><span class="s1"> is not a non-negative number of seconds'</span><span class="p">)</span>
+        <span class="c1"># Zero is the RFC's own special case, so it is encoded rather than</span>
+        <span class="c1"># rejected -- which is where this parts company with</span>
+        <span class="c1"># ``_make_puzzle_lifetime``, whose field has no such value. Written as a</span>
+        <span class="c1"># truth test rather than ``== 0`` because ``seconds`` may be a float.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">seconds</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">64</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Not _make_uint, so that the message names the seconds given, and</span>
+        <span class="c1"># since the octet 0 is reserved for a zero duration.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
+                                <span class="s1">'one-octet Lifetime field'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">octet</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_lifetime_octet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                             <span class="n">exponent</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
+                             <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve a registration ``Lifetime`` octet from either input form.</span>
+
+<span class="sd">        An explicit ``exponent`` is the octet and wins, as a parsed parameter's</span>
+<span class="sd">        is; otherwise ``lifetime`` is a duration and</span>
+<span class="sd">        :meth:`_make_registration_lifetime` encodes it. Shared by the</span>
+<span class="sd">        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet</span>
+<span class="sd">        appears.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            exponent: the ``Lifetime`` octet itself, if any</span>
+<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
+<span class="sd">                seconds</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``Lifetime`` octet.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``exponent`` does not fit one octet, or</span>
+<span class="sd">                ``lifetime`` cannot be encoded.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">exponent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_registration_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">exponent</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'lifetime'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HIP._make_hip_param_data">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP._make_hip_param_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_hip_param_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'ParameterConstructor'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span>
+                             <span class="n">param</span><span class="p">:</span> <span class="s1">'Data_Parameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Parameter'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make a HIP parameter from the data model its reader produced.</span>
+
+<span class="sd">        The parsed parameter goes to ``meth`` **positionally**. Expanding it as</span>
+<span class="sd">        keyword arguments instead would drop every field whose constructor</span>
+<span class="sd">        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in</span>
+<span class="sd">        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as</span>
+<span class="sd">        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            meth: Parameter constructor.</span>
+<span class="sd">            code: Parameter code.</span>
+<span class="sd">            param: Parsed parameter data model.</span>
+<span class="sd">            version: HIP protocol version.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            HIP parameter schema.</span>
+
+<span class="sd">        .. versionadded:: 1.5.0</span>
+
+<span class="sd">        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+        <span class="c1"># NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'padding'</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                              <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a ``PUZZLE`` ``Lifetime`` octet.</span>
+
+<span class="sd">        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``</span>
+<span class="sd">        seconds -- and the ``PUZZLE`` section is the only place either RFC defines</span>
+<span class="sd">        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to</span>
+<span class="sd">        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is</span>
+<span class="sd">        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
+<span class="sd">                seconds</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``Lifetime`` octet.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive</span>
+<span class="sd">                and finite duration, or encodes to a value the one-octet field</span>
+<span class="sd">                cannot hold.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing</span>
+        <span class="c1"># for ``int`` would send a plain ``float`` down the timedelta branch and</span>
+        <span class="c1"># escape an :exc:`AttributeError`.</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
+
+        <span class="c1"># ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and</span>
+        <span class="c1"># ``math.floor`` one at infinity or NaN. Neither is a</span>
+        <span class="c1"># :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape</span>
+        <span class="c1"># the library's error handling with a message naming neither HIP nor</span>
+        <span class="c1"># the field.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">!r}</span><span class="s1"> is not a positive number of seconds'</span><span class="p">)</span>
+
+        <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Not _make_uint, so that the message names the seconds given</span>
+        <span class="c1"># rather than only the octet they encode to.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
+                                <span class="s1">'one-octet Lifetime field'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">octet</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_field_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                                 <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.</span>
+
+<span class="sd">        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``</span>
+<span class="sd">        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where</span>
+<span class="sd">        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm</span>
+<span class="sd">        (:rfc:`7401#section-2.3`). The width is therefore a property of the</span>
+<span class="sd">        association, not of the number that happens to be in the field, and it is</span>
+<span class="sd">        resolved here in that order of authority:</span>
+
+<span class="sd">        1. an explicit ``rhash_len`` argument;</span>
+<span class="sd">        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and</span>
+<span class="sd">           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both</span>
+<span class="sd">           ``Length`` values as literally 12 and 20;</span>
+<span class="sd">        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by</span>
+<span class="sd">           the callers below;</span>
+<span class="sd">        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up</span>
+<span class="sd">           to whole octets.</span>
+
+<span class="sd">        Only case 4 can lose a leading zero octet, and it is the only case where the</span>
+<span class="sd">        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing</span>
+<span class="sd">        declaring it. Using it unconditionally would re-serialise a</span>
+<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,</span>
+<span class="sd">        parameters this library's own reader rejects.</span>
+
+<span class="sd">        Things this deliberately does *not* reject, each of which looks like an</span>
+<span class="sd">        oversight and is not:</span>
+
+<span class="sd">        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a</span>
+<span class="sd">          zero-length output, so no conformant packet carries one -- but it is what</span>
+<span class="sd">          case 4 yields for the default ``random=0``, and it is what a</span>
+<span class="sd">          ``Length = 4`` parameter parses back to. Rejecting it would turn a</span>
+<span class="sd">          degenerate-but-self-consistent case into a failure for callers that pass</span>
+<span class="sd">          no value at all.</span>
+<span class="sd">        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is</span>
+<span class="sd">          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and</span>
+<span class="sd">          :meth:`_read_param_solution`, whose guards are likewise written as</span>
+<span class="sd">          ``version == 1`` rather than as an exhaustive check, so the reader and the</span>
+<span class="sd">          builder agree. Validating the version belongs with :meth:`make`'s public</span>
+<span class="sd">          signature, not here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            rhash_len: declared field width in bits, if any</span>
+<span class="sd">            *values: the field values that must fit</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The width of one field, in octets.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the declared width is not an :obj:`int`, is a</span>
+<span class="sd">                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,</span>
+<span class="sd">                contradicts the protocol version, is not a whole number of</span>
+<span class="sd">                octets, or is too narrow for ``values``.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: A value that is not an int is sized as nothing here, and the</span>
+        <span class="c1"># caller's _make_uint refuses it.</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: In bits, of a field whose octets a two-octet Length counts.</span>
+            <span class="n">rhash_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">rhash_len</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RHASH_len'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rhash_len</span> <span class="o">!=</span> <span class="mi">64</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                    <span class="sa">f</span><span class="s1">'HIPv1 fixes the field at 64 bits, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">64</span>
+        <span class="k">elif</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bits</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rhash_len</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rhash_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                <span class="sa">f</span><span class="s1">'RHASH_len must be a non-negative whole number of '</span>
+                                <span class="sa">f</span><span class="s1">'octets, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1"> bits'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bits</span> <span class="o">&gt;</span> <span class="n">rhash_len</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                <span class="sa">f</span><span class="s1">'a </span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">-bit value does not fit a </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">-bit field'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rhash_len</span> <span class="o">//</span> <span class="mi">8</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_identifier_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                               <span class="n">id_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve the on-wire width of an opaque ``Identifier`` field.</span>
+
+<span class="sd">        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``</span>
+<span class="sd">        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of</span>
+<span class="sd">        the Identifier, in octets" over an otherwise opaque value, so the width</span>
+<span class="sd">        is a property of the identifier as issued and not of the number that</span>
+<span class="sd">        happens to be in it. It is resolved here in that order of authority:</span>
+
+<span class="sd">        1. an explicit ``id_len`` argument, which is what a parsed parameter</span>
+<span class="sd">           carries on :attr:`TransactionIDParameter.id_len</span>
+<span class="sd">           &lt;pcapkit.protocols.internet.hip.data.TransactionIDParameter.id_len&gt;`;</span>
+<span class="sd">        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up</span>
+<span class="sd">           to whole octets.</span>
+
+<span class="sd">        Only case 2 can lose a leading zero octet, and it is the only case</span>
+<span class="sd">        where the width is genuinely unknowable -- a from-scratch build with</span>
+<span class="sd">        nothing declaring it. Using it unconditionally re-serialised a</span>
+<span class="sd">        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),</span>
+<span class="sd">        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``</span>
+<span class="sd">        against :issue:`653`.</span>
+
+<span class="sd">        A width of ``0`` is accepted rather than rejected: it is what case 2</span>
+<span class="sd">        yields for the default identifier of ``0``, and what a ``Length = 0``</span>
+<span class="sd">        parameter parses back to, so refusing it would fail callers that pass no</span>
+<span class="sd">        value at all.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            id_len: declared field width in octets, if any</span>
+<span class="sd">            identifier: the identifier that must fit</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The width of the ``Identifier`` field, in octets.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``identifier`` is negative or needs more octets</span>
+<span class="sd">                than the 2-octet ``Length`` field can count, or the declared</span>
+<span class="sd">                width is negative, too narrow for ``identifier``, or beyond</span>
+<span class="sd">                what that field can hold.</span>
+
+<span class="sd">        """</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mh">0xFFFF</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'identifier'</span><span class="p">,</span>
+                                     <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uint_size</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+
+        <span class="n">id_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">id_len</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'identifier width'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">id_len</span> <span class="o">*</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid identifier width: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">id_len</span><span class="si">}</span><span class="s1"> octets cannot hold </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">id_len</span></div>
 
 </pre></div>
         </article>

@@ -895,23 +895,6 @@
         <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="IPX._next_exthdr_depth">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.protocol.IPX._next_exthdr_depth">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_next_exthdr_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Place the next layer in its chain of IPv6 extension headers.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            proto: next layer IPX Packet Type</span>
-<span class="sd">            extension: if the next layer is parsed as an extension header</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Always ``0``: an IPX Packet Type is not an IP protocol number, so it</span>
-<span class="sd">            never names an IPv6 extension header (:issue:`2169`).</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="mi">0</span></div>
-
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ipx_address</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Address'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read IPX address field.</span>
 
@@ -958,7 +941,24 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
                 <span class="o">+</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
-                <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">socket</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+                <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">socket</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+<div class="viewcode-block" id="IPX._next_exthdr_depth">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.protocol.IPX._next_exthdr_depth">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next_exthdr_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Place the next layer in its chain of IPv6 extension headers.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto: next layer IPX Packet Type</span>
+<span class="sd">            extension: if the next layer is parsed as an extension header</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Always ``0``: an IPX Packet Type is not an IP protocol number, so it</span>
+<span class="sd">            never names an IPv6 extension header (:issue:`2169`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+</div>
 
 </pre></div>
         </article>

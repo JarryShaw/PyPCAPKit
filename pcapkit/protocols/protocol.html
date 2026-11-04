@@ -599,7 +599,7 @@ but from <a class="reference internal" href="#pcapkit.protocols.protocol.Protoco
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.0: </span>The built-in protocol families derive from <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, so a
 built-in protocol is not an instance of this class, where every one
-was; and a subclass is registered in <a class="reference internal" href="index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a>
+was; and a subclass is registered in <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code>
 when it is defined.</p>
 </div>
 <dl class="py property">
@@ -826,7 +826,10 @@ its other keys (<a class="extlink-issue reference external" href="https://github
 <p>A header the capture cut short, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> records, is cut
 back before it is read, and read at the width it declares, so the
 rebuild parses and verifies the octets captured as the capture did
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). It keeps the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer its data model holds,
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>), holding the values its parse read from them, not those
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> fills in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Inside a payload
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, which gives only its octets, the header
+made is read instead. It keeps the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer its data model holds,
 which a parse reading the header short of that width leaves it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>).</p>
 <dl class="field-list simple">
@@ -947,6 +950,11 @@ packed octets yields a schema – e.g. a raw option given to
 <code class="docutils literal notranslate"><span class="pre">make()</span></code>, directly or inside a data model – which <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
 cannot consume. The header is then replaced by the parsed one
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1312">#1312</a>).</p>
+<p>A header <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds from a short read is parsed
+from the octets captured instead, as quietly as the header made
+was read, and given the <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> of its data model before
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> reads it, as the record of a cut those octets may not
+show (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -998,7 +1006,10 @@ header made here, as the one <a class="reference internal" href="#pcapkit.protoc
 <p>That call, when <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds a header the capture cut
 short, cuts the header back to the octets captured, through its own
 <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and <a class="reference internal" href="index.html#pcapkit.protocols.schema.Schema._cut_short_read" title="pcapkit.protocols.schema.Schema._cut_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._cut_short_read</span></code></a>, and
-returns only those (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>).</p>
+returns only those (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> then
+drops that header, so that <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parses the octets back
+and the rebuild holds the values its parse read, not those
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> filled in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Calling it no longer replaces the instance’s
@@ -1126,8 +1137,8 @@ protocol class, and the protocol names in upper case obtained from
 protocol class itself, and the protocol names in upper case
 obtained from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code></a>.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">value</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, the method will attempt to search for
-the existing registered protocol class from
-<a class="reference internal" href="index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a> and follow <strong>step 2</strong>; otherwise,
+the existing registered protocol class with
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol()</span></code></a> and follow <strong>step 2</strong>; otherwise,
 return the value in upper case alone.</p></li>
 </ol>
 <dl class="field-list simple">
@@ -2440,16 +2451,29 @@ for the class of the subclass’s own name in the <code class="docutils literal 
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.
 An explicit <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> keyword is used as given.</p>
 </div>
-<p>This method also registers the subclass to the protocol registry,
-i.e., <a class="reference internal" href="index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a>. That registration is
-unconditional – it is the name-keyed identity registry, unrelated to
-the <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword – whereas <code class="docutils literal notranslate"><span class="pre">code</span></code>’s next-layer dispatch
-registration is opt-in; see
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__()</span></code></a> for the latter.</p>
+<p>This method also names a concrete subclass in the by-name registry,
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>,
+under its upper-cased class name, once
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__()</span></code></a> has accepted its <code class="docutils literal notranslate"><span class="pre">code</span></code>,
+whereas <code class="docutils literal notranslate"><span class="pre">code</span></code>’s next-layer dispatch registration is opt-in. An
+abstract subclass, as <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.isabstract" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.isabstract()</span></code></a> reports it, is not
+named, and nor is a class deriving <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> without this
+class, as every built-in protocol does. A name already holding another
+entry keeps it, and the clash is reported as a
+<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a> replaces an
+entry. A class meeting the <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+that names its own module and name is no clash, and the descriptor
+stays.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more information on the registry, please refer to
-<a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol()</span></code></a>.</p>
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>An abstract subclass is not registered, and a name already holding
+an entry keeps it, where every subclass was registered over it
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>).</p>
 </div>
 </dd></dl>
 
@@ -2772,6 +2796,92 @@ implements the resolution described above.</p>
 </div>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__registry__">
+<span class="sig-name descname"><span class="pre">__registry__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol registry by name, holding each protocol class under its
+upper-cased class name, <code class="docutils literal notranslate"><span class="pre">'IPV4'</span></code> for <a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4" title="pcapkit.protocols.internet.ipv4.protocol.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>.
+Each built-in protocol is a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+here, so the map names every one before any is imported, and
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_protocol()</span></code></a> imports a class only when it resolves its entry
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>). <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init_subclass__" title="pcapkit.protocols.protocol.Protocol.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init_subclass__()</span></code></a> adds each concrete
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass as it is defined, <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_protocol()</span></code></a>
+replaces an entry, and <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolMeta.registry" title="pcapkit.protocols.protocol.ProtocolMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolMeta.registry</span></code></a> is a read-only view.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.register_protocol">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.register_protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Register a protocol class in <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__registry__</span></code></a>, replacing what its name holds.</p>
+<p>The key is <code class="docutils literal notranslate"><span class="pre">protocol.__name__.upper()</span></code>. Defining a concrete
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass registers it already, but keeps an entry its
+name holds, so this is how to replace one, or to register a class that
+derives <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> alone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
+    class, or not a <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If the name holds a
+different class, naming it and its replacement, and their ids
+where the two read the same. A
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> entry is
+resolved to compare, so registering the class it names is silent
+and leaves the descriptor in place.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A built-in protocol is stored as the descriptor it shipped as, per
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">_shipped_registry</span></code>, rather than as its class, so undoing an
+override leaves the entry as shipped, to be imported on lookup.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.get_protocol">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.get_protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Look a protocol class up in <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__registry__</span></code></a> by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) → <span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>), <strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) → <span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>] | <code class="docutils literal notranslate"><span class="pre">_VT</span></code></span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – protocol name, in any case: <code class="docutils literal notranslate"><span class="pre">'ipv4'</span></code> finds
+<a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4" title="pcapkit.protocols.internet.ipv4.protocol.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a></p></li>
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – what to return where no entry has the name</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The class registered under <code class="docutils literal notranslate"><span class="pre">name.upper()</span></code>, imported where its entry
+is a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, or
+<code class="docutils literal notranslate"><span class="pre">default</span></code>. The entry is left as it is, so a descriptor is resolved
+again on each lookup and follows a reloaded module.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>pcapkit.utilities.exceptions.ProtocolError</strong></a> – If a descriptor names a
+    class its module does not define.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
 <p><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> inherits the other members of this class, and they are
 documented under it above; each group below links to its entries.</p>
 <dl class="py property">
@@ -2993,7 +3103,27 @@ documented under it above; each group below links to its entries.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">ProtocolMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
 <p>Metaclass of <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, and so of every protocol class.</p>
-<p>It adds no behaviour of its own over <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a>.</p>
+<p>Over <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a>, it adds the class property <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolMeta.registry" title="pcapkit.protocols.protocol.ProtocolMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolMeta.registry">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">registry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.MappingProxyType" title="(in Python v3.15)"><span class="pre">MappingProxyType</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolMeta.registry" title="Link to this definition">¶</a></dt>
+<dd><p>Read-only view of the by-name protocol registry.</p>
+<p>It is <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>, with each entry as stored: a
+built-in protocol is the <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+naming it, so reading the view imports nothing. Look a class up with
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol()</span></code></a>, which resolves a descriptor.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is one map, not a per-class one, so every protocol class reads
+the same entries, and the view shows each later registration. It
+is defined on this metaclass, so it is a class attribute and
+<strong>not</strong> an instance one.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py data">

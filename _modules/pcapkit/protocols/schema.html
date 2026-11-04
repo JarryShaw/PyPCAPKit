@@ -1350,12 +1350,23 @@
 <span class="sd">            records, and warn nothing (:issue:`2749`). The key is cleared as</span>
 <span class="sd">            unpacking starts too.</span>
 
+<span class="sd">            A ``__data_present__`` key in ``packet`` says that ``data`` holds</span>
+<span class="sd">            the data that many octets in, and past them the zeros a</span>
+<span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` of schema</span>
+<span class="sd">            items filled it out with, as the list says of the item the data</span>
+<span class="sd">            ends inside. The field a read crosses them in is given how many of</span>
+<span class="sd">            its octets the data holds, under the same key, so that a list there</span>
+<span class="sd">            ends with the data, as it does where the data itself ends</span>
+<span class="sd">            (:issue:`2760`). The key is cleared as unpacking starts too.</span>
+
 <span class="sd">        .. versionchanged:: 1.6.0</span>
 
 <span class="sd">           The field the data ends inside is given to the fields after it, as</span>
-<span class="sd">           ``__short_read__`` in ``packet`` (:issue:`2727`), and a schema whose</span>
+<span class="sd">           ``__short_read__`` in ``packet`` (:issue:`2727`), a schema whose</span>
 <span class="sd">           ``length`` ends with the data reads its fields past it as cut, not as</span>
-<span class="sd">           a negative length (:issue:`2749`).</span>
+<span class="sd">           a negative length (:issue:`2749`), and the field a read crosses the</span>
+<span class="sd">           end of the data in, inside zeros filled out past it, is told where it</span>
+<span class="sd">           ends (:issue:`2760`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># force cast arg type since decorator changed their signatures</span>
@@ -1370,6 +1381,10 @@
         <span class="c1"># NOTE: Fields running past a length that ends with the data are the cut its</span>
         <span class="c1"># short read records, not an overrun (#2749).</span>
         <span class="n">data_end</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__data_end__'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># NOTE: Where ``data`` holds the data ends, past it the zero fill of a list of schema</span>
+        <span class="c1"># items the data ends inside, which the field a read crosses it in is told of (#2760).</span>
+        <span class="n">present</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__data_present__'</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">+</span> <span class="n">present</span> <span class="k">if</span> <span class="n">present</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1433,7 +1448,10 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
-            <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">fill</span> <span class="o">&lt;</span> <span class="n">data</span><span class="o">.</span><span class="n">tell</span><span class="p">():</span>
+                <span class="n">context</span><span class="p">[</span><span class="s1">'__data_present__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">fill</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ListField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">shortfall</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># NOTE: The data ended before the items the list counts, each at least an</span>
                 <span class="c1"># octet, so it declares that many past those read (#2711).</span>

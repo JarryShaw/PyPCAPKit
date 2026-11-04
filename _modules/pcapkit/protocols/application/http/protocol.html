@@ -1389,6 +1389,35 @@
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="HTTP._member_of_version">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._member_of_version">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[HTTP]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The member a ``version`` of ``1`` or ``2`` names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            version: Version of HTTP.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or</span>
+<span class="sd">            :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a</span>
+<span class="sd">                :obj:`bool` or a :obj:`float` is refused even where it equals one.</span>
+
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">HTTPv1</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">HTTPv2</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="HTTP._dispatch_version">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._dispatch_version">[docs]</a>
     <span class="nd">@classmethod</span>
@@ -1446,35 +1475,6 @@
         <span class="k">if</span> <span class="n">_test_http2_frame</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv2</span>
         <span class="k">return</span> <span class="n">Raw</span></div>
-
-
-<div class="viewcode-block" id="HTTP._member_of_version">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP._member_of_version">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[HTTP]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""The member a ``version`` of ``1`` or ``2`` names.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            version: Version of HTTP.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or</span>
-<span class="sd">            :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``version`` is neither, or is no :obj:`int`: a</span>
-<span class="sd">                :obj:`bool` or a :obj:`float` is refused even where it equals one.</span>
-
-<span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">HTTPv1</span>
-            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">HTTPv2</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

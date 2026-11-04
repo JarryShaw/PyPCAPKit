@@ -982,6 +982,14 @@ dispatches here (<a class="reference internal" href="../../../contributing/conve
 <dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Dispatches on the fields of <code class="docutils literal notranslate"><span class="pre">data</span></code> rather than on its class, since
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>
+reads a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> as the legacy data model (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2762">#2762</a>): a
+<code class="docutils literal notranslate"><span class="pre">tls12_cid</span></code> record by its content type, and a unified header by
+<code class="docutils literal notranslate"><span class="pre">sequence_long</span></code>, its <code class="docutils literal notranslate"><span class="pre">S</span></code> bit, which no other record has.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

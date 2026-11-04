@@ -692,16 +692,25 @@ iterated item by item.</p>
     field’s length cannot be zero-filled.</p>
 </dd>
 </dl>
-<p>When <code class="docutils literal notranslate"><span class="pre">buffer</span></code> falls short of the field’s length, the schema item it
-ends inside is read as though its missing octets were zeros, as
+<p>When <code class="docutils literal notranslate"><span class="pre">buffer</span></code> falls short of the field’s length, the item it ends
+inside is read as though its missing octets were zeros, as
 <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.unpack" title="pcapkit.corekit.fields.field.FieldBase.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code></a>
 reads any other field, and the list ends with that item: none is read
-from the zeros past it, which hold no octet of the data.</p>
+from past the data, which holds no octet of it. A <code class="docutils literal notranslate"><span class="pre">__data_present__</span></code>
+key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> says that <code class="docutils literal notranslate"><span class="pre">buffer</span></code> holds the data that many octets
+in, and past them the zeros an enclosing list of schema items was
+filled out with, as <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> tells the fields of the item
+the data ends inside; the list then ends with the data there.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">__zero_tail__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code>, true, says instead that the
+octets past <code class="docutils literal notranslate"><span class="pre">buffer</span></code> are zeros of the data, as radiotap.org reads the
+octets a producer leaves off a TLV item (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2655">#2655</a>), so the list
+reads its items on through them to its length.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.6.0: </span>A list of schema items the data ends inside ends with the data, the
-item it ends inside read with its missing octets as zeros, where an
-item past the data was refused as consuming nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2686">#2686</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2756">#2756</a>).</p>
+<p><span class="versionmodified changed">Changed in version 1.6.0: </span>A list the data ends inside ends with the data, the item it ends
+inside read with its missing octets as zeros, where a schema item
+past the data was refused as consuming nothing and a plain value
+past it was read as zeros, and so does a list in an item the data
+ends inside (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2686">#2686</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2756">#2756</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>).</p>
 </div>
 </dd></dl>
 
@@ -715,9 +724,9 @@ item past the data was refused as consuming nothing (<a class="extlink-issue ref
 <li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Stream the items are read from.</p></li>
 <li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
 <li><p><strong>is_schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the items are schemas.</p></li>
-<li><p><strong>present</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets of <code class="docutils literal notranslate"><span class="pre">file</span></code> the data holds, past which it holds the
-zeros <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> filled it with; negative where it holds
-no zeros.</p></li>
+<li><p><strong>present</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets of <code class="docutils literal notranslate"><span class="pre">file</span></code> the data holds, past which <code class="docutils literal notranslate"><span class="pre">file</span></code>
+ends or holds zeros a fill made up; negative where it holds the
+data to the field’s length.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

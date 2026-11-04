@@ -581,7 +581,8 @@ formats.</p>
 <h2>Round-Trip Invariants<a class="headerlink" href="#round-trip-invariants" title="Link to this heading">¶</a></h2>
 <p><strong>A round trip either reproduces its input exactly or is a recorded defect.</strong> There is
 no tolerance in between: a cycle that comes back with different octets is a bug, even
-when both halves are internally consistent.</p>
+when both halves are internally consistent, and so is one whose parsed values differ:
+<code class="docutils literal notranslate"><span class="pre">from_data(info).info</span></code> equals <code class="docutils literal notranslate"><span class="pre">info</span></code>, for a cut header too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 <p>Coverage is <strong>enumerated from the registries rather than hand-picked</strong>, so a code
 registered tomorrow gets a case tomorrow. The registry-driven suites that carry a
 known-failure table keep their cases in a generator, beside the captures it also writes:</p>

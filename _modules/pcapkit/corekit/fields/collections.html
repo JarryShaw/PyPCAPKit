@@ -556,7 +556,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">_zero_filled_items</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">_give_back_fill</span><span class="p">,</span> <span class="n">_zero_filled_items</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
@@ -775,18 +775,29 @@
 <span class="sd">                consumes nothing from ``buffer``, or if schema items short of the</span>
 <span class="sd">                field's length cannot be zero-filled.</span>
 
-<span class="sd">        When ``buffer`` falls short of the field's length, the schema item it</span>
-<span class="sd">        ends inside is read as though its missing octets were zeros, as</span>
+<span class="sd">        When ``buffer`` falls short of the field's length, the item it ends</span>
+<span class="sd">        inside is read as though its missing octets were zeros, as</span>
 <span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
 <span class="sd">        reads any other field, and the list ends with that item: none is read</span>
-<span class="sd">        from the zeros past it, which hold no octet of the data.</span>
+<span class="sd">        from past the data, which holds no octet of it. A ``__data_present__``</span>
+<span class="sd">        key in ``packet`` says that ``buffer`` holds the data that many octets</span>
+<span class="sd">        in, and past them the zeros an enclosing list of schema items was</span>
+<span class="sd">        filled out with, as :meth:`Schema.unpack</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.Schema.unpack&gt;` tells the fields of the item</span>
+<span class="sd">        the data ends inside; the list then ends with the data there.</span>
+
+<span class="sd">        A ``__zero_tail__`` key in ``packet``, true, says instead that the</span>
+<span class="sd">        octets past ``buffer`` are zeros of the data, as radiotap.org reads the</span>
+<span class="sd">        octets a producer leaves off a TLV item (:issue:`2655`), so the list</span>
+<span class="sd">        reads its items on through them to its length.</span>
 
 <span class="sd">        .. versionchanged:: 1.6.0</span>
 
-<span class="sd">           A list of schema items the data ends inside ends with the data, the</span>
-<span class="sd">           item it ends inside read with its missing octets as zeros, where an</span>
-<span class="sd">           item past the data was refused as consuming nothing (:issue:`2686`,</span>
-<span class="sd">           :issue:`2756`).</span>
+<span class="sd">           A list the data ends inside ends with the data, the item it ends</span>
+<span class="sd">           inside read with its missing octets as zeros, where a schema item</span>
+<span class="sd">           past the data was refused as consuming nothing and a plain value</span>
+<span class="sd">           past it was read as zeros, and so does a list in an item the data</span>
+<span class="sd">           ends inside (:issue:`2686`, :issue:`2756`, :issue:`2760`).</span>
 
 <span class="sd">        """</span>
         <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
@@ -826,13 +837,23 @@
         <span class="c1"># :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`</span>
         <span class="c1"># afterwards.</span>
         <span class="n">is_schema</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">is_schema</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-            <span class="n">present</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">octets</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
             <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">_zero_filled_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="k">as</span> <span class="n">filled</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">,</span> <span class="n">present</span><span class="p">)</span>
+            <span class="c1"># NOTE: Past ``__data_present__`` octets the buffer holds an enclosing fill (#2760).</span>
+            <span class="n">held</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__data_present__'</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">present</span> <span class="o">=</span> <span class="n">held</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">held</span> <span class="o">&lt;</span> <span class="n">octets</span> <span class="k">else</span> <span class="n">octets</span>
+            <span class="c1"># NOTE: Octets past the data that are zeros of it are read as items too (#2655, #2760).</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__zero_tail__'</span><span class="p">)</span> <span class="k">else</span> <span class="n">present</span>
+            <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="n">is_schema</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">_zero_filled_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">present</span><span class="p">)</span> <span class="k">as</span> <span class="n">filled</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="n">stop</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># NOTE: A plain value the data ends inside zero-fills itself, as any field does.</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">,</span> <span class="n">present</span><span class="p">)</span>
+                <span class="n">_give_back_fill</span><span class="p">(</span><span class="n">octets</span> <span class="o">-</span> <span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">items</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_items</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">is_schema</span><span class="p">)</span></div>
 
 
@@ -846,9 +867,9 @@
 <span class="sd">            file: Stream the items are read from.</span>
 <span class="sd">            packet: Packet data.</span>
 <span class="sd">            is_schema: Whether the items are schemas.</span>
-<span class="sd">            present: Octets of ``file`` the data holds, past which it holds the</span>
-<span class="sd">                zeros :meth:`unpack` filled it with; negative where it holds</span>
-<span class="sd">                no zeros.</span>
+<span class="sd">            present: Octets of ``file`` the data holds, past which ``file``</span>
+<span class="sd">                ends or holds zeros a fill made up; negative where it holds the</span>
+<span class="sd">                data to the field's length.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked items.</span>
@@ -882,8 +903,11 @@
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_TL]</span>
         <span class="k">while</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># NOTE: An item starting past the octets present would be made of the zero-fill alone,</span>
-            <span class="c1"># one the capture never held, so the list ends with the data (#2756).</span>
+            <span class="c1"># or of nothing, one the capture never held, so the list ends with the data (#2756, #2760).</span>
             <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">present</span> <span class="o">&lt;=</span> <span class="n">offset</span> <span class="o">-</span> <span class="n">start</span><span class="p">:</span>
+                <span class="c1"># NOTE: A length no whole number of plain values fills is refused, as it is whole.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_schema</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">%</span> <span class="n">item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has invalid length.'</span><span class="p">)</span>
                 <span class="k">break</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">item_type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -891,6 +915,10 @@
                 <span class="c1"># NOTE: A counted list runs to the end of the data, so an item it counts</span>
                 <span class="c1"># running past the octets left is cut, not overrunning a length (#2749).</span>
                 <span class="n">context</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">__data_end__</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="k">else</span> <span class="n">packet</span>
+                <span class="c1"># NOTE: The item the data ends inside reads the fill past it, which the lists in it</span>
+                <span class="c1"># are told of, so they end with the data too (#2760).</span>
+                <span class="k">if</span> <span class="n">present</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">__data_present__</span><span class="o">=</span><span class="n">present</span> <span class="o">-</span> <span class="p">(</span><span class="n">offset</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'SchemaField'</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
                 <span class="n">end</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
@@ -919,6 +947,7 @@
 
                 <span class="n">buffer</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
             <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 

@@ -826,8 +826,8 @@
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CALIPSO</span><span class="p">:</span>                    <span class="s1">'calipso'</span><span class="p">,</span>  <span class="c1"># [RFC 5570]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SMF_DPD</span><span class="p">:</span>                    <span class="s1">'smf_dpd'</span><span class="p">,</span>  <span class="c1"># [RFC 6621]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PDM</span><span class="p">:</span>                        <span class="s1">'pdm'</span><span class="p">,</span>      <span class="c1"># [RFC 8250] 10</span>
-            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start</span><span class="p">:</span>                <span class="s1">'qs'</span><span class="p">,</span>       <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x23</span><span class="p">:</span>            <span class="s1">'rpl'</span><span class="p">,</span>      <span class="c1"># [RFC 9008]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start</span><span class="p">:</span>                <span class="s1">'qs'</span><span class="p">,</span>       <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x63</span><span class="p">:</span>            <span class="s1">'rpl'</span><span class="p">,</span>      <span class="c1"># [RFC 6553]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPL_Option</span><span class="p">:</span>                 <span class="s1">'mpl'</span><span class="p">,</span>      <span class="c1"># [RFC 7731]</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">ILNP_Nonce</span><span class="p">:</span>                 <span class="s1">'ilnp'</span><span class="p">,</span>     <span class="c1"># [RFC 6744]</span>
@@ -1133,56 +1133,6 @@
             <span class="s1">'len'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, bool]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read option type field.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            kind (int): option kind value</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Extracted IPv6-Opts option type field information (unknown option</span>
-<span class="sd">            action and change flag), see [:rfc:`8200#section-4.2`].</span>
-
-<span class="sd">        """</span>
-        <span class="n">bin_</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">kind</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_opts_option_length</span><span class="p">(</span><span class="n">schema_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.</span>
-
-<span class="sd">        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field</span>
-<span class="sd">        (what each ``Schema_*Option.len`` here holds) counts *"the length of</span>
-<span class="sd">        the Option Data field of this option, in octets"* -- i.e. it</span>
-<span class="sd">        excludes the Option Type and Opt Data Len fields themselves, so the</span>
-<span class="sd">        whole option, which is what every ``_read_opt_*`` below reports back</span>
-<span class="sd">        as the parsed option's own ``.length``, is two octets more. This is</span>
-<span class="sd">        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``</span>
-<span class="sd">        vs. ``Schema_PadOption.len`` below). The read-side half lives in this</span>
-<span class="sd">        one helper so the arithmetic has a single home. Do NOT drop the</span>
-<span class="sd">        ``+ 2``.</span>
-
-<span class="sd">        Section 4.2 is the citation because it defines the TLV option format and</span>
-<span class="sd">        contains the sentence quoted above. IPv6-Opts itself is the Destination</span>
-<span class="sd">        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but</span>
-<span class="sd">        says nothing about their internal length arithmetic. Section 4.3 is the</span>
-<span class="sd">        Hop-by-Hop Options header, a different header from the one this class</span>
-<span class="sd">        implements.</span>
-
-<span class="sd">        Note that only the *stored-length* read-side call sites are</span>
-<span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
-<span class="sd">        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed</span>
-<span class="sd">        ``.length`` back, so they have nothing to unify against this helper.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schema_len: raw ``Opt Data Len`` field value, as read off the wire.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Whole-option length, in octets, including the Type and Opt Data Len fields.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">schema_len</span> <span class="o">+</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="IPv6_Opts._read_ipv6_opts">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._read_ipv6_opts">[docs]</a>
@@ -1729,6 +1679,60 @@
         <span class="k">return</span> <span class="n">opt</span></div>
 
 
+<div class="viewcode-block" id="IPv6_Opts._read_opt_rpl">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._read_opt_rpl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RPLOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
+
+<span class="sd">        Structure of IPv6-Opts RPL option [:rfc:`6553`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  |  Opt Data Len |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                         (sub-TLVs)                            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when</span>
+<span class="sd">        unrecognised, are kept as raw octets in ``sub_tlvs``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            options: extracted IPv6-Opts options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``schema.len`` is less than ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_RPLOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">Enum_OptionAction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="n">change</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b00100000</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ipv6_opts_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_RPLFlags</span><span class="p">(</span>
+                <span class="n">down</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'down'</span><span class="p">]),</span>
+                <span class="n">rank_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'rank_err'</span><span class="p">]),</span>
+                <span class="n">fwd_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fwd_err'</span><span class="p">]),</span>
+                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">rank</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sub_tlvs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+
 <div class="viewcode-block" id="IPv6_Opts._read_opt_qs">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._read_opt_qs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_QuickStartOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_QuickStartOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -1820,60 +1824,6 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] unknown QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">opt</span></div>
-
-
-<div class="viewcode-block" id="IPv6_Opts._read_opt_rpl">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._read_opt_rpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RPLOption'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'Option'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RPLOption'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
-
-<span class="sd">        Structure of IPv6-Opts RPL option [:rfc:`6553`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">                                           |  Option Type  |  Opt Data Len |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                         (sub-TLVs)                            |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        The sub-TLVs, which :rfc:`6553#section-3` says MUST be skipped when</span>
-<span class="sd">        unrecognised, are kept as raw octets in ``sub_tlvs``.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            options: extracted IPv6-Opts options</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed option data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``schema.len`` is less than ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_RPLOption</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">action</span><span class="o">=</span><span class="n">Enum_OptionAction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">),</span>
-            <span class="n">change</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b00100000</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ipv6_opts_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">Data_RPLFlags</span><span class="p">(</span>
-                <span class="n">down</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'down'</span><span class="p">]),</span>
-                <span class="n">rank_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'rank_err'</span><span class="p">]),</span>
-                <span class="n">fwd_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fwd_err'</span><span class="p">]),</span>
-                <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
-            <span class="p">),</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="n">rank</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
-            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sub_tlvs</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
 
@@ -2158,45 +2108,6 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pad_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_PadOption], int]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make the padding options needed to align the header to 8 octets.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            offset: Number of octets emitted so far, **counting the two octets</span>
-<span class="sd">                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as</span>
-<span class="sd">                well as every option already in the list.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple of the padding option schemas and the number of octets they</span>
-<span class="sd">            occupy.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            It is the *whole* extension header, fixed part included, that has to</span>
-<span class="sd">            be a multiple of 8 octets [:rfc:`8200#section-4.6`] -- which is why</span>
-<span class="sd">            the alignment is computed from ``offset`` rather than from the</span>
-<span class="sd">            length of the option that has just been emitted. Aligning each</span>
-<span class="sd">            option to 8 octets on its own leaves the options area a multiple of</span>
-<span class="sd">            8 octets long, whereas :meth:`read` sizes it as</span>
-<span class="sd">            ``hdr_ext_len * 8 + 6`` -- two short of a multiple of 8 -- so the</span>
-<span class="sd">            header would declare 2 octets fewer than it carried.</span>
-
-<span class="sd">            A ``PadN`` option spends two octets on its own type and</span>
-<span class="sd">            ``Opt Data Len`` fields before any padding data, so occupying</span>
-<span class="sd">            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.</span>
-<span class="sd">            One octet is padded with a ``Pad1`` option instead, that being the</span>
-<span class="sd">            only form which can occupy a single octet. Two octets are one</span>
-<span class="sd">            ``PadN`` with an ``Opt Data Len`` of ``0``, not two ``Pad1``:</span>
-<span class="sd">            :rfc:`8200#section-4.2` says a ``PadN`` should be used rather than</span>
-<span class="sd">            multiple ``Pad1`` options.</span>
-
-<span class="sd">        """</span>
-        <span class="n">pad_len</span> <span class="o">=</span> <span class="n">pad_length</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span>
 
 <div class="viewcode-block" id="IPv6_Opts._make_opt_none">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._make_opt_none">[docs]</a>
@@ -2606,6 +2517,69 @@
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="IPv6_Opts._make_opt_rpl">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._make_opt_rpl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_RPLOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">down</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">rank_err</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">fwd_err</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">sub_tlvs</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPLOption'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make IPv6-Opts RPL option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: option type value</span>
+<span class="sd">            opt: option data</span>
+<span class="sd">            down: down flag</span>
+<span class="sd">            rank_err: rank error flag</span>
+<span class="sd">            fwd_err: forwarding error flag</span>
+<span class="sd">            id: RPL instance ID</span>
+<span class="sd">            rank: sender rank</span>
+<span class="sd">            reserved: reserved flag bits, i.e. the low five bits of the flags octet</span>
+<span class="sd">            sub_tlvs: sub-TLVs, as raw octets</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``reserved``, ``id`` or ``rank`` does not fit its</span>
+<span class="sd">                field, or ``sub_tlvs`` does not fit in the option.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">down</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">down</span>
+            <span class="n">rank_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rank_err</span>
+            <span class="n">fwd_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fwd_err</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rank</span>
+            <span class="n">sub_tlvs</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">sub_tlvs</span>
+
+        <span class="n">reserved</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">reserved</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL reserved flags'</span><span class="p">)</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL instance ID'</span><span class="p">)</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL sender rank'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">251</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too long RPL sub-TLVs: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_RPLOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'down'</span><span class="p">:</span> <span class="n">down</span><span class="p">,</span>
+                <span class="s1">'rank_err'</span><span class="p">:</span> <span class="n">rank_err</span><span class="p">,</span>
+                <span class="s1">'fwd_err'</span><span class="p">:</span> <span class="n">fwd_err</span><span class="p">,</span>
+                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+            <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">sub_tlvs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="IPv6_Opts._make_opt_qs">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._make_opt_qs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_QuickStartOption | Data_UnassignedOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2691,69 +2665,6 @@
         <span class="n">ttl_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">ttl_value</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Quick-Start TTL'</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">([(</span><span class="n">func_val</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">rate_val</span><span class="p">,</span> <span class="n">ttl_value</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="n">nonce</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">reserved</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_none</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="IPv6_Opts._make_opt_rpl">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts._make_opt_rpl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="s1">'Optional[Data_RPLOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">down</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">rank_err</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">fwd_err</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="nb">id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                      <span class="n">rank</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                      <span class="n">sub_tlvs</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
-                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RPLOption'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make IPv6-Opts RPL option.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: option type value</span>
-<span class="sd">            opt: option data</span>
-<span class="sd">            down: down flag</span>
-<span class="sd">            rank_err: rank error flag</span>
-<span class="sd">            fwd_err: forwarding error flag</span>
-<span class="sd">            id: RPL instance ID</span>
-<span class="sd">            rank: sender rank</span>
-<span class="sd">            reserved: reserved flag bits, i.e. the low five bits of the flags octet</span>
-<span class="sd">            sub_tlvs: sub-TLVs, as raw octets</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed option schema.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``reserved``, ``id`` or ``rank`` does not fit its</span>
-<span class="sd">                field, or ``sub_tlvs`` does not fit in the option.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">down</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">down</span>
-            <span class="n">rank_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rank_err</span>
-            <span class="n">fwd_err</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fwd_err</span>
-            <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">reserved</span>
-            <span class="nb">id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">id</span>
-            <span class="n">rank</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">rank</span>
-            <span class="n">sub_tlvs</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">sub_tlvs</span>
-
-        <span class="n">reserved</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">reserved</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL reserved flags'</span><span class="p">)</span>
-        <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL instance ID'</span><span class="p">)</span>
-        <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'RPL sender rank'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">251</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too long RPL sub-TLVs: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Schema_RPLOption</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_tlvs</span><span class="p">),</span>
-            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'down'</span><span class="p">:</span> <span class="n">down</span><span class="p">,</span>
-                <span class="s1">'rank_err'</span><span class="p">:</span> <span class="n">rank_err</span><span class="p">,</span>
-                <span class="s1">'fwd_err'</span><span class="p">:</span> <span class="n">fwd_err</span><span class="p">,</span>
-                <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
-            <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
-            <span class="n">sub_tlvs</span><span class="o">=</span><span class="n">sub_tlvs</span><span class="p">,</span>
-        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IPv6_Opts._make_opt_mpl">
@@ -3025,7 +2936,96 @@
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'DFF sequence number'</span><span class="p">),</span>
         <span class="p">)</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, bool]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read option type field.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind (int): option kind value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extracted IPv6-Opts option type field information (unknown option</span>
+<span class="sd">            action and change flag), see [:rfc:`8200#section-4.2`].</span>
+
+<span class="sd">        """</span>
+        <span class="n">bin_</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">kind</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_opts_option_length</span><span class="p">(</span><span class="n">schema_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.</span>
+
+<span class="sd">        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field</span>
+<span class="sd">        (what each ``Schema_*Option.len`` here holds) counts *"the length of</span>
+<span class="sd">        the Option Data field of this option, in octets"* -- i.e. it</span>
+<span class="sd">        excludes the Option Type and Opt Data Len fields themselves, so the</span>
+<span class="sd">        whole option, which is what every ``_read_opt_*`` below reports back</span>
+<span class="sd">        as the parsed option's own ``.length``, is two octets more. This is</span>
+<span class="sd">        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``</span>
+<span class="sd">        vs. ``Schema_PadOption.len`` below). The read-side half lives in this</span>
+<span class="sd">        one helper so the arithmetic has a single home. Do NOT drop the</span>
+<span class="sd">        ``+ 2``.</span>
+
+<span class="sd">        Section 4.2 is the citation because it defines the TLV option format and</span>
+<span class="sd">        contains the sentence quoted above. IPv6-Opts itself is the Destination</span>
+<span class="sd">        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but</span>
+<span class="sd">        says nothing about their internal length arithmetic. Section 4.3 is the</span>
+<span class="sd">        Hop-by-Hop Options header, a different header from the one this class</span>
+<span class="sd">        implements.</span>
+
+<span class="sd">        Note that only the *stored-length* read-side call sites are</span>
+<span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
+<span class="sd">        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed</span>
+<span class="sd">        ``.length`` back, so they have nothing to unify against this helper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema_len: raw ``Opt Data Len`` field value, as read off the wire.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whole-option length, in octets, including the Type and Opt Data Len fields.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">schema_len</span> <span class="o">+</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pad_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[Schema_PadOption], int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make the padding options needed to align the header to 8 octets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            offset: Number of octets emitted so far, **counting the two octets</span>
+<span class="sd">                of the fixed header** (``Next Header`` and ``Hdr Ext Len``) as</span>
+<span class="sd">                well as every option already in the list.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of the padding option schemas and the number of octets they</span>
+<span class="sd">            occupy.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            It is the *whole* extension header, fixed part included, that has to</span>
+<span class="sd">            be a multiple of 8 octets [:rfc:`8200#section-4.6`] -- which is why</span>
+<span class="sd">            the alignment is computed from ``offset`` rather than from the</span>
+<span class="sd">            length of the option that has just been emitted. Aligning each</span>
+<span class="sd">            option to 8 octets on its own leaves the options area a multiple of</span>
+<span class="sd">            8 octets long, whereas :meth:`read` sizes it as</span>
+<span class="sd">            ``hdr_ext_len * 8 + 6`` -- two short of a multiple of 8 -- so the</span>
+<span class="sd">            header would declare 2 octets fewer than it carried.</span>
+
+<span class="sd">            A ``PadN`` option spends two octets on its own type and</span>
+<span class="sd">            ``Opt Data Len`` fields before any padding data, so occupying</span>
+<span class="sd">            ``pad_len`` octets means an ``Opt Data Len`` of ``pad_len - 2``.</span>
+<span class="sd">            One octet is padded with a ``Pad1`` option instead, that being the</span>
+<span class="sd">            only form which can occupy a single octet. Two octets are one</span>
+<span class="sd">            ``PadN`` with an ``Opt Data Len`` of ``0``, not two ``Pad1``:</span>
+<span class="sd">            :rfc:`8200#section-4.2` says a ``PadN`` should be used rather than</span>
+<span class="sd">            multiple ``Pad1`` options.</span>
+
+<span class="sd">        """</span>
+        <span class="n">pad_len</span> <span class="o">=</span> <span class="n">pad_length</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">pad_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_pad</span><span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">pad_len</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 </pre></div>
         </article>

@@ -673,7 +673,8 @@
 
 
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_zero_filled_items</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[IO[bytes]]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zero_filled_items</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                       <span class="n">present</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[IO[bytes]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Zero-fill the octets of a list of schema items to its declared width.</span>
 
 <span class="sd">    :meth:`FieldBase.unpack` reads a field the data ends inside as though its</span>
@@ -686,11 +687,14 @@
 <span class="sd">    Args:</span>
 <span class="sd">        name: Field name.</span>
 <span class="sd">        length: Octets the field declares.</span>
-<span class="sd">        data: Octets actually present, fewer than ``length``.</span>
+<span class="sd">        data: Octets of the field's buffer, fewer than ``length``, or holding</span>
+<span class="sd">            past ``present`` the zeros of an enclosing fill.</span>
+<span class="sd">        present: Octets of ``data`` the data holds; negative for all of them.</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">        A stream of ``data``, zero-filled to ``length``. The zeros left unread</span>
-<span class="sd">        past where the stream ends up are not counted as octets read.</span>
+<span class="sd">        past where the stream ends up are not counted as octets read, an</span>
+<span class="sd">        enclosing fill's included (:issue:`2760`).</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FieldValueError: If ``length`` is past</span>
@@ -700,11 +704,13 @@
 <span class="sd">            octets it has actually read.</span>
 
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">present</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">present</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">ceiling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_LENGTH</span>
     <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">ceiling</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> declares a length of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s), '</span>
-            <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
+            <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="n">present</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
         <span class="p">)</span>
 
     <span class="n">ledger</span> <span class="o">=</span> <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -729,8 +735,9 @@
         <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
     <span class="c1"># NOTE: The items credit the zeros they read as octets supplied, so they are taken off in</span>
-    <span class="c1"># advance and those left unread given back (#2756); items that fail credit an unknown share,</span>
-    <span class="c1"># so the octets read go back as they were.</span>
+    <span class="c1"># advance and those left unread given back, an enclosing fill's too, which it took off</span>
+    <span class="c1"># (#2756, #2760); items that fail credit an unknown share, so the octets read go back as</span>
+    <span class="c1"># they were.</span>
     <span class="n">read</span> <span class="o">=</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">padding</span>
     <span class="n">filled</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
@@ -739,7 +746,26 @@
     <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
         <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">read</span>
         <span class="k">raise</span>
-    <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span> <span class="n">present</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_give_back_fill</span><span class="p">(</span><span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Give back the ``count`` zeros of a fill that a list of plain values left unread.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        count: Zeros of an enclosing fill in the list's buffer that no item</span>
+<span class="sd">            read; nothing is given back for none.</span>
+
+<span class="sd">    :func:`_zero_filled_items` takes the zeros of its fill off the octets read</span>
+<span class="sd">    in advance, as the items reading them credit them, and gives back those its</span>
+<span class="sd">    stream is left short of. A list in the item the data ends inside reads none</span>
+<span class="sd">    of its buffer past the data (:issue:`2760`), so the zeros it leaves there</span>
+<span class="sd">    are given back here.</span>
+
+<span class="sd">    """</span>
+    <span class="n">ledger</span> <span class="o">=</span> <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ledger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">count</span>
 
 
 <span class="c1">#: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative</span>

@@ -1046,62 +1046,6 @@
         <span class="p">}</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_exthdr_key</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Key an extension header's info is written under in :class:`Data_IPv6`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            alias: :attr:`~pcapkit.protocols.protocol.Protocol.alias` of</span>
-<span class="sd">                the extension header's parser.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The key; :meth:`str.lstrip` strips a character *set*, which every</span>
-<span class="sd">            parser's alias is chosen to suit.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Mapping[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Whether a Fragment header's info is that of a first fragment.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict</span>
-<span class="sd">                &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :data:`True` at a Fragment Offset of zero.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-
-<div class="viewcode-block" id="IPv6._read_ip_hextet">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._read_ip_hextet">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed data of those four octets: version number, traffic class</span>
-<span class="sd">            and flow label.</span>
-
-<span class="sd">        """</span>
-        <span class="n">_htet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
-        <span class="n">_vers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>      <span class="c1"># version number (6)</span>
-        <span class="n">_tcls</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>    <span class="c1"># traffic class</span>
-        <span class="n">_flow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>     <span class="c1"># flow label</span>
-
-        <span class="k">return</span> <span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">_tcls</span><span class="p">,</span> <span class="n">_flow</span><span class="p">)</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read IP address.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed IP address.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
-
 <div class="viewcode-block" id="IPv6._decode_next_layer">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'Data_IPv6'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
@@ -1281,6 +1225,62 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">frame_depth</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_exthdr_key</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Key an extension header's info is written under in :class:`Data_IPv6`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            alias: :attr:`~pcapkit.protocols.protocol.Protocol.alias` of</span>
+<span class="sd">                the extension header's parser.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The key; :meth:`str.lstrip` strips a character *set*, which every</span>
+<span class="sd">            parser's alias is chosen to suit.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Mapping[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a Fragment header's info is that of a first fragment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict</span>
+<span class="sd">                &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` at a Fragment Offset of zero.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="IPv6._read_ip_hextet">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._read_ip_hextet">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed data of those four octets: version number, traffic class</span>
+<span class="sd">            and flow label.</span>
+
+<span class="sd">        """</span>
+        <span class="n">_htet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">_vers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>      <span class="c1"># version number (6)</span>
+        <span class="n">_tcls</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>    <span class="c1"># traffic class</span>
+        <span class="n">_flow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>     <span class="c1"># flow label</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">_tcls</span><span class="p">,</span> <span class="n">_flow</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read IP address.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed IP address.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="IPv6._import_next_layer">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer">[docs]</a>

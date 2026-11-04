@@ -1125,11 +1125,9 @@
         </ul></li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.SchemaMeta.__prepare__">__prepare__() (pcapkit.protocols.schema.SchemaMeta class method)</a>
 </li>
-        <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.__proto__">__proto__ (in module pcapkit.protocols)</a>
+        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__">__proto__ (pcapkit.protocols.internet.internet.Internet attribute)</a>
 
         <ul>
-          <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__">(pcapkit.protocols.internet.internet.Internet attribute)</a>
-</li>
           <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.protocol.IPX.__proto__">(pcapkit.protocols.internet.ipx.protocol.IPX attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.protocol.FRAD.__proto__">(pcapkit.protocols.link.frad.protocol.FRAD attribute)</a>
@@ -1250,7 +1248,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__registry__">__registry__ (pcapkit.const.reg.apptype.apptype.AppType attribute)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__">(pcapkit.protocols.protocol.ProtocolBase attribute)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command.__repr__">__repr__() (pcapkit.const.ftp.command.Command method)</a>
 
         <ul>
@@ -23108,6 +23110,8 @@
           <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.Schema.get_payload">(pcapkit.protocols.schema.Schema method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.get_protocol">get_protocol() (pcapkit.protocols.protocol.ProtocolBase class method)</a>
+</li>
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.get_proxies">get_proxies() (in module pcapkit.vendor.default)</a>
 </li>
         <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.getlist">getlist() (pcapkit.corekit.multidict.MultiDict method)</a>
@@ -35364,8 +35368,6 @@
 </li>
           <li><a href="pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol">pcapkit.protocols.protocol</a>
 </li>
-          <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols.registry">pcapkit.protocols.registry</a>
-</li>
           <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols.schema">pcapkit.protocols.schema</a>
 </li>
           <li><a href="pcapkit/protocols/transport/index.html#module-pcapkit.protocols.transport">pcapkit.protocols.transport</a>
@@ -40210,6 +40212,8 @@
         <li><a href="pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.data.GroupRecord.num_sources">num_sources (pcapkit.protocols.internet.igmpv3.data.GroupRecord attribute)</a>
 
         <ul>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.data.Query.num_sources">(pcapkit.protocols.internet.igmpv3.data.Query attribute)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.GroupRecord.num_sources">(pcapkit.protocols.internet.igmpv3.schema.GroupRecord attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.schema.QueryExtension.num_sources">(pcapkit.protocols.internet.igmpv3.schema.QueryExtension attribute)</a>
@@ -46840,13 +46844,6 @@
 </li>
         </ul></li>
         <li>
-    pcapkit.protocols.registry
-
-        <ul>
-          <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols.registry">module</a>
-</li>
-        </ul></li>
-        <li>
     pcapkit.protocols.schema
 
         <ul>
@@ -46874,8 +46871,6 @@
           <li><a href="pcapkit/protocols/transport/dccp.html#module-pcapkit.protocols.transport.dccp.data">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.transport.dccp.protocol
 
@@ -46883,6 +46878,8 @@
           <li><a href="pcapkit/protocols/transport/dccp.html#module-pcapkit.protocols.transport.dccp.protocol">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.transport.dccp.schema
 
@@ -53484,7 +53481,11 @@
         <li><a href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng_secrets">register_pcapng_secrets() (in module pcapkit.foundation.registry.protocols.misc)</a>
 </li>
         <li><a href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol">register_protocol() (in module pcapkit.foundation.registry.protocols.protocol)</a>
+
+        <ul>
+          <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.register_protocol">(pcapkit.protocols.protocol.ProtocolBase class method)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code">register_protocol_code() (in module pcapkit.foundation.registry.protocols.protocol)</a>
 </li>
         <li><a href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.link.register_radiotap">register_radiotap() (in module pcapkit.foundation.registry.protocols.link)</a>
@@ -53573,6 +53574,8 @@
           <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.registry">(pcapkit.foundation.reassembly.reassembly.Reassembly property)</a>
 </li>
           <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow.registry">(pcapkit.foundation.traceflow.traceflow.TraceFlow property)</a>
+</li>
+          <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta.registry">(pcapkit.protocols.protocol.ProtocolMeta property)</a>
 </li>
           <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.EnumMeta.registry">(pcapkit.protocols.schema.EnumMeta property)</a>
 </li>
@@ -55921,10 +55924,10 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7742">reserved_7742 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7775">reserved_7775 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7775">reserved_7775 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_7784">reserved_7784 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/tcp.html#pcapkit.const.tcp.option.Option.Reserved_78">Reserved_78 (pcapkit.const.tcp.option.Option attribute)</a>
@@ -56817,39 +56820,41 @@
 </li>
           <li><a href="contributing/conventions/protocol-family-grouping.html#index-4">RFC 3376</a>, <a href="contributing/pep.html#index-17">[1]</a>, <a href="contributing/pep.html#index-64">[2]</a>, <a href="contributing/pep.html#index-68">[3]</a>, <a href="pcapkit/protocols/internet/igmp.html#index-20">[4]</a>, <a href="pcapkit/protocols/internet/igmp.html#index-5">[5]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-0">[6]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-1">[7]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-13">RFC 3376 Section 4.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-16">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-17">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-26">[3]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-14">RFC 3376 Section 4.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-17">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-18">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-27">[3]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-14">RFC 3376 Section 4.1.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-27">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-28">[2]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-15">RFC 3376 Section 4.1.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-28">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-29">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-20">RFC 3376 Section 4.1.10</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-21">RFC 3376 Section 4.1.10</a>
 </li>
-          <li><a href="contributing/pep.html#index-55">RFC 3376 Section 4.1.2</a>, <a href="pcapkit/corekit/checksum/internet.html#index-7">[1]</a>, <a href="pcapkit/protocols/internet/igmp.html#index-9">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-15">[3]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-2">[4]</a>
+          <li><a href="contributing/pep.html#index-55">RFC 3376 Section 4.1.2</a>, <a href="pcapkit/corekit/checksum/internet.html#index-7">[1]</a>, <a href="pcapkit/protocols/internet/igmp.html#index-9">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-16">[3]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-2">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-29">RFC 3376 Section 4.1.4</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-4">[1]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-30">RFC 3376 Section 4.1.4</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-4">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-30">RFC 3376 Section 4.1.5</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-5">[1]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-31">RFC 3376 Section 4.1.5</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-5">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-31">RFC 3376 Section 4.1.6</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-6">[1]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-32">RFC 3376 Section 4.1.6</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-6">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-18">RFC 3376 Section 4.1.7</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-32">[1]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-19">RFC 3376 Section 4.1.7</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-33">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-19">RFC 3376 Section 4.1.9</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-33">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-7">[2]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-34">RFC 3376 Section 4.1.8</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-8">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-21">RFC 3376 Section 4.2</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-34">[1]</a>, <a href="pcapkit/protocols/internet/mh.html#index-101">[2]</a>, <a href="pcapkit/protocols/internet/mh.html#index-173">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-299">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-304">[5]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-20">RFC 3376 Section 4.1.9</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-35">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-7">[2]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-35">RFC 3376 Section 4.2.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-36">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-8">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-9">[3]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-22">RFC 3376 Section 4.2</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-36">[1]</a>, <a href="pcapkit/protocols/internet/mh.html#index-101">[2]</a>, <a href="pcapkit/protocols/internet/mh.html#index-173">[3]</a>, <a href="pcapkit/protocols/internet/mh.html#index-299">[4]</a>, <a href="pcapkit/protocols/internet/mh.html#index-304">[5]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-12">RFC 3376 Section 4.2.10</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-25">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-40">[2]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-10">RFC 3376 Section 4.2.1</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-37">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-38">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-9">[3]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-22">RFC 3376 Section 4.2.11</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-13">RFC 3376 Section 4.2.10</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-26">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-42">[2]</a>
+</li>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-23">RFC 3376 Section 4.2.11</a>
 </li>
           <li><a href="pcapkit/vendor/igmp.html#index-0">RFC 3376 Section 4.2.12</a>
 </li>
           <li><a href="pcapkit/protocols/internet/igmp.html#index-10">RFC 3376 Section 4.2.2</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-3">[1]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-10">RFC 3376 Section 4.2.4</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-11">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-23">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-37">[3]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-38">[4]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-11">RFC 3376 Section 4.2.4</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-12">[1]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-24">[2]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-39">[3]</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-40">[4]</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-24">RFC 3376 Section 4.2.9</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-39">[1]</a>
+          <li><a href="pcapkit/protocols/internet/igmpv3.html#index-25">RFC 3376 Section 4.2.9</a>, <a href="pcapkit/protocols/internet/igmpv3.html#index-41">[1]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/igmp.html#index-7">RFC 3376 Section 7.1</a>
 </li>

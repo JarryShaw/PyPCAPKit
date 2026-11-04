@@ -577,7 +577,7 @@
 <span class="sd">  8          68   ``igmpv3.s_flag``                  Suppress Router-Side Processing (S)</span>
 <span class="sd">  8          69   ``igmpv3.qrv``                     Querier's Robustness Variable (QRV)</span>
 <span class="sd">  9          72   ``igmpv3.qqic``                    Querier's Query Interval Code</span>
-<span class="sd">  10         80                                      Number of Sources (N)</span>
+<span class="sd">  10         80   ``igmpv3.num_sources``             Number of Sources (N)</span>
 <span class="sd">  12         96   ``igmpv3.sources``                 Source Address [1..N]</span>
 <span class="sd">======= ========= ================================== ===================================</span>
 
@@ -602,6 +602,7 @@
 <span class="sd">.. versionadded:: 1.6.0</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.igmp.record_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordType</span> <span class="k">as</span> <span class="n">Enum_RecordType</span>
@@ -834,6 +835,7 @@
                 <span class="n">qrv</span><span class="o">=</span><span class="n">qrv</span><span class="p">,</span>
                 <span class="n">qqic</span><span class="o">=</span><span class="n">qqic</span><span class="p">,</span>
                 <span class="n">qqi</span><span class="o">=</span><span class="n">qqi</span><span class="p">,</span>
+                <span class="n">num_sources</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">num_sources</span><span class="p">,</span>
                 <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># type: Data_IGMPv3</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">Schema_Report</span><span class="p">):</span>
@@ -880,6 +882,7 @@
              <span class="n">qqic</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">qqi</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">sources</span><span class="p">:</span> <span class="s1">'Optional[Iterable[IPv4Address | str | bytes | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">num_sources</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">reserved_1</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">reserved_2</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">num_group_records</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -925,6 +928,11 @@
 <span class="sd">                is given; only meaningful for a Query.</span>
 <span class="sd">            sources: Source addresses being queried</span>
 <span class="sd">                (:rfc:`3376#section-4.1.9`); only meaningful for a Query.</span>
+<span class="sd">            num_sources: Number of sources, as transmitted on the wire</span>
+<span class="sd">                (:rfc:`3376#section-4.1.8`); the length of ``sources`` when not</span>
+<span class="sd">                given; only meaningful for a Query. A count above the length of</span>
+<span class="sd">                ``sources`` is written as given, as on a Query the capture cut</span>
+<span class="sd">                inside its sources.</span>
 <span class="sd">            reserved_1: The reserved octet following ``type``</span>
 <span class="sd">                (:rfc:`3376#section-4.2.1`); only meaningful for a Report.</span>
 <span class="sd">            reserved_2: The reserved 16 bits before the group-record count</span>
@@ -950,7 +958,8 @@
 <span class="sd">                or code outside 0 to 255, or is neither a Query nor a Report;</span>
 <span class="sd">                if ``max_resp_time`` is not an :obj:`int` from 0 to 255; if</span>
 <span class="sd">                ``num_group_records`` is not an :obj:`int` from the length of</span>
-<span class="sd">                ``records`` to 65535; if ``checksum`` or ``reserved_2`` is not</span>
+<span class="sd">                ``records`` to 65535, or ``num_sources`` one from the length of</span>
+<span class="sd">                ``sources``; if ``checksum`` or ``reserved_2`` is not</span>
 <span class="sd">                two octets; or if a record's ``record_type`` is refused, see</span>
 <span class="sd">                :meth:`_make_group_record`.</span>
 
@@ -987,10 +996,15 @@
             <span class="k">if</span> <span class="n">qqic</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">qqic</span> <span class="o">=</span> <span class="n">_encode_resp_code</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">qqi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">qqi</span><span class="p">)</span>
             <span class="n">source_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">sources</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_sources</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">num_sources</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_list</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">num_sources</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'num_sources'</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_list</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid num_sources: </span><span class="si">{</span><span class="n">num_sources</span><span class="si">!r}</span><span class="s1"> '</span>
+                                    <span class="sa">f</span><span class="s1">'for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">source_list</span><span class="p">)</span><span class="si">}</span><span class="s1"> source(s)'</span><span class="p">)</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="n">Schema_QueryExtension</span><span class="p">(</span>
                 <span class="n">flags</span><span class="o">=</span><span class="p">{</span><span class="s1">'resv'</span><span class="p">:</span> <span class="n">resv</span><span class="p">,</span> <span class="s1">'s_flag'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">s_flag</span><span class="p">)),</span> <span class="s1">'qrv'</span><span class="p">:</span> <span class="n">qrv</span><span class="p">},</span>
                 <span class="n">qqic</span><span class="o">=</span><span class="n">qqic</span><span class="p">,</span>
-                <span class="n">num_sources</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">source_list</span><span class="p">),</span>
+                <span class="n">num_sources</span><span class="o">=</span><span class="n">num_sources</span><span class="p">,</span>
                 <span class="n">sources</span><span class="o">=</span><span class="n">source_list</span><span class="p">,</span>
                 <span class="n">payload</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1058,6 +1072,18 @@
             <span class="p">}</span>
 
         <span class="n">query</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_Query'</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="c1"># NOTE: The count as parsed, while the sources are those a cut begins (11 octets into the body,</span>
+        <span class="c1"># octet 12 of the message), zeros past it; the info keeps no octets captured to compare (#2760).</span>
+        <span class="n">num_sources</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'body'</span><span class="p">:</span>
+            <span class="n">cut</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">packed</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">sources</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># edited, to be refused by ``make``</span>
+                <span class="n">packed</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packed</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">cut</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">packed</span><span class="p">[</span><span class="n">cut</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+                <span class="n">num_sources</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'num_sources'</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'version'</span><span class="p">),</span>
             <span class="s1">'type'</span><span class="p">:</span> <span class="n">query</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -1069,6 +1095,7 @@
             <span class="s1">'qrv'</span><span class="p">:</span> <span class="n">query</span><span class="o">.</span><span class="n">qrv</span><span class="p">,</span>
             <span class="s1">'qqic'</span><span class="p">:</span> <span class="n">query</span><span class="o">.</span><span class="n">qqic</span><span class="p">,</span>
             <span class="s1">'sources'</span><span class="p">:</span> <span class="n">query</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span>
+            <span class="s1">'num_sources'</span><span class="p">:</span> <span class="n">num_sources</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 

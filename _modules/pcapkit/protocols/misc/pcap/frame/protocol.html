@@ -1169,36 +1169,6 @@
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_check_record_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Refuse a tail too short to hold a record header.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            length: Length of packet data, as the caller declared it, or</span>
-<span class="sd">                :obj:`None` to measure what is left in</span>
-<span class="sd">                :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            StreamEOFError: If fewer than sixteen octets are left to read.</span>
-
-<span class="sd">        A PCAP record header is sixteen octets, which is what</span>
-<span class="sd">        :meth:`__length_hint__` reports. A shorter tail is not a record, so</span>
-<span class="sd">        parsing one would only invent fields from zero padding. Reporting the</span>
-<span class="sd">        end of the stream instead lets :meth:`Extractor.record_frames</span>
-<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` stop with the</span>
-<span class="sd">        frames read so far, as the PCAP-NG reader does for a truncated block</span>
-<span class="sd">        (:issue:`678`). See :issue:`1265`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: record truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
-                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">RECORD_HEADER_LEN</span><span class="si">}</span><span class="s1"> a record header needs'</span><span class="p">,</span>
-                                 <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Data_Frame'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Frame'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Decode next layer protocol.</span>
@@ -1277,6 +1247,36 @@
             <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">nanosecond</span><span class="p">)])</span>
 
         <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_record_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse a tail too short to hold a record header.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data, as the caller declared it, or</span>
+<span class="sd">                :obj:`None` to measure what is left in</span>
+<span class="sd">                :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            StreamEOFError: If fewer than sixteen octets are left to read.</span>
+
+<span class="sd">        A PCAP record header is sixteen octets, which is what</span>
+<span class="sd">        :meth:`__length_hint__` reports. A shorter tail is not a record, so</span>
+<span class="sd">        parsing one would only invent fields from zero padding. Reporting the</span>
+<span class="sd">        end of the stream instead lets :meth:`Extractor.record_frames</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` stop with the</span>
+<span class="sd">        frames read so far, as the PCAP-NG reader does for a truncated block</span>
+<span class="sd">        (:issue:`678`). See :issue:`1265`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: record truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
+                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">RECORD_HEADER_LEN</span><span class="si">}</span><span class="s1"> a record header needs'</span><span class="p">,</span>
+                                 <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Frame._dispatch_linktype">
 <a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame._dispatch_linktype">[docs]</a>

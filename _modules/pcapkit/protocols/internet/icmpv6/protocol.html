@@ -936,28 +936,6 @@
         <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="ICMPv6._verify_pseudo_checksum">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.protocol.ICMPv6._verify_pseudo_checksum">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_pseudo_checksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pseudo</span><span class="p">:</span> <span class="s1">'Optional[IP_Pseudo]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Verify the checksum over the pseudo-header of the enclosing IP layer.</span>
-
-<span class="sd">        That layer calls this once parsed, see</span>
-<span class="sd">        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.</span>
-
-<span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChecksumStatus</span><span class="p">,</span> <span class="n">verify_checksum</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
-        <span class="k">if</span> <span class="n">pseudo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">ChecksumStatus</span><span class="o">.</span><span class="n">NO_PSEUDO_HEADER</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">verify_checksum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
-                                     <span class="n">length</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">checksum_status</span><span class="o">=</span><span class="n">status</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="ICMPv6._read_data_type_none">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.protocol.ICMPv6._read_data_type_none">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_Unknown'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_ICMPv6'</span><span class="p">,</span>
@@ -1337,6 +1315,28 @@
             <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">Schema_Echo</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ICMPv6._verify_pseudo_checksum">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.protocol.ICMPv6._verify_pseudo_checksum">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_pseudo_checksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pseudo</span><span class="p">:</span> <span class="s1">'Optional[IP_Pseudo]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Verify the checksum over the pseudo-header of the enclosing IP layer.</span>
+
+<span class="sd">        That layer calls this once parsed, see</span>
+<span class="sd">        :func:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pseudo: Pseudo-header, or :data:`None` if the IP layer gives none.</span>
+
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChecksumStatus</span><span class="p">,</span> <span class="n">verify_checksum</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="n">pseudo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">ChecksumStatus</span><span class="o">.</span><span class="n">NO_PSEUDO_HEADER</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">verify_checksum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+                                     <span class="n">length</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">pseudo</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">checksum_status</span><span class="o">=</span><span class="n">status</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

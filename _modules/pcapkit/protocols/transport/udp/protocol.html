@@ -675,7 +675,14 @@
             <span class="c1"># :class:`pcapkit.protocols.application.http.protocol.HTTP`, as TCP's table</span>
             <span class="c1"># does. See the note in the class docstring.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http.protocol'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
-            <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http.protocol'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
+
+            <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version</span>
+            <span class="c1"># implemented, so the concrete class is bound rather than the</span>
+            <span class="c1"># abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)</span>
+            <span class="c1"># stays unbound because that version has no class; once it has,</span>
+            <span class="c1"># it takes 115 and this entry becomes a version switch on the Ver</span>
+            <span class="c1"># nibble. See pcapkit.protocols.link.l2tp.protocol.</span>
+            <span class="mi">1701</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2.protocol'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">),</span>
 
             <span class="c1"># CoAP over DTLS (RFC 7252) is bound here, but it is not the only</span>
             <span class="c1"># fixed port a DTLS-borne protocol is registered at -- IANA also</span>
@@ -686,13 +693,7 @@
             <span class="c1"># pcapkit.protocols.application.dtls.protocol.</span>
             <span class="mi">5684</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.dtls.protocol'</span><span class="p">,</span> <span class="s1">'DTLS'</span><span class="p">),</span>
 
-            <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version</span>
-            <span class="c1"># implemented, so the concrete class is bound rather than the</span>
-            <span class="c1"># abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)</span>
-            <span class="c1"># stays unbound because that version has no class; once it has,</span>
-            <span class="c1"># it takes 115 and this entry becomes a version switch on the Ver</span>
-            <span class="c1"># nibble. See pcapkit.protocols.link.l2tp.protocol.</span>
-            <span class="mi">1701</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2.protocol'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">),</span>
+            <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http.protocol'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 

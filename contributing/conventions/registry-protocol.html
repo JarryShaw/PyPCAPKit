@@ -1306,8 +1306,10 @@ public wrapper in <a class="reference internal" href="../../pcapkit/foundation/r
 established ones carry. A map’s registration comes in two parts:</p>
 <ol class="arabic simple">
 <li><p><strong>A</strong> <code class="docutils literal notranslate"><span class="pre">register</span></code> <strong>or</strong> <code class="docutils literal notranslate"><span class="pre">register_&lt;kind&gt;</span></code> <strong>classmethod</strong> on the class owning
-the map – <code class="docutils literal notranslate"><span class="pre">register</span></code> for <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">register_&lt;kind&gt;</span></code> for <code class="docutils literal notranslate"><span class="pre">__&lt;kind&gt;__</span></code>
-– which writes it and warns when it displaces an entry. An inherited one counts
+the map – <code class="docutils literal notranslate"><span class="pre">register</span></code> for <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">register_&lt;kind&gt;</span></code> for <code class="docutils literal notranslate"><span class="pre">__&lt;kind&gt;__</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> for the by-name registry below, named for the class it
+registers (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>) – which writes it and warns when it displaces an
+entry. An inherited one counts
 only when it is typed and validated for exactly that map’s keys, which the owner
 chose over an override on every class (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2511">#2511</a>). So
 <a class="reference internal" href="../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
@@ -1385,8 +1387,29 @@ one owner’s name fits and it takes
 </ul>
 <p><a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol()</span></code></a> and
 <a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> are
-outside the rule: the first writes <a class="reference internal" href="../../pcapkit/protocols/index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a>, keyed by
-class name, and the second whichever maps its <code class="docutils literal notranslate"><span class="pre">code</span></code> names.</p>
+outside the rule: the first writes the by-name registry, keyed by class name, and the
+second whichever maps its <code class="docutils literal notranslate"><span class="pre">code</span></code> names.</p>
+<p><strong>The by-name registry is a class-level map as well</strong>, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>.
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>
+maps each upper-cased class name to its class, and lists every built-in protocol as a
+<a class="reference internal" href="../../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, as a <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> map names its
+targets, so it is whole before any protocol module is imported and
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol</span></code></a>
+imports a class only when it resolves its entry, while
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta.registry" title="pcapkit.protocols.protocol.ProtocolMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolMeta.registry</span></code></a> is a
+read-only view of the entries as stored, read as <code class="docutils literal notranslate"><span class="pre">AnyProtocol.registry</span></code> and importing
+nothing. The map and both readers stay on the internal base, and only the hook that
+fills it is on the public one: a concrete subclass of
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> names itself from
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__" title="pcapkit.protocols.protocol.Protocol.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init_subclass__</span></code></a>,
+as the library’s other public bases register theirs, and an abstract one, or a class
+deriving <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> alone, does not. A name
+already held keeps its entry, and the clash is
+reported as a <a class="reference internal" href="../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a>,
+which the wrapper calls, replaces it. A built-in meeting its own descriptor there is no
+clash. <code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_protocol_registry_2763_unit.py</span></code> fails on a shipped
+protocol class with no entry, or on an entry naming another module or class.</p>
 <p><a class="reference internal" href="../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp_chunk" title="pcapkit.foundation.registry.protocols.transport.register_sctp_chunk"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp_chunk()</span></code></a> is the
 shape for a parser map:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__</span>
@@ -1405,7 +1428,8 @@ shape for a parser map:</p>
 every protocol class for such a map, and fails on one that no wrapper’s tag names
 unless its <code class="docutils literal notranslate"><span class="pre">EXCUSED</span></code> table gives the reason. It fails as well on a map whose owner
 defines no <code class="docutils literal notranslate"><span class="pre">register*</span></code> classmethod of its own, unless its <code class="docutils literal notranslate"><span class="pre">INHERITED</span></code> table names
-the one typed for that map’s keys.</p>
+the one typed for that map’s keys, and its <code class="docutils literal notranslate"><span class="pre">NAMED</span></code> table holds the classmethod named
+otherwise than for its map.</p>
 <p><strong>A protocol’s table from a code to the layout read under it is such a map as well, and
 each layout is a concrete schema.</strong> Ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2657">#2657</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2576">#2576</a>): the
 table is a class-level map on the protocol, with its <code class="docutils literal notranslate"><span class="pre">register_&lt;kind&gt;</span></code> classmethod and

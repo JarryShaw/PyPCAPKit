@@ -614,8 +614,12 @@ Ruled on <a class="extlink-issue reference external" href="https://github.com/Ja
 by key where there is no enum.</p>
 <p><strong>The guard.</strong> <code class="file docutils literal notranslate"><span class="pre">tests/project/test_protocol_member_order_2490_unit.py</span></code> holds
 every protocol class to the groups, <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code> first, each <code class="docutils literal notranslate"><span class="pre">_read_xxx()</span></code>
-before its <code class="docutils literal notranslate"><span class="pre">_make_xxx()</span></code>, and subgroup b, with a table of known exceptions
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>).</p>
+before its <code class="docutils literal notranslate"><span class="pre">_make_xxx()</span></code>, subgroups b, c and d, and the order of the registry
+maps, with a table of known exceptions (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>). It values a key that is an
+enum member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>; a map with a key of another shape, such as the
+computed keys of
+<a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PCAPNG.__option__</span></code></a>,
+it leaves in its own order, which rule c then follows.</p>
 </section>
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>

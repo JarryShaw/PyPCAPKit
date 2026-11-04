@@ -890,12 +890,16 @@ string <code class="docutils literal notranslate"><span class="pre">'(null)'</sp
 <dd><p>Register a protocol class.</p>
 <p>The protocol class must be a subclass of
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, and will be registered to
-the <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a> registry.</p>
+the by-name registry <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a> through
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a>, replacing the
+entry its name holds.</p>
 <p>The registry is keyed on <code class="docutils literal notranslate"><span class="pre">protocol.__name__.upper()</span></code>, which nothing makes
 unique: two protocol classes of the same name, such as a user’s class
-named after a shipped one, compete for one key. Registering one of them
-replaces whichever was there, and the replacement is observable through
-every reader of the registry, e.g. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.expand_comp" title="pcapkit.protocols.protocol.Protocol.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.expand_comp</span></code></a>, which resolves a
+named after a shipped one, compete for one key. Defining the second as a
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass keeps the first, and
+registering it here replaces whichever was there, and the
+replacement is observable through every reader of the registry, e.g.
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.expand_comp" title="pcapkit.protocols.protocol.Protocol.expand_comp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.expand_comp</span></code></a>, which resolves a
 bare protocol name through it. Per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/675">#675</a> the overwrite is reported,
 matching <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.register" title="pcapkit.protocols.protocol.Protocol.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.register</span></code></a> and the other
 overwrite-warning registries.</p>
@@ -916,7 +920,9 @@ it teaches a caller to filter
 <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> wholesale, and that
 filter would then hide the name collision this warning exists to
 surface. The sibling <code class="docutils literal notranslate"><span class="pre">register</span></code> methods across the package, each keyed on a
-caller-supplied <code class="docutils literal notranslate"><span class="pre">code</span></code>, apply the same identity criterion (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>).</p>
+caller-supplied <code class="docutils literal notranslate"><span class="pre">code</span></code>, apply the same identity criterion (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/718">#718</a>).
+A built-in’s <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> entry is
+the class it names for that criterion.</p>
 <p>Making the key itself unique would resolve the collision rather than
 merely reporting it, but it is a registry-format change that the bare-name
 readers outside this module cannot absorb on their own – the registry is a
@@ -951,7 +957,10 @@ same class under the same name is silent.</p>
 <a class="reference internal" href="../protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>, so registering
 one keeps its own key and no longer displaces
 <a class="reference internal" href="../protocols/application/http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a> under <code class="docutils literal notranslate"><span class="pre">'HTTP'</span></code>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2529">#2529</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2529">#2529</a>). The registry is
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>,
+written by <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a>, where it was
+<code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2763">#2763</a>).</p>
 </div>
 </dd></dl>
 

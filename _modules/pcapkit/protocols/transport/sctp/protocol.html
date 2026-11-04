@@ -1579,26 +1579,6 @@
         <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="SCTP._get_payload">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._get_payload">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Get payload of the packet.</span>
-
-<span class="sd">        SCTP has no payload field in its header schema -- user data travels</span>
-<span class="sd">        inside DATA chunks -- so this returns the user data of the *first* DATA</span>
-<span class="sd">        chunk found by :meth:`self.read &lt;SCTP.read&gt;`, which is also the chunk</span>
-<span class="sd">        whose payload protocol identifier selects the next layer. Should the</span>
-<span class="sd">        packet carry no DATA chunk, an empty :obj:`bytes` is returned and the</span>
-<span class="sd">        next layer resolves to</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Payload of the packet as :obj:`bytes`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload</span></div>
-
-
 <div class="viewcode-block" id="SCTP._read_sctp_chunks">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_sctp_chunks">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_sctp_chunks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Chunks'</span><span class="p">:</span>
@@ -1714,270 +1694,6 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
-
-
-<div class="viewcode-block" id="SCTP._make_sctp_chunk">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_chunk">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_Chunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Chunk'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Dispatch to the chunk constructor registered for ``code``.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: SCTP chunk type.</span>
-<span class="sd">            chunk: Chunk data, if constructing from a parsed data model.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed chunk schema.</span>
-
-<span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_chunk_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ChunkConstructor'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_chunk_donone</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_sctp_parameters">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_sctp_parameters">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_sctp_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schemas</span><span class="p">:</span> <span class="s1">'list[Schema_Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Parameters'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read SCTP chunk parameter list.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schemas: Parsed parameter schemas.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Extracted SCTP chunk parameters.</span>
-
-<span class="sd">        """</span>
-        <span class="n">parameters</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Parameters</span>
-
-        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterParser'</span><span class="p">,</span>
-                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_param_donone</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="n">parameters</span></div>
-
-
-<div class="viewcode-block" id="SCTP._make_sctp_parameters">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_parameters">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Schema_Parameter | bytes]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
-<span class="w">        </span><span class="sd">"""Make chunk parameters for SCTP.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            parameters: SCTP chunk parameters.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed parameter schemas.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the type of a parameter, given in a ``(type,</span>
-<span class="sd">                kwargs)`` pair or as the key of a container, is a name, a</span>
-<span class="sd">                :obj:`bool` or a code its field cannot carry, or if a parameter</span>
-<span class="sd">                given as raw octets is empty (:issue:`2723`).</span>
-
-<span class="sd">        """</span>
-        <span class="n">parameters_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Parameter | bytes]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid parameter: </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> holds no type field'</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
-                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">kind</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Parameter | int, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
-                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
-            <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._make_sctp_parameter">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_parameter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="s1">'Optional[Data_Parameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Parameter'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Dispatch to the parameter constructor registered for ``code``.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: SCTP chunk parameter type.</span>
-<span class="sd">            parameter: Parameter data, if constructing from a parsed data model.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed parameter schema.</span>
-
-<span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_donone</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_sctp_causes">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_sctp_causes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_sctp_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schemas</span><span class="p">:</span> <span class="s1">'list[Schema_ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Causes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read SCTP error cause list.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            schemas: Parsed error cause schemas.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Extracted SCTP error causes.</span>
-
-<span class="sd">        """</span>
-        <span class="n">causes</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Causes</span>
-
-        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'CauseParser'</span><span class="p">,</span>
-                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cause_donone</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">causes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">causes</span><span class="o">=</span><span class="n">causes</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="n">causes</span></div>
-
-
-<div class="viewcode-block" id="SCTP._make_sctp_causes">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_causes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Schema_ErrorCause | bytes]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
-<span class="w">        </span><span class="sd">"""Make error causes for SCTP.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            causes: SCTP error causes.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed error cause schemas.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the code of an error cause, given in a ``(code,</span>
-<span class="sd">                kwargs)`` pair or as the key of a container, is a name, a</span>
-<span class="sd">                :obj:`bool` or a code its field cannot carry, or if an error</span>
-<span class="sd">                cause given as raw octets is empty (:issue:`2723`).</span>
-
-<span class="sd">        """</span>
-        <span class="n">causes_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_ErrorCause | bytes]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">causes</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid error cause: </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> holds no code field'</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
-                    <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">kind</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_CauseCode | int, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                    <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">Enum_CauseCode</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'cause code'</span><span class="p">)</span>
-                    <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cause</span> <span class="ow">in</span> <span class="n">causes</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Enum_CauseCode</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'cause code'</span><span class="p">)</span>
-            <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._make_sctp_cause">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_cause">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_cause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span><span class="p">,</span> <span class="n">cause</span><span class="p">:</span> <span class="s1">'Optional[Data_ErrorCause]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ErrorCause'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Dispatch to the error cause constructor registered for ``code``.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            code: SCTP error cause code.</span>
-<span class="sd">            cause: Cause data, if constructing from a parsed data model.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Constructed error cause schema.</span>
-
-<span class="sd">        """</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'CauseConstructor'</span><span class="p">,</span>
-                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cause_donone</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_nested_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="s1">'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
-                            <span class="n">declared</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Compute the length of a chunk carrying a nested parameter or error</span>
-<span class="sd">        cause list.</span>
-
-<span class="sd">        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of</span>
-<span class="sd">        every nested item except the last. The RFC also asks receivers to</span>
-<span class="sd">        accept a length that counts the last item's padding too, so a parsed</span>
-<span class="sd">        chunk declaring that longer form keeps it.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            base: size of the chunk's fixed-length fields, including the</span>
-<span class="sd">                four-byte chunk header</span>
-<span class="sd">            items: constructed nested items; a raw :obj:`bytes` item is</span>
-<span class="sd">                counted as given</span>
-<span class="sd">            declared: chunk length declared by the parsed chunk being</span>
-<span class="sd">                rebuilt, if any</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Chunk length.</span>
-
-<span class="sd">        """</span>
-        <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
-        <span class="n">padded</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">declared</span> <span class="o">==</span> <span class="n">padded</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">padded</span>
-        <span class="k">return</span> <span class="n">padded</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-<div class="viewcode-block" id="SCTP._make_param_types">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_types">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="s1">'Optional[list[Enum_Parameter | int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Enum_Parameter]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve a list of parameter types.</span>
-
-<span class="sd">        Shared by :meth:`_make_param_addrtypes` and</span>
-<span class="sd">        :meth:`_make_cause_missing_param`, whose ``types`` both list</span>
-<span class="sd">        parameter types.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            types: parameter types, each given as a</span>
-<span class="sd">                :class:`~pcapkit.const.sctp.parameter.Parameter` member or an</span>
-<span class="sd">                :obj:`int` code</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The :class:`~pcapkit.const.sctp.parameter.Parameter` member each</span>
-<span class="sd">            item resolves to with ``get``, or the code itself where no member</span>
-<span class="sd">            holds it.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If an item is a :obj:`bool` (:issue:`2288`), a name,</span>
-<span class="sd">                any other non-:obj:`int`, or a code the 16-bit parameter type</span>
-<span class="sd">                field cannot carry (:issue:`2594`).</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="p">[]]</span></div>
 
 
 <div class="viewcode-block" id="SCTP._read_chunk_donone">
@@ -4799,6 +4515,290 @@
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'[Cause </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] length'</span><span class="p">),</span>
             <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._get_payload">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._get_payload">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get payload of the packet.</span>
+
+<span class="sd">        SCTP has no payload field in its header schema -- user data travels</span>
+<span class="sd">        inside DATA chunks -- so this returns the user data of the *first* DATA</span>
+<span class="sd">        chunk found by :meth:`self.read &lt;SCTP.read&gt;`, which is also the chunk</span>
+<span class="sd">        whose payload protocol identifier selects the next layer. Should the</span>
+<span class="sd">        packet carry no DATA chunk, an empty :obj:`bytes` is returned and the</span>
+<span class="sd">        next layer resolves to</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Payload of the packet as :obj:`bytes`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_payload</span></div>
+
+
+<div class="viewcode-block" id="SCTP._make_sctp_chunk">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_chunk">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_Chunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Chunk'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Dispatch to the chunk constructor registered for ``code``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: SCTP chunk type.</span>
+<span class="sd">            chunk: Chunk data, if constructing from a parsed data model.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed chunk schema.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_chunk_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ChunkConstructor'</span><span class="p">,</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_chunk_donone</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_sctp_parameters">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_sctp_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_sctp_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schemas</span><span class="p">:</span> <span class="s1">'list[Schema_Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Parameters'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read SCTP chunk parameter list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schemas: Parsed parameter schemas.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extracted SCTP chunk parameters.</span>
+
+<span class="sd">        """</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Parameters</span>
+
+        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterParser'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_param_donone</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">parameters</span></div>
+
+
+<div class="viewcode-block" id="SCTP._make_sctp_parameters">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Schema_Parameter | tuple[Enum_Parameter | int, dict[str, Any]] | bytes] | Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Schema_Parameter | bytes]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">"""Make chunk parameters for SCTP.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parameters: SCTP chunk parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed parameter schemas.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the type of a parameter, given in a ``(type,</span>
+<span class="sd">                kwargs)`` pair or as the key of a container, is a name, a</span>
+<span class="sd">                :obj:`bool` or a code its field cannot carry, or if a parameter</span>
+<span class="sd">                given as raw octets is empty (:issue:`2723`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">parameters_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Parameter | bytes]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid parameter: </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> holds no type field'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kind</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Parameter | int, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
+                    <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
+            <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._make_sctp_parameter">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_parameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="s1">'Optional[Data_Parameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_Parameter'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Dispatch to the parameter constructor registered for ``code``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: SCTP chunk parameter type.</span>
+<span class="sd">            parameter: Parameter data, if constructing from a parsed data model.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed parameter schema.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parameter__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_param_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ParameterConstructor'</span><span class="p">,</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_param_donone</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_sctp_causes">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_sctp_causes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_sctp_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schemas</span><span class="p">:</span> <span class="s1">'list[Schema_ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Causes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read SCTP error cause list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schemas: Parsed error cause schemas.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extracted SCTP error causes.</span>
+
+<span class="sd">        """</span>
+        <span class="n">causes</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Causes</span>
+
+        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_read_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'CauseParser'</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cause_donone</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">causes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">_keep_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">causes</span><span class="o">=</span><span class="n">causes</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">causes</span></div>
+
+
+<div class="viewcode-block" id="SCTP._make_sctp_causes">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_causes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_causes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'list[Schema_ErrorCause | tuple[Enum_CauseCode | int, dict[str, Any]] | bytes] | Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Schema_ErrorCause | bytes]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">"""Make error causes for SCTP.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            causes: SCTP error causes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed error cause schemas.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the code of an error cause, given in a ``(code,</span>
+<span class="sd">                kwargs)`` pair or as the key of a container, is a name, a</span>
+<span class="sd">                :obj:`bool` or a code its field cannot carry, or if an error</span>
+<span class="sd">                cause given as raw octets is empty (:issue:`2723`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">causes_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_ErrorCause | bytes]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">causes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">causes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid error cause: </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> holds no code field'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
+                    <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kind</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_CauseCode | int, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">Enum_CauseCode</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'cause code'</span><span class="p">)</span>
+                    <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cause</span> <span class="ow">in</span> <span class="n">causes</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Enum_CauseCode</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'cause code'</span><span class="p">)</span>
+            <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._make_sctp_cause">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_sctp_cause">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_sctp_cause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span><span class="p">,</span> <span class="n">cause</span><span class="p">:</span> <span class="s1">'Optional[Data_ErrorCause]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ErrorCause'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Dispatch to the error cause constructor registered for ``code``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: SCTP error cause code.</span>
+<span class="sd">            cause: Cause data, if constructing from a parsed data model.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments for the constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed error cause schema.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_make_cause_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'CauseConstructor'</span><span class="p">,</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cause_donone</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_restore_padding</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_nested_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="s1">'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                            <span class="n">declared</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute the length of a chunk carrying a nested parameter or error</span>
+<span class="sd">        cause list.</span>
+
+<span class="sd">        Per :rfc:`9260#section-3.2`, the chunk length counts the padding of</span>
+<span class="sd">        every nested item except the last. The RFC also asks receivers to</span>
+<span class="sd">        accept a length that counts the last item's padding too, so a parsed</span>
+<span class="sd">        chunk declaring that longer form keeps it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base: size of the chunk's fixed-length fields, including the</span>
+<span class="sd">                four-byte chunk header</span>
+<span class="sd">            items: constructed nested items; a raw :obj:`bytes` item is</span>
+<span class="sd">                counted as given</span>
+<span class="sd">            declared: chunk length declared by the parsed chunk being</span>
+<span class="sd">                rebuilt, if any</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Chunk length.</span>
+
+<span class="sd">        """</span>
+        <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+        <span class="n">padded</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">declared</span> <span class="o">==</span> <span class="n">padded</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">padded</span>
+        <span class="k">return</span> <span class="n">padded</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SCTP._make_param_types">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_types">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="s1">'Optional[list[Enum_Parameter | int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Enum_Parameter]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve a list of parameter types.</span>
+
+<span class="sd">        Shared by :meth:`_make_param_addrtypes` and</span>
+<span class="sd">        :meth:`_make_cause_missing_param`, whose ``types`` both list</span>
+<span class="sd">        parameter types.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            types: parameter types, each given as a</span>
+<span class="sd">                :class:`~pcapkit.const.sctp.parameter.Parameter` member or an</span>
+<span class="sd">                :obj:`int` code</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The :class:`~pcapkit.const.sctp.parameter.Parameter` member each</span>
+<span class="sd">            item resolves to with ``get``, or the code itself where no member</span>
+<span class="sd">            holds it.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If an item is a :obj:`bool` (:issue:`2288`), a name,</span>
+<span class="sd">                any other non-:obj:`int`, or a code the 16-bit parameter type</span>
+<span class="sd">                field cannot carry (:issue:`2594`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Enum_Parameter</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'parameter type'</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="p">[]]</span></div>
 </div>
 
 </pre></div>

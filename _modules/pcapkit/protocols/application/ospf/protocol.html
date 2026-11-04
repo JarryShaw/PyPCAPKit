@@ -987,56 +987,6 @@
         <span class="p">}</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read router and area IDs.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            id: ID bytes.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed IDs as an IPv4 address.</span>
-
-<span class="sd">        """</span>
-        <span class="c1">#_byte = self._read_fileng(4)</span>
-        <span class="c1">#_addr = '.'.join(str(_) for _ in _byte)</span>
-        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
-
-<div class="viewcode-block" id="OSPF._make_id_numbers">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF._make_id_numbers">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Make router and area IDs.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            id: ID.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            ID bytes.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``id`` is a :obj:`bool` (see</span>
-<span class="sd">                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).</span>
-
-<span class="sd">        Notes:</span>
-<span class="sd">            Latent rather than live: nothing in this module calls this method</span>
-<span class="sd">            (:meth:`make` builds ``router_id``/``area_id`` straight from its</span>
-<span class="sd">            own arguments), so the only caller is a unit test. It is routed</span>
-<span class="sd">            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`</span>
-<span class="sd">            anyway, so that a future caller passing a :obj:`bool` gets</span>
-<span class="sd">            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a</span>
-<span class="sd">            silent ``0.0.0.1``.</span>
-
-<span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
-<span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
-<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.alias&gt;`, because ``alias``</span>
-<span class="sd">            here reads ``self._version``, which :meth:`read` only assigns</span>
-<span class="sd">            from the wire -- unavailable to a construction-only instance that</span>
-<span class="sd">            never went through :meth:`read`.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
-            <span class="nb">id</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid ID'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span></div>
-
-
 <div class="viewcode-block" id="OSPF._read_encrypt_auth">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF._read_encrypt_auth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CryptographicAuthentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CryptographicAuthentication'</span><span class="p">:</span>
@@ -1120,6 +1070,56 @@
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: missing </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1"> in auth_data: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'OSPF: invalid type for auth_data: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read router and area IDs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id: ID bytes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed IDs as an IPv4 address.</span>
+
+<span class="sd">        """</span>
+        <span class="c1">#_byte = self._read_fileng(4)</span>
+        <span class="c1">#_addr = '.'.join(str(_) for _ in _byte)</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
+
+<div class="viewcode-block" id="OSPF._make_id_numbers">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.protocol.OSPF._make_id_numbers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Make router and area IDs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id: ID.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ID bytes.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``id`` is a :obj:`bool` (see</span>
+<span class="sd">                :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Latent rather than live: nothing in this module calls this method</span>
+<span class="sd">            (:meth:`make` builds ``router_id``/``area_id`` straight from its</span>
+<span class="sd">            own arguments), so the only caller is a unit test. It is routed</span>
+<span class="sd">            through :func:`~pcapkit.corekit.schema.ipaddress.parse_ip_address`</span>
+<span class="sd">            anyway, so that a future caller passing a :obj:`bool` gets</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a</span>
+<span class="sd">            silent ``0.0.0.1``.</span>
+
+<span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
+<span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.alias&gt;`, because ``alias``</span>
+<span class="sd">            here reads ``self._version``, which :meth:`read` only assigns</span>
+<span class="sd">            from the wire -- unavailable to a construction-only instance that</span>
+<span class="sd">            never went through :meth:`read`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+            <span class="nb">id</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid ID'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span></div>
 </div>
 
 </pre></div>
