@@ -107,6 +107,7 @@ Internal Definitions below.
    .. automethod:: _lookup_next_layer
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
+   .. automethod:: _empty_next_layer
    .. automethod:: _parse_next_layer
    .. automethod:: _get_context
 
@@ -117,6 +118,10 @@ Internal Definitions below.
    .. autoattribute:: _protos
    .. autoattribute:: _seekset
    .. autoattribute:: _sigterm
+   .. autoattribute:: __reconstructing__
+   .. autoattribute:: __short_read__
+   .. autoattribute:: _uncaptured
+   .. autoattribute:: _short_of_header
    .. autoattribute:: _past_layer_limit
    .. autoattribute:: __data__
 
