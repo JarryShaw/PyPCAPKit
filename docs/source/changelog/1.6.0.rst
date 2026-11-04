@@ -784,7 +784,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   defined, as in 1.5.x, but an abstract one is skipped, where 1.5.x
   registered it too, and one whose name is taken leaves the existing entry in
   place, warning with :exc:`~pcapkit.utilities.warnings.RegistryWarning`,
-  where 1.5.x replaced the entry and warned that it was overwriting it.
+  where 1.5.x replaced the entry and warned that it was overwriting it. The
+  built-in entries are grouped by layer, and a name a released registration
+  hands back goes through ``register_protocol``, so putting the displaced
+  class back over the registered one warns that it is overwriting, as handing
+  a code back does, where 1.5.x put the name back with no warning
+  (:issue:`2773`, :pr:`2779`).
 
 * **Changed** -- **a breaking change to** the schema helpers that code outside
   the schema layer calls, which move to :mod:`pcapkit.corekit.schema`, a
@@ -916,7 +921,12 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   (:issue:`2730`, :pr:`2757`), and the registry of protocol classes by name,
   given above, imports each class when it is first looked up. ``dir(pcapkit)``
   lists no incidental names, where 1.5.x listed ``os``, ``sys``, ``ROOT``,
-  ``warnings`` and ``tbtrim``.
+  ``warnings`` and ``tbtrim``. Each first resolution of a lazy name, and of a
+  :class:`~pcapkit.corekit.module.ModuleDescriptor` whose module is not yet
+  imported, holds :data:`pcapkit.utilities.importlib.import_lock`, a shared
+  re-entrant lock, so threads making first imports at once wait their turn
+  rather than holding package locks against each other (:issue:`2771`,
+  :pr:`2781`).
 
 * **Changed** -- :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`'s chunk makers
   refuse flags that are not one octet, and its Invalid Stream Identifier cause
@@ -946,7 +956,13 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   order (:issue:`2490`, :pr:`2491`, :pr:`2522`, :pr:`2523`, :pr:`2538`,
   :pr:`2539`, :pr:`2541`, :pr:`2613`), including a registry's readers and
   makers in its enumeration's order, the helpers nothing reaches last, and
-  the registry maps in enumeration order (:pr:`2765`).
+  the registry maps in enumeration order (:pr:`2765`). SCTP's readers precede
+  its makers, the protocol pages list members in source order, and PCAP-NG's
+  option schemas keep their namespaces alphabetically, so a clash
+  ``Option.register`` reports names those it displaced in alphabetical order,
+  ``'dsb', 'epb', 'if', ...`` for ``opt_comment``, where 1.5.x named them in
+  its namespace map's order, ``'opt', 'if', 'epb', ...`` (:issue:`2772`,
+  :pr:`2779`).
 
 * **Changed** -- the house conventions record that a protocol class takes its
   package's name, one to a package (:issue:`2529`, :pr:`2542`); that a
@@ -1021,7 +1037,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``unpack`` override of its own or a length callable clamped to the octets
   present (:issue:`2680`, :issue:`2694`, :pr:`2731`); a field callback leaves
   a value the cut left as zero to that short read, and refuses one read with
-  ``ProtocolError`` (:issue:`2727`, :pr:`2737`). A :mod:`pcapkit.const`
+  ``ProtocolError`` (:issue:`2727`, :pr:`2737`); and a cut header's rebuild is
+  read at the width its parse was given (:issue:`2761`, :pr:`2777`). The
+  member-order page orders every registry's readers before any registry's
+  makers, a map's integer keys with no enumeration by value and its string
+  keys alphabetically (:issue:`2772`, :pr:`2779`). A :mod:`pcapkit.const`
   package imports its enumerations on first use, through
   :func:`~pcapkit.utilities.importlib.lazy_exports`, and a crawler never
   writes a package's ``__init__.py`` (:issue:`2729`, :pr:`2735`). A next-layer
@@ -1289,8 +1309,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   cut left as zeros, and carries no ``error``, where 1.5.x's carried the failed
   dispatch's, as ``Field padding resolved to a negative length; template='-20s'``.
   A cut header rebuilt on its own reads back the values its parse read, its
-  Reserved octets and option area among them, rather than those its maker
-  filled in past the cut (:issue:`2761`, :pr:`2767`).
+  Reserved octets, option area and length among them, rather than those its
+  maker filled in past the cut (:issue:`2761`, :pr:`2767`), as it is read at
+  the width its parse was given, which the data model records as
+  ``__short_width__`` and ``to_dict()`` carries (:pr:`2777`).
 
 * **Fixed** -- a whole header rebuilt through ``from_data`` read back values
   its parse had not. An IPv6 extension header parsed with ``extension=True``,
@@ -1302,7 +1324,11 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   parse used, and Shim6's keeps its ``protocol`` (:issue:`2768`, :pr:`2774`).
   A TCP header rebuilt, or built by ``make()``, read its ``padding`` past the
   End of Option List as empty, where its parse read the octets there; it reads
-  them from the octets, as IPv4 does (:issue:`2769`, :pr:`2775`).
+  them from the octets, as IPv4 does (:issue:`2769`, :pr:`2775`). A PCAP-NG
+  block with octets after its ``opt_endofopt``, which 1.5.x rebuilt as
+  captured, rebuilt an info holding none of its options and no
+  ``padding_opts``; it holds both, as its parse did (:issue:`2776`,
+  :pr:`2778`).
 
 * **Fixed** -- the ``json``, ``plist`` and ``tree`` dumps of an
   :class:`~pcapkit.corekit.infoclass.Info`, and of its ``to_dict()`` export,
