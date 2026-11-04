@@ -9,19 +9,31 @@ the :pep:`562` ``__getattr__`` and ``__dir__`` that import each name it exports
 the first time the name is reached, rather than with the package itself. Every
 package under :mod:`pcapkit.const` imports its enumerations that way
 (:issue:`2729`), the mechanism :mod:`pcapkit.const.reg.apptype` had for its TCP
-and UDP registries (:issue:`1538`) made general.
+and UDP registries (:issue:`1538`) made general. It also holds :data:`import_lock`,
+which every such first import, and that of a
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made under.
 
 .. versionadded:: 1.6.0
 
 """
 import importlib
+import threading
 import types
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterable, Mapping, Optional
 
-__all__ = ['lazy_exports']
+__all__ = ['lazy_exports', 'import_lock']
+
+# NOTE: no pcapkit module resolves a lazy name or a descriptor on import: imported directly,
+# it would wait on this lock holding its own import lock, which the holder may need (#2771).
+#: threading.RLock: Held by every first import :func:`lazy_exports`
+#: makes, and by :attr:`ModuleDescriptor.klass
+#: <pcapkit.corekit.module.ModuleDescriptor.klass>` when its module is not imported
+#: yet, so threads make them one at a time; unserialised, they deadlock the import
+#: system (:issue:`2771`). Re-entrant, as one first import can nest another.
+import_lock = threading.RLock()
 
 
 def lazy_exports(package: 'str', namespace: 'dict[str, Any]',
@@ -52,6 +64,14 @@ def lazy_exports(package: 'str', namespace: 'dict[str, Any]',
     :mod:`pickle` of an object defined in a submodule all behave as an eager
     import would, apart from *when* the import happens.
 
+    That import holds :data:`import_lock`, shared by every package using this
+    function, so threads reaching names at once resolve them one at a time and
+    a resolution may nest another. Unserialised, they deadlock the import
+    system (:issue:`2771`): a family member's protocol module imports a module of
+    its base's package, taking that module's import lock before waiting on the
+    package, while a thread importing the package takes the two the other way.
+    A resolved name is bound in ``namespace``, so reaching it again takes no lock.
+
     ``__dir__`` lists what the eager import would have bound: the names the
     import system sets, ``__all__``, every export, every submodule an export
     comes from, and any other submodule already imported. The package's own
@@ -80,12 +100,17 @@ def lazy_exports(package: 'str', namespace: 'dict[str, Any]',
 
     def __getattr__(name: 'str') -> 'Any':
         if name in table:
-            module, attribute = table[name]
-            value = getattr(importlib.import_module(f'{package}.{module}'), attribute)
-            namespace[name] = value
-            return value
+            with import_lock:
+                # NOTE: another thread may have bound it while this one waited.
+                if name in namespace:
+                    return namespace[name]
+                module, attribute = table[name]
+                value = getattr(importlib.import_module(f'{package}.{module}'), attribute)
+                namespace[name] = value
+                return value
         if name in submodules:
-            return importlib.import_module(f'{package}.{name}')
+            with import_lock:
+                return importlib.import_module(f'{package}.{name}')
         raise AttributeError(f'module {package!r} has no attribute {name!r}')
 
     def __dir__() -> 'list[str]':
