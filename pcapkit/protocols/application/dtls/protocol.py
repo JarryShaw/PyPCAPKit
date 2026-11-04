@@ -109,6 +109,7 @@ from pcapkit.const.tls.content_type import ContentType as Enum_ContentType
 from pcapkit.const.tls.extension_type import ExtensionType as Enum_ExtensionType
 from pcapkit.corekit.context import ProtocolContext
 from pcapkit.corekit.decorators import beholder
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
 from pcapkit.protocols.application.dtls.data import DTLSCIDCiphertext as Data_DTLSCIDCiphertext
 from pcapkit.protocols.application.dtls.data import DTLSCiphertext as Data_DTLSCiphertext
@@ -126,11 +127,18 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.const.reg.apptype.udp import UDP as AppType_UDP
     from pcapkit.const.tls.handshake_type import HandshakeType as Enum_HandshakeType
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['DTLS', 'DTLSContext']
+
+#: The UDP port registry :meth:`DTLS.__index__` reads its port from, resolved
+#: there rather than imported, as ``import pcapkit`` leaves it unloaded
+#: (:issue:`1538`), so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_UDP: 'ModuleDescriptor[AppType_UDP]' = ModuleDescriptor('pcapkit.const.reg.apptype.udp', 'UDP')
 
 #: Length of a legacy record header -- content type, legacy version, epoch,
 #: sequence number and length (:rfc:`9147#section-4`).
@@ -768,10 +776,7 @@ class DTLS(SSL[Data_DTLS, Schema_DTLS], schema=Schema_DTLS, data=Data_DTLS):
         .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
 
         """
-        # imported here, as ``import pcapkit`` leaves the UDP registry unloaded (#1538)
-        from pcapkit.const.reg.apptype.udp import UDP  # pylint: disable=import-outside-toplevel
-
-        return int(UDP.coaps)  # type: ignore[call-overload]
+        return int(_UDP.klass.coaps)  # type: ignore[call-overload]
 
     ##########################################################################
     # Utilities.

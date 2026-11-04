@@ -100,6 +100,7 @@ states its version explicitly in those four bits. The switch belongs on the
 """
 from typing import TYPE_CHECKING, Generic, cast
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
@@ -109,7 +110,15 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+
 __all__ = ['L2TP']
+
+#: The member :meth:`L2TP._member_of_version` picks for version ``2``, resolved
+#: there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_L2TPV2: 'ModuleDescriptor[L2TPv2]' = \
+    ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2')
 
 
 class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -280,8 +289,6 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
                 implemented.
 
         """
-        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2  # isort: skip # pylint: disable=import-outside-toplevel
-
         if isinstance(version, int) and not isinstance(version, bool) and version == 2:
-            return cast('Type[L2TP]', L2TPv2)
+            return cast('Type[L2TP]', _L2TPV2.klass)
         raise ProtocolError(f'L2TP: invalid version: {version!r}')

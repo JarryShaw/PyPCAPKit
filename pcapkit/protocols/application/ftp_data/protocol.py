@@ -22,13 +22,22 @@ Transfer Protocol (FTP) [*]_, whose octets it keeps undissected.
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.misc.raw.protocol import Raw
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
+    from pcapkit.const.reg.apptype.tcp import TCP as AppType_TCP
+
 __all__ = ['FTP_DATA']
+
+#: The TCP port registry :meth:`FTP_DATA.__index__` reads its port from, resolved
+#: there rather than imported, as ``import pcapkit`` leaves it unloaded
+#: (:issue:`1538`), so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.apptype.tcp', 'TCP')
 
 
 class FTP_DATA(Application, Raw):  # pylint: disable=abstract-method
@@ -85,7 +94,4 @@ class FTP_DATA(Application, Raw):  # pylint: disable=abstract-method
            :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
 
         """
-        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
-        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
-
-        return int(TCP.ftp_data)  # type: ignore[call-overload]
+        return int(_TCP.klass.ftp_data)  # type: ignore[call-overload]

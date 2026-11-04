@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.schema.padding import pad_length
 from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
@@ -33,7 +34,7 @@ __all__ = ['PCAPNG']
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
-    from typing import Literal, Optional
+    from typing import Any, Literal, Optional
 
     from pcapkit.foundation.extraction import Extractor
     from pcapkit.protocols.misc.pcapng.data import PCAPNG as Data_PCAPNG
@@ -49,6 +50,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng.data import \
         SystemdJournalExportBlock as Data_SystemdJournalExportBlock
     from pcapkit.protocols.misc.pcapng.data import UnknownBlock as Data_UnknownBlock
+
+#: The toolkit functions :meth:`PCAPNG.read_frame` hands each frame to, resolved
+#: there rather than imported, so their first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TOOLKIT = tuple(ModuleDescriptor('pcapkit.toolkit.pcapng', name) for name in (
+    'dtls_reassembly', 'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+))  # type: tuple[ModuleDescriptor[Any], ...]
 
 
 @info_final
@@ -211,8 +219,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             Parsed PCAP-NG block.
 
         """
-        from pcapkit.toolkit.pcapng import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly,
-                                            tcp_reassembly, tcp_traceflow)
+        dtls_reassembly, ipv4_reassembly, ipv6_reassembly, tcp_reassembly, tcp_traceflow = (
+            descriptor.klass for descriptor in _TOOLKIT)
         ext = self._extractor
 
         while True:

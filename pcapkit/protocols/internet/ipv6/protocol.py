@@ -33,6 +33,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
@@ -51,10 +52,20 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['IPv6']
+
+#: The pseudo-header :meth:`IPv6.make` computes a payload's checksum over, and the
+#: check :meth:`IPv6.__post_init__` runs on the upper layer, resolved there rather
+#: than imported, so their first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_IP_PSEUDO: 'ModuleDescriptor[IP_Pseudo]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo')
+_VERIFY_UPPER: 'ModuleDescriptor[Any]' = \
+    ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'verify_upper')
 
 #: Length of the fixed IPv6 header, i.e. the offset of the first extension
 #: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it
@@ -338,7 +349,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # pseudo-header; see pcapkit.protocols.misc.checksum.ip_pseudo.protocol (#2471).
         if (config.CHECKSUM_COMPUTE and getattr(payload, '_checksum_pending', False)
                 and cast('ProtocolBase', payload).__index__() == next_val):
-            from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo  # isort: skip # pylint: disable=import-outside-toplevel
+            IP_Pseudo = _IP_PSEUDO.klass  # pylint: disable=invalid-name
 
             # NOTE: The payload follows this header directly, so no extension
             # header moves an address; it puts its own length in the pseudo-header.
@@ -420,8 +431,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         """
         super().__post_init__(file, length, **kwargs)
         if config.CHECKSUM_VERIFY:
-            from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import verify_upper  # isort: skip # pylint: disable=import-outside-toplevel
-            verify_upper(self)
+            _VERIFY_UPPER.klass(self)
 
     ##########################################################################
     # Utilities.

@@ -28,6 +28,7 @@ import pathlib
 import struct
 import subprocess
 import sys
+import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
@@ -49,10 +50,11 @@ DEADLINE = 60
 
 #: The child: from a thread each, all at once, reach every unbound export of
 #: ``packages``, every unbound submodule of ``submodules`` an export comes from, and
-#: each of ``names``; parse each of ``frames`` from an Ethernet header; and look up
-#: each protocol not imported yet with ``get_protocol`` if ``registry`` is set. Then
-#: print what failed, hung, was left unbound, parsed or resolved to the wrong class,
-#: or was imported for the first time without the lock held.
+#: each of ``names``; parse each of ``frames`` from an Ethernet header; look up each
+#: protocol not imported yet with ``get_protocol`` if ``registry`` is set; and, given a
+#: ``capture``, make each of its ``calls``. Then print what failed, hung, was left
+#: unbound, parsed or resolved to the wrong class, or was imported for the first time
+#: without the lock held.
 CHILD = '''
 import importlib, io, json, os, sys, threading, time
 
@@ -64,6 +66,36 @@ from pcapkit.protocols.protocol import ProtocolBase
 import_lock = getattr(importlib.import_module('pcapkit.utilities.importlib'), 'import_lock', None)
 if spec['frames']:
     from pcapkit.protocols.link.ethernet.protocol import Ethernet
+
+calls = {}
+if spec['capture']:
+    # NOTE: imported first without the lock on purpose: its package imports nothing
+    # from pcapkit.protocols, so no import-lock cycle runs through it.
+    import pcapkit.corekit.checksum.internet
+    from pcapkit.protocols.application.http.protocol import HTTP
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
+    from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+    from pcapkit.protocols.transport.udp.protocol import UDP
+    from pcapkit.utilities.exceptions import ProtocolError
+
+    def from_data():
+        try:
+            HTTP.from_data(object())
+        except ProtocolError:
+            return
+        raise AssertionError('HTTP.from_data took an object')
+
+    calls = {
+        'members': lambda: [LinuxSLL._member_of_version(1), LinuxSLL._member_of_version(2),
+                            ProtocolBase.get_protocol('L2TP')._member_of_version(2)],
+        'from_data': from_data,
+        'index': lambda: [ProtocolBase.get_protocol(name).__index__()
+                          for name in ('DTLS', 'FTP', 'FTP_DATA', 'HTTP', 'TLS', 'L2TPv2')],
+        'compute': lambda: IPv4(src='10.0.0.1', dst='10.0.0.2', protocol=17,
+                                payload=UDP(srcport=1, dstport=2, payload=b'ab')),
+        'extract': lambda: pcapkit.extract(fin=spec['capture'], nofile=True, reassembly=True,
+                                           verbose=False),
+    }
 
 jobs = [('attr',) + tuple(target) for target in spec['names']]
 for package in spec['packages']:
@@ -78,6 +110,8 @@ for member, octets in spec['frames']:
 if spec['registry']:
     jobs.extend(('get', name, entry) for name, entry in ProtocolBase.__registry__.items()
                 if entry.module not in sys.modules)
+for name in calls:
+    jobs.extend([('call', name, None)] * 2)
 barrier = threading.Barrier(len(jobs))
 errors, values, wrong, unlocked = [], {}, [], []
 
@@ -104,6 +138,8 @@ def run(kind, key, arg):
             layer = layer.payload
         if key not in names:
             wrong.append(f'{key}: {names}')
+    elif kind == 'call':
+        calls[key]()
     elif ProtocolBase.get_protocol(key) is not getattr(sys.modules[arg.module], arg.name):
         wrong.append(key)
 
@@ -185,17 +221,35 @@ FRAMES = [
     ('L2TPv2', ether(0x0800, ipv4(17, udp(1701, struct.pack('>HHH', 0x0002, 1, 1))))),
 ]
 
+#: A frame per helper its first parse resolves with checksums verified: HTTP's member
+#: for an HTTP/1.1 request, and the pseudo-header check over TCP, over UDP, and past
+#: an Authentication Header.
+HELPER_FRAMES = [
+    ('HTTPv1', ether(0x0800, ipv4(6, struct.pack('>HHIIBBHHH', 1234, 80, 1, 0, 5 << 4, 0x18, 1024, 0, 0)
+                                  + b'GET / HTTP/1.1\r\nHost: a\r\n\r\n'))),
+    ('AH', ether(0x0800, ipv4(51, bytes([17, 1, 0, 0]) + struct.pack('>II', 1, 1) + udp(53)))),
+    ('UDP', ether(0x0800, ipv4(17, udp(53, b'abcd')))),
+]
+
 
 def run_trial(packages: 'list[str]', submodules: 'list[str]', names: 'tuple[tuple[str, str], ...]' = (), *,
-              frames: 'bool' = False, registry: 'bool' = False) -> 'dict[str, Any]':
-    """Run :data:`CHILD` in a fresh interpreter; return what it printed."""
+              frames: 'bool' = False, registry: 'bool' = False, capture: 'str' = '') -> 'dict[str, Any]':
+    """Run :data:`CHILD` in a fresh interpreter; return what it printed.
+
+    With a ``capture``, the frames are :data:`HELPER_FRAMES`, parsed with checksums
+    verified, and the calls are made, one of which extracts ``capture``.
+
+    """
     environ = dict(os.environ)
     environ.pop('PYTHONSAFEPATH', None)
     environ['PYTHONPATH'] = os.pathsep.join(
         [str(ROOT), environ['PYTHONPATH']] if environ.get('PYTHONPATH') else [str(ROOT)])
+    if capture:
+        environ['PCAPKIT_CHECKSUM_VERIFY'] = '1'
+    chosen = HELPER_FRAMES if capture else FRAMES if frames else []
     spec = json.dumps({'root': str(ROOT), 'packages': packages, 'submodules': submodules, 'names': names,
-                       'frames': [(member, octets.hex()) for member, octets in FRAMES] if frames else [],
-                       'registry': registry, 'deadline': DEADLINE})
+                       'frames': [(member, octets.hex()) for member, octets in chosen],
+                       'registry': registry, 'capture': capture, 'deadline': DEADLINE})
     result = subprocess.run([sys.executable, '-c', CHILD, spec],  # nosec: B603
                             cwd=str(ROOT), env=environ, capture_output=True, text=True,
                             timeout=DEADLINE + 240, check=False)
@@ -236,6 +290,18 @@ class ConcurrentFirstImportTests(unittest.TestCase):
         outs = self.check([], [], frames=True, registry=True)
         for out in outs:
             self.assertEqual(out['kinds'], ['get', 'parse'])
+
+    def test_member_and_helper_first_imports_hold_the_lock(self) -> 'None':
+        """Members, data models, port registries, checksum helpers and toolkit, each first resolved at once."""
+        with tempfile.TemporaryDirectory() as directory:
+            capture = os.path.join(directory, 'helpers.pcap')
+            with open(capture, 'wb') as file:
+                file.write(struct.pack('<IHHiIII', 0xa1b2c3d4, 2, 4, 0, 0, 65535, 1))
+                for _, octets in HELPER_FRAMES:
+                    file.write(struct.pack('<IIII', 0, 0, len(octets), len(octets)) + octets)
+            outs = self.check([], [], capture=capture)
+        for out in outs:
+            self.assertEqual(out['kinds'], ['call', 'parse'])
 
 
 if __name__ == '__main__':

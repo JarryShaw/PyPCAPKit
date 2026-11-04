@@ -33,6 +33,10 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.enum import EnumRegistry
+    from pcapkit.protocols.link.linux_sll1.data import LinuxSLL1 as Data_LinuxSLL1
+    from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+    from pcapkit.protocols.link.linux_sll2.data import LinuxSLL2 as Data_LinuxSLL2
+    from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
     from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['LinuxSLL']
@@ -40,6 +44,19 @@ __all__ = ['LinuxSLL']
 #: Resolves ``protocol_type`` exactly as
 #: :class:`~pcapkit.protocols.link.ethernet.schema.Ethernet` resolves its ``type``.
 _ETHERTYPE_FIELD = EnumField(length=2, namespace=Enum_EtherType)
+
+#: The member :class:`LinuxSLL` hands a version 1 header to; it, the version 2
+#: member and their data models are resolved where used rather than imported, so a
+#: member's first import holds :data:`~pcapkit.utilities.importlib.import_lock`
+#: (:issue:`2771`).
+_LINUX_SLL1: 'ModuleDescriptor[LinuxSLL1]' = \
+    ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1')
+_LINUX_SLL2: 'ModuleDescriptor[LinuxSLL2]' = \
+    ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2')
+_DATA_LINUX_SLL1: 'ModuleDescriptor[Data_LinuxSLL1]' = \
+    ModuleDescriptor('pcapkit.protocols.link.linux_sll1.data', 'LinuxSLL1')
+_DATA_LINUX_SLL2: 'ModuleDescriptor[Data_LinuxSLL2]' = \
+    ModuleDescriptor('pcapkit.protocols.link.linux_sll2.data', 'LinuxSLL2')
 
 
 def _resolve_next_layer_proto(registry: 'DefaultDict[int, Any]', arphrd_type: 'int',
@@ -236,15 +253,10 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         if cls is not LinuxSLL:
             return super().from_data(data, **kwargs)
 
-        from pcapkit.protocols.link.linux_sll1.data import LinuxSLL1 as Data_LinuxSLL1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.link.linux_sll2.data import LinuxSLL2 as Data_LinuxSLL2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2  # isort: skip # pylint: disable=import-outside-toplevel
-
-        if isinstance(data, Data_LinuxSLL1):
-            return cast('Self', LinuxSLL1.from_data(data, **kwargs))
-        if isinstance(data, Data_LinuxSLL2):
-            return cast('Self', LinuxSLL2.from_data(data, **kwargs))
+        if isinstance(data, _DATA_LINUX_SLL1.klass):
+            return cast('Self', _LINUX_SLL1.klass.from_data(data, **kwargs))
+        if isinstance(data, _DATA_LINUX_SLL2.klass):
+            return cast('Self', _LINUX_SLL2.klass.from_data(data, **kwargs))
         raise ProtocolError('LinuxSLL: invalid data: must be a LinuxSLL1 or LinuxSLL2 data model')
 
     ##########################################################################
@@ -399,12 +411,9 @@ class LinuxSLL(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
                 :obj:`bool` or a :obj:`float` is refused even where it equals one.
 
         """
-        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2  # isort: skip # pylint: disable=import-outside-toplevel
-
         if isinstance(version, int) and not isinstance(version, bool):
             if version == 1:
-                return cast('Type[LinuxSLL]', LinuxSLL1)
+                return cast('Type[LinuxSLL]', _LINUX_SLL1.klass)
             if version == 2:
-                return cast('Type[LinuxSLL]', LinuxSLL2)
+                return cast('Type[LinuxSLL]', _LINUX_SLL2.klass)
         raise ProtocolError(f'LinuxSLL: invalid version: {version!r}')
