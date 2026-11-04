@@ -299,7 +299,7 @@ class TestStringFieldDumpers(unittest.TestCase):
                     self.assertTrue('�' in text or '\\ufffd' in text)
 
     def test_the_dumped_comment_still_packs_back_to_its_octets(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         whole = pcapng(b'caf\xe9')
         shb = whole[:int.from_bytes(whole[4:8], 'little')]

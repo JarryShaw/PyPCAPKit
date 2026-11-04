@@ -236,7 +236,7 @@ class DefaultEngineIPv4HeaderCheckTests(unittest.TestCase):
         # For every first octet, with room for 40 octets of options and with
         # none at all.
         from pcapkit import extract
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         cases = [(first, rest) for rest in (b'\x01' * 40 + segment(0), b'') for first in range(256)]
         built = [wire.ethernet(bytes([first]) + ipv4(rest)[1:], 0x0800) for first, rest in cases]

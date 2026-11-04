@@ -64,8 +64,8 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
-    from pcapkit.protocols.misc.pcap.frame import Frame
-    from pcapkit.protocols.misc.pcapng import PCAPNG
+    from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+    from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
     from pcapkit.protocols.protocol import ProtocolBase
 
     #: Every key registered in :attr:`Extractor.__output__` and in

@@ -3,10 +3,10 @@
 
 GitHub issue #2618: with the Checksum Present bit set, the GRE checksum covers the
 header and the payload, with no pseudo-header (:rfc:`2784#section-2.5`).
-:meth:`GRE.read <pcapkit.protocols.link.gre.GRE.read>` verifies it under
+:meth:`GRE.read <pcapkit.protocols.link.gre.protocol.GRE.read>` verifies it under
 :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`, as ICMP's is verified, and records
 :attr:`~pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED` when ``C`` is
-clear; :meth:`GRE.make <pcapkit.protocols.link.gre.GRE.make>` computes one that
+clear; :meth:`GRE.make <pcapkit.protocols.link.gre.protocol.GRE.make>` computes one that
 ``checksum_present`` asks for without giving it, under
 :data:`~pcapkit.utilities.config.CHECKSUM_COMPUTE`.
 
@@ -71,8 +71,8 @@ class GREChecksumTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning, ProtocolWarning
 

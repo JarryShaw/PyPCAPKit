@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-r""":class:`~pcapkit.protocols.application.http.HTTP` Constant Enumerations
-=============================================================================
+r""":class:`~pcapkit.protocols.application.http.protocol.HTTP` Constant Enumerations
+======================================================================================
 
 .. module:: pcapkit.const.http
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.http.HTTP` implementations. Available
+:class:`~pcapkit.protocols.application.http.protocol.HTTP` implementations. Available
 enumerations include:
 
 .. list-table::

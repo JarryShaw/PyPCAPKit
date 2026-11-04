@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 #: interpreter; the edge-case tables it serves run on every leg.
 __tier__ = 'LATEST'
 
-ETHERNET = 'pcapkit.protocols.link.ethernet:Ethernet'
+ETHERNET = 'pcapkit.protocols.link.ethernet.protocol:Ethernet'
 MACS = bytes.fromhex('0123456789ab') + bytes.fromhex('fedcba987654')
 
 

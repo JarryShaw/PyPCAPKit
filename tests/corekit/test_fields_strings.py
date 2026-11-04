@@ -63,8 +63,8 @@ class BitFieldTests(unittest.TestCase):
         Slice assignment on a :class:`bytearray` *grows* it, so declaring
         ``ihl: (4, 8)`` on a one-octet field built a 12-bit buffer and then
         failed in :meth:`int.to_bytes` with an opaque ``OverflowError``, far
-        from the declaration at fault. ``pcapkit/protocols/schema/internet/
-        ipv4.py`` really did carry that declaration.
+        from the declaration at fault.
+        ``pcapkit/protocols/internet/ipv4/schema.py`` really did carry that declaration.
 
         """
         from pcapkit.utilities.exceptions import FieldValueError
@@ -87,7 +87,7 @@ class BitFieldTests(unittest.TestCase):
 
     def test_ipv4_version_and_ihl_pack_into_one_octet(self) -> None:
         """The real declaration this guard was written for."""
-        from pcapkit.protocols.schema.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.schema import IPv4
 
         field = IPv4.__fields__['vihl']
 

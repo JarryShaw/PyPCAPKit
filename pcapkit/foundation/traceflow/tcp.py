@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Generic, overload
 from pcapkit.foundation.traceflow.data.data import Deferred
 from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
-from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
+from pcapkit.protocols.transport.tcp.protocol import TCP as TCP_Protocol
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['TCP']

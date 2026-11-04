@@ -50,7 +50,7 @@ class TestPCAPNGZigBeeKeyWidth(PCAPNGTestCase):
 
     def _quiet_rebuild(self, octets: 'bytes') -> 'tuple[bytes, list[str]]':
         """Parse ``octets`` quietly, then rebuild them, recording the rebuild's warnings."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         with warnings.catch_warnings():
@@ -120,7 +120,7 @@ class TestPCAPNGZigBeeKeyWidth(PCAPNGTestCase):
 
     def test_made_block_parses_back(self) -> None:
         """Made from a parsed model, the block parses back to the same secrets."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for secrets_type in (ZIGBEE_NWK_KEY, ZIGBEE_APS_KEY):
             for count in (10, WIDTH[secrets_type], WIDTH[secrets_type] + 6):
@@ -141,7 +141,7 @@ class TestPCAPNGZigBeeKeyWidth(PCAPNGTestCase):
         """Made from its fields, a key is its fixed width, and parses back to them."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.secrets_type import SecretsType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         key = _secrets(16)
         cases = (
@@ -167,8 +167,8 @@ class TestPCAPNGZigBeeKeyWidth(PCAPNGTestCase):
 
     def test_edited_fields_are_written(self) -> None:
         """A model built afresh, with no octets held, is written from its fields."""
-        from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.data import ZigBeeNWKKey
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         octets = _dsb(ZIGBEE_NWK_KEY, 10, _secrets(10))
         context = self._context()

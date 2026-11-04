@@ -51,14 +51,14 @@ class Row(NamedTuple):
     extra: 'dict[str, Any]' = {}
 
 
-ARP = ('pcapkit.protocols.link.arp', 'ARP')
-ETHERNET = ('pcapkit.protocols.link.ethernet', 'Ethernet')
-GRE = ('pcapkit.protocols.link.gre', 'GRE')
-L2TPV2 = ('pcapkit.protocols.link.l2tpv2', 'L2TPv2')
-C_TAG = ('pcapkit.protocols.link.c_tag', 'C_Tag')
-S_TAG = ('pcapkit.protocols.link.s_tag', 'S_Tag')
-LINUX_SLL1 = ('pcapkit.protocols.link.linux_sll1', 'LinuxSLL1')
-LINUX_SLL2 = ('pcapkit.protocols.link.linux_sll2', 'LinuxSLL2')
+ARP = ('pcapkit.protocols.link.arp.protocol', 'ARP')
+ETHERNET = ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet')
+GRE = ('pcapkit.protocols.link.gre.protocol', 'GRE')
+L2TPV2 = ('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2')
+C_TAG = ('pcapkit.protocols.link.c_tag.protocol', 'C_Tag')
+S_TAG = ('pcapkit.protocols.link.s_tag.protocol', 'S_Tag')
+LINUX_SLL1 = ('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1')
+LINUX_SLL2 = ('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2')
 
 HARDWARE = ('pcapkit.const.arp.hardware', 'Hardware')
 OPERATION = ('pcapkit.const.arp.operation', 'Operation')

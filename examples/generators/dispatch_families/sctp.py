@@ -18,13 +18,13 @@ generator = globals()['generator']  # type: Any
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
     return SCTP.__proto__
 
 
 def _build(ppid: 'Any') -> 'Any':
     from pcapkit.const.sctp.chunk import Chunk
-    from pcapkit.protocols.transport.sctp import SCTP
+    from pcapkit.protocols.transport.sctp.protocol import SCTP
 
     sctp = bytes(SCTP(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
                       chunks=[(Chunk.Payload_Data, {'ppid': ppid, 'data': b'ngap-pdu'})]))
@@ -41,7 +41,7 @@ FAMILIES = (
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
     'sctp/PayloadProtocolIdentifier_3GPP_NG_Application_Protocol':
-        ('pcapkit.protocols.application.ngap', 'NGAP'),
+        ('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
     'sctp/PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP':
-        ('pcapkit.protocols.application.ngap', 'NGAP'),
+        ('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
 }

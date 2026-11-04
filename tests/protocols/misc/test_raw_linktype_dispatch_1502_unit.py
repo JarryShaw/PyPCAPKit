@@ -2,10 +2,10 @@
 """GitHub issue #1502: ``LINKTYPE_RAW`` (101) is dissected as IPv4 or IPv6.
 
 This guards against
-:attr:`Frame.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>` and
-:attr:`PCAPNG.__proto__ <pcapkit.protocols.misc.pcapng.PCAPNG.__proto__>` lacking
+:attr:`Frame.__proto__ <pcapkit.protocols.misc.pcap.frame.protocol.Frame.__proto__>` and
+:attr:`PCAPNG.__proto__ <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__>` lacking
 an entry for ``LinkType.RAW``, which keeps a raw-IP frame as
-:class:`~pcapkit.protocols.misc.raw.Raw` so it never reaches reassembly. It
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` so it never reaches reassembly. It
 carries a bare IPv4 or IPv6 datagram that only the version nibble tells apart,
 so both dispatch it as ``IPV4`` or ``IPV6`` by that nibble, unless ``RAW``
 itself is registered.
@@ -50,14 +50,14 @@ class TestRawLinktypeDispatch(unittest.TestCase):
 
     @staticmethod
     def _keywords(frame):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         if isinstance(frame, Frame):
             return {'num': frame._fnum, 'header': frame._ghdr}
         return {'num': frame._fnum, 'sct': frame._sect, 'ctx': frame._ctx}
 
     def test_version_nibble_selects_the_layer(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for build, suffix in FORMATS:
             with self.subTest(format=suffix):
@@ -77,9 +77,9 @@ class TestRawLinktypeDispatch(unittest.TestCase):
 
     def test_dispatch_reaches_what_ipv4_is_registered_against(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         marker = type('W1502Marker', (Raw,), {'__module__': __name__})
         for (build, suffix), cls in zip(FORMATS, (Frame, PCAPNG)):
@@ -89,9 +89,9 @@ class TestRawLinktypeDispatch(unittest.TestCase):
 
     def test_an_entry_registered_under_raw_is_used_as_it_stands(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         marker = type('W1502RawMarker', (Raw,), {'__module__': __name__})
         for (build, suffix), cls in zip(FORMATS, (Frame, PCAPNG)):
@@ -101,8 +101,8 @@ class TestRawLinktypeDispatch(unittest.TestCase):
 
     def test_raw_is_not_registered(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (Frame, PCAPNG):
             with self.subTest(table=cls.__name__):

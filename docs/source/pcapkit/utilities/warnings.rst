@@ -35,7 +35,7 @@ there are. Constructing a warning class is not an act of reporting one -- it
 emits nothing and has no side effects.
 
 A next layer is parsed on trial, and replaced with
-:class:`~pcapkit.protocols.misc.raw.Raw` when its header was not captured or its
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` when its header was not captured or its
 parse raises. The trial's warnings are held back by
 :class:`~pcapkit.utilities.warnings.hold_warnings`: a replaced layer's are dropped
 on each channel, since they describe a layer the result does not have, and a kept

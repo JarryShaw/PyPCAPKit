@@ -45,11 +45,11 @@ from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN
-from pcapkit.protocols.schema.internet.ipv4 import IPV4_HEADER_LEN
-from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION, RESOLUTION_PLACES
-from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.protocols.internet.ipv4.schema import IPV4_HEADER_LEN
+from pcapkit.protocols.internet.ipv6.protocol import IPV6_HEADER_LEN
+from pcapkit.protocols.misc.pcap.frame.data import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.misc.pcap.header.schema import RESOLUTION, RESOLUTION_PLACES
+from pcapkit.protocols.transport.tcp.schema import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -361,7 +361,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
         after it; or :data:`None` if there are fewer than
-        :data:`TCP_MIN_HEADER_LEN <pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN>`
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.protocols.transport.tcp.schema.TCP_MIN_HEADER_LEN>`
         octets, the Data Offset counts fewer or more than were captured, or
         pcapkit's own TCP parser rejects the options (see
         :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).

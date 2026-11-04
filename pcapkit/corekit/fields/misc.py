@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.sentinels import NoValueType
     from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
 _TC = TypeVar('_TC')
 _TS = TypeVar('_TS', bound='Schema')
@@ -255,7 +255,7 @@ class PayloadField(FieldBase[_TP]):
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
         if self._protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel # isort:skip
+            from pcapkit.protocols.misc.raw.protocol import Raw  # pylint: disable=import-outside-toplevel # isort:skip
             return Raw
         return self._protocol
 
@@ -267,7 +267,7 @@ class PayloadField(FieldBase[_TP]):
             protocol: Payload protocol. A :obj:`str` is resolved against the
                 :data:`pcapkit.protocols.__proto__` registry, case-insensitively,
                 and an unresolved name leaves the payload as
-                :class:`~pcapkit.protocols.misc.raw.Raw`.
+                :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If ``protocol`` names a
@@ -283,7 +283,7 @@ class PayloadField(FieldBase[_TP]):
             # ``pcapkit.foundation.registry.protocols.protocol.register_protocol`` adds to
             # it, so a name looked up in any other case would miss every time --
             # and a miss leaves ``_protocol`` as :obj:`None`, which the property
-            # above resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So
+            # above resolves to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So
             # ``PayloadField(protocol='http')`` would yield a raw payload instead
             # of HTTP, with nothing to say so (#787).
             resolved = __proto__.get(protocol.upper())
@@ -291,7 +291,7 @@ class PayloadField(FieldBase[_TP]):
             # NOTE: Warned rather than left silent, and warned rather than
             # raised. Unlike the registry lookups that dispatch on a code read
             # off the wire -- where a miss is ordinary traffic and
-            # :class:`~pcapkit.protocols.misc.raw.Raw` is the right answer --
+            # :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the right answer --
             # this branch is reached only from a caller that named a protocol in
             # source, so a miss is a mistake in that name rather than a property
             # of the captured packet, and it is otherwise indistinguishable from
@@ -320,7 +320,7 @@ class PayloadField(FieldBase[_TP]):
         # getter would hand that same string back, so
         # ``PayloadField(protocol='http')`` -- or ``protocol='HTTP'`` -- would
         # yield neither the protocol nor
-        # :class:`~pcapkit.protocols.misc.raw.Raw` but the string itself (#787).
+        # :class:`~pcapkit.protocols.misc.raw.protocol.Raw` but the string itself (#787).
         # The lookup the setter performs stays inside
         # its ``isinstance(protocol, str)`` branch, so a field declared in a
         # schema class body -- every in-library use, none of which names a
@@ -372,8 +372,7 @@ class PayloadField(FieldBase[_TP]):
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TP', self._default)
 
-        from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.schema import Schema  # pylint: disable=import-outside-toplevel
         if isinstance(value, bytes):
             return value
         if isinstance(value, Schema):
@@ -570,7 +569,7 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         outer schema specifically rather than whichever schema happens to
         declare a given field -- see
         :func:`pcapkit.corekit.schema.byteorder.packet_byteorder` and
-        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`
+        :meth:`~pcapkit.protocols.misc.pcapng.schema.BlockType.post_process`
         for why that distinction matters; both hand-roll this exact fallback
         themselves rather than route through this function.
 
@@ -580,7 +579,7 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         write ever touching the enclosing schema's own data, and without the
         write silently disappearing either. That matters concretely rather
         than hypothetically:
-        :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension` declares
+        :class:`~pcapkit.protocols.internet.mh.schema.CGAExtension` declares
         its own ``length`` while the option enclosing it declares ``length``
         too, so handing a nested schema the enclosing mapping itself would let
         the inner ``length`` overwrite the outer one mid-pack.
@@ -601,14 +600,14 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         :class:`~abc.ABCMeta`-based class. That also settles a suspicion,
         raised on :issue:`439`, that a :class:`~collections.ChainMap` here
         would corrupt the :class:`~abc.ABCMeta` cache :class:`Schema
-        <pcapkit.protocols.schema.schema.Schema>` subclasses shared on CPython
+        <pcapkit.protocols.schema.Schema>` subclasses shared on CPython
         <= 3.10. The suspicion is *probably* wrong, and this code cannot
         test it: the cache keys on the **exact type queried**, so asking about a
         :class:`~collections.ChainMap` instance caches lookups for
         :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning
         observed in :issue:`439` came from ordinary code asking
         :func:`isinstance` about a plain :class:`dict`, and :issue:`439` is
-        fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own
+        fixed directly -- every :class:`~pcapkit.protocols.schema.Schema` subclass gets its own
         ``_abc_impl``. Against that, on CPython 3.10 choosing between a
         ``ChainMap`` and a plain literal here was observed to flip
         ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``
@@ -723,12 +722,11 @@ class SchemaField(FieldBase[_TS]):
         if isinstance(value, bytes):
             return value
 
-        # NOTE: :meth:`Schema.to_dict <pcapkit.protocols.schema.schema.Schema.to_dict>`
+        # NOTE: :meth:`Schema.to_dict <pcapkit.protocols.schema.Schema.to_dict>`
         # flattens a nested schema into a plain mapping, so a schema rebuilt
         # through ``from_dict`` hands that mapping back here; turn it into the
         # declared schema before packing it.
-        from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.schema import Schema  # pylint: disable=import-outside-toplevel
         if isinstance(value, Mapping) and not isinstance(value, Schema):
             value = self._schema.from_dict(value)
 

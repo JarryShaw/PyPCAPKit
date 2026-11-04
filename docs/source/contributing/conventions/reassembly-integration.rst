@@ -48,7 +48,7 @@ Parse Ownership
   :meth:`Protocol.analyze <pcapkit.protocols.protocol.Protocol.analyze>` for IPv4 and
   IPv6, :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`
   for TCP, and
-  :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+  :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
   for a DTLS handshake message.
 * Each :mod:`pcapkit.foundation.analysis` function is a public wrapper that calls that
   method and holds no parsing of its own.
@@ -66,17 +66,17 @@ Compliance, Measured
 ~~~~~~~~~~~~~~~~~~~~~
 
 **Point 1 holds for every engine.** None of
-:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.internet.ipv6.IPv6`,
-:class:`~pcapkit.protocols.transport.tcp.TCP` and
-:class:`~pcapkit.protocols.application.dtls.DTLS` imports or calls into
+:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`,
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` imports or calls into
 :mod:`pcapkit.foundation.reassembly` at all. The real path is
 :mod:`pcapkit.foundation.engines` calling a ``pcapkit.toolkit.<engine>`` extraction
 function on an already-parsed frame, feeding the result to the reassembly instance the
 :class:`~pcapkit.foundation.extraction.Extractor` holds; for DTLS that function is
 :func:`pcapkit.toolkit.pcap.dtls_reassembly` (:issue:`2496`).
-:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.DTLS.read_handshake>`
-and :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+:meth:`DTLS.read_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake>`
+and :meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
 are the parser methods the rule allows.
 
 **No engine meets point 2.** No single :mod:`pcapkit.toolkit` helper enumerates which
@@ -95,7 +95,7 @@ datagram's by its ports, through
 :meth:`Transport.analyze <pcapkit.protocols.transport.transport.Transport.analyze>`;
 and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes a reassembled
 DTLS handshake message (:issue:`2496`), through
-:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`
+:meth:`DTLS.analyze_handshake <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`
 (:issue:`2622`). The owner chose on :issue:`2581` to give IP and TCP modules of their
 own, each function named for the datagram its engine reassembles, rather than leave
 their outcomes to those dispatchers with no analysis method, which kept the rule true

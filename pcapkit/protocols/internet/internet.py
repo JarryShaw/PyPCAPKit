@@ -6,9 +6,9 @@
 .. module:: pcapkit.protocols.internet.internet
 
 :mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
-which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.AH`,
-:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.internet.ipv6.IPv6` and :class:`~pcapkit.protocols.internet.ipx.IPX`.
+which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.protocol.AH`,
+:class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` and :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`.
 
 """
 import collections
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.corekit.enum import EnumRegistry
-    from pcapkit.protocols.data.data import Data
+    from pcapkit.protocols.data import Data
 
 __all__ = ['Internet']
 
@@ -58,52 +58,52 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
        * - Index
          - Protocol
        * - :attr:`~pcapkit.const.reg.transtype.TransType.HOPOPT`
-         - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`
+         - :class:`pcapkit.protocols.internet.hopopt.protocol.HOPOPT`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv4`
-         - :class:`pcapkit.protocols.internet.ipv4.IPv4`
+         - :class:`pcapkit.protocols.internet.ipv4.protocol.IPv4`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.ICMP`
-         - :class:`pcapkit.protocols.internet.icmpv4.ICMPv4`
+         - :class:`pcapkit.protocols.internet.icmpv4.protocol.ICMPv4`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.TCP`
-         - :class:`pcapkit.protocols.transport.tcp.TCP`
+         - :class:`pcapkit.protocols.transport.tcp.protocol.TCP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.UDP`
-         - :class:`pcapkit.protocols.transport.udp.UDP`
+         - :class:`pcapkit.protocols.transport.udp.protocol.UDP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.DCCP`
-         - :class:`pcapkit.protocols.transport.dccp.DCCP`
+         - :class:`pcapkit.protocols.transport.dccp.protocol.DCCP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6`
-         - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+         - :class:`pcapkit.protocols.internet.ipv6.protocol.IPv6`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_ICMP`
-         - :class:`pcapkit.protocols.internet.icmpv6.ICMPv6`
+         - :class:`pcapkit.protocols.internet.icmpv6.protocol.ICMPv6`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Route`
-         - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
+         - :class:`pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`
-         - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
+         - :class:`pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.GRE`
-         - :class:`pcapkit.protocols.link.gre.GRE`
+         - :class:`pcapkit.protocols.link.gre.protocol.GRE`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.ESP`
-         - :class:`pcapkit.protocols.internet.esp.ESP`
+         - :class:`pcapkit.protocols.internet.esp.protocol.ESP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`
-         - :class:`pcapkit.protocols.internet.ah.AH`
+         - :class:`pcapkit.protocols.internet.ah.protocol.AH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IGMP`
-         - :class:`pcapkit.protocols.internet.igmp.IGMP`, which dispatches to
-           :class:`pcapkit.protocols.internet.igmpv1.IGMPv1`,
-           :class:`pcapkit.protocols.internet.igmpv2.IGMPv2` or
-           :class:`pcapkit.protocols.internet.igmpv3.IGMPv3`
+         - :class:`pcapkit.protocols.internet.igmp.protocol.IGMP`, which dispatches to
+           :class:`pcapkit.protocols.internet.igmpv1.protocol.IGMPv1`,
+           :class:`pcapkit.protocols.internet.igmpv2.protocol.IGMPv2` or
+           :class:`pcapkit.protocols.internet.igmpv3.protocol.IGMPv3`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
-         - :class:`pcapkit.protocols.misc.raw.Raw`
+         - :class:`pcapkit.protocols.misc.raw.protocol.Raw`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`
-         - :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+         - :class:`pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.IPX_in_IP`
-         - :class:`pcapkit.protocols.internet.ipx.IPX`
+         - :class:`pcapkit.protocols.internet.ipx.protocol.IPX`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.Mobility_Header`
-         - :class:`pcapkit.protocols.internet.mh.MH`
+         - :class:`pcapkit.protocols.internet.mh.protocol.MH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`
-         - :class:`pcapkit.protocols.internet.hip.HIP`
+         - :class:`pcapkit.protocols.internet.hip.protocol.HIP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.Shim6`
-         - :class:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+         - :class:`pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
-         - :class:`pcapkit.protocols.transport.sctp.SCTP`
+         - :class:`pcapkit.protocols.transport.sctp.protocol.SCTP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
-         - :class:`pcapkit.protocols.application.ospf.OSPF`
+         - :class:`pcapkit.protocols.application.ospf.protocol.OSPF`
 
     .. versionchanged:: 1.5.0
 
@@ -124,30 +124,30 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: see :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
         {
-            Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
-            Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4',       'IPv4'),
-            Enum_TransType.ICMP:            ModuleDescriptor('pcapkit.protocols.internet.icmpv4',     'ICMPv4'),
-            Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp',       'TCP'),
-            Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp',       'UDP'),
-            Enum_TransType.DCCP:            ModuleDescriptor('pcapkit.protocols.transport.dccp',      'DCCP'),
-            Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6',       'IPv6'),
-            Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6',     'ICMPv6'),
-            Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
-            Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+            Enum_TransType.HOPOPT:          ModuleDescriptor('pcapkit.protocols.internet.hopopt.protocol',     'HOPOPT'),
+            Enum_TransType.IPv4:            ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol',       'IPv4'),
+            Enum_TransType.ICMP:            ModuleDescriptor('pcapkit.protocols.internet.icmpv4.protocol',     'ICMPv4'),
+            Enum_TransType.TCP:             ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol',       'TCP'),
+            Enum_TransType.UDP:             ModuleDescriptor('pcapkit.protocols.transport.udp.protocol',       'UDP'),
+            Enum_TransType.DCCP:            ModuleDescriptor('pcapkit.protocols.transport.dccp.protocol',      'DCCP'),
+            Enum_TransType.IPv6:            ModuleDescriptor('pcapkit.protocols.internet.ipv6.protocol',       'IPv6'),
+            Enum_TransType.IPv6_ICMP:       ModuleDescriptor('pcapkit.protocols.internet.icmpv6.protocol',     'ICMPv6'),
+            Enum_TransType.IPv6_Route:      ModuleDescriptor('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route'),
+            Enum_TransType.IPv6_Frag:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_frag.protocol',  'IPv6_Frag'),
             # NOTE: a tunnel is placed by its payload, so GRE lives under ``protocols.link``;
             # see :doc:`/contributing/conventions/protocol-layer-placement`.
-            Enum_TransType.GRE:             ModuleDescriptor('pcapkit.protocols.link.gre',            'GRE'),
-            Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp',        'ESP'),
-            Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah',         'AH'),
-            Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp',       'IGMP'),
-            Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw',            'Raw'),
-            Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
-            Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx',        'IPX'),
-            Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh',         'MH'),
-            Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip',        'HIP'),
-            Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp',      'SCTP'),
+            Enum_TransType.GRE:             ModuleDescriptor('pcapkit.protocols.link.gre.protocol',            'GRE'),
+            Enum_TransType.ESP:             ModuleDescriptor('pcapkit.protocols.internet.esp.protocol',        'ESP'),
+            Enum_TransType.AH:              ModuleDescriptor('pcapkit.protocols.internet.ah.protocol',         'AH'),
+            Enum_TransType.IGMP:            ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol',       'IGMP'),
+            Enum_TransType.IPv6_NoNxt:      ModuleDescriptor('pcapkit.protocols.misc.raw.protocol',            'Raw'),
+            Enum_TransType.IPv6_Opts:       ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts.protocol',  'IPv6_Opts'),
+            Enum_TransType.IPX_in_IP:       ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol',        'IPX'),
+            Enum_TransType.Mobility_Header: ModuleDescriptor('pcapkit.protocols.internet.mh.protocol',         'MH'),
+            Enum_TransType.HIP:             ModuleDescriptor('pcapkit.protocols.internet.hip.protocol',        'HIP'),
+            Enum_TransType.SCTP:            ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol',      'SCTP'),
 
             # OSPF rides directly on IP, so IANA protocol number 89 is its only
             # dispatch point. The dissector nonetheless lives under
@@ -156,7 +156,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             # than forwarding packets -- the dispatch tier and the subpackage are
             # deliberately decoupled, see
             # :doc:`/contributing/conventions/protocol-layer-placement`.
-            Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf', 'OSPF'),
+            Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
         },
     )
 
@@ -168,13 +168,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype` checks
     #: its own -- a subclass sharing this registry is therefore checked as
     #: :class:`Internet` is (:issue:`2268`), while
-    #: :class:`~pcapkit.protocols.internet.ipx.IPX`, which keeps one of its own,
+    #: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps one of its own,
     #: declares its own pairing (:issue:`2511`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_TransType, False)
 
     #: int: How many IPv6 extension headers in a row the next layer follows:
     #: this layer's place in such a chain, or how many headers
-    #: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, see
+    #: :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` walked, else ``0``, see
     #: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.
     _exthdr_depth = 0
 
@@ -275,7 +275,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Notes:
             An IPv6 extension header is handed the rest of the datagram, but
             parses only itself: its :attr:`info` holds no payload, and
-            :class:`~pcapkit.protocols.internet.ipv6.IPv6` decodes what follows.
+            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` decodes what follows.
             So :attr:`data` is cut down to the header's own :attr:`length`, and
             ``from_data(info).data`` rebuilds it exactly (:issue:`1446`).
 
@@ -320,9 +320,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Arguments:
             proto: next layer protocol index
             extension: if the next layer is parsed as an extension header by
-                :class:`~pcapkit.protocols.internet.ipv6.IPv6`'s walk, which
+                :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`'s walk, which
                 counts the chain itself, see :meth:`IPv6._decode_next_layer
-                <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+                <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`
 
         Returns:
             One more than :attr:`_exthdr_depth` if ``proto`` names an IPv6
@@ -352,12 +352,12 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Note:
             The parse tells an extension header by the protocol number naming
             it, which a rebuild does not have, so this tells one by its class:
-            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` is the base
+            :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` is the base
             of every :class:`Internet` layer :attr:`__proto__` registers under
             such a number.
 
         """
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
         return _exthdr_rebuilt.get() if issubclass(cls, IPv6_Ext) else 0
 
     @classmethod
@@ -400,8 +400,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             extension: if is extension header, see :meth:`_next_exthdr_depth`
 
         Returns:
-            :class:`~pcapkit.protocols.misc.no_payload.NoPayload` if there is
-            nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if there is
+            nothing to parse; :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if the
             parse stops at this layer, or the next layer is an IPv6 extension
             header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the
             class registered for ``proto``. Paired with it, the keywords that
@@ -416,16 +416,16 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         """
         if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.no_payload import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
             return NoPayload, {}
         if self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             return Raw, {}
 
         depth = self._next_exthdr_depth(proto, extension)
         limit = config.EXTENSION_HEADER_LIMIT
         if limit != -1 and depth > limit:
-            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
             message = (f'{self.alias}: a chain of IPv6 extension headers reached the limit of '
                        f'{limit} headers; the rest of the packet, from Next '
@@ -437,7 +437,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
 
-        from pcapkit.protocols.internet.igmp import IGMP as IGMPBase  # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.igmp.protocol import IGMP as IGMPBase  # isort: skip # pylint: disable=import-outside-toplevel
 
         protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
         if protocol is IGMPBase:
@@ -460,7 +460,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             version: IP version
             ipv6_exthdr: protocol chain of IPv6 extension headers
             payload: payload from packet. If not provided, will extract from
-                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
+                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.Schema.get_payload>`
             declared: whether this layer declares the length of its payload
 
         Returns:
@@ -525,7 +525,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             version: IP protocol version
             extension: if is extension header
             payload: payload from packet. If not provided, will extract from
-                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.schema.Schema.get_payload>`
+                :meth:`self.__header__.get_payload <pcapkit.protocols.schema.Schema.get_payload>`
 
         Returns:
             Instance of next layer.
@@ -533,7 +533,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Notes:
             An IPv6 extension header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a
             row is not dissected: it and the rest of the packet are kept as
-            :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).
             Each header dissects the next one from here, so the chain's depth
             is handed to the next layer, see :meth:`_next_layer_class`.

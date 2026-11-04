@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`pcapkit.protocols.internet.esp`.
+"""Unit tests for :mod:`pcapkit.protocols.internet.esp.protocol`.
 
 Cryptographic behaviour is pinned with *published* test vectors rather than
 with round trips alone, so that a change to the nonce, associated data or
@@ -15,7 +15,7 @@ trailer handling cannot pass unnoticed:
   the expected ICV is recomputed in the test with :mod:`hmac` over the
   coverage :rfc:`4303` §2.8 specifies, independently of
   :meth:`SecurityAssociation.compute_icv
-  <pcapkit.protocols.internet.esp.SecurityAssociation.compute_icv>`, and the
+  <pcapkit.protocols.internet.esp.protocol.SecurityAssociation.compute_icv>`, and the
   resulting bytes are additionally pinned.
 
 """
@@ -132,7 +132,7 @@ class ESPRegistryTests(unittest.TestCase):
 
     def test_cipher_registry(self) -> None:
         from pcapkit.const.esp.cipher import Cipher as Const_Cipher
-        from pcapkit.protocols.internet.esp import CIPHER_SUITES, Cipher, CipherSuite
+        from pcapkit.protocols.internet.esp.protocol import CIPHER_SUITES, Cipher, CipherSuite
         from pcapkit.utilities.exceptions import ProtocolError
 
         # the enumeration is the generated IANA registry, re-exported
@@ -204,7 +204,7 @@ class ESPRegistryTests(unittest.TestCase):
 
     def test_integrity_registry(self) -> None:
         from pcapkit.const.esp.integrity import Integrity as Const_Integrity
-        from pcapkit.protocols.internet.esp import INTEGRITY_SUITES, Integrity, IntegritySuite
+        from pcapkit.protocols.internet.esp.protocol import INTEGRITY_SUITES, Integrity, IntegritySuite
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertIs(Integrity, Const_Integrity)
@@ -254,7 +254,7 @@ class ESPRegistryTests(unittest.TestCase):
             IntegritySuite.get('HMAC_SHA3_256')
 
     def test_security_association_validation(self) -> None:
-        from pcapkit.protocols.internet.esp import Cipher, Integrity, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import Cipher, Integrity, SecurityAssociation
         from pcapkit.utilities.exceptions import ProtocolError
 
         # RFC 4106 s8.1: the last four octets of the keying material are the salt
@@ -309,7 +309,7 @@ class ESPRegistryTests(unittest.TestCase):
         becoming ``IPv4Address('0.0.0.1')``, with no exception and no warning.
         See #491.
         """
-        from pcapkit.protocols.internet.esp import SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import SecurityAssociation
         from pcapkit.utilities.exceptions import ProtocolError
 
         for value in (True, False):
@@ -324,7 +324,7 @@ class ESPRegistryTests(unittest.TestCase):
         self.assertIsNone(SecurityAssociation(spi=1).destination)
 
     def test_security_association_repr_holds_no_key_material(self) -> None:
-        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, Integrity,
+        from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, Integrity,
                                                     SecurityAssociation)
 
         akey = bytes(range(32))
@@ -343,7 +343,7 @@ class ESPRegistryTests(unittest.TestCase):
 
     def test_context_registry_normalisation(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESPContext, SecurityAssociation
         from pcapkit.utilities.exceptions import RegistryError
 
         context = ESPContext(SecurityAssociation(spi=1))
@@ -379,7 +379,7 @@ class ESPRegistryTests(unittest.TestCase):
     def test_association_matching_prefers_the_most_specific(self) -> None:
         import ipaddress
 
-        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESPContext, SecurityAssociation
         from pcapkit.utilities.exceptions import ProtocolError
 
         dst = ipaddress.ip_address('192.168.123.100')
@@ -417,9 +417,9 @@ class ESPProtocolTests(unittest.TestCase):
     def test_identity_and_registration(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipsec import IPsec
+        from pcapkit.protocols.internet.ipsec.protocol import IPsec
 
         self.assertEqual(ESP.id(), ('ESP',))
         self.assertEqual(IPsec.id(), ('AH', 'ESP'))
@@ -437,7 +437,7 @@ class ESPProtocolTests(unittest.TestCase):
 
     def test_module_is_importable_and_exported(self) -> None:
         import pcapkit
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
 
         self.assertIn('ESP', pcapkit.__all__)
         self.assertIs(pcapkit.ESP, ESP)
@@ -448,7 +448,7 @@ class ESPProtocolTests(unittest.TestCase):
     ##########################################################################
 
     def test_no_sa_reports_opaque_payload(self) -> None:
-        from pcapkit.protocols.internet.esp import ESP, ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPStatus
 
         esp = ESP(CASE5_ESP, len(CASE5_ESP))
         info = esp.info
@@ -473,7 +473,7 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertEqual(esp.payload.data, CASE5_ESP[8:])
 
     def test_no_sa_never_raises_on_a_short_packet(self) -> None:
-        from pcapkit.protocols.internet.esp import ESP, ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPStatus
 
         payload = struct.pack('!II', 0xdeadbeef, 42)
         esp = ESP(payload, len(payload))
@@ -485,7 +485,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_null_cipher_recovers_the_trailer_without_cryptography(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESP, ESPContext, ESPStatus, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext, ESPStatus, SecurityAssociation
 
         # ESP-NULL: padding 01 02, pad length 2, next header 6 (TCP)
         packet = struct.pack('!II', 7, 3) + b'plaintext-payload' + bytes([1, 2, 2, 6])
@@ -508,7 +508,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_aes_cbc_transport_mode_rfc3602_case5(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
@@ -535,9 +535,9 @@ class ESPProtocolTests(unittest.TestCase):
 
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         sa = SecurityAssociation(spi=0x8765, encryption=Cipher.AES_CBC,
                                  encryption_key=CASE7_KEY)
@@ -559,9 +559,9 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_destination_keyed_association(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         packet = CASE7_IP + CASE7_ESP
 
@@ -585,7 +585,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_aes_gcm_128_mcgrew_vector(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         sa = SecurityAssociation(spi=0x0000a5f8, encryption=Cipher.AES_GCM_16,
@@ -609,7 +609,7 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_aes_gcm_256_mcgrew_vector(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESP, ESPContext, ESPStatus, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext, ESPStatus, SecurityAssociation
 
         sa = SecurityAssociation(spi=0x4a2cbfe3, encryption='aes-gcm-16',
                                  encryption_key=GCM256_KEYMAT)
@@ -634,8 +634,8 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_wrong_encryption_key_fails_cleanly(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet import esp as esp_module
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp import protocol as esp_module
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
@@ -658,7 +658,7 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_wrong_aead_key_fails_the_tag_check(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         sa = SecurityAssociation(spi=0x0000a5f8, encryption=Cipher.AES_GCM_16,
@@ -673,8 +673,8 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_padding_pattern_is_only_decisive_without_integrity(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet import esp as esp_module
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp import protocol as esp_module
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         # build a packet whose padding is zeros rather than the RFC 4303 s2.4
@@ -707,7 +707,7 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_truncated_icv_is_reported(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         sa = SecurityAssociation(spi=0x0000a5f8, encryption=Cipher.AES_GCM_16,
@@ -734,8 +734,8 @@ class ESPProtocolTests(unittest.TestCase):
 
     def test_degrades_without_cryptography(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet import esp as esp_module
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp import protocol as esp_module
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         with mock.patch.object(esp_module, 'load_cryptography', return_value=None):
@@ -770,8 +770,8 @@ class ESPProtocolTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet import esp as esp_module
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp import protocol as esp_module
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         body = bytes(range(32))
@@ -803,7 +803,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_hmac_sha256_integrity_round_trip_and_mismatch(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus, Integrity,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus, Integrity,
                                                     SecurityAssociation)
 
         akey = bytes(range(32))
@@ -859,7 +859,7 @@ class ESPProtocolTests(unittest.TestCase):
         self.assertIs(failed.info.status, ESPStatus.AUTH_FAILED)
 
     def test_compute_icv_requires_an_integrity_algorithm(self) -> None:
-        from pcapkit.protocols.internet.esp import Integrity, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import Integrity, SecurityAssociation
         from pcapkit.utilities.exceptions import ProtocolError
 
         sa = SecurityAssociation(spi=1, integrity=Integrity.HMAC_SHA1_96,
@@ -877,7 +877,7 @@ class ESPProtocolTests(unittest.TestCase):
     ##########################################################################
 
     def test_make_verbatim_round_trip(self) -> None:
-        from pcapkit.protocols.internet.esp import ESP, ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPStatus
 
         built = ESP(spi=9, seq=3, payload=b'opaque-ciphertext', icv=b'ICV!')
         wire = bytes(built)
@@ -902,7 +902,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_make_encrypt_pads_to_the_block_size(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
         from pcapkit.utilities.exceptions import ProtocolError, ProtocolUnbound
 
@@ -941,7 +941,7 @@ class ESPProtocolTests(unittest.TestCase):
     def test_make_encrypt_aead_round_trip(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         for cipher, icv_length in ((Cipher.AES_GCM_8, 8),
@@ -970,7 +970,7 @@ class ESPProtocolTests(unittest.TestCase):
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_extract_end_to_end_with_context(self) -> None:
         import pcapkit
-        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
 
         ethernet = hx('001122334455 66778899aabb 0800')
@@ -1012,9 +1012,9 @@ class ESPProtocolTests(unittest.TestCase):
     def test_ipv6_extension_header_position(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import (ESP, Cipher, ESPContext, ESPStatus,
+        from pcapkit.protocols.internet.esp.protocol import (ESP, Cipher, ESPContext, ESPStatus,
                                                     SecurityAssociation)
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         sa = SecurityAssociation(spi=0x66, encryption=Cipher.AES_CBC,
                                  encryption_key=CASE5_KEY)
@@ -1069,13 +1069,13 @@ class ESPProtocolTests(unittest.TestCase):
         IP header ... before the next layer protocol") is legitimate
         prose here too -- it is the primary-source evidence that ESP
         also travels directly as an IPv4 payload, exactly as
-        :mod:`~pcapkit.protocols.internet.hip` cites its own IPv4
+        :mod:`~pcapkit.protocols.internet.hip.protocol` cites its own IPv4
         appendix for the same reason. Per
         ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
         "own-protocolhood on its own is not sufficient" ruling (MH is the
         settling case),
         that fact *qualifies* an already-standalone header for a base
-        besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
+        besides :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`;
         it does not *make* the header standalone, and the RFC has no
         say in which base is named (``IPsec`` versus ``Internet``) --
         so a claim that the RFC "makes it a standalone protocol" or
@@ -1088,7 +1088,7 @@ class ESPProtocolTests(unittest.TestCase):
         """
         import re
 
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
 
         # Normalise the docstring's line-wrapping before matching, since the
         # citation may be split across lines by hand-wrapping.
@@ -1136,7 +1136,7 @@ class ESPErrorMessageTests(unittest.TestCase):
         self.assertEqual(str(ctx.exception), expected)
 
     def test_algorithm_lookup(self) -> None:
-        from pcapkit.protocols.internet.esp import (CIPHER_SUITES, INTEGRITY_SUITES, CipherSuite,
+        from pcapkit.protocols.internet.esp.protocol import (CIPHER_SUITES, INTEGRITY_SUITES, CipherSuite,
                                                     IntegritySuite)
 
         ciphers = ', '.join(key.name for key in CIPHER_SUITES)
@@ -1151,7 +1151,7 @@ class ESPErrorMessageTests(unittest.TestCase):
                            IntegritySuite.get, 'HMAC_SHA3_256')
 
     def test_security_association(self) -> None:
-        from pcapkit.protocols.internet.esp import (Cipher, ESPContext, Integrity,
+        from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, Integrity,
                                                     SecurityAssociation)
 
         self.assertMessage('ESP: invalid SPI: -1', SecurityAssociation, spi=-1)
@@ -1178,8 +1178,8 @@ class ESPErrorMessageTests(unittest.TestCase):
         self.assertMessage('ESP: not a security association: 1', ESPContext().register, 1)
 
     def test_missing_cryptography(self) -> None:
-        from pcapkit.protocols.internet import esp as esp_module
-        from pcapkit.protocols.internet.esp import Cipher, SecurityAssociation
+        from pcapkit.protocols.internet.esp import protocol as esp_module
+        from pcapkit.protocols.internet.esp.protocol import Cipher, SecurityAssociation
 
         expected = ("ESP: unavailable encryption algorithm: 'ENCR_AES_CBC' needs the optional "
                     '"cryptography" dependency, which is not installed')
@@ -1194,7 +1194,7 @@ class ESPErrorMessageTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_CRYPTO, 'cryptography not installed')
     def test_malformed_payload(self) -> None:
-        from pcapkit.protocols.internet.esp import Cipher, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import Cipher, SecurityAssociation
 
         cbc = SecurityAssociation(spi=1, encryption=Cipher.AES_CBC, encryption_key=CASE5_KEY)
         gcm = SecurityAssociation(spi=1, encryption=Cipher.AES_GCM_16,
@@ -1211,7 +1211,7 @@ class ESPErrorMessageTests(unittest.TestCase):
 
     def test_make(self) -> None:
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESP, ESPContext, SecurityAssociation
+        from pcapkit.protocols.internet.esp.protocol import ESP, ESPContext, SecurityAssociation
 
         registry = ContextRegistry.make(ESPContext(SecurityAssociation(spi=0x77)))
         self.assertMessage('ESP: no security association for SPI 0x00000099; '

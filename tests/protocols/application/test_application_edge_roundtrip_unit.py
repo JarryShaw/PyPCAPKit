@@ -24,9 +24,9 @@ from tests.protocols._edge_roundtrip import Case, MakeCase
 #: cases for the application layer, each written out by hand.
 __tier__ = 'ALL'
 
-FTP = 'pcapkit.protocols.application.ftp:FTP'
-HTTP1 = 'pcapkit.protocols.application.httpv1:HTTPv1'
-HTTP2 = 'pcapkit.protocols.application.httpv2:HTTPv2'
+FTP = 'pcapkit.protocols.application.ftp.protocol:FTP'
+HTTP1 = 'pcapkit.protocols.application.httpv1.protocol:HTTPv1'
+HTTP2 = 'pcapkit.protocols.application.httpv2.protocol:HTTPv2'
 
 
 def frame(type_: int, flags: int, sid: int, payload: bytes) -> bytes:

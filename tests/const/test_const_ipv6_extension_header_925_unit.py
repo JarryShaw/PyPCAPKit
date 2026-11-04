@@ -12,7 +12,7 @@ pins the crawler to the authoritative registry, and its
 file is exactly what the crawler produces from the fixture the issue's
 own investigation fetched.
 
-:meth:`pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer` resolves
+:meth:`pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer` resolves
 ``Enum_ExtensionHeader(proto)`` at the top of its extension-header walk loop,
 wrapped in ``try/except ValueError: break``. ``tests.protocols.internet
 .test_ipv6_ext_unit.IPv6ExtUnitTests
@@ -89,8 +89,8 @@ class ExtensionHeaderHasNoBitEmuTests(unittest.TestCase):
         # packet ends up dispatched by TransType instead of being walked as
         # an extension-header chain, and still parses without error.
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _ipv6_bytes(int(TransType.BIT_EMU), b'\x11\x01' + b'\x00' * 14)
         ipv6 = IPv6(io.BytesIO(raw), len(raw))

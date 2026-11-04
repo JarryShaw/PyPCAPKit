@@ -27,7 +27,7 @@ generator = globals()['generator']  # type: Any
 
 
 def _radiotap_field_registry() -> 'Any':
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
     return Radiotap.__field__
 
 
@@ -82,7 +82,7 @@ def _radiotap_field_overrides() -> 'dict[Any, dict[str, Any]]':
 
 def _radiotap_field_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.const.radiotap.field_type import FieldType as Enum_FieldType
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
     if code < Enum_FieldType.TLV_fields_in_radiotap:
         return Radiotap(present=(1 << code,), fields=[(code, dict(kwargs))])
@@ -91,7 +91,7 @@ def _radiotap_field_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _radiotap_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
     return Radiotap(octets, len(octets))
 
 
@@ -100,7 +100,7 @@ def _radiotap_field_extract(parsed: 'Any') -> 'Any':
 
 
 def _radiotap_field_rebuild(collection: 'Any') -> 'Any':
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
     present, decoded = collection
     return Radiotap(present=present, fields=decoded)

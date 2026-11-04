@@ -32,7 +32,7 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
 
     The MP_JOIN makers dispatch on ``self._flags`` to pick between the three layouts of
     :rfc:`8684` section 3.2, and :meth:`TCP.make
-    <pcapkit.protocols.transport.tcp.TCP.make>` is what assigns that attribute -- as an
+    <pcapkit.protocols.transport.tcp.protocol.TCP.make>` is what assigns that attribute -- as an
     :class:`aenum.IntFlag` member, resolved *before* ``_make_tcp_options`` runs.
 
     The cases go through ``TCP()`` rather than writing a plain :obj:`set` onto the attribute
@@ -48,7 +48,7 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
     resolved from these very arguments rather than left over from an earlier call.
 
     Args:
-        opt: A ``pcapkit.protocols.data.transport.tcp`` option object, for the data-model
+        opt: A ``pcapkit.protocols.transport.tcp.data`` option object, for the data-model
             construction form. Passed as an
             :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, which is the shape
             ``_make_tcp_options`` takes it in; ``subtype`` then comes from the object.
@@ -63,7 +63,7 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
     """
     from pcapkit.const.tcp.option import Option
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     options = ([(Option.Multipath_TCP, kwargs)] if opt is None else
                OrderedMultiDict([(Option.Multipath_TCP, opt)]))
@@ -78,8 +78,8 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_udp_index_make_and_make_data_preserve_core_fields(self) -> None:
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.schema import UDP as Schema_UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         udp = object.__new__(UDP)
         schema = UDP.make(udp, srcport=53, dstport=5353, checksum=b'\x12\x34', payload=b'data')
@@ -123,7 +123,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
     def test_tcp_index_and_make_data_preserve_flags_and_ports(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         flags = DummyData(ns=False, cwr=False, ece=False, urg=False, ack=True, psh=True, rst=False, syn=False, fin=True,
                           reserved=0)
@@ -162,9 +162,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.transport import tcp as tcp_data
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp import data as tcp_data
+        from pcapkit.protocols.transport.tcp import schema as tcp_schema
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         proto = object.__new__(TCP)
         proto._info = DummyData(
@@ -269,7 +269,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             )
 
         try:
-            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+            with mock.patch('pcapkit.protocols.transport.tcp.protocol.warn') as warn:
                 TCP.register_option(custom_option, (parse_option, make_option))
                 TCP.register_mp_option(custom_mp, (parse_mp, make_mp))
             warn.assert_not_called()
@@ -321,11 +321,11 @@ class TCPUDPUnitTests(unittest.TestCase):
 
     def test_tcp_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         original = TCP.__dict__['__option__'][Option.End_of_Option_List]
         try:
-            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+            with mock.patch('pcapkit.protocols.transport.tcp.protocol.warn') as warn:
                 TCP.register_option(Option.End_of_Option_List, 'nop')
             warn.assert_called_once()
             self.assertEqual(TCP.__dict__['__option__'][Option.End_of_Option_List], 'nop')
@@ -334,11 +334,11 @@ class TCPUDPUnitTests(unittest.TestCase):
 
     def test_tcp_register_mptcp_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         original = TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE]
         try:
-            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+            with mock.patch('pcapkit.protocols.transport.tcp.protocol.warn') as warn:
                 TCP.register_mp_option(MPTCPOption.MP_CAPABLE, 'join')
             warn.assert_called_once()
             self.assertEqual(TCP.__dict__['__mp_option__'][MPTCPOption.MP_CAPABLE], 'join')
@@ -347,7 +347,7 @@ class TCPUDPUnitTests(unittest.TestCase):
 
     def test_tcp_option_constructors_cover_common_branches(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)
@@ -415,8 +415,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.transport import tcp as tcp_data
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp import data as tcp_data
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)
@@ -678,7 +678,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.checksum import Checksum
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.schema.transport.tcp import (
+        from pcapkit.protocols.transport.tcp.schema import (
             AlternateChecksumData,
             AlternateChecksumRequest,
             Authentication,
@@ -703,7 +703,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             UserTimeout,
             WindowScale,
         )
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)
@@ -879,7 +879,7 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_tcp_mptcp_constructors_cover_flag_branches(self) -> None:
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)
@@ -953,7 +953,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.schema.transport.tcp import (
+        from pcapkit.protocols.transport.tcp.schema import (
             MPTCPAddAddress,
             MPTCPCapable,
             MPTCPDSS,
@@ -966,7 +966,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             MPTCPRemoveAddress,
             MPTCPUnknown,
         )
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(TCP)
@@ -1184,7 +1184,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.fields.numbers import PortEnumField
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
+        from pcapkit.protocols.transport.tcp import schema as tcp_schema
         from pcapkit.utilities.exceptions import FieldError
 
         tcp_field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
@@ -1268,19 +1268,19 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_construction_accepts_bare_integer_ports(self) -> None:
         """``TCP(srcport=80, dstport=443)`` is the documented construction path.
 
-        :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` advertises
+        :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` advertises
         ``Enum_AppType | int``. Guards against the schema field converting an
         :obj:`int` only on its way out to :obj:`bytes`, which leaves the schema
         attribute an :obj:`int` -- and :meth:`TCP.read
-        <pcapkit.protocols.transport.tcp.TCP.read>`, which reads ``srcport.port``
+        <pcapkit.protocols.transport.tcp.protocol.TCP.read>`, which reads ``srcport.port``
         to pick the next layer, then raises ``AttributeError: 'int' object has no
         attribute 'port'``. UDP is exposed identically; SCTP is not, only because
         it keys its next layer on the DATA chunk's PPID and never reads ``.port``.
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         tcp = TCP(srcport=80, dstport=443)
         self.assertEqual(bytes(tcp)[:4], b'\x00\x50\x01\xbb')
@@ -1315,7 +1315,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         import struct
 
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         # data offset 6: a cookie request, then two no-operations
         wire = struct.pack('!HHIIBBHHH', 1, 2, 0, 0, 6 << 4, 0x10, 0xFFFF, 0, 0) \
@@ -1364,7 +1364,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         import struct
 
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -1404,14 +1404,14 @@ class TCPUDPUnitTests(unittest.TestCase):
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such segment into an error.
 
-        :class:`~pcapkit.protocols.transport.tcp.TCP` itself refuses the segment
+        :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` itself refuses the segment
         with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 16
         missing octets would otherwise be rebuilt as zeros (#1404).
 
         """
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -1444,7 +1444,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         <pcapkit.corekit.fields.collections.OptionField.unpack>` refuses the
         option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
         instead (#1325). Inside an IPv4 datagram the segment is kept as the
-        octets captured, a :class:`~pcapkit.protocols.misc.raw.Raw` payload
+        octets captured, a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload
         carrying that error, and rebuilds byte for byte.
 
         """
@@ -1452,9 +1452,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         import warnings
 
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -1487,7 +1487,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         The reproduction from #425: one segment carrying option kind 156, which
         nothing registers. ``__option__`` is a
         :class:`collections.defaultdict` on a class attribute shared by every
-        :class:`~pcapkit.protocols.transport.tcp.TCP` instance in the process, so
+        :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` instance in the process, so
         a ``__option__[kind]`` read inserts the kind it misses -- and the value
         it inserts is ``'donone'``, exactly what the default factory returns
         anyway. The entry buys nothing and costs a
@@ -1504,7 +1504,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.option import Option
         from pcapkit.foundation.registry.protocols import register_tcp_option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         # ports, seq, ack, data offset 6 words / flags, window, checksum, urgent
         # pointer, then one 4-octet option of kind 156.
@@ -1532,7 +1532,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             TCP(io.BytesIO(packet), len(packet))
             self.assertEqual(set(registry), before)
 
-            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+            with mock.patch('pcapkit.protocols.transport.tcp.protocol.warn') as warn:
                 register_tcp_option(Option(156), 'donone')
             self.assertEqual(warn.call_count, 0)
         finally:
@@ -1543,19 +1543,19 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         The parse path cannot reach it with an unregistered subtype: the schema
         layer resolves an unknown subtype to
-        :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPUnknown`, whose
+        :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPUnknown`, whose
         ``data`` field sizes itself from ``pkt['length']`` -- a key the nested
         packet context does not carry -- so it raises before
-        :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp` ever looks the
+        :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_mp` ever looks the
         subtype up. Construction reaches the sibling read site in
-        :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp`, which is open to
+        :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp`, which is open to
         the identical defect.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.foundation.registry.protocols import register_tcp_mp_option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         registry = TCP.__dict__['__mp_option__']
         before = set(registry)
@@ -1566,7 +1566,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             self.assertEqual(schema.test['subtype'], MPTCPOption(0xF))
             self.assertEqual(set(registry), before)
 
-            with mock.patch('pcapkit.protocols.transport.tcp.warn') as warn:
+            with mock.patch('pcapkit.protocols.transport.tcp.protocol.warn') as warn:
                 register_tcp_mp_option(MPTCPOption(0xF), 'unknown')
             self.assertEqual(warn.call_count, 0)
         finally:
@@ -1575,7 +1575,7 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_a_flagless_segment_seeds_its_connection_flags_as_an_enum(self) -> None:
         """A segment whose flags octet is all zero still parses to an ``Enum_Flags``. C.f. #616.
 
-        Guards against :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>`
+        Guards against :meth:`TCP.read <pcapkit.protocols.transport.tcp.protocol.TCP.read>`
         seeding its flag accumulator with ``cast('Enum_Flags', 0)``.
         :func:`typing.cast` is a runtime no-op -- it returns its second argument
         unchanged -- so the accumulator would begin life as the plain :class:`int`
@@ -1591,7 +1591,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         :data:`True`, so ``assertEqual(proto.connection, 0)`` passes with either seed
         and cannot discriminate -- and neither can a membership test alone, on
         the flagful rows. Hence ``assertIs(type(...), Enum_Flags)``, which is what the
-        :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` property advertises
+        :attr:`~pcapkit.protocols.transport.tcp.protocol.TCP.connection` property advertises
         it returns.
 
         The last block pins the consequence rather than the type. ``_read_mptcp_join``
@@ -1599,7 +1599,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         ``self._flags`` for SYN and ACK, and falls through to the library's own
         ``ProtocolError`` when neither is set. On an :obj:`int` it would die on a bare
         :exc:`TypeError` at the flag test instead. That branch is not reachable from
-        a caller -- :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector`
+        a caller -- :func:`~pcapkit.protocols.transport.tcp.schema.mptcp_data_selector`
         rejects a flagless MP_JOIN with a ``FieldError`` before the dispatcher runs --
         so the defect is latent, but latent only by virtue of a guard in a different
         file.
@@ -1627,7 +1627,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.dumpkit.common import make_dumper
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import ProtocolError
 
         def segment(flags_octet: 'int') -> 'bytes':

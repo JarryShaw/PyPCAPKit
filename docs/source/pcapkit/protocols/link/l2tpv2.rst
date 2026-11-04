@@ -2,13 +2,14 @@ L2TPv2 - Layer Two Tunnelling Protocol Version 2
 ================================================
 
 .. module:: pcapkit.protocols.link.l2tpv2
+.. module:: pcapkit.protocols.link.l2tpv2.protocol
 
-:mod:`pcapkit.protocols.link.l2tpv2` contains
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` only, which implements the extractor
+:mod:`pcapkit.protocols.link.l2tpv2.protocol` contains
+:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` only, which implements the extractor
 for the Layer Two Tunnelling Protocol version 2 (L2TPv2) [*]_ as specified by
 :rfc:`2661` -- a 16-bit tunnel ID and a 16-bit session ID, with the version nibble
 reading ``2``. It is dispatched from
-:attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` at port
+:attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>` at port
 1701. Its structure is described as below:
 
 .. table::
@@ -52,12 +53,12 @@ reading ``2``. It is dispatched from
 .. note::
 
    The parsed datagram appears under ``l2tp``, not ``l2tpv2``:
-   :attr:`~pcapkit.protocols.link.l2tp.L2TP.info_name` is declared on the
+   :attr:`~pcapkit.protocols.link.l2tp.protocol.L2TP.info_name` is declared on the
    version-agnostic base so that a consumer finds the data at the same key
    whichever version was on the wire. The version is reported by
-   :attr:`~pcapkit.protocols.link.l2tpv2.L2TPv2.alias` instead.
+   :attr:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.alias` instead.
 
-.. autoclass:: pcapkit.protocols.link.l2tpv2.L2TPv2
+.. autoclass:: pcapkit.protocols.link.l2tpv2.protocol.L2TPv2
    :no-members:
    :show-inheritance:
 
@@ -78,34 +79,44 @@ reading ``2``. It is dispatched from
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.l2tp
+.. module:: pcapkit.protocols.link.l2tp.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.l2tp.L2TP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.link.l2tp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.link.l2tp.schema.L2TP
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.link.l2tp.FlagsType
+.. autoclass:: pcapkit.protocols.link.l2tp.schema.FlagsType
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.link.l2tp.l2tp_payload_length
+.. autofunction:: pcapkit.protocols.link.l2tp.schema.l2tp_payload_length
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.l2tp
+.. module:: pcapkit.protocols.link.l2tp.data
 
-.. autoclass:: pcapkit.protocols.data.link.l2tp.L2TP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.link.l2tp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.link.l2tp.data.L2TP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.link.l2tp.Flags
+.. autoclass:: pcapkit.protocols.link.l2tp.data.Flags
    :members:
    :show-inheritance:
 

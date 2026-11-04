@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """HIP's ``alias`` is readable while the header is still being decoded.
 
-GitHub issue #1184: :attr:`HIP.alias <pcapkit.protocols.internet.hip.HIP.alias>`
+GitHub issue #1184: :attr:`HIP.alias <pcapkit.protocols.internet.hip.protocol.HIP.alias>`
 read ``self._info.version``. Outside an IPv6 extension chain,
-:meth:`HIP.read <pcapkit.protocols.internet.hip.HIP.read>` ends in
+:meth:`HIP.read <pcapkit.protocols.internet.hip.protocol.HIP.read>` ends in
 ``_decode_next_layer``, which reads ``alias`` for the protocol chain, but
 ``_info`` is assigned only once ``read`` has returned. So parsing or
 constructing a standalone HIP header, and
@@ -46,13 +46,13 @@ class TestHIPFromDataAlias(unittest.TestCase):
         return [(Parameter.R1_COUNTER, {'counter': 0x0123456789abcdef})]
 
     def _octets(self, version: 'int') -> 'bytes':
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(parameters=self._parameters(), extension=True,
                    version=version, **HIP_BASE).data
 
     def test_construct_standalone_header(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
@@ -61,7 +61,7 @@ class TestHIPFromDataAlias(unittest.TestCase):
                 self.assertEqual(proto.data, self._octets(version))
 
     def test_parse_standalone_header(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):
@@ -71,7 +71,7 @@ class TestHIPFromDataAlias(unittest.TestCase):
                 self.assertEqual(str(proto.protochain).split(':')[0], f'HIPv{version}')
 
     def test_from_data_rebuilds_extension_header_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for version in (1, 2):
             with self.subTest(version=version):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """An IPv4 packet with no captured payload octets carries no payload layer.
 
-GitHub issue #1167. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+GitHub issue #1167. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>`
 handed the next layer the length the header declared even when the capture held
 none of its octets, so its UDP layer was parsed from an empty stream into an
 all-zero header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
 rebuilt those 8 octets as if they had been on the wire. Such a payload is a
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload`. ``test.pcapng`` frame 3, cut
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`. ``test.pcapng`` frame 3, cut
 inside the IPv4 header itself (18 of 20 octets), is kept as raw octets
 (#1170).
 
@@ -37,8 +37,8 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
 
     def test_capture_cut_inside_the_header(self) -> None:
         from pcapkit.interface import extract
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         extractor = extract(fin=sample_path('test.pcapng'), fout='/tmp/out', format='tree',
                             store=True, nofile=True)
@@ -53,16 +53,16 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
         self.assertEqual(Ethernet.from_data(parsed.info).data, parsed.data)
 
     def test_header_without_payload_octets(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         parsed = IPv4(HEADER, len(HEADER))
         self.assertIsInstance(parsed.payload, NoPayload)
         self.assertEqual(IPv4.from_data(parsed.info).data, HEADER)
 
     def test_captured_payload_is_still_parsed(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         segment = bytes.fromhex('0035003500200000')
         parsed = IPv4(HEADER + segment, len(HEADER + segment))

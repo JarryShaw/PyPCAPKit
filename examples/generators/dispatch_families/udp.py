@@ -36,7 +36,7 @@ _PORT_PAYLOAD = {
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.transport.udp import UDP
+    from pcapkit.protocols.transport.udp.protocol import UDP
     return UDP.__proto__
 
 
@@ -56,8 +56,8 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
-    'udp/80': ('pcapkit.protocols.application.http', 'HTTP'),
-    'udp/1701': ('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
-    'udp/5684': ('pcapkit.protocols.application.dtls', 'DTLS'),
-    'udp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
+    'udp/80': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
+    'udp/1701': ('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
+    'udp/5684': ('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
+    'udp/8080': ('pcapkit.protocols.application.http.protocol', 'HTTP'),
 }

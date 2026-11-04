@@ -35,8 +35,8 @@ DST = ipaddress.IPv6Address('2001:db8::2')
 
 
 def _classes() -> 'dict[str, tuple[type, int, str]]':
-    from pcapkit.protocols.internet.hopopt import HOPOPT
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
     return {'HOPOPT': (HOPOPT, 0, 'hopopt'), 'IPv6_Opts': (IPv6_Opts, 60, 'opts')}
 
 
@@ -56,7 +56,7 @@ class TestMPLSeedRebuild(unittest.TestCase):
                     self.assertEqual(cls.from_data(parsed.info).data, octets)
 
     def test_source_address_seed_rebuilds_inside_ipv6(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name, (cls, nh, key) in _classes().items():
             with self.subTest(proto=name):

@@ -140,7 +140,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def assert_packs_as_captured(self, schema: 'object', raw: bytes, kept: int) -> None:
         """``schema`` records the cut in its last item's padding and packs ``raw`` back."""
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         assert isinstance(schema, SCTP)
         self.assertEqual(_last_item(schema).__dict__['__short_read__'], ('padding', kept))
@@ -154,7 +154,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
         self.assertEqual(schema.pack(), raw[:4] + b'\x55\x66\x77\x88' + raw[8:])
 
     def test_bytes_cut_inside_the_padding(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         for name, width, kept, raw in _cases():
             for given in (None, len(raw)):
@@ -167,7 +167,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
                     self.assert_packs_as_captured(schema, raw, kept)
 
     def test_stream_cut_inside_the_padding(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         for name, width, kept, raw in _cases():
             with self.subTest(case=name, width=width, kept=kept, length=None):
@@ -188,7 +188,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def test_chunk_schema_on_its_own(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk as Enum_Chunk
-        from pcapkit.protocols.schema.transport.sctp import Chunk
+        from pcapkit.protocols.transport.sctp.schema import Chunk
 
         for width in (1, 2, 3):
             for kind, chunk in _final(width).items():
@@ -207,7 +207,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
     def test_parameter_and_cause_schemas_on_their_own(self) -> None:
         from pcapkit.const.sctp.cause_code import CauseCode as Enum_CauseCode
         from pcapkit.const.sctp.parameter import Parameter as Enum_Parameter
-        from pcapkit.protocols.schema.transport.sctp import ErrorCause, Parameter
+        from pcapkit.protocols.transport.sctp.schema import ErrorCause, Parameter
 
         bases = {'Parameter': (Parameter, Enum_Parameter), 'ErrorCause': (ErrorCause, Enum_CauseCode)}
         for width in (1, 2, 3):
@@ -224,7 +224,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def test_parsed_header_packs_as_captured(self) -> None:
         # the protocol's own info is as before: the cut is the chunk's, not the packet's
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, width, kept, raw in _cases():
             with self.subTest(case=name, width=width, kept=kept):
@@ -238,9 +238,9 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def test_envelope_declaring_the_octets(self) -> None:
         # an IPv4 Total Length or IPv6 Payload Length that ends where the capture does
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for name, width, kept, raw in _cases():
             for cls, packet in ((IPv4, wire.ipv4(raw, proto=132)), (IPv6, wire.ipv6(raw, nxt=132))):
@@ -254,7 +254,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def test_an_item_running_past_its_chunk_is_refused(self) -> None:
         # only a cut inside the padding is kept: a Length past the chunk is an overrun (#1325)
-        from pcapkit.protocols.schema.transport.sctp import SCTP, ErrorChunk, INITChunk
+        from pcapkit.protocols.transport.sctp.schema import SCTP, ErrorChunk, INITChunk
         from pcapkit.utilities.exceptions import ProtocolError
 
         # a Host Name Address parameter and an Unrecognized Chunk Type cause each
@@ -274,7 +274,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
 
     def test_a_header_cut_keeps_its_own_record(self) -> None:
         # a longer declared length must not displace the field the data ended inside
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         names = ('srcport', 'dstport', 'vtag', 'chksum')
         widths = (2, 2, 4, 4)
@@ -290,8 +290,8 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
                     self.assertEqual(schema.pack(), raw)
 
     def test_whole_padding_is_the_control(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
-        from pcapkit.protocols.transport.sctp import SCTP as Protocol_SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP as Protocol_SCTP
 
         for name, width, whole in _wholes():
             for given in (None, len(whole)):
@@ -306,7 +306,7 @@ class SCTPSchemaPaddingCutTests(unittest.TestCase):
                 self.assertNotIn('__short_read__', Protocol_SCTP(whole, len(whole)).info)
 
     def test_issue_2680_repro(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP, DATAChunk
+        from pcapkit.protocols.transport.sctp.schema import SCTP, DATAChunk
 
         data = struct.pack('!BBHIHHI', 0, 3, 21, 7, 1, 2, 0) + b'abcde'
         raw = (struct.pack('!HHI', 5000, 5001, 1) + bytes(4) + data + bytes(3))[:34]

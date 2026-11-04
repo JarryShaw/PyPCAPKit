@@ -5,7 +5,7 @@ A line of a TLS or WireGuard key log that does not parse -- an unknown label,
 fields that are not hexadecimal, a garbage line, or the first octets of an entry
 cut inside the block's padding -- raises a
 :class:`~pcapkit.utilities.warnings.ProtocolWarning` from
-:meth:`TLSKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`
+:meth:`TLSKeyLog.post_process <pcapkit.protocols.misc.pcapng.schema.TLSKeyLog.post_process>`
 rather than a :exc:`~pcapkit.utilities.exceptions.FieldValueError`, which would
 end the whole extraction. The line is kept as captured in the log text and leaves
 no trace in the entries, the well-formed entries around it are kept, and the
@@ -158,7 +158,7 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
         self.assertRebuildsQuietly(octets)
 
     def test_malformed_wireguard_line(self) -> None:
-        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.protocol import WireGuardKeyLabel
 
         for line, label in WG_MALFORMED:
             for secrets in (line + WG_LINE, WG_LINE + line + WG_LINE):
@@ -176,7 +176,7 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
     def test_malformed_line_leaves_no_empty_bucket(self) -> None:
         """A line with a known label but fields that do not decode adds no bucket for that label."""
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, WireGuardKeyLog
+        from pcapkit.protocols.misc.pcapng.schema import TLSKeyLog, WireGuardKeyLog
 
         for secrets in (b'CLIENT_RANDOM zz yy\n', b'CLIENT_RANDOM zz yy\n' + TLS_LINE2,
                         b'CLIENT_RANDOM ' + b'ab' * 32 + b' zz\n'):

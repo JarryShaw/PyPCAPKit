@@ -369,7 +369,7 @@ class DecoratorTests(unittest.TestCase):
         """``post_process`` need not return a schema, so the flag reset is guarded.
 
         An implementation may hand back a nested schema instead of ``self`` --
-        ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` returns
+        ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` returns
         ``self.data`` -- and the stand-ins above return the packet mapping.
         Neither may raise from the reset.
 

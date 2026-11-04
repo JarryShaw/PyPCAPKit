@@ -2,11 +2,11 @@
 """A GRE header the data ends inside reads ``TRUNCATED``, not ``INVALID``.
 
 GitHub issue #2689: built directly on octets that end inside its header, a
-:class:`~pcapkit.protocols.link.gre.GRE` layer reads the fields the data never held as
+:class:`~pcapkit.protocols.link.gre.protocol.GRE` layer reads the fields the data never held as
 zeros, and verifying that zero-filled checksum would read ``INVALID`` with a
 ``ChecksumWarning``. The checksum covers the whole message (:rfc:`2784#section-2.5`),
 so a header cut anywhere, in the Checksum or after it, leaves part of what it covers
-uncaptured, and :meth:`GRE.read <pcapkit.protocols.link.gre.GRE.read>` reads the
+uncaptured, and :meth:`GRE.read <pcapkit.protocols.link.gre.protocol.GRE.read>` reads the
 schema's own ``__short_read__`` record as ``TRUNCATED``. A whole header is verified.
 
 The messages are built here; this module is unit-tier and reads no capture file.
@@ -65,7 +65,7 @@ class GREHeaderCutTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning
 

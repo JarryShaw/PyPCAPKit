@@ -94,7 +94,7 @@ class GuardedNameTests(unittest.TestCase):
         whole constructor, and Sphinx renders ``*args: '_VT'`` from the string.
 
         """
-        from pcapkit.protocols.schema import schema  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols import schema  # pylint: disable=import-outside-toplevel
 
         namespace = vars(schema)
         before = set(namespace)

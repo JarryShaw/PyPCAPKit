@@ -6,7 +6,7 @@ PCAP-NG's MAC and EUI address makers passed a :obj:`bool`, :class:`int`,
 bare :class:`TypeError`. Anything not a :class:`str`, :class:`bytes` or
 :class:`bytearray`, a :obj:`bool` included, raises
 :class:`~pcapkit.utilities.exceptions.ProtocolError`. Both addresses go through
-:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr>`,
+:meth:`PCAPNG._make_mac_addr <pcapkit.protocols.misc.pcapng.protocol.PCAPNG._make_mac_addr>`,
 the EUI one with ``size=8`` (#2614).
 Each case reaches the maker through the ``if_MACaddr`` or ``if_EUIaddr``
 option of an Interface Description Block.
@@ -33,7 +33,7 @@ class TestPCAPNGAddressType(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         return PCAPNG(num=2, sct=1, ctx=self._context(), type=BlockType.Interface_Description_Block,
                       block={'linktype': LinkType.ETHERNET, 'snaplen': 65535,

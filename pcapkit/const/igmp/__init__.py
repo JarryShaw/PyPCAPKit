@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.igmp.IGMP` Constant Enumerations
-==========================================================================
+""":class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` Constant Enumerations
+===================================================================================
 
 .. module:: pcapkit.const.igmp
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.igmp.IGMP` implementations. Available
+:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` implementations. Available
 enumerations include:
 
 .. list-table::

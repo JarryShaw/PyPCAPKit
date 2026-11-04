@@ -70,7 +70,7 @@ class TestCutExtensionHeader(unittest.TestCase):
 
     def _dissected(self, protocol: 'int', data: 'bytes') -> 'object':
         """The layer pcapkit's own IPv4 dissection makes of ``data``."""
-        from pcapkit.protocols.internet.ipv4 import IPv4  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4  # pylint: disable=import-outside-toplevel
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -103,7 +103,7 @@ class TestCutExtensionHeader(unittest.TestCase):
 
     def test_ipv4_dissection_agrees(self) -> None:
         """pcapkit's own IPv4 dissection keeps the same cut headers, with the same length."""
-        from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.misc.raw.protocol import Raw  # pylint: disable=import-outside-toplevel
 
         for name, (protocol, _, whole) in HEADERS.items():
             for cut in range(1, DECLARED):

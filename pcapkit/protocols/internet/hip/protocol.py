@@ -1,0 +1,5731 @@
+# -*- coding: utf-8 -*-
+"""HIP - Host Identity Protocol
+==================================
+
+.. module:: pcapkit.protocols.internet.hip.protocol
+
+:mod:`pcapkit.protocols.internet.hip.protocol` contains
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,
+which implements the extractor for Host Identity
+Protocol (HIP) [*]_, whose structure is described
+as below:
+
+======= ========= ====================== ==================================
+Octets      Bits        Name                    Description
+======= ========= ====================== ==================================
+  0           0   ``hip.next``              Next Header
+  1           8   ``hip.length``            Header Length
+  2          16   ``hip.packet_fixed``      Fixed Bit (``0``)
+  2          17   ``hip.type``              Packet Type
+  3          24   ``hip.version``           Version
+  3          28   ``hip.reserved``          Reserved
+  3          31   ``hip.version_fixed``     Fixed Bit (``1``)
+  4          32   ``hip.chksum``            Checksum
+  6          48   ``hip.control``           Controls
+  8          64   ``hip.shit``              Sender's Host Identity Tag
+  24        192   ``hip.rhit``              Receiver's Host Identity Tag
+  40        320   ``hip.parameters``        HIP Parameters
+======= ========= ====================== ==================================
+
+.. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol
+
+"""
+import collections
+import datetime
+import ipaddress
+import math
+from datetime import timedelta
+from typing import TYPE_CHECKING, cast, overload
+
+from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
+from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
+from pcapkit.const.hip.di import DITypes as Enum_DITypes
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
+from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
+from pcapkit.const.hip.group import Group as Enum_Group
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
+from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
+from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
+from pcapkit.const.hip.packet import Packet as Enum_Packet
+from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration import Registration as Enum_Registration
+from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
+from pcapkit.const.hip.suite import Suite as Enum_Suite
+from pcapkit.const.hip.transport import Transport as Enum_Transport
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.schema.ipaddress import parse_ip_address
+from pcapkit.corekit.schema.padding import pad_length
+from pcapkit.protocols.internet.hip.data import HIP as Data_HIP
+from pcapkit.protocols.internet.hip.data import AckDataParameter as Data_AckDataParameter
+from pcapkit.protocols.internet.hip.data import ACKParameter as Data_ACKParameter
+from pcapkit.protocols.internet.hip.data import CertParameter as Data_CertParameter
+from pcapkit.protocols.internet.hip.data import Control as Data_Control
+from pcapkit.protocols.internet.hip.data import DHGroupListParameter as Data_DHGroupListParameter
+from pcapkit.protocols.internet.hip.data import \
+    DiffieHellmanParameter as Data_DiffieHellmanParameter
+from pcapkit.protocols.internet.hip.data import \
+    EchoRequestSignedParameter as Data_EchoRequestSignedParameter
+from pcapkit.protocols.internet.hip.data import \
+    EchoRequestUnsignedParameter as Data_EchoRequestUnsignedParameter
+from pcapkit.protocols.internet.hip.data import \
+    EchoResponseSignedParameter as Data_EchoResponseSignedParameter
+from pcapkit.protocols.internet.hip.data import \
+    EchoResponseUnsignedParameter as Data_EchoResponseUnsignedParameter
+from pcapkit.protocols.internet.hip.data import EncryptedParameter as Data_EncryptedParameter
+from pcapkit.protocols.internet.hip.data import ESPInfoParameter as Data_ESPInfoParameter
+from pcapkit.protocols.internet.hip.data import ESPTransformParameter as Data_ESPTransformParameter
+from pcapkit.protocols.internet.hip.data import Flags as Data_Flags
+from pcapkit.protocols.internet.hip.data import FromParameter as Data_FromParameter
+from pcapkit.protocols.internet.hip.data import HIPCipherParameter as Data_HIPCipherParameter
+from pcapkit.protocols.internet.hip.data import HIPMAC2Parameter as Data_HIPMAC2Parameter
+from pcapkit.protocols.internet.hip.data import HIPMACParameter as Data_HIPMACParameter
+from pcapkit.protocols.internet.hip.data import \
+    HIPSignature2Parameter as Data_HIPSignature2Parameter
+from pcapkit.protocols.internet.hip.data import HIPSignatureParameter as Data_HIPSignatureParameter
+from pcapkit.protocols.internet.hip.data import HIPTransformParameter as Data_HIPTransformParameter
+from pcapkit.protocols.internet.hip.data import \
+    HIPTransportModeParameter as Data_HIPTransportModeParameter
+from pcapkit.protocols.internet.hip.data import HITSuiteListParameter as Data_HITSuiteListParameter
+from pcapkit.protocols.internet.hip.data import HostIdentity as Data_HostIdentity
+from pcapkit.protocols.internet.hip.data import HostIDParameter as Data_HostIDParameter
+from pcapkit.protocols.internet.hip.data import Lifetime as Data_Lifetime
+from pcapkit.protocols.internet.hip.data import Locator as Data_Locator
+from pcapkit.protocols.internet.hip.data import LocatorData as Data_LocatorData
+from pcapkit.protocols.internet.hip.data import LocatorSetParameter as Data_LocatorSetParameter
+from pcapkit.protocols.internet.hip.data import \
+    NATTraversalModeParameter as Data_NATTraversalModeParameter
+from pcapkit.protocols.internet.hip.data import NotificationParameter as Data_NotificationParameter
+from pcapkit.protocols.internet.hip.data import OverlayIDParameter as Data_OverlayIDParameter
+from pcapkit.protocols.internet.hip.data import OverlayTTLParameter as Data_OverlayTTLParameter
+from pcapkit.protocols.internet.hip.data import Parameter as Data_Parameter
+from pcapkit.protocols.internet.hip.data import PayloadMICParameter as Data_PayloadMICParameter
+from pcapkit.protocols.internet.hip.data import PuzzleParameter as Data_PuzzleParameter
+from pcapkit.protocols.internet.hip.data import R1CounterParameter as Data_R1CounterParameter
+from pcapkit.protocols.internet.hip.data import RegFailedParameter as Data_RegFailedParameter
+from pcapkit.protocols.internet.hip.data import RegFromParameter as Data_RegFromParameter
+from pcapkit.protocols.internet.hip.data import RegInfoParameter as Data_RegInfoParameter
+from pcapkit.protocols.internet.hip.data import RegRequestParameter as Data_RegRequestParameter
+from pcapkit.protocols.internet.hip.data import RegResponseParameter as Data_RegResponseParameter
+from pcapkit.protocols.internet.hip.data import RelayFromParameter as Data_RelayFromParameter
+from pcapkit.protocols.internet.hip.data import RelayHMACParameter as Data_RelayHMACParameter
+from pcapkit.protocols.internet.hip.data import RelayToParameter as Data_RelayToParameter
+from pcapkit.protocols.internet.hip.data import RouteDstParameter as Data_RouteDstParameter
+from pcapkit.protocols.internet.hip.data import RouteViaParameter as Data_RouteViaParameter
+from pcapkit.protocols.internet.hip.data import RVSHMACParameter as Data_RVSHMACParameter
+from pcapkit.protocols.internet.hip.data import SeqDataParameter as Data_SeqDataParameter
+from pcapkit.protocols.internet.hip.data import SEQParameter as Data_SEQParameter
+from pcapkit.protocols.internet.hip.data import SolutionParameter as Data_SolutionParameter
+from pcapkit.protocols.internet.hip.data import \
+    TransactionIDParameter as Data_TransactionIDParameter
+from pcapkit.protocols.internet.hip.data import \
+    TransactionPacingParameter as Data_TransactionPacingParameter
+from pcapkit.protocols.internet.hip.data import \
+    TransportFormatListParameter as Data_TransportFormatListParameter
+from pcapkit.protocols.internet.hip.data import UnassignedParameter as Data_UnassignedParameter
+from pcapkit.protocols.internet.hip.data import ViaRVSParameter as Data_ViaRVSParameter
+from pcapkit.protocols.internet.hip.schema import HIP as Schema_HIP
+from pcapkit.protocols.internet.hip.schema import AckDataParameter as Schema_AckDataParameter
+from pcapkit.protocols.internet.hip.schema import ACKParameter as Schema_ACKParameter
+from pcapkit.protocols.internet.hip.schema import CertParameter as Schema_CertParameter
+from pcapkit.protocols.internet.hip.schema import \
+    DHGroupListParameter as Schema_DHGroupListParameter
+from pcapkit.protocols.internet.hip.schema import \
+    DiffieHellmanParameter as Schema_DiffieHellmanParameter
+from pcapkit.protocols.internet.hip.schema import \
+    ECDSACurveHostIdentity as Schema_ECDSACurveHostIdentity
+from pcapkit.protocols.internet.hip.schema import \
+    ECDSALowCurveHostIdentity as Schema_ECDSALowCurveHostIdentity
+from pcapkit.protocols.internet.hip.schema import \
+    EchoRequestSignedParameter as Schema_EchoRequestSignedParameter
+from pcapkit.protocols.internet.hip.schema import \
+    EchoRequestUnsignedParameter as Schema_EchoRequestUnsignedParameter
+from pcapkit.protocols.internet.hip.schema import \
+    EchoResponseSignedParameter as Schema_EchoResponseSignedParameter
+from pcapkit.protocols.internet.hip.schema import \
+    EchoResponseUnsignedParameter as Schema_EchoResponseUnsignedParameter
+from pcapkit.protocols.internet.hip.schema import \
+    EdDSACurveHostIdentity as Schema_EdDSACurveHostIdentity
+from pcapkit.protocols.internet.hip.schema import EncryptedParameter as Schema_EncryptedParameter
+from pcapkit.protocols.internet.hip.schema import ESPInfoParameter as Schema_ESPInfoParameter
+from pcapkit.protocols.internet.hip.schema import \
+    ESPTransformParameter as Schema_ESPTransformParameter
+from pcapkit.protocols.internet.hip.schema import FromParameter as Schema_FromParameter
+from pcapkit.protocols.internet.hip.schema import HIPCipherParameter as Schema_HIPCipherParameter
+from pcapkit.protocols.internet.hip.schema import HIPMAC2Parameter as Schema_HIPMAC2Parameter
+from pcapkit.protocols.internet.hip.schema import HIPMACParameter as Schema_HIPMACParameter
+from pcapkit.protocols.internet.hip.schema import \
+    HIPSignature2Parameter as Schema_HIPSignature2Parameter
+from pcapkit.protocols.internet.hip.schema import \
+    HIPSignatureParameter as Schema_HIPSignatureParameter
+from pcapkit.protocols.internet.hip.schema import \
+    HIPTransformParameter as Schema_HIPTransformParameter
+from pcapkit.protocols.internet.hip.schema import \
+    HIPTransportModeParameter as Schema_HIPTransportModeParameter
+from pcapkit.protocols.internet.hip.schema import \
+    HITSuiteListParameter as Schema_HITSuiteListParameter
+from pcapkit.protocols.internet.hip.schema import HostIdentity as Schema_HostIdentity
+from pcapkit.protocols.internet.hip.schema import HostIDParameter as Schema_HostIDParameter
+from pcapkit.protocols.internet.hip.schema import Locator as Schema_Locator
+from pcapkit.protocols.internet.hip.schema import LocatorData as Schema_LocatorData
+from pcapkit.protocols.internet.hip.schema import LocatorSetParameter as Schema_LocatorSetParameter
+from pcapkit.protocols.internet.hip.schema import \
+    NATTraversalModeParameter as Schema_NATTraversalModeParameter
+from pcapkit.protocols.internet.hip.schema import \
+    NotificationParameter as Schema_NotificationParameter
+from pcapkit.protocols.internet.hip.schema import OverlayIDParameter as Schema_OverlayIDParameter
+from pcapkit.protocols.internet.hip.schema import OverlayTTLParameter as Schema_OverlayTTLParameter
+from pcapkit.protocols.internet.hip.schema import PayloadMICParameter as Schema_PayloadMICParameter
+from pcapkit.protocols.internet.hip.schema import PuzzleParameter as Schema_PuzzleParameter
+from pcapkit.protocols.internet.hip.schema import R1CounterParameter as Schema_R1CounterParameter
+from pcapkit.protocols.internet.hip.schema import RegFailedParameter as Schema_RegFailedParameter
+from pcapkit.protocols.internet.hip.schema import RegFromParameter as Schema_RegFromParameter
+from pcapkit.protocols.internet.hip.schema import RegInfoParameter as Schema_RegInfoParameter
+from pcapkit.protocols.internet.hip.schema import RegRequestParameter as Schema_RegRequestParameter
+from pcapkit.protocols.internet.hip.schema import \
+    RegResponseParameter as Schema_RegResponseParameter
+from pcapkit.protocols.internet.hip.schema import RelayFromParameter as Schema_RelayFromParameter
+from pcapkit.protocols.internet.hip.schema import RelayHMACParameter as Schema_RelayHMACParameter
+from pcapkit.protocols.internet.hip.schema import RelayToParameter as Schema_RelayToParameter
+from pcapkit.protocols.internet.hip.schema import RouteDstParameter as Schema_RouteDstParameter
+from pcapkit.protocols.internet.hip.schema import RouteViaParameter as Schema_RouteViaParameter
+from pcapkit.protocols.internet.hip.schema import RVSHMACParameter as Schema_RVSHMACParameter
+from pcapkit.protocols.internet.hip.schema import SeqDataParameter as Schema_SeqDataParameter
+from pcapkit.protocols.internet.hip.schema import SEQParameter as Schema_SEQParameter
+from pcapkit.protocols.internet.hip.schema import SolutionParameter as Schema_SolutionParameter
+from pcapkit.protocols.internet.hip.schema import \
+    TransactionIDParameter as Schema_TransactionIDParameter
+from pcapkit.protocols.internet.hip.schema import \
+    TransactionPacingParameter as Schema_TransactionPacingParameter
+from pcapkit.protocols.internet.hip.schema import \
+    TransportFormatListParameter as Schema_TransportFormatListParameter
+from pcapkit.protocols.internet.hip.schema import UnassignedParameter as Schema_UnassignedParameter
+from pcapkit.protocols.internet.hip.schema import ViaRVSParameter as Schema_ViaRVSParameter
+from pcapkit.protocols.internet.hip.schema import parameter_total_len
+from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+from pcapkit.protocols.schema import Schema
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
+
+if TYPE_CHECKING:
+    from datetime import timedelta
+    from ipaddress import IPv6Address
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
+
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
+    from typing_extensions import Literal, NotRequired
+
+    from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.internet.hip.schema import Parameter as Schema_Parameter
+    from pcapkit.protocols.protocol import ProtocolBase
+
+    Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
+    ParameterParser = Callable[[Schema_Parameter, NamedArg(int, 'version'),
+                                NamedArg(Parameter, 'options')], Data_Parameter]
+    ParameterConstructor = Callable[[Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
+                                     NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
+
+__all__ = ['HIP']
+
+
+if SPHINX_TYPE_CHECKING:  # pragma: no cover
+    from typing_extensions import TypedDict
+
+    class Locator(TypedDict):
+        """Locator dictionary type."""
+
+        #: Traffic type.
+        traffic: 'int'
+        #: Locator type.
+        type: 'int'
+        #: Preferred flag.
+        preferred: 'bool'
+        #: Reserved bits of the flags octet.
+        reserved: 'NotRequired[int]'
+        #: Lifetime.
+        lifetime: 'timedelta | int'
+        #: IP address.
+        ip: 'IPv6Address | bytes | int | str'
+        #: SPI.
+        spi: 'NotRequired[int]'
+
+
+class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
+          schema=Schema_HIP, data=Data_HIP):
+    """This class implements Host Identity Protocol.
+
+    Double-inherited, per the convention set on :issue:`917`: a header usable
+    *only* as an extension header inherits
+    :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` alone, while one also
+    usable as a standalone protocol names
+    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is both,
+    on independent grounds:
+
+    * :rfc:`7401#section-5.1` states that "the HIP header is logically an
+      IPv6 extension header", and IANA lists protocol 139 in its *IPv6
+      Extension Header Types* registry.
+    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a checksum
+      for an **IPv4** header carrying ``Next Header: 139`` with
+      ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4
+      payload, as do :class:`~pcapkit.protocols.internet.ah.protocol.AH` and
+      :class:`~pcapkit.protocols.internet.esp.protocol.ESP`.
+
+    The IPv4 ground separates HIP from
+    :class:`~pcapkit.protocols.internet.mh.protocol.MH` and Shim6, which are protocols
+    in their own right but cannot appear under IPv4:
+    :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a
+    pseudo-header of IPv6 header fields with no IPv4 variant, and Mobile IPv4
+    carries its equivalent messages over UDP port 434 (:rfc:`5944`) rather
+    than as protocol 135.
+
+    :class:`~pcapkit.protocols.internet.internet.Internet` is already reached transitively through
+    :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`; naming it records the classification, so
+    a reader can tell a deliberate standalone protocol from a header that merely inherits one.
+
+    This class parses the following HIP parameters, which are registered in the
+    :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.protocol.HIP.__parameter__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Parameter Code
+         - Parameter Parser
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ESP_INFO`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_esp_info`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.R1_Counter`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_r1_counter`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.R1_COUNTER`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_r1_counter`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.LOCATOR_SET`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_locator_set`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.PUZZLE`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_puzzle`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.SOLUTION`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_solution`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.SEQ`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_seq`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ACK`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_ack`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_dh_group_list`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.DIFFIE_HELLMAN`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_diffie_hellman`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_TRANSFORM`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_transform`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_CIPHER`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_cipher`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.NAT_TRAVERSAL_MODE`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_nat_traversal_mode`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.TRANSACTION_PACING`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_transaction_pacing`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ENCRYPTED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_encrypted`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HOST_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_host_id`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIT_SUITE_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hit_suite_list`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.CERT`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_cert`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.NOTIFICATION`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_notification`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_SIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_request_signed`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_INFO`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_info`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_REQUEST`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_request`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_RESPONSE`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_response`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_FAILED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_failed`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.REG_FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_reg_from`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_response_signed`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_transport_format_list`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ESP_TRANSFORM`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_esp_transform`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.SEQ_DATA`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_seq_data`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ACK_DATA`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_ack_data`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_payload_mic`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.TRANSACTION_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_transaction_id`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.OVERLAY_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_overlay_id`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ROUTE_DST`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_route_dst`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_TRANSPORT_MODE`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_transport_mode`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_MAC`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_mac`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_MAC_2`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_mac_2`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE_2`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_signature_2`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_hip_signature`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_UNSIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_request_unsigned`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_UNSIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_echo_response_unsigned`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.RELAY_FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_relay_from`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.RELAY_TO`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_relay_to`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.OVERLAY_TTL`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_overlay_ttl`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.ROUTE_VIA`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_route_via`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_from`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.RVS_HMAC`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_rvs_hmac`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.VIA_RVS`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_via_rvs`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.RELAY_HMAC`
+         - :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_relay_hmac`
+
+    .. versionchanged:: 1.5.0
+
+       * Parameters dispatch through :attr:`__parameter__` rather than by
+         method name (:issue:`429`).
+       * A parameter is padded to the record length :rfc:`7401` gives
+         (:issue:`651`), and ``PUZZLE``, ``SOLUTION``, ``R1_COUNTER`` and
+         ``LOCATOR_SET`` are sized as the RFCs give them (:issue:`608`,
+         :issue:`653` to :issue:`655`, :issue:`672`, :issue:`679`).
+       * A rebuild reproduces the Header Length, a packet with no parameters,
+         the ``PUZZLE`` lifetime, the reserved, padding and Locator flag bits,
+         and the two fixed header bits (:issue:`1313`, :issue:`1314`,
+         :issue:`1323`, :issue:`1328`, :issue:`1365`, :issue:`1417`,
+         :issue:`1459`).
+       * A ``(code, data)`` pair rebuilds from the parsed data model rather
+         than from its fields as keyword arguments, which dropped every field
+         whose constructor keyword is spelled differently (:issue:`2352`).
+
+    .. versionchanged:: 1.6.0
+
+       * :meth:`make` and the parameter makers, given an integer argument its
+         field cannot carry -- negative, too wide, or a :obj:`bool` for a
+         field wider than one bit -- raise
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         writing a different value or raising another exception; so does
+         :meth:`make` for parameters too long for the Header Length, and so do
+         the ``PUZZLE`` and registration makers for a lifetime that is a
+         :obj:`bool` or not a finite number of seconds (:issue:`2614`).
+       * The same makers raise it for a fixed-size octet argument of the wrong
+         width -- the checksum, the ``PUZZLE`` and ``SOLUTION`` opaque data, the
+         ``PAYLOAD_MIC`` payload data, or reserved octets -- rather than padding
+         or cutting it to the field. The opaque and payload data default to
+         zeros of that width (:issue:`2676`).
+       * Each enumeration field of :meth:`make` and of the parameter makers,
+         and the code of each parameter in ``parameters``, as a ``(code,
+         value)`` pair or parsed data, takes a member or an :class:`int` code,
+         resolved with the enumeration's ``get``; a name, a :obj:`bool` for a
+         field wider than one bit, or a code the field cannot carry raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         resolving against an enumeration inferred from the caller's frame or
+         writing a different value (:issue:`2594`).
+       * A header constructed without ``version`` is HIP version 2, as
+         :meth:`make` writes, rather than 6, the default IP version
+         :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext` hands on under
+         that name; and the ``ENCRYPTED`` maker, given an IV with a cipher
+         other than ``AES-128-CBC`` and ``AES-256-CBC``, raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, rather than
+         counting an IV in the Length that the parameter does not carry. A
+         parsed ``ENCRYPTED`` parameter takes its cipher from the
+         ``HIP_CIPHER`` parameters before it, so an AES cipher's IV is read
+         as the IV, rather than warning of a missing ``HIP_CIPHER`` and
+         reading the IV as encrypted data (:issue:`2708`).
+       * A parameter given to :meth:`make` as empty raw octets, which hold no
+         type, raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+         rather than being dropped from the header (:issue:`2723`).
+
+    .. versionremoved:: 1.6.0
+
+       The ``*_default``, ``*_namespace`` and ``*_reversed`` arguments that
+       went with each enumeration field of :meth:`make` and of the parameter
+       makers, such as ``next_default`` for ``next`` and ``group_default`` for
+       the items of ``groups``; resolve a name with
+       :meth:`~pcapkit.protocols.protocol.Protocol.resolve_index` first
+       (:issue:`2594`).
+
+    """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Parameter code to method mapping, see :meth:`_read_hip_param` and/or
+    #: :meth:`_make_hip_param`. A :obj:`str` value names the methods
+    #: ``_read_param_${name}`` and ``_make_param_${name}``, falling back to
+    #: ``_read_param_unassigned`` / ``_make_param_unassigned`` when they do not
+    #: exist; any other value is a ``(parser, constructor)`` pair of callables.
+    __parameter__ = collections.defaultdict(
+        lambda: 'unassigned',
+        {
+            Enum_Parameter.ESP_INFO:               'esp_info',                # [RFC 7402] 65
+            Enum_Parameter.R1_Counter:             'r1_counter',              # [RFC 5201] 128, v1 only
+            Enum_Parameter.R1_COUNTER:             'r1_counter',              # [RFC 7401] 129
+            Enum_Parameter.LOCATOR_SET:            'locator_set',             # [RFC 8046] 193
+            Enum_Parameter.PUZZLE:                 'puzzle',                  # [RFC 7401] 257
+            Enum_Parameter.SOLUTION:               'solution',                # [RFC 7401] 321
+            Enum_Parameter.SEQ:                    'seq',                     # [RFC 7401] 385
+            Enum_Parameter.ACK:                    'ack',                     # [RFC 7401] 449
+            Enum_Parameter.DH_GROUP_LIST:          'dh_group_list',           # [RFC 7401] 511
+            Enum_Parameter.DIFFIE_HELLMAN:         'diffie_hellman',          # [RFC 7401] 513
+            Enum_Parameter.HIP_TRANSFORM:          'hip_transform',           # [RFC 5201] 577, v1 only
+            Enum_Parameter.HIP_CIPHER:             'hip_cipher',              # [RFC 7401] 579
+            Enum_Parameter.NAT_TRAVERSAL_MODE:     'nat_traversal_mode',      # [RFC 5770] 608
+            Enum_Parameter.TRANSACTION_PACING:     'transaction_pacing',      # [RFC 5770] 610
+            Enum_Parameter.ENCRYPTED:              'encrypted',               # [RFC 7401] 641
+            Enum_Parameter.HOST_ID:                'host_id',                 # [RFC 7401] 705
+            Enum_Parameter.HIT_SUITE_LIST:         'hit_suite_list',          # [RFC 7401] 715
+            Enum_Parameter.CERT:                   'cert',                    # [RFC 7401][RFC 8002] 768
+            Enum_Parameter.NOTIFICATION:           'notification',            # [RFC 7401] 832
+            Enum_Parameter.ECHO_REQUEST_SIGNED:    'echo_request_signed',     # [RFC 7401] 897
+            Enum_Parameter.REG_INFO:               'reg_info',                # [RFC 8003] 930
+            Enum_Parameter.REG_REQUEST:            'reg_request',             # [RFC 8003] 932
+            Enum_Parameter.REG_RESPONSE:           'reg_response',            # [RFC 8003] 934
+            Enum_Parameter.REG_FAILED:             'reg_failed',              # [RFC 8003] 936
+            Enum_Parameter.REG_FROM:               'reg_from',                # [RFC 5770] 950
+            Enum_Parameter.ECHO_RESPONSE_SIGNED:   'echo_response_signed',    # [RFC 7401] 961
+            Enum_Parameter.TRANSPORT_FORMAT_LIST:  'transport_format_list',   # [RFC 7401] 2049
+            Enum_Parameter.ESP_TRANSFORM:          'esp_transform',           # [RFC 7402] 4095
+            Enum_Parameter.SEQ_DATA:               'seq_data',                # [RFC 6078] 4481
+            Enum_Parameter.ACK_DATA:               'ack_data',                # [RFC 6078] 4545
+            Enum_Parameter.PAYLOAD_MIC:            'payload_mic',             # [RFC 6078] 4577
+            Enum_Parameter.TRANSACTION_ID:         'transaction_id',          # [RFC 6078] 4580
+            Enum_Parameter.OVERLAY_ID:             'overlay_id',              # [RFC 6079] 4592
+            Enum_Parameter.ROUTE_DST:              'route_dst',               # [RFC 6028] 4601
+            Enum_Parameter.HIP_TRANSPORT_MODE:     'hip_transport_mode',      # [RFC 6261] 7680
+            Enum_Parameter.HIP_MAC:                'hip_mac',                 # [RFC 7401] 61505
+            Enum_Parameter.HIP_MAC_2:              'hip_mac_2',               # [RFC 7401] 61569
+            Enum_Parameter.HIP_SIGNATURE_2:        'hip_signature_2',         # [RFC 7401] 61633
+            Enum_Parameter.HIP_SIGNATURE:          'hip_signature',           # [RFC 7401] 61697
+            Enum_Parameter.ECHO_REQUEST_UNSIGNED:  'echo_request_unsigned',   # [RFC 7401] 63661
+            Enum_Parameter.ECHO_RESPONSE_UNSIGNED: 'echo_response_unsigned',  # [RFC 7401] 63425
+            Enum_Parameter.RELAY_FROM:             'relay_from',              # [RFC 5770] 63998
+            Enum_Parameter.RELAY_TO:               'relay_to',                # [RFC 5770] 64002
+            Enum_Parameter.OVERLAY_TTL:            'overlay_ttl',             # [RFC 6079] 64011
+            Enum_Parameter.ROUTE_VIA:              'route_via',               # [RFC 6028] 64017
+            Enum_Parameter.FROM:                   'from',                    # [RFC 8004] 65498
+            Enum_Parameter.RVS_HMAC:               'rvs_hmac',                # [RFC 8004] 65500
+            Enum_Parameter.VIA_RVS:                'via_rvs',                 # [RFC 8004] 65502
+            Enum_Parameter.RELAY_HMAC:             'relay_hmac',              # [RFC 5770] 65520
+        },
+    )  # type: DefaultDict[Enum_Parameter | int, str | tuple[ParameterParser, ParameterConstructor]]
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'Literal["Host Identity Protocol"]':
+        """Name of current protocol."""
+        return 'Host Identity Protocol'
+
+    @property
+    def alias(self) -> 'str':
+        """Acronym of corresponding protocol."""
+        return f'HIPv{self._info.version}'
+
+    @property
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.length
+
+    @property
+    def payload(self) -> 'ProtocolBase | NoReturn':
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+        return self._next
+
+    @property
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def read(self, length: 'Optional[int]' = None, *, extension: bool = False, **kwargs: 'Any') -> 'Data_HIP':  # pylint: disable=arguments-differ,unused-argument
+        """Read Host Identity Protocol.
+
+        Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Next Header   | Header Length |0| Packet Type |Version| RES.|1|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Checksum             |           Controls            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                Sender's Host Identity Tag (HIT)               |
+           |                                                               |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |               Receiver's Host Identity Tag (HIT)              |
+           |                                                               |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           /                        HIP Parameters                         /
+           /                                                               /
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            length: Length of packet data.
+            extension: If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
+
+        """
+        if length is None:
+            length = len(self)
+        schema = self.__header__
+
+        # NOTE: The two fixed bits are reserved for SHIM6 compatibility and
+        # "MUST be ignored when receiving" (:rfc:`7401#section-5.1`), so they
+        # are kept as read rather than validated.
+        # Header Length below 4 cannot cover the two HITs, and would leave a
+        # negative parameter length below.
+        if schema.len < 4:
+            raise ProtocolError(f'HIP: invalid header length: {schema.len}')
+
+        hip = Data_HIP(
+            next=schema.next,
+            length=schema.len * 8 + 8,
+            type=Enum_Packet(schema.pkt['type']),
+            packet_fixed=schema.pkt['bit_0'],
+            version=schema.ver['version'],
+            reserved=schema.ver['reserved'],
+            version_fixed=schema.ver['bit_1'],
+            chksum=schema.checksum,
+            control=Data_Control(
+                anonymous=bool(schema.control['anonymous']),
+                reserved=schema.control['reserved'],
+            ),
+            shit=schema.shit,
+            rhit=schema.rhit,
+        )
+
+        _prml = (schema.len - 4) * 8
+        if _prml:
+            hip.__update__([
+                ('parameters', self._read_hip_param(_prml, version=hip.version)),
+            ])
+
+        if extension:
+            # NOTE: As an IPv6 extension header the upper layer belongs to the enclosing
+            # IPv6 header, so hold NoPayload here so that membership does not raise (#2487).
+            self._next = NoPayload()  # pylint: disable=attribute-defined-outside-init
+            return hip
+
+        # NOTE: ``_decode_next_layer`` builds the protocol chain from
+        # :attr:`self.alias <HIP.alias>`, which reads ``self._info``, and
+        # ``__post_init__`` assigns that only once this method returns.
+        self._info = hip
+        return self._decode_next_layer(hip, schema.next, length - hip.length)
+
+    def make(self,
+             next: 'Enum_TransType | int' = Enum_TransType.UDP,
+             packet: 'Enum_Packet | int' = Enum_Packet.HIP_DATA,
+             packet_fixed: 'int' = 0,
+             version: 'int' = 2,
+             version_reserved: 'int' = 0,
+             version_fixed: 'int' = 1,
+             checksum: 'bytes' = b'\x00\x00',
+             controls_anonymous: 'bool' = False,
+             controls_reserved: 'int' = 0,
+             shit: 'int' = 0,
+             rhit: 'int' = 0,
+             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
+             payload: 'bytes | ProtocolBase | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_HIP':
+        """Make (construct) packet data.
+
+        Args:
+            next: Next header type.
+            packet: HIP packet type.
+            packet_fixed: The fixed leading bit of the ``Packet Type`` octet;
+                :rfc:`7401#section-5.1` prescribes ``0`` when sending.
+            version: HIP version.
+            version_reserved: The 3 reserved bits between ``Version`` and the
+                fixed low-order bit.
+            version_fixed: The fixed low-order bit of the ``Version`` octet;
+                :rfc:`7401#section-5.1` prescribes ``1`` when sending.
+            checksum: Checksum.
+            controls_anonymous: If the sender is anonymous.
+            controls_reserved: The 15 reserved high-order bits of ``Controls``.
+            shit: Sender's host identity tag (HIT).
+            rhit: Receiver's host identity tag (HIT).
+            parameters: HIP parameters.
+            payload: Payload.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Raises:
+            ProtocolError: If ``next``, ``packet``, ``version``, a fixed or
+                reserved bit, ``shit`` or ``rhit`` does not fit its field,
+                ``next`` or ``packet`` is a name, the code of a parameter in
+                ``parameters`` is a name, a :obj:`bool` or a code its field
+                cannot carry, ``checksum`` is not two octets, or the parameters
+                make a header too long for its one-octet Header Length.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``packet_fixed`` ahead of ``version`` and ``version_fixed``
+           ahead of ``checksum`` (:issue:`1459`), ``version_reserved`` before
+           ``version_fixed`` (:issue:`1417`), and ``controls_reserved`` ahead of
+           ``shit`` (:issue:`1328`), which shifts every later positional
+           argument.
+
+        """
+        next_value = self._make_index(next, Enum_TransType, bits=8, name='next header',
+                                      alias=f'HIPv{version}')
+        packet_value = self._make_index(packet, Enum_Packet, bits=7, name='packet type',
+                                        alias=f'HIPv{version}')
+
+        if parameters is not None:
+            parameters_value, total_length = self._make_hip_param(parameters, version=version)
+            # Ceiling division, so that Header Length never declares fewer
+            # octets than are packed.
+            length = -(-total_length // 8) + 4
+        else:
+            # NOTE: Header Length excludes the first 8 octets but always
+            # counts the two 16-octet HITs, hence the minimum of 4.
+            parameters_value, length = [], 4
+
+        return Schema_HIP(
+            next=next_value,
+            len=self._make_uint(length, bits=8, name='header length', alias=f'HIPv{version}'),
+            pkt = {
+                'bit_0': self._make_uint(packet_fixed, bits=1, name='packet type fixed bit',
+                                         alias=f'HIPv{version}'),
+                'type': packet_value,
+            },
+            ver = {
+                'bit_1': self._make_uint(version_fixed, bits=1, name='version fixed bit',
+                                         alias=f'HIPv{version}'),
+                'version': self._make_uint(version, bits=4, name='version', alias=f'HIPv{version}'),
+                'reserved': self._make_uint(version_reserved, bits=3, name='version reserved bits',
+                                            alias=f'HIPv{version}'),
+            },
+            checksum=self._make_octets(checksum, size=2, name='checksum', alias=f'HIPv{version}'),
+            control = {
+                'reserved': self._make_uint(controls_reserved, bits=15,
+                                            name='controls reserved bits', alias=f'HIPv{version}'),
+                'anonymous': controls_anonymous,
+            },
+            shit=self._make_uint(shit, bits=128, name='sender HIT', alias=f'HIPv{version}'),
+            rhit=self._make_uint(rhit, bits=128, name='receiver HIT', alias=f'HIPv{version}'),
+            param=parameters_value,
+            payload=payload,
+        )
+
+    @classmethod
+    def register_parameter(cls, code: 'Enum_Parameter', meth: 'str | tuple[ParameterParser, ParameterConstructor]') -> 'None':
+        """Register a parameter parser.
+
+        Args:
+            code: HIP parameter code.
+            meth: Name ``X`` of the ``_read_param_X`` and ``_make_param_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__parameter__`.
+
+        Warns:
+            RegistryWarning: If a different entry is already registered for
+                ``code``; it is overwritten. Handing back the entry already
+                stored, or one equal to it, is a silent no-op. The entry
+                ``code`` shipped with is accepted like any other, so an
+                override can be undone (:issue:`1362`, :issue:`1363`).
+
+        """
+        incumbent = cls.__parameter__.get(code)
+        if incumbent is not None and incumbent == meth:
+            return
+        if incumbent is not None:
+            warn(f'parameter {code} already registered, overwriting', RegistryWarning)
+        cls.__parameter__[code] = meth
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["HIP"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('HIP',)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @overload
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      version: 'int' = ..., extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      version: 'int' = 2, extension: 'bool' = False, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            version: When constructing, the HIP version :meth:`make` writes,
+                with :meth:`make`'s default, the :rfc:`7401` version; when
+                parsing, the version of the enclosing IP layer, which is not
+                read.
+            extension: If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        See Also:
+            For construction arguments, please refer to :meth:`self.make <HIP.make>`.
+
+        Note:
+            ``version`` is declared here because :meth:`IPv6_Ext.__post_init__
+            <pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__post_init__>`
+            defaults it to ``6``, the IP version, and hands it on to
+            :meth:`make`, which writes it as the HIP version. Left to that
+            default, a header constructed without one would be HIP version 6,
+            which no RFC defines, rather than the version 2 :meth:`make`
+            called directly writes (:issue:`2708`).
+
+        """
+        #: bool: If the protocol is used as an IPv6 extension header.
+        self._extf = extension
+
+        # call super __post_init__
+        super().__post_init__(file, length, version=version,  # type: ignore[call-overload]
+                              extension=extension, **kwargs)
+
+    def __length_hint__(self) -> 'Literal[40]':
+        """Return an estimated length for the object."""
+        return 40
+
+    @classmethod
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return Enum_TransType.HIP  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_HIP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'packet': data.type,
+            'packet_fixed': data.packet_fixed,
+            'version': data.version,
+            'version_reserved': data.reserved,
+            'version_fixed': data.version_fixed,
+            'checksum': data.chksum,
+            'controls_anonymous': data.control.anonymous,
+            'controls_reserved': data.control.reserved,
+            'shit': data.shit,
+            'rhit': data.rhit,
+            # ``read`` sets ``parameters`` only when the packet carries some.
+            'parameters': getattr(data, 'parameters', None),
+            'payload': cls._make_payload(data),
+        }
+
+    def _read_hip_param(self, length: 'int', *, version: 'int') -> 'Parameter':  # pylint: disable=line-too-long
+        """Read HIP parameters.
+
+        Arguments:
+            length: length of parameters
+            version: HIP version
+
+        Returns:
+            Extracted HIP parameters.
+
+        Raises:
+            ProtocolError: if packet length threshold check failed
+
+        """
+        counter = 0                   # length of read parameters
+        options = OrderedMultiDict()  # type: Parameter
+
+        for schema in self.__header__.param:
+            dscp = schema.type
+            name = self._lookup_registry(self.__parameter__, dscp)
+
+            if isinstance(name, str):
+                meth_name = f'_read_param_{name}'
+                meth = cast('ParameterParser',
+                            getattr(self, meth_name, self._read_param_unassigned))
+            else:
+                meth = name[0]
+            data = meth(schema, version=version, options=options)
+
+            # NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on
+            # the data model only when it is not all zeros -- the form a fresh
+            # build writes -- so that a rebuild reproduces it (#1223).
+            # :meth:`_make_hip_param` writes it back.
+            padding = schema.__dict__.get('padding')
+            if isinstance(padding, bytes) and any(padding):
+                data.__update__([('padding', padding)])
+
+            # record parameter data
+            options.add(dscp, data)
+            counter += len(schema)
+
+        # check threshold
+        if counter != length:
+            raise ProtocolError(f'HIPv{version}: invalid format')
+        return options
+
+    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]] | bytes] | Parameter', *,  # pylint: disable=line-too-long
+                        version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
+        """Make HIP parameter.
+
+        A ``(code, value)`` pair carries either a mapping of keyword arguments
+        for the parameter's constructor, or a parsed
+        :class:`~pcapkit.protocols.internet.hip.data.Parameter` data model,
+        which goes to the constructor positionally through
+        :meth:`_make_hip_param_data` rather than expanded as keyword arguments
+        (:issue:`2352`).
+
+        Args:
+            parameters: HIP parameters
+            version: HIP protocol version
+
+        Returns:
+            HIP parameters and total length.
+
+        Raises:
+            ProtocolError: If the code of a ``(code, value)`` pair, or the key
+                of a parameter given as parsed data, is a name, a :obj:`bool` or
+                a code its field cannot carry, or if a parameter given as raw
+                octets is empty (:issue:`2723`).
+
+        """
+        total_length = 0
+        if isinstance(parameters, list):
+            parameters_list = []  # type: list[Schema_Parameter | bytes]
+            for schema in parameters:
+                if isinstance(schema, bytes):
+                    if not schema:
+                        raise ProtocolError(f'HIPv{version}: invalid parameter: {schema!r} holds no type field')
+                    # :rfc:`7401#section-5.2.1` pads every parameter to a
+                    # multiple of 8 octets, and Header Length counts in those
+                    # units; a raw parameter is taken to omit its padding.
+                    schema += bytes(pad_length(len(schema), 8))
+                    parameters_list.append(schema)
+                    total_length += len(schema)
+                elif isinstance(schema, Schema):
+                    schema_packed = schema.pack()
+
+                    parameters_list.append(schema_packed)
+                    total_length += len(schema_packed)
+                else:
+                    item, args = cast('tuple[Enum_Parameter | int, Data_Parameter | dict[str, Any]]',
+                                      schema)
+                    code = self._make_index(item, Enum_Parameter, bits=16, name='parameter type',
+                                            alias=f'HIPv{version}')
+                    name = self._lookup_registry(self.__parameter__, code)
+                    if isinstance(name, str):
+                        meth_name = f'_make_param_{name}'
+                        meth = cast('ParameterConstructor',
+                                    getattr(self, meth_name, self._make_param_unassigned))
+                    else:
+                        meth = name[1]
+
+                    if isinstance(args, Data_Parameter):
+                        data = self._make_hip_param_data(meth, code, args,
+                                                         version=version)  # type: Schema_Parameter
+                    else:
+                        data = meth(code, version=version, **args)
+                    data_packed = data.pack()
+
+                    parameters_list.append(data)
+                    total_length += len(data_packed)
+            return parameters_list, total_length
+
+        parameters_list = []
+        for key, param in parameters.items(multi=True):
+            code = self._make_index(key, Enum_Parameter, bits=16, name='parameter type',
+                                    alias=f'HIPv{version}')
+            name = self._lookup_registry(self.__parameter__, code)
+            if isinstance(name, str):
+                meth_name = f'_make_param_{name}'
+                meth = cast('ParameterConstructor',
+                            getattr(self, meth_name, self._make_param_unassigned))
+            else:
+                meth = name[1]
+
+            data = self._make_hip_param_data(meth, code, param, version=version)
+            data_packed = data.pack()
+
+            parameters_list.append(data)
+            total_length += len(data_packed)
+        return parameters_list, total_length
+
+    def _read_param_unassigned(self, schema: 'Schema_UnassignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_UnassignedParameter':  # pylint: disable=unused-argument
+        """Read HIP unassigned parameters.
+
+        Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type            |C|             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           /                          Contents                             /
+           /                                               +-+-+-+-+-+-+-+-+
+           |                                               |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        unassigned = Data_UnassignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            contents=schema.value,
+        )
+        return unassigned
+
+    def _read_param_esp_info(self, schema: 'Schema_ESPInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_ESPInfoParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ESP_INFO`` parameter.
+
+        Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Reserved            |         KEYMAT Index          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            OLD SPI                            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            NEW SPI                            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``12``.
+
+        """
+        if schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        esp_info = Data_ESPInfoParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            index=schema.index,
+            old_spi=schema.old_spi,
+            new_spi=schema.new_spi,
+        )
+        return esp_info
+
+    def _read_param_r1_counter(self, schema: 'Schema_R1CounterParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_R1CounterParameter':  # pylint: disable=unused-argument
+        """Read HIP ``R1_COUNTER`` parameter.
+
+        Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Reserved, 4 bytes                       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                R1 generation counter, 8 bytes                 |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``12``, or the parameter
+                is the HIPv1-only code ``128`` in a packet of another version.
+
+        """
+        if schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+        if schema.type == 128 and version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+
+        r1_counter = Data_R1CounterParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            counter=schema.counter,
+        )
+        return r1_counter
+
+    def _read_param_locator_set(self, schema: 'Schema_LocatorSetParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_LocatorSetParameter':  # pylint: disable=unused-argument
+        """Read HIP ``LOCATOR_SET`` parameter.
+
+        Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |            Length             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Traffic Type   | Locator Type | Locator Length | Reserved   |P|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Locator Lifetime                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Locator                            |
+           |                                                               |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                                                               .
+           .                                                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Traffic Type   | Locator Type | Locator Length | Reserved   |P|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Locator Lifetime                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Locator                            |
+           |                                                               |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If locator data is malformed.
+
+        """
+        def _read_locator(locator: 'Schema_Locator') -> 'Data_LocatorData | IPv6Address':
+            """Parse locator data.
+
+            Args:
+                locator: locator data
+
+            Returns:
+                * If ``kind`` is ``0`` and the locator is 16 octets,
+                  an :class:`~ipaddress.IPv6Address` object.
+                * If ``kind`` is ``1`` and the locator is 20 octets,
+                  a :class:`~pcapkit.protocols.internet.hip.data.LocatorData` object.
+
+            Raises:
+                ProtocolError: in other cases
+
+            """
+            kind = locator.type
+            size = 8 + locator.len * 4
+
+            if kind == 0 and locator.len == 4:
+                return cast('IPv6Address', locator.value)
+            if kind == 1 and locator.len == 5:
+                loc_val = cast('Schema_LocatorData', locator.value)
+                return Data_LocatorData(
+                    spi=loc_val.spi,
+                    ip=ipaddress.ip_address(loc_val.ip),  # type: ignore[arg-type]
+                )
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        # length of read locators
+        _size = 0
+        # list of locators
+        _locs = []  # type: list[Data_Locator]
+
+        for locator in schema.locators:
+            _traf = locator.traffic
+            _loct = locator.type
+            _locl = locator.len * 4
+            _resp = locator.flags
+            _life = locator.lifetime
+            _lobj = _read_locator(locator)
+
+            _locs.append(Data_Locator(
+                traffic=_traf,
+                type=_loct,
+                length=_locl,
+                preferred=bool(_resp['preferred']),
+                reserved=_resp['reserved'],
+                lifetime=datetime.timedelta(seconds=_life),
+                locator=_lobj,
+            ))
+
+        locator_set = Data_LocatorSetParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            locator_set=tuple(_locs),
+        )
+
+        return locator_set
+
+    def _read_param_puzzle(self, schema: 'Schema_PuzzleParameter', *, version: 'int',
+                           options: 'Parameter') -> 'Data_PuzzleParameter':  # pylint: disable=unused-argument
+        """Read HIP ``PUZZLE`` parameter.
+
+        Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  #K, 1 byte   |    Lifetime   |        Opaque, 2 bytes        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                      Random #I, RHASH_len / 8 bytes           |
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**
+                ``12``.
+
+        """
+        if version == 1 and schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        _numk = schema.index
+        _time = schema.lifetime
+        _opak = schema.opaque
+        _rand = schema.random  # Length (schema.len) = 4 + RHASH_len / 8
+
+        puzzle = Data_PuzzleParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            index=_numk,
+            lifetime_exponent=_time,
+            lifetime=self._read_puzzle_lifetime(_time),
+            opaque=_opak,
+            random=_rand,
+            # Keep the field's on-wire width, which ``_rand`` alone cannot carry:
+            # ``int.bit_length()`` sees the value, not the octets it was padded
+            # into. ``schema.len`` is ``4 + RHASH_len / 8``, so the width in bits
+            # is ``(schema.len - 4) * 8``.
+            rhash_len=(schema.len - 4) * 8,
+        )
+        return puzzle
+
+    @staticmethod
+    def _read_puzzle_lifetime(octet: 'int') -> 'Optional[timedelta]':
+        """Decode a ``PUZZLE`` ``Lifetime`` octet into a duration.
+
+        :rfc:`7401#section-5.2.4` gives the lifetime as ``2^(value - 32)``
+        seconds. The result is informational only: :meth:`_make_param_puzzle`
+        writes back the octet itself, since :class:`~datetime.timedelta` rounds
+        octets below ``12`` to zero and cannot hold those of ``79`` and above.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime, or :obj:`None` if it exceeds
+            :attr:`datetime.timedelta.max`.
+
+        """
+        try:
+            return datetime.timedelta(seconds=2 ** (octet - 32))
+        except OverflowError:
+            return None
+
+    def _read_param_solution(self, schema: 'Schema_SolutionParameter', *, version: 'int',
+                             options: 'Parameter') -> 'Data_SolutionParameter':  # pylint: disable=unused-argument
+        """Read HIP ``SOLUTION`` parameter.
+
+        Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  #K, 1 byte   |   Reserved    |        Opaque, 2 bytes        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                      Random #I, n bytes                       |
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |            Puzzle solution #J, RHASH_len / 8 bytes            |
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``version`` is ``1`` and ``schema.len`` is **NOT**
+                ``20``, or if ``schema.len - 4`` is odd.
+
+        """
+        if version == 1 and schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+        if (schema.len - 4) % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        _numk = schema.index
+        # :rfc:`7401#section-5.2.5` names this octet ``Reserved``, "zero when sent,
+        # ignored when received", and only ``PUZZLE`` (:rfc:`7401#section-5.2.4`)
+        # has a ``Lifetime`` at this offset. Record it verbatim rather than reading
+        # it as a ``2^(value - 32)`` duration: that would write ``0x20`` into a
+        # field the RFC requires to be zero, and make the conformant ``0x00``
+        # impossible to re-serialise.
+        _resv = schema.reserved
+        _opak = schema.opaque
+        _rand = schema.random
+        # ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which
+        # is the same quantity as ``4 + 2 * (RHASH_len / 8)`` (two equal-width fields
+        # of ``RHASH_len / 8`` octets) only because ``RHASH_len`` is a whole number of
+        # octets. Do not reuse the ``/ 4`` shorthand on a width that is not.
+        _solt = schema.solution
+
+        solution = Data_SolutionParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            index=_numk,
+            reserved=_resv,
+            opaque=_opak,
+            random=_rand,
+            solution=_solt,
+            # Keep the two fields' shared on-wire width, which the values alone
+            # cannot carry. Each is ``RHASH_len / 8`` octets and ``schema.len`` is
+            # ``4 + RHASH_len / 4``, so the width in bits is
+            # ``((schema.len - 4) // 2) * 8``, the same halving the schema's own
+            # field lengths do.
+            rhash_len=((schema.len - 4) // 2) * 8,
+        )
+        return solution
+
+    def _read_param_seq(self, schema: 'Schema_SEQParameter', *, version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'Data_SEQParameter':  # pylint: disable=unused-argument
+        """Read HIP ``SEQ`` parameter.
+
+        Structure of HIP ``SEQ`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Update ID                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
+
+        """
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        _upid = schema.update_id
+
+        seq = Data_SEQParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            id=_upid,
+        )
+        return seq
+
+    def _read_param_ack(self, schema: 'Schema_ACKParameter', *, version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'Data_ACKParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ACK`` parameter.
+
+        Structure of HIP ``ACK`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       peer Update ID 1                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                       peer Update ID n                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``4``.
+
+        """
+        if schema.len % 4 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        ack = Data_ACKParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            update_id=tuple(schema.update_id),
+        )
+        return ack
+
+    def _read_param_dh_group_list(self, schema: 'Schema_DHGroupListParameter', *, version: 'int',
+                                  options: 'Parameter') -> 'Data_DHGroupListParameter':  # pylint: disable=unused-argument
+        """Read HIP ``DH_GROUP_LIST`` parameter.
+
+        Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | DH GROUP ID #1| DH GROUP ID #2| DH GROUP ID #3| DH GROUP ID #4|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | DH GROUP ID #n|                Padding                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+
+        dh_group_list = Data_DHGroupListParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            group_id=tuple(schema.groups),
+        )
+        return dh_group_list
+
+    def _read_param_diffie_hellman(self, schema: 'Schema_DiffieHellmanParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_DiffieHellmanParameter':  # pylint: disable=unused-argument
+        """Read HIP ``DIFFIE_HELLMAN`` parameter.
+
+        Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Group ID    |      Public Value Length      | Public Value  /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        diffie_hellman = Data_DiffieHellmanParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            group_id=schema.group,
+            pub_len=schema.pub_len,
+            pub_val=schema.pub_val,
+        )
+        return diffie_hellman
+
+    def _read_param_hip_transform(self, schema: 'Schema_HIPTransformParameter', *, version: 'int',
+                                  options: 'Parameter') -> 'Data_HIPTransformParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_TRANSFORM`` parameter.
+
+        Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |            Suite ID #1        |          Suite ID #2          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |            Suite ID #n        |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If the parameter is used in a version other than
+                HIPv1, or ``schema.len`` is **not** a multiple of ``2``.
+
+        """
+        if version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        hip_transform = Data_HIPTransformParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            suite_id=tuple(schema.suites),
+        )
+        return hip_transform
+
+    def _read_param_hip_cipher(self, schema: 'Schema_HIPCipherParameter', *, version: 'int',
+                               options: 'Parameter') -> 'Data_HIPCipherParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_CIPHER`` parameter.
+
+        Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Cipher ID #1         |          Cipher ID #2         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Cipher ID #n         |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
+                **not** a multiple of ``2``.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
+        # more than six (6) Cipher IDs in one HIP_CIPHER parameter. Conversely, a
+        # recipient MUST be prepared to handle received transport parameters that
+        # contain more than six Cipher IDs by accepting the first six Cipher IDs and
+        # dropping the rest. [:rfc:`7401#section-5.2.8`]
+        ciphers = schema.ciphers
+        if len(ciphers) > 6:
+            warn(f'HIPv{version}: [ParamNo {schema.type}] invalid format', ProtocolWarning)
+            ciphers = ciphers[:6]
+
+        hip_cipher = Data_HIPCipherParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            cipher_id=tuple(ciphers),
+        )
+        return hip_cipher
+
+    def _read_param_nat_traversal_mode(self, schema: 'Schema_NATTraversalModeParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_NATTraversalModeParameter':  # pylint: disable=unused-argument,line-too-long
+        """Read HIP ``NAT_TRAVERSAL_MODE`` parameter.
+
+        Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Reserved            |            Mode ID #1         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Mode ID #2          |            Mode ID #3         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Mode ID #n          |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
+
+        """
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        nat_traversal_mode = Data_NATTraversalModeParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            mode_id=tuple(schema.modes),
+        )
+        return nat_traversal_mode
+
+    def _read_param_transaction_pacing(self, schema: 'Schema_TransactionPacingParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_TransactionPacingParameter':  # pylint: disable=unused-argument,line-too-long
+        """Read HIP ``TRANSACTION_PACING`` parameter.
+
+        Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            Min Ta                             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
+
+        """
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        transaction_pacing = Data_TransactionPacingParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            min_ta=schema.min_ta,
+        )
+        return transaction_pacing
+
+    def _read_param_encrypted(self, schema: 'Schema_EncryptedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_EncryptedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ENCRYPTED`` parameter.
+
+        Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                           Reserved                            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                              IV                               /
+           /                                                               /
+           /                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               /
+           /                        Encrypted data                         /
+           /                                                               /
+           /                               +-------------------------------+
+           /                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        encrypted = Data_EncryptedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            cipher=schema.cipher,
+            iv=getattr(schema, 'iv', None),
+            data=schema.data,
+        )
+        return encrypted
+
+    def _read_param_host_id(self, schema: 'Schema_HostIDParameter', *, version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_HostIDParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HOST_ID`` parameter.
+
+        Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          HI Length            |DI-Type|      DI Length        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Algorithm            |         Host Identity         /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |       Domain Identifier       /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                               |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        if schema.algorithm == Enum_HIAlgorithm.ECDSA:
+            schema_hi = cast('Schema_ECDSACurveHostIdentity', schema.hi)
+            hi = Data_HostIdentity(
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
+            )
+        elif schema.algorithm == Enum_HIAlgorithm.ECDSA_LOW:
+            schema_hi = cast('Schema_ECDSALowCurveHostIdentity', schema.hi)  # type: ignore[assignment]
+            hi = Data_HostIdentity(
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
+            )
+        elif schema.algorithm == Enum_HIAlgorithm.EdDSA:
+            schema_hi = cast('Schema_EdDSACurveHostIdentity', schema.hi)  # type: ignore[assignment]
+            hi = Data_HostIdentity(
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
+            )
+        else:
+            hi = cast('bytes', schema.hi)  # type: ignore[assignment]
+
+        host_id = Data_HostIDParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            hi_len=schema.hi_len,
+            di_type=schema.di_data['type'],
+            di_len=schema.di_data['len'],
+            algorithm=schema.algorithm,
+            hi=hi,
+            di=schema.di,
+        )
+        return host_id
+
+    def _read_param_hit_suite_list(self, schema: 'Schema_HITSuiteListParameter', *, version: 'int',
+                                   options: 'Parameter') -> 'Data_HITSuiteListParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIT_SUITE_LIST`` parameter.
+
+        Structure of HIP ``HIT_SUITE_LIST`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     ID #1     |     ID #2     |     ID #3     |     ID #4     |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     ID #n     |                Padding                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+
+        hit_suite_list = Data_HITSuiteListParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            suite_id=tuple(schema.suites),
+        )
+        return hit_suite_list
+
+    def _read_param_cert(self, schema: 'Schema_CertParameter', *, version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'Data_CertParameter':  # pylint: disable=unused-argument
+        """Read HIP ``CERT`` parameter.
+
+        Structure of HIP ``CERT`` parameter [:rfc:`8002`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  CERT group   |  CERT count   |    CERT ID    |   CERT type   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                          Certificate                          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |   Padding (variable length)   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        cert = Data_CertParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            cert_group=schema.cert_group,
+            cert_count=schema.cert_count,
+            cert_id=schema.cert_id,
+            cert_type=schema.cert_type,
+            cert=schema.cert,
+        )
+        return cert
+
+    def _read_param_notification(self, schema: 'Schema_NotificationParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'Data_NotificationParameter':  # pylint: disable=unused-argument
+        """Read HIP ``NOTIFICATION`` parameter.
+
+        Structure of HIP ``NOTIFICATION`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Reserved             |      Notify Message Type      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               /
+           /                   Notification Data                           /
+           /                                               +---------------+
+           /                                               |     Padding   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        notification = Data_NotificationParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            msg_type=schema.msg_type,
+            msg=schema.msg,
+        )
+        return notification
+
+    def _read_param_echo_request_signed(self, schema: 'Schema_EchoRequestSignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                        options: 'Parameter') -> 'Data_EchoRequestSignedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ECHO_REQUEST_SIGNED`` parameter.
+
+        Structure of HIP ``ECHO_REQUEST_SIGNED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        echo_request_signed = Data_EchoRequestSignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            opaque=schema.opaque,
+        )
+        return echo_request_signed
+
+    @staticmethod
+    def _read_registration_lifetime(octet: 'int') -> 'timedelta':
+        """Decode a registration ``Lifetime`` octet into a duration.
+
+        :rfc:`8003#section-4.1` encodes the registration lifetimes of
+        ``REG_INFO``, ``REG_REQUEST`` and ``REG_RESPONSE`` as an exponent: the
+        octet ``0`` is "a special lifetime duration of 0 (zero) seconds", used
+        to request and grant cancellation, and any other value stands for
+        ``2^((lifetime - 64)/8)`` seconds. That spans ``2^(-63/8)`` seconds
+        (about 4 ms) to ``2^(191/8)`` seconds (about 178 days), all of which
+        :class:`~datetime.timedelta` holds, so -- unlike
+        :meth:`_read_puzzle_lifetime` -- no octet overflows and the return is
+        never :obj:`None`.
+
+        Reading the octet as a count of seconds instead reported every duration
+        wrongly: an octet of ``64``, which is one second, read as 64 seconds.
+        See :issue:`2281`.
+
+        Args:
+            octet: the ``Lifetime`` octet
+
+        Returns:
+            The lifetime.
+
+        """
+        if not octet:
+            return datetime.timedelta(0)
+        return datetime.timedelta(seconds=2 ** ((octet - 64) / 8))
+
+    @staticmethod
+    def _make_registration_lifetime(code: 'Enum_Parameter', version: 'int',
+                                    lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a registration ``Lifetime`` octet.
+
+        The inverse of :meth:`_read_registration_lifetime`, rounding down to the
+        nearest representable octet as :meth:`_make_puzzle_lifetime` does for
+        ``PUZZLE``. A duration of zero is the one exact case:
+        :rfc:`8003#section-4.1` reserves the octet ``0`` for it.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a
+                non-negative and finite duration, or encodes to a value the
+                one-octet field cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 <= seconds < math.inf):
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds!r} is not a non-negative number of seconds')
+        # Zero is the RFC's own special case, so it is encoded rather than
+        # rejected -- which is where this parts company with
+        # ``_make_puzzle_lifetime``, whose field has no such value. Written as a
+        # truth test rather than ``== 0`` because ``seconds`` may be a float.
+        if not seconds:
+            return 0
+
+        octet = math.floor(math.log2(seconds) * 8 + 64)
+
+        # NOTE: Not _make_uint, so that the message names the seconds given, and
+        # since the octet 0 is reserved for a zero duration.
+        if not 1 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    def _make_lifetime_octet(self, code: 'Enum_Parameter', version: 'int',
+                             exponent: 'Optional[int]',
+                             lifetime: 'timedelta | int | float') -> 'int':
+        """Resolve a registration ``Lifetime`` octet from either input form.
+
+        An explicit ``exponent`` is the octet and wins, as a parsed parameter's
+        is; otherwise ``lifetime`` is a duration and
+        :meth:`_make_registration_lifetime` encodes it. Shared by the
+        :rfc:`8003` registration makers, wherever a ``Lifetime`` octet
+        appears.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            exponent: the ``Lifetime`` octet itself, if any
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``exponent`` does not fit one octet, or
+                ``lifetime`` cannot be encoded.
+
+        """
+        if exponent is None:
+            return self._make_registration_lifetime(code, version, lifetime)
+        return self._make_uint(exponent, bits=8, name='lifetime', alias=f'HIPv{version}')
+
+    def _read_param_reg_info(self, schema: 'Schema_RegInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
+        """Read HIP ``REG_INFO`` parameter.
+
+        Structure of HIP ``REG_INFO`` parameter [:rfc:`8003`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Min Lifetime  | Max Lifetime  |  Reg Type #1  |  Reg Type #2  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      ...      |     ...       |  Reg Type #n  |               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        reg_info = Data_RegInfoParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            lifetime=Data_Lifetime(
+                # The octets are the round-trip source; the durations are
+                # decoded from them per :rfc:`8003#section-4.1` (#2281).
+                min_exponent=schema.min_lifetime,
+                max_exponent=schema.max_lifetime,
+                min=self._read_registration_lifetime(schema.min_lifetime),
+                max=self._read_registration_lifetime(schema.max_lifetime),
+            ),
+            reg_type=tuple(schema.reg_info),
+        )
+        return reg_info
+
+    def _read_param_reg_request(self, schema: 'Schema_RegRequestParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_RegRequestParameter':  # pylint: disable=unused-argument
+        """Read HIP ``REG_REQUEST`` parameter.
+
+        Structure of HIP ``REG_REQUEST`` parameter [:rfc:`8003`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Lifetime    |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      ...      |     ...       |  Reg Type #n  |               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        reg_request = Data_RegRequestParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            lifetime_exponent=schema.lifetime,
+            lifetime=self._read_registration_lifetime(schema.lifetime),
+            reg_type=tuple(schema.reg_request),
+        )
+        return reg_request
+
+    def _read_param_reg_response(self, schema: 'Schema_RegResponseParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'Data_RegResponseParameter':  # pylint: disable=unused-argument
+        """Read HIP ``REG_RESPONSE`` parameter.
+
+        Structure of HIP ``REG_RESPONSE`` parameter [:rfc:`8003`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Lifetime    |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      ...      |     ...       |  Reg Type #n  |               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        reg_response = Data_RegResponseParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            lifetime_exponent=schema.lifetime,
+            lifetime=self._read_registration_lifetime(schema.lifetime),
+            reg_type=tuple(schema.reg_response),
+        )
+        return reg_response
+
+    def _read_param_reg_failed(self, schema: 'Schema_RegFailedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RegFailedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``REG_FAILED`` parameter.
+
+        Structure of HIP ``REG_FAILED`` parameter [:rfc:`8003`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           | Failure Type  |  Reg Type #1  |  Reg Type #2  |  Reg Type #3  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      ...      |     ...       |  Reg Type #n  |               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    Padding    +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        reg_failed = Data_RegFailedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            failure_type=schema.failure_type,
+            reg_type=tuple(schema.reg_failed),
+        )
+        return reg_failed
+
+    def _read_param_reg_from(self, schema: 'Schema_RegFromParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RegFromParameter':  # pylint: disable=unused-argument
+        """Read HIP ``REG_FROM`` parameter.
+
+        Structure of HIP ``REG_FROM`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Type              |             Length            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Port              |    Protocol   |     Reserved  |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            |                            Address                            |
+            |                                                               |
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
+
+        """
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        reg_from = Data_RegFromParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            port=schema.port,
+            protocol=schema.protocol,
+            address=schema.address,
+        )
+        return reg_from
+
+    def _read_param_echo_response_signed(self, schema: 'Schema_EchoResponseSignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                         options: 'Parameter') -> 'Data_EchoResponseSignedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.
+
+        Structure of HIP ``ECHO_RESPONSE_SIGNED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        echo_response_signed = Data_EchoResponseSignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            opaque=schema.opaque,
+        )
+        return echo_response_signed
+
+    def _read_param_transport_format_list(self, schema: 'Schema_TransportFormatListParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'Data_TransportFormatListParameter':  # pylint: disable=unused-argument
+        """Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.
+
+        Structure of HIP ``TRANSPORT_FORMAT_LIST`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Type              |             Length            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |          TF type #1           |           TF type #2          /
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            /          TF type #n           |             Padding           |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
+                **not** a multiple of ``2``.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        transport_format_list = Data_TransportFormatListParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            tf_type=tuple(schema.formats),
+        )
+        return transport_format_list
+
+    def _read_param_esp_transform(self, schema: 'Schema_ESPTransformParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'Data_ESPTransformParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ESP_TRANSFORM`` parameter.
+
+        Structure of HIP ``ESP_TRANSFORM`` parameter [:rfc:`7402`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Reserved             |           Suite ID #1         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Suite ID #2          |           Suite ID #3         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Suite ID #n          |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
+
+        """
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        esp_transform = Data_ESPTransformParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            suite_id=tuple(schema.suites),
+        )
+        return esp_transform
+
+    def _read_param_seq_data(self, schema: 'Schema_SeqDataParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_SeqDataParameter':  # pylint: disable=unused-argument
+        """Read HIP ``SEQ_DATA`` parameter.
+
+        Structure of HIP ``SEQ_DATA`` parameter [:rfc:`6078`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                        Sequence number                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
+
+        """
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        seq_data = Data_SeqDataParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            seq=schema.seq,
+        )
+        return seq_data
+
+    def _read_param_ack_data(self, schema: 'Schema_AckDataParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_AckDataParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ACK_DATA`` parameter.
+
+        Structure of HIP ``ACK_DATA`` parameter [:rfc:`6078`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                     Acked Sequence number                     /
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``4``.
+
+        """
+        if schema.len % 4 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        ack_data = Data_AckDataParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            ack=tuple(schema.ack),
+        )
+        return ack_data
+
+    def _read_param_payload_mic(self, schema: 'Schema_PayloadMICParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_PayloadMICParameter':  # pylint: disable=unused-argument
+        """Read HIP ``PAYLOAD_MIC`` parameter.
+
+        Structure of HIP ``PAYLOAD_MIC`` parameter [:rfc:`6078`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |                   Reserved                    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                         Payload Data                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           /                         MIC Value                             /
+           /                                               +-+-+-+-+-+-+-+-+
+           |                                               |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        payload_mic = Data_PayloadMICParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            next=schema.next,
+            payload=schema.payload,
+            mic=schema.mic,
+        )
+        return payload_mic
+
+    def _read_param_transaction_id(self, schema: 'Schema_TransactionIDParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_TransactionIDParameter':  # pylint: disable=unused-argument
+        """Read HIP ``TRANSACTION_ID`` parameter.
+
+        Structure of HIP ``TRANSACTION_ID`` parameter [:rfc:`6078`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                           Identifier                          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                               |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        transaction_id = Data_TransactionIDParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            id=schema.id,
+            # Keep the declared width, which ``schema.id`` alone cannot carry
+            # and which ``length`` cannot recover: ``parameter_total_len``
+            # pads, so ``Length`` 1 through 4 all give 8 (#2271).
+            id_len=schema.len,
+        )
+        return transaction_id
+
+    def _read_param_overlay_id(self, schema: 'Schema_OverlayIDParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_OverlayIDParameter':  # pylint: disable=unused-argument
+        """Read HIP ``OVERLAY_ID`` parameter.
+
+        Structure of HIP ``OVERLAY_ID`` parameter [:rfc:`6079`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                           Identifier                          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                               |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        overlay_id = Data_OverlayIDParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            id=schema.id,
+            # The declared width, for the reason ``_read_param_transaction_id``
+            # gives (#2271).
+            id_len=schema.len,
+        )
+        return overlay_id
+
+    def _read_param_route_dst(self, schema: 'Schema_RouteDstParameter', *, version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_RouteDstParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ROUTE_DST`` parameter.
+
+        Structure of HIP ``ROUTE_DST`` parameter [:rfc:`6028`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Flags             |            Reserved           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #1                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #n                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If the parameter is malformed.
+
+        """
+        if (schema.len - 4) % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        route_dst = Data_RouteDstParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            flags=Data_Flags(
+                symmetric=bool(schema.flags['symmetric']),
+                must_follow=bool(schema.flags['must_follow']),
+                reserved=schema.flags['reserved'],
+            ),
+            hit=tuple(schema.hit),
+        )
+        return route_dst
+
+    def _read_param_hip_transport_mode(self, schema: 'Schema_HIPTransportModeParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_HIPTransportModeParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_TRANSPORT_MODE`` parameter.
+
+        Structure of HIP ``HIP_TRANSPORT_MODE`` parameter [:rfc:`6261`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Port              |           Mode ID #1          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Mode ID #2           |           Mode ID #3          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Mode ID #n           |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
+
+        """
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        hip_transport_mode = Data_HIPTransportModeParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            port=schema.port,
+            mode_id=tuple(schema.mode),
+        )
+        return hip_transport_mode
+
+    def _read_param_hip_mac(self, schema: 'Schema_HIPMACParameter', *, version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_HIPMACParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_MAC`` parameter.
+
+        Structure of HIP ``HIP_MAC`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Type              |             Length            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            |                             HMAC                              |
+            /                                                               /
+            /                               +-------------------------------+
+            |                               |            Padding            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        hip_mac = Data_HIPMACParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            hmac=schema.hmac,
+        )
+        return hip_mac
+
+    def _read_param_hip_mac_2(self, schema: 'Schema_HIPMAC2Parameter', *, version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_HIPMAC2Parameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_MAC_2`` parameter.
+
+        Structure of HIP ``HIP_MAC_2`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        hip_mac_2 = Data_HIPMAC2Parameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            hmac=schema.hmac,
+        )
+        return hip_mac_2
+
+    def _read_param_hip_signature_2(self, schema: 'Schema_HIPSignature2Parameter', *, version: 'int',  # pylint: disable=unused-argument
+                                    options: 'Parameter') -> 'Data_HIPSignature2Parameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_SIGNATURE_2`` parameter.
+
+        Structure of HIP ``HIP_SIGNATURE_2`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    SIG alg                    |            Signature          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        hip_signature_2 = Data_HIPSignature2Parameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            algorithm=schema.algorithm,
+            signature=schema.signature,
+        )
+        return hip_signature_2
+
+    def _read_param_hip_signature(self, schema: 'Schema_HIPSignatureParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'Data_HIPSignatureParameter':  # pylint: disable=unused-argument
+        """Read HIP ``HIP_SIGNATURE`` parameter.
+
+        Structure of HIP ``HIP_SIGNATURE`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    SIG alg                    |            Signature          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        hip_signature = Data_HIPSignatureParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            algorithm=schema.algorithm,
+            signature=schema.signature,
+        )
+        return hip_signature
+
+    def _read_param_echo_request_unsigned(self, schema: 'Schema_EchoRequestUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'Data_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
+
+        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        echo_request_unsigned = Data_EchoRequestUnsignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            opaque=schema.opaque,
+        )
+        return echo_request_unsigned
+
+    def _read_param_echo_response_unsigned(self, schema: 'Schema_EchoResponseUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                           options: 'Parameter') -> 'Data_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
+
+        Structure of HIP ``ECHO_RESPONSE_UNSIGNED`` parameter [:rfc:`7401`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        echo_response_unsigned = Data_EchoResponseUnsignedParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            opaque=schema.opaque,
+        )
+        return echo_response_unsigned
+
+    def _read_param_relay_from(self, schema: 'Schema_RelayFromParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RelayFromParameter':  # pylint: disable=unused-argument
+        """Read HIP ``RELAY_FROM`` parameter.
+
+        Structure of HIP ``RELAY_FROM`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Port              |    Protocol   |     Reserved  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
+
+        """
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        address = ipaddress.ip_address(schema.address)
+        schema.address = address  # type: ignore[assignment]
+
+        relay_from = Data_RelayFromParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            port=schema.port,
+            protocol=schema.protocol,
+            address=address,  # type: ignore[arg-type]
+        )
+        return relay_from
+
+    def _read_param_relay_to(self, schema: 'Schema_RelayToParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RelayToParameter':  # pylint: disable=unused-argument
+        """Read HIP ``RELAY_TO`` parameter.
+
+        Structure of HIP ``RELAY_TO`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Type              |             Length            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Port              |    Protocol   |     Reserved  |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            |                            Address                            |
+            |                                                               |
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
+
+        """
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        address = ipaddress.ip_address(schema.address)
+        schema.address = address  # type: ignore[assignment]
+
+        relay_to = Data_RelayToParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            port=schema.port,
+            protocol=schema.protocol,
+            address=address,  # type: ignore[arg-type]
+        )
+        return relay_to
+
+    def _read_param_overlay_ttl(self, schema: 'Schema_OverlayTTLParameter', *, version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_OverlayTTLParameter':  # pylint: disable=unused-argument
+        """Read HIP ``OVERLAY_TTL`` parameter.
+
+        Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6079`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             TTL               |            Reserved           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
+
+        """
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        overlay_ttl = Data_OverlayTTLParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            # A hop count, not a duration -- see ``OverlayTTLParameter.ttl``
+            # in :mod:`pcapkit.protocols.internet.hip.data` (#2282).
+            ttl=schema.ttl,
+        )
+        return overlay_ttl
+
+    def _read_param_route_via(self, schema: 'Schema_RouteViaParameter', *, version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_RouteViaParameter':  # pylint: disable=unused-argument
+        """Read HIP ``ROUTE_VIA`` parameter.
+
+        Structure of HIP ``ROUTE_VIA`` parameter [:rfc:`6028`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Flags             |            Reserved           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #1                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #n                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If the parameter is malformed.
+
+        """
+        if (schema.len - 4) % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        route_via = Data_RouteViaParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            reserved=schema.reserved,
+            flags=Data_Flags(
+                symmetric=bool(schema.flags['symmetric']),
+                must_follow=bool(schema.flags['must_follow']),
+                reserved=schema.flags['reserved'],
+            ),
+            hit=tuple(schema.hit),
+        )
+        return route_via
+
+    def _read_param_from(self, schema: 'Schema_FromParameter', *, version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'Data_FromParameter':  # pylint: disable=unused-argument
+        """Read HIP ``FROM`` parameter.
+
+        Structure of HIP ``FROM`` parameter [:rfc:`8004`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             Address                           |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **NOT** ``16``.
+
+        """
+        if schema.len != 16:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        from_ = Data_FromParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            address=schema.address,
+        )
+        return from_
+
+    def _read_param_rvs_hmac(self, schema: 'Schema_RVSHMACParameter', *, version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RVSHMACParameter':  # pylint: disable=unused-argument
+        """Read HIP ``RVS_HMAC`` parameter.
+
+        Structure of HIP ``RVS_HMAC`` parameter [:rfc:`8004`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        rvs_hmac = Data_RVSHMACParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            hmac=schema.hmac,
+        )
+        return rvs_hmac
+
+    def _read_param_via_rvs(self, schema: 'Schema_ViaRVSParameter', *, version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_ViaRVSParameter':  # pylint: disable=unused-argument
+        """Read HIP ``VIA_RVS`` parameter.
+
+        Structure of HIP ``VIA_RVS`` parameter [:rfc:`8004`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``16``.
+
+        """
+        if schema.len % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+        via_rvs = Data_ViaRVSParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            address=tuple(schema.address),
+        )
+        return via_rvs
+
+    def _read_param_relay_hmac(self, schema: 'Schema_RelayHMACParameter', *, version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RelayHMACParameter':  # pylint: disable=unused-argument
+        """Read HIP ``RELAY_HMAC`` parameter.
+
+        Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: parsed parameter schema
+            version: HIP protocol version
+            options: parsed HIP parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        relay_hmac = Data_RelayHMACParameter(
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=parameter_total_len(schema.len),
+            hmac=schema.hmac,
+        )
+        return relay_hmac
+
+    def _make_hip_param_data(self, meth: 'ParameterConstructor', code: 'Enum_Parameter',
+                             param: 'Data_Parameter', *,
+                             version: 'int') -> 'Schema_Parameter':
+        """Make a HIP parameter from the data model its reader produced.
+
+        The parsed parameter goes to ``meth`` **positionally**. Expanding it as
+        keyword arguments instead would drop every field whose constructor
+        keyword is spelled differently -- ``HIP_TRANSFORM`` keeps its suites in
+        ``suite_id`` and :meth:`_make_param_hip_transform` takes them as
+        ``suites``, so ``**param`` left the parameter empty (:issue:`2352`).
+
+        Args:
+            meth: Parameter constructor.
+            code: Parameter code.
+            param: Parsed parameter data model.
+            version: HIP protocol version.
+
+        Returns:
+            HIP parameter schema.
+
+        .. versionadded:: 1.5.0
+
+        """
+        data = meth(code, param, version=version)
+        # NOTE: The trailing padding :meth:`_read_hip_param` kept, if any.
+        padding = getattr(param, 'padding', None)
+        if isinstance(padding, bytes) and 'padding' in data.__fields__:
+            data.padding = padding
+        return data
+
+    def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               contents: 'bytes' = b'',
+                               **kwargs: 'Any') -> 'Schema_UnassignedParameter':
+        """Make HIP unassigned parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            contents: parameter contents
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            contents = param.contents
+
+        return Schema_UnassignedParameter(
+            type=code,
+            len=len(contents),
+            value=contents,
+        )
+
+    def _make_param_esp_info(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPInfoParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             reserved: 'int' = 0,
+                             index: 'int' = 0,
+                             old_spi: 'int' = 0,
+                             new_spi: 'int' = 0,
+                             **kwargs: 'Any') -> 'Schema_ESPInfoParameter':
+        """Make HIP ``ESP_INFO`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            reserved: reserved octets (:rfc:`7402#section-5.1.1`)
+            index: KEYMAT index
+            old_spi: old SPI
+            new_spi: new SPI
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``reserved``, ``index``, ``old_spi`` or ``new_spi`` does
+                not fit its field.
+
+        """
+        if param is not None:
+            reserved = param.reserved
+            index = param.index
+            old_spi = param.old_spi
+            new_spi = param.new_spi
+
+        return Schema_ESPInfoParameter(
+            type=code,
+            len=12,
+            reserved=self._make_uint(reserved, bits=16, name='reserved bits',
+                                     alias=f'HIPv{version}'),
+            index=self._make_uint(index, bits=16, name='KEYMAT index', alias=f'HIPv{version}'),
+            old_spi=self._make_uint(old_spi, bits=32, name='old SPI', alias=f'HIPv{version}'),
+            new_spi=self._make_uint(new_spi, bits=32, name='new SPI', alias=f'HIPv{version}'),
+        )
+
+    def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Optional[Data_R1CounterParameter]' = None, *, # pylint: disable=unused-argument
+                               version: 'int',
+                               counter: 'int' = 0,
+                               reserved: 'bytes' = b'\x00\x00\x00\x00',
+                               **kwargs: 'Any') -> 'Schema_R1CounterParameter':
+        """Make HIP ``R1_COUNTER`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            counter: R1 generation counter
+            reserved: the four reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``code`` is the HIPv1-only ``128`` and ``version``
+                is **NOT** ``1``, or ``counter`` does not fit in eight octets.
+                Also if ``reserved`` is not four octets.
+
+        """
+        if code == Enum_Parameter.R1_Counter and version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00\x00')
+            counter = param.counter
+
+        return Schema_R1CounterParameter(
+            reserved=self._make_octets(reserved, size=4, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=12,
+            counter=self._make_uint(counter, bits=64, name='R1 generation counter',
+                                    alias=f'HIPv{version}'),
+        )
+
+    def _make_param_locator_set(self, code: 'Enum_Parameter', param: 'Optional[Data_LocatorSetParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int',
+                                locator_set: 'Optional[list[Data_Locator | Locator]]' = None,
+                                **kwargs: 'Any') -> 'Schema_LocatorSetParameter':
+        """Make HIP ``LOCATOR_SET`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            locator_set: locators data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        def _make_locator(locator: 'Optional[Data_Locator]' = None, *,
+                          traffic: 'int' = 0,
+                          type: 'Optional[int]' = None,
+                          preferred: 'bool' = False,
+                          reserved: 'int' = 0,
+                          lifetime: 'timedelta | int' = 0,
+                          ip: 'IPv6Address | bytes | int | str' = '::',
+                          spi: 'Optional[int]' = None,
+                          **kwargs: 'Any') -> 'Schema_Locator':
+            """Make locator data.
+
+            Args:
+                locator: locator data
+                traffic: traffic type
+                type: locator type; derived from ``spi`` when not given --
+                    ``1`` with an ``spi``, ``0`` without
+                preferred: preferred flag
+                reserved: the 7 reserved high-order bits of the flags octet
+                lifetime: lifetime
+                ip: IP address
+                spi: SPI
+                **kwargs: arbitrary keyword arguments
+
+            Returns:
+                HIP locator schema.
+
+            Raises:
+                ProtocolError: If ``locator`` holds neither an
+                    :class:`~ipaddress.IPv6Address` nor a
+                    :class:`~pcapkit.protocols.internet.hip.data.LocatorData`,
+                    or if an explicit ``type`` contradicts ``spi``, or
+                    ``traffic``, ``type``, ``reserved``, ``lifetime`` or
+                    ``spi`` does not fit its field.
+
+            """
+            if locator is not None:
+                value = locator.locator
+                if isinstance(value, ipaddress.IPv6Address):
+                    data = value.packed  # type: bytes | Schema_LocatorData
+                elif isinstance(value, Data_LocatorData):
+                    data = Schema_LocatorData(
+                        spi=value.spi,
+                        ip=value.ip.packed,
+                    )
+                else:
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid locator: '
+                                        f'must be an ipaddress.IPv6Address or a LocatorData, '
+                                        f'not {value!r}')
+
+                traffic = locator.traffic
+                type = locator.type
+                length = locator.length // 4
+                preferred = locator.preferred
+                reserved = locator.reserved
+                lifetime = math.floor(locator.lifetime.total_seconds())
+            else:
+                # NOTE: Through ``parse_ip_address`` because the locator is packed
+                # to octets *here*, ahead of the schema, so a bare
+                # ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``
+                # and hand the schema's ``SwitchField`` plain bytes that its guard
+                # cannot question. The ``version=6`` argument is the *IP* version
+                # rather than the HIP one the message names, and it keeps the
+                # ``int`` widening this signature documents: ``0x102`` is
+                # ``::102``, not the ``0.0.1.2`` that ``ipaddress.ip_address``
+                # would give.
+                ip_val = parse_ip_address(
+                    ip, f'HIPv{version}: [ParamNo {code}] invalid locator', version=6)
+
+                # ``Locator Type`` and the presence of an SPI are one fact
+                # written twice: :rfc:`8046#section-4.2` makes Type 0 a bare
+                # IPv6 address and Type 1 "the concatenation of an ESP SPI
+                # (first 32 bits) followed by an IPv6 address". ``Locator
+                # Length`` follows from the choice, and ``locator_value_selector``
+                # accepts only the two consistent pairs, so leaving ``type`` at
+                # a default of 0 while an ``spi`` set the length to 5 made the
+                # public ``spi=`` path raise (#2276). Deriving it keeps
+                # the caller from restating what ``spi`` already says.
+                if type is None:
+                    type = 0 if spi is None else 1
+                elif (type == 1) != (spi is not None):
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid locator type: '
+                                        f'{type!r} does not match spi {spi!r}')
+
+                if spi is None:
+                    length = 4
+                    data = ip_val.packed
+                else:
+                    length = 5
+                    data = Schema_LocatorData(
+                        spi=self._make_uint(spi, bits=32, name='SPI', alias=f'HIPv{version}'),
+                        ip=ip_val.packed,
+                    )
+
+                if isinstance(lifetime, timedelta):
+                    lifetime = math.floor(lifetime.total_seconds())
+
+            return Schema_Locator(
+                traffic=self._make_uint(traffic, bits=8, name='traffic type',
+                                        alias=f'HIPv{version}'),
+                type=self._make_uint(type, bits=8, name='locator type', alias=f'HIPv{version}'),
+                len=length,
+                flags={
+                    'reserved': self._make_uint(reserved, bits=7, name='reserved bits',
+                                                alias=f'HIPv{version}'),
+                    'preferred': preferred,
+                },
+                lifetime=self._make_uint(lifetime, bits=32, name='locator lifetime',
+                                         alias=f'HIPv{version}'),
+                value=data,
+            )
+
+        if param is not None:
+            locators = [_make_locator(locator) for locator in param.locator_set]
+        else:
+            if locator_set is None:
+                locator_set = []
+            locators = [_make_locator(**locator) for locator in locator_set]
+
+        return Schema_LocatorSetParameter(
+            type=code,
+            # NOTE: ``Locator.len`` is ``Locator Length``, which
+            # :rfc:`8046#section-4` gives "in 4-octet units" and which counts
+            # only the ``Locator`` field, so a locator record is the eight
+            # fixed octets (traffic type, locator type, locator length,
+            # reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This
+            # parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,
+            # "length of the Contents, in bytes", so it is the sum of those
+            # record sizes. Summing ``locator['len']`` instead gives ``4n``
+            # where the contents are ``24n`` octets for plain IPv6 locators,
+            # mis-declaring the record and starving the reader's ``ListField``
+            # -- see ``LocatorSetParameter.locators`` in
+            # :mod:`pcapkit.protocols.internet.hip.schema`.
+            len=sum(8 + locator['len'] * 4 for locator in locators),
+            locators=locators,
+        )
+
+    @staticmethod
+    def _make_puzzle_lifetime(code: 'Enum_Parameter', version: 'int',
+                              lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a ``PUZZLE`` ``Lifetime`` octet.
+
+        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``
+        seconds -- and the ``PUZZLE`` section is the only place either RFC defines
+        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to
+        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
+        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is a :obj:`bool`, is not a positive
+                and finite duration, or encodes to a value the one-octet field
+                cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: testing
+        # for ``int`` would send a plain ``float`` down the timedelta branch and
+        # escape an :exc:`AttributeError`.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below, and
+        # ``math.floor`` one at infinity or NaN. Neither is a
+        # :class:`~pcapkit.utilities.exceptions.BaseError`, so it would escape
+        # the library's error handling with a message naming neither HIP nor
+        # the field.
+        if (isinstance(seconds, bool) or not isinstance(seconds, (int, float))
+                or not 0 < seconds < math.inf):
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds!r} is not a positive number of seconds')
+
+        octet = math.floor(math.log2(seconds) + 32)
+
+        # NOTE: Not _make_uint, so that the message names the seconds given
+        # rather than only the octet they encode to.
+        if not 0 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    def _make_puzzle_field_width(self, code: 'Enum_Parameter', version: 'int',
+                                 rhash_len: 'Optional[int]', *values: 'int') -> 'int':
+        """Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.
+
+        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``
+        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where
+        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm
+        (:rfc:`7401#section-2.3`). The width is therefore a property of the
+        association, not of the number that happens to be in the field, and it is
+        resolved here in that order of authority:
+
+        1. an explicit ``rhash_len`` argument;
+        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and
+           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both
+           ``Length`` values as literally 12 and 20;
+        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by
+           the callers below;
+        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 4 can lose a leading zero octet, and it is the only case where the
+        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
+        declaring it. Using it unconditionally would re-serialise a
+        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,
+        parameters this library's own reader rejects.
+
+        Things this deliberately does *not* reject, each of which looks like an
+        oversight and is not:
+
+        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
+          zero-length output, so no conformant packet carries one -- but it is what
+          case 4 yields for the default ``random=0``, and it is what a
+          ``Length = 4`` parameter parses back to. Rejecting it would turn a
+          degenerate-but-self-consistent case into a failure for callers that pass
+          no value at all.
+        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is
+          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and
+          :meth:`_read_param_solution`, whose guards are likewise written as
+          ``version == 1`` rather than as an exhaustive check, so the reader and the
+          builder agree. Validating the version belongs with :meth:`make`'s public
+          signature, not here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            rhash_len: declared field width in bits, if any
+            *values: the field values that must fit
+
+        Returns:
+            The width of one field, in octets.
+
+        Raises:
+            ProtocolError: If the declared width is not an :obj:`int`, is a
+                :obj:`bool`, is negative or wider than ``0xFFFF`` octets,
+                contradicts the protocol version, is not a whole number of
+                octets, or is too narrow for ``values``.
+
+        """
+        # NOTE: A value that is not an int is sized as nothing here, and the
+        # caller's _make_uint refuses it.
+        bits = max((value.bit_length() for value in values if isinstance(value, int)), default=0)
+
+        if rhash_len is not None:
+            # NOTE: In bits, of a field whose octets a two-octet Length counts.
+            rhash_len = self._make_uint(rhash_len, bits=16 + 3, name='RHASH_len', alias=f'HIPv{version}')
+        if version == 1:
+            if rhash_len is not None and rhash_len != 64:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                    f'HIPv1 fixes the field at 64 bits, got {rhash_len}')
+            rhash_len = 64
+        elif rhash_len is None:
+            rhash_len = 8 * math.ceil(bits / 8)
+
+        if rhash_len < 0 or rhash_len % 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'RHASH_len must be a non-negative whole number of '
+                                f'octets, got {rhash_len} bits')
+        if bits > rhash_len:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'a {bits}-bit value does not fit a {rhash_len}-bit field')
+        return rhash_len // 8
+
+    def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Optional[Data_PuzzleParameter]' = None, *,  # pylint: disable=unused-argument
+                           version: 'int',
+                           index: 'int' = 0,
+                           lifetime: 'timedelta | int' = 0,
+                           lifetime_exponent: 'Optional[int]' = None,
+                           opaque: 'bytes' = b'\x00\x00',
+                           random: 'int' = 0,
+                           rhash_len: 'Optional[int]' = None,
+                           **kwargs: 'Any') -> 'Schema_PuzzleParameter':
+        """Make HIP ``PUZZLE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            index: #K index
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime`` octet;
+                ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``value`` in
+                :rfc:`7401#section-5.2.4`'s ``2^(value - 32)`` seconds
+            opaque: opaque data
+            random: random #I value
+            rhash_len: on-wire width of ``Random #I``, in bits; defaults to the
+                width ``param`` was parsed with, or to what ``version`` fixes, or
+                to ``random``'s own bit length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, or the width of ``Random #I`` is
+                invalid; see ``_make_puzzle_lifetime`` and
+                ``_make_puzzle_field_width``. Also if ``index`` does not fit
+                one octet, or ``random`` is negative or a :obj:`bool`.
+                Also if ``opaque`` is not two octets.
+
+        """
+        if param is not None:
+            index = param.index
+            lifetime_exponent = param.lifetime_exponent
+            opaque = param.opaque
+            random = param.random
+            if rhash_len is None:
+                rhash_len = param.rhash_len
+
+        if lifetime_exponent is None:
+            lifetime_exponent = self._make_puzzle_lifetime(code, version, lifetime)
+        else:
+            lifetime_exponent = self._make_uint(lifetime_exponent, bits=8, name='lifetime',
+                                                alias=f'HIPv{version}')
+
+        width = self._make_puzzle_field_width(code, version, rhash_len, random)
+
+        return Schema_PuzzleParameter(
+            type=code,
+            # One field of ``RHASH_len / 8`` octets after the 4-octet
+            # ``#K``/``Lifetime``/``Opaque`` prefix; :rfc:`7401#section-5.2.4`
+            # spells the same quantity ``4 + RHASH_len / 8``.
+            len=4 + width,
+            index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
+            lifetime=lifetime_exponent,
+            opaque=self._make_octets(opaque, size=2, name='puzzle opaque', alias=f'HIPv{version}'),
+            random=self._make_uint(random, bits=8 * width, name='puzzle random',
+                                   alias=f'HIPv{version}'),
+        )
+
+    def _make_param_solution(self, code: 'Enum_Parameter', param: 'Optional[Data_SolutionParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             index: 'int' = 0,
+                             reserved: 'Optional[int]' = None,
+                             opaque: 'bytes' = b'\x00\x00',
+                             random: 'int' = 0,
+                             solution: 'int' = 0,
+                             rhash_len: 'Optional[int]' = None,
+                             **kwargs: 'Any') -> 'Schema_SolutionParameter':
+        """Make HIP ``SOLUTION`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            index: #K index
+            reserved: the ``Reserved`` octet, which :rfc:`7401#section-5.2.5`
+                requires to be "zero when sent". Defaults to the octet ``param``
+                arrived with, so that re-serialising reproduces it rather than
+                rewriting it, and to that mandated zero otherwise. Pass it
+                explicitly to override either -- notably to write the conformant
+                zero over a non-conformant one received from a peer, which is
+                otherwise unreachable because
+                :class:`~pcapkit.protocols.internet.hip.data.SolutionParameter` is
+                immutable
+            opaque: opaque data
+            random: random #I value
+            solution: solution #J value
+            rhash_len: on-wire width of ``Random #I`` and ``Puzzle solution #J``
+                alike, in bits; defaults to the width ``param`` was parsed with, or
+                to what ``version`` fixes, or to the values' own bit length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If the width of the two fields is invalid; see
+                ``_make_puzzle_field_width``. Also if ``index`` or ``reserved``
+                does not fit one octet, or ``random`` or ``solution`` is
+                negative or a :obj:`bool`. Also if ``opaque`` is not two octets.
+
+        """
+        if param is not None:
+            index = param.index
+            opaque = param.opaque
+            random = param.random
+            solution = param.solution
+            # Both of these are `None`-sentinelled rather than overwritten
+            # outright, unlike the data fields above. `Data_SolutionParameter` is
+            # immutable, so a caller with a parsed parameter in hand has no other
+            # way to sanitise a peer's non-conformant `Reserved` or to re-frame
+            # the parameter for a different `RHASH_len`.
+            if reserved is None:
+                reserved = param.reserved
+            if rhash_len is None:
+                rhash_len = param.rhash_len
+        elif reserved is None:
+            # :rfc:`7401#section-5.2.5`: "zero when sent".
+            reserved = 0
+
+        width = self._make_puzzle_field_width(code, version, rhash_len, random, solution)
+
+        return Schema_SolutionParameter(
+            type=code,
+            # Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of
+            # ``RHASH_len / 8`` octets each, so the contents length is necessarily
+            # even after the 4-octet ``#K``/``Reserved``/``Opaque`` prefix.
+            # :rfc:`7401#section-5.2.5` spells the same quantity
+            # ``4 + RHASH_len / 4``, an identity only because a real
+            # ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an
+            # arbitrary :meth:`int.bit_length` is not that quantity and yields an odd
+            # width that :meth:`_read_param_solution` rejects.
+            len=4 + 2 * width,
+            index=self._make_uint(index, bits=8, name='puzzle difficulty', alias=f'HIPv{version}'),
+            reserved=self._make_uint(reserved, bits=8, name='reserved octet',
+                                     alias=f'HIPv{version}'),
+            opaque=self._make_octets(opaque, size=2, name='solution opaque', alias=f'HIPv{version}'),
+            random=self._make_uint(random, bits=8 * width, name='puzzle random',
+                                   alias=f'HIPv{version}'),
+            solution=self._make_uint(solution, bits=8 * width, name='puzzle solution',
+                                     alias=f'HIPv{version}'),
+        )
+
+    def _make_param_seq(self, code: 'Enum_Parameter', param: 'Optional[Data_SEQParameter]' = None, *,  # pylint: disable=unused-argument
+                        version: 'int',
+                        update_id: 'int' = 0,
+                        **kwargs: 'Any') -> 'Schema_SEQParameter':
+        """Make HIP ``SEQ`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            update_id: update ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``update_id`` does not fit its field.
+
+        """
+        if param is not None:
+            update_id = param.id
+
+        return Schema_SEQParameter(
+            type=code,
+            len=4,
+            update_id=self._make_uint(update_id, bits=32, name='update ID', alias=f'HIPv{version}'),
+        )
+
+    def _make_param_ack(self, code: 'Enum_Parameter', param: 'Optional[Data_ACKParameter]' = None, *,  # pylint: disable=unused-argument
+                        version: 'int',
+                        update_id: 'Optional[list[int]]' = None,
+                        **kwargs: 'Any') -> 'Schema_ACKParameter':
+        """Make HIP ``ACK`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            update_id: list of update ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If an entry of ``update_id`` does not fit its field.
+
+        """
+        if param is not None:
+            id_list = cast('list[int]', param.update_id)
+        else:
+            if update_id is None:
+                update_id = []
+            id_list = update_id
+
+        for item in id_list:
+            self._make_uint(item, bits=32, name='update ID', alias=f'HIPv{version}')
+
+        return Schema_ACKParameter(
+            type=code,
+            len=4 * len(id_list),
+            update_id=id_list,
+        )
+
+    def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Optional[Data_DHGroupListParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int',
+                                  groups: 'Optional[list[Enum_Group | int]]' = None,
+                                  **kwargs: 'Any') -> 'Schema_DHGroupListParameter':
+        """Make HIP ``DH_GROUP_LIST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            groups: list of group ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``groups`` is a name or does not fit its field.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            group_id = cast('list[Enum_Group]', param.group_id)
+        else:
+            group_id = [self._make_index(group, Enum_Group, bits=8, name='DH group ID',
+                                         alias=f'HIPv{version}')
+                        for group in groups or []]
+
+        return Schema_DHGroupListParameter(
+            type=code,
+            len=len(group_id),
+            groups=group_id,
+        )
+
+    def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Optional[Data_DiffieHellmanParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int',
+                                   group: 'Enum_Group | int' = Enum_Group.NIST_P_256,
+                                   pub_val: 'int' = 0,
+                                   **kwargs: 'Any') -> 'Schema_DiffieHellmanParameter':
+        """Make HIP ``DIFFIE_HELLMAN`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            group: group ID
+            pub_val: public value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``group`` is a name or does not fit its field, or
+                ``pub_val`` is negative, a :obj:`bool`, or wider than its
+                ``pub_len`` octets.
+
+        """
+        if param is not None:
+            group_id = param.group_id
+            pub_len = param.pub_len
+            pub_val = param.pub_val
+        else:
+            group_id = self._make_index(group, Enum_Group, bits=8, name='group ID',
+                                        alias=f'HIPv{version}')
+            pub_len = self._uint_size(pub_val)
+
+        return Schema_DiffieHellmanParameter(
+            type=code,
+            len=3 + pub_len,
+            group=group_id,
+            pub_len=pub_len,
+            pub_val=self._make_uint(pub_val, bits=8 * pub_len, name='public value',
+                                    alias=f'HIPv{version}'),
+        )
+
+    def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransformParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int',
+                                  suites: 'Optional[list[Enum_Suite | int]]' = None,
+                                  **kwargs: 'Any') -> 'Schema_HIPTransformParameter':
+        """Make HIP ``HIP_TRANSFORM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            suites: list of suite ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported outside HIPv1, or
+                an entry of ``suites`` is a name or does not fit its field.
+
+        """
+        # ``HIP_TRANSFORM`` is :rfc:`5201#section-5.2.7` only -- :rfc:`7401`
+        # replaced it with ``HIP_CIPHER`` -- and the gate mirrors
+        # :meth:`_read_param_hip_transform`'s. Without it the maker built
+        # octets its own reader rejects (#2275), where
+        # :meth:`_make_param_hip_cipher` refuses the opposite mismatch.
+        if version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            suite_id = cast('list[Enum_Suite]', param.suite_id)
+        else:
+            suite_id = [self._make_index(suite, Enum_Suite, bits=16, name='suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
+
+        return Schema_HIPTransformParameter(
+            type=code,
+            len=2 * len(suite_id),
+            suites=suite_id,
+        )
+
+    def _make_param_hip_cipher(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPCipherParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               ciphers: 'Optional[list[Enum_Cipher | int]]' = None,
+                               **kwargs: 'Any') -> 'Schema_HIPCipherParameter':
+        """Make HIP ``HIP_CIPHER`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            ciphers: list of cipher ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``ciphers`` is a name or does not fit its field.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            cipher_id = cast('list[Enum_Cipher]', param.cipher_id)
+        else:
+            cipher_id = [self._make_index(cipher, Enum_Cipher, bits=16, name='cipher ID',
+                                          alias=f'HIPv{version}')
+                         for cipher in ciphers or []]
+
+        return Schema_HIPCipherParameter(
+            type=code,
+            len=2 * len(cipher_id),
+            ciphers=cipher_id,
+        )
+
+    def _make_param_nat_traversal_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_NATTraversalModeParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int',
+                                       modes: 'Optional[list[Enum_NATTraversal | int]]' = None,
+                                       reserved: 'bytes' = b'\x00\x00',
+                                       **kwargs: 'Any') -> 'Schema_NATTraversalModeParameter':
+        """Make HIP ``NAT_TRAVERSAL_MODE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            modes: list of mode ID
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If an entry of ``modes`` is a name or does not fit
+                its field, or ``reserved`` is not two octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            mode_id = cast('list[Enum_NATTraversal]', param.mode_id)
+        else:
+            mode_id = [self._make_index(mode, Enum_NATTraversal, bits=16, name='mode ID',
+                                        alias=f'HIPv{version}')
+                       for mode in modes or []]
+
+        return Schema_NATTraversalModeParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=2 + 2 * len(mode_id),
+            modes=mode_id,
+        )
+
+    def _make_param_transaction_pacing(self, code: 'Enum_Parameter', param: 'Optional[Data_TransactionPacingParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int',
+                                       min_ta: 'int' = 0,
+                                       **kwargs: 'Any') -> 'Schema_TransactionPacingParameter':
+        """Make HIP ``TRANSACTION_PACING`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            min_ta: minimum time between transactions
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``min_ta`` does not fit its field.
+
+        """
+        if param is not None:
+            min_ta = param.min_ta
+
+        return Schema_TransactionPacingParameter(
+            type=code,
+            len=4,
+            min_ta=self._make_uint(min_ta, bits=32, name='Min Ta', alias=f'HIPv{version}'),
+        )
+
+    def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Optional[Data_EncryptedParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int',
+                              cipher: 'Enum_Cipher | int' = Enum_Cipher.NULL_ENCRYPT,
+                              iv: 'Optional[bytes]' = None,
+                              data: 'bytes' = b'',
+                              reserved: 'bytes' = b'\x00\x00\x00\x00',
+                              **kwargs: 'Any') -> 'Schema_EncryptedParameter':
+        """Make HIP ``ENCRYPTED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            cipher: cipher ID, of the width ``HIP_CIPHER`` carries it in
+            iv: initialization vector, given for the AES ciphers and only
+                for them
+            data: encrypted data
+            reserved: the four reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``cipher`` is a name or does not fit its field,
+                the cipher is ``AES-128-CBC`` or ``AES-256-CBC`` and ``iv``
+                is missing or **NOT** 16 octets, or ``iv`` is given with any
+                other cipher, which takes none.
+                Also if ``reserved`` is not four octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00\x00')
+            cipher_id = param.cipher
+            iv = param.iv
+            data = param.data
+        else:
+            cipher_id = self._make_index(cipher, Enum_Cipher, bits=16, name='cipher ID',
+                                         alias=f'HIPv{version}')
+
+        if cipher_id in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC):
+            if iv is None:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV is required for AES cipher')
+            if len(iv) != 16:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV length must be 16 bytes for AES cipher')
+        elif iv is not None:
+            # NOTE: The schema writes an IV for the AES ciphers alone, so one
+            # given here would count in Length and be dropped (#2708).
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV is not used by cipher {cipher_id!r}')
+
+        schema = Schema_EncryptedParameter(
+            reserved=self._make_octets(reserved, size=4, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=4 + len(iv or b'') + len(data),
+            iv=iv,
+            data=data,
+        )
+        # NOTE: ``cipher`` is not a schema field: ``ENCRYPTED``'s own wire
+        # format carries no cipher ID, only the preceding ``HIP_CIPHER``
+        # parameter does. Passed as a constructor keyword it draws an
+        # ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall
+        # back to its sibling lookup, which a standalone ``make`` call gives no
+        # ``HIP_CIPHER`` parameter to search; the parameter would then be treated as
+        # cipher-less and silently packed without its IV. Setting the
+        # already-resolved ``cipher_id`` as a plain attribute instead reaches
+        # ``pack()``'s packet context via ``packet.update(self.__dict__)``,
+        # where ``pre_unpack`` honours it ahead of that lookup.
+        schema.cipher = cipher_id
+        return schema
+
+    def _make_param_host_id(self, code: 'Enum_Parameter', param: 'Optional[Data_HostIDParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int',
+                            hi: 'Optional[Data_HostIdentity | bytes | Schema_HostIdentity]' = None,
+                            hi_curve: 'Optional[Enum_ECDSACurve | Enum_ECDSALowCurve | Enum_EdDSACurve]' = None,  # pylint: disable=line-too-long
+                            hi_pub_key: 'bytes' = b'',
+                            hi_algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
+                            di: 'bytes' = b'',
+                            di_type: 'Enum_DITypes | int' = Enum_DITypes.none_included,
+                            **kwargs: 'Any') -> 'Schema_HostIDParameter':
+        """Make HIP ``HOST_ID`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            hi: host identity
+            hi_curve: host identity curve
+            hi_pub_key: host identity public key
+            hi_algorithm: host identity algorithm
+            di: domain identifier
+            di_type: domain identifier type
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``hi_algorithm`` or ``di_type`` is a name or does
+                not fit its field, if neither ``hi`` nor ``param`` is given and
+                ``hi_curve`` is not an ECDSA, ECDSA_LOW or EdDSA curve, or if
+                ``hi`` is a :class:`~pcapkit.protocols.internet.hip.data.HostIdentity`
+                whose ``curve`` is none of those.
+
+        """
+        if param is not None:
+            hi = param.hi
+            di = param.di
+            hi_len = param.hi_len
+            di_len = param.di_len
+            di_enum = param.di_type
+            algorithm = param.algorithm  # type: int | Enum_HIAlgorithm
+        else:
+            di_len = len(di)
+            di_enum = self._make_index(di_type, Enum_DITypes, bits=4, name='DI-type',
+                                       alias=f'HIPv{version}')
+            algorithm = self._make_index(hi_algorithm, Enum_HIAlgorithm, bits=16, name='algorithm',
+                                         alias=f'HIPv{version}')
+
+        if hi is None:
+            hi_len = 2 + len(hi_pub_key)
+
+            if isinstance(hi_curve, Enum_ECDSACurve):
+                hi_data = Schema_ECDSACurveHostIdentity(
+                    curve=hi_curve,
+                    pub_key=hi_pub_key,
+                )  # type: Schema_HostIdentity | bytes
+                algorithm = Enum_HIAlgorithm.ECDSA
+            elif isinstance(hi_curve, Enum_ECDSALowCurve):
+                hi_data = Schema_ECDSALowCurveHostIdentity(
+                    curve=hi_curve,
+                    pub_key=hi_pub_key,
+                )
+                algorithm = Enum_HIAlgorithm.ECDSA_LOW
+            elif isinstance(hi_curve, Enum_EdDSACurve):
+                hi_data = Schema_EdDSACurveHostIdentity(
+                    curve=hi_curve,
+                    pub_key=hi_pub_key,
+                )
+                algorithm = Enum_HIAlgorithm.EdDSA
+            else:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid curve: {hi_curve!r}')
+        else:
+            if isinstance(hi, Data_HostIdentity):
+                hi_len = 2 + len(hi.pubkey)
+                if isinstance(hi.curve, Enum_ECDSACurve):
+                    hi_data = Schema_ECDSACurveHostIdentity(
+                        curve=hi.curve,
+                        pub_key=hi.pubkey,
+                    )
+                    algorithm = Enum_HIAlgorithm.ECDSA
+                elif isinstance(hi.curve, Enum_ECDSALowCurve):
+                    hi_data = Schema_ECDSALowCurveHostIdentity(
+                        curve=hi.curve,
+                        pub_key=hi.pubkey,
+                    )
+                    algorithm = Enum_HIAlgorithm.ECDSA_LOW
+                elif isinstance(hi.curve, Enum_EdDSACurve):
+                    hi_data = Schema_EdDSACurveHostIdentity(
+                        curve=hi.curve,
+                        pub_key=hi.pubkey,
+                    )
+                    algorithm = Enum_HIAlgorithm.EdDSA
+                else:
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid curve: {hi.curve!r}')
+            elif isinstance(hi, Schema_HostIdentity):
+                hi_len = 2 + len(hi.pub_key)
+                hi_data = hi
+            else:
+                hi_len = len(hi)
+                hi_data = hi
+
+        return Schema_HostIDParameter(
+            type=code,
+            len=6 + hi_len + di_len,
+            hi_len=hi_len,
+            di_data={
+                'type': di_enum,
+                'len': di_len,
+            },
+            algorithm=algorithm,  # type: ignore[arg-type]
+            hi=hi_data,
+            di=di,
+        )
+
+    def _make_param_hit_suite_list(self, code: 'Enum_Parameter', param: 'Optional[Data_HITSuiteListParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int',
+                                   suites: 'Optional[list[Enum_HITSuite | int]]' = None,
+                                   **kwargs: 'Any') -> 'Schema_HITSuiteListParameter':
+        """Make HIP ``HIT_SUITE_LIST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            suites: list of suites
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``suites`` is a name or does not fit its field.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            suite_id = cast('list[Enum_HITSuite]', param.suite_id)
+        else:
+            suite_id = [self._make_index(suite, Enum_HITSuite, bits=8, name='HIT suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
+
+        return Schema_HITSuiteListParameter(
+            type=code,
+            len=len(suite_id),
+            suites=suite_id,
+        )
+
+    def _make_param_cert(self, code: 'Enum_Parameter', param: 'Optional[Data_CertParameter]' = None, *,  # pylint: disable=unused-argument
+                         version: 'int',
+                         cert_group: 'int' = 0,
+                         cert_count: 'int' = 0,
+                         cert_id: 'int' = 0,
+                         cert_type: 'Enum_Certificate | int' = Enum_Certificate.X_509_v3,
+                         cert: 'bytes' = b'',
+                         **kwargs: 'Any') -> 'Schema_CertParameter':
+        """Make HIP ``CERT`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            cert_group: certificate group ID -- an arbitrary number, locally
+                managed by the sender per :rfc:`8002#section-2`
+            cert_count: certificate count
+            cert_id: certificate ID
+            cert_type: certificate type
+            cert: certificate data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``cert_group``, ``cert_count``, ``cert_id`` or
+                ``cert_type`` does not fit its field, or ``cert_type`` is a name.
+
+        .. versionchanged:: 1.5.0
+
+           ``cert_group`` is a plain :obj:`int` and defaults to ``0``; the
+           ``cert_group_default``, ``cert_group_namespace`` and
+           ``cert_group_reversed`` arguments are gone, since they existed only
+           to look the value up in the Diffie-Hellman group registry that
+           :rfc:`8002` does not define for it (:issue:`2283`).
+
+        """
+        if param is not None:
+            group = param.cert_group
+            count = param.cert_count
+            id = param.cert_id
+            type = param.cert_type
+            cert = param.cert
+        else:
+            group = cert_group
+            count = cert_count
+            id = cert_id
+            type = self._make_index(cert_type, Enum_Certificate, bits=8, name='certificate type',
+                                    alias=f'HIPv{version}')
+
+        return Schema_CertParameter(
+            type=code,
+            len=4 + len(cert),
+            cert_group=self._make_uint(group, bits=8, name='certificate group',
+                                       alias=f'HIPv{version}'),
+            cert_count=self._make_uint(count, bits=8, name='certificate count',
+                                       alias=f'HIPv{version}'),
+            cert_id=self._make_uint(id, bits=8, name='certificate ID', alias=f'HIPv{version}'),
+            cert_type=type,
+            cert=cert,
+        )
+
+    def _make_param_notification(self, code: 'Enum_Parameter', param: 'Optional[Data_NotificationParameter]' = None, *,  # pylint: disable=unused-argument
+                                 version: 'int',
+                                 msg_type: 'Enum_NotifyMessage | int' = Enum_NotifyMessage.I2_ACKNOWLEDGEMENT,
+                                 msg: 'bytes' = b'',
+                                 reserved: 'bytes' = b'\x00\x00',
+                                 **kwargs: 'Any') -> 'Schema_NotificationParameter':
+        """Make HIP ``NOTIFICATION`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            msg_type: notification message type
+            msg: notification message
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``msg_type`` is a name or does not fit its field,
+                or ``reserved`` is not two octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            type = param.msg_type
+            msg = param.msg
+        else:
+            type = self._make_index(msg_type, Enum_NotifyMessage, bits=16,
+                                    name='notify message type', alias=f'HIPv{version}')
+
+        return Schema_NotificationParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=4 + len(msg),
+            msg_type=type,
+            msg=msg,
+        )
+
+    def _make_param_echo_request_signed(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestSignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                        version: 'int',
+                                        opaque: 'bytes' = b'',
+                                        **kwargs: 'Any') -> 'Schema_EchoRequestSignedParameter':
+        """Make HIP ``ECHO_REQUEST_SIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            opaque = param.opaque
+
+        return Schema_EchoRequestSignedParameter(
+            type=code,
+            len=len(opaque),
+            opaque=opaque,
+        )
+
+    def _make_param_reg_info(self, code: 'Enum_Parameter', param: 'Optional[Data_RegInfoParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             min_lifetime: 'timedelta | int | float' = 0,
+                             max_lifetime: 'timedelta | int | float' = 0xf,
+                             min_lifetime_exponent: 'Optional[int]' = None,
+                             max_lifetime_exponent: 'Optional[int]' = None,
+                             reg_info: 'Optional[list[Enum_Registration | int]]' = None,
+                             **kwargs: 'Any') -> 'Schema_RegInfoParameter':
+        """Make HIP ``REG_INFO`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            min_lifetime: minimum lifetime, encoded to the nearest lower
+                ``Min Lifetime`` octet; ignored when
+                ``min_lifetime_exponent`` is given
+            max_lifetime: maximum lifetime, encoded to the nearest lower
+                ``Max Lifetime`` octet; ignored when
+                ``max_lifetime_exponent`` is given
+            min_lifetime_exponent: the ``Min Lifetime`` octet itself,
+                ``lifetime`` in :rfc:`8003#section-4.1`'s
+                ``2^((lifetime - 64)/8)`` seconds
+            max_lifetime_exponent: the ``Max Lifetime`` octet itself
+            reg_info: registration information list
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If either exponent does not fit one octet, either
+                lifetime cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of ``reg_info`` is a
+                name or does not fit its field.
+
+        .. versionchanged:: 1.5.0
+
+           ``min_lifetime`` and ``max_lifetime`` are durations encoded per
+           :rfc:`8003#section-4.1` rather than octets written verbatim, and the
+           new ``min_lifetime_exponent`` and ``max_lifetime_exponent`` take the
+           octets directly (:issue:`2281`).
+
+        """
+        if param is not None:
+            reg_type = cast('list[Enum_Registration]', param.reg_type)
+            if min_lifetime_exponent is None:
+                min_lifetime_exponent = param.lifetime.min_exponent
+            if max_lifetime_exponent is None:
+                max_lifetime_exponent = param.lifetime.max_exponent
+        else:
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_info or []]
+
+        min_lt = self._make_lifetime_octet(code, version, min_lifetime_exponent, min_lifetime)
+        max_lt = self._make_lifetime_octet(code, version, max_lifetime_exponent, max_lifetime)
+
+        return Schema_RegInfoParameter(
+            type=code,
+            len=2 + len(reg_type),
+            min_lifetime=min_lt,
+            max_lifetime=max_lt,
+            reg_info=reg_type,
+        )
+
+    def _make_param_reg_request(self, code: 'Enum_Parameter', param: 'Optional[Data_RegRequestParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int',
+                                lifetime: 'timedelta | int | float' = 0,
+                                lifetime_exponent: 'Optional[int]' = None,
+                                reg_request: 'Optional[list[Enum_Registration | int]]' = None,
+                                **kwargs: 'Any') -> 'Schema_RegRequestParameter':
+        """Make HIP ``REG_REQUEST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime``
+                octet; ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
+                :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
+            reg_request: registration request list
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of ``reg_request``
+                is a name or does not fit its field.
+
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is a duration encoded per :rfc:`8003#section-4.1`
+           rather than an octet written verbatim, and the new
+           ``lifetime_exponent`` takes the octet directly (:issue:`2281`).
+
+        """
+        if param is not None:
+            reg_type = cast('list[Enum_Registration]', param.reg_type)
+            if lifetime_exponent is None:
+                lifetime_exponent = param.lifetime_exponent
+        else:
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_request or []]
+
+        lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
+
+        return Schema_RegRequestParameter(
+            type=code,
+            len=1 + len(reg_type),
+            lifetime=lt,
+            reg_request=reg_type,
+        )
+
+    def _make_param_reg_response(self, code: 'Enum_Parameter', param: 'Optional[Data_RegResponseParameter]' = None, *,  # pylint: disable=unused-argument
+                                 version: 'int',
+                                 lifetime: 'timedelta | int | float' = 0,
+                                 lifetime_exponent: 'Optional[int]' = None,
+                                 reg_response: 'Optional[list[Enum_Registration | int]]' = None,
+                                 **kwargs: 'Any') -> 'Schema_RegResponseParameter':
+        """Make HIP ``REG_RESPONSE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            lifetime: lifetime, encoded to the nearest lower ``Lifetime``
+                octet; ignored when ``lifetime_exponent`` is given
+            lifetime_exponent: the ``Lifetime`` octet itself, ``lifetime`` in
+                :rfc:`8003#section-4.1`'s ``2^((lifetime - 64)/8)`` seconds
+            reg_response: registration response list
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, see
+                ``_make_registration_lifetime``, or an entry of
+                ``reg_response`` is a name or does not fit its field.
+
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is a duration encoded per :rfc:`8003#section-4.1`
+           rather than an octet written verbatim, and the new
+           ``lifetime_exponent`` takes the octet directly (:issue:`2281`).
+
+        """
+        if param is not None:
+            reg_type = cast('list[Enum_Registration]', param.reg_type)
+            if lifetime_exponent is None:
+                lifetime_exponent = param.lifetime_exponent
+        else:
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_response or []]
+
+        lt = self._make_lifetime_octet(code, version, lifetime_exponent, lifetime)
+
+        return Schema_RegResponseParameter(
+            type=code,
+            len=1 + len(reg_type),
+            lifetime=lt,
+            reg_response=reg_type,
+        )
+
+    def _make_param_reg_failed(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFailedParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               failure_type: 'Enum_RegistrationFailure | int' = Enum_RegistrationFailure.Registration_requires_additional_credentials,  # pylint: disable=line-too-long
+                               reg_failed: 'Optional[list[Enum_Registration | int]]' = None,
+                               **kwargs: 'Any') -> 'Schema_RegFailedParameter':
+        """Make HIP ``REG_FAILED`` parameter.
+
+        .. versionchanged:: 1.5.0
+
+           ``lifetime`` is replaced by ``failure_type``, with no alias, and
+           ``reg_failed`` takes registration types rather than failure types
+           (:issue:`2309`).
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            failure_type: registration failure type
+            reg_failed: list of registration types that failed
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``failure_type`` or an entry of ``reg_failed`` is
+                a name or does not fit its field.
+
+        """
+        if param is not None:
+            failure = param.failure_type
+            reg_type = cast('list[Enum_Registration]', param.reg_type)
+        else:
+            failure = self._make_index(failure_type, Enum_RegistrationFailure, bits=8,
+                                       name='failure type', alias=f'HIPv{version}')
+            reg_type = [self._make_index(reg, Enum_Registration, bits=8, name='registration type',
+                                         alias=f'HIPv{version}')
+                        for reg in reg_failed or []]
+
+        return Schema_RegFailedParameter(
+            type=code,
+            len=1 + len(reg_type),
+            failure_type=failure,
+            reg_failed=reg_type,
+        )
+
+    def _make_param_reg_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFromParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             port: 'int' = 0,
+                             protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
+                             address: 'IPv6Address | str | int | bytes' = '::',
+                             reserved: 'bytes' = b'\x00',
+                             **kwargs: 'Any') -> 'Schema_RegFromParameter':
+        """Make HIP ``REG_FROM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            port: port number
+            protocol: transport protocol
+            address: IPv6 address
+            reserved: the reserved octet
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
+            port = param.port
+            proto = param.protocol
+            address = param.address
+        else:
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
+
+        return Schema_RegFromParameter(
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=20,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
+            protocol=proto,
+            address=address,
+        )
+
+    def _make_param_echo_response_signed(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoResponseSignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                         version: 'int',
+                                         opaque: 'bytes' = b'',
+                                         **kwargs: 'Any') -> 'Schema_EchoResponseSignedParameter':
+        """Make HIP ``ECHO_RESPONSE_SIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            opaque = param.opaque
+
+        return Schema_EchoResponseSignedParameter(
+            type=code,
+            len=len(opaque),
+            opaque=opaque,
+        )
+
+    def _make_param_transport_format_list(self, code: 'Enum_Parameter', param: 'Optional[Data_TransportFormatListParameter]' = None, *,  # pylint: disable=unused-argument
+                                          version: 'int',
+                                          formats: 'Optional[list[Enum_Parameter | int]]' = None,
+                                          **kwargs: 'Any') -> 'Schema_TransportFormatListParameter':
+        """Make HIP ``TRANSPORT_FORMAT_LIST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            formats: transport format list, each a parameter type
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: The parameter is **NOT** supported in HIPv1, or an
+                entry of ``formats`` is a name or does not fit its field.
+
+        """
+        if version == 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
+
+        if param is not None:
+            tf_type = cast('list[Enum_Parameter]', param.tf_type)
+        else:
+            tf_type = [self._make_index(tf, Enum_Parameter, bits=16, name='transport format type',
+                                        alias=f'HIPv{version}')
+                       for tf in formats or []]
+
+        return Schema_TransportFormatListParameter(
+            type=code,
+            len=2 * len(tf_type),
+            formats=tf_type,
+        )
+
+    def _make_param_esp_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPTransformParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int',
+                                  suites: 'Optional[list[Enum_ESPTransformSuite | int]]' = None,
+                                  reserved: 'bytes' = b'\x00\x00',
+                                  **kwargs: 'Any') -> 'Schema_ESPTransformParameter':
+        """Make HIP ``ESP_TRANSFORM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            suites: ESP transform suite list
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If an entry of ``suites`` is a name or does not fit
+                its field, or ``reserved`` is not two octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            suite_id = cast('list[Enum_ESPTransformSuite]', param.suite_id)
+        else:
+            suite_id = [self._make_index(suite, Enum_ESPTransformSuite, bits=16, name='suite ID',
+                                         alias=f'HIPv{version}')
+                        for suite in suites or []]
+
+        return Schema_ESPTransformParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=2 + 2 * len(suite_id),
+            suites=suite_id,
+        )
+
+    def _make_param_seq_data(self, code: 'Enum_Parameter', param: 'Optional[Data_SeqDataParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             seq: 'int' = 0,
+                             **kwargs: 'Any') -> 'Schema_SeqDataParameter':
+        """Make HIP ``SEQ_DATA`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            seq: sequence number
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``seq`` does not fit its field.
+
+        """
+        if param is not None:
+            seq = param.seq
+
+        return Schema_SeqDataParameter(
+            type=code,
+            len=4,
+            seq=self._make_uint(seq, bits=32, name='sequence number', alias=f'HIPv{version}'),
+        )
+
+    def _make_param_ack_data(self, code: 'Enum_Parameter', param: 'Optional[Data_AckDataParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             ack: 'Optional[list[int]]' = None,
+                             **kwargs: 'Any') -> 'Schema_AckDataParameter':
+        """Make HIP ``ACK_DATA`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            ack: ACK list
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If an entry of ``ack`` does not fit its field.
+
+        """
+        if param is not None:
+            ack = cast('list[int]', param.ack)
+        else:
+            ack = [] if ack is None else ack
+
+        for item in ack:
+            self._make_uint(item, bits=32, name='acknowledged sequence number',
+                            alias=f'HIPv{version}')
+
+        return Schema_AckDataParameter(
+            type=code,
+            len=4 * len(ack),
+            ack=ack,
+        )
+
+    def _make_param_payload_mic(self, code: 'Enum_Parameter', param: 'Optional[Data_PayloadMICParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int',
+                                next: 'Enum_TransType | int' = Enum_TransType.UDP,
+                                payload: 'bytes' = b'\x00\x00\x00\x00',
+                                mic: 'bytes' = b'',
+                                reserved: 'bytes' = b'\x00\x00\x00',
+                                **kwargs: 'Any') -> 'Schema_PayloadMICParameter':
+        """Make HIP ``PAYLOAD_MIC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            next: next protocol
+            payload: payload data
+            mic: message integrity code
+            reserved: the three reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``next`` is a name or does not fit its field,
+                ``payload`` is not four octets, or ``reserved`` is not three.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00\x00')
+            protocol = param.next
+            payload = param.payload
+            mic = param.mic
+        else:
+            protocol = self._make_index(next, Enum_TransType, bits=8, name='next header',
+                                        alias=f'HIPv{version}')
+
+        return Schema_PayloadMICParameter(
+            reserved=self._make_octets(reserved, size=3, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=8 + len(mic),
+            next=protocol,
+            payload=self._make_octets(payload, size=4, name='payload data', alias=f'HIPv{version}'),
+            mic=mic,
+        )
+
+    def _make_identifier_width(self, code: 'Enum_Parameter', version: 'int',
+                               id_len: 'Optional[int]', identifier: 'int') -> 'int':
+        """Resolve the on-wire width of an opaque ``Identifier`` field.
+
+        ``TRANSACTION_ID`` (:rfc:`6078#section-4.4`) and ``OVERLAY_ID``
+        (:rfc:`6079#section-6.1`) both spell their ``Length`` as the "Length of
+        the Identifier, in octets" over an otherwise opaque value, so the width
+        is a property of the identifier as issued and not of the number that
+        happens to be in it. It is resolved here in that order of authority:
+
+        1. an explicit ``id_len`` argument, which is what a parsed parameter
+           carries on :attr:`TransactionIDParameter.id_len
+           <pcapkit.protocols.internet.hip.data.TransactionIDParameter.id_len>`;
+        2. failing that, the identifier's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 2 can lose a leading zero octet, and it is the only case
+        where the width is genuinely unknowable -- a from-scratch build with
+        nothing declaring it. Using it unconditionally re-serialised a
+        ``Length = 4`` identifier of ``1`` as ``Length = 1`` (:issue:`2271`),
+        the same way :meth:`_make_puzzle_field_width` guards ``Random #I``
+        against :issue:`653`.
+
+        A width of ``0`` is accepted rather than rejected: it is what case 2
+        yields for the default identifier of ``0``, and what a ``Length = 0``
+        parameter parses back to, so refusing it would fail callers that pass no
+        value at all.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            id_len: declared field width in octets, if any
+            identifier: the identifier that must fit
+
+        Returns:
+            The width of the ``Identifier`` field, in octets.
+
+        Raises:
+            ProtocolError: If ``identifier`` is negative or needs more octets
+                than the 2-octet ``Length`` field can count, or the declared
+                width is negative, too narrow for ``identifier``, or beyond
+                what that field can hold.
+
+        """
+        identifier = self._make_uint(identifier, bits=0xFFFF * 8, name='identifier',
+                                     alias=f'HIPv{version}')
+        if id_len is None:
+            return self._uint_size(identifier)
+
+        id_len = self._make_uint(id_len, bits=16, name='identifier width', alias=f'HIPv{version}')
+        if identifier.bit_length() > id_len * 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid identifier width: '
+                                f'{id_len} octets cannot hold {identifier!r}')
+        return id_len
+
+    def _make_param_transaction_id(self, code: 'Enum_Parameter', param: 'Optional[Data_TransactionIDParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int',
+                                   id: 'int' = 0,
+                                   id_len: 'Optional[int]' = None,
+                                   **kwargs: 'Any') -> 'Schema_TransactionIDParameter':
+        """Make HIP ``TRANSACTION_ID`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            id: transaction ID
+            id_len: on-wire width of ``Identifier``, in octets; defaults to the
+                width ``param`` was parsed with, or to ``id``'s own bit length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If the width of ``Identifier`` is invalid; see
+                ``_make_identifier_width``.
+
+        .. versionchanged:: 1.5.0
+
+           New ``id_len`` argument, so that an identifier with leading zero
+           octets rebuilds at the width it was read with (:issue:`2271`).
+
+        """
+        if param is not None:
+            id = param.id
+            if id_len is None:
+                id_len = param.id_len
+
+        return Schema_TransactionIDParameter(
+            type=code,
+            len=self._make_identifier_width(code, version, id_len, id),
+            id=id,
+        )
+
+    def _make_param_overlay_id(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayIDParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               id: 'int' = 0,
+                               id_len: 'Optional[int]' = None,
+                               **kwargs: 'Any') -> 'Schema_OverlayIDParameter':
+        """Make HIP ``OVERLAY_ID`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            id: overlay ID
+            id_len: on-wire width of ``Identifier``, in octets; defaults to the
+                width ``param`` was parsed with, or to ``id``'s own bit length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If the width of ``Identifier`` is invalid; see
+                ``_make_identifier_width``.
+
+        .. versionchanged:: 1.5.0
+
+           New ``id_len`` argument, so that an identifier with leading zero
+           octets rebuilds at the width it was read with (:issue:`2271`).
+
+        """
+        if param is not None:
+            id = param.id
+            if id_len is None:
+                id_len = param.id_len
+
+        return Schema_OverlayIDParameter(
+            type=code,
+            len=self._make_identifier_width(code, version, id_len, id),
+            id=id,
+        )
+
+    def _make_param_route_dst(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteDstParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int',
+                              symmetric: 'bool' = False,
+                              must_follow: 'bool' = False,
+                              flags_reserved: 'int' = 0,
+                              hit: 'Optional[list[bytes | str | int | IPv6Address]]' = None,
+                              reserved: 'bytes' = b'\x00\x00',
+                              **kwargs: 'Any') -> 'Schema_RouteDstParameter':
+        """Make HIP ``ROUTE_DST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            symmetric: symmetric flag
+            must_follow: must-follow flag
+            flags_reserved: the 14 reserved low-order bits of ``Flags``
+            hit: list of HITs
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``flags_reserved`` does not fit its field.
+                Also if ``reserved`` is not two octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            symmetric = param.flags.symmetric
+            must_follow = param.flags.must_follow
+            flags_reserved = param.flags.reserved
+            hit_list = cast('list[bytes | str | int | IPv6Address]', param.hit)
+        else:
+            hit_list = hit if hit is not None else []
+
+        return Schema_RouteDstParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=4 + 16 * len(hit_list),
+            flags={
+                'symmetric': int(symmetric),
+                'must_follow': int(must_follow),
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits',
+                                            alias=f'HIPv{version}'),
+            },
+            hit=hit_list,
+        )
+
+    def _make_param_hip_transport_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransportModeParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int',
+                                       port: 'int' = 0,
+                                       modes: 'Optional[list[Enum_Transport | int]]' = None,
+                                       **kwargs: 'Any') -> 'Schema_HIPTransportModeParameter':
+        """Make HIP ``HIP_TRANSPORT_MODE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            port: port number
+            modes: transport mode list
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``port`` or an entry of ``modes`` does not fit its
+                field, or an entry of ``modes`` is a name.
+
+        """
+        if param is not None:
+            port = param.port
+            mode_id = cast('list[Enum_Transport]', param.mode_id)
+        else:
+            mode_id = [self._make_index(mode, Enum_Transport, bits=16, name='mode ID',
+                                        alias=f'HIPv{version}')
+                       for mode in modes or []]
+
+        return Schema_HIPTransportModeParameter(
+            type=code,
+            len=2 + 2 * len(mode_id),
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
+            mode=mode_id,
+        )
+
+    def _make_param_hip_mac(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPMACParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int',
+                            hmac: 'bytes' = b'',
+                            **kwargs: 'Any') -> 'Schema_HIPMACParameter':
+        """Make HIP ``HIP_MAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            hmac = param.hmac
+
+        return Schema_HIPMACParameter(
+            type=code,
+            len=len(hmac),
+            hmac=hmac,
+        )
+
+    def _make_param_hip_mac_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPMAC2Parameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int',
+                              hmac: 'bytes' = b'',
+                              **kwargs: 'Any') -> 'Schema_HIPMAC2Parameter':
+        """Make HIP ``HIP_MAC_2`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            hmac = param.hmac
+
+        return Schema_HIPMAC2Parameter(
+            type=code,
+            len=len(hmac),
+            hmac=hmac,
+        )
+
+    def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignature2Parameter]' = None, *,  # pylint: disable=unused-argument
+                                    version: 'int',
+                                    algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
+                                    signature: 'bytes' = b'',
+                                    **kwargs: 'Any') -> 'Schema_HIPSignature2Parameter':
+        """Make HIP ``HIP_SIGNATURE_2`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            algorithm: signature algorithm
+            signature: signature value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``algorithm`` is a name or does not fit its field.
+
+        """
+        if param is not None:
+            algo = param.algorithm
+            signature = param.signature
+        else:
+            algo = self._make_index(algorithm, Enum_HIAlgorithm, bits=16,
+                                    name='signature algorithm', alias=f'HIPv{version}')
+
+        return Schema_HIPSignature2Parameter(
+            type=code,
+            len=2 + len(signature),
+            algorithm=algo,
+            signature=signature,
+        )
+
+    def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignatureParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int',
+                                  algorithm: 'Enum_HIAlgorithm | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
+                                  signature: 'bytes' = b'',
+                                  **kwargs: 'Any') -> 'Schema_HIPSignatureParameter':
+        """Make HIP ``HIP_SIGNATURE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            algorithm: signature algorithm
+            signature: signature value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``algorithm`` is a name or does not fit its field.
+
+        """
+        if param is not None:
+            algo = param.algorithm
+            signature = param.signature
+        else:
+            algo = self._make_index(algorithm, Enum_HIAlgorithm, bits=16,
+                                    name='signature algorithm', alias=f'HIPv{version}')
+
+        return Schema_HIPSignatureParameter(
+            type=code,
+            len=2 + len(signature),
+            algorithm=algo,
+            signature=signature,
+        )
+
+    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                          version: 'int',
+                                          opaque: 'bytes' = b'',
+                                          **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
+        """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            opaque = param.opaque
+
+        return Schema_EchoRequestUnsignedParameter(
+            type=code,
+            len=len(opaque),
+            opaque=opaque,
+        )
+
+    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoResponseUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                           version: 'int',
+                                           opaque: 'bytes' = b'',
+                                           **kwargs: 'Any') -> 'Schema_EchoResponseUnsignedParameter':
+        """Make HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            opaque = param.opaque
+
+        return Schema_EchoResponseUnsignedParameter(
+            type=code,
+            len=len(opaque),
+            opaque=opaque,
+        )
+
+    def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayFromParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               port: 'int' = 0,
+                               protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
+                               address: 'IPv6Address | str | int | bytes' = '::',
+                               reserved: 'bytes' = b'\x00',
+                               **kwargs: 'Any') -> 'Schema_RelayFromParameter':
+        """Make HIP ``RELAY_FROM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            port: port number
+            protocol: transport protocol
+            address: the address the relay server received the relayed
+                packet from (:rfc:`5770`)
+            reserved: the reserved octet
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
+            port = param.port
+            proto = param.protocol
+            address = param.address
+        else:
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
+
+        return Schema_RelayFromParameter(
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=20,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
+            protocol=proto,
+            address=address,
+        )
+
+    def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayToParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             port: 'int' = 0,
+                             protocol: 'Enum_TransType | int' = Enum_TransType.UDP,
+                             address: 'IPv6Address | str | int | bytes' = '::',
+                             reserved: 'bytes' = b'\x00',
+                             **kwargs: 'Any') -> 'Schema_RelayToParameter':
+        """Make HIP ``RELAY_TO`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            port: port number
+            protocol: transport protocol
+            address: the address the relay server forwards the packet to
+                (:rfc:`5770`)
+            reserved: the reserved octet
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``port`` or ``protocol`` does not fit its field,
+                or ``protocol`` is a name.
+                Also if ``reserved`` is not one octet.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00')
+            port = param.port
+            proto = param.protocol
+            address = param.address
+        else:
+            proto = self._make_index(protocol, Enum_TransType, bits=8, name='protocol',
+                                     alias=f'HIPv{version}')
+
+        return Schema_RelayToParameter(
+            reserved=self._make_octets(reserved, size=1, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=20,
+            port=self._make_uint(port, bits=16, name='port', alias=f'HIPv{version}'),
+            protocol=proto,
+            address=address,
+        )
+
+    def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayTTLParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int',
+                                ttl: 'int' = 0,
+                                reserved: 'bytes' = b'\x00\x00',
+                                **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
+        """Make HIP ``OVERLAY_TTL`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            ttl: overlay time-to-live (TTL), as a count of remaining overlay
+                hops rather than a duration -- see
+                :attr:`OverlayTTLParameter.ttl
+                <pcapkit.protocols.internet.hip.data.OverlayTTLParameter.ttl>`
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``ttl`` does not fit its field.
+                Also if ``reserved`` is not two octets.
+
+        .. versionchanged:: 1.5.0
+
+           ``ttl`` is a hop count rather than a duration, and no longer accepts
+           a :class:`~datetime.timedelta` (:issue:`2282`).
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            ttl_val = param.ttl
+        else:
+            ttl_val = ttl
+
+        return Schema_OverlayTTLParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=4,
+            ttl=self._make_uint(ttl_val, bits=16, name='TTL', alias=f'HIPv{version}'),
+        )
+
+    def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteViaParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int',
+                              symmetric: 'bool' = False,
+                              must_follow: 'bool' = False,
+                              flags_reserved: 'int' = 0,
+                              hit: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                              reserved: 'bytes' = b'\x00\x00',
+                              **kwargs: 'Any') -> 'Schema_RouteViaParameter':
+        """Make HIP ``ROUTE_VIA`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            symmetric: symmetric flag
+            must_follow: must-follow flag
+            flags_reserved: the 14 reserved low-order bits of ``Flags``
+            hit: list of HITs
+            reserved: the two reserved octets
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``flags_reserved`` does not fit its field.
+                Also if ``reserved`` is not two octets.
+
+        """
+        if param is not None:
+            reserved = getattr(param, 'reserved', b'\x00\x00')
+            symmetric = param.flags.symmetric
+            must_follow = param.flags.must_follow
+            flags_reserved = param.flags.reserved
+            hit_list = cast('list[IPv6Address | bytes | str | int]', param.hit)
+        else:
+            hit_list = hit if hit is not None else []
+
+        return Schema_RouteViaParameter(
+            reserved=self._make_octets(reserved, size=2, name='reserved octets', alias=f'HIPv{version}'),
+            type=code,
+            len=4 + 16 * len(hit_list),
+            flags={
+                'symmetric': int(symmetric),
+                'must_follow': int(must_follow),
+                'reserved': self._make_uint(flags_reserved, bits=14, name='reserved bits',
+                                            alias=f'HIPv{version}'),
+            },
+            hit=hit_list,
+        )
+
+    def _make_param_from(self, code: 'Enum_Parameter', param: 'Optional[Data_FromParameter]' = None, *,  # pylint: disable=unused-argument
+                         version: 'int',
+                         address: 'IPv6Address | str | int | bytes' = '::',
+                         **kwargs: 'Any') -> 'Schema_FromParameter':
+        """Make HIP ``FROM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            address: the original source address of the relayed packet
+                (:rfc:`8004`)
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            address = param.address
+
+        return Schema_FromParameter(
+            type=code,
+            len=16,
+            address=address,
+        )
+
+    def _make_param_rvs_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RVSHMACParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int',
+                             hmac: 'bytes' = b'',
+                             **kwargs: 'Any') -> 'Schema_RVSHMACParameter':
+        """Make HIP ``RVS_HMAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            hmac = param.hmac
+
+        return Schema_RVSHMACParameter(
+            type=code,
+            len=len(hmac),
+            hmac=hmac,
+        )
+
+    def _make_param_via_rvs(self, code: 'Enum_Parameter', param: 'Optional[Data_ViaRVSParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int',
+                            address: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                            **kwargs: 'Any') -> 'Schema_ViaRVSParameter':
+        """Make HIP ``VIA_RVS`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            address: list of relay addresses
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            addr_list = cast('list[IPv6Address | bytes | str | int]', param.address)
+        else:
+            addr_list = address if address is not None else []
+
+        return Schema_ViaRVSParameter(
+            type=code,
+            len=16 * len(addr_list),
+            address=addr_list,
+        )
+
+    def _make_param_relay_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayHMACParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int',
+                               hmac: 'bytes' = b'',
+                               **kwargs: 'Any') -> 'Schema_RelayHMACParameter':
+        """Make HIP ``RELAY_HMAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if param is not None:
+            hmac = param.hmac
+
+        return Schema_RelayHMACParameter(
+            type=code,
+            len=len(hmac),
+            hmac=hmac,
+        )

@@ -83,7 +83,7 @@ def _split_frames(wire: bytes) -> 'list[bytes]':
 
 def _layers(proto: 'object') -> 'tuple[list, object]':
     """Each HTTP/2 layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
     layers = []
     while isinstance(proto, HTTPv2):
@@ -99,7 +99,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for name, wire in FRAMES.items():
             with self.subTest(frame=name):
@@ -107,7 +107,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(HTTPv2.from_data(parsed.info)).hex(), wire.hex())
 
     def test_preface_is_parsed_and_rebuilt(self) -> None:
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         for name, wire in {
             'preface + SETTINGS': PREFACE + bytes.fromhex('000000040000000000'),
@@ -119,7 +119,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
                 self.assertEqual(bytes(HTTP.from_data(parsed.info)).hex(), wire.hex())
 
     def test_payload_is_bounded_by_the_declared_length(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         wire = FRAMES['1243 DATA then SETTINGS ACK']
         parsed = HTTPv2(wire, len(wire))
@@ -128,7 +128,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         self.assertEqual(bytes(parsed.payload), SETTINGS_ACK)
 
     def test_reserved_and_undefined_bits_are_parsed(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         def parse(name: str) -> 'object':
             wire = FRAMES[name]
@@ -143,7 +143,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
 
     def test_repeated_settings_keep_their_order(self) -> None:
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         wire = FRAMES['1247 SETTINGS A, B, A']
         settings = HTTPv2(wire, len(wire)).info.settings
@@ -156,7 +156,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
     def test_repeated_settings_index_to_the_last_value(self) -> None:
         """The last value of a repeated identifier wins (RFC 9113 section 6.5)."""
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         wire = FRAMES['1247 SETTINGS A, B, A']
         info = HTTPv2(wire, len(wire)).info
@@ -172,14 +172,14 @@ class TestHTTP2RoundTrip(unittest.TestCase):
 
     def test_make_padded_with_zero_pad_length(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         made = HTTPv2(type=Frame.DATA, sid=1, frame={'padded': True, 'data': b'abc'})
         self.assertEqual(bytes(made), FRAMES['1244 DATA PADDED, Pad Length 0'])
 
     def test_make_accepts_frame_bytes(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for frame_type, sid, payload in (
             (Frame.DATA, 1, b'abc'),
@@ -202,7 +202,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
 
     def test_make_frame_bytes_wrong_for_the_type_raise_protocol_error(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -210,7 +210,7 @@ class TestHTTP2RoundTrip(unittest.TestCase):
 
     def test_make_ping_rejects_wrong_width_opaque_data(self) -> None:
         from pcapkit.const.http.frame import Frame
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for data in (b'abc', b'0123456789'):
@@ -229,8 +229,8 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
 
     def test_every_frame_is_an_http2_layer(self) -> None:
         """Each layer holds the frame header the specification frames (RFC 9113, section 4.1)."""
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
@@ -245,9 +245,9 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
                     self.assertEqual(layer.info.sid, int.from_bytes(frame[5:9], 'big') & 0x7FFFFFFF)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp_to_80 = bytes.fromhex('c350005000000001000000015010ffff00000000')
         for name, wire in SEGMENTS.items():
@@ -265,7 +265,7 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
 
     def test_make_then_parse_is_byte_exact(self) -> None:
         """Each frame made from its parsed fields, carrying the next as ``payload``."""
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
@@ -286,8 +286,8 @@ class TestHTTP2SegmentRoundTrip(unittest.TestCase):
 
     def test_trailing_partial_frame_stays_raw(self) -> None:
         """The frame a segment ends inside is the reassembly limit, kept as its own octets."""
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, segment in SEGMENTS.items():
             with self.subTest(segment=name):

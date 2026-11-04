@@ -31,7 +31,7 @@ class TestSignedNumberFieldDecode(unittest.TestCase):
 
     def test_schema_int32_decodes_negative(self) -> None:
         from pcapkit.corekit.fields.numbers import Int32Field, UInt8Field
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.schema import Schema
 
         class T(Schema):
             z: 'int' = Int32Field()
@@ -48,7 +48,7 @@ class TestSignedNumberFieldDecode(unittest.TestCase):
                 self.assertEqual(T(z=schema.z, u=schema.u).pack({}), data)
 
     def test_pcap_thiszone_round_trips(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         data = bytes.fromhex('d4c3b2a1' '0200' '0400' 'f0f1ffff' '00000000' 'ffff0000' '01000000')
         header = Header(data)

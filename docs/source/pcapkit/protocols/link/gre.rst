@@ -2,9 +2,10 @@ GRE - Generic Routing Encapsulation
 ====================================
 
 .. module:: pcapkit.protocols.link.gre
+.. module:: pcapkit.protocols.link.gre.protocol
 
-:mod:`pcapkit.protocols.link.gre` contains
-:class:`~pcapkit.protocols.link.gre.GRE`
+:mod:`pcapkit.protocols.link.gre.protocol` contains
+:class:`~pcapkit.protocols.link.gre.protocol.GRE`
 only, which implements the extractor for the Generic Routing Encapsulation
 base header [*]_ plus the optional Key and Sequence Number extensions [*]_, as
 reached through IP protocol number 47 behind any layer sharing
@@ -45,7 +46,7 @@ is 4, 8, 12 or 16 octets depending on which are set. The Protocol Type field
 is an EtherType, dispatched onward through
 :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, the same
 family registry Ethernet, VLAN and LinuxSLL already share -- unlike
-:class:`~pcapkit.protocols.link.frad.FRAD`, this class keeps no registry of
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD`, this class keeps no registry of
 its own. A nonzero Version Number (RFC 2637's "Enhanced GRE"/PPTP, version 1)
 is a different, incompatible protocol and is refused rather than misread; see
 the module docstring's *Scope* section.
@@ -55,7 +56,7 @@ IP header nearest the TCP segment as for any tunnel (:issue:`1581`), and IPv4
 reassembly of an outer datagram fragmented in transit yields a parsed GRE
 layer.
 
-.. autoclass:: pcapkit.protocols.link.gre.GRE
+.. autoclass:: pcapkit.protocols.link.gre.protocol.GRE
    :no-members:
    :show-inheritance:
 
@@ -77,18 +78,18 @@ layer.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.link.gre
+.. module:: pcapkit.protocols.link.gre.schema
 
-.. autoclass:: pcapkit.protocols.schema.link.gre.GRE
+.. autoclass:: pcapkit.protocols.link.gre.schema.GRE
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.link.gre
+.. module:: pcapkit.protocols.link.gre.data
 
-.. autoclass:: pcapkit.protocols.data.link.gre.GRE
+.. autoclass:: pcapkit.protocols.link.gre.data.GRE
    :members:
    :show-inheritance:
 

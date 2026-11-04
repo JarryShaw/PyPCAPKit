@@ -100,7 +100,7 @@ class TestMHFlagsReserved(unittest.TestCase):
     def _parse(octets: 'bytes') -> 'object':
         import io
 
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH(io.BytesIO(octets), len(octets), extension=True)
 
@@ -130,8 +130,8 @@ class TestMHFlagsReserved(unittest.TestCase):
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.qos_attribute import QoSAttribute
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         if site in MESSAGES:
             data = {'flags_reserved': reserved['value']} if reserved else {}
@@ -164,7 +164,7 @@ class TestMHFlagsReserved(unittest.TestCase):
                 self.assertEqual(getattr(model, attr), (1 << width) - 1)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         for site, (frame, _) in FRAMES.items():
             with self.subTest(site=site):

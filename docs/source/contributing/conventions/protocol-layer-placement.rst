@@ -46,8 +46,8 @@ The subpackages, functionally rather than by carrier:
 .. important::
 
    :mod:`~pcapkit.protocols.application` is **not** "payloads reached by port or SCTP
-   PPID". :class:`~pcapkit.protocols.application.ospf.OSPF` is reached by IANA protocol
-   number and :class:`~pcapkit.protocols.application.rarp.RARP` by EtherType, and
+   PPID". :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` is reached by IANA protocol
+   number and :class:`~pcapkit.protocols.application.rarp.protocol.RARP` by EtherType, and
    neither has a port.
 
 Why Function and Not Encapsulation
@@ -108,8 +108,8 @@ Tunnelling Protocols: Payload, Not Carrier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A tunnelling protocol is placed by what it carries, not by what carries it. So
-:class:`~pcapkit.protocols.link.l2tp.L2TP` and
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` stay in
+:class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` and
+:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` stay in
 :mod:`~pcapkit.protocols.link` and are **not** application-layer, even though L2TP is
 commonly seen over UDP.
 
@@ -134,17 +134,17 @@ the MRO, so whichever base owns it *earliest* wins:
 .. code-block:: pycon
 
    >>> from pcapkit.protocols.link.link import Link
-   >>> from pcapkit.protocols.misc.raw import Raw
+   >>> from pcapkit.protocols.misc.raw.protocol import Raw
    >>> '__layer__' in vars(Link), '__layer__' in vars(Raw)
    (True, False)
 
-:class:`~pcapkit.protocols.misc.raw.Raw` does **not** own ``__layer__`` -- it inherits
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` does **not** own ``__layer__`` -- it inherits
 :obj:`None` from :class:`~pcapkit.protocols.protocol.ProtocolBase` -- so a class
 naming both :class:`~pcapkit.protocols.application.application.Application` and
-:class:`~pcapkit.protocols.misc.raw.Raw` reports ``'Application'`` in either base order.
-So :class:`~pcapkit.protocols.application.ftp_data.FTP_DATA`, declared
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` reports ``'Application'`` in either base order.
+So :class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`, declared
 ``class FTP_DATA(Application, Raw)``, reports ``'Application'``.
-:class:`~pcapkit.protocols.link.arp.ARP`'s chain reaches
+:class:`~pcapkit.protocols.link.arp.protocol.ARP`'s chain reaches
 :class:`~pcapkit.protocols.link.link.Link`, which **does** own it, so
 ``class RARP(ARP, Application)`` would report ``'Link'`` and be wrong.
 
@@ -157,13 +157,13 @@ Apparent Mistakes
 Each is deliberate. Do not "fix" any of them.
 
 **A parsing base may live in another subpackage.**
-:mod:`pcapkit.protocols.application.rarp` imports
-:class:`~pcapkit.protocols.link.arp.ARP` from :mod:`pcapkit.protocols.link.arp`. That
+:mod:`pcapkit.protocols.application.rarp.protocol` imports
+:class:`~pcapkit.protocols.link.arp.protocol.ARP` from :mod:`pcapkit.protocols.link.arp.protocol`. That
 ``application/ → link/`` dependency is the honest consequence of letting layer and
 parser disagree.
 
 **A pseudo-header protocol is in** :mod:`~pcapkit.protocols.misc`, **not beside the
-layer it is built from.** :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`
+layer it is built from.** :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`
 is built from an IPv4 or IPv6 layer but is no layer on the wire, and its ``__layer__``
 is :obj:`None`. Pseudo-header protocols share :mod:`pcapkit.protocols.misc.checksum`,
 ruled in review of the IP pseudo-header, :pr:`2479` (:issue:`2471`); the issue's
@@ -179,17 +179,17 @@ nothing about which registry reaches it, and no dispatch key depends on it:
    * - Class
      - Dispatched from
      - Subpackage
-   * - :class:`~pcapkit.protocols.application.ospf.OSPF`
+   * - :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`
      - :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>` by
        :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
      - :mod:`~pcapkit.protocols.application`
-   * - :class:`~pcapkit.protocols.application.rarp.RARP`
+   * - :class:`~pcapkit.protocols.application.rarp.protocol.RARP`
      - :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>` by EtherType
      - :mod:`~pcapkit.protocols.application`
 
 Nothing else needs overriding. :class:`~pcapkit.protocols.application.application.Application`
 accepts the ``-1`` sentinel (the undissected remainder) and resolves it to
-:class:`~pcapkit.protocols.misc.raw.Raw`, so OSPF's body and the padding Ethernet adds
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, so OSPF's body and the padding Ethernet adds
 to a short RARP frame attach without either class touching
 ``__post_init__``, ``_decode_next_layer`` or ``_import_next_layer``. Only a real
 protocol number is refused.
@@ -210,13 +210,13 @@ plus ``__index__``, ``_decode_next_layer`` and ``_import_next_layer``.
 ``register``, ``_read_protos`` and ``_shipped_proto``, the last set because
 :class:`~pcapkit.protocols.link.link.Link` defines its own ``__proto__`` -- and each of
 those also exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so each still
-resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. The strict difference
+resolves on :class:`~pcapkit.protocols.application.ospf.protocol.OSPF`. The strict difference
 :class:`~pcapkit.protocols.link.link.Link` minus
 :class:`~pcapkit.protocols.application.application.Application` minus
 :class:`~pcapkit.protocols.protocol.ProtocolBase` is ``__proto_key__`` alone, which
 :class:`~pcapkit.protocols.link.link.Link` declares, as asked for on :pr:`2392` (no
 issue holds the ruling), and neither of the others does, so it does **not** resolve on
-:class:`~pcapkit.protocols.application.ospf.OSPF`. Nothing turns on that:
+:class:`~pcapkit.protocols.application.ospf.protocol.OSPF`. Nothing turns on that:
 :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` reads the pairing
 out of the registry owner's own namespace rather than off the class, and reads its
 absence as *declares no pairing* rather than as an error. What changes is which
@@ -225,10 +225,10 @@ registry it resolves *to*: ``OSPF.__proto__`` is
 than :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, so OSPF does not
 see Link's EtherType entries. That is inert -- nothing reaches OSPF by EtherType, and a
 ``-1`` lookup misses in both registries alike and resolves to
-:class:`~pcapkit.protocols.misc.raw.Raw`, inserting nothing on the miss.
-:class:`~pcapkit.protocols.application.rarp.RARP` keeps
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, inserting nothing on the miss.
+:class:`~pcapkit.protocols.application.rarp.protocol.RARP` keeps
 :class:`~pcapkit.protocols.link.link.Link`'s through
-:class:`~pcapkit.protocols.link.arp.ARP`.
+:class:`~pcapkit.protocols.link.arp.protocol.ARP`.
 
 Tie-Break Order
 ~~~~~~~~~~~~~~~

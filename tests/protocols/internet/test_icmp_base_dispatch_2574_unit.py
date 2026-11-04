@@ -2,7 +2,7 @@
 """The ICMP family base dispatches where the version is known. C.f. #2574.
 
 A versioned family's base never yields an instance of itself. The ``version``
-keyword names the member :class:`~pcapkit.protocols.internet.icmp.ICMP` gives,
+keyword names the member :class:`~pcapkit.protocols.internet.icmp.protocol.ICMP` gives,
 from octets or from fields, and nothing else does: an ICMP message has no
 version field -- the IP layer names it, by protocol number 1 (RFC 792) or 58
 (RFC 4443, section 1) -- and no field picks a member, so both are refused
@@ -36,7 +36,7 @@ NO_VERSION_FIELDS = '^ICMP: no version to build with; pass version=4 or version=
 def pseudo() -> 'object':
     """An IPv6 pseudo-header, which only ICMPv6 takes."""
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
+    from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
 
     return IP_Pseudo(src='2001:db8::1', dst='2001:db8::2', protocol=TransType.IPv6_ICMP, upper_length=0)
 
@@ -49,13 +49,13 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     @staticmethod
     def member(version: 'int') -> 'type':
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         return {4: ICMPv4, 6: ICMPv6}[version]
 
     def test_octets_without_version_raise(self) -> None:
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version, octets in ECHO.items():
@@ -69,7 +69,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_octets(self) -> None:
         """Even octets of the other version: the format carries none to object."""
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
 
         for version in (4, 6):
             for octets_of, octets in ECHO.items():
@@ -84,7 +84,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_fields(self) -> None:
         """Each build is byte-exact against the member's own and parses back unchanged."""
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
 
         cases = {
             'ICMPv4 defaults': ({}, 4),
@@ -104,7 +104,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_fields_without_version_raise(self) -> None:
         """Even ``pseudo``, the field only ICMPv6 takes, picks nothing."""
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, fields in (('no fields', {}), ('shared fields', {'type': 8, 'body': ECHO[4][4:]}),
@@ -115,7 +115,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         for version in (1, True, '6', 4.0, 6.0):
@@ -127,8 +127,8 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must name the member; parsing, it is handed on unread."""
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertEqual(ICMPv4(version=4).data, ICMPv4().data)
@@ -141,7 +141,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         class Outside(ICMP):  # type: ignore[type-arg]
@@ -162,7 +162,7 @@ class ICMPBaseDispatchTests(unittest.TestCase):
             Outside(version=6)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
-        from pcapkit.protocols.internet.icmp import ICMP
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version, octets in ECHO.items():
@@ -179,10 +179,10 @@ class ICMPBaseDispatchTests(unittest.TestCase):
 
     def test_only_the_base_dispatches(self) -> None:
         """A subclass of the base is constructed as itself, abstract or not."""
-        from pcapkit.protocols.data.internet.icmpv4 import ICMPv4 as Data_ICMPv4
-        from pcapkit.protocols.internet.icmp import ICMP
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
-        from pcapkit.protocols.schema.internet.icmpv4 import ICMPv4 as Schema_ICMPv4
+        from pcapkit.protocols.internet.icmpv4.data import ICMPv4 as Data_ICMPv4
+        from pcapkit.protocols.internet.icmp.protocol import ICMP
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.schema import ICMPv4 as Schema_ICMPv4
 
         class Abstract(ICMP):  # type: ignore[type-arg] # pylint: disable=abstract-method
             """A direct subclass of the base, still abstract."""

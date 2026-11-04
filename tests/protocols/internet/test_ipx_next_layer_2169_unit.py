@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """An IPX payload is dissected by IPX Packet Type, not as an IP protocol number.
 
-GitHub issue #2169: :meth:`IPX.read <pcapkit.protocols.internet.ipx.IPX.read>`
+GitHub issue #2169: :meth:`IPX.read <pcapkit.protocols.internet.ipx.protocol.IPX.read>`
 handed the IPX Packet Type to the next-layer lookup it inherits from
 :class:`~pcapkit.protocols.internet.internet.Internet`, whose registry is keyed
 by IP protocol number. So Packet Type 17 (NCP) parsed as UDP, 4 (PEP) as IPv4
 and 6 as TCP; and Packet Type 0 counted as an IPv6 Hop-by-Hop Options header
 towards :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 
-:class:`~pcapkit.protocols.internet.ipx.IPX` keeps a registry of its own, keyed
+:class:`~pcapkit.protocols.internet.ipx.protocol.IPX` keeps a registry of its own, keyed
 by Packet Type, and its payload is Raw unless an IPX-native protocol is
 registered there.
 
@@ -57,8 +57,8 @@ class TestIPXNextLayer(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_payload_is_raw_and_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, packet in PACKETS.items():
             with self.subTest(packet=name), warnings.catch_warnings():
@@ -70,8 +70,8 @@ class TestIPXNextLayer(unittest.TestCase):
     def test_registered_ipx_protocol_is_dissected(self) -> None:
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.transport.udp import UDP as Proto_UDP
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.transport.udp.protocol import UDP as Proto_UDP
 
         self.assertIsNot(IPX.__proto__, Internet.__proto__)
         packet = PACKETS['NCP-17']
@@ -81,8 +81,8 @@ class TestIPXNextLayer(unittest.TestCase):
         self.assertIs(type(parsed.payload), Proto_UDP)
 
     def test_packet_type_zero_is_no_extension_header(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipx.protocol import IPX
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ProtocolWarning
 
@@ -96,7 +96,7 @@ class TestIPXNextLayer(unittest.TestCase):
 
     def test_protocol_is_the_packet_type(self) -> None:
         from pcapkit.const.ipx.packet import Packet
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         packet = PACKETS['NCP-17']
         with warnings.catch_warnings():

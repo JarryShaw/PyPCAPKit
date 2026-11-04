@@ -9,11 +9,11 @@ honoured: on a little-endian runner, a reader that ignores the file's declared
 order and uses :data:`sys.byteorder` produces exactly the right answer.
 
 This guards against GitHub issue #605, where
-:meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` seeded the
+:meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` seeded the
 order under the key ``bytesorder``, while ``byteorder_callback``
 (:file:`pcapkit/corekit/schema/byteorder.py`) reads ``byteorder``, so the
 ``.get()`` never found the key and always fell back to the host's order -- the
-sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>`
+sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>`
 spelled it correctly, which is what marks it as a slip rather than a second
 key. Measured without the fix against
 ``big_endian.pcap``, whose first record really holds ``ts_sec=1500000000``,
@@ -23,7 +23,7 @@ every field byte-swapped, dated 1970-02-05 rather than 2017-07-14. And because
 ``incl_len`` is the payload length, that first record swallowed the rest of the
 file and the read that followed was handed a negative payload length, raising
 ``ValueError: read length must be non-negative or -1`` from
-:file:`pcapkit/protocols/schema/schema.py`. So the defect was a wrong answer
+:file:`pcapkit/protocols/schema.py`. So the defect was a wrong answer
 first and a crash second.
 
 The fixtures come from :file:`examples/generators/endian.py`, and the set is

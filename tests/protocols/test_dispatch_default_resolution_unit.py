@@ -2,7 +2,7 @@
 
 A next layer code nobody registered resolves to the fallback
 :class:`~pcapkit.corekit.module.ModuleDescriptor` the registry's default factory
-produces -- normally :class:`~pcapkit.protocols.misc.raw.Raw`. That resolution is
+produces -- normally :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. That resolution is
 deliberately **not** written back into the registry, because the registry is a
 class-level :class:`collections.defaultdict` and recording a miss in it is
 GitHub issue #421's defect, guarded at this layer by pull request #426, at the
@@ -56,7 +56,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: Module and class name of the fallback every next layer registry declares.
-RAW_MODULE = 'pcapkit.protocols.misc.raw'
+RAW_MODULE = 'pcapkit.protocols.misc.raw.protocol'
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -110,7 +110,7 @@ class DefaultDescriptorResolutionTests(unittest.TestCase):
 
         """
         Dummy = self._dummy_protocol()
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         imported = []  # type: list[str]
         real_import = importlib.import_module
@@ -143,8 +143,8 @@ class DefaultDescriptorResolutionTests(unittest.TestCase):
 
         """
         Dummy = self._dummy_protocol()
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for _ in range(5):
             self.assertIs(Dummy._lookup_next_layer(Dummy.__proto__, 99), Raw)

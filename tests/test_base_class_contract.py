@@ -27,7 +27,7 @@ Nothing is wrong at runtime; the classes are correct. What is wrong is that
 the source says the opposite of what it does, and that is not a cosmetic
 complaint: aliasing kept in check by *convention* rather than by a mechanism
 lets a sweep miss a site with nothing failing. A sweep missed one twice --
-issue #506 (a runtime import in ``schema/schema.py`` unreachable for three
+issue #506 (a runtime import in ``schema.py`` unreachable for three
 years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
 built-ins for three years). These tests replace the convention with
 something that fails.

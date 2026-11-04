@@ -86,7 +86,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -100,7 +100,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         body = _dsb_body(TLS_LOG)
         block = PCAPNG(num=2, sct=1, ctx=self._context(),
@@ -117,7 +117,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
     def test_every_block_type_handed_its_octets_round_trips(self) -> None:
         """#2354: raw octets parse as the block they describe, and rebuild byte for byte."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for label, (name, keywords) in CASES.items():
             with self.subTest(block=label):
@@ -135,7 +135,7 @@ class TestPCAPNGRawBlockBytes(unittest.TestCase):
     def test_octets_that_are_no_block_are_refused(self) -> None:
         """#2354: a short or impossible block raises the library's own error."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError, StreamEOFError
 
         context = self._context()

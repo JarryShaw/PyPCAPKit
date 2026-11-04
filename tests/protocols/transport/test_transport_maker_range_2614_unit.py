@@ -59,7 +59,7 @@ class TCPRangeTests(RangeTestCase):
     """:rfc:`9293#section-3.1` header fields, and the option fields."""
 
     def test_header_field_outside_its_width_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for keyword, name, values in (('seq_no', 'sequence number', (-1, 1 << 32, True)),
                                       ('ack_no', 'acknowledgement number', (-1, 1 << 32)),
@@ -71,14 +71,14 @@ class TCPRangeTests(RangeTestCase):
                     self.assertRefused('TCP', name, value, lambda: TCP(**{keyword: value}))
 
     def test_checksum_of_the_wrong_size_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for value in (b'', b'\x01', b'\x01\x02\x03'):
             with self.subTest(value=value):
                 self.assertWrongSize('TCP', 'checksum', 2, value, lambda: TCP(checksum=value))
 
     def test_header_field_takes_its_widest_value(self) -> 'None':
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = TCP(seq_no=0xFFFF_FFFF, ack_no=0xFFFF_FFFF, reserved=0b111, window=0xFFFF,
                   checksum=b'\x12\x34', urgent=0xFFFF).data
@@ -88,7 +88,7 @@ class TCPRangeTests(RangeTestCase):
 
     def test_option_field_outside_its_width_is_refused(self) -> 'None':
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for code, args, name, value in (
             (Option.Maximum_Segment_Size, {'mss': 1 << 16}, 'mss', 1 << 16),
@@ -112,8 +112,8 @@ class TCPRangeTests(RangeTestCase):
     def test_user_timeout_outside_its_range_is_refused(self) -> 'None':
         """A negative timeout raises by name, not a bare ``ValueError``, and ``True`` is not one second."""
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.data.transport.tcp import UserTimeout
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.data import UserTimeout
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         code = Option.User_Timeout_Option
         for value in (-1, datetime.timedelta(seconds=-5), True, 1.5, None):
@@ -128,7 +128,7 @@ class TCPRangeTests(RangeTestCase):
     def test_user_timeout_takes_its_range(self) -> 'None':
         """RFC 5482 section 3: the ``G`` bit, then 15 bits of seconds or minutes."""
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         code = Option.User_Timeout_Option
         for value, wire in ((0, '1c040000'), (datetime.timedelta(0), '1c040000'),
@@ -138,7 +138,7 @@ class TCPRangeTests(RangeTestCase):
 
     def test_option_octets_of_the_wrong_size_are_refused(self) -> 'None':
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for code, keyword, size, value in ((Option.Echo, 'data', 4, b'abc'),
                                            (Option.Echo_Reply, 'data', 4, b'abcde'),
@@ -150,7 +150,7 @@ class TCPRangeTests(RangeTestCase):
     def test_mptcp_field_outside_its_width_is_refused(self) -> 'None':
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         syn, synack, ack = {'syn': True}, {'syn': True, 'ack': True}, {'ack': True}
         for flags, subtype, args, name, value in (
@@ -191,7 +191,7 @@ class TCPRangeTests(RangeTestCase):
     def test_mptcp_octets_of_the_wrong_size_are_refused(self) -> 'None':
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for flags, subtype, args, name, size, value in (
             ({'syn': True, 'ack': True}, MPTCPOption.MP_JOIN, {}, 'hmac', 8, bytes(7)),
@@ -208,7 +208,7 @@ class TCPRangeTests(RangeTestCase):
         """The first data octet is the low nibble of the subtype octet, refused past it, not masked."""
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         subtype = MPTCPOption.get(14)
         self.assertRefused('TCP', f'[OptNo {Option.Multipath_TCP}] subtype {subtype} first data octet', 0xFA,
@@ -219,7 +219,7 @@ class TCPRangeTests(RangeTestCase):
     def test_option_field_takes_its_widest_value(self) -> 'None':
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = TCP(options=[(Option.Maximum_Segment_Size, {'mss': 0xFFFF}),
                            (Option.Timestamps, {'tsval': 0xFFFF_FFFF, 'tsecr': 0xFFFF_FFFF}),
@@ -231,7 +231,7 @@ class TCPRangeTests(RangeTestCase):
     def test_quick_start_ttl_diff_wraps_modulo_256(self) -> 'None':
         """RFC 4782 section 4.2 defines the TTL Diff modulo 256, so it wraps and is not refused."""
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for value, octet in ((-1, 0xFF), (256, 0x00), (255, 0xFF), (300, 0x2C)):
             with self.subTest(diff=value):
@@ -244,7 +244,7 @@ class UDPRangeTests(RangeTestCase):
     """:rfc:`768` Length and Checksum."""
 
     def test_length_outside_16_bits_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for value in (-1, 1 << 16, True):
             with self.subTest(total_length=value):
@@ -252,14 +252,14 @@ class UDPRangeTests(RangeTestCase):
         self.assertRefused('UDP', 'length', 1 << 16, lambda: UDP(payload=bytes(0xFFF8)))
 
     def test_checksum_of_the_wrong_size_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         for value in (b'\x01', b'\x01\x02\x03'):
             with self.subTest(value=value):
                 self.assertWrongSize('UDP', 'checksum', 2, value, lambda: UDP(checksum=value))
 
     def test_length_takes_its_widest_value_and_a_jumbogram_zero(self) -> 'None':
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertEqual(UDP(payload=bytes(0xFFF7)).data[4:6], b'\xff\xff')
         self.assertEqual(UDP(total_length=0xFFFF, checksum=b'\x00\x00').data, bytes(4) + b'\xff\xff' + bytes(2))
@@ -271,7 +271,7 @@ class DCCPRangeTests(RangeTestCase):
     """:rfc:`4340#section-5.1` generic header, its subheaders, and the options."""
 
     def test_header_field_outside_its_width_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
 
         for args, name, value in (({'reserved': 8}, 'reserved', 8),
                                   ({'ccval': 16}, 'ccval', 16),
@@ -287,7 +287,7 @@ class DCCPRangeTests(RangeTestCase):
                 self.assertRefused('DCCP', name, value, lambda: DCCP(**args))
 
     def test_header_octets_of_the_wrong_size_are_refused(self) -> 'None':
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
 
         self.assertWrongSize('DCCP', 'checksum', 2, b'\x01', lambda: DCCP(checksum=b'\x01'))
         self.assertWrongSize('DCCP', 'reset data', 3, b'\x01\x02',
@@ -295,7 +295,7 @@ class DCCPRangeTests(RangeTestCase):
 
     def test_option_field_outside_its_width_is_refused(self) -> 'None':
         from pcapkit.const.dccp.option import Option
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
 
         for code, args, name, value in ((Option.NDP_Count, {'count': -1}, 'NDP count', -1),
                                         (Option.Timestamp, {'timestamp': 1 << 32}, 'timestamp', 1 << 32),
@@ -308,7 +308,7 @@ class DCCPRangeTests(RangeTestCase):
 
     def test_field_takes_its_widest_value(self) -> 'None':
         from pcapkit.const.dccp.option import Option
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
 
         # X clear: a 24-bit Sequence Number at octet 9, then a reserved octet and a
         # 24-bit Acknowledgement Number (RFC 4340 section 5.1).
@@ -323,7 +323,7 @@ class SCTPRangeTests(RangeTestCase):
     """:rfc:`9260#section-3` common header, chunks, parameters and error causes."""
 
     def test_header_field_outside_its_width_is_refused(self) -> 'None':
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for value in (-1, 1 << 32, True):
             with self.subTest(vtag=value):
@@ -332,7 +332,7 @@ class SCTPRangeTests(RangeTestCase):
 
     def test_chunk_field_outside_its_width_is_refused(self) -> 'None':
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         data = {'data': b'x'}
         for code, args, name, value in (
@@ -366,7 +366,7 @@ class SCTPRangeTests(RangeTestCase):
         from pcapkit.const.sctp.cause_code import CauseCode
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for chunk, code, nested, args, name, value in (
             (Chunk.Initiation, Parameter.Cookie_Preservative, 'parameters', {'increment': 1 << 32},
@@ -386,7 +386,7 @@ class SCTPRangeTests(RangeTestCase):
 
     def test_field_takes_its_widest_value(self) -> 'None':
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         raw = SCTP(vtag=0xFFFF_FFFF, chunks=[(Chunk.Payload_Data, {
             'data': b'x', 'tsn': 0xFFFF_FFFF, 'stream_id': 0xFFFF, 'stream_seq': 0xFFFF, 'ppid': 0xFFFF_FFFF,

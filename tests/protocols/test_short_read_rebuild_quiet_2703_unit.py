@@ -78,15 +78,15 @@ RECORD = bytes.fromhex('01000001ef0101010a000001')
 #: Query by its length. A Report cut after its header or its first group record ends
 #: on a whole field, before the records its count declares, which reads short (#2711).
 DIRECT = {
-    'GRE C': ('link.gre', 'GRE', gre(0x8000, b''), 4, range(1, 8)),
-    'GRE C, K, S': ('link.gre', 'GRE', gre(0xB000, struct.pack('>II', 0x11223344, 7)), 4, range(1, 16)),
-    'IGMPv1 report': ('internet.igmpv1', 'IGMPv1', message(b'\x12\x00', bytes([224, 0, 0, 1])), 2, range(1, 8)),
-    'IGMPv2 leave': ('internet.igmpv2', 'IGMPv2', message(b'\x17\x00', bytes([239, 1, 2, 3])), 2, range(1, 8)),
-    'IGMPv3 report': ('internet.igmpv3', 'IGMPv3', message(b'\x22\x00', bytes.fromhex('00000002') + RECORD * 2),
+    'GRE C': ('link.gre.protocol', 'GRE', gre(0x8000, b''), 4, range(1, 8)),
+    'GRE C, K, S': ('link.gre.protocol', 'GRE', gre(0xB000, struct.pack('>II', 0x11223344, 7)), 4, range(1, 16)),
+    'IGMPv1 report': ('internet.igmpv1.protocol', 'IGMPv1', message(b'\x12\x00', bytes([224, 0, 0, 1])), 2, range(1, 8)),
+    'IGMPv2 leave': ('internet.igmpv2.protocol', 'IGMPv2', message(b'\x17\x00', bytes([239, 1, 2, 3])), 2, range(1, 8)),
+    'IGMPv3 report': ('internet.igmpv3.protocol', 'IGMPv3', message(b'\x22\x00', bytes.fromhex('00000002') + RECORD * 2),
                       2, range(1, 32)),
-    'IGMPv3 query': ('internet.igmpv3', 'IGMPv3', message(b'\x11\x64', bytes(4) + bytes.fromhex('027d00010a000001')),
+    'IGMPv3 query': ('internet.igmpv3.protocol', 'IGMPv3', message(b'\x11\x64', bytes(4) + bytes.fromhex('027d00010a000001')),
                      2, range(12, 16)),
-    'OSPFv2': ('application.ospf', 'OSPF', ospf(), 12, range(1, 24)),
+    'OSPFv2': ('application.ospf.protocol', 'OSPF', ospf(), 12, range(1, 24)),
 }  # type: dict[str, tuple[str, str, bytes, int, Any]]
 
 #: Each message read from a capture, behind Ethernet and IPv4: its IP protocol number,

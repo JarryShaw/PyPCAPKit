@@ -41,8 +41,8 @@ class LinkType(Vendor):
     #: each, and :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`
     #: already registers into every one of them by hand.
     PROTO_DEST = (
-        ModuleDescriptor('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-        ModuleDescriptor('pcapkit.protocols.misc.pcapng', 'PCAPNG'),
+        ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+        ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
     )
 
     def count(self, data: 'list[str]') -> 'Counter[str]':

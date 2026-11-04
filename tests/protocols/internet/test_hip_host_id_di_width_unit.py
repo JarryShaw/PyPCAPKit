@@ -64,7 +64,7 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
         from pcapkit.const.hip.di import DITypes
         from pcapkit.const.hip.ecdsa_curve import ECDSACurve
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         schema = object.__new__(HIP)._make_param_host_id(  # type: ignore[arg-type]
             Parameter.HOST_ID, version=2, hi_curve=ECDSACurve.NIST_P_256,
@@ -78,7 +78,7 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
         """A conformant record reads ``Algorithm = 7`` and the DI it carries."""
         from pcapkit.const.hip.di import DITypes
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
-        from pcapkit.protocols.schema.internet.hip import HostIDParameter
+        from pcapkit.protocols.internet.hip.schema import HostIDParameter
 
         raw = rfc_host_id()
         schema = HostIDParameter.unpack(raw, len(raw))  # type: ignore[arg-type]
@@ -102,7 +102,7 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
         from pcapkit.const.hip.di import DITypes
         from pcapkit.const.hip.ecdsa_curve import ECDSACurve
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         options = {'hi_curve': ECDSACurve.NIST_P_256, 'hi_pub_key': PUB_KEY,
                    'di': DI, 'di_type': DITypes.FQDN}

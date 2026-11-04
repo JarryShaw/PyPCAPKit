@@ -6,12 +6,12 @@ behaviour of the toolkit code that reads them, at exactly the value each one
 gives:
 
 * :func:`pcapkit.toolkit.pypcapfile._walk_extension_headers` steps over an AH of
-  exactly :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN` octets -- one
+  exactly :data:`~pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN` octets -- one
   carrying no Integrity Check Value -- and rejects a shorter one;
 * :class:`pcapkit.toolkit.dpkt.Timestamp` defaults to microseconds and
   :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp` to nanoseconds, the two
   resolutions of
-  :data:`~pcapkit.protocols.schema.misc.pcap.header.RESOLUTION`.
+  :data:`~pcapkit.protocols.misc.pcap.header.schema.RESOLUTION`.
 
 Every value is built here and neither PyPCAPFile nor DPKT is imported, so the
 module is in the unit tier.

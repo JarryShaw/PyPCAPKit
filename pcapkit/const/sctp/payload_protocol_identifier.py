@@ -35,7 +35,7 @@ class PayloadProtocolIdentifier(EnumRegistry, IntEnum):
     #: references rather than imported, because :mod:`pcapkit.const` sits below
     #: :mod:`pcapkit.protocols` and importing one from here would be circular.
     __proto_dest__ = (
-        ModuleDescriptor('pcapkit.protocols.transport.sctp', 'SCTP'),
+        ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),
     )
 
     #: Reserved by SCTP [:rfc:`9260`]

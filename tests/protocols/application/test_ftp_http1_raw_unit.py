@@ -51,7 +51,7 @@ class FTPRawTests(unittest.TestCase):
 
     def test_command_case_rebuilds_byte_exactly(self) -> None:
         from pcapkit.const.ftp.command import Command
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         for raw, command in ((b'quit\r\n', Command.QUIT), (b'Retr file.txt\r\n', Command.RETR)):
             with self.subTest(raw=raw):
@@ -61,14 +61,14 @@ class FTPRawTests(unittest.TestCase):
                 self.assertEqual(FTP.from_data(request).data, raw)
 
     def test_changed_command_is_written_from_the_change(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         ftp = object.__new__(FTP)
         self.assertEqual(ftp.make(cmmd='USER', raw_cmmd=b'quit').data, b'USER\r\n')
         self.assertEqual(ftp.make(cmmd='QUIT').data, b'QUIT\r\n')
 
     def test_whole_multi_line_reply_parses_and_rebuilds(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         for raw, lines in ((b'220-a\r\n220 b\r\n', (b'220 b',)),
                            (b'230-a\r\n  free text\r\n230-b\r\n230 end\r\n',
@@ -85,7 +85,7 @@ class FTPRawTests(unittest.TestCase):
         self.assertEqual(single.lines, ())
 
     def test_multi_line_reply_must_end_at_its_closing_line(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -109,7 +109,7 @@ class FTPRawTests(unittest.TestCase):
         self.assertEqual(FTP.from_data(reply).data, raw)
 
     def test_lines_must_be_bytes(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for lines in ('220 b', ('220 b',), (b'220 b\n',)):
@@ -118,7 +118,7 @@ class FTPRawTests(unittest.TestCase):
                     object.__new__(FTP).make(code=220, args='a', more=True, lines=lines)
 
     def test_lines_follow_only_a_multi_line_reply(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         ftp = object.__new__(FTP)
@@ -138,8 +138,8 @@ class HTTP1RawTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         for cls in (HTTPv1, HTTP):
             for name, raw, _, _ in HTTP1_MESSAGES:
@@ -147,7 +147,7 @@ class HTTP1RawTests(unittest.TestCase):
                     self.assertEqual(cls.from_data(cls(raw, len(raw)).info).data, raw)
 
     def test_parsed_values_stay_normalised(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         for name, raw, receipt, fields in HTTP1_MESSAGES:
             with self.subTest(name=name):
@@ -160,7 +160,7 @@ class HTTP1RawTests(unittest.TestCase):
 
     def test_changed_values_are_written_from_the_change(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         raw = b'HTTP/1.1 200  OK\r\nA:1\r\nB:\tcaf\xe9\r\n\r\n'
         info = HTTPv1(raw, len(raw)).info
@@ -178,7 +178,7 @@ class HTTP1RawTests(unittest.TestCase):
 
     def test_raw_lines_cannot_write_a_line_break_their_values_lack(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
         from pcapkit.utilities.exceptions import ProtocolError
 
         http = object.__new__(HTTPv1)
@@ -193,7 +193,7 @@ class HTTP1RawTests(unittest.TestCase):
                     http.make(status=200, message='OK', raw_line=raw)
 
     def test_line_breaks_the_values_carry_still_rebuild(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         for raw in (b'GET / HTTP/1.1\r\nX: a\nb\r\n\r\n', b'GET / HTTP/1.1\r\nX: a\r\n\tb\r\n\r\n'):
             with self.subTest(raw=raw):
@@ -201,7 +201,7 @@ class HTTP1RawTests(unittest.TestCase):
 
     def test_field_lines_are_matched_by_content(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         raw = b'GET / HTTP/1.1\r\nA:1\r\nB:  2\r\nC:3\r\n\r\n'
         data = HTTPv1._make_data(HTTPv1(raw, len(raw)).info)

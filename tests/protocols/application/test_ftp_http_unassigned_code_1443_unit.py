@@ -33,7 +33,7 @@ class TestFTPReturnCodeEveryValue(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_three_digit_reply_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         for code in range(1000):
             raw = b'%03d hi\r\n' % code
@@ -43,7 +43,7 @@ class TestFTPReturnCodeEveryValue(unittest.TestCase):
                 self.assertEqual(FTP.from_data(parsed.info).data, raw)
 
     def test_multi_line_unassigned_reply_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         for raw in (b'777-first\r\nmiddle\r\n777 last\r\n', b'099-a\r\n099 b\r\n'):
             with self.subTest(raw=raw):
@@ -74,7 +74,7 @@ class TestFTPReturnCodeEveryValue(unittest.TestCase):
                     ReturnCode.get(value)
 
     def test_make_keeps_the_leading_zero(self) -> None:
-        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.protocols.application.ftp.protocol import FTP
 
         proto = FTP(code=99, args='x')
         self.assertEqual(proto.data, b'099 x\r\n')
@@ -88,7 +88,7 @@ class TestHTTPStatusCodeEveryValue(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_every_three_digit_status_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         for code in range(1000):
             raw = b'HTTP/1.1 %03d X\r\n\r\n' % code
@@ -118,7 +118,7 @@ class TestHTTPStatusCodeEveryValue(unittest.TestCase):
                     StatusCode.get(value)
 
     def test_make_keeps_the_leading_zero(self) -> None:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1
 
         proto = HTTPv1(status=99, message='X', http_version='1.1')
         self.assertEqual(proto.data, b'HTTP/1.1 099 X\r\n\r\n')

@@ -17,7 +17,7 @@ mismatch warns with a :exc:`~pcapkit.utilities.warnings.ChecksumWarning`,
 which a filter can silence alone (:issue:`2470`).
 
 A checksum over the IP pseudo-header is left to the enclosing IP layer, see
-:mod:`pcapkit.protocols.misc.checksum.ip_pseudo`. A checksum over the message
+:mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`. A checksum over the message
 alone, as ICMP's, IGMP's and GRE's, is verified as it is parsed, unless the IP
 layer it is parsed from is a fragment, see :func:`verify_message`.
 

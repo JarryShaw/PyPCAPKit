@@ -26,7 +26,7 @@ class IPv4UnitTests(unittest.TestCase):
 
     def test_ipv4_index_returns_expected_registry_value(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         self.assertEqual(IPv4.__index__(), TransType.IPv4)
 
@@ -34,7 +34,7 @@ class IPv4UnitTests(unittest.TestCase):
         from datetime import timedelta
 
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         class DummyDict(dict):
             __getattr__ = dict.__getitem__
@@ -69,12 +69,12 @@ class IPv4UnitTests(unittest.TestCase):
         """Regression test for #494.
 
         Guards against two defects in :meth:`IPv4._make_data
-        <pcapkit.protocols.internet.ipv4.IPv4._make_data>`: the fragment
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4._make_data>`: the fragment
         ``offset`` was handed back in octets to a parameter that
-        :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>` takes in
+        :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>` takes in
         on-wire 8-octet units (:rfc:`791`), and ``data.options`` was read
         unconditionally even though :meth:`IPv4.read
-        <pcapkit.protocols.internet.ipv4.IPv4.read>` only sets it when
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4.read>` only sets it when
         ``hdr_len`` exceeds the fixed 20-octet header.
 
         The two interact: the missing-``options`` ``AttributeError`` fires
@@ -87,7 +87,7 @@ class IPv4UnitTests(unittest.TestCase):
         does.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         proto = object.__new__(IPv4)
 
@@ -116,22 +116,22 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_from_data_rebuilds_a_parsed_datagram(self) -> None:
         """Regression test for #506.
 
-        :meth:`IPv4.from_data <pcapkit.protocols.internet.ipv4.IPv4.from_data>`
+        :meth:`IPv4.from_data <pcapkit.protocols.internet.ipv4.protocol.IPv4.from_data>`
         could not rebuild a datagram that had been *parsed*, only one that had
         been built by hand. The test above covers :meth:`IPv4._make_data
-        <pcapkit.protocols.internet.ipv4.IPv4._make_data>` in isolation, which is
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4._make_data>` in isolation, which is
         why it cannot surface this (#494): ``_make_data`` is one input to
         ``from_data``, and both faults are downstream of it.
 
         The wire literals below are parsed rather than constructed, so the info
         they yield carries what parsing actually produces -- a
-        :class:`~pcapkit.protocols.misc.raw.Raw` or
-        :class:`~pcapkit.protocols.misc.no_payload.NoPayload` instance for the payload,
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` or
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` instance for the payload,
         and an option *container* for the options -- rather than the
         constructor-shaped values :meth:`IPv4.make
-        <pcapkit.protocols.internet.ipv4.IPv4.make>` is normally handed. Without
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>` is normally handed. Without
         the fix, each one raises: the first two with ``ProtocolUnbound: unsupported
-        type <class 'pcapkit.protocols.misc.raw.Raw'>``, the third with the same
+        type <class 'pcapkit.protocols.misc.raw.protocol.Raw'>``, the third with the same
         naming ``NoPayload``.
 
         The third literal is the ``RTRALT`` frame of ``options-ipv4.pcap`` as
@@ -144,9 +144,9 @@ class IPv4UnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         cases = [
             # the issue's own repro: fragment offset 5, no options, 8 octets of
@@ -191,7 +191,7 @@ class IPv4UnitTests(unittest.TestCase):
         annotates its ``payload`` as ``bytes | Protocol | Schema``, where
         ``Protocol`` is :class:`~pcapkit.protocols.protocol.ProtocolBase`
         imported under its historical name. :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` nonetheless rejected every
+        <pcapkit.protocols.schema.Schema.pack>` nonetheless rejected every
         protocol instance in the library, because its own ``isinstance`` check
         named the *other* class -- the thin
         :class:`~pcapkit.protocols.protocol.Protocol` subclass, which nothing
@@ -204,9 +204,9 @@ class IPv4UnitTests(unittest.TestCase):
         fail for different reasons.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import Protocol, ProtocolBase
 
         proto = object.__new__(IPv4)
@@ -246,8 +246,8 @@ class IPv4UnitTests(unittest.TestCase):
         """The packing layer itself, with no ``make`` in front of it. C.f. #506.
 
         The test above reaches :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` through :meth:`IPv4.make
-        <pcapkit.protocols.internet.ipv4.IPv4.make>`, so it cannot say which of
+        <pcapkit.protocols.schema.Schema.pack>` through :meth:`IPv4.make
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>`, so it cannot say which of
         the two was at fault. This one builds the header schema directly and
         packs it, which is where the defect actually lived: the ``PayloadField``
         branch of ``Schema.pack`` tested ``isinstance(data, Protocol)`` where it
@@ -269,9 +269,9 @@ class IPv4UnitTests(unittest.TestCase):
           guards its input rather than accepting everything.
 
         """
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import Protocol, ProtocolBase
-        from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+        from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
         from pcapkit.utilities.exceptions import ProtocolUnbound
 
         payload = b'\xaa' * 8
@@ -310,12 +310,12 @@ class IPv4UnitTests(unittest.TestCase):
 
         This closes a hole in the tests above rather than describing a defect
         of its own. Every one of them hands the payload field a
-        :class:`~pcapkit.protocols.misc.raw.Raw` or a
-        :class:`~pcapkit.protocols.misc.no_payload.NoPayload`, because those are what
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` or a
+        :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload`, because those are what
         *parsing* yields, so between them they exercise exactly two of the
         :class:`~pcapkit.protocols.protocol.ProtocolBase` descendants the
         check in :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` has to accept. That is
+        <pcapkit.protocols.schema.Schema.pack>` has to accept. That is
         enough coverage to be defeated by a fix that is not one: replacing the
         ``isinstance(data, ProtocolBase)`` check of #536 with
 
@@ -344,12 +344,12 @@ class IPv4UnitTests(unittest.TestCase):
         the other reason it belongs in the suite on its own merits.
 
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import Protocol, ProtocolBase
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         proto = object.__new__(IPv4)
 
@@ -438,7 +438,7 @@ class IPv4UnitTests(unittest.TestCase):
         """Option padding has to be an option, not an option number. C.f. #506.
 
         :meth:`IPv4._make_ipv4_options
-        <pcapkit.protocols.internet.ipv4.IPv4._make_ipv4_options>` pads each
+        <pcapkit.protocols.internet.ipv4.protocol.IPv4._make_ipv4_options>` pads each
         option out to a 32-bit boundary with ``NOP`` options and a terminating
         ``EOOL``. The ``NOP``\\ s went in as option schemas but the ``EOOL`` went
         in as :attr:`OptionNumber.EOOL
@@ -456,8 +456,8 @@ class IPv4UnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.schema import Schema
 
         proto = object.__new__(IPv4)
         sec = (OptionNumber.SEC, {})
@@ -518,7 +518,7 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.warnings import ProtocolWarning
 
         proto = object.__new__(IPv4)
@@ -569,7 +569,7 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         proto = object.__new__(IPv4)
 
@@ -632,7 +632,7 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv4)
@@ -702,7 +702,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         option = bytes.fromhex('88040037')
         header = bytes.fromhex('46000018 00000000 00060000 '
@@ -744,7 +744,7 @@ class IPv4UnitTests(unittest.TestCase):
         """``TSOption`` will not turn a ``bool`` into an address. C.f. #552.
 
         :meth:`TSOption.post_process
-        <pcapkit.protocols.schema.internet.ipv4.TSOption.post_process>` runs on the
+        <pcapkit.protocols.internet.ipv4.schema.TSOption.post_process>` runs on the
         **packing** path as well as the unpacking one, so the ``ts_data`` entries it
         reads as addresses under the ``IP with Timestamp`` and ``Prespecified IP
         with Timestamp`` flags are whatever the caller passed. It converted them
@@ -770,8 +770,8 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.ts_flag import TSFlag
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet.ipv4 import TSOption
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4.schema import TSOption
         from pcapkit.utilities.exceptions import FieldValueError
 
         def option(ts_data: 'list[int]', flag: 'TSFlag') -> 'TSOption':
@@ -819,7 +819,7 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_quick_start_option_is_eight_octets_wide_on_the_wire(self) -> None:
         """Both Quick-Start suboptions survive the round trip whole. C.f. #552.
 
-        :func:`~pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector`
+        :func:`~pcapkit.protocols.internet.ipv4.schema.quick_start_data_selector`
         sized the nested suboption schema with a hardcoded
         ``SchemaField(length=5)``, which is the width of a Quick-Start Request's
         ``ttl`` and ``nonce`` alone -- the ``type``, ``length`` and ``flags``
@@ -828,7 +828,7 @@ class IPv4UnitTests(unittest.TestCase):
         for both functions -- *"the second byte contains the length field,
         indicating an option length of eight bytes"*, with figure 3 for a Request
         and figure 4 for a Report -- and
-        :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` rejects any
+        :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._read_opt_qs` rejects any
         other ``length`` outright.
 
         So the reader consumed five, warned ``SchemaWarning: packet length < 0:
@@ -856,8 +856,8 @@ class IPv4UnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4 import schema as ipv4_schema
         from pcapkit.utilities.exceptions import FieldValueError
 
         self.assertEqual(
@@ -919,10 +919,10 @@ class IPv4UnitTests(unittest.TestCase):
         """``make`` keeps the timestamps it is given. C.f. #552.
 
         ``_make_opt_ts`` passed ``data=`` to
-        :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, whose field is
+        :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`, whose field is
         ``ts_data`` -- ``data`` is the attribute its ``post_process`` *derives*.
         :meth:`Schema.__update__
-        <pcapkit.protocols.schema.schema.Schema.__update__>` answers a name it does
+        <pcapkit.protocols.schema.Schema.__update__>` answers a name it does
         not know with an
         :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` and carries on, so
         every timestamp was dropped in silence and ``ts_data`` stayed bound to its
@@ -938,7 +938,7 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.ts_flag import TSFlag
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -984,8 +984,8 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_properties_read_and_make_cover_packet_paths(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4 import schema as ipv4_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv4)
@@ -1095,13 +1095,13 @@ class IPv4UnitTests(unittest.TestCase):
 
     def test_ipv4_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         registry = IPv4.__dict__['__option__']
 
         original = registry[OptionNumber.EOOL]
         try:
-            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
                 IPv4.register_option(OptionNumber.EOOL, 'nop')
             warn.assert_called_once()
             self.assertEqual(registry[OptionNumber.EOOL], 'nop')
@@ -1115,17 +1115,17 @@ class IPv4UnitTests(unittest.TestCase):
         custom = OptionNumber.get(31)
         self.assertNotIn(custom, registry)
         try:
-            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
                 IPv4.register_option(custom, 'unassigned')
             warn.assert_not_called()
             self.assertEqual(registry[custom], 'unassigned')
 
             # Handing back the entry just stored is no overwrite either (#1362).
-            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
                 IPv4.register_option(custom, 'unassigned')
             warn.assert_not_called()
 
-            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
                 IPv4.register_option(custom, 'nop')
             warn.assert_called_once()
         finally:
@@ -1147,9 +1147,9 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import ipv4 as ipv4_data
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.protocols.internet.ipv4 import data as ipv4_data
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4 import schema as ipv4_schema
 
         registry = IPv4.__dict__['__option__']
         custom = OptionNumber.get(31)
@@ -1215,7 +1215,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         registry = IPv4.__dict__['__option__']
         fallback = registry.default_factory()
@@ -1241,7 +1241,7 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_unregistered_option_code_does_not_mutate_the_registry(self) -> None:
         """Parsing must not write to the shared IPv4 option registry.
 
-        :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
+        :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.protocol.IPv4.__option__>`
         is a :class:`collections.defaultdict` on a class attribute shared by
         every instance in the process, so ``registry[code]`` would insert each
         code it missed -- the leak #428 guards the other registries against, so
@@ -1254,8 +1254,8 @@ class IPv4UnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4 import schema as ipv4_schema
 
         registry = IPv4.__dict__['__option__']
         proto = object.__new__(IPv4)
@@ -1284,7 +1284,7 @@ class IPv4UnitTests(unittest.TestCase):
                 self.assertEqual(set(registry), before)
 
                 # a leak would make the next genuine registration warn
-                with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+                with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
                     try:
                         IPv4.register_option(code, 'unassigned')
                         warn.assert_not_called()
@@ -1296,7 +1296,7 @@ class IPv4UnitTests(unittest.TestCase):
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
         from pcapkit.const.ipv4.qs_function import QSFunction
         from pcapkit.const.ipv4.ts_flag import TSFlag
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(IPv4)
@@ -1399,8 +1399,8 @@ class IPv4UnitTests(unittest.TestCase):
         from pcapkit.const.ipv4.router_alert import RouterAlert
         from pcapkit.const.ipv4.ts_flag import TSFlag
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import ipv4 as ipv4_data
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4 import data as ipv4_data
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         proto = object.__new__(IPv4)
 
@@ -1476,7 +1476,7 @@ class IPv4UnitTests(unittest.TestCase):
         )
         # An integer is the raw field, its high-order bit marking a non-standard
         # value, so it is written as is and without a warning. C.f. #1320.
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             ts_schema = proto._make_opt_ts(OptionNumber.TS, ts_tuple)
         self.assertEqual(ts_schema.flags['oflw'], 1)
         self.assertEqual(ts_schema.ts_data[1], 0x80000000)
@@ -1497,29 +1497,29 @@ class IPv4UnitTests(unittest.TestCase):
             remaining=(),
             remainder=b'',
         )
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             self.assertEqual(proto._make_opt_ts(OptionNumber.TS, ts_prespecified).flags['flag'],
                              TSFlag.Prespecified_IP_with_Timestamp)
         warn.assert_not_called()
 
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp=[1, 2])
         warn.assert_called_once()
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp=[0x80000000])
         warn.assert_not_called()
         # A timedelta too large for 31 bits still warns.
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1,
                                timestamp=[datetime.timedelta(milliseconds=0x80000000)])
         warn.assert_called_once()
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1, timestamp={
                 ip_address('192.0.2.20'): 1,
                 ip_address('192.0.2.21'): 2,
             })
         warn.assert_called_once()
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._make_opt_ts(OptionNumber.TS, counts=1,
                                timestamp={ip_address('192.0.2.22'): 0x80000000})
         warn.assert_not_called()
@@ -1654,8 +1654,8 @@ class IPv4UnitTests(unittest.TestCase):
         from pcapkit.const.ipv4.qs_function import QSFunction
         from pcapkit.const.ipv4.ts_flag import TSFlag
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet.ipv4 import (
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4.schema import (
             EOOLOption,
             ESECOption,
             LSROption,
@@ -1712,7 +1712,7 @@ class IPv4UnitTests(unittest.TestCase):
                       level=ClassificationLevel.Unclassified, data=b''),
             options=options,
         ).flags, ())
-        with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.protocol.warn') as warn:
             proto._read_opt_sec(
                 SECOption(type=OptionNumber.SEC, length=5,
                           level=ClassificationLevel.Unclassified,
@@ -1876,7 +1876,7 @@ class IPv4UnitTests(unittest.TestCase):
         from pcapkit.const.ipv4.qs_function import QSFunction
         from pcapkit.const.ipv4.ts_flag import TSFlag
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.protocols.internet.ipv4 import schema as ipv4_schema
         from pcapkit.utilities.exceptions import FieldValueError
 
         eool = ipv4_schema.EOOLOption(type=OptionNumber.EOOL, length=99)
@@ -1919,7 +1919,7 @@ class IPv4UnitTests(unittest.TestCase):
             flags={'oflw': 0, 'flag': TSFlag.Timestamp_Only},
             ts_data=[1000, 0x80000005],
         )
-        with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.schema.warn') as warn:
             ts_only.post_process({})
         self.assertEqual(ts_only.ts_flag, TSFlag.Timestamp_Only)
         self.assertEqual(ts_only.data, [1000, 0x80000005])
@@ -1939,7 +1939,7 @@ class IPv4UnitTests(unittest.TestCase):
                 0x80000007,
             ],
         )
-        with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.schema.warn') as warn:
             ip_ts.post_process({})
         self.assertIsInstance(ip_ts.data, OrderedMultiDict)
         self.assertEqual(ip_ts.timestamp[ip_address('192.0.2.1')],
@@ -1961,7 +1961,7 @@ class IPv4UnitTests(unittest.TestCase):
                 0,
             ],
         )
-        with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.schema.warn') as warn:
             pre_ts.post_process({})
         self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.2')], 0x80000006)
         self.assertEqual(pre_ts.timestamp[ip_address('192.0.2.5')],
@@ -1976,7 +1976,7 @@ class IPv4UnitTests(unittest.TestCase):
             flags={'oflw': 0, 'flag': 2},
             ts_data=[1],
         )
-        with mock.patch('pcapkit.protocols.schema.internet.ipv4.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.ipv4.schema.warn') as warn:
             unknown.post_process({})
         self.assertEqual(tuple(unknown.timestamp), (1,))
         warn.assert_called_once()
@@ -1993,14 +1993,14 @@ class IPv4UnitTests(unittest.TestCase):
         option's progress *after* its end-of-option-list break rather than before:
         checking first turns every such header into an error. C.f. #431.
 
-        :class:`~pcapkit.protocols.internet.ipv4.IPv4` itself refuses the header
+        :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` itself refuses the header
         with :exc:`~pcapkit.utilities.exceptions.ProtocolError`, since the 20
         missing octets would otherwise be rebuilt as zeros (#1404).
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 
@@ -2034,14 +2034,14 @@ class IPv4UnitTests(unittest.TestCase):
         <pcapkit.corekit.fields.collections.OptionField.unpack>` refuses the
         option with :exc:`~pcapkit.utilities.exceptions.ProtocolError` (#1325).
         Inside a frame the datagram is kept as the octets captured, a
-        :class:`~pcapkit.protocols.misc.raw.Raw` payload carrying that error,
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload carrying that error,
         and rebuilds byte for byte.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
         from tests._support import time_limit
 

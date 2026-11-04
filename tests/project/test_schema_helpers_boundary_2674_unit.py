@@ -8,15 +8,13 @@ layer, which any module may call; the rule is written down on
 of module are checked, by what may call the functions they define:
 
 * **The parts of the schema layer no one protocol owns** -- every field module
-  under :file:`pcapkit/corekit/fields/`, and :mod:`pcapkit.protocols.schema.schema`.
-  Only the schema layer, :file:`pcapkit/corekit/fields/` and
-  :file:`pcapkit/protocols/schema/`, may call their functions.
-* **A protocol's own schema module** -- every other module under
-  :file:`pcapkit/protocols/schema/`. Only that protocol may call its functions:
-  its protocol, data and schema modules, which share a path below
-  :mod:`pcapkit.protocols` once ``schema`` or ``data`` is dropped from it. A
-  module a protocol family shares, with no protocol of its own, names the
-  members that may call it in :data:`SHARED`.
+  under :file:`pcapkit/corekit/fields/`, and :mod:`pcapkit.protocols.schema`.
+  Only the schema layer, :file:`pcapkit/corekit/fields/` and the ``schema``
+  modules under :file:`pcapkit/protocols/`, may call their functions.
+* **A protocol's own schema module** -- every other ``schema`` module under
+  :file:`pcapkit/protocols/`. Only that protocol may call its functions: the
+  modules of its package (#2534). A family base's schema module that its
+  members share names the members that may call it in :data:`SHARED`.
 
 A call is found wherever :mod:`pcapkit`, ``examples`` or ``util`` makes one:
 
@@ -50,16 +48,14 @@ from tests.project.test_utilities_import_boundary_1735_unit import (ROOT, _modul
 #: Test tier (#1958): reads the tree's import graph, a question about the tree.
 __tier__ = 'LATEST'
 
-#: The schema layer.
-LAYER = (ROOT / 'pcapkit' / 'corekit' / 'fields', ROOT / 'pcapkit' / 'protocols' / 'schema')
+#: The field modules, the part of the schema layer outside :mod:`pcapkit.protocols`.
+FIELDS = ROOT / 'pcapkit' / 'corekit' / 'fields'
 
-#: The schema package of :mod:`pcapkit.protocols`.
-SCHEMA = ROOT / 'pcapkit' / 'protocols' / 'schema'
+#: The protocols, whose ``schema`` modules are the rest of the schema layer.
+PROTOCOLS = ROOT / 'pcapkit' / 'protocols'
 
 #: The modules of the layer no one protocol owns.
-GENERIC = tuple(sorted((ROOT / 'pcapkit' / 'corekit' / 'fields').rglob('*.py'))) + (
-    SCHEMA / 'schema.py',
-)
+GENERIC = tuple(sorted(FIELDS.rglob('*.py'))) + (PROTOCOLS / 'schema.py',)
 
 #: The home of the helpers shared across the schema layer, which any module may
 #: call.
@@ -70,14 +66,14 @@ HELPERS = ROOT / 'pcapkit' / 'corekit' / 'schema'
 ABOVE_HELPERS = ('pcapkit.corekit.fields', 'pcapkit.protocols', 'pcapkit.foundation')
 
 #: The protocols' own schema modules.
-PROTOCOL = tuple(path for path in sorted(SCHEMA.rglob('*.py'))
-                 if path.name != '__init__.py' and path not in GENERIC)
+PROTOCOL = tuple(path for path in sorted(PROTOCOLS.rglob('schema.py')) if path not in GENERIC)
 
-#: A schema module a protocol family shares, with no protocol of its own, mapped
-#: to the protocols of the family, each as :func:`protocol_key` gives it.
+#: A family base's schema module its members share, mapped to the protocols of
+#: the family that may call it, each as :func:`protocol_key` gives it.
 SHARED = {
     # The IPv6 options [RFC 8200, section 4.2] both option headers carry.
-    'pcapkit.protocols.schema.internet.ipv6_option': ('internet.hopopt', 'internet.ipv6_opts'),
+    'pcapkit.protocols.internet.ipv6_ext.schema': ('internet.ipv6_ext', 'internet.hopopt',
+                                                   'internet.ipv6_opts'),
 }
 
 #: Where a call is looked for.
@@ -87,21 +83,22 @@ CALLERS = ('pcapkit', 'examples', 'util')
 def protocol_key(module: 'str') -> 'str | None':
     """The protocol ``module`` belongs to, as its path below :mod:`pcapkit.protocols`.
 
-    A protocol's schema and data modules sit at the same path as its protocol
-    module, under ``schema`` and ``data``, so all three give one key. A module
-    outside :mod:`pcapkit.protocols` belongs to no protocol.
+    A protocol's ``protocol``, ``schema`` and ``data`` modules sit in its package
+    (#2534), so all three give the package's key. A module outside
+    :mod:`pcapkit.protocols` belongs to no protocol.
 
     """
     parts = module.split('.')
     if parts[:2] != ['pcapkit', 'protocols'] or len(parts) < 3:
         return None
-    rest = parts[3:] if parts[2] in ('schema', 'data') else parts[2:]
+    rest = parts[2:-1] if len(parts) > 3 and parts[-1] in ('protocol', 'schema', 'data') \
+        else parts[2:]
     return '.'.join(rest) or None
 
 
 def _in_layer(path: 'pathlib.Path') -> 'bool':
     """Whether ``path`` is a source file of the schema layer."""
-    return any(base in path.parents for base in LAYER)
+    return FIELDS in path.parents or (PROTOCOLS in path.parents and path.name == 'schema.py')
 
 
 def _all_names(tree: 'ast.Module') -> 'set[str]':
@@ -247,12 +244,12 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
     def test_the_walk_found_both_kinds(self) -> None:
         generic = helpers(GENERIC)
         self.assertIn('nested_packet_context', generic['pcapkit.corekit.fields.misc'][0])
-        self.assertIn('schema_final', generic['pcapkit.protocols.schema.schema'][0])
-        self.assertIn('schema_final', generic['pcapkit.protocols.schema.schema'][1])
+        self.assertIn('schema_final', generic['pcapkit.protocols.schema'][0])
+        self.assertIn('schema_final', generic['pcapkit.protocols.schema'][1])
         protocol = helpers(PROTOCOL)
-        self.assertIn('jumbogram_error', protocol['pcapkit.protocols.schema.internet.ipv6'][0])
-        self.assertIn('calipso_pad_len', protocol['pcapkit.protocols.schema.internet.ipv6_option'][0])
-        self.assertNotIn('pcapkit.protocols.schema.schema', protocol)
+        self.assertIn('jumbogram_error', protocol['pcapkit.protocols.internet.ipv6.schema'][0])
+        self.assertIn('calipso_pad_len', protocol['pcapkit.protocols.internet.ipv6_ext.schema'][0])
+        self.assertNotIn('pcapkit.protocols.schema', protocol)
 
     def test_every_call_is_one_the_ruling_allows(self) -> None:
         found = violations()
@@ -279,7 +276,7 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
             'from pcapkit.corekit.schema import shortread',
             'shortread.keep_short_read(None)',
         ])
-        self.assertEqual(calls(source, 'pcapkit.protocols.internet.hip', helpers(GENERIC + PROTOCOL)), [])
+        self.assertEqual(calls(source, 'pcapkit.protocols.internet.hip.protocol', helpers(GENERIC + PROTOCOL)), [])
 
     def test_the_shared_helpers_import_nothing_that_imports_them(self) -> None:
         found = []  # type: list[str]
@@ -312,22 +309,21 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
         ])
 
     def test_every_shared_module_is_a_family_module(self) -> None:
-        # Both directions: a schema module with no protocol of its own names its
-        # family here, and an entry here has no protocol of its own but members
-        # that do.
+        # Every schema module sits in a protocol's package (#2534), and an entry
+        # here is a family base's schema module whose members are protocols too.
         orphans = sorted(_module_name(path) for path in PROTOCOL
-                         if not (ROOT / 'pcapkit' / 'protocols' / path.relative_to(SCHEMA)).exists())
-        self.assertEqual(orphans, sorted(SHARED))
+                         if not (path.parent / 'protocol.py').is_file())
+        self.assertEqual(orphans, [])
         for home, members in SHARED.items():
+            self.assertIn(home, {_module_name(path) for path in PROTOCOL})
             for member in members:
                 with self.subTest(home=home, member=member):
-                    self.assertTrue((ROOT / 'pcapkit' / 'protocols' / f"{member.replace('.', '/')}.py")
-                                    .is_file())
+                    self.assertTrue((PROTOCOLS / member.replace('.', '/') / 'protocol.py').is_file())
 
     def test_protocol_key(self) -> None:
-        self.assertEqual(protocol_key('pcapkit.protocols.internet.ipv6'), 'internet.ipv6')
-        self.assertEqual(protocol_key('pcapkit.protocols.schema.internet.ipv6'), 'internet.ipv6')
-        self.assertEqual(protocol_key('pcapkit.protocols.data.misc.pcap.header'), 'misc.pcap.header')
+        self.assertEqual(protocol_key('pcapkit.protocols.internet.ipv6.protocol'), 'internet.ipv6')
+        self.assertEqual(protocol_key('pcapkit.protocols.internet.ipv6.schema'), 'internet.ipv6')
+        self.assertEqual(protocol_key('pcapkit.protocols.misc.pcap.header.data'), 'misc.pcap.header')
         self.assertIsNone(protocol_key('pcapkit.toolkit.scapy'))
         self.assertIsNone(protocol_key('pcapkit.protocols'))
 
@@ -335,7 +331,7 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
         homes = {
             'pcapkit.corekit.fields.ipaddress': ({'parse_ip_address', '_reject_bool'},
                                                  {'parse_ip_address', 'IPv4AddressField'}),
-            'pcapkit.protocols.schema.schema': ({'keep_short_read'}, {'Schema'}),
+            'pcapkit.protocols.schema': ({'keep_short_read'}, {'Schema'}),
         }
         source = '\n'.join([
             'from pcapkit.corekit.fields.ipaddress import IPv4AddressField',            # 1
@@ -345,21 +341,21 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
             'from pcapkit.corekit.fields.ipaddress import *',                           # 5
             'from pcapkit.corekit.fields import ipaddress',                             # 6
             'ipaddress.parse_ip_address(1, "x")',                                       # 7
-            'import pcapkit.protocols.schema.schema as base',                           # 8
+            'import pcapkit.protocols.schema as base',                           # 8
             'base.Schema, base.keep_short_read',                                        # 9
             'import pcapkit.corekit.fields.ipaddress',                                  # 10
             'pcapkit.corekit.fields.ipaddress.parse_ip_address(1, "x")',                # 11
             'ipaddress.IPv4AddressField',                                               # 12
             'from pcapkit.corekit.schema.ipaddress import parse_ip_address',                 # 13
-            'from pcapkit.protocols.schema.schema import *',                            # 14
+            'from pcapkit.protocols.schema import *',                            # 14
         ])
         self.assertEqual(calls(source, 'pcapkit.protocols.ipv4', homes), [
             (2, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
             (3, 'pcapkit.corekit.fields.ipaddress', '_reject_bool'),
-            (4, 'pcapkit.protocols.schema.schema', 'keep_short_read'),
+            (4, 'pcapkit.protocols.schema', 'keep_short_read'),
             (5, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
             (7, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
-            (9, 'pcapkit.protocols.schema.schema', 'keep_short_read'),
+            (9, 'pcapkit.protocols.schema', 'keep_short_read'),
             (11, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
         ])
 
@@ -380,29 +376,29 @@ class SchemaHelpersBoundaryTests(unittest.TestCase):
             'from pcapkit.corekit.fields import parse_ip_address',        # 5
             'from pcapkit.corekit.fields import IPv4AddressField',        # 6
         ])
-        self.assertEqual(calls(source, 'pcapkit.protocols.internet.hip', homes), [
+        self.assertEqual(calls(source, 'pcapkit.protocols.internet.hip.protocol', homes), [
             (2, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
             (4, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
             (5, 'pcapkit.corekit.fields.ipaddress', 'parse_ip_address'),
         ])
 
     def test_who_may_call_what(self) -> None:
-        generic = {'pcapkit.corekit.fields.ipaddress', 'pcapkit.protocols.schema.schema'}
-        ipv6 = 'pcapkit.protocols.schema.internet.ipv6'
-        option = 'pcapkit.protocols.schema.internet.ipv6_option'
+        generic = {'pcapkit.corekit.fields.ipaddress', 'pcapkit.protocols.schema'}
+        ipv6 = 'pcapkit.protocols.internet.ipv6.schema'
+        option = 'pcapkit.protocols.internet.ipv6_ext.schema'
         cases = (
             # (caller, in the layer, home, allowed)
-            ('pcapkit.protocols.schema.internet.hip', True, 'pcapkit.corekit.fields.ipaddress', True),
-            ('pcapkit.protocols.internet.hip', False, 'pcapkit.corekit.fields.ipaddress', False),
-            ('pcapkit.protocols.internet.ipv6', False, ipv6, True),
-            ('pcapkit.protocols.data.internet.ipv6', False, ipv6, True),
-            ('pcapkit.protocols.misc.checksum.ip_pseudo', False, ipv6, False),
+            ('pcapkit.protocols.internet.hip.schema', True, 'pcapkit.corekit.fields.ipaddress', True),
+            ('pcapkit.protocols.internet.hip.protocol', False, 'pcapkit.corekit.fields.ipaddress', False),
+            ('pcapkit.protocols.internet.ipv6.protocol', False, ipv6, True),
+            ('pcapkit.protocols.internet.ipv6.data', False, ipv6, True),
+            ('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', False, ipv6, False),
             ('pcapkit.toolkit.scapy', False, ipv6, False),
             ('examples.generators.options', False, ipv6, False),
-            ('pcapkit.protocols.schema.internet.ipv6_ext', True, ipv6, False),
-            ('pcapkit.protocols.schema.internet.hopopt', True, option, True),
-            ('pcapkit.protocols.schema.internet.ipv6_opts', True, option, True),
-            ('pcapkit.protocols.schema.transport.tcp', True, option, False),
+            ('pcapkit.protocols.internet.ipv6_ext.schema', True, ipv6, False),
+            ('pcapkit.protocols.internet.hopopt.schema', True, option, True),
+            ('pcapkit.protocols.internet.ipv6_opts.schema', True, option, True),
+            ('pcapkit.protocols.transport.tcp.schema', True, option, False),
         )
         for caller, in_layer, home, expected in cases:
             with self.subTest(caller=caller, home=home):

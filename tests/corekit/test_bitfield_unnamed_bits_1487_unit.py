@@ -67,7 +67,7 @@ class BitFieldUnnamedBitsTests(unittest.TestCase):
 
     def test_schema_to_dict_from_dict_keeps_the_unnamed_bits(self) -> None:
         from pcapkit.corekit.fields.strings import BitField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class Flags(Schema):

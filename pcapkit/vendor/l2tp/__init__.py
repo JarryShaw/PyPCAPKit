@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.l2tp.L2TP` Vendor Crawlers
-================================================================
+""":class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` Vendor Crawlers
+=========================================================================
 
 .. module:: pcapkit.vendor.l2tp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.l2tp.L2TP` implementations. Available
+:class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` implementations. Available
 enumerations include:
 
 .. list-table::

@@ -4,7 +4,7 @@
 This guards against GitHub issue #1126, where
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` took nothing but the
 data, so the ``num`` and ``header`` that
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` requires could not reach it,
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` requires could not reach it,
 and every call raised :exc:`TypeError`. ``from_data`` forwards extra keywords to
 the construction, so the caller passes both alongside the data.
 
@@ -30,8 +30,8 @@ class FrameFromDataRuntimeTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_round_trips_every_frame_byte_for_byte(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         path = sample_path('in.pcap')
         size = os.path.getsize(path)
@@ -54,8 +54,8 @@ class FrameFromDataRuntimeTests(unittest.TestCase):
         self.assertEqual(num, 6)
 
     def test_from_data_keyword_overrides_make_data(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         with open(sample_path('in.pcap'), 'rb') as file:
             header = Header(file)
@@ -65,8 +65,8 @@ class FrameFromDataRuntimeTests(unittest.TestCase):
         self.assertEqual(rebuilt.info.frame_info.ts_sec, 42)
 
     def test_from_data_rejects_a_misspelled_keyword(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with open(sample_path('in.pcap'), 'rb') as file:

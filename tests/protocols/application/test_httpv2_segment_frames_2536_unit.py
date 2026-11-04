@@ -50,7 +50,7 @@ CUT_SHORT = {
 
 def _layers(proto: 'object') -> 'tuple[list, object]':
     """Each HTTP/2 layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.httpv2 import HTTPv2
+    from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
     layers = []
     while isinstance(proto, HTTPv2):
@@ -66,8 +66,8 @@ class SegmentFrameTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_two_and_three_frames_are_each_a_layer(self) -> None:
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, segment, chain in (
                 ('two frames', SETTINGS + WINDOW_UPDATE, 'TCP:HTTP/2:HTTP/2'),
@@ -87,7 +87,7 @@ class SegmentFrameTests(unittest.TestCase):
         """Each layer holds its own frame header and payload (RFC 9113, sections 6.5 and 6.9)."""
         from pcapkit.const.http.frame import Frame
         from pcapkit.const.http.setting import Setting
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http.protocol import HTTP
 
         wire = _PREFACE + SETTINGS + SETTINGS_ACK + WINDOW_UPDATE
         layers, _ = _layers(HTTP(wire, len(wire)))
@@ -102,8 +102,8 @@ class SegmentFrameTests(unittest.TestCase):
         self.assertEqual(layers[2].info.increment, 65535)
 
     def test_a_whole_frame_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, bad in MALFORMED.items():
             with self.subTest(frame=name):
@@ -121,8 +121,8 @@ class SegmentFrameTests(unittest.TestCase):
                 self.assertEqual(rebuilt, raw)
 
     def test_a_frame_cut_short_stays_raw_without_an_error(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, tail in CUT_SHORT.items():
             with self.subTest(tail=name):
@@ -139,9 +139,9 @@ class SegmentFrameTests(unittest.TestCase):
                 self.assertEqual(bytes(TCP.from_data(proto.info)), raw)
 
     def test_a_parse_stopping_at_http2_keeps_the_rest_raw(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         wire = SETTINGS + SETTINGS_ACK + WINDOW_UPDATE
         self.assertEqual(str(HTTPv2(wire, len(wire)).protochain), 'HTTP/2:HTTP/2:HTTP/2')
@@ -159,7 +159,7 @@ class SegmentFrameTests(unittest.TestCase):
 
     def test_frame_layer_limit_bounds_the_frames(self) -> None:
         """Each frame is a layer, so the limit stops the walk with one warning."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ProtocolWarning
 

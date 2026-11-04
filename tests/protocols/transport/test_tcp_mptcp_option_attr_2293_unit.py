@@ -2,16 +2,16 @@
 """A parsed Multipath TCP schema carries the same attributes as a built one, ``option`` included.
 
 GitHub issue #2293. :meth:`_MPTCP.post_process
-<pcapkit.protocols.schema.transport.tcp._MPTCP.post_process>` set ``ret.option =
+<pcapkit.protocols.transport.tcp.schema._MPTCP.post_process>` set ``ret.option =
 Enum_Option.Multipath_TCP`` on the subtype schema it returns. No ``_make_mptcp_*`` maker, and
-not :meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.TCP._make_mode_mp>` either, made
+not :meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp>` either, made
 the matching assignment -- so the attribute existed on a schema unpacked from wire bytes and
 not on the same schema built in memory.
 
 Why the assignment had nothing to be symmetric about
 ----------------------------------------------------
 
-``option`` was not a field. :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` declares
+``option`` was not a field. :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP` declares
 exactly ``kind`` and ``length`` (#541) and every concrete subtype adds its own on top; none of
 them declares ``option``, under :data:`~typing.TYPE_CHECKING` or otherwise. So the assignment
 created an attribute out of nothing at unpack time, and nothing in ``pcapkit`` read it back:
@@ -89,7 +89,7 @@ SPEC_OPTIONS = {
 def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
     """Pack a whole SYN segment carrying ``option_octets`` verbatim as its only option.
 
-    Goes through :class:`~pcapkit.protocols.schema.transport.tcp.TCP` (the schema, not the
+    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not the
     protocol) directly, so no ``_make_mptcp_*`` maker runs and the option bytes reach the
     wire exactly as given -- which is what makes the parsed side of each comparison below an
     independent starting point rather than something a maker produced.
@@ -110,7 +110,7 @@ def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
         schema class built from a stale ``Schema`` base.
 
     """
-    from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 
     if len(option_octets) % 4:
         raise ValueError('option_octets must already be a multiple of 4 octets long')
@@ -134,14 +134,14 @@ def parse_and_rebuild(option_octets: 'bytes') -> 'tuple[object, object]':
 
     Returns:
         The schema :meth:`_MPTCP.post_process
-        <pcapkit.protocols.schema.transport.tcp._MPTCP.post_process>` returned for the parsed
+        <pcapkit.protocols.transport.tcp.schema._MPTCP.post_process>` returned for the parsed
         option, and the schema :meth:`TCP._make_mode_mp
-        <pcapkit.protocols.transport.tcp.TCP._make_mode_mp>` builds from the parsed option's
+        <pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp>` builds from the parsed option's
         data model -- the two paths #2293 is about, starting from the same option.
 
     """
     from pcapkit.const.tcp.option import Option as Enum_Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     raw = build_tcp_segment(option_octets)
     protocol = TCP(raw, len(raw))
@@ -187,7 +187,7 @@ class TCPMPTCPOptionAttributeUnitTests(unittest.TestCase):
     def test_kind_still_carries_multipath_tcp(self) -> None:
         """Dropping ``option`` loses no value: ``kind`` is where the option number lives.
 
-        ``kind`` is a real field on :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, so
+        ``kind`` is a real field on :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`, so
         it is both set on every path and actually packed, which is the whole reason ``option``
         was redundant rather than merely asymmetric.
 
@@ -245,7 +245,7 @@ class TCPMPTCPOptionAttributeUnitTests(unittest.TestCase):
         here, so the claim is rechecked whenever a subtype gains a field.
 
         """
-        from pcapkit.protocols.schema.transport.tcp import MPTCP
+        from pcapkit.protocols.transport.tcp.schema import MPTCP
 
         schemas = [MPTCP, *MPTCP.__enum__.values(),
                    MPTCP.__enum__.default_factory()]  # the ``MPTCPUnknown`` fallback

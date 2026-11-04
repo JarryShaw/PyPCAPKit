@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` Vendor Crawlers
-========================================================================
+""":class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` Vendor Crawlers
+=================================================================================
 
 .. module:: pcapkit.vendor.icmp
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.icmpv4.ICMPv4` implementations. Available
+:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` implementations. Available
 enumerations include:
 
 .. list-table::

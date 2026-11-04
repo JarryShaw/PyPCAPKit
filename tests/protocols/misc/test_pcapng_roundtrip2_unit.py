@@ -43,7 +43,7 @@ class PCAPNGTestCase(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -54,7 +54,7 @@ class PCAPNGTestCase(unittest.TestCase):
 
     def _parse(self, octets: 'bytes', context: 'Any' = None) -> 'Any':
         """Parse ``octets`` as one block; a section header needs no context."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         if octets[:4] == b'\x0a\x0d\x0d\x0a':
             return PCAPNG(octets, len(octets), num=0, sct=1, ctx=None)
@@ -62,7 +62,7 @@ class PCAPNGTestCase(unittest.TestCase):
 
     def _rebuild(self, octets: 'bytes', context: 'Any' = None) -> 'bytes':
         """Parse ``octets`` as one block and rebuild it from its data model."""
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         if octets[:4] == b'\x0a\x0d\x0d\x0a':
             parsed = PCAPNG(octets, len(octets), num=0, sct=1, ctx=None)
@@ -107,7 +107,7 @@ class TestPCAPNGLengths(PCAPNGTestCase):
         import warnings
 
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context(snaplen=8)
         with warnings.catch_warnings():
@@ -126,7 +126,7 @@ class TestPCAPNGLengths(PCAPNGTestCase):
     def test_snaplen_zero_means_no_limit(self) -> None:
         """#1283: a snaplen of zero clips nothing."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         block = PCAPNG(num=2, sct=1, ctx=self._context(snaplen=0), type=BlockType.Enhanced_Packet_Block,
                        block={'packet_data': b'A' * 16, 'timestamp': 0})
@@ -134,8 +134,8 @@ class TestPCAPNGLengths(PCAPNGTestCase):
 
     def test_pcap_frame_clips_to_snaplen(self) -> None:
         """#1283: a PCAP record over a snaplen of 8 is 16 + 8 octets."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         frame = Frame(num=1, header=Header(snaplen=8).info, packet=b'A' * 16)
         self.assertEqual(len(frame.data), 24)
@@ -183,7 +183,7 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = Context(PCAPNG(SHB_BE, len(SHB_BE), num=0, sct=1, ctx=None).info)  # type: Any
         interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
@@ -194,7 +194,7 @@ class TestPCAPNGModelling(PCAPNGTestCase):
     def test_big_endian_section_header_rebuilds(self) -> None:
         """#1272: a big-endian SHB keeps its byte order, with or without a context."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         self.assertEqual(self._parse(SHB_BE).info.byteorder, 'big')
         self.assertRebuilds(SHB_BE)
@@ -206,7 +206,7 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         """#1273: direction is bits 0-1 and the FCS length bits 5-8 of the word."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG, PacketDirection
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, PacketDirection
 
         context = self._context()
         for kwargs, word in (({'direction': PacketDirection.INBOUND}, '01000000'),
@@ -236,7 +236,7 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         import warnings
 
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PacketDirection
+        from pcapkit.protocols.misc.pcapng.protocol import PacketDirection
 
         octets = H('02000000 30000000 0000 0000 00000000 00000000 04000000 04000000 61626364'
                    '0200 0400 02000000 00000000 30000000')

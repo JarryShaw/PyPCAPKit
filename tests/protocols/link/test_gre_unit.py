@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2501: Generic Routing Encapsulation (GRE) frames.
 
-:class:`~pcapkit.protocols.link.gre.GRE` dissects the ``arphrd_type``
+:class:`~pcapkit.protocols.link.gre.protocol.GRE` dissects the ``arphrd_type``
 ``ARPHRD_IPGRE``/``ARPHRD_IP6GRE`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.Raw` (see
-:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`). Covers the
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+:attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 base header [:rfc:`2784`], the optional Key and Sequence Number extensions
 [:rfc:`2890`], the EtherType-keyed dispatch through
 :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, and
@@ -66,7 +66,7 @@ class TestGRE(unittest.TestCase):
 
     def test_base_header_dispatches_ipv4_and_ipv6(self) -> None:
         """:rfc:`2784`'s base header, no optional fields -- the common case."""
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         for protocol_type, payload, name in ((0x0800, IPV4, 'IPv4'), (0x86DD, IPV6, 'IPv6')):
             with self.subTest(protocol_type=hex(protocol_type)):
@@ -88,7 +88,7 @@ class TestGRE(unittest.TestCase):
                 self._assert_rebuilds(parsed)
 
     def test_checksum_present_adds_checksum_and_reserved1(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, checksum=0x1234, reserved1=0)
         parsed = GRE(raw, len(raw))
@@ -102,7 +102,7 @@ class TestGRE(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_key_present_adds_key_rfc_2890(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, key=0xDEADBEEF)
         parsed = GRE(raw, len(raw))
@@ -115,7 +115,7 @@ class TestGRE(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_sequence_present_adds_sequence_number_rfc_2890(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, sequence_number=12345)
         parsed = GRE(raw, len(raw))
@@ -129,7 +129,7 @@ class TestGRE(unittest.TestCase):
 
     def test_every_optional_field_together_is_the_longest_form(self) -> None:
         """``C``, ``K`` and ``S`` all set: the 16-octet longest form."""
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, checksum=0xBEEF, reserved1=0, key=0x11223344, sequence_number=99)
         parsed = GRE(raw, len(raw))
@@ -146,7 +146,7 @@ class TestGRE(unittest.TestCase):
         less the ``K``/``S`` bits :rfc:`2890` carves out of it -- are carried
         verbatim rather than silently zeroed.
         """
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, reserved=0x4FF8)
         parsed = GRE(raw, len(raw))
@@ -159,7 +159,7 @@ class TestGRE(unittest.TestCase):
         different protocol (RFC 2637's Enhanced GRE/PPTP, version 1), not
         implemented here -- refused rather than misread.
         """
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw = _gre(0x0800, IPV4, version=1)
@@ -167,7 +167,7 @@ class TestGRE(unittest.TestCase):
             GRE(raw, len(raw))
 
     def test_make_then_parse_base_header(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         made = GRE(payload=IPV4).data
         self.assertEqual(made, _gre(0x0800, IPV4))
@@ -177,7 +177,7 @@ class TestGRE(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_then_parse_every_optional_field(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         made = GRE(checksum=0xBEEF, key=0x11223344, sequence_number=99, payload=IPV4).data
         self.assertEqual(made, _gre(0x0800, IPV4, checksum=0xBEEF, key=0x11223344,
@@ -189,18 +189,18 @@ class TestGRE(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_defaults(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         self.assertEqual(GRE().data, _gre(0x0800, b''))
 
     def test_make_infers_presence_from_the_value_given(self) -> None:
-        """As :meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.L2TPv2.make>`
+        """As :meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.make>`
         infers ``S`` from whether ``ns``/``nr`` are given, ``C``/``K``/``S``
         here are inferred from whether ``checksum``/``key``/``sequence_number``
         are given; only ``C`` also has a flag argument, ``checksum_present``,
         to ask for a computed checksum (#2618).
         """
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         self.assertFalse(GRE().info.checksum_present)
         self.assertTrue(GRE(checksum=0).info.checksum_present)
@@ -208,21 +208,21 @@ class TestGRE(unittest.TestCase):
         self.assertTrue(GRE(sequence_number=0).info.sequence_present)
 
     def test_make_rejects_reserved1_without_checksum(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
             GRE(reserved1=5)
 
     def test_make_rejects_reserved_bits_outside_the_mask(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
             GRE(reserved=0x8000)
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in (
@@ -241,8 +241,8 @@ class TestGRE(unittest.TestCase):
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         self.assertEqual(GRE.id(), ('GRE',))
         self.assertIs(GRE.__index__(), TransType.GRE)
@@ -252,8 +252,8 @@ class TestGRE(unittest.TestCase):
                 self.assertIs(LinuxSLL._lookup_next_layer(LinuxSLL.__proto__, arphrd), GRE)
 
     def test_unregistered_protocol_type_is_kept_raw(self) -> None:
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _gre(0x1234, IPV4)
         parsed = GRE(raw, len(raw))
@@ -270,7 +270,7 @@ class TestGRE(unittest.TestCase):
         """
         import warnings
 
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
 
         raw = _gre(0x0800, IPV4, checksum=0xBEEF, key=0x11223344, sequence_number=99)
         for keep in (1, 2, 3, 4, 8, 12, 15):

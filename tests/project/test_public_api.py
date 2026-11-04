@@ -119,7 +119,7 @@ defect the package had:
   ``'MH_HandoverInitiateStatus'``. A duplicate is harmless on its own, which is
   why it survived; what made it a defect is that it displaced a real name. The
   class exists at ``pcapkit/const/mh/handover_initiate_status.py`` and is used by
-  :mod:`pcapkit.protocols.internet.mh`, yet it was never imported into the package
+  :mod:`pcapkit.protocols.internet.mh.protocol`, yet it was never imported into the package
   and so ``pcapkit.const.mh.MH_HandoverInitiateStatus`` did not resolve at all.
   Note that a duplicate is invisible to
   :meth:`~PublicAPISurfaceTests.test_every_all_entry_resolves`, because the name
@@ -157,8 +157,6 @@ EXCLUDED_ROOTS = frozenset()  # type: frozenset[str]
 #: every other package. See the module docstring for why these are held to
 #: the stricter form.
 AGGREGATORS = (
-    'pcapkit.protocols.data',
-    'pcapkit.protocols.schema',
     'pcapkit.foundation.registry',
 )
 
@@ -226,7 +224,10 @@ def _unlisted_public_attributes(module: 'types.ModuleType') -> 'list[str]':
 
     Submodules are skipped. A submodule becomes an attribute of its parent package
     as a side effect of being imported, whether or not the parent means to
-    re-export it, so counting them would flag every package that has children.
+    re-export it, so counting them would flag every package that has children. So
+    is a protocol package's ``Schema_*`` or ``Data_*`` name bound to the class of that
+    name in its ``schema`` or ``data`` module, which the owner ruled in review of
+    #2753 stays out of ``__all__``.
 
     """
     declared = getattr(module, '__all__', ())
@@ -235,7 +236,18 @@ def _unlisted_public_attributes(module: 'types.ModuleType') -> 'list[str]':
         if not attribute.startswith('_')
         and attribute not in declared
         and not isinstance(getattr(module, attribute), types.ModuleType)
+        and not _is_role_alias(module, attribute)
     )
+
+
+def _is_role_alias(module: 'types.ModuleType', attribute: 'str') -> 'bool':
+    """Whether ``attribute`` is a protocol package's alias of a class its ``schema`` or ``data`` defines."""
+    for prefix, role in (('Schema_', 'schema'), ('Data_', 'data')):
+        if attribute.startswith(prefix):
+            sibling = getattr(module, role, None)
+            return isinstance(sibling, types.ModuleType) \
+                and getattr(sibling, attribute[len(prefix):], None) is getattr(module, attribute)
+    return False
 
 
 def _is_excluded(name: 'str') -> 'bool':
@@ -297,7 +309,7 @@ class PublicAPISurfaceTests(unittest.TestCase):
                            'the module walk found implausibly few modules')
         self.assertGreater(len(packages), 40,
                            'the module walk found implausibly few packages')
-        for name in ('pcapkit', 'pcapkit.protocols.data', 'pcapkit.protocols.schema',
+        for name in ('pcapkit', 'pcapkit.protocols.link', 'pcapkit.protocols.misc.pcap',
                      'pcapkit.foundation.registry', 'pcapkit.const.mh',
                      'pcapkit.vendor', 'pcapkit.vendor.ipx'):
             self.assertIn((name, True), modules, f'{name} missing from the walk')

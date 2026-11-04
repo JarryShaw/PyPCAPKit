@@ -2,9 +2,16 @@ HIP - Host Identity Protocol
 ============================
 
 .. module:: pcapkit.protocols.internet.hip
+.. module:: pcapkit.protocols.internet.hip.protocol
 
-:mod:`pcapkit.protocols.internet.hip` contains
-:class:`~pcapkit.protocols.internet.hip.HIP` only,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.internet.hip.Locator``, with no alias: it is in this module, and
+   :mod:`pcapkit.protocols.internet.hip` exports the protocol class alone
+   (:issue:`2534`).
+
+:mod:`pcapkit.protocols.internet.hip.protocol` contains
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,
 which implements the extractor for Host Identity
 Protocol (HIP) [*]_, whose structure is described
 as below:
@@ -26,7 +33,7 @@ Octets      Bits        Name                    Description
   40        320   ``hip.parameters``        HIP Parameters
 ======= ========= ====================== ==================================
 
-.. autoclass:: pcapkit.protocols.internet.hip.HIP
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.HIP
    :no-members:
    :show-inheritance:
 
@@ -158,517 +165,527 @@ Octets      Bits        Name                    Description
 Type Stubs
 ----------
 
-.. autoclass:: pcapkit.protocols.internet.hip.Locator
+.. autoclass:: pcapkit.protocols.internet.hip.protocol.Locator
    :members:
    :show-inheritance:
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.hip
+.. module:: pcapkit.protocols.internet.hip.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.hip``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.UnassignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.UnassignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ESPInfoParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ESPInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.R1CounterParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.R1CounterParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorSetParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.LocatorSetParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.Locator
+.. autoclass:: pcapkit.protocols.internet.hip.schema.Locator
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorData
+.. autoclass:: pcapkit.protocols.internet.hip.schema.LocatorData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.PuzzleParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.PuzzleParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.SolutionParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.SolutionParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.SEQParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.SEQParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ACKParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ACKParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.DHGroupListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.DHGroupListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.DiffieHellmanParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.DiffieHellmanParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPTransformParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPTransformParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPCipherParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPCipherParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.NATTraversalModeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.TransactionPacingParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.TransactionPacingParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EncryptedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EncryptedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HostIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HostIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HostIdentity
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HostIdentity
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ECDSACurveHostIdentity
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ECDSALowCurveHostIdentity
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EdDSACurveHostIdentity
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HITSuiteListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HITSuiteListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.CertParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.CertParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.NotificationParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.NotificationParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoRequestSignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EchoRequestSignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RegInfoParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RegInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RegRequestParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RegRequestParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RegResponseParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RegResponseParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RegFailedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RegFailedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RegFromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RegFromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoResponseSignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EchoResponseSignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.TransportFormatListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.TransportFormatListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ESPTransformParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ESPTransformParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.SeqDataParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.SeqDataParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.AckDataParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.AckDataParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.PayloadMICParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.PayloadMICParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.TransactionIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.TransactionIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.OverlayIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.OverlayIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteDstParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RouteDstParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPTransportModeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPMACParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPMAC2Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPMAC2Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPSignature2Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPSignature2Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPSignatureParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.HIPSignatureParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoRequestUnsignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EchoRequestUnsignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoResponseUnsignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.EchoResponseUnsignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayFromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RelayFromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayToParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RelayToParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.OverlayTTLParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.OverlayTTLParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteViaParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RouteViaParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.FromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.FromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RVSHMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RVSHMACParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ViaRVSParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ViaRVSParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayHMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RelayHMACParameter
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.PacketType
+.. autoclass:: pcapkit.protocols.internet.hip.schema.PacketType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.VersionType
+.. autoclass:: pcapkit.protocols.internet.hip.schema.VersionType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.ControlsType
+.. autoclass:: pcapkit.protocols.internet.hip.schema.ControlsType
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorFlags
+.. autoclass:: pcapkit.protocols.internet.hip.schema.LocatorFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.DIData
+.. autoclass:: pcapkit.protocols.internet.hip.schema.DIData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteFlags
+.. autoclass:: pcapkit.protocols.internet.hip.schema.RouteFlags
    :members:
    :show-inheritance:
 
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_value_selector
-.. autofunction:: pcapkit.protocols.schema.internet.hip.host_id_hi_selector
-.. autofunction:: pcapkit.protocols.schema.internet.hip.registration_type_list_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.reg_info_list_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.transport_format_list_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.encrypted_data_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_total_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_padding_len
-.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_set_len_callback
-.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_set_padding_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.locator_value_selector
+.. autofunction:: pcapkit.protocols.internet.hip.schema.host_id_hi_selector
+.. autofunction:: pcapkit.protocols.internet.hip.schema.registration_type_list_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.reg_info_list_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.two_octet_prefix_list_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.transport_format_list_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.encrypted_data_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.parameter_total_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.parameter_padding_len
+.. autofunction:: pcapkit.protocols.internet.hip.schema.locator_set_len_callback
+.. autofunction:: pcapkit.protocols.internet.hip.schema.locator_set_padding_len
 
-.. autodata:: pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN
+.. autodata:: pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.hip
+.. module:: pcapkit.protocols.internet.hip.data
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.hip``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Control
+.. autoclass:: pcapkit.protocols.internet.hip.data.Control
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.UnassignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.UnassignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.ESPInfoParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.ESPInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.R1CounterParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.R1CounterParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorSetParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.LocatorSetParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Locator
+.. autoclass:: pcapkit.protocols.internet.hip.data.Locator
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorData
+.. autoclass:: pcapkit.protocols.internet.hip.data.LocatorData
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.PuzzleParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.PuzzleParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.SolutionParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.SolutionParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.SEQParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.SEQParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.ACKParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.ACKParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.DHGroupListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.DHGroupListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.DiffieHellmanParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.DiffieHellmanParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransformParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPTransformParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPCipherParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPCipherParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.NATTraversalModeParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.NATTraversalModeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionPacingParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.TransactionPacingParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.EncryptedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.EncryptedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HostIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HostIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HostIdentity
+.. autoclass:: pcapkit.protocols.internet.hip.data.HostIdentity
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HITSuiteListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HITSuiteListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.CertParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.CertParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.NotificationParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.NotificationParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestSignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.EchoRequestSignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegInfoParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RegInfoParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Lifetime
+.. autoclass:: pcapkit.protocols.internet.hip.data.Lifetime
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegRequestParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RegRequestParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegResponseParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RegResponseParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegFailedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RegFailedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegFromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RegFromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseSignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.EchoResponseSignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransportFormatListParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.TransportFormatListParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.ESPTransformParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.ESPTransformParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.SeqDataParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.SeqDataParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.AckDataParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.AckDataParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.PayloadMICParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.PayloadMICParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.TransactionIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayIDParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.OverlayIDParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RouteDstParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RouteDstParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Flags
+.. autoclass:: pcapkit.protocols.internet.hip.data.Flags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransportModeParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPTransportModeParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPMACParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMAC2Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPMAC2Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignature2Parameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPSignature2Parameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignatureParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.HIPSignatureParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestUnsignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.EchoRequestUnsignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseUnsignedParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.EchoResponseUnsignedParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayFromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RelayFromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayToParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RelayToParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayTTLParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.OverlayTTLParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RouteViaParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RouteViaParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.FromParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.FromParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RVSHMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RVSHMACParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.ViaRVSParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.ViaRVSParameter
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayHMACParameter
+.. autoclass:: pcapkit.protocols.internet.hip.data.RelayHMACParameter
    :members:
    :show-inheritance:
 

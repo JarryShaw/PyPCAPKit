@@ -261,7 +261,7 @@ def restore_module_table() -> 'Iterator[None]':
     :class:`~typing.Generic` stayed bound after the test that installed it, and
     the next test to import :mod:`pcapkit` died on ``TypeError: type
     'ProtocolBase' is not subscriptable`` at the :class:`Frame` class statement
-    in :mod:`pcapkit.protocols.misc.pcap.frame` -- a run of tests in
+    in :mod:`pcapkit.protocols.misc.pcap.frame.protocol` -- a run of tests in
     :mod:`tests.project`, and only when the polluting file happened to be
     collected first. Several files turned out to leak this way, one of
     which -- :mod:`tests.cli.test_main` -- did not import :mod:`tests._support`

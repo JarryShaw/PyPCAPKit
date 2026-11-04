@@ -2,32 +2,33 @@ DTLS - Datagram Transport Layer Security
 ==============================================
 
 .. module:: pcapkit.protocols.application.dtls
+.. module:: pcapkit.protocols.application.dtls.protocol
 
-:mod:`pcapkit.protocols.application.dtls` contains
-:class:`~pcapkit.protocols.application.dtls.DTLS`, which implements an
+:mod:`pcapkit.protocols.application.dtls.protocol` contains
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`, which implements an
 extractor for Datagram Transport Layer Security (DTLS) [*]_ -- DTLS 1.0
 (:rfc:`4347`), DTLS 1.2 (:rfc:`6347`) and its connection-ID records
 (:rfc:`9146`), and DTLS 1.3's legacy-format and
 unified-header records (:rfc:`9147`) -- at the record layer, plus the epoch/sequence-number fields and
 the handshake-message fragment header that set DTLS apart from
-:class:`~pcapkit.protocols.application.tls.TLS`, whose reliable, ordered
+:class:`~pcapkit.protocols.application.tls.protocol.TLS`, whose reliable, ordered
 transport needs neither. It also contains
-:class:`~pcapkit.protocols.application.dtls.DTLSContext`, which holds the
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext`, which holds the
 connection IDs those records carry.
 
 Version Identification
 ----------------------
 
-As with :class:`~pcapkit.protocols.application.tls.TLS`, one class parses
-every version and :meth:`~pcapkit.protocols.application.dtls.DTLS.read` sets
-:attr:`~pcapkit.protocols.application.dtls.DTLS.alias` from the record;
-:meth:`~pcapkit.protocols.application.dtls.DTLS.id` stays ``('DTLS',)``.
+As with :class:`~pcapkit.protocols.application.tls.protocol.TLS`, one class parses
+every version and :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.read` sets
+:attr:`~pcapkit.protocols.application.dtls.protocol.DTLS.alias` from the record;
+:meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.id` stays ``('DTLS',)``.
 
 .. list-table::
    :header-rows: 1
 
    * - Legacy record version
-     - :attr:`~pcapkit.protocols.application.dtls.DTLS.alias`
+     - :attr:`~pcapkit.protocols.application.dtls.protocol.DTLS.alias`
    * - ``0xFEFF``
      - ``DTLS 1.0``
    * - ``0xFEFD``
@@ -59,7 +60,7 @@ A ``tls12_cid`` record carries a connection ID between its sequence number
 and its length (:rfc:`9146#section-4`), and a DTLS 1.3 unified header with
 its ``C`` bit set carries one between its first octet and its sequence number
 (:rfc:`9147#section-4`). Either way the ID's length is negotiated rather than
-carried. :class:`~pcapkit.protocols.application.dtls.DTLSContext` resolves
+carried. :class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext` resolves
 it for both, in this order:
 
 * a connection ID that a ``ClientHello`` or ``ServerHello``
@@ -67,9 +68,9 @@ it for both, in this order:
   naming the one it receives (:rfc:`9146#section-3`,
   :rfc:`9147#section-9.1`), and that the record's ID begins with;
 * the ``cid_length`` the caller gives
-  :class:`~pcapkit.protocols.application.dtls.DTLSContext`.
+  :class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext`.
 
-Without either the record stays :class:`~pcapkit.protocols.misc.raw.Raw`.
+Without either the record stays :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 A dissected one reports its connection ID alongside its other header fields,
 and keeps its encrypted content as octets. The context reaches DTLS through
 :mod:`pcapkit.corekit.context`:
@@ -77,12 +78,12 @@ and keeps its encrypted content as octets. The context reaches DTLS through
 .. code-block:: python
 
    import pcapkit
-   from pcapkit.protocols.application.dtls import DTLSContext
+   from pcapkit.protocols.application.dtls.protocol import DTLSContext
 
    extraction = pcapkit.extract('dtls.pcap', context=DTLSContext(cid_length=8))
 
 The connection IDs a
-:class:`~pcapkit.protocols.application.dtls.DTLSContext` learns belong to that
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext` learns belong to that
 instance. A new instance starts with none, and one the caller reuses keeps
 what it has learned. An extraction given none gets its own in its own
 registry, so it carries what its handshakes negotiate across its capture and
@@ -96,13 +97,13 @@ Matching by value relies on IDs being self-delineating
 A rebuild parses each layer's octets again, so ``from_data`` takes the same
 ``__context__``. Without it the octets still rebuild exactly, and
 ``DTLS.from_data`` keeps its chain, but a record with a connection ID under a
-rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.Raw`.
+rebuilt UDP layer reads as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
 Records in One Datagram
 -----------------------
 
 A whole record after the first in a UDP datagram is dissected as a further
-:class:`~pcapkit.protocols.application.dtls.DTLS` layer, the previous record's
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS` layer, the previous record's
 payload (:rfc:`6347#section-4.1.1`, :rfc:`9147#section-4.3`, :issue:`2535`): a
 ``ChangeCipherSpec`` followed by an ``Alert`` reads ``UDP:DTLS 1.2:DTLS 1.2``.
 A unified-header record is delimited by its length; one without a length runs
@@ -110,7 +111,7 @@ to the end of the datagram, so it is the last (:rfc:`9147#section-4`). The
 exceptions:
 
 * A whole record that fails to decode becomes
-  :class:`~pcapkit.protocols.misc.raw.Raw` together with everything after it.
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` together with everything after it.
 * Octets that open no whole record stay raw, with no error: an unsupported
   content type, a legacy version outside ``0xFExx``, a header cut short, a
   length past the end of the datagram, or a connection ID whose length is
@@ -125,12 +126,12 @@ Known Limitations
 
 **A handshake message split across DTLS records is not decoded here**
 (:rfc:`6347#section-4.2.3`, :issue:`2440`). Each fragment is flagged
-:attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented`
-and its :attr:`~pcapkit.protocols.data.application.dtls.DTLSHandshake.body`
+:attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented`
+and its :attr:`~pcapkit.protocols.application.dtls.data.DTLSHandshake.body`
 kept as raw octets. ``Extractor(reassembly=True, dtls=True)`` reassembles the
 message, and :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` decodes it
-with :meth:`~pcapkit.protocols.application.dtls.DTLS.analyze_handshake`, which
-reads it with :meth:`~pcapkit.protocols.application.dtls.DTLS.read_handshake`.
+with :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake`, which
+reads it with :meth:`~pcapkit.protocols.application.dtls.protocol.DTLS.read_handshake`.
 
 **A connection ID negotiated in a fragmented hello is not learned**: the
 message is not decoded here, so its ``connection_id`` extension is not read.
@@ -138,7 +139,7 @@ message is not decoded here, so its ``connection_id`` extension is not read.
 **A connection ID a DTLS 1.3** ``NewConnectionId`` **issues is not learned**
 (:rfc:`9147#section-9`, :issue:`2625`): the message is encrypted, so only the
 caller can give it to
-:class:`~pcapkit.protocols.application.dtls.DTLSContext`.
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext`.
 
 **A unified-header record carries only the low two bits of the epoch**, and
 its sequence number is header-protected, so the values it reports are the
@@ -150,7 +151,7 @@ ones on the wire.
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.dtls.DTLS
+.. autoclass:: pcapkit.protocols.application.dtls.protocol.DTLS
    :no-members:
    :show-inheritance:
 
@@ -171,7 +172,7 @@ ones on the wire.
 
    .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.application.dtls.DTLSContext
+.. autoclass:: pcapkit.protocols.application.dtls.protocol.DTLSContext
    :no-members:
    :show-inheritance:
 
@@ -185,44 +186,44 @@ ones on the wire.
 Header Schema
 -------------
 
-.. module:: pcapkit.protocols.schema.application.dtls
+.. module:: pcapkit.protocols.application.dtls.schema
 
-.. autoclass:: pcapkit.protocols.schema.application.dtls.DTLS
+.. autoclass:: pcapkit.protocols.application.dtls.schema.DTLS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.dtls.DTLSCiphertext
+.. autoclass:: pcapkit.protocols.application.dtls.schema.DTLSCiphertext
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.application.dtls.DTLSCIDCiphertext
+.. autoclass:: pcapkit.protocols.application.dtls.schema.DTLSCIDCiphertext
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.application.dtls
+.. module:: pcapkit.protocols.application.dtls.data
 
-.. autoclass:: pcapkit.protocols.data.application.dtls.DTLS
+.. autoclass:: pcapkit.protocols.application.dtls.data.DTLS
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.dtls.DTLSCiphertext
+.. autoclass:: pcapkit.protocols.application.dtls.data.DTLSCiphertext
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.dtls.DTLSCIDCiphertext
+.. autoclass:: pcapkit.protocols.application.dtls.data.DTLSCIDCiphertext
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.application.dtls.DTLSHandshake
+.. autoclass:: pcapkit.protocols.application.dtls.data.DTLSHandshake
    :members:
    :show-inheritance:
 
 See :doc:`ssl` for ``ClientHello``, ``ServerHello``, ``EncryptedExtensions``,
 ``Extension`` and its decoded bodies, ``Alert`` and ``ChangeCipherSpec``,
-shared verbatim with :class:`~pcapkit.protocols.application.tls.TLS`.
+shared verbatim with :class:`~pcapkit.protocols.application.tls.protocol.TLS`.
 
 .. rubric:: Footnotes
 

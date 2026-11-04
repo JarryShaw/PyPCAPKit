@@ -2,13 +2,13 @@
 """A cut IPv6 extension header chain rebuilds byte-exact, from info and dict.
 
 GitHub issue #1471: an upper layer cut short after an extension header fell
-back to :class:`~pcapkit.protocols.misc.raw.Raw` over the *whole* IPv6 payload,
+back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` over the *whole* IPv6 payload,
 since :func:`~pcapkit.corekit.decorators.beholder` ignored the ``payload`` it
 was handed, so the rebuild wrote the extension headers twice -- Destination
 Options, TCP cut at 57 octets rebuilt 65.
 
 GitHub issue #2477: a header whose dedicated parser raises is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, and the walk ends there. GitHub issue
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and the walk ends there. GitHub issue
 #2694: a capture cut is no refusal but the schema's short read, so a cut header
 is an extension header of its own and rebuilds from its own info.
 
@@ -77,8 +77,8 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
         warnings.simplefilter('ignore')
 
     def test_every_cut_rebuilds_from_info_and_dict(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for name in CHAINS:
             full = packet(name)
@@ -93,8 +93,8 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
                         self.assertEqual(cls.from_data(proto.info.to_dict()).data, data)
 
     def test_raw_upper_layer_starts_past_the_extension_headers(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         data = packet('dst-tcp')[:57]
         ip6 = IPv6(data, len(data))
@@ -107,8 +107,8 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
         # cut belongs to the schema's short read instead (#2694), so the header is
         # parsed, and records where the data ended
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for cut in (48, 50, 52, 55):
             data = packet('hop-nonxt')[:cut]

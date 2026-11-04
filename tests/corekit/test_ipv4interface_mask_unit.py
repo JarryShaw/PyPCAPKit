@@ -177,7 +177,7 @@ class TestIPv4InterfaceMask(unittest.TestCase):
         self.assertNotEqual(value, field.unpack(bytes.fromhex(MASKS['hostmask /1']), {}))
 
     def test_pcapng_if_ipv4addr_option_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.schema.misc.pcapng import IF_IPv4AddrOption
+        from pcapkit.protocols.misc.pcapng.schema import IF_IPv4AddrOption
 
         option = bytes.fromhex('0400' '0800') + bytes.fromhex(MASKS['hostmask /24'])
         schema = IF_IPv4AddrOption.unpack(option)

@@ -50,7 +50,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         for code in (ExtensionHeader.HOPOPT, ExtensionHeader.IPv6_Route,
                      ExtensionHeader.IPv6_Opts, ExtensionHeader.Mobility_Header,
@@ -67,7 +67,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """RFC 4302 §2.2: ``(octet[1] + 2) * 4``, not RFC 6564's 8-octet units."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.TCP), 2]) + b'\x00' * 14  # (2+2)*4 == 16
         inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
@@ -82,7 +82,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.UDP), 200]) + b'\x00' * 14  # 200 must be ignored
         inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
@@ -99,7 +99,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.warnings import SchemaWarning
 
         # (250 + 1) * 8 == 2008, but only 8 octets are actually available.
@@ -126,7 +126,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         :class:`IPv6ExtSharedBaseContractTests` relies on this test for that
         half of the #917 contract.
         """
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall):
@@ -135,7 +135,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def test_extension_mode_blocks_payload_and_protochain_but_not_protocol(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
@@ -158,7 +158,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def test_make_and_make_data_round_trip_the_generic_and_ah_rules(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         for code, len_octet, total in (
             (ExtensionHeader.HOPOPT, 1, 16),
@@ -179,7 +179,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def _malformed_mh() -> bytes:
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.mh import MH, FastBindingAcknowledgmentStatus
+        from pcapkit.protocols.internet.mh.protocol import MH, FastBindingAcknowledgmentStatus
 
         mh_raw = bytearray(bytes(MH(
             next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
@@ -193,8 +193,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         header and everything after it are ``Raw``, not walked past.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         body = self._malformed_mh() + _udp_bytes(b'hello')
         raw = _ipv6_bytes(int(TransType.Mobility_Header), body)
@@ -215,9 +215,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         udp = int(TransType.UDP)
         router_alert = bytes([udp, 0, 0x05, 10]) + bytes(4)  # 10 octets in a 6-octet area
@@ -257,9 +257,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.logging import logger
 
         udp = int(TransType.UDP)
@@ -284,8 +284,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """GitHub issue #2477: an AH its own parser rejects is ``Raw``, too."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.logging import logger
 
         ah = bytes([int(TransType.UDP), 0]) + bytes(6)  # Payload Len 0: a negative ICV length
@@ -310,8 +310,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         when that is ``Raw``.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader as EH
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         routing = bytes([int(EH.IPv6_Route), 2]) + bytes(6)  # 24 octets declared, 8 present
         raw = _ipv6_bytes(int(EH.IPv6_Route), routing)
@@ -329,8 +329,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.warnings import SchemaWarning
 
         shim6 = bytes([int(TransType.UDP), 250]) + bytes(14)  # (250 + 1) * 8 overruns
@@ -364,16 +364,16 @@ class IPv6ExtUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         self.assertIs(Internet.__proto__[TransType.Shim6], IPv6_Ext)
 
     def test_shim6_packet_parses_generically_and_chain_reaches_real_udp(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         shim6_ext = bytes([int(TransType.UDP), 1]) + b'\x00' * 14  # 16 octets, generic rule
         udp_payload = _udp_bytes(b'shim6-ok')
@@ -395,7 +395,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def test_alias_is_hyphenated_like_its_siblings(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
         inst = IPv6_Ext(io.BytesIO(raw), len(raw), extension=True,
@@ -413,7 +413,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         import inspect
 
         import pcapkit.protocols  # noqa: F401  # pylint: disable=unused-import
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         members = [klass for klass in IPv6_Ext.__subclasses__() if not inspect.isabstract(klass)]
         self.assertCountEqual(IPv6_Ext.id(), [klass.__name__ for klass in members])
@@ -446,7 +446,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
     def test_selector_matches_by_member_and_by_family(self) -> None:
         """A member name matches only that member; the family name matches all."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         packets = self._member_packets()
         for name, raw in packets.items():
@@ -467,9 +467,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def test_eq_on_the_family_name_is_false_like_ip_and_ipsec(self) -> None:
         """``==`` tests a layer's own :meth:`id`, which omits a family name."""
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         ah = bytes([int(TransType.UDP), 2, 0, 0]) + bytes(12) + _udp_bytes(b'ok')
         raw = _ipv4_bytes(int(TransType.AH), ah)
@@ -494,9 +494,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """A HOPOPT that its own parser rejects is ``Raw`` (GitHub issue #2477)."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         # Router Alert declaring 10 octets of data in a 6-octet option area
         hopopt = bytes([int(TransType.UDP), 0, 0x05, 10]) + bytes(4)
@@ -517,8 +517,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """Shim6 is parsed by ``IPv6_Ext``, whose :meth:`id` names every member."""
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         shim6 = bytes([int(TransType.UDP), 0]) + bytes(6)
         raw = _ipv6_bytes(int(ExtensionHeader.Shim6), shim6 + _udp_bytes(b'ok'))
@@ -536,7 +536,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
     def test_version_gate_rejects_non_ipv6_construction(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14
@@ -554,7 +554,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.utilities.exceptions import ProtocolError
 
         expected = 'IPv6_Ext: invalid version: must be 6, not 4'
@@ -576,12 +576,12 @@ class IPv6ExtUnitTests(unittest.TestCase):
         extension-header chain. The version gate on ``__post_init__`` sends
         construction back through the caller's own ``@beholder``, which
         falls back to plain ``Raw`` -- verified
-        against a real :class:`~pcapkit.protocols.internet.ipv4.IPv4` packet,
+        against a real :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` packet,
         not just the class in isolation.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _ipv4_bytes(int(TransType.Shim6), b'\x11\x01' + b'\x00' * 14)
         ipv4 = IPv4(io.BytesIO(raw), len(raw))
@@ -601,7 +601,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         no ``next`` -- the exact #891 signature if the walk read
         ``info.next`` on it unconditionally. The structural check in
         :meth:`IPv6._decode_next_layer
-        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` must stop
+        <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>` must stop
         there instead, keeping this packet's own header (source, destination,
         hop limit) intact rather than losing it to a further-out
         ``@beholder``. ``254`` is the same code path (also has no dedicated
@@ -619,8 +619,8 @@ class IPv6ExtUnitTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         code_253 = TransType.Use_for_experimentation_and_testing_253
         raw = _ipv6_bytes(int(code_253), b'\x11\x01' + b'\x00' * 14)
@@ -704,7 +704,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     def _family(self) -> 'list[type]':
         """The discovered family, with every member module imported first."""
         import pcapkit.protocols.internet  # noqa: F401  # populates __subclasses__
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         return self._subclasses(IPv6_Ext)
 
@@ -769,7 +769,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
         """
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         for klass in self._family():
             with self.subTest(cls=klass.__qualname__):
@@ -832,7 +832,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
 
     def test_every_subclass_alias_survives_the_packet_dict_key_computation(self) -> None:
         """:meth:`IPv6._decode_next_layer
-        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` keys its
+        <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>` keys its
         packet dict by ``alias.lstrip('IPv6-').lower()`` (in ``_exthdr_key``).
         :meth:`str.lstrip` strips a character *set*, so the hyphen in
         ``IPv6-Route``/``IPv6-Frag``/``IPv6-Opts`` is what lets ``IPv6`` fall
@@ -862,7 +862,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         directly rather than only through the ``__dict__`` check: no real
         header may end up reporting the fallback parser's own identity.
         """
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         base_name = self._constant(IPv6_Ext, 'name')
         base_alias = self._constant(IPv6_Ext, 'alias')
@@ -882,11 +882,11 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         land on :class:`~pcapkit.protocols.protocol.ProtocolBase` rather than
         on the base's fallback-role ``protocol``.
         """
-        from pcapkit.protocols.internet.ah import AH
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.ah.protocol import AH
+        from pcapkit.protocols.internet.esp.protocol import ESP
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipsec import IPsec
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipsec.protocol import IPsec
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         for klass in (AH, ESP):
             with self.subTest(klass=klass.__qualname__):
@@ -901,12 +901,12 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         """GitHub issue #895: ``ESP`` accepted ``extension=``, stored it in
         ``_extf`` and never read it. Subclassing the base makes ``_extf``
         load-bearing for
-        :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload` and
-        :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain`, which
+        :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.payload` and
+        :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protochain`, which
         ``ESP`` inherits, and ``ESP.protocol`` supplies the third guard by hand.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         wire = struct.pack('>II', 0x66, 1) + b'\x00' * 16
@@ -930,7 +930,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         and ``IPv6_Ext`` sits between it and
         :class:`~pcapkit.protocols.protocol.ProtocolBase` in the MRO. Without
         the ``__data__`` discriminator in
-        :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`, that
+        :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protocol`, that
         ``super()`` lands on the *fallback-role* body, which reads
         ``self._info.protocol`` -- a field none of the family's data models has.
         Measured without the discriminator: ``AttributeError`` on every one.
@@ -939,10 +939,10 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ah import AH
-        from pcapkit.protocols.internet.esp import ESP
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ah.protocol import AH
+        from pcapkit.protocols.internet.esp.protocol import ESP
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         udp = _udp_bytes(b'hi')
         cases = [
@@ -967,8 +967,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         raw = bytes([int(TransType.UDP), 0]) + b'\x00' * 6 + _udp_bytes(b'hi')
         inst = IPv6_Ext(io.BytesIO(raw), len(raw), alias=int(ExtensionHeader.HOPOPT))
@@ -979,13 +979,13 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         self.assertEqual(inst.length, 8)
 
     def test_make_emits_the_two_guaranteed_octets(self) -> None:
-        """:meth:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make` reads
+        """:meth:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.make` reads
         ``next``/``len``/``payload`` out of ``**kwargs`` rather than declaring
         them (see its docstring), so exercise the construction path that
         actually supplies them.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         built = IPv6_Ext(next=TransType.TCP, len=0, payload=b'\x00' * 6, version=6)
         self.assertEqual(bytes(built)[:2], bytes([int(TransType.TCP), 0]))
@@ -1003,7 +1003,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         member.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         raw = bytes([int(TransType.UDP), 1]) + b'\x00' * 14  # (1+1)*8 == 16
         for label, kwargs in (('absent', {}), ('unregistered', {'alias': 200})):
@@ -1025,7 +1025,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         import inspect
 
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
         from pcapkit.protocols.protocol import _declared_keywords
         from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -1049,7 +1049,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         """Eight: :rfc:`6564#section-4`'s Hdr Ext Len excludes the first 8
         octets, so no conforming header is shorter (:rfc:`8200#section-4`).
         """
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         self.assertEqual(object.__new__(IPv6_Ext).__length_hint__(), 8)
 
@@ -1062,8 +1062,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         be decrypted.
         """
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         hopopt_wire = bytes([int(TransType.UDP), 0]) + b'\x01\x04\x00\x00\x00\x00'
         self.assertEqual(
@@ -1093,7 +1093,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
         return struct.pack('!IHBB', 6 << 28, len(body), first, 64) + bytes(32) + body
 
     def _parse(self, first: int, body: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         data = self._ipv6(first, body)
         with warnings.catch_warnings():
@@ -1105,7 +1105,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
         return next(ext for ext in ipv6.extension_headers.values() if isinstance(ext, cls))
 
     def test_terminal_hopopt_membership_does_not_raise(self) -> None:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
 
         # next=59 (No Next Header), Hdr Ext Len 0, PadN(4)
         body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
@@ -1115,7 +1115,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
         self.assertNotIn('ESP', hopopt)
 
     def test_terminal_ipv6_opts_membership_does_not_raise(self) -> None:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
         body = struct.pack('!BB', 59, 0) + bytes([1, 4, 0, 0, 0, 0])
         opts = self._layer(60, body, IPv6_Opts)
@@ -1124,7 +1124,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
         self.assertNotIn('ESP', opts)
 
     def test_terminal_ipv6_route_membership_does_not_raise(self) -> None:
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         # next=59, Hdr Ext Len 0, Routing Type 0, Segments Left 0, reserved
         body = struct.pack('!BBBBI', 59, 0, 0, 0, 0)
@@ -1134,7 +1134,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
         self.assertNotIn('ESP', route)
 
     def test_terminal_ipv6_frag_membership_does_not_raise(self) -> None:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
 
         body = struct.pack('!BBHI', 59, 0, 0, 0x1234)
         frag = self._layer(44, body, IPv6_Frag)
@@ -1144,7 +1144,7 @@ class ExtensionLayerMembershipTests(unittest.TestCase):
 
     def test_terminal_shim6_membership_does_not_raise(self) -> None:
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
-        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
 
         # Shim6 (140) has no dedicated parser: the generic fallback handles it.
         # next=59 (No Next Header), Hdr Ext Len 0, padding to 8 octets

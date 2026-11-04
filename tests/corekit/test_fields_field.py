@@ -134,7 +134,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
 
         262144 (``0x40_000``) is libpcap's own ``MAXIMUM_SNAPLEN`` and this
         package's own default ``snaplen``
-        (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). A test that
+        (:meth:`pcapkit.protocols.misc.pcap.header.protocol.Header.make`). A test that
         only ever reads the constant back from the module would still pass
         if that figure were quietly changed to something unjustified.
         """
@@ -916,7 +916,7 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     A ``length=lambda pkt: pkt['__length__']``-style callback is
     attacker/corruption-controlled the same way :attr:`FieldBase.unpack`'s
     ``length`` argument is (see the class above): :meth:`Schema.unpack
-    <pcapkit.protocols.schema.schema.Schema.unpack>` decrements
+    <pcapkit.protocols.schema.Schema.unpack>` decrements
     ``packet['__length__']`` by each field's nominal width regardless of how
     many octets the buffer actually held, and a subsequent field's callback
     can resolve to that negative remainder. :class:`~pcapkit.corekit.fields.

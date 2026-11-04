@@ -58,7 +58,7 @@ class EngineMeta(abc.ABCMeta, Generic[_T]):
 
         Note:
             Unlike :attr:`EnumSchema.registry
-            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            <pcapkit.protocols.schema.EnumSchema.registry>`, this is not
             a per-class mapping: every engine registration lands in the single
             :attr:`Extractor.__engine__
             <pcapkit.foundation.extraction.Extractor.__engine__>` table, so
@@ -279,7 +279,7 @@ class Engine(EngineBase[_T], Generic[_T]):
         ``engine`` is given. This is what lets a subclass decline registration
         rather than having to inherit :class:`EngineBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`, which
         guards on its own ``code`` keyword the same way.
 
         Note:

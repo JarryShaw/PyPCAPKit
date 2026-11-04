@@ -2,9 +2,10 @@ L2TP - Layer Two Tunnelling Protocol
 ====================================
 
 .. module:: pcapkit.protocols.link.l2tp
+.. module:: pcapkit.protocols.link.l2tp.protocol
 
-:mod:`pcapkit.protocols.link.l2tp` contains
-:class:`~pcapkit.protocols.link.l2tp.L2TP` only, an abstract base class for the
+:mod:`pcapkit.protocols.link.l2tp.protocol` contains
+:class:`~pcapkit.protocols.link.l2tp.protocol.L2TP` only, an abstract base class for the
 Layer Two Tunnelling Protocol family [*]_. The concrete versions live in modules
 of their own:
 
@@ -15,18 +16,18 @@ of their own:
      - Class
      - Specification
    * - L2TPv2
-     - :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`
+     - :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`
      - :rfc:`2661`
 
 Only L2TPv2 is implemented.
 
 The base deliberately parses no header, as
-:class:`~pcapkit.protocols.internet.ip.IP` does for its family, because the
+:class:`~pcapkit.protocols.internet.ip.protocol.IP` does for its family, because the
 versions do not share one. Only the first 16-bit word, with a version nibble at
 bits 12-15, is common to all of them; a base that parsed further would assume one
 version's layout for every version.
 
-.. autoclass:: pcapkit.protocols.link.l2tp.L2TP
+.. autoclass:: pcapkit.protocols.link.l2tp.protocol.L2TP
    :no-members:
    :show-inheritance:
 
@@ -57,7 +58,7 @@ the value 1 "to permit detection of L2F packets should they arrive intermixed wi
 L2TP packets". L2F is a separate protocol with its own header, so it is to be
 implemented as ``L2F``, the canonical name, with ``L2TPv1`` only as an alias in its
 :meth:`~pcapkit.protocols.protocol.Protocol.id`. See
-:meth:`L2TPv2.id <pcapkit.protocols.link.l2tpv2.L2TPv2.id>` for
+:meth:`L2TPv2.id <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.id>` for
 how a version-flavoured alias is spelled: canonical name first, alias second,
 since callers take element zero as canonical.
 
@@ -67,16 +68,16 @@ Version Dispatch
 Constructing the base gives the member its ``version`` field names, from octets or
 from fields; without it, octets give the one their version nibble names, and fields
 are refused, since no field picks a member (:issue:`2574`).
-:meth:`~pcapkit.protocols.link.l2tp.L2TP._member_of_version` maps ``2`` to
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` and refuses any other version, for
+:meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version` maps ``2`` to
+:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` and refuses any other version, for
 that field, for the nibble and for the data
-:meth:`~pcapkit.protocols.link.l2tp.L2TP.from_data` is handed. UDP port 1701 binds
+:meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP.from_data` is handed. UDP port 1701 binds
 L2TPv2 itself, the only member. The switch is where a further member goes, and
 binding the port to the base through a hook making the same switch, as
-:meth:`IGMP._dispatch <pcapkit.protocols.internet.igmp.IGMP._dispatch>` does for
+:meth:`IGMP._dispatch <pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch>` does for
 IP protocol 2, needs no new registry. L2TP is the easier case beside
-:class:`~pcapkit.protocols.application.http.HTTP`, whose
-:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` has to *infer*
+:class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose
+:meth:`~pcapkit.protocols.application.http.protocol.HTTP._guess_version` has to *infer*
 the version, because HTTP's wire format carries no version field, whereas L2TP
 states its version explicitly in those four bits.
 

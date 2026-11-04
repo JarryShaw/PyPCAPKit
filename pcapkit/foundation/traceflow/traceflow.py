@@ -22,7 +22,7 @@ from dictdumper.dumper import Dumper
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols import __proto__ as protocol_registry
-from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
@@ -88,7 +88,7 @@ class TraceFlowMeta(abc.ABCMeta):
 
         Note:
             Unlike :attr:`EnumSchema.registry
-            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            <pcapkit.protocols.schema.EnumSchema.registry>`, this is not
             a per-class mapping: every flow tracing registration lands in the
             single :attr:`Extractor.__traceflow__
             <pcapkit.foundation.extraction.Extractor.__traceflow__>` table, so
@@ -565,7 +565,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         ``protocol`` is given. This is what lets a subclass decline registration
         rather than having to inherit :class:`TraceFlowBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`, which
         guards on its own ``code`` keyword the same way.
 
         Note:

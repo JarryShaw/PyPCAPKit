@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.radiotap.Radiotap` Constant Enumerations
-==============================================================================
+""":class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` Constant Enumerations
+=======================================================================================
 
 .. module:: pcapkit.const.radiotap
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.link.radiotap.Radiotap` implementations. Available
+:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations. Available
 enumerations include:
 
 .. list-table::

@@ -63,9 +63,9 @@ Internal Definitions
    .. important::
 
       Packet blocks --
-      :class:`~pcapkit.protocols.data.misc.pcapng.PacketBlock`,
-      :class:`~pcapkit.protocols.data.misc.pcapng.SimplePacketBlock` and
-      :class:`~pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock` -- are
+      :class:`~pcapkit.protocols.misc.pcapng.data.PacketBlock`,
+      :class:`~pcapkit.protocols.misc.pcapng.data.SimplePacketBlock` and
+      :class:`~pcapkit.protocols.misc.pcapng.data.EnhancedPacketBlock` -- are
       not stored in :class:`Context`, since the
       :class:`~pcapkit.foundation.extraction.Extractor` stores them directly.
 

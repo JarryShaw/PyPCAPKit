@@ -104,9 +104,9 @@ def _analysis(kind: str) -> 'tuple[Callable[[Any], Any], Any, Any]':
     """The public function, the default protocol and the engine for ``kind``."""
     from pcapkit.foundation.analysis import ip_datagram, tcp_datagram
     from pcapkit.foundation.reassembly import ipv4, ipv6, tcp
-    from pcapkit.protocols.internet.ipv4 import IPv4
-    from pcapkit.protocols.internet.ipv6 import IPv6
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
+    from pcapkit.protocols.internet.ipv6.protocol import IPv6
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     return {
         'ipv4': (ip_datagram, IPv4, ipv4.IPv4),
@@ -117,8 +117,8 @@ def _analysis(kind: str) -> 'tuple[Callable[[Any], Any], Any, Any]':
 
 def _expected(kind: str) -> 'Any':
     """The class the default protocol parses ``kind``'s whole payload to."""
-    from pcapkit.protocols.application.httpv1 import HTTPv1
-    from pcapkit.protocols.transport.udp import UDP as UDP_Protocol
+    from pcapkit.protocols.application.httpv1.protocol import HTTPv1
+    from pcapkit.protocols.transport.udp.protocol import UDP as UDP_Protocol
 
     return HTTPv1 if kind == 'tcp' else UDP_Protocol
 
@@ -159,8 +159,8 @@ class AnalysisFunctionTests(unittest.TestCase):
     def test_ip_datagram_parses_by_the_payload_protocol_type(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.analysis import ip_datagram
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.udp import UDP as UDP_Protocol
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.udp.protocol import UDP as UDP_Protocol
 
         packet = ip_datagram(self._ip(UDP))
         self.assertIsInstance(packet, UDP_Protocol)
@@ -169,8 +169,8 @@ class AnalysisFunctionTests(unittest.TestCase):
 
     def test_ip_datagram_takes_the_protocol_its_addresses_belong_to(self) -> None:
         from pcapkit.foundation.analysis import ip_datagram
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for v6, called, idle in ((False, IPv4, IPv6), (True, IPv6, IPv4)):
             with self.subTest(v6=v6):
@@ -184,9 +184,9 @@ class AnalysisFunctionTests(unittest.TestCase):
     def test_tcp_datagram_parses_by_its_ports(self) -> None:
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.foundation.analysis import tcp_datagram
-        from pcapkit.protocols.application.httpv1 import HTTPv1 as HTTP
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1 as HTTP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         payload = b''.join(REQUEST)
         with mock.patch.object(TCP, 'analyze', wraps=TCP.analyze) as analyze:
@@ -198,8 +198,8 @@ class AnalysisFunctionTests(unittest.TestCase):
 
     def test_a_contiguous_incomplete_payload_is_parsed(self) -> None:
         from pcapkit.foundation.analysis import ip_datagram, tcp_datagram
-        from pcapkit.protocols.application.httpv1 import HTTPv1 as HTTP
-        from pcapkit.protocols.transport.udp import UDP as UDP_Protocol
+        from pcapkit.protocols.application.httpv1.protocol import HTTPv1 as HTTP
+        from pcapkit.protocols.transport.udp.protocol import UDP as UDP_Protocol
 
         request = b''.join(REQUEST)
         for completed in ('PARTIAL', 'TIMEOUT'):

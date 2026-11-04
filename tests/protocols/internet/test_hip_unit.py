@@ -25,7 +25,7 @@ class HIPUnitTests(unittest.TestCase):
     def test_hip_index_length_alias_and_make_data(self) -> None:
         from pcapkit.const.hip.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         data = DummyDict(
             next=TransType.TCP,
@@ -75,10 +75,10 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         proto = object.__new__(HIP)
@@ -227,13 +227,13 @@ class HIPUnitTests(unittest.TestCase):
 
     def test_hip_register_parameter_warns_on_overwrite(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         registry = HIP.__dict__['__parameter__']
 
         original = registry[Parameter.ESP_INFO]
         try:
-            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
                 HIP.register_parameter(Parameter.ESP_INFO, 'unassigned')
             warn.assert_called_once()
             self.assertEqual(registry[Parameter.ESP_INFO], 'unassigned')
@@ -247,17 +247,17 @@ class HIPUnitTests(unittest.TestCase):
         custom = Parameter.Unassigned_65501
         self.assertNotIn(custom, registry)
         try:
-            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
                 HIP.register_parameter(custom, 'unassigned')
             warn.assert_not_called()
             self.assertEqual(registry[custom], 'unassigned')
 
             # Handing back the entry just stored is no overwrite either (#1362).
-            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
                 HIP.register_parameter(custom, 'unassigned')
             warn.assert_not_called()
 
-            with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+            with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
                 HIP.register_parameter(custom, 'esp_info')
             warn.assert_called_once()
         finally:
@@ -279,9 +279,9 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         registry = HIP.__dict__['__parameter__']
         custom = Parameter.Unassigned_65501
@@ -347,7 +347,7 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         registry = HIP.__dict__['__parameter__']
         fallback = registry.default_factory()
@@ -381,7 +381,7 @@ class HIPUnitTests(unittest.TestCase):
     def test_hip_unregistered_parameter_code_does_not_mutate_the_registry(self) -> None:
         """Parsing must not write to the shared HIP parameter registry.
 
-        :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`
+        :attr:`HIP.__parameter__ <pcapkit.protocols.internet.hip.protocol.HIP.__parameter__>`
         is a :class:`collections.defaultdict` on a class attribute shared by
         every instance in the process, so ``registry[code]`` would insert each
         code it missed -- the leak #428 guards the other registries against, so
@@ -395,8 +395,8 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         registry = HIP.__dict__['__parameter__']
         proto = object.__new__(HIP)
@@ -421,7 +421,7 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(set(registry), before)
 
                 # a leak would make the next genuine registration warn
-                with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+                with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
                     try:
                         HIP.register_parameter(code, 'unassigned')
                         warn.assert_not_called()
@@ -448,8 +448,8 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.transport import Transport
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HIP)
@@ -584,7 +584,7 @@ class HIPUnitTests(unittest.TestCase):
                 version=2,
                 options=options,
             )
-        with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
             hip_cipher = proto._read_param_hip_cipher(
                 hip_schema.HIPCipherParameter(type=Parameter.HIP_CIPHER, len=14,
                                               ciphers=[Cipher.NULL_ENCRYPT] * 7),
@@ -931,7 +931,7 @@ class HIPUnitTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 reader(packet, version=version, options=options)
 
-        with mock.patch('pcapkit.protocols.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.protocol.warn') as warn:
             self.assertEqual(proto._read_param_hip_cipher(
                 hip_schema.HIPCipherParameter(type=Parameter.HIP_CIPHER, len=2,
                                               ciphers=[Cipher.NULL_ENCRYPT]),
@@ -959,9 +959,9 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.suite import Suite
         from pcapkit.const.hip.transport import Transport
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HIP)
@@ -1326,7 +1326,7 @@ class HIPUnitTests(unittest.TestCase):
 
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         proto = object.__new__(HIP)
         iv = b'\x11' * 16
@@ -1384,8 +1384,8 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.suite import Suite
         from pcapkit.const.hip.transport import Transport
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HIP)
@@ -1858,7 +1858,7 @@ class HIPUnitTests(unittest.TestCase):
         rejecting the malformed ``Length``.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import FieldValueError
 
         # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
@@ -1902,7 +1902,7 @@ class HIPUnitTests(unittest.TestCase):
         ``Length``.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import FieldValueError
 
         # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
@@ -1937,7 +1937,7 @@ class HIPUnitTests(unittest.TestCase):
         rather than rejecting the malformed ``Length``.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import FieldValueError
 
         # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
@@ -1966,8 +1966,8 @@ class HIPUnitTests(unittest.TestCase):
         literally "2x number of TF types", with nothing between ``Length`` and
         the list to account for. Applying it anyway turns ``Length = 0`` with an
         empty ``formats`` list -- which packs as ``08010000`` -- into a raise.
-        This parses it back to confirm :func:`~pcapkit.protocols.
-        schema.internet.hip.transport_format_list_len` accepts it.
+        This parses it back to confirm
+        :func:`~pcapkit.protocols.internet.hip.schema.transport_format_list_len` accepts it.
 
         Two copies -- a lone one is representable (#651) -- because two
         consecutive parameters are what prove the reader's *stride*. A parser
@@ -1978,7 +1978,7 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         # next(1) len(1)=6 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
         # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
@@ -2021,14 +2021,14 @@ class HIPUnitTests(unittest.TestCase):
         :func:`two_octet_prefix_list_len`'s other two call sites, all three
         two-octet. So this test's four entries are four *two*-octet values
         (``Length = 8``), and with
-        :func:`~pcapkit.protocols.schema.internet.hip.
+        :func:`~pcapkit.protocols.internet.hip.schema.
         transport_format_list_len` returning ``Length`` unchanged, and
         ``item_type=EnumField(length=2, ...)``, all four survive the round
         trip rather than being dropped or double-counted.
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         # next(1) len(1)=8 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
         # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
@@ -2083,8 +2083,8 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         cases = (
@@ -2120,7 +2120,7 @@ class HIPUnitTests(unittest.TestCase):
         rather than rejecting the malformed ``Length``.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import FieldValueError
 
         # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
@@ -2154,7 +2154,7 @@ class HIPUnitTests(unittest.TestCase):
         rather than rejecting the malformed ``Length``.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import FieldValueError
 
         # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
@@ -2187,7 +2187,7 @@ class HIPUnitTests(unittest.TestCase):
         disagreement. Building through the maker instead pins the two to
         agree: with a one-octet ``item_type``, one entry's maker-computed
         ``len=4`` reverses through
-        :func:`~pcapkit.protocols.schema.internet.hip.
+        :func:`~pcapkit.protocols.internet.hip.schema.
         two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
         ``[1, 0]``, one spurious trailing entry -- while with the
         two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
@@ -2199,8 +2199,8 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         cases = ([], [1], [1, 2], [1, 2, 3])
@@ -2229,7 +2229,7 @@ class HIPUnitTests(unittest.TestCase):
         expose a maker/schema disagreement. Building through the maker
         instead pins the two to agree: with a one-octet ``item_type``, one
         entry's maker-computed ``len=4`` reverses through
-        :func:`~pcapkit.protocols.schema.internet.hip.
+        :func:`~pcapkit.protocols.internet.hip.schema.
         two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
         ``[1, 0]``, one spurious trailing entry -- while with the
         two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
@@ -2241,8 +2241,8 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         cases = ([], [1], [1, 2], [1, 2, 3])
@@ -2284,7 +2284,7 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         proto = object.__new__(HIP)
 
@@ -2329,13 +2329,13 @@ class HIPUnitTests(unittest.TestCase):
 
         This guards against ``R1CounterParameter`` registering itself with
         ``code=Enum_Parameter.R1_COUNTER`` alone -- 129, the HIPv2 spelling.
-        :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` carries two
+        :attr:`~pcapkit.protocols.internet.hip.protocol.HIP.__parameter__` carries two
         hand-written entries -- not a name-normalisation rule -- mapping both
         128 and 129 to ``_read_param_r1_counter``, and
         ``_make_param_r1_counter`` builds a real ``R1CounterParameter`` for 128
         -- so construction works either way and only parsing can break. The
         *schema* that unpacks a parameter off the wire is chosen by a
-        different mapping, :attr:`~pcapkit.protocols.schema.schema.EnumSchema.
+        different mapping, :attr:`~pcapkit.protocols.schema.EnumSchema.
         registry`, wired into :class:`HIP`'s ``param`` field as
         ``OptionField(..., registry=Parameter.registry)``, and that one is
         keyed solely by the ``code=`` a schema class declares. So without the
@@ -2364,9 +2364,9 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         # The schema registry itself: both codes resolve to the same class.
         self.assertIs(hip_schema.Parameter.registry[Parameter.R1_Counter],
@@ -2427,7 +2427,7 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import FieldValueError
 
         ipv6_field = hip_schema.locator_value_selector({'type': 0, 'len': 4})
@@ -2472,7 +2472,7 @@ class HIPUnitTests(unittest.TestCase):
             hip_schema.transport_format_list_len({'len': -1})
 
         missing_packet: dict[str, object] = {}
-        with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.schema.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(missing_packet)
         self.assertEqual(missing_packet['__cipher__'], Cipher.get(0xffff))
         warn.assert_called_once()
@@ -2481,14 +2481,14 @@ class HIPUnitTests(unittest.TestCase):
         # before it into the same context, as the parameters of one area are.
         no_cipher_packet: dict[str, object] = {}
         hip_schema.HIPCipherParameter.unpack(b'\x02\x43\x00\x00' + bytes(4), packet=no_cipher_packet)
-        with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.schema.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(no_cipher_packet)
         self.assertEqual(no_cipher_packet['__cipher__'], Cipher.get(0xffff))
         warn.assert_called_once()
 
         cipher_packet: dict[str, object] = {}
         hip_schema.HIPCipherParameter.unpack(b'\x02\x43\x00\x04\x00\x02\x00\x01', packet=cipher_packet)
-        with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.schema.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
         self.assertIs(cipher_packet['__cipher__'], Cipher.AES_128_CBC)
         warn.assert_not_called()
@@ -2496,7 +2496,7 @@ class HIPUnitTests(unittest.TestCase):
         hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
         self.assertIs(cipher_packet['__cipher__'], Cipher.NULL_ENCRYPT)
 
-        with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
+        with mock.patch('pcapkit.protocols.internet.hip.schema.warn') as warn:
             hip_schema.EncryptedParameter.pre_unpack(cipher_packet)
         self.assertEqual(cipher_packet['__cipher__'], Cipher.get(0xfffe))
         warn.assert_called_once()
@@ -2519,16 +2519,16 @@ class HIPUnitTests(unittest.TestCase):
         twice ``/ 8`` and holds only because ``RHASH_len`` -- the natural output
         length of a hash function, in bits -- is a whole number of octets.
         This guards against
-        :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_solution`
+        :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._make_param_solution`
         applying that shorthand to an arbitrary :meth:`int.bit_length`, where
         the identity fails, and so emitting an odd contents width that
-        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`'s
+        :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_solution`'s
         ``(len - 4) % 2`` guard rejects -- the library refusing to parse what it
         has just built.
 
         Two independent symptoms, both asserted below. The odd ``len`` is
         rejected outright; and because
-        :class:`~pcapkit.protocols.schema.internet.hip.SolutionParameter` sizes
+        :class:`~pcapkit.protocols.internet.hip.schema.SolutionParameter` sizes
         each field from that same ``len``, an undersized ``len`` also silently
         *truncates* the values on the way out -- ``solution=0xfff`` packed into
         the one octet ``len=7`` allowed for it came back as ``0xff``.
@@ -2555,8 +2555,8 @@ class HIPUnitTests(unittest.TestCase):
 
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         options = OrderedMultiDict()
@@ -2605,7 +2605,7 @@ class HIPUnitTests(unittest.TestCase):
 
         :rfc:`5201#section-5.2.5` fixes ``Random #I`` and ``Puzzle solution #J``
         at 8 octets each and the parameter's ``Length`` at 20, and
-        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`
+        :meth:`~pcapkit.protocols.internet.hip.protocol.HIP._read_param_solution`
         enforces exactly that for ``version=1``. A 57-bit value is a perfectly
         ordinary 8-octet field with seven leading zero bits, so it must produce
         ``Length = 20``; ``4 + ceil(57 / 4)`` produces 19, which fails both the
@@ -2618,7 +2618,7 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         proto = object.__new__(HIP)
         options = OrderedMultiDict()
@@ -2666,8 +2666,8 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         options = OrderedMultiDict()
@@ -2752,9 +2752,9 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         proto = object.__new__(HIP)
@@ -2857,8 +2857,8 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(HIP)
@@ -2937,7 +2937,7 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HIP)
@@ -3035,7 +3035,7 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(HIP)
@@ -3133,7 +3133,7 @@ class HIPUnitTests(unittest.TestCase):
         independent statement of the RFC's arithmetic can see it, which is what
         ``rfc_total`` below is. It is written out longhand from the RFC text and
         deliberately does *not* call
-        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len`,
+        :func:`~pcapkit.protocols.internet.hip.schema.parameter_total_len`,
         since comparing an implementation with itself asserts nothing.
 
         Every ``Length`` from 0 to 63 is checked, which is what makes the widths
@@ -3163,7 +3163,7 @@ class HIPUnitTests(unittest.TestCase):
         former.
 
         """
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         def rfc_total(length: int) -> int:
             """RFC 7401 5.2.1, transcribed rather than imported."""
@@ -3190,11 +3190,11 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertNotEqual(total, pre_651_total(length))
 
         # Which parameters this governs, stated rather than implied: every padding
-        # site in ``schema/internet/hip.py`` and every reported record length in
-        # ``internet/hip.py`` routes through these two helpers -- every parameter
+        # site in ``internet/hip/schema.py`` and every reported record length in
+        # ``internet/hip/protocol.py`` routes through these two helpers -- every parameter
         # schema and every reported length but one. The exception is
         # ``LOCATOR_SET``, which uses
-        # :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`
+        # :func:`~pcapkit.protocols.internet.hip.schema.locator_set_padding_len`
         # instead (#679): the same arithmetic, read off a snapshot of the parameter's
         # own ``Length`` rather than off ``pkt['len']``, which its nested
         # locators shadow while they pack. The identity of that one callback is
@@ -3240,7 +3240,7 @@ class HIPUnitTests(unittest.TestCase):
         """#651/#664/#679: every HIP parameter pads through a known callback, and no other.
 
         Every HIP padding site goes through
-        :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`
+        :func:`~pcapkit.protocols.internet.hip.schema.parameter_padding_len`
         (#651), with one deliberate exception. ``LOCATOR_SET`` carried two
         defects that cancelled at the shape its tests sampled -- a ``Length``
         in 4-octet units where :rfc:`7401` Section 5.2.1 counts bytes, and a
@@ -3251,11 +3251,11 @@ class HIPUnitTests(unittest.TestCase):
 
         **The exclusion is not a hold-back (#679).**
         ``LocatorSetParameter.padding`` uses
-        :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`,
+        :func:`~pcapkit.protocols.internet.hip.schema.locator_set_padding_len`,
         which defers to ``parameter_padding_len`` for the arithmetic and differs
         from it only in *where it reads the length from*: the
-        :data:`~pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN` snapshot
-        that :func:`~pcapkit.protocols.schema.internet.hip.locator_set_len_callback`
+        :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN` snapshot
+        that :func:`~pcapkit.protocols.internet.hip.schema.locator_set_len_callback`
         takes before the nested locators overwrite ``pkt['len']``.
 
         Three failure modes make the shape worth guarding, none of which
@@ -3280,7 +3280,7 @@ class HIPUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         on_helper = []  # type: list[str]
         on_locator_set = []  # type: list[str]
@@ -3350,7 +3350,7 @@ class HIPUnitTests(unittest.TestCase):
     def test_hip_parameter_records_are_eight_octet_aligned_on_the_wire(self) -> None:
         """#651: the octets a real parameter packs, not just the arithmetic.
 
-        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len` being
+        :func:`~pcapkit.protocols.internet.hip.schema.parameter_total_len` being
         right is necessary but not sufficient -- every padding site in the
         schema module has to *use* it. So this packs real parameter schemas,
         chosen to cover the residues that discriminate, and measures the octets.
@@ -3369,14 +3369,14 @@ class HIPUnitTests(unittest.TestCase):
         any other.
 
         Nothing here imports
-        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len`: the
+        :func:`~pcapkit.protocols.internet.hip.schema.parameter_total_len`: the
         RFC's formula is written out inline, so without #651 this fails with a
         real octet-count mismatch rather than with an :exc:`AttributeError` for
         a helper that does not exist there.
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         proto = object.__new__(HIP)
 
@@ -3468,8 +3468,8 @@ class HIPUnitTests(unittest.TestCase):
         """
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
         from pcapkit.utilities.exceptions import FieldValueError
 
         proto = object.__new__(HIP)
@@ -3528,9 +3528,9 @@ class HIPUnitTests(unittest.TestCase):
         # #2170: the maker built the ECHO_REQUEST_UNSIGNED schema class, and its
         # ``param`` and return annotations named the Request classes.
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.data.internet import hip as hip_data
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.protocols.internet.hip import data as hip_data
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip import schema as hip_schema
 
         proto = object.__new__(HIP)
         param = hip_data.EchoResponseUnsignedParameter(type=Parameter.ECHO_RESPONSE_UNSIGNED,
@@ -3567,8 +3567,8 @@ class HIPExtensionMembershipTests(unittest.TestCase):
         import struct  # pylint: disable=import-outside-toplevel
         import warnings  # pylint: disable=import-outside-toplevel
 
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         # HIP: next=59, Hdr Len 4 (40 octets), packet type 1, version 1, checksum, controls
         hip_body = struct.pack('!BBBBHH', 59, 4, 0x01, 0x10, 0, 0) + bytes(32)

@@ -148,7 +148,7 @@ class JumbogramCaseTests(unittest.TestCase):
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_the_frame_is_a_jumbogram_read_whole(self) -> None:
         """Payload Length 0, octets to the Jumbo Payload Length, decoded to the end."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         frame = bytes(self.options._frame(self.options.FAMILY_MAP['hopopt-option'],  # pylint: disable=protected-access
                                           self.octets, 12))

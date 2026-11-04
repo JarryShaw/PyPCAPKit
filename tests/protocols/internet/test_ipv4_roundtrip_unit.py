@@ -78,12 +78,12 @@ class TestIPv4RoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def parse(self, data: 'bytes') -> 'object':
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         return IPv4(io.BytesIO(data), len(data))
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.warnings import ProtocolWarning
 
         for name, data in HEADERS.items():
@@ -95,7 +95,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_make_pads_once_after_the_last_option(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         cases = {
             'RR twice': ([(OptionNumber.RR, {'counts': 1}), (OptionNumber.RR, {'counts': 1})],
@@ -113,7 +113,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
                 self.assertEqual([code for code, _ in parsed.info.options.items(multi=True)], codes)
 
     def test_make_builds_an_unassigned_option(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         data = IPv4(options=[(0x9e, {'data': b'\xab\xcd'})], protocol=253).data
         self.assertEqual(data[20:].hex(), '9e04abcd')
@@ -121,8 +121,8 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_make_builds_an_unassigned_quick_start_function(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.data.internet.ipv4 import UnassignedOption
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.data import UnassignedOption
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         data = IPv4(options=[(OptionNumber.QS, {'func': 15, 'ttl': 1, 'nonce': 2})],
                     protocol=253).data
@@ -133,7 +133,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_route_slots_past_the_pointer_are_data(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         option = self.parse(HEADERS['1319 SSR, one slot past the pointer']).info.options[OptionNumber.SSR]
         self.assertEqual([str(ip) for ip in option.route], ['10.0.0.1'])
@@ -172,7 +172,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_reserved_bits_are_data(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         self.assertEqual(self.parse(HEADERS['1326 reserved flag bit']).info.flags.reserved, 1)
         self.assertEqual(IPv4(reserved=1, protocol=253).data[6:8].hex(), '8000')
@@ -191,7 +191,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_edited_options_recompute_the_header_length(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         rtralt = self.parse(header('94040000')).info.options[OptionNumber.RTRALT]
 
@@ -214,7 +214,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
     def test_padding_needs_an_eool_before_it(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         # A fresh list drops its EOOL and pads once, so the octets go nowhere.
         data = IPv4(options=[(OptionNumber.RR, {'counts': 1})], padding=b'\xff', protocol=253).data

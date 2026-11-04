@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.ospf`."""
+"""Unit tests for :mod:`pcapkit.protocols.application.ospf.protocol`."""
 from __future__ import annotations
 
 import importlib.util
@@ -26,7 +26,7 @@ class OSPFUnitTests(unittest.TestCase):
     def test_ospf_index_is_its_transtype_and_make_data_preserves_header(self) -> None:
         from pcapkit.const.ospf.packet import Packet
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         data = DummyData(
             version=2,
@@ -55,12 +55,12 @@ class OSPFUnitTests(unittest.TestCase):
     def test_ospf_properties_read_make_and_auth_helpers(self) -> None:
         from pcapkit.const.ospf.authentication import Authentication
         from pcapkit.const.ospf.packet import Packet
-        from pcapkit.protocols.data.application.ospf import \
+        from pcapkit.protocols.application.ospf.data import \
             CryptographicAuthentication as DataCryptoAuth
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.schema.application.ospf import \
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.ospf.schema import \
             CryptographicAuthentication as SchemaCryptoAuth
-        from pcapkit.protocols.schema.application.ospf import OSPF as SchemaOSPF
+        from pcapkit.protocols.application.ospf.schema import OSPF as SchemaOSPF
         from pcapkit.utilities.exceptions import ProtocolError
 
         ospf = object.__new__(OSPF)
@@ -161,7 +161,7 @@ class OSPFUnitTests(unittest.TestCase):
 
            OSPF._make_id_numbers(True) -> 00000001  (i.e. 0.0.0.1)
         """
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         proto = object.__new__(OSPF)

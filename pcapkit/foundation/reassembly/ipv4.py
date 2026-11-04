@@ -11,7 +11,7 @@ origin. Please refer to :doc:`ip` for more information.
 
 """
 from pcapkit.foundation.reassembly.ip import IP
-from pcapkit.protocols.internet.ipv4 import IPv4 as IPv4_Protocol
+from pcapkit.protocols.internet.ipv4.protocol import IPv4 as IPv4_Protocol
 
 __all__ = ['IPv4']
 

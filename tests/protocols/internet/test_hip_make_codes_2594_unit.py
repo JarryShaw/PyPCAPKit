@@ -9,8 +9,8 @@ its field, or a :obj:`bool` for a field wider than one bit, raises
 ``ProtocolError`` rather than being masked or written as another value.
 
 :data:`ROWS` holds one row per (maker, field, enumeration, width) of
-:class:`~pcapkit.protocols.internet.hip.HIP`. Each width is the field's in
-:mod:`pcapkit.protocols.schema.internet.hip` -- ``EnumField(length=1)`` is 8
+:class:`~pcapkit.protocols.internet.hip.protocol.HIP`. Each width is the field's in
+:mod:`pcapkit.protocols.internet.hip.schema` -- ``EnumField(length=1)`` is 8
 bits, ``length=2`` is 16, a bit-field item its declared bits -- which matches
 the RFC each parameter cites. Every row is reached the way a caller reaches it,
 through ``HIP(parameters=[(code, value)])`` or the header keyword itself, and
@@ -203,7 +203,7 @@ class HIPMakeCodeTests(unittest.TestCase):
 
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         version = VERSION.get(code, 2)
 
@@ -236,7 +236,7 @@ class HIPMakeCodeTests(unittest.TestCase):
     @staticmethod
     def _parse(octets: 'bytes') -> 'Any':
         """The HIP packet ``octets`` parse into."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         return HIP(io.BytesIO(octets), len(octets), extension=True)
 
@@ -299,7 +299,7 @@ class HIPMakeCodeTests(unittest.TestCase):
 
     def test_the_widest_code_builds_parses_back_and_rebuilds(self) -> None:
         """#2594: the field width decides what is refused, so ``(1 << bits) - 1`` builds."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for maker, argument, _, _, bits, _, code, extra, listed in ROWS:
             label = f'{maker}.{argument}'
@@ -329,7 +329,7 @@ class HIPMakeCodeTests(unittest.TestCase):
         """A builder for each form ``parameters`` takes a parameter's type in."""
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         def pair(value: 'Any') -> 'bytes':
             return HIP(version=2, parameters=[(value, {'contents': b'\x01'})],
@@ -353,7 +353,7 @@ class HIPMakeCodeTests(unittest.TestCase):
 
     def test_the_widest_parameter_type_builds_parses_back_and_rebuilds(self) -> None:
         """#2594: a parameter type no member holds builds in either form, and rebuilds."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for form, build in self._parameter_builders().items():
             with self.subTest(form=form):
@@ -370,7 +370,7 @@ class HIPMakeCodeTests(unittest.TestCase):
         maker's positional ``code`` is the code ``make.parameters`` resolves.
 
         """
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         found = set()
         for name in vars(HIP):
@@ -385,7 +385,7 @@ class HIPMakeCodeTests(unittest.TestCase):
 
     def test_no_maker_takes_a_removed_keyword(self) -> None:
         """#2594: no maker's signature declares a ``*_default``, ``*_namespace`` or ``*_reversed`` keyword."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for name in vars(HIP):
             if name != 'make' and not name.startswith('_make_'):

@@ -11,7 +11,7 @@ chain in a loop, went on to any depth.
 
 Both stop at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
 headers in a row: what follows is kept as
-:class:`~pcapkit.protocols.misc.raw.Raw`, with one
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, however long the chain and
 whatever the recursion limit.
 
@@ -74,9 +74,9 @@ def frame(carrier: str, count: int, *, mixed: bool = False) -> bytes:
 
 
 def raw_of(parsed: object) -> object:
-    """The first :class:`~pcapkit.protocols.misc.raw.Raw` layer of ``parsed``, if any."""
-    from pcapkit.protocols.misc.no_payload import NoPayload
-    from pcapkit.protocols.misc.raw import Raw
+    """The first :class:`~pcapkit.protocols.misc.raw.protocol.Raw` layer of ``parsed``, if any."""
+    from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+    from pcapkit.protocols.misc.raw.protocol import Raw
 
     layer = parsed
     while not isinstance(layer, (Raw, NoPayload)):
@@ -110,7 +110,7 @@ class ExtensionHeaderChainLimitTests(unittest.TestCase):
 
     def dissect(self, data: bytes) -> 'tuple[object, list[str]]':
         """The frame ``data`` parses to, and the messages of the ProtocolWarnings it gave."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
         from pcapkit.utilities.warnings import ProtocolWarning
 
         with warnings.catch_warnings(record=True) as caught:
@@ -200,9 +200,9 @@ class ExtensionHeaderChainLimitTests(unittest.TestCase):
                 self.assertEqual(messages, [])
 
     def test_a_cut_frame_rebuilds_byte_exact(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for carrier, klass in (('ipv4', IPv4), ('ipv6', IPv6)):
             for count in (32, 33, 1000):

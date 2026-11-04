@@ -67,8 +67,8 @@ class PrefaceCutTests(unittest.TestCase):
 
     def assert_cut(self, http: 'object', wire_: bytes, keep: int) -> None:
         """``http`` holds the preface and the first ``keep`` octets of ``wire_``, and rebuilds them."""
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.http.protocol import HTTP
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         cut = PREFACE + wire_[:keep]
         self.assertIsInstance(http, HTTPv2)
@@ -85,7 +85,7 @@ class PrefaceCutTests(unittest.TestCase):
         self.assertEqual(HTTP.from_data(http.info).data, cut)
 
     def test_cut_through_tcp_at_every_offset(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for label, (wire_, _, _) in FRAMES.items():
             packet = _datagram(PREFACE + wire_)
@@ -102,7 +102,7 @@ class PrefaceCutTests(unittest.TestCase):
                         self.assertEqual(IPv4.from_data(ipv4.info.to_dict()).data, raw)
 
     def test_cut_through_httpv2_at_every_offset(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         for label, (wire_, _, _) in FRAMES.items():
             for keep in range(1, len(wire_)):
@@ -113,8 +113,8 @@ class PrefaceCutTests(unittest.TestCase):
                         self.assert_cut(http, wire_, keep)
 
     def test_whole_frame_is_the_control(self) -> None:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         for label, (wire_, held, expected) in FRAMES.items():
             app = PREFACE + wire_

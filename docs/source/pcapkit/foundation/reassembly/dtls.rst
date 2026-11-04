@@ -36,7 +36,7 @@ Algorithm
 A DTLS handshake record may carry more than one message fragment --
 :rfc:`6347#section-4.2.3` allows several handshake messages (or fragments of
 them) to be coalesced into one record, and :meth:`SSL._read_tls_handshake_messages
-<pcapkit.protocols.application.ssl.SSL._read_tls_handshake_messages>`
+<pcapkit.protocols.application.ssl.protocol.SSL._read_tls_handshake_messages>`
 reads however many fit rather than assuming exactly one. A fragment names the
 message it belongs to (``message_seq``), the message's total length
 (``length``), and its own byte range within that message (``fragment_offset``,
@@ -57,7 +57,7 @@ Terminology
        ``fragment_length`` and raw ``payload``, built by
        :func:`pcapkit.toolkit.pcap.dtls_reassembly` or
        :func:`pcapkit.toolkit.pcapng.dtls_reassembly` from a single
-       :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`.
+       :class:`~pcapkit.protocols.application.dtls.data.DTLSHandshake`.
 
    reasm.dtls.datagram
        Data structure for **reassembled DTLS handshake message** (element of

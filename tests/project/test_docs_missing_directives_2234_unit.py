@@ -8,7 +8,7 @@
   ``Internet._next_exthdr_depth`` hook, which ``internet.rst`` documents, so the
   override is contract too.
 * ``held_body``, ``FlagsField`` and ``PACKET_FLAGS`` in
-  :mod:`pcapkit.protocols.schema.misc.pcapng` -- listed beside the length
+  :mod:`pcapkit.protocols.misc.pcapng.schema` -- listed beside the length
   callbacks, the option fields and the ``autodata`` constants respectively.
 
 Each entry is checked as declared on its page and as naming a real object, the
@@ -27,7 +27,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 API = ROOT / 'docs' / 'source' / 'pcapkit' / 'protocols'
 
 #: The pcapng schema module, whose helpers ``pcapng.rst`` documents.
-SCHEMA = 'pcapkit.protocols.schema.misc.pcapng'
+SCHEMA = 'pcapkit.protocols.misc.pcapng.schema'
 
 
 def _block(text: 'str', directive: 'str') -> 'str':
@@ -78,7 +78,7 @@ class IPXNextExthdrDepthTests(unittest.TestCase):
     def test_ipx_autoclass_lists_the_override(self) -> 'None':
         """Listed on the ``IPX`` autoclass beside ``_make_data``."""
         text = (API / 'internet' / 'ipx.rst').read_text(encoding='utf-8')
-        block = _block(text, '.. autoclass:: pcapkit.protocols.internet.ipx.IPX')
+        block = _block(text, '.. autoclass:: pcapkit.protocols.internet.ipx.protocol.IPX')
         self.assertIn('   .. automethod:: _next_exthdr_depth\n', block)
 
     def test_the_hook_it_overrides_is_documented(self) -> 'None':
@@ -88,7 +88,7 @@ class IPXNextExthdrDepthTests(unittest.TestCase):
 
     def test_ipx_defines_its_own_override(self) -> 'None':
         """The entry documents the method ``IPX`` defines, not an inherited one."""
-        from pcapkit.protocols.internet.ipx import IPX  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.internet.ipx.protocol import IPX  # pylint: disable=import-outside-toplevel
         self.assertIn('_next_exthdr_depth', IPX.__dict__)
 
 

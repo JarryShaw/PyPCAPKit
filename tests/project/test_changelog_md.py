@@ -483,7 +483,7 @@ class PythonRoleTests(ChangelogTreeMixin, unittest.TestCase):
 
     def test_an_explicit_title_is_shown_as_written(self) -> None:
         markdown = self.body(':meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`'
-                             ' and :class:`TCP() <pcapkit.protocols.transport.tcp.TCP>`.')
+                             ' and :class:`TCP() <pcapkit.protocols.transport.tcp.protocol.TCP>`.')
 
         self.assertIn('`AppType.get` and `TCP()`.', markdown)
         self.assertNotIn('<pcapkit', markdown)

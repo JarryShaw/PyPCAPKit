@@ -2,7 +2,7 @@
 """The IP family base dispatches on both paths. C.f. #2574.
 
 A versioned family's base never yields an instance of itself: parsing octets
-through :class:`~pcapkit.protocols.internet.ip.IP`, constructing it from fields,
+through :class:`~pcapkit.protocols.internet.ip.protocol.IP`, constructing it from fields,
 and its ``from_data`` all give ``IPv4`` or ``IPv6``. The ``version`` keyword
 names the member on either path, and it is the only thing that does: fields
 without it are refused, whichever member takes them. Octets without it are read
@@ -66,13 +66,13 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     @staticmethod
     def member(name: 'str | int') -> 'type':
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         return {'IPv4': IPv4, 'IPv6': IPv6, 4: IPv4, 6: IPv6}[name]
 
     def test_octets_without_version_give_the_member_their_version_names(self) -> None:
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
 
         for label, (octets, name) in OCTETS.items():
             for source in ('bytes', 'stream'):
@@ -86,7 +86,7 @@ class IPBaseDispatchTests(unittest.TestCase):
                     self.assertEqual(str(layer.protochain), str(direct.protochain))
 
     def test_octets_naming_no_version_raise(self) -> None:
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version in (0, 5, 15):
@@ -98,7 +98,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_fields(self) -> None:
         """Each build is byte-exact against the member's own and parses back unchanged."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
 
         for label, (fields, version) in FIELDS.items():
             with self.subTest(fields=label):
@@ -111,7 +111,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_octets(self) -> None:
         """A ``version`` that matches the octets parses them as the member would."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
 
         for label, (octets, name) in OCTETS.items():
             for source in ('bytes', 'stream'):
@@ -124,7 +124,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_version_over_octets_of_the_other_member_is_its_parser_s_error(self) -> None:
         """No cross-check: the member ``version`` names parses, and refuses the Version field."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = {
@@ -138,8 +138,8 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_a_member_checks_the_version_field_before_its_header(self) -> None:
         """IPv6's first octet reads to IPv4 as an IHL of 0 to 4; the Version field is checked first."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         six = OCTETS['IPv6 UDP'][0]
@@ -152,7 +152,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_fields_without_version_raise(self) -> None:
         """Even a field only one member takes picks nothing."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = {
@@ -170,7 +170,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_version_is_the_only_check(self) -> None:
         """A bad ``version`` raises; a field the member lacks fails the member's check."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         for version in (5, True, '4', 4.0, 6.0):
@@ -191,8 +191,8 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_a_member_takes_version_only_as_its_own(self) -> None:
         """Building, ``version`` must name the member; parsing, it is handed on unread."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertEqual(IPv4(version=4).data, IPv4().data)
@@ -209,7 +209,7 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_a_subclass_outside_the_members_has_no_version_of_its_own(self) -> None:
         """So it takes no ``version``, as a member takes no other's."""
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError
 
         class Outside(IP):  # type: ignore[type-arg]
@@ -230,7 +230,7 @@ class IPBaseDispatchTests(unittest.TestCase):
             Outside(version=4)
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
-        from pcapkit.protocols.internet.ip import IP
+        from pcapkit.protocols.internet.ip.protocol import IP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for label, (octets, name) in OCTETS.items():
@@ -248,10 +248,10 @@ class IPBaseDispatchTests(unittest.TestCase):
 
     def test_only_the_base_dispatches(self) -> None:
         """A subclass of the base is constructed as itself, abstract or not."""
-        from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
-        from pcapkit.protocols.internet.ip import IP
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+        from pcapkit.protocols.internet.ipv4.data import IPv4 as Data_IPv4
+        from pcapkit.protocols.internet.ip.protocol import IP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv4.schema import IPv4 as Schema_IPv4
 
         class Abstract(IP):  # type: ignore[type-arg] # pylint: disable=abstract-method
             """A direct subclass of the base, still abstract."""

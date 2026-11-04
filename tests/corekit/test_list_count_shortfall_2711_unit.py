@@ -3,7 +3,7 @@
 
 :class:`~pcapkit.corekit.fields.collections.ListField` takes a ``count``, and a list
 whose octets hold fewer items than it counts reports the rest as its ``shortfall``,
-which :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` records
+which :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` records
 as a short read. A payload field of a declared length the data ends inside records
 one too. Either way the fields after it find the ``(name, octets read)`` pair in
 their packet as ``__short_read__``, as :issue:`2727` gives them any other field's.
@@ -31,7 +31,7 @@ class ShortReadSeenAfterTests(unittest.TestCase):
         from pcapkit.corekit.fields.misc import PayloadField, SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         seen = self.seen = []  # type: list
 

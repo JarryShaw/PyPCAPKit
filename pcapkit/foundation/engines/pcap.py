@@ -14,10 +14,10 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.protocols.misc.pcap.frame import Frame
-from pcapkit.protocols.misc.pcap.header import Header
-from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
-from pcapkit.protocols.schema.misc.pcap.header import MAGIC_NUMBER as Schema_MAGIC_NUMBER
+from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
+from pcapkit.protocols.misc.pcap.header.protocol import Header
+from pcapkit.protocols.misc.pcap.header.schema import MAGIC_NUMBER as Schema_MAGIC_NUMBER
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['PCAP']
@@ -50,7 +50,7 @@ class PCAP(EngineBase[Frame]):
         _nnsec: 'bool'
 
     #: The PCAP magic numbers this engine claims, read from their one home,
-    #: :data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`
+    #: :data:`pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER`
     #: (:issue:`1739`).
     MAGIC_NUMBER = tuple(Schema_MAGIC_NUMBER)
 

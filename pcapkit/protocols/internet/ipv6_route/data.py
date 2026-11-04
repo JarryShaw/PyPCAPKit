@@ -1,0 +1,113 @@
+# -*- coding: utf-8 -*-
+"""data model for IPv6 Routing Header"""
+
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import info_final
+from pcapkit.protocols.data import Protocol
+
+if TYPE_CHECKING:
+    from ipaddress import IPv6Address
+
+    from pcapkit.const.ipv6.routing import Routing
+    from pcapkit.const.reg.transtype import TransType
+
+__all__ = [
+    'IPv6_Route',
+
+    'UnknownType', 'SourceRoute', 'Type2', 'RPL',
+]
+
+
+class IPv6_Route(Protocol):
+    """Data model for IPv6-Route protocol."""
+
+    #: Next header.
+    next: 'TransType'
+    #: Header length, in octets, decoded from ``Hdr Ext Len``.
+    length: 'int'
+    #: Routing type.
+    type: 'Routing'
+    #: Segments left.
+    seg_left: 'int'
+
+
+@info_final
+class UnknownType(IPv6_Route):
+    """Data model for IPv6-Route unknown type."""
+
+    #: Data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class SourceRoute(IPv6_Route):
+    """Data model for IPv6-Route Source Route data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
+    #: Source addresses.
+    ip: 'tuple[IPv6Address, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     reserved: 'bytes', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class Type2(IPv6_Route):
+    """Data model for IPv6-Route Type 2 data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
+
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
+    #: Address.
+    ip: 'IPv6Address'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     reserved: 'bytes', ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+
+
+@info_final
+class RPL(IPv6_Route):
+    """Data model for RPL Source data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``reserved`` (:issue:`1235`) and ``padding``
+       (:issue:`1223`).
+
+    """
+
+    #: CmprI.
+    cmpr_i: 'int'
+    #: CmprE.
+    cmpr_e: 'int'
+    #: Pad.
+    pad: 'int'
+    #: Reserved bits, carried verbatim so that a rebuild reproduces them.
+    reserved: 'int'
+    #: Addresses.
+    ip: 'tuple[IPv6Address | bytes, ...]'
+    #: The ``Pad`` octets after the addresses, as captured.
+    padding: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', reserved: 'int', ip: 'tuple[IPv6Address | bytes, ...]', padding: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long

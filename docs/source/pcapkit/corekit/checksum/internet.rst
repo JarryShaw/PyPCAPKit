@@ -14,7 +14,7 @@ which a filter can silence alone (:issue:`2470`).
 
 It imports nothing from :mod:`pcapkit.protocols`, which builds on it
 (:issue:`2580`). A checksum over the IP pseudo-header is left to the enclosing
-IP layer, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo`. ICMP's, IGMP's
+IP layer, see :mod:`pcapkit.protocols.misc.checksum.ip_pseudo.protocol`. ICMP's, IGMP's
 and GRE's checksums, over the message alone, are verified as it is parsed,
 unless the IP layer it is parsed from is a fragment, see :func:`verify_message`
 (:issue:`2618`).

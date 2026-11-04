@@ -30,7 +30,7 @@ Vendor.__init__` would drive from a live fetch -- so the crawler is exercised
 without ever calling :mod:`requests`. Per the standing rule on this package,
 no test here (or anywhere) invokes the crawler against the network.
 
-**The const side drops ``BIT_EMU`` as well.** :meth:`pcapkit.protocols.internet.ipv6.IPv6
+**The const side drops ``BIT_EMU`` as well.** :meth:`pcapkit.protocols.internet.ipv6.protocol.IPv6
 ._decode_next_layer`'s walk resolves ``Enum_ExtensionHeader(proto)`` at the
 top of its loop, and 147 was only ever the *example* of an unregistered,
 ``Raw``-resolving code -- ``"253``/``254`` are the same code path (also

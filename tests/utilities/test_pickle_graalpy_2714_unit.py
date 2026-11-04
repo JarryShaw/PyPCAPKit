@@ -120,7 +120,7 @@ class GenericPickleTests(unittest.TestCase):
 
     def test_an_info_reduces_as_protocol_2_does(self) -> None:
         from pcapkit.corekit.infoclass import Info
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         info = IPv4(IPV4_HEADER).info
         self.assertIsInstance(info, Info)
@@ -146,9 +146,9 @@ class GenericPickleTests(unittest.TestCase):
 
     def test_a_schema_pickles_and_keeps_its_sentinel(self) -> None:
         from pcapkit.corekit.sentinels import NO_VALUE
-        from pcapkit.protocols.internet.hopopt import HOPOPT
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.schema import Schema
 
         mpl = HOPOPT(MPL_HEADER, len(MPL_HEADER), extension=True).schema
         ipv4 = IPv4(IPV4_HEADER).schema
@@ -196,7 +196,7 @@ class SharedReductionTests(unittest.TestCase):
     def test_a_deferred_pickles_still_deferred(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.reassembly.data.data import Deferred
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         payload = struct.pack('!HHHH', 1234, 9, 8, 0)
         deferred = Deferred(IPv4.analyze, TransType.UDP, payload)
@@ -210,7 +210,7 @@ class SharedReductionTests(unittest.TestCase):
 
     def test_a_frame_record_pickles_with_its_attributes(self) -> None:
         from pcapkit.foundation.traceflow.data.data import FrameRecord
-        from pcapkit.protocols.data.misc.pcap.frame import FrameInfo
+        from pcapkit.protocols.misc.pcap.frame.data import FrameInfo
 
         record = FrameRecord({'packet': b'rebuilt', 'Ethernet': {'type': 2048}}, packet=b'captured',
                              frame_info=FrameInfo(ts_sec=1, ts_usec=2, incl_len=8, orig_len=9),

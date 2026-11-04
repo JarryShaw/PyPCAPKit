@@ -2,7 +2,7 @@
 """GitHub issue #2438: the Linux "cooked" capture encapsulation v2 (``LINUX_SLL2``).
 
 Covers the 20-octet header, the same ``arphrd_type``-gated next-layer rule as
-v1 (see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`),
+v1 (see :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`),
 link-address validation, and byte-exact round trips.
 
 Each test imports :mod:`pcapkit` itself, after
@@ -56,7 +56,7 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_ethernet_arphrd_dispatches_by_ethertype(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         raw = _header(0x0800, 0, 7, Hardware.Ethernet, 0, bytes.fromhex('001122334455'), 6) + IPV4
         parsed = LinuxSLL2(raw, len(raw))
@@ -76,15 +76,15 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_netlink_arphrd_dispatches_to_netlink(self) -> None:
         """``ARPHRD_NETLINK`` dispatches to
-        :class:`~pcapkit.protocols.link.netlink.Netlink`, not
-        :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`2500`), through
-        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`.
+        :class:`~pcapkit.protocols.link.netlink.protocol.Netlink`, not
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2500`), through
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`.
         """
         import struct
 
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         nlmsg = struct.pack('<IHHII', 20, 3, 0, 1, 0) + b'\xaa\xbb\xcc\xdd'
         raw = _header(0x0800, 0, 0, ARPHRD.NETLINK, 2, b'', 0) + nlmsg
@@ -98,11 +98,11 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_radiotap_arphrd_dispatches_to_radiotap(self) -> None:
         """GitHub issue #2502: ``ARPHRD_IEEE80211_RADIOTAP`` dispatches to
-        :class:`~pcapkit.protocols.link.radiotap.Radiotap` rather than
-        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         radiotap = bytes.fromhex('00' '00' '0800' '00000000' 'd4000000' 'aaaaaaaaaaaa' '11223344')
         raw = _header(0x0800, 0, 0, ARPHRD.IEEE80211_RADIOTAP, 2, b'', 0) + radiotap
@@ -116,11 +116,11 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_frad_arphrd_dispatches_to_frad(self) -> None:
         """GitHub issue #2460: ``ARPHRD_FRAD`` dispatches to
-        :class:`~pcapkit.protocols.link.frad.FRAD` rather than falling back to
-        :class:`~pcapkit.protocols.misc.raw.Raw`.
+        :class:`~pcapkit.protocols.link.frad.protocol.FRAD` rather than falling back to
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         frad = bytes.fromhex('0c21') + b'\x03\xcc' + IPV4
         raw = _header(0x0800, 0, 0, ARPHRD.FRAD, 2, b'', 0) + frad
@@ -134,12 +134,12 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_frad_protocol_type_is_not_an_ethertype(self) -> None:
         """``ARPHRD_FRAD`` is a key of
-        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.LinuxSLL.__proto__>`,
+        :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`,
         so its ``protocol_type`` is never looked up as an EtherType, per
         tcpdump.org's LINUX_SLL2 page (:issue:`2460`).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL, _resolve_next_layer_proto
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL, _resolve_next_layer_proto
 
         self.assertIn(ARPHRD.FRAD, LinuxSLL.__proto__)
         proto = _resolve_next_layer_proto(LinuxSLL.__proto__, ARPHRD.FRAD, 0x0800)
@@ -148,13 +148,13 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_truncated_frad_is_kept_raw_with_an_int_protocol(self) -> None:
         """A FRAD payload too short for its header is kept as
-        :class:`~pcapkit.protocols.misc.raw.Raw`, which records
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, which records
         ``protocol_type`` as a plain :class:`int`, not an EtherType member
         (:issue:`2460`).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for size in (1, 2, 3):
             with self.subTest(size=size):
@@ -169,11 +169,11 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_ipgre_and_ip6gre_arphrd_dispatch_to_gre(self) -> None:
         """GitHub issue #2501: ``ARPHRD_IPGRE`` and ``ARPHRD_IP6GRE`` both
-        dispatch to :class:`~pcapkit.protocols.link.gre.GRE` rather than
-        falling back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        dispatch to :class:`~pcapkit.protocols.link.gre.protocol.GRE` rather than
+        falling back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         for arphrd in (ARPHRD.IPGRE, ARPHRD.IP6GRE):
             with self.subTest(arphrd=arphrd):
@@ -191,7 +191,7 @@ class TestLinuxSLL2(unittest.TestCase):
         """Loopback, PPP and SLIP/CSLIP are not among the exceptions, so
         ``protocol_type`` is still an EtherType for them.
         """
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         for arphrd, name in ((772, 'loopback'), (512, 'PPP'), (256, 'SLIP'), (257, 'CSLIP')):
             with self.subTest(arphrd=arphrd, name=name):
@@ -209,8 +209,8 @@ class TestLinuxSLL2(unittest.TestCase):
         parse, exactly as v1 (see the sibling test on ``LinuxSLL1``).
         """
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _header(0x1234, 0, 0, Hardware.Ethernet, 0, b'', 0) + IPV4
         parsed = LinuxSLL2(raw, len(raw))
@@ -227,20 +227,20 @@ class TestLinuxSLL2(unittest.TestCase):
     @staticmethod
     def _ethernet(ether_type: int):  # type: ignore[no-untyped-def]
         """A bare Ethernet frame carrying ``ether_type``, for comparison."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         raw = bytes.fromhex('ffffffffffff001122334455') + struct.pack('>H', ether_type) + IPV4
         return Ethernet(raw, len(raw))
 
     def test_known_ethertype_without_a_dissector_matches_ethernet(self) -> None:
         """0x88CC (LLDP) is an assigned EtherType with no dissector: the
-        :class:`~pcapkit.protocols.misc.raw.Raw` fallback records the
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` fallback records the
         EtherType member, as a bare Ethernet frame's does, not a bare int.
         """
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _sll(0x88CC, Hardware.Ethernet) + IPV4
         parsed = LinuxSLL2(raw, len(raw))
@@ -252,12 +252,12 @@ class TestLinuxSLL2(unittest.TestCase):
 
     def test_unassigned_ethertype_raw_fallback_records_the_value(self) -> None:
         """0x1234 is unassigned in EtherType: the
-        :class:`~pcapkit.protocols.misc.raw.Raw` fallback records the
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` fallback records the
         ``<unassigned>`` pseudo-member a bare Ethernet frame's does.
         """
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _sll(0x1234, Hardware.Ethernet) + IPV4
         parsed = LinuxSLL2(raw, len(raw))
@@ -278,10 +278,10 @@ class TestLinuxSLL2(unittest.TestCase):
 
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.link.netlink import Netlink
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.link.netlink.protocol import Netlink
 
         registry = Link.__dict__['__proto__']
         had_original = 0x1234 in registry
@@ -312,7 +312,7 @@ class TestLinuxSLL2(unittest.TestCase):
     def test_reserved_and_padding_round_trip_even_when_non_zero(self) -> None:
         """``reserved`` and the padding beyond ``link_addr_length`` round-trip verbatim."""
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         raw = bytearray(_header(0x0800, 0, 0, Hardware.Ethernet, 0,
                                 bytes.fromhex('0011223344'), 5) + IPV4)
@@ -329,7 +329,7 @@ class TestLinuxSLL2(unittest.TestCase):
     def test_make_then_parse(self) -> None:
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.reg.ethertype import EtherType
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         made = LinuxSLL2(protocol_type=EtherType.Internet_Protocol_version_4, interface_index=3,
                          arphrd_type=Hardware.Ethernet, packet_type=4,
@@ -342,12 +342,12 @@ class TestLinuxSLL2(unittest.TestCase):
         self._assert_rebuilds(parsed)
 
     def test_make_defaults(self) -> None:
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         self.assertEqual(LinuxSLL2().data, _header(0x0800, 0, 0, 1, 0, b'', 0))
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError):
@@ -361,7 +361,7 @@ class TestLinuxSLL2(unittest.TestCase):
     def test_link_addr_length_over_8_round_trips(self) -> None:
         """A ``link_addr_length`` over 8 parses and rebuilds."""
         from pcapkit.const.arp.hardware import Hardware
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         raw = _header(0x0800, 0, 0, Hardware.Ethernet, 0,
                       bytes.fromhex('0011223344556677'), 20) + IPV4
@@ -378,9 +378,9 @@ class TestLinuxSLL2(unittest.TestCase):
     def test_registered_against_frame_and_pcapng(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (Frame, PCAPNG):
             with self.subTest(table=cls.__name__):

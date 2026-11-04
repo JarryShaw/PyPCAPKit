@@ -6,7 +6,7 @@ declared no reserved subfields, so bits 2, 3, 5 and 8-11 were lost on a
 ``from_data`` rebuild: ``200200010002ff03002145000000`` came back as
 ``000200010002ff03002145000000``.
 
-GitHub issue #1208: :meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.make` set ``S``
+GitHub issue #1208: :meth:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.make` set ``S``
 only when both ``ns`` and ``nr`` were given, so ``L2TPv2(ns=7)`` silently wrote
 neither. :rfc:`2661` §3.1 has ``S`` mark the presence of both fields together,
 so a lone value is refused with
@@ -41,7 +41,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_issue_1207_reproduction(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         raw = bytes.fromhex('200200010002ff03002145000000')
         parsed = L2TPv2(raw)
@@ -49,7 +49,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
         self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_each_reserved_mask_round_trips(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for mask in RESERVED_MASKS:
             raw = (mask | 0x0002).to_bytes(2, 'big') + bytes.fromhex('00010002') + PAYLOAD
@@ -59,7 +59,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
                 self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_reserved_bits_round_trip_inside_udp(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         l2tp = bytes.fromhex('34f200010002') + PAYLOAD
         raw = (1701).to_bytes(2, 'big') * 2 + (8 + len(l2tp)).to_bytes(2, 'big') + b'\x00\x00' + l2tp
@@ -68,7 +68,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
         self.assertEqual(UDP.from_data(parsed.info).data, raw)
 
     def test_make_writes_reserved_and_refuses_other_bits(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.assertEqual(L2TPv2(type=0, reserved=0x0400).data[:2], bytes.fromhex('0402'))
@@ -79,7 +79,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
                     L2TPv2(type=0, reserved=bad)
 
     def test_issue_1208_lone_ns_or_nr_is_refused(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in ({'ns': 7}, {'nr': 7}, {'ns': 0}, {'nr': 0}):
@@ -88,7 +88,7 @@ class TestL2TPv2RoundTrip(unittest.TestCase):
                     L2TPv2(**kwargs)
 
     def test_ns_and_nr_together_round_trip(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         made = L2TPv2(type=0, ns=7, nr=0)
         self.assertEqual(made.data, bytes.fromhex('08020000000000070000'))

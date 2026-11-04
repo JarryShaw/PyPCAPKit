@@ -2,9 +2,28 @@ ESP - Encapsulating Security Payload
 ====================================
 
 .. module:: pcapkit.protocols.internet.esp
+.. module:: pcapkit.protocols.internet.esp.protocol
 
-:mod:`pcapkit.protocols.internet.esp` contains
-:class:`~pcapkit.protocols.internet.esp.ESP`,
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.internet.esp._CRYPTO``,
+   ``pcapkit.protocols.internet.esp.load_cryptography``,
+   ``pcapkit.protocols.internet.esp._resolve``,
+   ``pcapkit.protocols.internet.esp.CipherSuite``,
+   ``pcapkit.protocols.internet.esp.IntegritySuite``,
+   ``pcapkit.protocols.internet.esp.CIPHER_SUITES``,
+   ``pcapkit.protocols.internet.esp.INTEGRITY_SUITES``,
+   ``pcapkit.protocols.internet.esp.ESPStatus``,
+   ``pcapkit.protocols.internet.esp.SecurityAssociation`` and
+   ``pcapkit.protocols.internet.esp.ESPContext``, with no alias: they are in this
+   module, and :mod:`pcapkit.protocols.internet.esp` exports the protocol class alone.
+   ``pcapkit.protocols.internet.esp.Cipher`` and
+   ``pcapkit.protocols.internet.esp.Integrity``, which it re-exported, with no alias:
+   use :class:`pcapkit.const.esp.cipher.Cipher` and
+   :class:`pcapkit.const.esp.integrity.Integrity` instead (:issue:`2534`).
+
+:mod:`pcapkit.protocols.internet.esp.protocol` contains
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP`,
 which implements the extractor for Encapsulating
 Security Payload (ESP) [*]_, and the security association, algorithm and
 status types documented below. The ESP structure is described as below:
@@ -26,19 +45,19 @@ fields *inside* the ciphertext, and leaves the length of the ``Integrity
 Check Value`` to be determined by the Security Association (SA), which is
 negotiated out of band. Therefore:
 
-* **Without** SA context, :class:`~pcapkit.protocols.internet.esp.ESP`
+* **Without** SA context, :class:`~pcapkit.protocols.internet.esp.protocol.ESP`
   parses the ``SPI`` and ``Sequence Number``, reports the remainder as an
   opaque encrypted payload, and says so through
-  :attr:`esp.status <pcapkit.protocols.data.internet.esp.ESP.status>`.
+  :attr:`esp.status <pcapkit.protocols.internet.esp.data.ESP.status>`.
   It does *not* guess at the trailer, and it does not raise.
-* **With** SA context, :class:`~pcapkit.protocols.internet.esp.ESP` splits
+* **With** SA context, :class:`~pcapkit.protocols.internet.esp.protocol.ESP` splits
   off the ICV, verifies integrity, decrypts, strips the padding using
   ``Pad Length``, and dispatches the recovered plaintext to the next layer
   using ``Next Header`` -- so an ESP tunnelled TCP segment decodes as TCP.
 
 .. versionadded:: 1.5.0
 
-.. autoclass:: pcapkit.protocols.internet.esp.ESP
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.ESP
    :no-members:
    :show-inheritance:
 
@@ -69,7 +88,7 @@ in :mod:`pcapkit.corekit.context`:
 .. code-block:: python
 
    import pcapkit
-   from pcapkit.protocols.internet.esp import (Cipher, ESPContext, Integrity,
+   from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext, Integrity,
                                                SecurityAssociation)
 
    sa = SecurityAssociation(
@@ -82,7 +101,7 @@ in :mod:`pcapkit.corekit.context`:
    )
    extraction = pcapkit.extract('esp.pcap', context=ESPContext(sa))
 
-.. autoclass:: pcapkit.protocols.internet.esp.SecurityAssociation
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.SecurityAssociation
    :no-members:
    :show-inheritance:
 
@@ -101,7 +120,7 @@ in :mod:`pcapkit.corekit.context`:
    .. automethod:: _split_key
    .. automethod:: __repr__
 
-.. autoclass:: pcapkit.protocols.internet.esp.ESPContext
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.ESPContext
    :no-members:
    :show-inheritance:
 
@@ -143,10 +162,10 @@ A registry enumerates what IANA assigned an ID to, which is far more than
 :mod:`pcapkit` implements. **Registration is not support.** A member of either
 enumeration says only that IANA assigned the transform an ID; what
 :mod:`pcapkit` can actually apply is the separate, explicit
-:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` tables, and
-:meth:`CipherSuite.get <pcapkit.protocols.internet.esp.CipherSuite.get>` /
-:meth:`IntegritySuite.get <pcapkit.protocols.internet.esp.IntegritySuite.get>`
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` tables, and
+:meth:`CipherSuite.get <pcapkit.protocols.internet.esp.protocol.CipherSuite.get>` /
+:meth:`IntegritySuite.get <pcapkit.protocols.internet.esp.protocol.IntegritySuite.get>`
 refuse anything outside them rather than half-working:
 
 .. code-block:: python
@@ -168,7 +187,7 @@ payload path, with a warning.
 The supported set is anchored on the *mandatory to implement* algorithms of
 :rfc:`8221`. The tables below are the authority on what an SA may actually
 name; the rows marked ``yes`` are exactly the keys of
-:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES`, and everything else the
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES`, and everything else the
 registry lists is enumerated and rejected.
 
 ============================ =================== ============ ==================================
@@ -189,7 +208,7 @@ DES, Blowfish, 3IDEA         MUST NOT            **no**       registered, delibe
 ``ENCR_DES_IV32``, ``ENCR_BLOWFISH`` and ``ENCR_3IDEA``.
 
 Likewise, the rows marked ``yes`` below are exactly the keys of
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES`:
+:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES`:
 
 ============================ =================== ============ ==================================
 Integrity                    :rfc:`8221` status   Implemented  Notes
@@ -208,8 +227,8 @@ MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, delibe
 ``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``.
 
 Each implemented suite applies its algorithm with the parameters below, as
-:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` record them. Lengths
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` record them. Lengths
 and sizes are in octets.
 
 ========================== =========== ============== ============== ============== ============== =============== =========================
@@ -232,20 +251,20 @@ Integrity                  ``digest``     ``icv_length`` ``key_size``
 ``AUTH_HMAC_SHA2_512_256`` ``sha512``     32             64
 ========================== ============== ============== ==============
 
-.. autoclass:: pcapkit.protocols.internet.esp.CipherSuite
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.CipherSuite
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.internet.esp.IntegritySuite
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.IntegritySuite
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autodata:: pcapkit.protocols.internet.esp.CIPHER_SUITES
+.. autodata:: pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES
    :no-value:
 
-.. autodata:: pcapkit.protocols.internet.esp.INTEGRITY_SUITES
+.. autodata:: pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES
    :no-value:
 
 Known Limitations
@@ -268,32 +287,42 @@ Known Limitations
 Processing Status
 -----------------
 
-.. autoclass:: pcapkit.protocols.internet.esp.ESPStatus
+.. autoclass:: pcapkit.protocols.internet.esp.protocol.ESPStatus
    :members:
    :show-inheritance:
 
-.. autofunction:: pcapkit.protocols.internet.esp.load_cryptography
+.. autofunction:: pcapkit.protocols.internet.esp.protocol.load_cryptography
 
-.. autodata:: pcapkit.protocols.internet.esp._CRYPTO
+.. autodata:: pcapkit.protocols.internet.esp.protocol._CRYPTO
    :no-value:
 
-.. autofunction:: pcapkit.protocols.internet.esp._resolve
+.. autofunction:: pcapkit.protocols.internet.esp.protocol._resolve
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.esp
+.. module:: pcapkit.protocols.internet.esp.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.esp.ESP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.esp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.esp.schema.ESP
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.esp
+.. module:: pcapkit.protocols.internet.esp.data
 
-.. autoclass:: pcapkit.protocols.data.internet.esp.ESP
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.esp``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.esp.data.ESP
    :members:
    :show-inheritance:
 

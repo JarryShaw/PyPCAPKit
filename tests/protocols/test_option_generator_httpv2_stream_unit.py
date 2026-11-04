@@ -6,7 +6,7 @@
 :file:`examples/generators/options.py`. :rfc:`9113#section-6` makes ``DATA``,
 ``HEADERS``, ``PRIORITY``, ``RST_STREAM``, ``PUSH_PROMISE`` and ``CONTINUATION``
 on stream 0 a connection error, and :meth:`HTTP._guess_version
-<pcapkit.protocols.application.http.HTTP._guess_version>` declines a frame no
+<pcapkit.protocols.application.http.protocol.HTTP._guess_version>` declines a frame no
 conforming sender writes (#1153), so a function putting every frame on stream 0
 decodes six of the ten segments as ``TCP:Raw``.
 :mod:`tests.protocols.test_option_coverage_runtime` checks only the
@@ -123,7 +123,7 @@ class HTTPv2GeneratedFrameTests(unittest.TestCase):
 
     def test_each_frame_decodes_as_http2_over_tcp(self) -> None:
         """A port-80 segment carrying the frame decodes ``TCP:HTTP/2``, not ``TCP:Raw``."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for code, outcome in self.frames.items():
             with self.subTest(type=code):

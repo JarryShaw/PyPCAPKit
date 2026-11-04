@@ -71,7 +71,7 @@ class ProtocolsImportBoundaryTests(unittest.TestCase):
     def test_the_walk_found_the_package(self) -> None:
         names = {path.relative_to(PROTOCOLS).as_posix() for path in PROTOCOLS.rglob('*.py')}
         self.assertIn('protocol.py', names)
-        self.assertIn('application/dtls.py', names)
+        self.assertIn('application/dtls/protocol.py', names)
 
     def test_no_protocol_module_imports_foundation_to_do_its_work(self) -> None:
         found = []  # type: list[str]
@@ -88,7 +88,7 @@ class ProtocolsImportBoundaryTests(unittest.TestCase):
         source = '\n'.join([
             'from typing import TYPE_CHECKING',                           # 1
             'from pcapkit.foundation.analysis.dtls import dtls_handshake',  # 2
-            'from ...foundation.reassembly import dtls',                  # 3
+            'from ....foundation.reassembly import dtls',                 # 3
             'from pcapkit import foundation',                             # 4
             'from pcapkit.foundation.registry.protocols import register',  # 5
             'if TYPE_CHECKING:',                                          # 6
@@ -103,7 +103,7 @@ class ProtocolsImportBoundaryTests(unittest.TestCase):
             '    from pcapkit.foundation.registry import protocols',      # 15
             '    from pcapkit.foundation.registry.protocolsx import x',   # 16
         ])
-        self.assertEqual(violations(source, 'pcapkit.protocols.application.dtls'), [
+        self.assertEqual(violations(source, 'pcapkit.protocols.application.dtls.protocol'), [
             (2, 'pcapkit.foundation.analysis.dtls'),
             (2, 'pcapkit.foundation.analysis.dtls.dtls_handshake'),
             (3, 'pcapkit.foundation.reassembly'),

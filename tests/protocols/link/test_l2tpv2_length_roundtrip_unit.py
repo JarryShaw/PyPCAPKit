@@ -2,10 +2,10 @@
 """L2TPv2 keeps the ``L`` flag and the Length field through ``from_data``.
 
 GitHub issue #1172: :meth:`L2TPv2._make_data
-<pcapkit.protocols.link.l2tpv2.L2TPv2._make_data>` returned the parsed Length
+<pcapkit.protocols.link.l2tpv2.protocol.L2TPv2._make_data>` returned the parsed Length
 under ``length``, which is the parse length
 :class:`~pcapkit.protocols.protocol.ProtocolBase` takes for itself, so it never
-reached :meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.make`. The rebuild then
+reached :meth:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.make`. The rebuild then
 cleared ``L`` and omitted the two Length octets: ``c802000c0001000000010002``
 came back as ``88020001000000010002``.
 
@@ -61,7 +61,7 @@ class TestL2TPv2LengthRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_issue_reproduction(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         raw = bytes.fromhex('c802000c0001000000010002')  # ZLB ACK: T, L and S set
         parsed = L2TPv2(raw)
@@ -70,7 +70,7 @@ class TestL2TPv2LengthRoundTrip(unittest.TestCase):
         self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_every_flag_combination_round_trips(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         self.assertEqual(len(COMBINATIONS), 24)
         for t, l, s, o, pad in COMBINATIONS:
@@ -80,7 +80,7 @@ class TestL2TPv2LengthRoundTrip(unittest.TestCase):
                 self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_make_data_passes_the_length_as_total_length(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         values = L2TPv2._make_data(L2TPv2(build(1, 1, 1, 0, 0)).info)
         self.assertNotIn('length', values)
@@ -90,7 +90,7 @@ class TestL2TPv2LengthRoundTrip(unittest.TestCase):
         self.assertIsNone(values['total_length'])
 
     def test_make_sets_l_flag_only_with_total_length(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         # ``type`` is passed as the raw ``T`` bit so the octets do not depend on
         # how :class:`~pcapkit.const.l2tp.type.Type` names it.

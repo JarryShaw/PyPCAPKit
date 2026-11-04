@@ -5,8 +5,8 @@ non-registry enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 GitHub pull request #921 re-parented every other non-registry enumeration and left these
 alone, because the files holding them were open under other pull requests:
 :mod:`pcapkit.const.ftp.command` (``CommandType``, ``ConformanceRequirement``) under #913,
-and :mod:`pcapkit.protocols.internet.esp` (``ESPStatus``) plus
-:mod:`pcapkit.protocols.internet.mh` (``FastBindingAcknowledgmentStatus``,
+and :mod:`pcapkit.protocols.internet.esp.protocol` (``ESPStatus``) plus
+:mod:`pcapkit.protocols.internet.mh.protocol` (``FastBindingAcknowledgmentStatus``,
 ``IPv6AddressPrefixCode``, ``LMAAddressCode``, ``LocalizedRoutingStatus``) under #904. This
 module pins that they derive from the base, so that every non-registry enumeration is
 inside the hierarchy and none is outside it.
@@ -131,7 +131,7 @@ class ReparentedBasesTests(unittest.TestCase):
         import enum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
 
         self.assertEqual(ESPStatus.__bases__, (EnumLookup, enum.IntEnum))
         self.assertIn(EnumLookup, ESPStatus.__mro__)
@@ -145,7 +145,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
+        from pcapkit.protocols.internet.mh.protocol import FastBindingAcknowledgmentStatus
 
         self.assertEqual(FastBindingAcknowledgmentStatus.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, FastBindingAcknowledgmentStatus.__mro__)
@@ -157,7 +157,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
+        from pcapkit.protocols.internet.mh.protocol import IPv6AddressPrefixCode
 
         self.assertEqual(IPv6AddressPrefixCode.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, IPv6AddressPrefixCode.__mro__)
@@ -168,7 +168,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.internet.mh import LocalizedRoutingStatus
+        from pcapkit.protocols.internet.mh.protocol import LocalizedRoutingStatus
 
         self.assertEqual(LocalizedRoutingStatus.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, LocalizedRoutingStatus.__mro__)
@@ -179,7 +179,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
-        from pcapkit.protocols.internet.mh import LMAAddressCode
+        from pcapkit.protocols.internet.mh.protocol import LMAAddressCode
 
         self.assertEqual(LMAAddressCode.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, LMAAddressCode.__mro__)
@@ -204,8 +204,8 @@ class NoMintingTests(unittest.TestCase):
         mistake for growth.
         """
         from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
-        from pcapkit.protocols.internet.esp import ESPStatus
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
 
@@ -249,7 +249,7 @@ class GetByNameAndValueTests(unittest.TestCase):
         self.assertIs(ConformanceRequirement.get(1), ConformanceRequirement.M)
 
     def test_esp_status(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
 
         self.assertIs(ESPStatus.get('DECRYPTED'), ESPStatus.DECRYPTED)
         self.assertIs(ESPStatus.get(0), ESPStatus.DECRYPTED)
@@ -257,7 +257,7 @@ class GetByNameAndValueTests(unittest.TestCase):
         self.assertIs(ESPStatus.get(5), ESPStatus.UNSUPPORTED)
 
     def test_fast_binding_acknowledgment_status(self) -> None:
-        from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
+        from pcapkit.protocols.internet.mh.protocol import FastBindingAcknowledgmentStatus
 
         self.assertIs(
             FastBindingAcknowledgmentStatus.get('Fast_Binding_Update_accepted'),
@@ -266,20 +266,20 @@ class GetByNameAndValueTests(unittest.TestCase):
                       FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted)
 
     def test_ipv6_address_prefix_code(self) -> None:
-        from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
+        from pcapkit.protocols.internet.mh.protocol import IPv6AddressPrefixCode
 
         self.assertIs(IPv6AddressPrefixCode.get('Old_Care_of_Address'),
                       IPv6AddressPrefixCode.Old_Care_of_Address)
         self.assertIs(IPv6AddressPrefixCode.get(1), IPv6AddressPrefixCode.Old_Care_of_Address)
 
     def test_localized_routing_status(self) -> None:
-        from pcapkit.protocols.internet.mh import LocalizedRoutingStatus
+        from pcapkit.protocols.internet.mh.protocol import LocalizedRoutingStatus
 
         self.assertIs(LocalizedRoutingStatus.get('Success'), LocalizedRoutingStatus.Success)
         self.assertIs(LocalizedRoutingStatus.get(0), LocalizedRoutingStatus.Success)
 
     def test_lma_address_code(self) -> None:
-        from pcapkit.protocols.internet.mh import LMAAddressCode
+        from pcapkit.protocols.internet.mh.protocol import LMAAddressCode
 
         self.assertIs(LMAAddressCode.get('Reserved'), LMAAddressCode.Reserved)
         self.assertIs(LMAAddressCode.get(0), LMAAddressCode.Reserved)
@@ -318,7 +318,7 @@ class FailedLookupTests(unittest.TestCase):
         self.assertIsInstance(value_miss.exception, EnumValueError)
 
     def test_esp_status(self) -> None:
-        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
@@ -333,7 +333,7 @@ class FailedLookupTests(unittest.TestCase):
         """Resolves through the base's own ``get`` (GitHub issue #935) -- the
         same mechanism :meth:`test_localized_routing_status` below
         exercises."""
-        from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
+        from pcapkit.protocols.internet.mh.protocol import FastBindingAcknowledgmentStatus
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
@@ -345,7 +345,7 @@ class FailedLookupTests(unittest.TestCase):
         self.assertIsInstance(value_miss.exception, EnumValueError)
 
     def test_ipv6_address_prefix_code(self) -> None:
-        from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
+        from pcapkit.protocols.internet.mh.protocol import IPv6AddressPrefixCode
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
@@ -361,7 +361,7 @@ class FailedLookupTests(unittest.TestCase):
         :exc:`EnumValueError` directly -- the base's ``get`` re-raises it
         unchanged rather than wrapping it, since it is already a
         :exc:`~pcapkit.utilities.exceptions.BaseError`."""
-        from pcapkit.protocols.internet.mh import LocalizedRoutingStatus
+        from pcapkit.protocols.internet.mh.protocol import LocalizedRoutingStatus
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
@@ -373,7 +373,7 @@ class FailedLookupTests(unittest.TestCase):
         self.assertIsInstance(value_miss.exception, EnumValueError)
 
     def test_lma_address_code(self) -> None:
-        from pcapkit.protocols.internet.mh import LMAAddressCode
+        from pcapkit.protocols.internet.mh.protocol import LMAAddressCode
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
@@ -419,7 +419,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         """The behaviour GitHub issue #930 pins: ``get`` is quiet, matching
         the base, where without the fix it is loud (see the class
         docstring)."""
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -436,7 +436,7 @@ class InheritedQuietnessTests(unittest.TestCase):
     def test_get_all_is_new_and_quiet_too(self) -> None:
         """``get_all`` exists on both classes, and the miss it reaches through
         this same ``get`` is quiet for the same reason ``get`` itself is."""
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -466,7 +466,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         ``TypeError`` on the second positional argument instead (GitHub
         issue #935).
         """
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
         from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -501,8 +501,8 @@ class EachInheritsTheBareClassmethodTests(unittest.TestCase):
 
     def test_each_inherits_the_bare_classmethod(self) -> None:
         from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
-        from pcapkit.protocols.internet.esp import ESPStatus
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
 
@@ -544,8 +544,8 @@ class NonCanonicalKeyConvergenceTests(unittest.TestCase):
 
     def test_none_and_float_keys_all_raise_enumvalueerror(self) -> None:
         from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
-        from pcapkit.protocols.internet.esp import ESPStatus
-        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+        from pcapkit.protocols.internet.esp.protocol import ESPStatus
+        from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
         from pcapkit.utilities.exceptions import EnumValueError

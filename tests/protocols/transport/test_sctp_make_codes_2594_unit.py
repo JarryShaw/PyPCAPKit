@@ -165,7 +165,7 @@ class SCTPMakeCodeTests(unittest.TestCase):
     @staticmethod
     def _make(row: 'Row', value: 'Any', chunks: 'Any' = None) -> 'Any':
         """The schema ``SCTP.make`` builds with ``value`` for the row's field, or from ``chunks``."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         proto = SCTP.__new__(SCTP)
         return SCTP.make(proto, srcport=9899, dstport=38412, chksum=b'\x00' * 4,
@@ -185,7 +185,7 @@ class SCTPMakeCodeTests(unittest.TestCase):
             self.fail(f'{row.maker} {row.field}={value!r} was accepted')
 
     def test_each_row_reaches_its_maker(self) -> 'None':
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for row in FIELDS:
             member = getattr(self._enum(row), row.member)
@@ -229,7 +229,7 @@ class SCTPMakeCodeTests(unittest.TestCase):
 
     def test_a_parsed_list_has_its_keys_checked(self) -> 'None':
         """A parsed list rebuilds as it was, and one keyed by a refused code is refused."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         for row in FIELDS:
             if row.keyed is None:
@@ -245,7 +245,7 @@ class SCTPMakeCodeTests(unittest.TestCase):
     def test_code_no_member_holds_is_written_as_given(self) -> 'None':
         """A code the field carries but no member holds builds, and its capture
         rebuilds byte for byte."""
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         memberless = {}  # type: dict[str, list[int]]
         for row in FIELDS:

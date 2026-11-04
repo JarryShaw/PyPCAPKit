@@ -231,7 +231,7 @@ class DispatchBindingTests(unittest.TestCase):
         """``TransType.L2TP`` (115) stays unbound: it is L2TPv3, and v3 has no class.
 
         :rfc:`3931` gives protocol number 115 a different session header from the
-        :rfc:`2661` framing :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`
+        :rfc:`2661` framing :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`
         implements, so the binding waits on an ``L2TPv3`` class rather than on a
         framing decision. 115 is also the first index anything in this family
         would carry.
@@ -277,8 +277,8 @@ class DispatchBindingTests(unittest.TestCase):
         self.assertIn('httpv1', frames[1].info.to_dict()['ethernet']['ipv4']['udp'])
 
     def test_registered_ports_are_exactly_those_intended(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertEqual(sorted(TCP.__proto__), [20, 21, 80, 443, 8080])
         self.assertEqual(sorted(UDP.__proto__), [80, 1701, 5684, 8080])
@@ -289,8 +289,8 @@ class DispatchBindingTests(unittest.TestCase):
         Binding HTTP there would hand a TLS record to an HTTP parser.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertNotIn(8443, TCP.__proto__)
         self.assertNotIn(8443, UDP.__proto__)
@@ -305,8 +305,8 @@ class DispatchBindingTests(unittest.TestCase):
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.link.link import Link
         from pcapkit.protocols.protocol import ProtocolBase
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         registries = (Link.__proto__, Internet.__proto__,
                       TCP.__proto__, UDP.__proto__)
@@ -319,7 +319,7 @@ class DispatchBindingTests(unittest.TestCase):
         self.assertEqual([len(registry) for registry in registries], sizes)
 
     def test_parsing_an_unregistered_port_does_not_grow_the_registry(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         before = dict(TCP.__proto__)
         self.extract(ethernet(0x0800, ipv4(6, tcp(50000, 9999, b'whatever'))))

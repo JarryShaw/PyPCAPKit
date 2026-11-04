@@ -72,9 +72,9 @@ def ip_families() -> 'list[tuple[str, Callable[..., bytes], Callable[[bytes], An
     from pcapkit.const.ipv4.option_number import OptionNumber
     from pcapkit.const.ipv6.option import Option
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.protocols.internet.hopopt import HOPOPT
-    from pcapkit.protocols.internet.ipv4 import IPv4
-    from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+    from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
+    from pcapkit.protocols.internet.ipv4.protocol import IPv4
+    from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
 
     def ipv4(options: 'list') -> 'bytes':
         return IPv4(src='192.0.2.1', dst='192.0.2.2', protocol=TransType.UDP, options=options).data
@@ -124,7 +124,7 @@ class CodecTests(_QSTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.proto = Raw(b'')
 
@@ -260,7 +260,7 @@ class RoundTripTests(_QSTestCase):
 
     def test_tcp_make_then_parse_gives_the_values_back(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         code = Option.Quick_Start_Response
         for n, rate in RATES.items():
@@ -276,7 +276,7 @@ class RoundTripTests(_QSTestCase):
 
     def test_tcp_parse_then_rebuild_gives_the_octets_back(self) -> None:
         from pcapkit.const.tcp.option import Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         header = bytes.fromhex('0001000200000000000000007000ffff00000000')
         for n, rate in RATES.items():

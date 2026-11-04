@@ -3,8 +3,8 @@
 
 GitHub issue #548 reported that IANA protocol number 115 (``TransType.L2TP``)
 is registered nowhere, so an L2TP-over-IP capture falls through to
-:class:`~pcapkit.protocols.misc.raw.Raw`, and proposed binding
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` there. Measurement says that
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and proposed binding
+:class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` there. Measurement says that
 binding would be wrong, and these tests are what pin that down.
 
 :rfc:`3931` §4.1.1 ("L2TPv3 over IP") is what protocol 115 designates:
@@ -17,11 +17,11 @@ nibble anywhere. So 115 is not a second door onto the :rfc:`2661` framing
 class can read, and no such class exists in this tree.
 
 What these tests pin is the guard that makes that reasoning enforceable.
-:attr:`L2TPv2.version <pcapkit.protocols.link.l2tpv2.L2TPv2.version>`
+:attr:`L2TPv2.version <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.version>`
 is annotated ``Literal[2]``, returns a hard-coded ``2``, and its
 docstring promises that *"a datagram carrying any other value is a
 different protocol reached through a different class"* -- so a
-:meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.read` that stores the wire nibble
+:meth:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.read` that stores the wire nibble
 unchecked has the class report ``version == 2`` while its own parsed data
 reports ``3`` for the same octets. These tests hold the two to the same
 answer.
@@ -106,7 +106,7 @@ class L2TPVersionTests(unittest.TestCase):
 
     def parse(self, data: bytes):
         """Parse ``data`` as :class:`L2TPv2` directly, with no dispatch."""
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         return L2TPv2(io.BytesIO(data), len(data))
 
@@ -199,13 +199,13 @@ class L2TPVersionTests(unittest.TestCase):
         confident header assembled out of a Session ID and the first two octets
         of a PPP frame, its top half read as the flags word and its lower half
         as the Tunnel ID. Degrading to
-        :class:`~pcapkit.protocols.misc.raw.Raw` is the honest answer, and is
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the honest answer, and is
         what the library does for any payload it has no dissector for.
 
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         snapshot = dict(Internet.__proto__)
         self.addCleanup(lambda: (Internet.__proto__.clear(),

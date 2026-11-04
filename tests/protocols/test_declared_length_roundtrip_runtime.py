@@ -2,9 +2,9 @@
 """``from_data`` keeps the length a truncated capture declared.
 
 This guards against GitHub issue #1155, where
-:meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>`,
-:meth:`UDP.make <pcapkit.protocols.transport.udp.UDP.make>` and :meth:`IPv6.make
-<pcapkit.protocols.internet.ipv6.IPv6.make>` computed their length field from the
+:meth:`IPv4.make <pcapkit.protocols.internet.ipv4.protocol.IPv4.make>`,
+:meth:`UDP.make <pcapkit.protocols.transport.udp.protocol.UDP.make>` and :meth:`IPv6.make
+<pcapkit.protocols.internet.ipv6.protocol.IPv6.make>` computed their length field from the
 payload they were handed. On a capture cut short by the snaplen that is the
 *recorded* length rather than the declared one, so a
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuild of
@@ -57,8 +57,8 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
 
     def assertRoundTrips(self, sample: str) -> None:
         """Every IPv4 and UDP packet of ``sample`` rebuilds byte for byte."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         seen = 0
         for index, frame in enumerate(self._frames(sample)):
@@ -75,8 +75,8 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
         for sample in TRUNCATED_SAMPLES:
             frame = self._frames(sample)[2]
 
-            from pcapkit.protocols.internet.ipv4 import IPv4
-            from pcapkit.protocols.transport.udp import UDP
+            from pcapkit.protocols.internet.ipv4.protocol import IPv4
+            from pcapkit.protocols.transport.udp.protocol import UDP
 
             with self.subTest(sample=sample):
                 # The frame as recorded: 82 of the 1186 declared octets.
@@ -109,8 +109,8 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
         were kept.
 
         """
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         parsed = self._frames('test.pcapng')[2][Ethernet]
         self.assertIsInstance(parsed.payload, Raw)
@@ -129,18 +129,18 @@ class DeclaredLengthConstructionTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_length_is_computed_when_not_given(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self.assertEqual(IPv4(payload=b'\x00' * 10).info.len, 30)
         self.assertEqual(UDP(payload=b'\x00' * 10).info.len, 18)
         self.assertEqual(IPv6(payload=b'\x00' * 10).info.payload, 10)
 
     def test_explicit_length_is_written_as_given(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         ipv4 = IPv4(total_length=1186, payload=b'\x00' * 10)
         self.assertEqual(ipv4.info.len, 1186)

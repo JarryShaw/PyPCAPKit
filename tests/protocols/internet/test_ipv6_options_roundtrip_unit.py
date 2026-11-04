@@ -38,8 +38,8 @@ __tier__ = 'ALL'
 
 #: The protocol classes sharing the option code, by module and class name.
 PROTOCOLS = (
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
 )
 
 #: Parsed headers which have to rebuild unchanged, by issue.
@@ -97,9 +97,9 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
 
     def test_unassigned_quick_start_function_is_kept_as_raw_data(self) -> None:
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.data.internet.hopopt import \
+        from pcapkit.protocols.internet.hopopt.data import \
             UnassignedOption as Data_HOPOPT_UnassignedOption
-        from pcapkit.protocols.data.internet.ipv6_opts import \
+        from pcapkit.protocols.internet.ipv6_opts.data import \
             UnassignedOption as Data_IPv6_Opts_UnassignedOption
 
         for cls in self._protocols():
@@ -161,7 +161,7 @@ class TestIPv6OptionsRoundTrip(unittest.TestCase):
                 self.assertEqual(made.data, bytes.fromhex('3b00' '040105' '010100'))
 
     def test_ipv6_packet_with_padn_of_length_zero_rebuilds(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         icmp = bytes.fromhex('8f00' '1234' '00000001' '04000000' 'ff020000000000000000000000000016')
         payload = bytes.fromhex('3a00' '05020000' '0100') + icmp

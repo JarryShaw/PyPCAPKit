@@ -48,7 +48,8 @@ def _names(annotation: 'str') -> 'set[str]':
 
 def _schemas() -> 'dict[str, tuple[object, int]]':
     from pcapkit.const.ipv6.extension_header import ExtensionHeader
-    from pcapkit.protocols.schema.internet import hopopt, ipv6_opts
+    from pcapkit.protocols.internet.hopopt import schema as hopopt
+    from pcapkit.protocols.internet.ipv6_opts import schema as ipv6_opts
     return {
         'HOPOPT': (hopopt, ExtensionHeader.HOPOPT),
         'IPv6_Opts': (ipv6_opts, ExtensionHeader.IPv6_Opts),
@@ -86,7 +87,7 @@ class TestMPLSeedAnnotation(unittest.TestCase):
                 self.assertEqual(_names(_init_stub_seed(module)), {'Optional', 'int', 'IPv6Address'})
 
     def test_seed_types_inside_ipv6(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name, (module, code) in _schemas().items():
             for kind, octets in HEADERS.items():

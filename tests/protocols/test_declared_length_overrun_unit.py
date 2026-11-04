@@ -10,7 +10,7 @@ octets with none present rebuilt 24 octets from 16.
 
 Such an option raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
 Inside a parent layer the octets are kept as captured, as a
-:class:`~pcapkit.protocols.misc.raw.Raw` payload, and the parent rebuilds byte
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload, and the parent rebuilds byte
 for byte.
 
 An option that begins at the end of the data reads nothing at all, and is still
@@ -67,46 +67,46 @@ def _ipv6(proto: int, payload: bytes) -> bytes:
 #: Option areas whose last option declares more octets than the area holds.
 OVERRUNS = {
     # issue #1325: ACK declaring 0x0100 octets, 4 present
-    'HIP ACK': ('pcapkit.protocols.internet.hip', 'HIP', _hip(bytes.fromhex('01c10100 00000000'))),
+    'HIP ACK': ('pcapkit.protocols.internet.hip.protocol', 'HIP', _hip(bytes.fromhex('01c10100 00000000'))),
     # issue #1325: PadN declaring 3 octets, none present
-    'MH PadN': ('pcapkit.protocols.internet.mh', 'MH',
+    'MH PadN': ('pcapkit.protocols.internet.mh.protocol', 'MH',
                 bytes.fromhex('3b010000 00000000 010400000000 0103')),
-    'HOPOPT PadN': ('pcapkit.protocols.internet.hopopt', 'HOPOPT', _ext6(bytes.fromhex('010700000000'))),
-    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts', _ext6(bytes.fromhex('010700000000'))),
+    'HOPOPT PadN': ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT', _ext6(bytes.fromhex('010700000000'))),
+    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts', _ext6(bytes.fromhex('010700000000'))),
     # An SCTP chunk declaring more octets than the packet holds is not here:
     # with no packet length field it is kept as the packet's trailer instead,
     # c.f. ``tests/protocols/transport/test_sctp_stray_octets_unit.py`` (#1468).
     # an unassigned kind declaring 12 octets, 8 present
-    'TCP unassigned': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(bytes.fromhex('4f0caabb ccddeeff'))),
+    'TCP unassigned': ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(bytes.fromhex('4f0caabb ccddeeff'))),
     # an unassigned option declaring 12 octets, 8 present in a complete
     # 8-octet area, with 8 octets of payload behind it
-    'IPv4 unassigned': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'IPv4 unassigned': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                         _ipv4(bytes.fromhex('1f0caabb ccddeeff'), ihl=7, payload=bytes(8))),
 }
 
 #: The same option areas with every option complete.
 CONTROLS = {
-    'HIP ACK': ('pcapkit.protocols.internet.hip', 'HIP', _hip(bytes.fromhex('01c10004 00000001'))),
-    'MH PadN': ('pcapkit.protocols.internet.mh', 'MH',
+    'HIP ACK': ('pcapkit.protocols.internet.hip.protocol', 'HIP', _hip(bytes.fromhex('01c10004 00000001'))),
+    'MH PadN': ('pcapkit.protocols.internet.mh.protocol', 'MH',
                 bytes.fromhex('3b010000 00000000 0106000000000000')),
-    'HOPOPT PadN': ('pcapkit.protocols.internet.hopopt', 'HOPOPT', _ext6(bytes.fromhex('010400000000'))),
-    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts', _ext6(bytes.fromhex('010400000000'))),
-    'SCTP INIT parameter': ('pcapkit.protocols.transport.sctp', 'SCTP', _sctp(
+    'HOPOPT PadN': ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT', _ext6(bytes.fromhex('010400000000'))),
+    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts', _ext6(bytes.fromhex('010400000000'))),
+    'SCTP INIT parameter': ('pcapkit.protocols.transport.sctp.protocol', 'SCTP', _sctp(
         bytes.fromhex('0100001c 00000001 00010000 00010001 00000001 000c0008 00050006'))),
-    'TCP unassigned': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(bytes.fromhex('4f08aabb ccddeeff'))),
-    'IPv4 unassigned': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'TCP unassigned': ('pcapkit.protocols.transport.tcp.protocol', 'TCP', _tcp(bytes.fromhex('4f08aabb ccddeeff'))),
+    'IPv4 unassigned': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                         _ipv4(bytes.fromhex('1f08aabb ccddeeff'), ihl=7)),
 }
 
 #: Each overrun inside a parent layer: (parent module, parent class, frame).
 IN_PARENT = {
-    'HIP ACK': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(139, OVERRUNS['HIP ACK'][2])),
-    'MH PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(135, OVERRUNS['MH PadN'][2])),
-    'HOPOPT PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(0, OVERRUNS['HOPOPT PadN'][2])),
-    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(60, OVERRUNS['IPv6-Opts PadN'][2])),
-    'TCP unassigned': ('pcapkit.protocols.internet.ipv4', 'IPv4',
+    'HIP ACK': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', _ipv6(139, OVERRUNS['HIP ACK'][2])),
+    'MH PadN': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', _ipv6(135, OVERRUNS['MH PadN'][2])),
+    'HOPOPT PadN': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', _ipv6(0, OVERRUNS['HOPOPT PadN'][2])),
+    'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6', _ipv6(60, OVERRUNS['IPv6-Opts PadN'][2])),
+    'TCP unassigned': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4',
                        _ipv4(b'', ihl=5, proto=6, payload=OVERRUNS['TCP unassigned'][2])),
-    'IPv4 unassigned': ('pcapkit.protocols.link.ethernet', 'Ethernet',
+    'IPv4 unassigned': ('pcapkit.protocols.link.ethernet.protocol', 'Ethernet',
                         bytes.fromhex('0123456789ab fedcba987654 0800') + OVERRUNS['IPv4 unassigned'][2]),
 }
 
@@ -142,7 +142,7 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
                 self.assertEqual(protocol.from_data(parsed.info).data, data)
 
     def test_an_overrunning_layer_is_kept_as_captured_by_its_parent(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for case, (module, name, frame) in IN_PARENT.items():
             with self.subTest(case=case):
@@ -157,9 +157,9 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
                 self.assertEqual(protocol.from_data(parsed.info).data, frame)
 
     def test_an_option_area_declared_past_the_data_is_kept_as_captured(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import ProtocolError
 
         # ``ihl`` declares 20 octets of options with none present: reading the

@@ -79,6 +79,20 @@ def make_pcap(case: 'unittest.TestCase', linktype: 'int', *frames: bytes) -> str
     return path
 
 
+def find_spec_or_none(name: 'str') -> 'object':
+    """:func:`importlib.util.find_spec`, or :obj:`None` where a parent package is missing too.
+
+    ``find_spec`` raises rather than answering :obj:`None` when the parent is
+    absent, as it is for a path in the ``pcapkit.protocols.schema`` and
+    ``pcapkit.protocols.data`` trees #2534 removed.
+
+    """
+    try:
+        return importlib.util.find_spec(name)
+    except ModuleNotFoundError:
+        return None
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ProtocolLayerPlacementTests(unittest.TestCase):
     """``OSPF``/``RARP`` report ``'Application'`` and still parse and dispatch."""
@@ -91,9 +105,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     ##########################################################################
 
     def test_ospf_and_rarp_report_the_application_layer(self) -> None:
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
         for cls in (OSPF, RARP, DRARP):
             with self.subTest(cls=cls.__name__):
@@ -105,15 +119,15 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_arp_and_inarp_stay_on_the_link_layer(self) -> None:
         """:rfc:`1122#section-2.3.2` keeps ARP on the link layer; RARP is not."""
-        from pcapkit.protocols.link.arp import ARP
-        from pcapkit.protocols.link.inarp import InARP
+        from pcapkit.protocols.link.arp.protocol import ARP
+        from pcapkit.protocols.link.inarp.protocol import InARP
 
         self.assertEqual(ARP.__layer__, 'Link')
         self.assertEqual(InARP.__layer__, 'Link')
 
     def test_ospf_names_application_as_its_only_base(self) -> None:
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.protocols.link.link import Link
 
         self.assertEqual(OSPF.__bases__, (Application,))
@@ -122,9 +136,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_rarp_subclasses_both_application_and_arp_in_that_order(self) -> None:
         """The order is load-bearing: ``Link`` owns ``__layer__``, ``Raw`` does not."""
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.rarp import RARP
-        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.rarp.protocol import RARP
+        from pcapkit.protocols.link.arp.protocol import ARP
         from pcapkit.protocols.link.link import Link
 
         self.assertTrue(issubclass(RARP, Application))
@@ -142,8 +156,8 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_ftp_data_subclasses_both_application_and_raw_in_that_order(self) -> None:
         """``FTP_DATA`` follows the convention: layer base first, then ``Raw`` (#2285)."""
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.ftp_data import FTP_DATA
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertEqual(FTP_DATA.__bases__, (Application, Raw))
         self.assertEqual(FTP_DATA.__layer__, 'Application')
@@ -152,8 +166,8 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_ftp_data_still_parses_and_rebuilds_as_raw(self) -> None:
         """The ``Application`` base leaves ``Raw``'s parsing and rebuild untouched."""
         from pcapkit.const.reg.apptype import TCP
-        from pcapkit.protocols.application.ftp_data import FTP_DATA
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         packet = FTP_DATA(b'binary-file-contents')
         self.assertEqual(packet.info.packet, b'binary-file-contents')
@@ -169,7 +183,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_link_owns_layer_but_raw_does_not(self) -> None:
         """The mechanism the ordering convention rests on, asserted directly."""
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertIn('__layer__', vars(Link))
         self.assertNotIn('__layer__', vars(Raw))
@@ -181,9 +195,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_the_top_level_packages_re_export_the_classes(self) -> None:
         import pcapkit
         import pcapkit.protocols
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
         for name, cls in (('OSPF', OSPF), ('RARP', RARP), ('DRARP', DRARP)):
             with self.subTest(name=name):
@@ -206,7 +220,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                      'pcapkit.protocols.data.link.ospf',
                      'pcapkit.protocols.schema.link.ospf'):
             with self.subTest(path=path):
-                self.assertIsNone(importlib.util.find_spec(path))
+                self.assertIsNone(find_spec_or_none(path))
 
     ##########################################################################
     # Dispatch.
@@ -217,16 +231,16 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.rarp.protocol import RARP
         from pcapkit.protocols.internet.internet import Internet
         from pcapkit.protocols.link.link import Link
 
         cases = (
             ('OSPF', Internet.__proto__[TransType.OSPFIGP],
-             'pcapkit.protocols.application.ospf', OSPF),
+             'pcapkit.protocols.application.ospf.protocol', OSPF),
             ('RARP', Link.__proto__[EtherType.Reverse_Address_Resolution_Protocol],
-             'pcapkit.protocols.application.rarp', RARP),
+             'pcapkit.protocols.application.rarp.protocol', RARP),
         )
         for name, entry, module, cls in cases:
             with self.subTest(name=name):
@@ -243,12 +257,12 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         ``_read_protos`` are ``Link``'s EtherType machinery, and OSPF takes each
         of them from ``ProtocolBase`` instead. The first assertion pins a subset
         of ``Link``'s own names. The absence is inert because a ``-1`` lookup misses in either
-        registry and falls back to :class:`~pcapkit.protocols.misc.raw.Raw`.
+        registry and falls back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
         """
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.rarp.protocol import RARP
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import ProtocolBase
 
         self.assertEqual(
@@ -279,9 +293,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     def test_ospf_and_rarp_override_none_of_the_next_layer_hooks(self) -> None:
         """Both inherit the hooks from ``Application`` rather than re-pointing them."""
         from pcapkit.protocols.application.application import Application
-        from pcapkit.protocols.application.drarp import DRARP
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.application.rarp import RARP
+        from pcapkit.protocols.application.drarp.protocol import DRARP
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.application.rarp.protocol import RARP
 
         hooks = ('__post_init__', '_decode_next_layer', '_import_next_layer')
         for cls in (OSPF, RARP, DRARP):
@@ -292,8 +306,8 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_ospf_still_attaches_its_undissected_body(self) -> None:
         """OSPF dispatches its body on ``-1``, which ``Application`` accepts."""
-        from pcapkit.protocols.application.ospf import OSPF
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.ospf.protocol import OSPF
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         packet = OSPF(ospf_hello())
         self.assertEqual(str(packet.protochain), 'OSPFv2:Raw')
@@ -301,9 +315,9 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_rarp_still_attaches_a_padded_frames_trailer(self) -> None:
         """Ethernet pads a short RARP frame; ``ARP.read`` dispatches the padding."""
-        from pcapkit.protocols.application.rarp import RARP
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.rarp.protocol import RARP
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         unpadded = RARP(rarp_request())
         self.assertEqual(str(unpadded.protochain), 'RARP')
@@ -336,10 +350,10 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         dispatches its body on the ``-1`` sentinel and both the ``_sigterm``
         branch of ``_import_next_layer`` and ``ProtocolBase.__proto__``'s default
         resolve to
-        :class:`~pcapkit.protocols.misc.raw.Raw`. A ``link`` extraction of a
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. A ``link`` extraction of a
         capture with no Ethernet header never reaches a link protocol at all.
         """
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         frame = self.extract_ipv4_ospf(layer='link')
         self.assertEqual(str(frame.protochain), 'IPv4:OSPFv2:Raw')
@@ -387,7 +401,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         """``layer='application'`` and ``layer=FTP_DATA`` both stop at FTP_DATA (#2285)."""
         import pcapkit
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.application.ftp_data import FTP_DATA
+        from pcapkit.protocols.application.ftp_data.protocol import FTP_DATA
 
         path = make_pcap(self, LinkType.IPV4, ipv4(6, tcp(50000, 20, b'binary-file-contents')))
         for layer in ('application', FTP_DATA):

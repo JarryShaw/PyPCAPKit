@@ -6,7 +6,7 @@ GitHub issue #1862: for an enumeration with no members, the standard library's
 module=None, ...)``, so
 :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
 :class:`~pcapkit.const.pcapng.filter_type.FilterType` and
-:class:`FrameType.Flags <pcapkit.protocols.schema.application.httpv2.FrameType.Flags>`
+:class:`FrameType.Flags <pcapkit.protocols.application.httpv2.schema.FrameType.Flags>`
 render it by default. ``restore_class_signature`` in :file:`docs/source/conf.py` gives
 every enumeration the ``(*values)`` an enumeration with members renders.
 
@@ -38,7 +38,7 @@ __tier__ = 'LATEST'
 MEMBERLESS = (
     'pcapkit.const.reg.apptype.apptype.AppType',
     'pcapkit.const.pcapng.filter_type.FilterType',
-    'pcapkit.protocols.schema.application.httpv2.FrameType.Flags',
+    'pcapkit.protocols.application.httpv2.schema.FrameType.Flags',
 )
 
 #: The signature every enumeration gets.

@@ -29,16 +29,16 @@ from pcapkit.const.tcp.option import Option as TCP_Option
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.sentinels import NULL
 from pcapkit.foundation.registry.protocols.protocol import _check_code, _register_name
-from pcapkit.protocols.schema.transport.dccp import Option as Schema_DCCP_Option
-from pcapkit.protocols.schema.transport.sctp import Chunk as Schema_SCTP_Chunk
-from pcapkit.protocols.schema.transport.sctp import ErrorCause as Schema_SCTP_ErrorCause
-from pcapkit.protocols.schema.transport.sctp import Parameter as Schema_SCTP_Parameter
-from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
-from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
-from pcapkit.protocols.transport.dccp import DCCP
-from pcapkit.protocols.transport.sctp import SCTP
-from pcapkit.protocols.transport.tcp import TCP
-from pcapkit.protocols.transport.udp import UDP
+from pcapkit.protocols.transport.dccp.protocol import DCCP
+from pcapkit.protocols.transport.dccp.schema import Option as Schema_DCCP_Option
+from pcapkit.protocols.transport.sctp.protocol import SCTP
+from pcapkit.protocols.transport.sctp.schema import Chunk as Schema_SCTP_Chunk
+from pcapkit.protocols.transport.sctp.schema import ErrorCause as Schema_SCTP_ErrorCause
+from pcapkit.protocols.transport.sctp.schema import Parameter as Schema_SCTP_Parameter
+from pcapkit.protocols.transport.tcp.protocol import TCP
+from pcapkit.protocols.transport.tcp.schema import MPTCP as Schema_TCP_MPTCP
+from pcapkit.protocols.transport.tcp.schema import Option as Schema_TCP_Option
+from pcapkit.protocols.transport.udp.protocol import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
@@ -49,18 +49,21 @@ if TYPE_CHECKING:
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
     from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.transport.dccp import OptionConstructor as DCCP_OptionConstructor
-    from pcapkit.protocols.transport.dccp import OptionParser as DCCP_OptionParser
-    from pcapkit.protocols.transport.sctp import CauseConstructor as SCTP_CauseConstructor
-    from pcapkit.protocols.transport.sctp import CauseParser as SCTP_CauseParser
-    from pcapkit.protocols.transport.sctp import ChunkConstructor as SCTP_ChunkConstructor
-    from pcapkit.protocols.transport.sctp import ChunkParser as SCTP_ChunkParser
-    from pcapkit.protocols.transport.sctp import ParameterConstructor as SCTP_ParameterConstructor
-    from pcapkit.protocols.transport.sctp import ParameterParser as SCTP_ParameterParser
-    from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
-    from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
-    from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
-    from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
+    from pcapkit.protocols.transport.dccp.protocol import \
+        OptionConstructor as DCCP_OptionConstructor
+    from pcapkit.protocols.transport.dccp.protocol import OptionParser as DCCP_OptionParser
+    from pcapkit.protocols.transport.sctp.protocol import CauseConstructor as SCTP_CauseConstructor
+    from pcapkit.protocols.transport.sctp.protocol import CauseParser as SCTP_CauseParser
+    from pcapkit.protocols.transport.sctp.protocol import ChunkConstructor as SCTP_ChunkConstructor
+    from pcapkit.protocols.transport.sctp.protocol import ChunkParser as SCTP_ChunkParser
+    from pcapkit.protocols.transport.sctp.protocol import \
+        ParameterConstructor as SCTP_ParameterConstructor
+    from pcapkit.protocols.transport.sctp.protocol import ParameterParser as SCTP_ParameterParser
+    from pcapkit.protocols.transport.tcp.protocol import \
+        MPOptionConstructor as TCP_MPOptionConstructor
+    from pcapkit.protocols.transport.tcp.protocol import MPOptionParser as TCP_MPOptionParser
+    from pcapkit.protocols.transport.tcp.protocol import OptionConstructor as TCP_OptionConstructor
+    from pcapkit.protocols.transport.tcp.protocol import OptionParser as TCP_OptionParser
 
 __all__ = [
     'register_apptype',
@@ -100,8 +103,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or
-    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.
+    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` and/or
+    :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.
 
     Arguments:
         code: port number
@@ -155,10 +158,10 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             :issue:`833`.
 
     Important:
-        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**
+        :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` is deliberately **not**
         one of the registries this writes to, so naming ``sctp`` here is an error
         rather than a no-op. Its
-        :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is
+        :data:`~pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry is
         keyed by the DATA chunk's payload protocol identifier rather than by
         port number, so writing a port number into it would dispatch on a
         number from the wrong registry. Use
@@ -288,7 +291,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolB
 def register_tcp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__
+# NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__proto__
 def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                  class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -298,7 +301,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` registry.
+    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__proto__` registry.
 
     Arguments:
         code: port number
@@ -328,23 +331,23 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     _register_name(module, (TCP, code))
 
 
-# NOTE: pcapkit.protocols.transport.tcp.TCP.__option__
+# NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__option__
 def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser, TCP_OptionConstructor]', *,
                         schema: 'Optional[Type[Schema_TCP_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
-    :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.
+    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__option__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
+        code: :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` option code as in
             :class:`~pcapkit.const.tcp.option.Option`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the option. A name names the
             ``_read_mode_*`` and ``_make_mode_*`` methods, and has to name
             an existing ``_read_mode_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.transport.tcp.schema.Option`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.option.Option`
@@ -362,23 +365,23 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
     logger.debug('registered TCP option parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__
+# NOTE: pcapkit.protocols.transport.tcp.protocol.TCP.__mp_option__
 def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]', *,
                            schema: 'Optional[Type[Schema_TCP_MPTCP]]' = None) -> 'None':
     """Register an MPTCP option parser.
 
     The function will register the given option parser to the
-    :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.
+    :data:`pcapkit.protocols.transport.tcp.protocol.TCP.__mp_option__` registry.
 
     Args:
-        code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
+        code: Multipath :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` option code as in
             :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the option. A name names the
             ``_read_mptcp_*`` and ``_make_mptcp_*`` methods, and has to name
             an existing ``_read_mptcp_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.transport.tcp.schema.MPTCP`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
@@ -402,7 +405,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolB
 def register_udp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.transport.udp.UDP.__proto__
+# NOTE: pcapkit.protocols.transport.udp.protocol.UDP.__proto__
 def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                  class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -412,7 +415,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.
+    :data:`pcapkit.protocols.transport.udp.protocol.UDP.__proto__` registry.
 
     Arguments:
         code: port number
@@ -448,7 +451,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'ModuleD
 def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__
+# NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__
 def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -458,7 +461,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.transport.sctp.SCTP.__proto__` registry.
+    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__` registry.
 
     Arguments:
         code: payload protocol identifier (PPID), as in
@@ -494,23 +497,23 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
     _register_name(module, (SCTP, code))
 
 
-# NOTE: pcapkit.protocols.transport.sctp.SCTP.__chunk__
+# NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__
 def register_sctp_chunk(code: 'SCTP_Chunk', meth: 'str | tuple[SCTP_ChunkParser, SCTP_ChunkConstructor]', *,
                         schema: 'Optional[Type[Schema_SCTP_Chunk]]' = None) -> 'None':
     """Register a chunk parser.
 
     The function will register the given chunk parser to the
-    :data:`pcapkit.protocols.transport.sctp.SCTP.__chunk__` registry.
+    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__chunk__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk type as in
+        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` chunk type as in
             :class:`~pcapkit.const.sctp.chunk.Chunk`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the chunk. A name names the
             ``_read_chunk_*`` and ``_make_chunk_*`` methods, and has to name
             an existing ``_read_chunk_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the chunk.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Chunk`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the chunk.
+            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.Chunk`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.chunk.Chunk`
@@ -530,24 +533,24 @@ def register_sctp_chunk(code: 'SCTP_Chunk', meth: 'str | tuple[SCTP_ChunkParser,
     logger.debug('registered SCTP chunk parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.transport.sctp.SCTP.__parameter__
+# NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__parameter__
 def register_sctp_parameter(code: 'SCTP_Parameter',
                             meth: 'str | tuple[SCTP_ParameterParser, SCTP_ParameterConstructor]', *,
                             schema: 'Optional[Type[Schema_SCTP_Parameter]]' = None) -> 'None':
     """Register a chunk parameter parser.
 
     The function will register the given chunk parameter parser to the
-    :data:`pcapkit.protocols.transport.sctp.SCTP.__parameter__` registry.
+    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__parameter__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` chunk parameter type
+        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` chunk parameter type
             as in :class:`~pcapkit.const.sctp.parameter.Parameter`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the parameter. A name names the
             ``_read_param_*`` and ``_make_param_*`` methods, and has to name
             an existing ``_read_param_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.Parameter`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the parameter.
+            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.Parameter`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.parameter.Parameter`
@@ -567,23 +570,23 @@ def register_sctp_parameter(code: 'SCTP_Parameter',
     logger.debug('registered SCTP chunk parameter parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.transport.sctp.SCTP.__cause__
+# NOTE: pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__
 def register_sctp_cause(code: 'SCTP_CauseCode', meth: 'str | tuple[SCTP_CauseParser, SCTP_CauseConstructor]', *,
                         schema: 'Optional[Type[Schema_SCTP_ErrorCause]]' = None) -> 'None':
     """Register an error cause parser.
 
     The function will register the given error cause parser to the
-    :data:`pcapkit.protocols.transport.sctp.SCTP.__cause__` registry.
+    :data:`pcapkit.protocols.transport.sctp.protocol.SCTP.__cause__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.transport.sctp.SCTP` error cause code as
+        code: :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` error cause code as
             in :class:`~pcapkit.const.sctp.cause_code.CauseCode`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the cause. A name names the
             ``_read_cause_*`` and ``_make_cause_*`` methods, and has to name
             an existing ``_read_cause_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the cause.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.sctp.ErrorCause`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the cause.
+            It should be a subclass of :class:`pcapkit.protocols.transport.sctp.schema.ErrorCause`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.sctp.cause_code.CauseCode`
@@ -609,7 +612,7 @@ def register_dccp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[Protocol
 def register_dccp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
-# NOTE: pcapkit.protocols.transport.dccp.DCCP.__proto__
+# NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__
 def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
@@ -619,7 +622,7 @@ def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pr
         should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.transport.dccp.DCCP.__proto__` registry.
+    :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__` registry.
 
     Arguments:
         code: port number
@@ -651,23 +654,23 @@ def register_dccp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pr
     _register_name(module, (DCCP, code))
 
 
-# NOTE: pcapkit.protocols.transport.dccp.DCCP.__option__
+# NOTE: pcapkit.protocols.transport.dccp.protocol.DCCP.__option__
 def register_dccp_option(code: 'DCCP_Option', meth: 'str | tuple[DCCP_OptionParser, DCCP_OptionConstructor]', *,
                          schema: 'Optional[Type[Schema_DCCP_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
-    :data:`pcapkit.protocols.transport.dccp.DCCP.__option__` registry.
+    :data:`pcapkit.protocols.transport.dccp.protocol.DCCP.__option__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.transport.dccp.DCCP` option type as in
+        code: :class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` option type as in
             :class:`~pcapkit.const.dccp.option.Option`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the option. A name names the
             ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
             an existing ``_read_opt_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
-            It should be a subclass of :class:`pcapkit.protocols.schema.transport.dccp.Option`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the option.
+            It should be a subclass of :class:`pcapkit.protocols.transport.dccp.schema.Option`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.dccp.option.Option`

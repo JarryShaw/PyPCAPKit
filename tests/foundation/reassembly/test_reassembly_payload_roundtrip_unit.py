@@ -308,7 +308,7 @@ class TestReassemblyPayloadRoundTrip(harness.RoundTripBase):
 
     def test_builders_carry_the_payload(self) -> None:
         """The wire builders put the payload where the reassembler looks for it."""
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         frame = ethernet(ipv6(udp(b'abc'), nxt=17), 0x86DD)
         self.assertEqual(len(frame), 14 + 40 + 11)

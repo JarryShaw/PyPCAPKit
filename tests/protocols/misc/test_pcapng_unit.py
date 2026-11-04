@@ -54,7 +54,7 @@ def block_body(body: bytes) -> bytes:
     """Wrap ``body`` in the two block total length fields of a PCAP-NG block.
 
     The returned buffer is what a block schema is handed by
-    :class:`~pcapkit.protocols.schema.misc.pcapng.PCAPNG`, i.e. the block
+    :class:`~pcapkit.protocols.misc.pcapng.schema.PCAPNG`, i.e. the block
     without its leading 4-octet block type, but *with* the block total length
     at either end. The length itself counts the block type as well, so it is
     the length of the returned buffer plus four.
@@ -71,7 +71,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_index_length_and_make_data(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, _option_key
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         pcapng = object.__new__(PCAPNG)
@@ -99,7 +99,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
-        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, _option_key
 
         block_map = PCAPNG.__dict__['__block__']
         option_map = PCAPNG.__dict__['__option__']
@@ -112,7 +112,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             secrets_map[SecretsType.TLS_Key_Log],
         )
         try:
-            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                 PCAPNG.register_block(BlockType.Section_Header_Block, 'shb_w1401')
                 PCAPNG.register_option(OptionType.opt_endofopt, 'endofopt_w1401')
                 PCAPNG.register_record(RecordType.nrb_record_end, 'end_w1401')
@@ -133,12 +133,12 @@ class PCAPNGUnitTests(unittest.TestCase):
         # #1038: guards against the warning calling an ``nrb_record_*`` entry
         # a "systemd(1) journal export record", with a literal reST role.
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         record_map = PCAPNG.__dict__['__record__']
         original = record_map[RecordType.nrb_record_end]
         try:
-            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                 PCAPNG.register_record(RecordType.nrb_record_end, 'end_w1401')
         finally:
             record_map[RecordType.nrb_record_end] = original
@@ -156,8 +156,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import (NS_DNSIP4AddrOption, NS_DNSIP6AddrOption,
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import (NS_DNSIP4AddrOption, NS_DNSIP6AddrOption,
                                                           NS_DNSNameOption)
         from pcapkit.utilities.exceptions import ProtocolError
 
@@ -211,8 +211,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import EPB_QueueOption
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import EPB_QueueOption
         from pcapkit.utilities.exceptions import ProtocolError
 
         pcapng = object.__new__(PCAPNG)
@@ -243,7 +243,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_option_registry_preserves_duplicate_numeric_codes(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, _option_key
 
         option_map = PCAPNG.__dict__['__option__']
 
@@ -258,7 +258,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         #425's defect, once per registry. ``__block__``, ``__option__``,
         ``__record__`` and ``__secrets__`` are each a
         :class:`collections.defaultdict` on a class attribute shared by every
-        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` instance in the process, so
+        :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` instance in the process, so
         ``registry[code]`` inserted every unrecognised block type, option code,
         record type and secrets type a capture carried -- values the default
         factory returns anyway.
@@ -276,7 +276,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.interface import extract
-        from pcapkit.protocols.misc.pcapng import PCAPNG, _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, _option_key
 
         def block(type_: int, body: bytes) -> bytes:
             length = 12 + len(body)
@@ -327,7 +327,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                     parse(trailer)
                     self.assertEqual(set(registry), before)
 
-                    with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+                    with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                         register(code, 'unknown')
                     self.assertEqual(warn.call_count, 0)
                 finally:
@@ -335,7 +335,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_simple_packet_block_populates_default_interface_and_timestamp(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock
+        from pcapkit.protocols.misc.pcapng.data import SimplePacketBlock
 
         block = SimplePacketBlock(
             type=BlockType.Simple_Packet_Block,
@@ -358,7 +358,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.misc.pcapng import (CommentOption, IPv4Record, IPv6Record,
+        from pcapkit.protocols.misc.pcapng.data import (CommentOption, IPv4Record, IPv6Record,
                                                         NameResolutionBlock, UnknownRecord)
 
         ipv4 = IPv4Record(
@@ -402,9 +402,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.data.misc.pcapng import (IF_TSOffsetOption, IF_TSResolOption,
+        from pcapkit.protocols.misc.pcapng.data import (IF_TSOffsetOption, IF_TSResolOption,
                                                         IF_TZoneOption)
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         pcapng = object.__new__(PCAPNG)
@@ -469,10 +469,10 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.data.misc.pcapng import IF_TSOffsetOption, IF_TSResolOption, IF_TZoneOption
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.schema.misc.pcapng import (PCAPNG as Schema_PCAPNG,
+        from pcapkit.protocols.misc.pcapng.data import IF_TSOffsetOption, IF_TSResolOption, IF_TZoneOption
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.misc.pcapng.schema import (PCAPNG as Schema_PCAPNG,
                                                           SectionHeaderBlock,
                                                           SimplePacketBlock,
                                                           UnknownBlock)
@@ -494,7 +494,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng.index('Raw'), 33)
         with self.assertRaises(UnsupportedCall):
             _ = pcapng.section_context
-        with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
             self.assertEqual(pcapng.ts_resolution, 1_000_000)
             self.assertEqual(pcapng.ts_offset, 0)
             # #361: UTC, not the reading host's zone -- the format's own
@@ -552,7 +552,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                     astimezone=lambda: types.SimpleNamespace(tzinfo=None),
                 )
 
-        with mock.patch('pcapkit.protocols.misc.pcapng.datetime.datetime', NoTimezoneDateTime):
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.datetime.datetime', NoTimezoneDateTime):
             self.assertEqual(PCAPNG._get_local_timezone(), datetime.timezone.utc)
 
         pcapng._ctx = types.SimpleNamespace(interfaces=[interface],
@@ -561,8 +561,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Faked through pcapng.py's own binding of
         # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
         # instead of :meth:`datetime.datetime.fromtimestamp` (#2099).
-        with mock.patch('pcapkit.protocols.misc.pcapng.fromtimestamp', side_effect=ValueError), \
-                mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.fromtimestamp', side_effect=ValueError), \
+                mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
         self.assertEqual(timestamp, datetime.datetime.fromtimestamp(0, datetime.timezone.utc))
         # #361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. A leading
@@ -572,11 +572,11 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(epoch, decimal.Decimal(2) + decimal.Decimal('0.000000001'))
         warn.assert_called_once()
 
-        with mock.patch('pcapkit.protocols.misc.pcapng.time.time_ns', return_value=3_500_000_000):
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.time.time_ns', return_value=3_500_000_000):
             self.assertEqual(pcapng._make_timestamp(interface_id=0), (0, 1_500_000_000))
         low_res = IF_TSResolOption(type=OptionType.if_tsresol, length=1, resolution=1_000_000)
         interface.options[OptionType.if_tsresol] = low_res
-        with mock.patch('pcapkit.protocols.misc.pcapng.time.time', return_value=5.25):
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.time.time', return_value=5.25):
             self.assertEqual(pcapng._make_timestamp(interface_id=0), (0, 3_250_000))
         instant = datetime.datetime.fromtimestamp(6, datetime.timezone.utc)
         self.assertEqual(pcapng._make_timestamp(instant, interface_id=0), (0, 4_000_000))
@@ -593,7 +593,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         proto_code = LinkType.USER0
         custom_block = 65000
         custom_option = OptionType.get(65000)
-        from pcapkit.protocols.misc.pcapng import _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import _option_key
 
         custom_option_key = _option_key(custom_option)
         custom_record = 65000
@@ -615,7 +615,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             return UnknownBlock(length=12 + len(body), body=body, length2=12 + len(body))
 
         try:
-            PCAPNG.register(proto_code, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+            PCAPNG.register(proto_code, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
             self.assertIs(proto_map[proto_code], Raw)
 
             class Other(Raw):
@@ -627,13 +627,13 @@ class PCAPNGUnitTests(unittest.TestCase):
             # no-op covered by the identity guard for GitHub issue #718 (see
             # ``test_pcapng_register_stays_quiet_on_same_object_reregistration``).
             # A genuinely different class is needed to still warn here.
-            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                 PCAPNG.register(proto_code, Other)
             warn.assert_called_once()
             with self.assertRaises(RegistryError):
                 PCAPNG.register(LinkType.USER1, object)  # type: ignore[arg-type]
 
-            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                 PCAPNG.register_block(custom_block, (read_block, make_block))
                 PCAPNG.register_option(custom_option, 'unknown')
                 PCAPNG.register_record(custom_record, 'unknown')
@@ -758,8 +758,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         # block, a Section Header Block included; the section is ``section_context``.
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.corekit.context import ContextRegistry
-        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.internet.esp.protocol import ESPContext, SecurityAssociation
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.protocols.protocol import ProtocolBase
 
         esp = ESPContext(SecurityAssociation(spi=7))
@@ -792,15 +792,15 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         proto_map = PCAPNG.__dict__['__proto__']
         code = LinkType.USER2
         had_original = code in proto_map
         original = proto_map.get(code)
         try:
-            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn') as warn:
                 PCAPNG.register(code, Raw)
                 PCAPNG.register(code, Raw)
             warn.assert_not_called()
@@ -813,7 +813,7 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_pcapng_interface_option_constructors_and_scope_guards(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import ProtocolError
 
         pcapng = object.__new__(PCAPNG)
@@ -890,8 +890,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.verdict_type import VerdictType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, PacketDirection, PacketReception
-        from pcapkit.protocols.schema.misc.pcapng import (CommentOption, CustomOption, EndOfOption,
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, PacketDirection, PacketReception
+        from pcapkit.protocols.misc.pcapng.schema import (CommentOption, CustomOption, EndOfOption,
                                                           EPB_DropCountOption, EPB_FlagsOption,
                                                           EPB_HashOption, EPB_PacketIDOption,
                                                           EPB_QueueOption, EPB_VerdictOption,
@@ -1336,8 +1336,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, WireGuardKeyLabel
-        from pcapkit.protocols.schema.misc.pcapng import (EndRecord, IPv4Record, IPv6Record,
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng.schema import (EndRecord, IPv4Record, IPv6Record,
                                                           TLSKeyLog, UnknownRecord, UnknownSecrets,
                                                           WireGuardKeyLog, ZigBeeAPSKey,
                                                           ZigBeeNWKKey)
@@ -1409,7 +1409,7 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_tls_key_label_tracks_rfc_9850_plus_documented_rsa_exception(self) -> None:
         # GitHub issue #886: the canonical definition is the generated one under
         # :mod:`pcapkit.const.pcapng.tls_key_label`, with no re-export at
-        # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#1744);
+        # ``pcapkit.protocols.misc.pcapng.protocol.TLSKeyLabel`` (#1744);
         # tests/project/test_no_moved_name_re_exports_1744_unit.py pins that.
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
 
@@ -1459,8 +1459,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field
-        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
-        from pcapkit.protocols.schema.misc import pcapng as schema_pcapng
+        from pcapkit.protocols.misc.pcapng.protocol import WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng import schema as schema_pcapng
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import ProtocolWarning
 
@@ -1536,7 +1536,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                 registry[key].update(saved)
 
         mismatch = schema_pcapng.UnknownBlock(length=16, body=b'abcd', length2=20)
-        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.schema.warn') as warn:
             self.assertIs(mismatch.post_process({'__packet__': {'type': BlockType.Reserved_0x00000000}}),
                           mismatch)
         warn.assert_called_once()
@@ -1652,8 +1652,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import (CommentOption, CustomBlock,
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import (CommentOption, CustomBlock,
                                                           DecryptionSecretsBlock,
                                                           EnhancedPacketBlock,
                                                           InterfaceDescriptionBlock,
@@ -1783,7 +1783,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.corekit.version import VersionInfo
-        from pcapkit.protocols.data.misc.pcapng import (CommentOption as DataCommentOption,
+        from pcapkit.protocols.misc.pcapng.data import (CommentOption as DataCommentOption,
                                                         CustomBlock as DataCustomBlock,
                                                         DecryptionSecretsBlock as DataDecryptionSecretsBlock,
                                                         EnhancedPacketBlock as DataEnhancedPacketBlock,
@@ -1799,9 +1799,9 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                         UnknownBlock as DataUnknownBlock,
                                                         UnknownOption as DataUnknownOption)
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.misc.pcapng import (PCAPNG, PacketDirection, PacketReception,
+        from pcapkit.protocols.misc.pcapng.protocol import (PCAPNG, PacketDirection, PacketReception,
                                                    WireGuardKeyLabel)
-        from pcapkit.protocols.schema.misc.pcapng import CommentOption, EndOfOption
+        from pcapkit.protocols.misc.pcapng.schema import CommentOption, EndOfOption
         from pcapkit.utilities.exceptions import ProtocolError
 
         pcapng = object.__new__(PCAPNG)
@@ -2110,9 +2110,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.verdict_type import VerdictType
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.misc.pcapng import (PCAPNG, PacketDirection, PacketReception,
+        from pcapkit.protocols.misc.pcapng.protocol import (PCAPNG, PacketDirection, PacketReception,
                                                    WireGuardKeyLabel)
-        from pcapkit.protocols.schema.misc.pcapng import (CommentOption, DecryptionSecretsBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (CommentOption, DecryptionSecretsBlock,
                                                           EndRecord, IPv4Record as SchemaIPv4Record,
                                                           IPv6Record as SchemaIPv6Record,
                                                           UnknownOption as SchemaUnknownOption,
@@ -2450,7 +2450,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         assert_duplicate('_make_option_pack_flags', OptionType.pack_flags, BlockType.Packet_Block)
 
         option_code = OptionType.get(65001)
-        from pcapkit.protocols.misc.pcapng import _option_key
+        from pcapkit.protocols.misc.pcapng.protocol import _option_key
 
         option_key = _option_key(option_code)
         record_code = RecordType.get(65001)
@@ -2635,8 +2635,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         ).addr_low, 0x9ABC)
 
     def test_pcapng_custom_block_data_spans_padding_and_options(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import CustomBlock
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import CustomBlock
 
         # A Custom Block carries no length for its custom data, so everything
         # between the private enterprise number and the trailing block total
@@ -2665,7 +2665,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_isb_option_area_excludes_trailing_block_length(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import InterfaceStatisticsBlock
+        from pcapkit.protocols.misc.pcapng.schema import InterfaceStatisticsBlock
 
         # The ISB's fixed fields occupy 24 octets: block type, block total
         # length, interface ID, the 64-bit timestamp, and the trailing block
@@ -2691,7 +2691,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_option_field_hands_unconsumed_remainder_to_next_field(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import InterfaceStatisticsBlock
+        from pcapkit.protocols.misc.pcapng.schema import InterfaceStatisticsBlock
 
         # An option list that ends at ``opt_endofopt`` before the option area
         # does leaves a remainder, reported through ``__option_padding__``.
@@ -2711,7 +2711,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_nrb_ipv6_record_name_follows_sixteen_octet_address(self) -> None:
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.schema.misc.pcapng import NameResolutionBlock
+        from pcapkit.protocols.misc.pcapng.schema import NameResolutionBlock
 
         # An ``nrb_record_ipv6`` record value is a 16-octet address followed by
         # zero-terminated names, so the names span ``length - 16``. Sizing them
@@ -2740,7 +2740,7 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_pcapng_nrb_options_read_from_inside_the_block(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
-        from pcapkit.protocols.schema.misc.pcapng import NameResolutionBlock
+        from pcapkit.protocols.misc.pcapng.schema import NameResolutionBlock
 
         # The NRB is the only block with two consecutive option fields: the
         # record area's size is known only once its records have been parsed,
@@ -2771,7 +2771,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_obsolete_packet_block_uses_sixteen_bit_ids(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import PacketBlock
+        from pcapkit.protocols.misc.pcapng.schema import PacketBlock
 
         # The obsolete Packet Block packs Interface ID and Drops Count into one
         # 32-bit word, which is what the option area's ``length - 32`` overhead
@@ -2801,8 +2801,8 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_pcapng_read_block_packet_resolves_linktype_without_info(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import PacketBlock, PCAPNG as Header
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import PacketBlock, PCAPNG as Header
 
         # ``_read_block_packet`` runs before ``self._info`` exists, so it has to
         # resolve the link type from the schema's interface ID the way the EPB
@@ -2825,7 +2825,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         )
         self.assertFalse(hasattr(pcapng, '_info'))
 
-        with mock.patch('pcapkit.protocols.misc.pcapng.warn'):
+        with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn'):
             block = pcapng._read_block_packet(
                 PacketBlock(length=36, interface_id=0, drop_count=1, timestamp_high=0,
                             timestamp_low=0, captured_length=4, original_length=4,
@@ -2846,14 +2846,14 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         Returns a list of ``(label, block type, schema)`` triples covering every
         block schema of
-        :mod:`pcapkit.protocols.schema.misc.pcapng`, each with the block total
+        :mod:`pcapkit.protocols.misc.pcapng.schema`, each with the block total
         length its own fields imply.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.schema.misc.pcapng import (CustomBlock, DecryptionSecretsBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (CustomBlock, DecryptionSecretsBlock,
                                                           EnhancedPacketBlock,
                                                           InterfaceDescriptionBlock,
                                                           InterfaceStatisticsBlock,
@@ -2925,7 +2925,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # which ``Schema.pack`` does not fill in, so packing them handed
         # ``struct.pack`` the ``NO_VALUE`` sentinel.
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (DecryptionSecretsBlock,
                                                           EnhancedPacketBlock, PacketBlock)
 
         for schema in (EnhancedPacketBlock, PacketBlock, DecryptionSecretsBlock):
@@ -2937,7 +2937,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Regression for #366, causes 2 and 4: the option length callbacks read
         # ``pkt['padding_data']`` and ``pkt['__option_padding__']``, neither of
         # which is a key in the packet data while packing.
-        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (DecryptionSecretsBlock,
                                                           EnhancedPacketBlock,
                                                           InterfaceDescriptionBlock,
                                                           InterfaceStatisticsBlock,
@@ -2969,7 +2969,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Regression for #366, cause 3: nothing in the package called
         # ``Schema.pre_pack``, so ``SectionHeaderBlock.pre_pack`` never got to
         # seed ``packet['match']`` and packing an SHB raised ``KeyError``.
-        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+        from pcapkit.protocols.misc.pcapng.schema import SectionHeaderBlock
 
         for byteorder, endian in (('big', '>'), ('little', '<')):
             with self.subTest(byteorder=byteorder):
@@ -2998,8 +2998,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.interface import extract
-        from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Header
-        from pcapkit.protocols.schema.misc.pcapng import (CommentOption, EndOfOption,
+        from pcapkit.protocols.misc.pcapng.schema import PCAPNG as Header
+        from pcapkit.protocols.misc.pcapng.schema import (CommentOption, EndOfOption,
                                                           EnhancedPacketBlock,
                                                           InterfaceDescriptionBlock,
                                                           InterfaceStatisticsBlock,
@@ -3126,8 +3126,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.schema.misc.pcapng import Option
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import Option
 
         # ``'shb'`` names no namespace on either side of the wire
         namespaces = set(dict(OptionType.__members_ns__)) | set(dict(Option.registry))
@@ -3170,7 +3170,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             with self.subTest(block=name):
                 recorded.clear()
                 pcapng._type = block_type
-                with mock.patch('pcapkit.protocols.misc.pcapng.warn'):
+                with mock.patch('pcapkit.protocols.misc.pcapng.protocol.warn'):
                     call()
                 self.assertEqual(recorded, [expected])
                 # the namespace has to be a real one, otherwise every code in
@@ -3185,7 +3185,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # The read side is the authority on which registry a block's options
         # come from: each block schema's ``OptionField`` names it explicitly.
         # #365's fix has to agree with it, block for block.
-        from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (DecryptionSecretsBlock,
                                                           EnhancedPacketBlock,
                                                           InterfaceDescriptionBlock,
                                                           InterfaceStatisticsBlock,
@@ -3216,7 +3216,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # list, so an out-of-range interface ID escaped as a bare ``IndexError``
         # from ``_get_timezone`` instead of the intended ``FormatError``.
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import FormatError
 
         tags = {
@@ -3252,7 +3252,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # A block that is not in ``INTERFACE_ID_BLOCK_TAGS`` still has to report
         # a ``FormatError`` rather than an ``IndexError``, naming the block type.
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import FormatError
 
         pcapng = object.__new__(PCAPNG)
@@ -3273,7 +3273,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         """A Section Header Block, options and all, in the given byte order.
 
         The buffer starts at the block total length, i.e. it is what a
-        :class:`~pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock` is
+        :class:`~pcapkit.protocols.misc.pcapng.schema.SectionHeaderBlock` is
         handed, without the leading 4-octet block type.
 
         """
@@ -3300,7 +3300,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # big-endian section every option was replaced by one bogus
         # ``opt_unknown`` whose byte-swapped length swallowed the option area.
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+        from pcapkit.protocols.misc.pcapng.schema import SectionHeaderBlock
 
         expected = [
             (2, 9, b'Apple MBP'),
@@ -3329,7 +3329,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # ``None``, it is the *previous* section's context, so seeding the byte
         # order from it is wrong even when a context exists. An SHB has to read
         # its own options through its own magic whatever the packet data says.
-        from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock
+        from pcapkit.protocols.misc.pcapng.schema import SectionHeaderBlock
 
         for byteorder in ('big', 'little'):
             other = 'little' if byteorder == 'big' else 'big'
@@ -3425,7 +3425,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         is skipped rather than passed.
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         if not hasattr(time, 'tzset'):  # pragma: no cover
             self.skipTest('time.tzset() is unavailable on this platform')
@@ -3556,7 +3556,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
 
     def _unpack_epb(self, options: bytes, packet_data: bytes = bytes(4)):
         """Unpack an EPB whose option area is exactly ``options``."""
-        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+        from pcapkit.protocols.misc.pcapng.schema import EnhancedPacketBlock
 
         raw = block_body(epb_body(options, packet_data))
         schema = EnhancedPacketBlock.unpack(raw, len(raw), {'byteorder': 'little'})
@@ -3574,7 +3574,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
     def _unpack_epb_declaring(self, options: bytes, declared: int,
                               packet_data: bytes = bytes(4)):
         """Unpack an EPB whose Block Total Length lies about its own size."""
-        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+        from pcapkit.protocols.misc.pcapng.schema import EnhancedPacketBlock
 
         body = epb_body(options, packet_data)
         raw = struct.pack('<I', declared) + body + struct.pack('<I', declared)
@@ -3758,7 +3758,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         shows up as a subtest that fails.
 
         """
-        from pcapkit.protocols.schema.misc import pcapng as schema_module
+        from pcapkit.protocols.misc.pcapng import schema as schema_module
         from pcapkit.utilities.exceptions import ProtocolError
 
         # (schema class, octets of fixed field between the header and the
@@ -3791,17 +3791,17 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
 
     def test_keeping_the_area_warns_rather_than_passing_in_silence(self) -> None:
         """A kept option area is reported; an option that fits is not."""
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.warnings import ProtocolWarning
 
-        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.schema.warn') as warn:
             self._unpack_epb(over_declared(UNKNOWN_OPT, b'', 0xFFFF))
         self.assertEqual(warn.call_count, 1)
         self.assertIs(warn.call_args.args[1], ProtocolWarning)
         self.assertIn('65535', warn.call_args.args[0])
         self.assertIn('kept as captured', warn.call_args.args[0])
 
-        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+        with mock.patch('pcapkit.protocols.misc.pcapng.schema.warn') as warn:
             raw = tlv(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd')
             UnknownOption.unpack(raw, len(raw), {'byteorder': 'little'})
         self.assertEqual(warn.call_count, 0)
@@ -3819,7 +3819,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         rather than as a discriminator.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
 
         value = b'\xaa' * 8
         option = UnknownOption(type=UNKNOWN_OPT, length=len(value), data=value)
@@ -4140,7 +4140,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         to one, two and three octets.
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import StreamEOFError
 
         for size in range(12):
@@ -4156,11 +4156,11 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         """Twelve octets is a block, so the floor may not reject it.
 
         An off-by-one here would stop every well-formed
-        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` of minimum
+        :class:`~pcapkit.protocols.misc.pcapng.schema.UnknownBlock` of minimum
         size, and ``__length_hint__`` reports the same twelve.
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         raw = struct.pack('<I', 0x0BAD0BAD) + struct.pack('<I', 12) + struct.pack('<I', 12)
 
@@ -4173,7 +4173,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         """Measuring the remainder needs a seek, and nothing here guards that.
 
         It does not have to:
-        :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG.__post_init__` has already
+        :meth:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__post_init__` has already
         called :meth:`~io.IOBase.tell` on the stream to record ``_seek_set``
         before ``unpack`` runs, so an unseekable stream never reaches the floor.
         Pinned rather than assumed, because a ``seekable()`` guard on the floor
@@ -4181,7 +4181,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         behaves the same with or without the floor.
 
         """
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         stream = Unseekable(bytes(3))
         self.assertFalse(stream.seekable())
@@ -4196,13 +4196,13 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         A Section Header Block is 28 octets, comfortably over the floor, but the
         floor is skipped there on principle rather than on size: a block short
         enough to trip it is already reported by
-        :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG.read`'s own Block Total
+        :meth:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`'s own Block Total
         Length check, which names the length and so says more than an
         end-of-stream would.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         block = PCAPNG(num=0, sct=1, ctx=None,
                        type=BlockType.Section_Header_Block, block={})
@@ -4266,14 +4266,14 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         """Exhaustive over the module, so a new unfloored subtraction is caught.
 
         Walks every schema in
-        :mod:`pcapkit.protocols.schema.misc.pcapng` and drives every ``length``
+        :mod:`pcapkit.protocols.misc.pcapng.schema` and drives every ``length``
         callback with the hostile packet above. Measured without the floor, the
         callbacks return negatives from ``-1`` on an ``epb_hash`` declaring no
         payload to ``-16777248`` on an Enhanced Packet Block's option area.
 
         """
-        from pcapkit.protocols.schema.misc import pcapng as module
-        from pcapkit.protocols.schema.schema import Schema
+        from pcapkit.protocols.misc.pcapng import schema as module
+        from pcapkit.protocols.schema import Schema
 
         packet = self._hostile_packet()
         exercised = []
@@ -4304,7 +4304,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 
         ``UnknownSecrets.data``, ``TLSKeyLog.data`` and ``WireGuardKeyLog.data``
         read ``__length__`` whole rather than subtracting from it, and
-        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` leaves
+        :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` leaves
         it at ``-1`` when no length is known -- so flooring them at zero packs
         *nothing*. Measured: it empties the secrets payloads, which the
         round-trip sweep in ``tests/protocols/test_option_roundtrip_unit.py``
@@ -4313,7 +4313,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         pinned rather than left to the reader.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, UnknownSecrets
+        from pcapkit.protocols.misc.pcapng.schema import TLSKeyLog, UnknownSecrets
 
         for schema_cls, field_name in ((UnknownSecrets, 'data'), (TLSKeyLog, 'data')):
             with self.subTest(schema=schema_cls.__name__):
@@ -4329,7 +4329,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         so the warning cannot be routine noise.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import nonnegative
+        from pcapkit.protocols.misc.pcapng.schema import nonnegative
         from pcapkit.utilities.warnings import SchemaWarning
 
         callback = nonnegative(lambda pkt: pkt['length'] - 12)
@@ -4352,7 +4352,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         negative nominal, so it returned it unclamped.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+        from pcapkit.protocols.misc.pcapng.schema import EnhancedPacketBlock
 
         body = (struct.pack('<IIIII', 0, 0, 0, 0xFFFFFF, 0xFFFFFF) + bytes(8))
         raw = block_body(body)
@@ -4379,7 +4379,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         export, 24 for Interface Statistics, 16 for a Custom Block.
 
         """
-        from pcapkit.protocols.schema.misc.pcapng import (CustomBlock,
+        from pcapkit.protocols.misc.pcapng.schema import (CustomBlock,
                                                           InterfaceDescriptionBlock,
                                                           InterfaceStatisticsBlock,
                                                           NameResolutionBlock,
@@ -4889,7 +4889,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
     def _snapshot(self):
         """Restore every namespace dictionary on teardown."""
-        from pcapkit.protocols.schema.misc.pcapng import Option
+        from pcapkit.protocols.misc.pcapng.schema import Option
 
         saved = {key: value.copy() for key, value in Option.registry.items()}
         names = set(Option.registry)
@@ -4916,7 +4916,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()
@@ -4941,7 +4941,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()
@@ -4968,7 +4968,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()
@@ -4997,7 +4997,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()
@@ -5024,7 +5024,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
 
         option = self._snapshot()
         before = {key: len(value) for key, value in option.registry.items()}
@@ -5047,7 +5047,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import _IF_Option
+        from pcapkit.protocols.misc.pcapng.schema import _IF_Option
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()
@@ -5077,7 +5077,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.schema.misc.pcapng import IF_NameOption, UnknownOption
+        from pcapkit.protocols.misc.pcapng.schema import IF_NameOption, UnknownOption
         from pcapkit.utilities.warnings import RegistryWarning
 
         option = self._snapshot()

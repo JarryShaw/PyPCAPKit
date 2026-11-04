@@ -18,14 +18,14 @@ generator = globals()['generator']  # type: Any
 
 
 def _registry() -> 'Any':
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
     return Radiotap.__proto__
 
 
 def _build(code: 'Any') -> 'Any':
     """An 802.11 Ack behind radiotap, on a ``LINUX_SLL`` capture.
 
-    :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.Radiotap.read>`
+    :meth:`Radiotap.read <pcapkit.protocols.link.radiotap.protocol.Radiotap.read>`
     consults ``LinkType.IEEE802_11`` alone, so that is the only code with a
     case.
 
@@ -34,9 +34,9 @@ def _build(code: 'Any') -> 'Any':
     from pcapkit.const.ieee802_11.type import Type
     from pcapkit.const.linux.arphrd import ARPHRD
     from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.protocols.link.ieee802_11 import IEEE802_11
-    from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-    from pcapkit.protocols.link.radiotap import Radiotap
+    from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
+    from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+    from pcapkit.protocols.link.radiotap.protocol import Radiotap
 
     if code != LinkType.IEEE802_11:
         raise ValueError(f'no radiotap case for link type {code!r}')
@@ -54,5 +54,5 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
-    'radiotap/IEEE802_11': ('pcapkit.protocols.link.ieee802_11', 'IEEE802_11'),
+    'radiotap/IEEE802_11': ('pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11'),
 }

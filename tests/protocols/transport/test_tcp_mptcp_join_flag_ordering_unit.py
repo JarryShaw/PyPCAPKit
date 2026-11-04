@@ -3,14 +3,14 @@
 
 GitHub issue #587. Distinct from #576/#585, which are about MPTCP option *length*
 arithmetic; this one is a statement-ordering defect in
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`.
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>`.
 
 The ordering
 ------------
 
-:meth:`TCP._make_mptcp_join <pcapkit.protocols.transport.tcp.TCP._make_mptcp_join>`,
+:meth:`TCP._make_mptcp_join <pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_join>`,
 reached from ``_make_tcp_options``, *branches on* ``self._flags`` to pick which of the
-three MP_JOIN layouts to emit, so :meth:`~pcapkit.protocols.transport.tcp.TCP.make` has
+three MP_JOIN layouts to emit, so :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.make` has
 to assign the flags before it builds the options. Built the other way round:
 
 .. code-block:: python
@@ -24,7 +24,7 @@ a fresh instance has no such attribute yet, and construction dies outright::
     AttributeError: 'TCP' object has no attribute '_flags'
 
 The parse path has the identical pair of branches in ``_read_mptcp_join``, and
-:meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags`` before it
+:meth:`~pcapkit.protocols.transport.tcp.protocol.TCP.read` assigns ``self._flags`` before it
 parses the options. In ``make`` the ``flags`` dict and the ``_flag`` accumulation sit
 above the ``_make_tcp_options`` call; the ``offset`` computation stays below it, being the
 one statement in that block that genuinely depends on the options' ``total_length``.
@@ -97,7 +97,7 @@ since a bare :exc:`TypeError` escaping the library would break the in-library ex
 contract.
 
 On the read path,
-:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector` guards the flagless
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_data_selector` guards the flagless
 case and raises :exc:`~pcapkit.utilities.exceptions.FieldError` before
 ``_read_mptcp_join`` is reached at all, and ``read`` seeds ``Enum_Flags(0)`` as well
 (#616).
@@ -120,7 +120,7 @@ import inspect
 import unittest
 
 #: Header fields shared by every constructed segment here, spelled with the parameter
-#: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` actually declares.
+#: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.protocol.TCP.make>` actually declares.
 #:
 #: Deliberately *not* a copy of :data:`examples.generators.option_families.tcp.TCP_BASE`, which
 #: sibling modules in this directory mirror -- and, unlike theirs, this dict omits
@@ -162,7 +162,7 @@ def build_join(*, syn: 'bool', ack: 'bool', **option: 'object') -> 'object':
             arguments.
 
     Returns:
-        The constructed :class:`~pcapkit.protocols.transport.tcp.TCP` instance.
+        The constructed :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` instance.
 
     Note:
         :mod:`pcapkit` is imported inside the function rather than at module level, for
@@ -175,7 +175,7 @@ def build_join(*, syn: 'bool', ack: 'bool', **option: 'object') -> 'object':
     """
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
     from pcapkit.const.tcp.option import Option as Enum_Option
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     args = dict(option)
     args['subtype'] = Enum_MPTCPOption.MP_JOIN
@@ -205,7 +205,7 @@ def build_tcp_segment(option_octets: 'bytes', *, syn: 'bool', ack: 'bool') -> 'b
             make the header's ``offset`` unrepresentable.
 
     """
-    from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+    from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
 
     if len(option_octets) % 4:
         raise ValueError('option_octets must already be a multiple of 4 octets long')
@@ -236,7 +236,7 @@ class JoinLayoutMixin:
         placed ahead of the option build.
 
         Args:
-            tcp: The constructed :class:`~pcapkit.protocols.transport.tcp.TCP` instance.
+            tcp: The constructed :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` instance.
             expected: The option octets :rfc:`8684` gives for this form.
 
         """
@@ -275,7 +275,7 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(srcport=1, dstport=2, seq_no=0, ack=0, syn=True,
                   options=[(Enum_Option.Multipath_TCP,
@@ -403,7 +403,7 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
 
         """
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(syn=False, ack=False, **TCP_HEADER)
         self.assertEqual(bytes(tcp)[13], 0x00, 'no flag octet bit should be set')
@@ -430,7 +430,7 @@ class TCPMPTCPJoinRoundTripUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         cases = (
             ('SYN', dict(syn=True, ack=False, addr_id=1, token=0xAAAAAAAA,
@@ -473,7 +473,7 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
             The instance, whose ``_flags`` is ``SYN`` from the wire.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         raw = build_tcp_segment(MP_JOIN_SYN_OCTETS, syn=True, ack=False)
         parsed = TCP(raw, len(raw))
@@ -561,7 +561,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
 
     def test_flags_are_assigned_before_the_options_are_built(self) -> None:
         """In ``TCP.make``'s source, ``self._flags`` is set before ``_make_tcp_options``."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         source = inspect.getsource(TCP.make)
         assignment = source.index('self._flags = _flag')
@@ -581,7 +581,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
         flags would make the header's data offset describe an empty option area.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         source = inspect.getsource(TCP.make)
         build = source.index('self._make_tcp_options(options')
@@ -613,7 +613,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for label, syn, ack in (('none', False, False), ('syn', True, False),
                                 ('ack', False, True), ('both', True, True)):
@@ -640,7 +640,7 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
         """Hand-built figures 5, 6 and 7 each reach their own reader."""
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         cases = (
             ('figure 5', MP_JOIN_SYN_OCTETS, True, False, 12, Enum_Flags.SYN),
@@ -670,7 +670,7 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
         :meth:`tests.protocols.transport.test_tcp_udp_unit.TCPUDPUnitTests.test_a_flagless_segment_seeds_its_connection_flags_as_an_enum`.
 
         """
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import FieldError
 
         raw = build_tcp_segment(MP_JOIN_SYN_OCTETS, syn=False, ack=False)
@@ -701,7 +701,7 @@ class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         def capable(syn: 'bool', ack: 'bool') -> 'bytes':
             tcp = TCP(syn=syn, ack=ack,
@@ -726,7 +726,7 @@ class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.tcp.option import Option as Enum_Option
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         tcp = TCP(syn=True, ack=False,
                   options=[(Enum_Option.Maximum_Segment_Size, {'mss': 1460})],

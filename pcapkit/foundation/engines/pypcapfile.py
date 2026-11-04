@@ -18,7 +18,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.io import NamedStream
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
+from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
 

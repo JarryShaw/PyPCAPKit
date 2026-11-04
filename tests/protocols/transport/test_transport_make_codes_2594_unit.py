@@ -95,8 +95,8 @@ class EnumerationFieldTests(unittest.TestCase):
         from pcapkit.const.dccp.option import Option as DCCP_Option
         from pcapkit.const.dccp.packet_type import PacketType
         from pcapkit.const.tcp.option import Option as TCP_Option
-        from pcapkit.protocols.transport.dccp import DCCP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         def dccp_option(code: 'Any', args: 'dict[str, Any]') -> 'bytes':
             return DCCP(type=PacketType.DCCP_Ack, ack=1, checksum=b'\x00\x00', options=[(code, args)]).data
@@ -122,8 +122,8 @@ class EnumerationFieldTests(unittest.TestCase):
     def build_list(field: 'Field', options: 'Any') -> 'bytes':
         """The octets of a packet carrying the option list ``options``."""
         from pcapkit.const.dccp.packet_type import PacketType
-        from pcapkit.protocols.transport.dccp import DCCP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         if field.maker == 'TCP._make_tcp_options':
             return TCP(options=options).data
@@ -198,8 +198,8 @@ class EnumerationFieldTests(unittest.TestCase):
     def test_a_parsed_option_list_has_its_keys_checked(self) -> 'None':
         """A parsed option list rebuilds as it was, and one keyed by a refused code is refused."""
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.transport.dccp import DCCP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for field in FIELDS:
             if field.maker not in OPTION_LISTS:

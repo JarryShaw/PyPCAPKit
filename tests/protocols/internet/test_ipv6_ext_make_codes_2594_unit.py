@@ -86,7 +86,7 @@ CLASSES = {
 
 
 def _class(name: 'str') -> 'type':
-    module = __import__(f'pcapkit.protocols.internet.{CLASSES[name][0]}', fromlist=[name])
+    module = __import__(f'pcapkit.protocols.internet.{CLASSES[name][0]}.protocol', fromlist=[name])
     return getattr(module, name)
 
 
@@ -97,7 +97,7 @@ def _member(module: 'str', member: 'str') -> 'object':
 
 def _esp_context() -> 'object':
     from pcapkit.corekit.context import ContextRegistry
-    from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+    from pcapkit.protocols.internet.esp.protocol import ESPContext, SecurityAssociation
 
     # NOTE: An ENCR_NULL association with no integrity algorithm, so that
     # ``encrypt=True`` writes ``next`` into the trailer without the cryptography package.

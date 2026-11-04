@@ -22,27 +22,27 @@ from pcapkit.foundation.reassembly.data.dtls import Packet as DTLS_Packet
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.application.dtls import DTLS
-from pcapkit.protocols.data.application.dtls import DTLS as Data_DTLS
-from pcapkit.protocols.data.application.dtls import DTLSHandshake as Data_DTLSHandshake
-from pcapkit.protocols.internet.ip import IP as Protocol_IP
-from pcapkit.protocols.internet.ipv4 import IPv4
-from pcapkit.protocols.internet.ipv6 import IPv6
-from pcapkit.protocols.misc.no_payload import NoPayload
-from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.application.dtls.data import DTLS as Data_DTLS
+from pcapkit.protocols.application.dtls.data import DTLSHandshake as Data_DTLSHandshake
+from pcapkit.protocols.application.dtls.protocol import DTLS
+from pcapkit.protocols.internet.ip.protocol import IP as Protocol_IP
+from pcapkit.protocols.internet.ipv4.protocol import IPv4
+from pcapkit.protocols.internet.ipv6.protocol import IPv6
+from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.protocols.protocol import ProtocolBase
-from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
-from pcapkit.protocols.transport.tcp import TCP
-from pcapkit.protocols.transport.udp import UDP
+from pcapkit.protocols.transport.tcp.protocol import TCP
+from pcapkit.protocols.transport.tcp.schema import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.protocols.transport.udp.protocol import UDP
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
     from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
-    from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-    from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+    from pcapkit.protocols.internet.ipv4.data import IPv4 as Data_IPv4
+    from pcapkit.protocols.internet.ipv6.data import IPv6 as Data_IPv6
+    from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'dtls_reassembly',
@@ -124,7 +124,7 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         the IP layer that carries it -- in a tunnel, the innermost
         (:issue:`1581`). Otherwise, the fields of the fixed 20-octet TCP header
         (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a
-        :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` the TCP parser rejected, of
         protocol TCP, from a datagram that is not a later fragment, with at
         least those 20 octets captured; else :data:`None`. A segment past
         :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` is kept raw
@@ -134,7 +134,7 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         A capture snapped inside the TCP header leaves a Data Offset that runs
         past the captured octets, and the TCP parser rejects such a header by
         design (:issue:`1404`), so the segment arrives as
-        :class:`~pcapkit.protocols.misc.raw.Raw`. The ports, numbers and flags
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. The ports, numbers and flags
         are all in the fixed header, so the segment still belongs to its flow,
         as it does for |dpkt|_, :mod:`scapy` and Wireshark (:issue:`1518`).
         The header and payload are then the captured octets either side of the
@@ -205,8 +205,8 @@ def _fragment(frame: 'ProtocolBase', version: 'type[IPv4 | IPv6]') -> 'Optional[
 
     Args:
         frame: PCAP frame or PCAP-NG block.
-        version: :class:`~pcapkit.protocols.internet.ipv4.IPv4` or
-            :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the layer to fetch.
+        version: :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` or
+            :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the layer to fetch.
 
     Returns:
         The first ``version`` layer, from the outside in, that is a fragment --
@@ -241,8 +241,8 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     A frame can be reassembled if it contains an IPv4 layer
-    (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and the **DF**
-    (:attr:`IPv4.flags.df <pcapkit.protocols.data.internet.ipv4.Flags.df>`) flag is
+    (:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`) and the **DF**
+    (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.data.Flags.df>`) flag is
     :data:`False`. In an IP-in-IP tunnel, the layer is the first that is a fragment
     (see :func:`_fragment`).
 
@@ -286,9 +286,9 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     A frame can be reassembled if it contains an IPv6 layer
-    (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and an IPv6 Fragment header
+    (:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`) and an IPv6 Fragment header
     (:rfc:`2460#section-4.5`, i.e.,
-    :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`). In an IP-in-IP tunnel,
+    :class:`~pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`). In an IP-in-IP tunnel,
     the layer is the first that has one (see :func:`_fragment`).
 
     Args:
@@ -311,7 +311,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info
 
         # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since
-        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`
         # adds each extension header's length before the Fragment-header check
         # breaks its loop. That is correct for a header length, but the
         # reassembled packet carries no Fragment header at all
@@ -349,7 +349,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     A frame can be reassembled if it contains a TCP layer
-    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the
+    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the
     TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).
 
     Args:
@@ -403,7 +403,7 @@ def _dtls_fragments(frame: 'ProtocolBase', *, num: 'int',
 
     Returns:
         One record per fragmented handshake message in the frame's first
-        :class:`~pcapkit.protocols.application.dtls.DTLS` layer, if UDP carries
+        :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` layer, if UDP carries
         it and it is a cleartext ``handshake`` record holding one; otherwise
         :data:`None`. The buffer ID is the IP and UDP endpoints nearest above
         the record, with its epoch (:rfc:`6347#section-4.1`).
@@ -455,10 +455,10 @@ def dtls_reassembly(frame: 'Frame') -> 'Optional[tuple[DTLS_Packet, ...]]':
     """Make data for DTLS handshake-message reassembly.
 
     A frame can be reassembled if UDP carries a DTLS layer
-    (:class:`~pcapkit.protocols.application.dtls.DTLS`) whose cleartext
+    (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`) whose cleartext
     ``handshake`` record holds a fragmented message
     (:attr:`DTLSHandshake.is_fragmented
-    <pcapkit.protocols.data.application.dtls.DTLSHandshake.is_fragmented>`,
+    <pcapkit.protocols.application.dtls.data.DTLSHandshake.is_fragmented>`,
     :rfc:`6347#section-4.2.3`). Only the frame's first record is read.
 
     Args:
@@ -479,7 +479,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
     """Trace packet flow for TCP.
 
     A frame can be traced if it contains a TCP layer
-    (:class:`~pcapkit.protocols.transport.tcp.TCP`), or a TCP segment whose header the
+    (:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`), or a TCP segment whose header the
     TCP parser rejected, as it does one the snapshot length cut short (:issue:`1518`).
 
     Args:

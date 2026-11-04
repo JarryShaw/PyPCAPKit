@@ -105,7 +105,7 @@ else:
 # decorated object, and before that it is a pure annotation for the type checker
 # leaving no runtime trace at all. That dunder is *read* --
 # :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__` and
-# :meth:`pcapkit.protocols.schema.schema.Schema.__init_subclass__` refuse to
+# :meth:`pcapkit.protocols.schema.Schema.__init_subclass__` refuse to
 # derive from a class carrying it in its own ``__dict__`` -- so on 3.8 to 3.10,
 # all in the CI matrix, keying the guard on 3.8 would leave the runtime check
 # reading an attribute nothing had set: a silent no-op on those interpreters and

@@ -2,9 +2,9 @@
 """GitHub issue #1574: the BSD loopback encapsulation is dissected.
 
 A frame on a ``LINKTYPE_NULL`` (0) or ``LINKTYPE_LOOP`` (108) interface was
-kept whole as :class:`~pcapkit.protocols.misc.raw.Raw`, because neither link
+kept whole as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, because neither link
 type had a dissector: frames 3 and 4 of ``many_interfaces.pcapng`` read ``NULL``
-where scapy reads IPv4. :class:`~pcapkit.protocols.link.loopback.Loopback`
+where scapy reads IPv4. :class:`~pcapkit.protocols.link.loopback.protocol.Loopback`
 reads the 4-octet address family -- in the capturing host's byte order for
 ``NULL``, in network byte order for ``LOOP`` -- and dispatches 2 to IPv4 and 24,
 28 and 30 to IPv6. Both link types are registered against it for PCAP and
@@ -76,7 +76,7 @@ class TestLoopback(unittest.TestCase):
                 self.assertEqual(type(layer).from_data(data, **kwargs).data.hex(), layer.data.hex())
 
     def test_each_family_in_both_byte_orders(self) -> None:
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
 
         for family, payload, name in FAMILIES:
             for byteorder in ('little', 'big'):
@@ -93,8 +93,8 @@ class TestLoopback(unittest.TestCase):
                     self._assert_rebuilds(parsed)
 
     def test_other_family_is_kept_raw(self) -> None:
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for family, byteorder in ((7, 'little'), (23, 'big'), (0, 'little'), (0x0102, 'big')):
             with self.subTest(family=family, byteorder=byteorder):
@@ -106,7 +106,7 @@ class TestLoopback(unittest.TestCase):
                 self._assert_rebuilds(parsed)
 
     def test_make_then_parse(self) -> None:
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
 
         for family, payload, name in FAMILIES:
             for byteorder in ('little', 'big'):
@@ -120,7 +120,7 @@ class TestLoopback(unittest.TestCase):
         self.assertEqual(Loopback().data, _header(2, sys.byteorder))
 
     def test_make_rejects_what_does_not_fit(self) -> None:
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
         from pcapkit.utilities.exceptions import ProtocolError
 
         for kwargs in ({'byteorder': 'native'}, {'family': -1}, {'family': 0x1_0000_0000}):
@@ -129,7 +129,7 @@ class TestLoopback(unittest.TestCase):
 
     def test_make_names_an_unknown_byteorder(self) -> None:
         """The byte-order check is inline, not ``_make_uint``'s, with this prefix (#2614)."""
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
@@ -140,7 +140,7 @@ class TestLoopback(unittest.TestCase):
         # #2289: a bool is an int and packs as family 1; a non-int fails the
         # range comparison or ``to_bytes`` with a bare ``TypeError`` or
         # ``AttributeError``. Each must raise ``ProtocolError``.
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
         from pcapkit.utilities.exceptions import ProtocolError
 
         for family in (True, False, '2', 2.0, None):
@@ -152,9 +152,9 @@ class TestLoopback(unittest.TestCase):
     def test_registered_for_null_and_loop(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (Frame, PCAPNG):
             for code in (LinkType.NULL, LinkType.LOOP):
@@ -176,8 +176,8 @@ class TestLoopback(unittest.TestCase):
 
     def _assert_capture(self, linktype: int, records: 'list[tuple[bytes, str]]', ipv4: int) -> 'list':
         """Extract ``records`` under ``linktype`` in both formats; check chains and rebuilds."""
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         frames = []
         for build, suffix in ((_pcap, '.pcap'), (_pcapng, '.pcapng')):
@@ -218,8 +218,8 @@ class TestLoopback(unittest.TestCase):
     def test_little_endian_loop_family_is_not_ipv4(self) -> None:
         """``LINKTYPE_LOOP`` is network byte order: ``02 00 00 00`` is family 0x02000000."""
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         raw = _header(2, 'little') + IPV4
         frames = self._assert_capture(108, [(raw, 'Loopback:Raw')], ipv4=0)
@@ -241,7 +241,7 @@ class TestLoopback(unittest.TestCase):
     def test_rebuild_keeps_the_parsed_info(self) -> None:
         """Every family, in either byte order, under every link-type hint, rebuilds to its own info."""
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
 
         for family in (0, 2, 7, 23, 24, 28, 30):
             payload = IPV6 if family in (24, 28, 30) else IPV4
@@ -259,7 +259,7 @@ class TestLoopback(unittest.TestCase):
                         self._assert_rebuilds_info(parsed)
 
     def test_read_rejects_an_unknown_byteorder(self) -> None:
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
         from pcapkit.utilities.exceptions import ProtocolError
 
         raw = _header(2, 'little') + IPV4
@@ -269,7 +269,7 @@ class TestLoopback(unittest.TestCase):
 
     def test_family_byteorder(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.link.loopback import family_byteorder
+        from pcapkit.protocols.link.loopback.protocol import family_byteorder
 
         for octets, null in ((b'\x02\x00\x00\x00', 'little'), (b'\x00\x00\x00\x02', 'big'),
                              (bytes(4), 'little'), (b'\x02\x00\x02\x00', 'little')):
@@ -279,7 +279,7 @@ class TestLoopback(unittest.TestCase):
                 self.assertEqual(family_byteorder(octets, LinkType.LOOP), 'big')
 
     def test_short_header_is_kept_raw(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         extractor = self._extract(_pcap(0, [b'\x02\x00\x00']), '.pcap')
         frame = extractor.frame[0]

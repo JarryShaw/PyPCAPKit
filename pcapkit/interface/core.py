@@ -149,10 +149,10 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         context: caller supplied parsing context for protocols that need
             information not carried on the wire, keyed by protocol index ID --
             cf. :mod:`pcapkit.corekit.context`. The motivating case is
-            :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the
+            :class:`~pcapkit.protocols.internet.esp.protocol.ESP`, which needs the
             Security Association to find the trailer and decrypt the payload::
 
-                >>> from pcapkit.protocols.internet.esp import (Cipher, ESPContext,
+                >>> from pcapkit.protocols.internet.esp.protocol import (Cipher, ESPContext,
                 ...                                            SecurityAssociation)
                 >>> sa = SecurityAssociation(spi=0x4321, encryption=Cipher.AES_CBC,
                 ...                          encryption_key=key)

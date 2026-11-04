@@ -151,8 +151,8 @@ class TestEncodersOnGraalPy(unittest.TestCase):
 
     def test_mh_mesg_id(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.schema.internet.mh import MesgIDOption
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.internet.mh.schema import MesgIDOption
 
         proto = object.__new__(MH)
         for instant in INSTANTS[1:5]:
@@ -164,7 +164,7 @@ class TestEncodersOnGraalPy(unittest.TestCase):
                 self.assertEqual(MesgIDOption.unpack(made.pack()).timestamp, instant)
 
     def test_pcap_frame(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 
         frame = object.__new__(Frame)
         instant = datetime.datetime(1969, 12, 31, 23, 59, 58, 250_000, tzinfo=UTC)
@@ -176,7 +176,7 @@ class TestEncodersOnGraalPy(unittest.TestCase):
                 self.assertEqual(made, expected)
 
     def test_pcapng_block(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         pcapng = object.__new__(PCAPNG)
         instant = datetime.datetime(1950, 6, 1, 12, 0, 0, 500_000, tzinfo=UTC)

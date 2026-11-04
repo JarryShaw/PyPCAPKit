@@ -60,7 +60,7 @@ class ProtocolRegistryRuntimeTests(unittest.TestCase):
             Internet.__dict__['__proto__'][TransType.TCP] = original
 
     def test_transport_register_rejects_abstract_base_usage(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.transport.transport import Transport
         from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -68,14 +68,14 @@ class ProtocolRegistryRuntimeTests(unittest.TestCase):
             Transport.register(80, Raw)
 
     def test_transport_register_rejects_non_protocol_types(self) -> None:
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         with self.assertRaises(TypeError):
             TCP.register(65535, dict)
 
     def test_transport_register_warns_on_overwrite(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         original = TCP.__dict__['__proto__'].get(80)
         try:
@@ -91,7 +91,7 @@ class ProtocolRegistryRuntimeTests(unittest.TestCase):
 
     def test_pcap_frame_register_rejects_non_protocol_types(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
         from pcapkit.utilities.exceptions import RegistryError
 
         with self.assertRaises(RegistryError):
@@ -99,12 +99,12 @@ class ProtocolRegistryRuntimeTests(unittest.TestCase):
 
     def test_pcap_frame_register_warns_on_overwrite(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         original = Frame.__dict__['__proto__'][LinkType.ETHERNET]
         try:
-            with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.warn') as warn:
                 Frame.register(LinkType.ETHERNET, Raw)
             warn.assert_called_once()
             self.assertIs(Frame.__dict__['__proto__'][LinkType.ETHERNET], Raw)

@@ -42,7 +42,7 @@ class InternetProtocolRuntimeTests(unittest.TestCase):
 
         This frame's message (Neighbor Solicitation, type 135) is Neighbor
         Discovery (:rfc:`4861`), which is unimplemented, so it is
-        :class:`~pcapkit.protocols.data.internet.icmpv6.Unknown`.
+        :class:`~pcapkit.protocols.internet.icmpv6.data.Unknown`.
         """
         extractor = self._extract('ipv6.pcap')
         frame = extractor.frame[2]

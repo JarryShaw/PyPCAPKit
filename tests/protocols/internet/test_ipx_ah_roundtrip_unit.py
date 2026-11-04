@@ -2,10 +2,10 @@
 """IPX and AH headers rebuild byte for byte through ``from_data``.
 
 GitHub issue #1315: :meth:`IPX._make_data
-<pcapkit.protocols.internet.ipx.IPX._make_data>` handed the parsed
-:class:`~pcapkit.protocols.data.internet.ipx.Address` objects to a schema that
+<pcapkit.protocols.internet.ipx.protocol.IPX._make_data>` handed the parsed
+:class:`~pcapkit.protocols.internet.ipx.data.Address` objects to a schema that
 packs 12 raw octets, so every rebuild raised :exc:`struct.error`; and
-:meth:`IPX.make <pcapkit.protocols.internet.ipx.IPX.make>` recomputed the
+:meth:`IPX.make <pcapkit.protocols.internet.ipx.protocol.IPX.make>` recomputed the
 packet length instead of keeping the parsed one.
 
 GitHub issue #1327: the AH reserved field (:rfc:`4302#section-2.3`) was a
@@ -53,7 +53,7 @@ class TestIPXRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         for name, packet in IPX_PACKETS.items():
             with self.subTest(packet=name), warnings.catch_warnings():
@@ -62,7 +62,7 @@ class TestIPXRoundTrip(unittest.TestCase):
                 self.assertEqual(IPX.from_data(parsed.info).data, packet)
 
     def test_make_computes_length_when_not_given(self) -> None:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -77,7 +77,7 @@ class TestAHRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         for name, header in AH_HEADERS.items():
             with self.subTest(header=name), warnings.catch_warnings():
@@ -86,7 +86,7 @@ class TestAHRoundTrip(unittest.TestCase):
                 self.assertEqual(AH.from_data(parsed.info).data, header)
 
     def test_reserved_is_parsed(self) -> None:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         header = AH_HEADERS['reserved-nonzero']
         with warnings.catch_warnings():
@@ -95,7 +95,7 @@ class TestAHRoundTrip(unittest.TestCase):
         self.assertEqual(parsed.info.reserved, 0xdead)
 
     def test_make_reserved_defaults_to_zero(self) -> None:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

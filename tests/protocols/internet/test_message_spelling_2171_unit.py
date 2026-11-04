@@ -2,9 +2,9 @@
 """The IPv4 timestamp warning and the MH prefix error are spelt correctly.
 
 GitHub issue #2171: :meth:`TSOption.post_process
-<pcapkit.protocols.schema.internet.ipv4.TSOption.post_process>` warned of an
+<pcapkit.protocols.internet.ipv4.schema.TSOption.post_process>` warned of an
 "unknown timestmap flag", and :meth:`MH._make_opt_mnp
-<pcapkit.protocols.internet.mh.MH._make_opt_mnp>` raised on an "invalid movile
+<pcapkit.protocols.internet.mh.protocol.MH._make_opt_mnp>` raised on an "invalid movile
 network prefix".
 
 Classes are imported inside each test, after
@@ -27,7 +27,7 @@ class TestMessageSpelling(unittest.TestCase):
     def test_unknown_timestamp_flag_warning(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.ts_flag import TSFlag
-        from pcapkit.protocols.schema.internet.ipv4 import TSOption
+        from pcapkit.protocols.internet.ipv4.schema import TSOption
         from pcapkit.utilities.warnings import ProtocolWarning
 
         option = TSOption(type=OptionNumber.TS, length=12, pointer=13,
@@ -41,7 +41,7 @@ class TestMessageSpelling(unittest.TestCase):
 
     def test_invalid_mobile_network_prefix_error(self) -> None:
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = object.__new__(MH)

@@ -2,11 +2,11 @@
 """OSPF rebuilds byte for byte from the dict form of its info, #1464.
 
 Under cryptographic authentication (AuType 2) the ``auth`` field is a
-:class:`~pcapkit.protocols.data.application.ospf.CryptographicAuthentication`,
+:class:`~pcapkit.protocols.application.ospf.data.CryptographicAuthentication`,
 which ``to_dict()`` flattens into a plain :obj:`dict`. ``from_dict`` cannot
 restore it, since the field is declared ``bytes | CryptographicAuthentication``,
 so :meth:`OSPF._make_encrypt_auth
-<pcapkit.protocols.application.ospf.OSPF._make_encrypt_auth>` has to accept
+<pcapkit.protocols.application.ospf.protocol.OSPF._make_encrypt_auth>` has to accept
 that :obj:`dict` rather than raise ``invalid type for auth_data``.
 
 Every case builds its own octets in memory and reads no capture.
@@ -58,7 +58,7 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_dict_form_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         for name, raw in PACKETS.items():
             with self.subTest(packet=name):
@@ -66,7 +66,7 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
                 self.assertEqual(OSPF.from_data(parsed.info.to_dict()).data, raw)
 
     def test_from_data_rebuilds_object_form_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         for name, raw in PACKETS.items():
             with self.subTest(packet=name):
@@ -77,7 +77,7 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
         # The premise of the dict branch: the dict form really does carry a plain
         # mapping -- the OrderedMultiDict ``to_dict()`` writes (#1484).
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         raw = PACKETS['autype-2-nonzero-reserved']
         auth = OSPF(raw, len(raw)).info.to_dict()['auth']
@@ -85,20 +85,20 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
         self.assertEqual(auth.to_dict(), {'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
 
     def test_make_accepts_dict_auth_data(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         proto = OSPF(router_id='1.1.1.1', auth_type=2,
                      auth_data={'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
         self.assertEqual(proto.data, packet(2, crypto(reserved=0xbeef, key_id=255, seq=0xffffffff)))
 
     def test_make_dict_auth_data_defaults_reserved_to_zero(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         proto = OSPF(router_id='1.1.1.1', auth_type=2, auth_data={'key_id': 1, 'len': 16, 'seq': 7})
         self.assertEqual(proto.data, packet(2, crypto()))
 
     def test_make_dict_auth_data_missing_key_is_refused(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r"^OSPF: missing 'seq' in auth_data: "):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.sslv2`.
+"""Unit tests for :mod:`pcapkit.protocols.application.sslv2.protocol`.
 
 SSLv2's record header is 2 or 3 octets depending on the high bit of its first
 octet (:issue:`2457`), so every case below is built and read back in both
@@ -75,7 +75,7 @@ def _split_records(wire: bytes) -> 'list[tuple[int, bytes]]':
 
 def _layers(proto: 'Any') -> 'tuple[list[Any], Any]':
     """Each SSLv2 layer of ``proto``'s chain, in order, and the layer that ends it."""
-    from pcapkit.protocols.application.sslv2 import SSLv2
+    from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
     layers = []
     while isinstance(proto, SSLv2):
@@ -86,7 +86,7 @@ def _layers(proto: 'Any') -> 'tuple[list[Any], Any]':
 
 def _behind_tcp_443(wire: bytes, **stop: 'Any') -> 'tuple[Any, Any]':
     """``wire`` parsed behind TLS's SSLv2 fallback on TCP 443, and the layer ending its SSLv2 chain."""
-    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.protocols.transport.tcp.protocol import TCP
 
     segment = TCP_TO_443 + wire
     tcp = TCP(segment, len(segment), **stop)
@@ -106,7 +106,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_client_hello_two_byte_header_round_trips(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2(
             msg_type=HandshakeType.CLIENT_HELLO,
@@ -133,7 +133,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_client_hello_three_byte_header_round_trips(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2(
             msg_type=HandshakeType.CLIENT_HELLO,
@@ -162,7 +162,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_server_hello_two_byte_header_round_trips(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2(
             msg_type=HandshakeType.SERVER_HELLO,
@@ -189,7 +189,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_server_hello_three_byte_header_session_id_hit_round_trips(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # A SESSION-ID-HIT SERVER-HELLO carries no certificate or cipher specs.
         proto = SSLv2(
@@ -222,7 +222,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         not specifically ``0x01``, so the exact octet survives a round trip
         rather than being normalised to a :obj:`bool`."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2(
             msg_type=HandshakeType.SERVER_HELLO,
@@ -248,7 +248,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A message type this package does not decode the body of -- here
         ``CLIENT-FINISHED`` -- is kept as raw octets rather than dropped."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
         raw = proto.data
@@ -262,7 +262,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A second record chained onto the first survives a ``from_data``
         round trip: ``_make_data`` passes ``payload`` through to ``make``."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         first = SSLv2(msg_type=HandshakeType.CLIENT_HELLO, two_byte_header=True, body={
             'cipher_specs': b'\x01\x00\x80', 'session_id': b'', 'challenge': b'\xcc' * 16,
@@ -279,7 +279,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """``from_data`` emits no :exc:`UnknownFieldWarning`: ``_make_data``
         drops derived fields such as ``header_len`` and ``record_length``."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
         proto = SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body=b'\x01\x02\x03\x04')
@@ -296,7 +296,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         (``0x7FFF`` and ``0x3FFF``), checked against literal header octets;
         one octet more is refused rather than wrapped into the flag bits."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         finished = int(HandshakeType.CLIENT_FINISHED)
@@ -331,7 +331,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         ``MSG-TYPE`` itself). A malformed capture declaring ``0`` is refused
         rather than reading ``MSG-TYPE`` and the body from the next record."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         second_record = bytes(SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
@@ -346,8 +346,8 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """The schema alone, without ``read()``'s check, sizes the body of a
         ``RECORD-LENGTH = 0`` record to nothing rather than the rest of the buffer."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.schema.application.sslv2 import SSLv2 as Schema_SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.application.sslv2.schema import SSLv2 as Schema_SSLv2
 
         second_record = bytes(SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, two_byte_header=True,
                                    body=b'\xaa\xbb'))
@@ -363,7 +363,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         form, so an out-of-range value is refused rather than wrapped mod 256;
         a ``bool``, which would pack as ``0x00``/``0x01``, and a non-``int``,
         which would reach a bare ``TypeError``, are refused too (#2614)."""
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for padding in (256, 300, -1, True, False, '1', 1.0, None):
@@ -375,13 +375,13 @@ class TestSSLv2RoundTrip(unittest.TestCase):
                          255)
 
     def test_ids_are_stable(self) -> None:
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         self.assertEqual(SSLv2.id(), ('SSLv2',))
 
     def test_name_property(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # ``CLIENT-FINISHED`` so the (deliberately empty) raw body does not
         # short-read against ``ClientHello``'s fixed fields.
@@ -393,7 +393,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """``body=None`` (the default) builds the same empty ``CLIENT-HELLO``
         body as ``body={}`` would, rather than raising."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         proto = SSLv2()
         self.assertEqual(proto.info.msg_type, HandshakeType.CLIENT_HELLO)
@@ -401,12 +401,12 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         self.assertEqual(proto.info.body.session_id, b'')
 
     def test_make_accepts_a_data_model_body(self) -> None:
-        """A :class:`~pcapkit.protocols.data.application.sslv2.ClientHello`/
-        :class:`~pcapkit.protocols.data.application.sslv2.ServerHello` data
+        """A :class:`~pcapkit.protocols.application.sslv2.data.ClientHello`/
+        :class:`~pcapkit.protocols.application.sslv2.data.ServerHello` data
         model -- e.g. a round trip through :meth:`~pcapkit.protocols.protocol.Protocol.from_data`
         -- rebuilds the same body a dict would."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         first = SSLv2(msg_type=HandshakeType.CLIENT_HELLO, body={
             'cipher_specs': b'\x01\x00\x80', 'session_id': b'', 'challenge': b'\xcc' * 16,
@@ -422,8 +422,8 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_make_accepts_a_prebuilt_schema_body(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.schema.application.sslv2 import ClientHello as Schema_ClientHello
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.application.sslv2.schema import ClientHello as Schema_ClientHello
 
         schema = Schema_ClientHello(
             client_version=2, cipher_specs_length=0, session_id_length=0, challenge_length=16,
@@ -435,14 +435,14 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_dict_body_refused_for_an_unparsed_message_type(self) -> None:
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'SSLv2: a .* body must be given as bytes'):
             SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body={'foo': b'bar'})
 
     def test_invalid_body_type_is_refused(self) -> None:
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaisesRegex(ProtocolError, r'SSLv2: invalid body: '):
@@ -452,7 +452,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """``SESSION-ID-HIT`` is a single octet, so ``256``, ``300`` and ``-1``
         are refused rather than wrapped mod 256; ``0`` and ``255`` build."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         for bad in (256, 300, -1):
@@ -472,12 +472,12 @@ class TestSSLv2RoundTrip(unittest.TestCase):
             self.assertEqual(parsed.info.body.session_id_hit, good)
 
     def test_make_rejects_mismatched_data_model_body_msg_type(self) -> None:
-        """A :class:`~pcapkit.protocols.data.application.sslv2.ClientHello`/
-        :class:`~pcapkit.protocols.data.application.sslv2.ServerHello` data
+        """A :class:`~pcapkit.protocols.application.sslv2.data.ClientHello`/
+        :class:`~pcapkit.protocols.application.sslv2.data.ServerHello` data
         model handed to ``make()`` is refused unless ``msg_type`` matches it,
         since a mismatched record would re-parse as another type's fields."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         hello = SSLv2(msg_type=HandshakeType.SERVER_HELLO, body={
@@ -504,7 +504,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         as a known answer: a round trip alone cannot catch a bug shared by
         ``make()`` and ``read()``."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # 2-octet header, RECORD-LENGTH=34: MSG-SERVER-HELLO(4),
         # SESSION-ID-HIT=0, CERTIFICATE-TYPE=1, SERVER-VERSION=0x0002,
@@ -532,7 +532,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         bits, parsed as a known answer in both header forms."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.const.sslv2.version import Version
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         certificate = bytes(range(256))
         # MSG-SERVER-HELLO(4), SESSION-ID-HIT=0, CERTIFICATE-TYPE=1,
@@ -569,8 +569,8 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         every length zero, still decodes as a ``CLIENT-HELLO``."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
         from pcapkit.const.sslv2.version import Version
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.data.application.sslv2 import ClientHello
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.application.sslv2.data import ClientHello
 
         # 2-octet header, RECORD-LENGTH=9: MSG-CLIENT-HELLO(1),
         # CLIENT-VERSION=0x0002, then three zero lengths.
@@ -590,10 +590,10 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A ``SERVER-HELLO``-tagged record whose own declared sub-field
         lengths do not add up to its ``RECORD-LENGTH`` -- simulating
         ciphertext under a hello tag -- falls back to
-        :class:`~pcapkit.protocols.schema.application.sslv2.UnknownHandshakeBody`,
+        :class:`~pcapkit.protocols.application.sslv2.schema.UnknownHandshakeBody`,
         keeping the raw body whole."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # 2-octet header, RECORD-LENGTH=21: MSG-SERVER-HELLO(4), followed by
         # 20 octets of "ciphertext" whose first ten -- read as SESSION-ID-HIT,
@@ -611,7 +611,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
         # The gate also holds when the parsed schema is rebuilt from its
         # dict form, which still carries the forward-matched ``probe``.
-        from pcapkit.protocols.schema.application.sslv2 import SSLv2 as Schema_SSLv2
+        from pcapkit.protocols.application.sslv2.schema import SSLv2 as Schema_SSLv2
         self.assertEqual(bytes(Schema_SSLv2.from_dict(parsed.__header__.to_dict())), raw)
 
     def test_hello_tagged_body_shorter_than_its_fixed_sub_header_falls_back(self) -> None:
@@ -619,7 +619,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         fixed-width sub-header (8 octets for ``CLIENT-HELLO``, 10 for
         ``SERVER-HELLO``) cannot be a hello at all, so it is kept raw."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         cases = (
             (HandshakeType.CLIENT_HELLO, 3), (HandshakeType.CLIENT_HELLO, 7),
@@ -638,7 +638,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A valid ``SERVER-HELLO`` body followed by one more octet inside the
         same record overruns its declared sub-field lengths, so it is kept raw."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         hello = SSLv2(msg_type=HandshakeType.SERVER_HELLO, body={
             'certificate_type': 1, 'certificate': b'\xaa' * 4,
@@ -655,7 +655,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
     def _assert_made_schema_round_trips(self, proto: 'Any') -> None:
         """``Schema_SSLv2.from_dict(made.__header__.to_dict())`` packs back
         to the made record's exact octets, with no unknown-field warning."""
-        from pcapkit.protocols.schema.application.sslv2 import SSLv2 as Schema_SSLv2
+        from pcapkit.protocols.application.sslv2.schema import SSLv2 as Schema_SSLv2
         from pcapkit.utilities.warnings import UnknownFieldWarning
 
         made = proto.__header__.to_dict()
@@ -667,11 +667,11 @@ class TestSSLv2RoundTrip(unittest.TestCase):
 
     def test_made_client_hello_schema_round_trips_through_from_dict(self) -> None:
         """A ``make()``-built schema has no forward-matched ``probe``, so
-        :func:`~pcapkit.protocols.schema.application.sslv2.sslv2_body_selector`
+        :func:`~pcapkit.protocols.application.sslv2.schema.sslv2_body_selector`
         must not treat it as an implausibly short one and pick
         ``UnknownHandshakeBody``."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         self._assert_made_schema_round_trips(SSLv2())
         for two_byte_header in (True, False):
@@ -686,7 +686,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
     def test_made_server_hello_schema_round_trips_through_from_dict(self) -> None:
         """``SERVER-HELLO`` counterpart of the ``CLIENT-HELLO`` case above."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         self._assert_made_schema_round_trips(SSLv2(msg_type=HandshakeType.SERVER_HELLO))
         for two_byte_header in (True, False):
@@ -699,14 +699,14 @@ class TestSSLv2RoundTrip(unittest.TestCase):
                 ))
 
     def test_read_rejects_out_of_range_session_id_hit_on_a_prebuilt_schema(self) -> None:
-        """A prebuilt :class:`~pcapkit.protocols.schema.application.sslv2.ServerHello`
+        """A prebuilt :class:`~pcapkit.protocols.application.sslv2.schema.ServerHello`
         bypasses ``make()``'s own ``SESSION-ID-HIT`` range check; ``read()``'s
         guard is what refuses it, where it would otherwise pack as ``0x00``
         and silently turn a HIT into a MISS. The guard takes ``int()`` first,
         so a ``bool``, a documented spelling, passes it (#2614)."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.schema.application.sslv2 import ServerHello as Schema_ServerHello
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.application.sslv2.schema import ServerHello as Schema_ServerHello
         from pcapkit.utilities.exceptions import ProtocolError
 
         schema = Schema_ServerHello(
@@ -726,7 +726,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """A ``CLIENT-HELLO``-tagged body whose declared sub-field lengths
         overrun or underrun its ``RECORD-LENGTH`` is kept as raw octets."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         # CLIENT-VERSION=0x0002, then CIPHER-SPECS-LENGTH, SESSION-ID-LENGTH,
         # CHALLENGE-LENGTH; the 8-octet sub-header is followed by 19 octets.
@@ -747,7 +747,7 @@ class TestSSLv2RoundTrip(unittest.TestCase):
         """``make()`` refuses an out-of-range ``SESSION-ID-HIT`` itself, called
         directly so ``read()``'s own check never runs."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
         from pcapkit.utilities.exceptions import ProtocolError
 
         proto = SSLv2(msg_type=HandshakeType.CLIENT_FINISHED, body=b'')
@@ -764,8 +764,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_every_record_is_an_sslv2_layer(self) -> None:
         """Each record's header form and RECORD-LENGTH, per the draft's §4.1."""
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.misc.no_payload import NoPayload
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
@@ -783,7 +783,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
     def test_records_match_the_draft(self) -> None:
         """Each record's own message type and body, decoded as a direct parse would."""
         from pcapkit.const.sslv2.handshake_type import HandshakeType
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         wire = SEGMENTS['SERVER-HELLO + SERVER-VERIFY (3-octet header) + SERVER-FINISHED']
         layers, _ = _layers(SSLv2(wire, len(wire)))
@@ -803,8 +803,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_parse_then_rebuild_is_byte_exact(self) -> None:
         """Parsed directly and behind TLS's SSLv2 fallback on TCP 443."""
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
@@ -824,7 +824,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_make_then_parse_is_byte_exact(self) -> None:
         """Each record made from its parsed fields, carrying the next as ``payload``."""
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         for name, wire in SEGMENTS.items():
             with self.subTest(segment=name):
@@ -843,8 +843,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_a_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
         """A RECORD-LENGTH of 0 ends the chain as ``Raw`` carrying ``read()``'s error."""
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, segment, chain in (
                 ('second record', CLIENT_HELLO + ZERO_LENGTH + CLIENT_MASTER_KEY, 'SSLv2:Raw'),
@@ -865,8 +865,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
                 self.assertEqual(rebuilt, segment)
 
     def test_octets_opening_no_record_stay_raw_without_an_error(self) -> None:
-        from pcapkit.protocols.application.sslv2 import SSLv2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, tail in (('a 2-octet header cut short', b'\x80'),
                            ('a 3-octet header cut short', b'\x00\x05'),
@@ -885,7 +885,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
                 self.assertEqual(bytes(SSLv2.from_data(parsed.info)), wire)
 
     def test_a_parse_stopping_at_sslv2_keeps_the_rest_raw(self) -> None:
-        from pcapkit.protocols.application.sslv2 import SSLv2
+        from pcapkit.protocols.application.sslv2.protocol import SSLv2
 
         wire = SEGMENTS['CLIENT-HELLO + CLIENT-MASTER-KEY']
         self.assertEqual(str(SSLv2(wire, len(wire)).protochain), 'SSLv2:SSLv2')
@@ -897,8 +897,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_a_tcp_443_parse_stopping_at_sslv2_keeps_the_rest_raw(self) -> None:
         """Behind TLS's SSLv2 fallback too, whether TLS or the SSLv2 trial matches the stop."""
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         wire = SEGMENTS['CLIENT-HELLO + CLIENT-MASTER-KEY']
         self.assertEqual(str(_behind_tcp_443(wire)[0].protochain), 'TCP:SSLv2:SSLv2')
@@ -917,8 +917,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_a_tcp_443_record_that_fails_to_decode_is_raw_with_the_rest(self) -> None:
         """Behind TLS's SSLv2 fallback, as in a direct parse."""
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, wire, chain in (
                 ('second record', CLIENT_HELLO + ZERO_LENGTH + CLIENT_MASTER_KEY, 'TCP:SSLv2:Raw'),
@@ -939,8 +939,8 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_a_tcp_443_record_cut_short_stays_raw_without_an_error(self) -> None:
         """Behind TLS's SSLv2 fallback, as in a direct parse."""
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         for name, tail in (('a 2-octet header cut short', b'\x80'),
                            ('a 3-octet header cut short', b'\x00\x05'),
@@ -980,7 +980,7 @@ class TestSSLv2SegmentRecords(unittest.TestCase):
 
     def test_frame_layer_limit_bounds_the_records(self) -> None:
         """Each record is a layer, so the limit stops the walk with one warning."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ProtocolWarning
 

@@ -149,7 +149,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
         """
         import pcapkit
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.corekit.schema.jumbogram import jumbo_payload_length
 
         path = _capture('options-ipv6.pcap')

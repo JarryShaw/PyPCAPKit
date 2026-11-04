@@ -6,8 +6,8 @@ PCAP-NG blocks, with the PCAP-NG body and its fallback to an enclosing
 ``__packet__``: a superset that gives the frame header the same answer on every
 packet the
 library hands it, since :meth:`Frame.pack
-<pcapkit.protocols.misc.pcap.frame.Frame.pack>` and :meth:`Frame.unpack
-<pcapkit.protocols.misc.pcap.frame.Frame.unpack>` always seed ``byteorder``.
+<pcapkit.protocols.misc.pcap.frame.protocol.Frame.pack>` and :meth:`Frame.unpack
+<pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>` always seed ``byteorder``.
 This pins the helper, its ``__packet__`` fallback, and that both schemas use it.
 
 GitHub issue #1711 moved the helper out of the schemas, with no re-export at
@@ -81,8 +81,8 @@ class TestSchemaByteorder(unittest.TestCase):
                 self.assertEqual(field._byteorder, expected)  # pylint: disable=protected-access
 
     def test_frame_and_pcapng_use_the_shared_helper(self) -> None:
-        frame = importlib.import_module('pcapkit.protocols.schema.misc.pcap.frame')
-        pcapng = importlib.import_module('pcapkit.protocols.schema.misc.pcapng')
+        frame = importlib.import_module('pcapkit.protocols.misc.pcap.frame.schema')
+        pcapng = importlib.import_module('pcapkit.protocols.misc.pcapng.schema')
         shared = self._shared()
 
         self.assertIs(frame.byteorder_callback, shared.byteorder_callback)
@@ -94,7 +94,7 @@ class TestSchemaByteorder(unittest.TestCase):
                               shared.byteorder_callback)
 
     def test_frame_header_reads_the_byte_order_it_is_given(self) -> None:
-        frame = importlib.import_module('pcapkit.protocols.schema.misc.pcap.frame')
+        frame = importlib.import_module('pcapkit.protocols.misc.pcap.frame.schema')
         raw = struct.pack('>IIII' if OTHER == 'big' else '<IIII', 1, 2, 0, 0)
         for packet in ({'byteorder': OTHER}, {'__packet__': {'byteorder': OTHER}}):
             with self.subTest(packet=packet):
@@ -104,12 +104,11 @@ class TestSchemaByteorder(unittest.TestCase):
 
     def test_the_schema_misc_byteorder_path_does_not_import(self) -> None:
         """#1711: the move leaves no re-export at ``pcapkit.protocols.schema.misc.byteorder``."""
+        # The schema tree the path sat in went as well (#2534), so the import
+        # fails at its first missing package.
         with self.assertRaises(ModuleNotFoundError) as ctx:
             importlib.import_module(OLD_PATH)
-        self.assertEqual(ctx.exception.name, OLD_PATH)
-
-        package = importlib.import_module(OLD_PATH.rpartition('.')[0])
-        self.assertFalse(hasattr(package, 'byteorder'))
+        self.assertTrue(f'{OLD_PATH}.'.startswith(f'{ctx.exception.name}.'), ctx.exception.name)
 
     def test_the_module_imports_nothing_from_foundation_or_protocols(self) -> None:
         """``corekit`` sits below both, so the helper may not reach up to either."""

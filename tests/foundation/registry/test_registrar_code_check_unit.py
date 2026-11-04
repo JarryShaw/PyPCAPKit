@@ -44,58 +44,58 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
 #: Registrars keyed on an enum code and given a parser method, with the protocol
 #: and schema classes holding the tables they write.
 METHOD_REGISTRARS = (
-    ('register_ipv4_option', 'pcapkit.protocols.internet.ipv4:IPv4',
-     'pcapkit.protocols.schema.internet.ipv4:Option'),
-    ('register_hip_parameter', 'pcapkit.protocols.internet.hip:HIP',
-     'pcapkit.protocols.schema.internet.hip:Parameter'),
-    ('register_hopopt_option', 'pcapkit.protocols.internet.hopopt:HOPOPT',
-     'pcapkit.protocols.schema.internet.hopopt:Option'),
-    ('register_ipv6_opts_option', 'pcapkit.protocols.internet.ipv6_opts:IPv6_Opts',
-     'pcapkit.protocols.schema.internet.ipv6_opts:Option'),
-    ('register_ipv6_route_routing', 'pcapkit.protocols.internet.ipv6_route:IPv6_Route',
-     'pcapkit.protocols.schema.internet.ipv6_route:RoutingType'),
-    ('register_mh_message', 'pcapkit.protocols.internet.mh:MH',
-     'pcapkit.protocols.schema.internet.mh:Packet'),
-    ('register_mh_option', 'pcapkit.protocols.internet.mh:MH',
-     'pcapkit.protocols.schema.internet.mh:Option'),
-    ('register_mh_extension', 'pcapkit.protocols.internet.mh:MH',
-     'pcapkit.protocols.schema.internet.mh:CGAExtension'),
-    ('register_tcp_option', 'pcapkit.protocols.transport.tcp:TCP',
-     'pcapkit.protocols.schema.transport.tcp:Option'),
-    ('register_tcp_mp_option', 'pcapkit.protocols.transport.tcp:TCP',
-     'pcapkit.protocols.schema.transport.tcp:MPTCP'),
-    ('register_sctp_chunk', 'pcapkit.protocols.transport.sctp:SCTP',
-     'pcapkit.protocols.schema.transport.sctp:Chunk'),
-    ('register_sctp_parameter', 'pcapkit.protocols.transport.sctp:SCTP',
-     'pcapkit.protocols.schema.transport.sctp:Parameter'),
-    ('register_sctp_cause', 'pcapkit.protocols.transport.sctp:SCTP',
-     'pcapkit.protocols.schema.transport.sctp:ErrorCause'),
-    ('register_dccp_option', 'pcapkit.protocols.transport.dccp:DCCP',
-     'pcapkit.protocols.schema.transport.dccp:Option'),
-    ('register_http_frame', 'pcapkit.protocols.application.httpv2:HTTPv2',
-     'pcapkit.protocols.schema.application.httpv2:FrameType'),
-    ('register_pcapng_block', 'pcapkit.protocols.misc.pcapng:PCAPNG',
-     'pcapkit.protocols.schema.misc.pcapng:BlockType'),
-    ('register_pcapng_option', 'pcapkit.protocols.misc.pcapng:PCAPNG',
-     'pcapkit.protocols.schema.misc.pcapng:Option'),
-    ('register_pcapng_record', 'pcapkit.protocols.misc.pcapng:PCAPNG',
-     'pcapkit.protocols.schema.misc.pcapng:NameResolutionRecord'),
-    ('register_pcapng_secrets', 'pcapkit.protocols.misc.pcapng:PCAPNG',
-     'pcapkit.protocols.schema.misc.pcapng:DSBSecrets'),
-    ('register_radiotap_field', 'pcapkit.protocols.link.radiotap:Radiotap',
-     'pcapkit.protocols.schema.link.radiotap:RadiotapField'),
+    ('register_ipv4_option', 'pcapkit.protocols.internet.ipv4.protocol:IPv4',
+     'pcapkit.protocols.internet.ipv4.schema:Option'),
+    ('register_hip_parameter', 'pcapkit.protocols.internet.hip.protocol:HIP',
+     'pcapkit.protocols.internet.hip.schema:Parameter'),
+    ('register_hopopt_option', 'pcapkit.protocols.internet.hopopt.protocol:HOPOPT',
+     'pcapkit.protocols.internet.hopopt.schema:Option'),
+    ('register_ipv6_opts_option', 'pcapkit.protocols.internet.ipv6_opts.protocol:IPv6_Opts',
+     'pcapkit.protocols.internet.ipv6_opts.schema:Option'),
+    ('register_ipv6_route_routing', 'pcapkit.protocols.internet.ipv6_route.protocol:IPv6_Route',
+     'pcapkit.protocols.internet.ipv6_route.schema:RoutingType'),
+    ('register_mh_message', 'pcapkit.protocols.internet.mh.protocol:MH',
+     'pcapkit.protocols.internet.mh.schema:Packet'),
+    ('register_mh_option', 'pcapkit.protocols.internet.mh.protocol:MH',
+     'pcapkit.protocols.internet.mh.schema:Option'),
+    ('register_mh_extension', 'pcapkit.protocols.internet.mh.protocol:MH',
+     'pcapkit.protocols.internet.mh.schema:CGAExtension'),
+    ('register_tcp_option', 'pcapkit.protocols.transport.tcp.protocol:TCP',
+     'pcapkit.protocols.transport.tcp.schema:Option'),
+    ('register_tcp_mp_option', 'pcapkit.protocols.transport.tcp.protocol:TCP',
+     'pcapkit.protocols.transport.tcp.schema:MPTCP'),
+    ('register_sctp_chunk', 'pcapkit.protocols.transport.sctp.protocol:SCTP',
+     'pcapkit.protocols.transport.sctp.schema:Chunk'),
+    ('register_sctp_parameter', 'pcapkit.protocols.transport.sctp.protocol:SCTP',
+     'pcapkit.protocols.transport.sctp.schema:Parameter'),
+    ('register_sctp_cause', 'pcapkit.protocols.transport.sctp.protocol:SCTP',
+     'pcapkit.protocols.transport.sctp.schema:ErrorCause'),
+    ('register_dccp_option', 'pcapkit.protocols.transport.dccp.protocol:DCCP',
+     'pcapkit.protocols.transport.dccp.schema:Option'),
+    ('register_http_frame', 'pcapkit.protocols.application.httpv2.protocol:HTTPv2',
+     'pcapkit.protocols.application.httpv2.schema:FrameType'),
+    ('register_pcapng_block', 'pcapkit.protocols.misc.pcapng.protocol:PCAPNG',
+     'pcapkit.protocols.misc.pcapng.schema:BlockType'),
+    ('register_pcapng_option', 'pcapkit.protocols.misc.pcapng.protocol:PCAPNG',
+     'pcapkit.protocols.misc.pcapng.schema:Option'),
+    ('register_pcapng_record', 'pcapkit.protocols.misc.pcapng.protocol:PCAPNG',
+     'pcapkit.protocols.misc.pcapng.schema:NameResolutionRecord'),
+    ('register_pcapng_secrets', 'pcapkit.protocols.misc.pcapng.protocol:PCAPNG',
+     'pcapkit.protocols.misc.pcapng.schema:DSBSecrets'),
+    ('register_radiotap_field', 'pcapkit.protocols.link.radiotap.protocol:Radiotap',
+     'pcapkit.protocols.link.radiotap.schema:RadiotapField'),
 )
 
 #: Registrars keyed on an enum code and given a protocol class, with the classes
 #: whose ``__proto__`` they write.
 MODULE_REGISTRARS = (
-    ('register_linktype', ('pcapkit.protocols.misc.pcap.frame:Frame',
-                           'pcapkit.protocols.misc.pcapng:PCAPNG')),
-    ('register_pcap', ('pcapkit.protocols.misc.pcap.frame:Frame',)),
-    ('register_pcapng', ('pcapkit.protocols.misc.pcapng:PCAPNG',)),
+    ('register_linktype', ('pcapkit.protocols.misc.pcap.frame.protocol:Frame',
+                           'pcapkit.protocols.misc.pcapng.protocol:PCAPNG')),
+    ('register_pcap', ('pcapkit.protocols.misc.pcap.frame.protocol:Frame',)),
+    ('register_pcapng', ('pcapkit.protocols.misc.pcapng.protocol:PCAPNG',)),
     ('register_ethertype', ('pcapkit.protocols.link.link:Link',)),
-    ('register_arphrd', ('pcapkit.protocols.link.linux_sll:LinuxSLL',)),
-    ('register_radiotap', ('pcapkit.protocols.link.radiotap:Radiotap',)),
+    ('register_arphrd', ('pcapkit.protocols.link.linux_sll.protocol:LinuxSLL',)),
+    ('register_radiotap', ('pcapkit.protocols.link.radiotap.protocol:Radiotap',)),
     ('register_transtype', ('pcapkit.protocols.internet.internet:Internet',)),
 )
 
@@ -138,16 +138,16 @@ REGISTRAR_ENUMS = {
 #: address family, NLPID or message type used, the classes whose
 #: ``__proto__`` they write, and any trailing arguments.
 NUMBER_REGISTRARS = (
-    ('register_loopback', 2, ('pcapkit.protocols.link.loopback:Loopback',), ()),
-    ('register_ipx', 17, ('pcapkit.protocols.internet.ipx:IPX',), ()),
-    ('register_tcp', 80, ('pcapkit.protocols.transport.tcp:TCP',), ()),
-    ('register_udp', 53, ('pcapkit.protocols.transport.udp:UDP',), ()),
-    ('register_sctp', 60, ('pcapkit.protocols.transport.sctp:SCTP',), ()),
-    ('register_dccp', 5004, ('pcapkit.protocols.transport.dccp:DCCP',), ()),
-    ('register_apptype', 80, ('pcapkit.protocols.transport.tcp:TCP',
-                              'pcapkit.protocols.transport.udp:UDP'), ('tcp',)),
-    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad:FRAD',), ()),
-    ('register_netlink', 16, ('pcapkit.protocols.link.netlink:Netlink',), ()),
+    ('register_loopback', 2, ('pcapkit.protocols.link.loopback.protocol:Loopback',), ()),
+    ('register_ipx', 17, ('pcapkit.protocols.internet.ipx.protocol:IPX',), ()),
+    ('register_tcp', 80, ('pcapkit.protocols.transport.tcp.protocol:TCP',), ()),
+    ('register_udp', 53, ('pcapkit.protocols.transport.udp.protocol:UDP',), ()),
+    ('register_sctp', 60, ('pcapkit.protocols.transport.sctp.protocol:SCTP',), ()),
+    ('register_dccp', 5004, ('pcapkit.protocols.transport.dccp.protocol:DCCP',), ()),
+    ('register_apptype', 80, ('pcapkit.protocols.transport.tcp.protocol:TCP',
+                              'pcapkit.protocols.transport.udp.protocol:UDP'), ('tcp',)),
+    ('register_frad', 0xCC, ('pcapkit.protocols.link.frad.protocol:FRAD',), ()),
+    ('register_netlink', 16, ('pcapkit.protocols.link.netlink.protocol:Netlink',), ()),
 )
 
 #: The registrars above whose registry no enum keys, so a plain ``int`` is the
@@ -229,7 +229,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                                             (parser, parser), schema=schema_cls)
 
     def test_module_registrars_reject_a_non_enum_code_before_registering(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, targets in MODULE_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw)
@@ -243,7 +243,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
                                             codes=(self._wrong_code(name),), schema=schema_cls)
 
     def test_module_registrars_reject_a_member_of_another_enum(self) -> None:
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, targets in MODULE_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw,
@@ -251,7 +251,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
     def test_number_registrars_reject_none_and_a_str(self) -> None:
         """Accepting an ``int`` lets in neither :obj:`None` nor its digits as a :class:`str` (#2511)."""
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, number, targets, extra in NUMBER_REGISTRARS:
             self._assert_rejected_unchanged(name, tuple(map(resolve, targets)), Raw, *extra,
@@ -259,7 +259,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
 
     def test_number_registrars_reject_a_member_of_another_enum(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for name, number, targets, extra in NUMBER_REGISTRARS:
             # an IntEnum member is an int, so accepting an int must not let it in
@@ -273,8 +273,8 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         """A :class:`bool` is an :class:`int` subclass, but never a port or PPID (#2269)."""
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
         from pcapkit.foundation.registry.protocols import transport as reg_transport
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import RegistryError
 
         for name, _, targets, extra in NUMBER_REGISTRARS:
@@ -293,9 +293,9 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import protocol as reg_protocol
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         for name, _, targets, extra in NUMBER_REGISTRARS:
@@ -328,7 +328,7 @@ class RegistrarCodeCheckTests(unittest.TestCase):
         """
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.registry import protocols as registrars
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities.exceptions import RegistryError
 
         def parser(*args: 'object', **kwargs: 'object') -> None: ...

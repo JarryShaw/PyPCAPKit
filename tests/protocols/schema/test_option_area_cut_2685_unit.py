@@ -50,7 +50,7 @@ def _over_reporting_schemas():  # type: ignore[no-untyped-def]
     from pcapkit.corekit.fields.collections import OptionField
     from pcapkit.corekit.fields.numbers import UInt8Field
     from pcapkit.corekit.fields.strings import BytesField
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
     class Wide(Schema):
         type: 'int' = UInt8Field()
@@ -110,7 +110,7 @@ class OptionAreaCutTests(unittest.TestCase):
         warnings.simplefilter('ignore')
 
     def test_tcp_cut_at_every_offset_packs_as_captured(self) -> None:
-        from pcapkit.protocols.schema.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP
 
         for keep in range(20, len(TCP_WHOLE) + 1):
             raw = TCP_WHOLE[:keep]
@@ -130,7 +130,7 @@ class OptionAreaCutTests(unittest.TestCase):
                         self.assertNotIn('__short_read__', schema.__dict__)
 
     def test_tcp_cut_inside_the_padding_leaves_the_header_alone(self) -> None:
-        from pcapkit.protocols.schema.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP
 
         raw = TCP_WHOLE[:25]
         schema = TCP.unpack(raw, len(TCP_WHOLE))
@@ -154,7 +154,7 @@ class OptionAreaCutTests(unittest.TestCase):
                     self.assertEqual(schema.__dict__['__short_read__'], ('options', len(raw)))
 
     def test_sctp_on_a_stream_that_cannot_seek(self) -> None:
-        from pcapkit.protocols.schema.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
 
         data_end = 12 + 24
         cases = {

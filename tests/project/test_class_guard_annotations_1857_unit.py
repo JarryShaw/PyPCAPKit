@@ -72,7 +72,7 @@ GUARDS = frozenset({'TYPE_CHECKING', 'SPHINX_TYPE_CHECKING'})
 #: Every class a module defines at top level is checked; the listed ones must be
 #: among them, so that a rename cannot quietly shrink the check.
 MODULES = {
-    'pcapkit.protocols.schema.application.httpv2': ('FrameType', 'RSTStreamFrame', 'GoawayFrame'),
+    'pcapkit.protocols.application.httpv2.schema': ('FrameType', 'RSTStreamFrame', 'GoawayFrame'),
     'pcapkit.foundation.engines.dpkt': ('DPKT',),
     'pcapkit.foundation.engines.scapy': ('Scapy',),
     'pcapkit.foundation.engines.pyshark': ('PyShark',),
@@ -308,7 +308,7 @@ class ClassGuardAnnotationTests(unittest.TestCase):
                 with self.subTest(module=modname, cls=name):
                     self.assertIn(name, checked)
 
-        from pcapkit.protocols.schema.application.httpv2 import FrameType  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.application.httpv2.schema import FrameType  # pylint: disable=import-outside-toplevel
         self.assertIn('__flags__', dict(class_annotations(FrameType)))
         for modname, names in MODULES.items():
             if modname.startswith('pcapkit.foundation.engines.'):

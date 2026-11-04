@@ -34,8 +34,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_header_make_length_index_and_make_data(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.version import VersionInfo
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.pcap.header.schema import Header as Schema_Header
         from pcapkit.utilities.exceptions import EndianError, ProtocolError
         from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -151,9 +151,9 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_make_index_length_and_make_data(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.corekit.module import ModuleDescriptor
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.misc.pcap.frame.schema import Frame as Schema_Frame
         from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall
 
         frame = object.__new__(Frame)
@@ -202,7 +202,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         had_original = code in registry
         original = registry.get(code)
         try:
-            Frame.register(code, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
+            Frame.register(code, ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'))
             self.assertIs(registry[code], Raw)
 
             class Other(Raw):
@@ -214,7 +214,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
             # no-op covered by the identity guard for GitHub issue #718 (see
             # ``test_frame_register_stays_quiet_on_same_object_reregistration``).
             # A genuinely different class is needed to still warn here.
-            with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.warn') as warn:
                 Frame.register(code, Other)
             warn.assert_called_once()
             with self.assertRaises(RegistryError):
@@ -225,9 +225,9 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
             else:
                 registry.pop(code, None)
 
-        with mock.patch('pcapkit.protocols.misc.pcap.frame.time.time', return_value=1.5):
+        with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.time.time', return_value=1.5):
             self.assertEqual(frame._make_timestamp(), (1, 500000))
-        with mock.patch('pcapkit.protocols.misc.pcap.frame.time.time_ns', return_value=1_234_567_890):
+        with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.time.time_ns', return_value=1_234_567_890):
             self.assertEqual(frame._make_timestamp(nanosecond=True), (1, 234567890))
         instant = datetime.datetime(1970, 1, 1, 0, 0, 2, 500000,
                                     tzinfo=datetime.timezone.utc)
@@ -289,10 +289,10 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         # Faked through frame.py's own binding of
         # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
         # instead of :meth:`datetime.datetime.fromtimestamp` (#2099).
-        with mock.patch('pcapkit.protocols.misc.pcap.frame.fromtimestamp', side_effect=ValueError), \
+        with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.fromtimestamp', side_effect=ValueError), \
                 mock.patch.object(Frame, '_decode_next_layer',
                                   lambda self, info, proto=None, length=None, packet=None: info), \
-                mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
+                mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.warn') as warn:
             self.assertEqual(Frame.read(bad_time, _read=False).number, 6)
         warn.assert_called_once()
 
@@ -326,15 +326,15 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         registry = Frame.__dict__['__proto__']
         code = LinkType.USER2
         had_original = code in registry
         original = registry.get(code)
         try:
-            with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
+            with mock.patch('pcapkit.protocols.misc.pcap.frame.protocol.warn') as warn:
                 Frame.register(code, Raw)
                 Frame.register(code, Raw)
             warn.assert_not_called()
@@ -347,7 +347,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_data_holds_its_own_record_not_the_next(self) -> None:
         """A frame's raw data must be the record it parsed, at its own offset.
 
-        #357: :meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`
+        #357: :meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.protocol.Frame.read>`
         rewound by ``self.length`` (16) to find the start of the record, but the
         schema unpack has by then consumed the record header *and* the
         ``incl_len`` octets of packet data. So the rewind landed ``incl_len``
@@ -361,8 +361,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         case.
 
         """
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         path = sample_path('in.pcap')
         with open(path, 'rb') as stream:
@@ -407,8 +407,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         as a different wall-clock time on every host.
 
         """
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         path = sample_path('in.pcap')
         with open(path, 'rb') as stream:
@@ -430,7 +430,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_header_is_read_in_the_files_byte_order(self) -> None:
         """#605: a big-endian record header, read on a little-endian host.
 
-        :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
+        :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.protocol.Frame.unpack>`
         seeded the file's byte order under the key ``bytesorder``, where
         ``byteorder_callback`` (:file:`pcapkit/corekit/schema/byteorder.py`)
         reads ``byteorder``, so the lookup always missed and always fell back to
@@ -452,12 +452,12 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         ``incl_len`` of 60 reads as 1006632960, which consumes the rest of the
         file, and frame 2 is then asked to read a negative payload length --
         ``ValueError: read length must be non-negative or -1`` out of
-        :file:`pcapkit/protocols/schema/schema.py`.
+        :file:`pcapkit/protocols/schema.py`.
 
         """
         from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         records = (
             (1500000000, 123456, b'\x02\x00\x00\x00' + bytes(range(56))),

@@ -2,7 +2,7 @@
 """Ethernet packs MAC addresses as six octets, and rebuilds byte for byte.
 
 GitHub issue #1123: :meth:`Ethernet._make_mac_addr
-<pcapkit.protocols.link.ethernet.Ethernet._make_mac_addr>` stripped the
+<pcapkit.protocols.link.ethernet.protocol.Ethernet._make_mac_addr>` stripped the
 separators from a ``aa:bb:cc:dd:ee:ff`` string and returned the remaining
 *hex text*, which the 6-octet schema field then truncated. So ``make()``
 wrote the ASCII digits of the address onto the wire, and
@@ -40,7 +40,7 @@ class TestEthernetMacRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_make_packs_mac_addresses_as_octets(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         proto = Ethernet(dst='01:23:45:67:89:ab', src='fe-dc-ba-98-76-54',
                          payload=b'payload')
@@ -49,13 +49,13 @@ class TestEthernetMacRoundTrip(unittest.TestCase):
         self.assertEqual(proto.info.src, 'fe:dc:ba:98:76:54')
 
     def test_make_default_mac_is_all_zero_octets(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         proto = Ethernet(payload=b'payload')
         self.assertEqual(proto.data, FRAMES['all-zero'])
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
 
         for name, frame in FRAMES.items():
             with self.subTest(frame=name):

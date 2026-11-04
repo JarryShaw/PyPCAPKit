@@ -47,18 +47,18 @@ def _payload(code: 'int') -> 'bytes':
 
     _ip4, _ip6, _tcp, _udp = generator._ip4, generator._ip6, generator._tcp, generator._udp
     if code == TransType.HOPOPT:
-        from pcapkit.protocols.internet.hopopt import HOPOPT
+        from pcapkit.protocols.internet.hopopt.protocol import HOPOPT
         return bytes(HOPOPT(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPv4:  # IP-in-IP.
         return _ip4(6, _tcp(9999))
     if code == TransType.ICMP:
-        from pcapkit.protocols.internet.icmpv4 import ICMPv4
+        from pcapkit.protocols.internet.icmpv4.protocol import ICMPv4
 
         # NOTE: the checksum is left uncomputed (#2470).
         return bytes(ICMPv4(type=8, code=0,
                             body={'id': 1, 'seq': 1, 'data': b'ping'}))
     if code == TransType.IPv6_ICMP:
-        from pcapkit.protocols.internet.icmpv6 import ICMPv6
+        from pcapkit.protocols.internet.icmpv6.protocol import ICMPv6
 
         # NOTE: the checksum is left uncomputed (#2470).
         return bytes(ICMPv6(type=128, code=0,
@@ -68,31 +68,31 @@ def _payload(code: 'int') -> 'bytes':
     if code == TransType.UDP:
         return _udp(9999)
     if code == TransType.DCCP:
-        from pcapkit.protocols.transport.dccp import DCCP
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
         return bytes(DCCP(srcport=50000, dstport=9999, seq=1, payload=b'\x01\x02\x03'))
     if code == TransType.IPv6:
         return _ip6(6, _tcp(9999))
     if code == TransType.IPv6_Route:
         from pcapkit.const.ipv6.routing import Routing
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
         return bytes(IPv6_Route(type=Routing.Type_2_Routing_Header, data={'ip': '2001:db8::2'},
                                 next=6, seg_left=0, payload=_tcp(9999)))
     if code == TransType.IPv6_Frag:
-        from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+        from pcapkit.protocols.internet.ipv6_frag.protocol import IPv6_Frag
         return bytes(IPv6_Frag(next=17, id=1, offset=0, mf=False, payload=_udp(9999)))
     if code == TransType.GRE:
-        from pcapkit.protocols.link.gre import GRE
+        from pcapkit.protocols.link.gre.protocol import GRE
         return bytes(GRE(protocol_type=0x0800, payload=_ip4(6, _tcp(9999))))
     if code == TransType.ESP:
-        from pcapkit.protocols.internet.esp import ESP
+        from pcapkit.protocols.internet.esp.protocol import ESP
         return bytes(ESP(spi=0x1234, seq=1, payload=b'\x01\x02\x03\x04'))
     if code == TransType.AH:
-        from pcapkit.protocols.internet.ah import AH
+        from pcapkit.protocols.internet.ah.protocol import AH
         return bytes(AH(next=TransType.TCP, spi=0x1234, seq=1, icv=b'\x00' * 12,
                         payload=_tcp(9999)))
     if code == TransType.IGMP:
         from pcapkit.const.igmp.type import Type
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
 
         # A General Query: an IGMPv1/v2 message is the 8-octet header and
         # nothing else, so there is no further payload to wrap. A nonzero
@@ -104,24 +104,24 @@ def _payload(code: 'int') -> 'bytes':
         # non-empty payload demonstrates the same thing an empty one would.
         return b'\x01\x02\x03'
     if code == TransType.IPv6_Opts:
-        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+        from pcapkit.protocols.internet.ipv6_opts.protocol import IPv6_Opts
         return bytes(IPv6_Opts(options=[], next=6, payload=_tcp(9999)))
     if code == TransType.IPX_in_IP:
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
         return bytes(IPX())
     if code == TransType.SCTP:
         from pcapkit.const.sctp.chunk import Chunk
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
         return bytes(SCTP(srcport=50000, dstport=80, vtag=0x11223344, chksum=b'\x00' * 4,
                           chunks=[(Chunk.Payload_Data, {'data': b'\x01\x02\x03'})]))
     if code == TransType.Mobility_Header:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         return bytes(MH(next=6, chksum=b'\x00\x00', type=Packet.Binding_Refresh_Request,
                         data={'options': []}, payload=_tcp(9999)))
     if code == TransType.HIP:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         # Only the dispatch into HIP is under test here, so which parameter
         # travels inside it does not matter.
@@ -129,7 +129,7 @@ def _payload(code: 'int') -> 'bytes':
                          next=6, packet=1, version=2, checksum=b'\x00\x00',
                          controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
     if code == TransType.OSPFIGP:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
         return bytes(OSPF())
     if code == TransType.Shim6:
         # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
@@ -158,29 +158,29 @@ FAMILIES = (
 #: The class each case of :data:`FAMILIES` is pinned to, as
 #: :data:`examples.generators.dispatch.PINNED_TARGETS` describes.
 PINNED_TARGETS = {
-    'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    'internet/IPv4': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4', 'ICMPv4'),
-    'internet/TCP': ('pcapkit.protocols.transport.tcp', 'TCP'),
-    'internet/UDP': ('pcapkit.protocols.transport.udp', 'UDP'),
-    'internet/DCCP': ('pcapkit.protocols.transport.dccp', 'DCCP'),
-    'internet/IPv6': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6', 'ICMPv6'),
-    'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
-    'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag', 'IPv6_Frag'),
-    'internet/GRE': ('pcapkit.protocols.link.gre', 'GRE'),
-    'internet/ESP': ('pcapkit.protocols.internet.esp', 'ESP'),
-    'internet/AH': ('pcapkit.protocols.internet.ah', 'AH'),
-    'internet/IGMP': ('pcapkit.protocols.internet.igmp', 'IGMP'),
-    'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw', 'Raw'),
-    'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
-    'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx', 'IPX'),
-    'internet/Mobility_Header': ('pcapkit.protocols.internet.mh', 'MH'),
-    'internet/HIP': ('pcapkit.protocols.internet.hip', 'HIP'),
-    'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
-    'internet/OSPFIGP': ('pcapkit.protocols.application.ospf', 'OSPF'),
+    'internet/HOPOPT': ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+    'internet/IPv4': ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
+    'internet/ICMP': ('pcapkit.protocols.internet.icmpv4.protocol', 'ICMPv4'),
+    'internet/TCP': ('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
+    'internet/UDP': ('pcapkit.protocols.transport.udp.protocol', 'UDP'),
+    'internet/DCCP': ('pcapkit.protocols.transport.dccp.protocol', 'DCCP'),
+    'internet/IPv6': ('pcapkit.protocols.internet.ipv6.protocol', 'IPv6'),
+    'internet/IPv6_ICMP': ('pcapkit.protocols.internet.icmpv6.protocol', 'ICMPv6'),
+    'internet/IPv6_Route': ('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route'),
+    'internet/IPv6_Frag': ('pcapkit.protocols.internet.ipv6_frag.protocol', 'IPv6_Frag'),
+    'internet/GRE': ('pcapkit.protocols.link.gre.protocol', 'GRE'),
+    'internet/ESP': ('pcapkit.protocols.internet.esp.protocol', 'ESP'),
+    'internet/AH': ('pcapkit.protocols.internet.ah.protocol', 'AH'),
+    'internet/IGMP': ('pcapkit.protocols.internet.igmp.protocol', 'IGMP'),
+    'internet/IPv6_NoNxt': ('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+    'internet/IPv6_Opts': ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
+    'internet/IPX_in_IP': ('pcapkit.protocols.internet.ipx.protocol', 'IPX'),
+    'internet/Mobility_Header': ('pcapkit.protocols.internet.mh.protocol', 'MH'),
+    'internet/HIP': ('pcapkit.protocols.internet.hip.protocol', 'HIP'),
+    'internet/SCTP': ('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),
+    'internet/OSPFIGP': ('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
     # #904: Shim6 (140) is registered directly at IPv6_Ext, which parses
     # the RFC 6564 §4 generic layout, as Shim6 has no dedicated dissector.
     # Without the entry the default factory would resolve it to Raw.
-    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext', 'IPv6_Ext'),
+    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext.protocol', 'IPv6_Ext'),
 }

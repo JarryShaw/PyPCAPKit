@@ -51,7 +51,7 @@ def _examples() -> 'dict':
     from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
     from pcapkit.const.mh.option import Option
     from pcapkit.const.mh.qos_attribute import QoSAttribute as QoS
-    from pcapkit.protocols.data.internet.mh import CGAParameter
+    from pcapkit.protocols.internet.mh.data import CGAParameter
 
     fields = {'modifier': CGAType.Tag_086F_CA5E_10B2_00C9_9C8C_E001_6427_7C08,
               'prefix': 0x20010db800000000, 'collision_count': 0}  # type: dict
@@ -123,15 +123,15 @@ class TestMHOptionMutation(unittest.TestCase):
     @staticmethod
     def _brr(code: 'object', kwargs: 'dict') -> bytes:
         from pcapkit.const.mh.packet import Packet
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         return MH(type=Packet.Binding_Refresh_Request, next=59, chksum=b'\x00\x00',
                   data={'options': [(code, kwargs)]}).data
 
     def _assert_identity_or_refused(self, raw: bytes, crashed: 'set[str]', name: str) -> 'object':
         """Parse ``raw`` alone and inside IPv6; return the parsed MH, or None if refused."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import BaseError
 
         try:
@@ -153,9 +153,9 @@ class TestMHOptionMutation(unittest.TestCase):
     def test_reported_cases(self) -> None:
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.fields.strings import DecodedString
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.mh import MH
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.mh.protocol import MH
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.utilities import exceptions
         from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.logging import logger
@@ -216,7 +216,7 @@ class TestMHOptionMutation(unittest.TestCase):
     def test_text_identifiers_count_their_octets(self) -> None:
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # RFC 4283 section 3 and RFC 5149 section 3 count octets, and NAI and the
         # service identifier are UTF-8, so a non-ASCII character takes two
@@ -234,7 +234,7 @@ class TestMHOptionMutation(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import ProtocolError
 
         # RFC 5555 section 3.2.1, RFC 5844 sections 3.3.1 and 3.3.2 and RFC 7148
@@ -265,8 +265,8 @@ class TestMHOptionMutation(unittest.TestCase):
     def test_cga_public_key_takes_its_der_length(self) -> None:
         from pcapkit.const.mh.cga_type import CGAType
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.data.internet.mh import CGAParameter
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.data import CGAParameter
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         # RFC 3972 section 3 has the key a DER SubjectPublicKeyInfo, whose length
         # past 127 octets is 0x80 plus the count of the octets holding it (X.690)
@@ -282,7 +282,7 @@ class TestMHOptionMutation(unittest.TestCase):
                 self.assertEqual(MH.from_data(mh.info).data, raw)
 
     def test_every_option_changed_in_one_octet(self) -> None:
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.mh.protocol import MH
 
         examples = _examples()
         crashed = set()  # type: set[str]

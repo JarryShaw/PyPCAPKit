@@ -7,7 +7,7 @@ says the parameter "contains a 64-bit unsigned integer in network byte order" --
 so nothing here is inferred from a figure.
 :rfc:`5201#section-5.2.3` gives the same ``Reserved, 4 bytes`` plus 8-octet
 counter layout, which is why both codes that reach
-:class:`~pcapkit.protocols.schema.internet.hip.R1CounterParameter` are affected:
+:class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter` are affected:
 ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129).
 
 Guards against ``counter`` being a
@@ -80,7 +80,7 @@ def rfc_total(length: 'int') -> 'int':
     """:rfc:`7401#section-5.2.1`'s ``Total Length = 11 + Length - (Length + 3) % 8``.
 
     Written out here rather than imported from
-    :func:`pcapkit.protocols.schema.internet.hip.parameter_total_len`, so that
+    :func:`pcapkit.protocols.internet.hip.schema.parameter_total_len`, so that
     this module compares the packed octets against the RFC and not against the
     library's own reading of it.
 
@@ -114,7 +114,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         ``rfc_total(12) - 4 - 12`` is zero.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         hip = object.__new__(HIP)
         for code, version, prefix in ((Parameter.R1_Counter, 1, '0080'),
@@ -149,8 +149,8 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         the generation counter a peer sent.
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.schema.internet.hip import R1CounterParameter
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.hip.schema import R1CounterParameter
 
         hip = object.__new__(HIP)
         for counter in (0, 1, 0xffffffff, 0x1_0000_0000, 0x0123456789abcdef,
@@ -185,7 +185,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         not here; this module stays scoped to the width (#672).
         """
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         counter = 0x0123456789abcdef
         built = HIP(parameters=[(Parameter.R1_COUNTER, {'counter': counter})],

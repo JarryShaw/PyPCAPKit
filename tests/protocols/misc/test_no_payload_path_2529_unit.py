@@ -2,10 +2,10 @@
 """``NoPayload`` and its schema and data model live in ``no_payload`` modules, and only there.
 
 GitHub issue #2529: a protocol class and the module holding it share a name, so
-:class:`~pcapkit.protocols.misc.no_payload.NoPayload` is in
-:mod:`pcapkit.protocols.misc.no_payload`, its header schema in
-:mod:`pcapkit.protocols.schema.misc.no_payload` and its data model in
-:mod:`pcapkit.protocols.data.misc.no_payload`. The ``misc.null`` paths they
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` is in
+:mod:`pcapkit.protocols.misc.no_payload.protocol`, its header schema in
+:mod:`pcapkit.protocols.misc.no_payload.schema` and its data model in
+:mod:`pcapkit.protocols.misc.no_payload.data`. The ``misc.null`` paths they
 shipped under in 1.5.x keep no re-export, by the ruling on #1715 (#1744). This
 pins both halves: the old paths do not import, and every importer reaches the
 classes through the new modules. The ``versionremoved`` notes for the old paths
@@ -28,21 +28,31 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: ``(new module, old module)`` for the protocol, its header schema and its data model.
 PATHS = (
-    ('pcapkit.protocols.misc.no_payload', 'pcapkit.protocols.misc.null'),
-    ('pcapkit.protocols.schema.misc.no_payload', 'pcapkit.protocols.schema.misc.null'),
-    ('pcapkit.protocols.data.misc.no_payload', 'pcapkit.protocols.data.misc.null'),
+    ('pcapkit.protocols.misc.no_payload.protocol', 'pcapkit.protocols.misc.null'),
+    ('pcapkit.protocols.misc.no_payload.schema', 'pcapkit.protocols.schema.misc.null'),
+    ('pcapkit.protocols.misc.no_payload.data', 'pcapkit.protocols.data.misc.null'),
 )
 
 #: The packages that export ``NoPayload``, as ``(package, module it comes from)``.
 PACKAGES = (
-    ('pcapkit', 'pcapkit.protocols.misc.no_payload'),
-    ('pcapkit.protocols', 'pcapkit.protocols.misc.no_payload'),
-    ('pcapkit.protocols.misc', 'pcapkit.protocols.misc.no_payload'),
-    ('pcapkit.protocols.schema', 'pcapkit.protocols.schema.misc.no_payload'),
-    ('pcapkit.protocols.schema.misc', 'pcapkit.protocols.schema.misc.no_payload'),
-    ('pcapkit.protocols.data', 'pcapkit.protocols.data.misc.no_payload'),
-    ('pcapkit.protocols.data.misc', 'pcapkit.protocols.data.misc.no_payload'),
+    ('pcapkit', 'pcapkit.protocols.misc.no_payload.protocol'),
+    ('pcapkit.protocols', 'pcapkit.protocols.misc.no_payload.protocol'),
+    ('pcapkit.protocols.misc', 'pcapkit.protocols.misc.no_payload.protocol'),
 )
+
+
+def find_spec_or_none(name: 'str') -> 'object':
+    """:func:`importlib.util.find_spec`, or :obj:`None` where a parent package is missing too.
+
+    ``find_spec`` raises rather than answering :obj:`None` when the parent is
+    absent, as it is for a path in the ``pcapkit.protocols.schema`` and
+    ``pcapkit.protocols.data`` trees #2534 removed.
+
+    """
+    try:
+        return importlib.util.find_spec(name)
+    except ModuleNotFoundError:
+        return None
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -58,8 +68,10 @@ class NoPayloadPathTests(unittest.TestCase):
             with self.subTest(path=old):
                 with self.assertRaises(ModuleNotFoundError) as ctx:
                     importlib.import_module(old)
-                self.assertEqual(ctx.exception.name, old)
-                self.assertIsNone(importlib.util.find_spec(old))
+                # the schema and data trees went as well (#2534), so those two
+                # fail at their first missing package
+                self.assertTrue(f'{old}.'.startswith(f'{ctx.exception.name}.'), ctx.exception.name)
+                self.assertIsNone(find_spec_or_none(old))
 
     def test_each_module_holds_no_payload_alone(self) -> None:
         for new, _ in PATHS:
@@ -69,9 +81,9 @@ class NoPayloadPathTests(unittest.TestCase):
                 self.assertEqual(module.NoPayload.__module__, new)
 
     def test_the_protocol_binds_the_new_schema_and_data_model(self) -> None:
-        from pcapkit.protocols.data.misc.no_payload import NoPayload as Data_NoPayload
-        from pcapkit.protocols.misc.no_payload import NoPayload
-        from pcapkit.protocols.schema.misc.no_payload import NoPayload as Schema_NoPayload
+        from pcapkit.protocols.misc.no_payload.data import NoPayload as Data_NoPayload
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+        from pcapkit.protocols.misc.no_payload.schema import NoPayload as Schema_NoPayload
 
         self.assertIs(NoPayload.__schema__, Schema_NoPayload)
         self.assertIs(NoPayload.__data__, Data_NoPayload)

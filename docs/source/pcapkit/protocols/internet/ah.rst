@@ -2,9 +2,10 @@ AH - Authentication Header
 ==========================
 
 .. module:: pcapkit.protocols.internet.ah
+.. module:: pcapkit.protocols.internet.ah.protocol
 
-:mod:`pcapkit.protocols.internet.ah` contains
-:class:`~pcapkit.protocols.internet.ah.AH` only,
+:mod:`pcapkit.protocols.internet.ah.protocol` contains
+:class:`~pcapkit.protocols.internet.ah.protocol.AH` only,
 which implements the extractor for Authentication
 Header (AH) [*]_, whose structure is described
 as below:
@@ -20,7 +21,7 @@ Octets      Bits        Name                    Description
   12         96   ``ah.icv``                Integrity Check Value (ICV)
 ======= ========= ======================= ===================================
 
-.. autoclass:: pcapkit.protocols.internet.ah.AH
+.. autoclass:: pcapkit.protocols.internet.ah.protocol.AH
    :no-members:
    :show-inheritance:
 
@@ -44,20 +45,30 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ah
+.. module:: pcapkit.protocols.internet.ah.schema
 
-.. autodata:: pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN
+.. versionremoved:: 1.6.0
 
-.. autoclass:: pcapkit.protocols.schema.internet.ah.AH
+   ``pcapkit.protocols.schema.internet.ah``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autodata:: pcapkit.protocols.internet.ah.schema.AH_HEADER_LEN
+
+.. autoclass:: pcapkit.protocols.internet.ah.schema.AH
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ah
+.. module:: pcapkit.protocols.internet.ah.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ah.AH
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ah``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ah.data.AH
    :members:
    :show-inheritance:
 

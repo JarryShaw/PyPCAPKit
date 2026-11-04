@@ -2,9 +2,10 @@ DCCP - Datagram Congestion Control Protocol
 ===========================================
 
 .. module:: pcapkit.protocols.transport.dccp
+.. module:: pcapkit.protocols.transport.dccp.protocol
 
-:mod:`pcapkit.protocols.transport.dccp` contains
-:class:`~pcapkit.protocols.transport.dccp.DCCP` only,
+:mod:`pcapkit.protocols.transport.dccp.protocol` contains
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` only,
 which implements the extractor for Datagram Congestion
 Control Protocol (DCCP) [*]_, whose generic header is
 described as below:
@@ -30,7 +31,7 @@ header 12 octets long. The fields of the packet type, then the options, follow.
 
 .. versionadded:: 1.6.0
 
-.. autoclass:: pcapkit.protocols.transport.dccp.DCCP
+.. autoclass:: pcapkit.protocols.transport.dccp.protocol.DCCP
    :no-members:
    :show-inheritance:
 
@@ -88,173 +89,173 @@ header 12 octets long. The fields of the packet type, then the options, follow.
 
    .. automethod:: __index__
 
-.. autodata:: pcapkit.protocols.transport.dccp.DCCP_MAX_HEADER_LEN
+.. autodata:: pcapkit.protocols.transport.dccp.protocol.DCCP_MAX_HEADER_LEN
 
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.transport.dccp
+.. module:: pcapkit.protocols.transport.dccp.schema
 
-.. autodata:: pcapkit.protocols.schema.transport.dccp.DCCP_MIN_HEADER_LEN
+.. autodata:: pcapkit.protocols.transport.dccp.schema.DCCP_MIN_HEADER_LEN
 
-.. autodata:: pcapkit.protocols.schema.transport.dccp.DCCP_SINGLE_OCTET_OPTION_MAX
+.. autodata:: pcapkit.protocols.transport.dccp.schema.DCCP_SINGLE_OCTET_OPTION_MAX
 
-.. autodata:: pcapkit.protocols.schema.transport.dccp.ACK_TYPES
+.. autodata:: pcapkit.protocols.transport.dccp.schema.ACK_TYPES
    :no-value:
 
-.. autodata:: pcapkit.protocols.schema.transport.dccp.SERVICE_TYPES
+.. autodata:: pcapkit.protocols.transport.dccp.schema.SERVICE_TYPES
    :no-value:
 
-.. autodata:: pcapkit.protocols.schema.transport.dccp.RESET_TYPE
+.. autodata:: pcapkit.protocols.transport.dccp.schema.RESET_TYPE
 
-.. autofunction:: pcapkit.protocols.schema.transport.dccp.header_length
+.. autofunction:: pcapkit.protocols.transport.dccp.schema.header_length
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.DCCP
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.DCCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Coverage
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Coverage
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.TypeField
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.TypeField
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Option
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.UnassignedOption
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Padding
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Padding
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Mandatory
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Mandatory
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.SlowReceiver
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.SlowReceiver
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Change
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Change
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Confirm
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Confirm
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.InitCookie
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.InitCookie
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.NDPCount
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.NDPCount
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.AckVector
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.AckVector
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.DataDropped
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.DataDropped
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.Timestamp
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.Timestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.TimestampEcho
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.TimestampEcho
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.ElapsedTime
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.ElapsedTime
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.dccp.DataChecksum
+.. autoclass:: pcapkit.protocols.transport.dccp.schema.DataChecksum
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.transport.dccp
+.. module:: pcapkit.protocols.transport.dccp.data
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.DCCP
+.. autoclass:: pcapkit.protocols.transport.dccp.data.DCCP
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Option
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.UnassignedOption
+.. autoclass:: pcapkit.protocols.transport.dccp.data.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Padding
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Padding
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Mandatory
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Mandatory
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.SlowReceiver
+.. autoclass:: pcapkit.protocols.transport.dccp.data.SlowReceiver
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Change
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Change
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Confirm
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Confirm
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.InitCookie
+.. autoclass:: pcapkit.protocols.transport.dccp.data.InitCookie
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.NDPCount
+.. autoclass:: pcapkit.protocols.transport.dccp.data.NDPCount
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.AckVector
+.. autoclass:: pcapkit.protocols.transport.dccp.data.AckVector
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.AckVectorRun
+.. autoclass:: pcapkit.protocols.transport.dccp.data.AckVectorRun
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.DataDropped
+.. autoclass:: pcapkit.protocols.transport.dccp.data.DataDropped
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.DataDroppedBlock
+.. autoclass:: pcapkit.protocols.transport.dccp.data.DataDroppedBlock
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.Timestamp
+.. autoclass:: pcapkit.protocols.transport.dccp.data.Timestamp
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.TimestampEcho
+.. autoclass:: pcapkit.protocols.transport.dccp.data.TimestampEcho
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.ElapsedTime
+.. autoclass:: pcapkit.protocols.transport.dccp.data.ElapsedTime
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.dccp.DataChecksum
+.. autoclass:: pcapkit.protocols.transport.dccp.data.DataChecksum
    :members:
    :show-inheritance:
 

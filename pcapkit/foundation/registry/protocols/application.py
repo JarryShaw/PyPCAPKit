@@ -19,19 +19,21 @@ from typing import TYPE_CHECKING
 from pcapkit.const.http.frame import Frame as HTTP_Frame
 from pcapkit.const.tls.extension_type import ExtensionType as TLS_ExtensionType
 from pcapkit.foundation.registry.protocols.protocol import _check_code
-from pcapkit.protocols.application.httpv2 import HTTPv2
-from pcapkit.protocols.application.ssl import SSL
-from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP_FrameType
+from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+from pcapkit.protocols.application.httpv2.schema import FrameType as Schema_HTTP_FrameType
+from pcapkit.protocols.application.ssl.protocol import SSL
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
     from typing import Optional, Type
 
-    from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
-    from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
-    from pcapkit.protocols.application.ssl import ExtensionConstructor as TLS_ExtensionConstructor
-    from pcapkit.protocols.application.ssl import ExtensionParser as TLS_ExtensionParser
+    from pcapkit.protocols.application.httpv2.protocol import \
+        FrameConstructor as HTTP_FrameConstructor
+    from pcapkit.protocols.application.httpv2.protocol import FrameParser as HTTP_FrameParser
+    from pcapkit.protocols.application.ssl.protocol import \
+        ExtensionConstructor as TLS_ExtensionConstructor
+    from pcapkit.protocols.application.ssl.protocol import ExtensionParser as TLS_ExtensionParser
 
 __all__ = [
     'register_http_frame',
@@ -48,23 +50,23 @@ logger = get_logger(__name__)
 ###############################################################################
 
 
-# NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__
+# NOTE: pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__
 def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]', *,
                         schema: 'Optional[Type[Schema_HTTP_FrameType]]' = None) -> 'None':
     """Register a frame parser.
 
     The function will register the given frame parser to the
-    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.
+    :data:`pcapkit.protocols.application.httpv2.protocol.HTTPv2.__frame__` registry.
 
     Args:
-        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>` frame type
+        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>` frame type
             code as in :class:`~pcapkit.const.http.frame.Frame`.
         meth: Method name, or a ``(parser, constructor)`` pair of callables, to
             parse and construct the frame. A name names the
             ``_read_http_*`` and ``_make_http_*`` methods, and has to name
             an existing ``_read_http_*`` one.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.
-            It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.
+        schema: :class:`~pcapkit.protocols.schema.Schema` class for the frame.
+            It should be a subclass of :class:`pcapkit.protocols.application.httpv2.schema.FrameType`.
 
     Raises:
         RegistryError: If ``code`` is not a :class:`~pcapkit.const.http.frame.Frame`
@@ -82,15 +84,15 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     logger.debug('registered HTTP/2 frame parser: %s', code.name)
 
 
-# NOTE: pcapkit.protocols.application.ssl.SSL.__extension__
+# NOTE: pcapkit.protocols.application.ssl.protocol.SSL.__extension__
 def register_tls_extension(code: 'TLS_ExtensionType',
                            meth: 'str | tuple[TLS_ExtensionParser, TLS_ExtensionConstructor]') -> 'None':
     """Register an extension parser.
 
     The function will register the given extension parser to the
-    :data:`pcapkit.protocols.application.ssl.SSL.__extension__` registry, which
-    :class:`~pcapkit.protocols.application.tls.TLS` and
-    :class:`~pcapkit.protocols.application.dtls.DTLS` share.
+    :data:`pcapkit.protocols.application.ssl.protocol.SSL.__extension__` registry, which
+    :class:`~pcapkit.protocols.application.tls.protocol.TLS` and
+    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` share.
 
     Args:
         code: TLS/DTLS extension type as in

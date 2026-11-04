@@ -2,7 +2,7 @@
 """Where the Multipath TCP option header keeps its length: bits 8-15, not seven bits early.
 
 GitHub issue #553. :class:`_MPTCP
-<pcapkit.protocols.schema.transport.tcp._MPTCP>` reads the option header through
+<pcapkit.protocols.transport.tcp.schema._MPTCP>` reads the option header through
 a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` over a 3-octet
 :class:`~pcapkit.corekit.fields.strings.BitField`, and that field's namespace
 declares ``'length': (8, 8)``. Guards against ``(1, 8)`` -- eight bits starting
@@ -23,7 +23,7 @@ one bit in -- and three independent pieces of evidence say ``(8, 8)`` is right:
   ``_MPTCP`` is registered as the schema for the option itself
   (``Option.register(Enum_Option.Multipath_TCP, _MPTCP)``) and, alone among the
   option schemas, does not inherit :class:`Option
-  <pcapkit.protocols.schema.transport.tcp.Option>` -- so it is handed the
+  <pcapkit.protocols.transport.tcp.schema.Option>` -- so it is handed the
   option's first octet and nothing has consumed ``kind``/``length`` before it.
 
 At ``(1, 8)`` the field would straddle the low seven bits of ``kind`` and the
@@ -36,7 +36,7 @@ Why a round trip cannot see it
 
 The decoded length is used for one thing, ``SchemaField(length=pkt['test']['length'])``
 in :func:`mptcp_data_selector
-<pcapkit.protocols.schema.transport.tcp.mptcp_data_selector>`, which sizes the
+<pcapkit.protocols.transport.tcp.schema.mptcp_data_selector>`, which sizes the
 nested subtype schema. Over-declaring that size does not fail loudly: the
 enclosing :class:`~pcapkit.corekit.fields.collections.OptionField` stops at the
 end-of-option-list marker or at the declared options length whichever comes
@@ -45,7 +45,7 @@ first, so the over-read is absorbed rather than reported.
 So the assertion here is deliberately on the *decoded namespace* rather than on a
 round trip: a full parse can fail, or pass, for reasons that have nothing to do
 with the bit offset -- the subtype schemas' own ``kind``/``length`` declarations
-on :class:`MPTCP <pcapkit.protocols.schema.transport.tcp.MPTCP>` (#541), for one
+on :class:`MPTCP <pcapkit.protocols.transport.tcp.schema.MPTCP>` (#541), for one
 -- and the offset is pinned independently of them.
 
 The field is read off the schema class, ``_MPTCP.__fields__['test']``, rather
@@ -63,7 +63,7 @@ import unittest
 
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
-from pcapkit.protocols.schema.transport.tcp import _MPTCP
+from pcapkit.protocols.transport.tcp.schema import _MPTCP
 
 #: The 12-octet MP_CAPABLE of :rfc:`8684` figure 4, as it appears on the wire.
 #: ``1e`` is the Multipath TCP option kind (30), ``0c`` its length (12), ``01``
@@ -80,7 +80,7 @@ def decode_header(option: 'bytes') -> 'dict[str, int]':
 
     Returns:
         The ``test`` namespace, as :class:`_MPTCP
-        <pcapkit.protocols.schema.transport.tcp._MPTCP>` would see it.
+        <pcapkit.protocols.transport.tcp.schema._MPTCP>` would see it.
 
     """
     field = _MPTCP.__fields__['test']
@@ -126,7 +126,7 @@ class MPTCPHeaderOffsetTests(unittest.TestCase):
         ``length`` at bit 8 is only correct if bit 0 is the first bit of
         ``kind``. That is asserted here by reading the octet the option itself
         begins with, so a later change that made ``_MPTCP`` inherit
-        :class:`Option <pcapkit.protocols.schema.transport.tcp.Option>` -- and so
+        :class:`Option <pcapkit.protocols.transport.tcp.schema.Option>` -- and so
         consume ``kind``/``length`` before this field ever runs -- fails here
         with a message about the anchor rather than silently shifting every
         offset in the namespace by two octets.

@@ -26,7 +26,7 @@ MH_BASE = {'next': 59, 'chksum': b'\x00\x00', 'payload': b''}
 
 
 def _mh_message_registry() -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH.__message__
 
 
@@ -35,7 +35,7 @@ def _mh_message_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _mh_message_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
 
     # ``data`` has to be a mapping for ``make`` to dispatch on the message
     # type; a Data object takes the other branch, which is what rebuild uses.
@@ -43,7 +43,7 @@ def _mh_message_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
 
 
 def _mh_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH(octets, len(octets), extension=True)
 
 
@@ -52,12 +52,12 @@ def _mh_message_extract(parsed: 'Any') -> 'Any':
 
 
 def _mh_message_rebuild(message: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH(type=message.type, data=message, **MH_BASE)
 
 
 def _mh_option_registry() -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH.__option__
 
 
@@ -122,7 +122,7 @@ def _mh_carrier() -> 'Any':
 
 
 def _mh_option_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH(type=_mh_carrier(), data={'options': [(code, dict(kwargs))]}, **MH_BASE)
 
 
@@ -132,12 +132,12 @@ def _mh_option_extract(parsed: 'Any') -> 'Any':
 
 
 def _mh_option_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH(type=_mh_carrier(), data={'options': options}, **MH_BASE)
 
 
 def _mh_extension_registry() -> 'Any':
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.protocol import MH
     return MH.__extension__
 
 
@@ -149,8 +149,8 @@ def _mh_extension_overrides() -> 'dict[Any, dict[str, Any]]':
 def _mh_extension_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     from pcapkit.const.mh.cga_type import CGAType as Enum_CGAType
     from pcapkit.const.mh.option import Option as Enum_Option
-    from pcapkit.protocols.data.internet.mh import CGAParameter as Data_CGAParameter
-    from pcapkit.protocols.internet.mh import MH
+    from pcapkit.protocols.internet.mh.data import CGAParameter as Data_CGAParameter
+    from pcapkit.protocols.internet.mh.protocol import MH
 
     # A CGA extension has exactly one carrier: the ``extensions`` list of a CGA
     # parameter, inside a CGA Parameters option. It has to be a *Data* model

@@ -2,7 +2,7 @@
 """GitHub issue #2438: the ``LinuxSLL`` family selector.
 
 The versions share a family name, not a wire format, so they follow
-:class:`~pcapkit.protocols.internet.ip.IP`: the family name selects either
+:class:`~pcapkit.protocols.internet.ip.protocol.IP`: the family name selects either
 version and each version's own name selects that version only. See
 :ref:`linux-sll-labels`.
 
@@ -66,9 +66,9 @@ class TestLinuxSLLSelector(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_id_and_alias_values(self) -> None:
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         self.assertEqual(LinuxSLL.id(), ('LinuxSLL1', 'LinuxSLL2'))
         self.assertEqual(LinuxSLL1.id(), ('LinuxSLL1',))
@@ -78,7 +78,7 @@ class TestLinuxSLLSelector(unittest.TestCase):
         self.assertEqual(LinuxSLL2(payload=b'').alias, 'LINUX_SLL2')
 
     def test_family_base_has_no_registry_index(self) -> None:
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         with self.assertRaises(UnsupportedCall):
@@ -86,14 +86,14 @@ class TestLinuxSLLSelector(unittest.TestCase):
 
     def test_registered_in_the_name_registry(self) -> None:
         from pcapkit.protocols import __proto__ as registry
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         self.assertIs(registry.get('LINUXSLL'), LinuxSLL)
 
     def test_family_name_selects_either_version(self) -> None:
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         v1 = LinuxSLL1(payload=b'')
         v2 = LinuxSLL2(payload=b'')
@@ -104,8 +104,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         self.assertIn(LinuxSLL, v2)
 
     def test_version_name_selects_only_that_version(self) -> None:
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         v1 = LinuxSLL1(payload=b'')
         v2 = LinuxSLL2(payload=b'')
@@ -116,8 +116,8 @@ class TestLinuxSLLSelector(unittest.TestCase):
         self.assertNotIn('LinuxSLL2', v1)
 
     def test_class_selector_is_version_narrow(self) -> None:
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
 
         v1 = LinuxSLL1(payload=b'')
         v2 = LinuxSLL2(payload=b'')
@@ -129,7 +129,7 @@ class TestLinuxSLLSelector(unittest.TestCase):
 
     def test_string_eq_is_narrower_than_in_for_the_family_name(self) -> None:
         """String ``==`` compares against ``(cls, *id())`` only, so a family name is not ``==``."""
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
 
         v1 = LinuxSLL1(payload=b'')
 

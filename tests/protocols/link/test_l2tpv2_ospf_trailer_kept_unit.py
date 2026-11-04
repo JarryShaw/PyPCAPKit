@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Octets captured past an L2TPv2 or OSPF packet's own length survive a rebuild.
 
-GitHub issue #1455: :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` reads its
-Length field and :class:`~pcapkit.protocols.application.ospf.OSPF` its Packet
+GitHub issue #1455: :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` reads its
+Length field and :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` its Packet
 Length, but the octets after either were kept by no ``info``, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` dropped them: an
 L2TPv2 header of Length 8 followed by two octets rebuilt as 8 octets of its 10,
@@ -66,7 +66,7 @@ class TestL2TPv2TrailerKept(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_datagram_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for name, (raw, trailer) in L2TP_TRAILER.items():
             with self.subTest(datagram=name):
@@ -77,7 +77,7 @@ class TestL2TPv2TrailerKept(unittest.TestCase):
                 self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_no_trailer_key_without_excess(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for name, raw in L2TP_NO_TRAILER.items():
             with self.subTest(datagram=name):
@@ -86,7 +86,7 @@ class TestL2TPv2TrailerKept(unittest.TestCase):
                 self.assertEqual(L2TPv2.from_data(parsed.info).data, raw)
 
     def test_udp_carrier_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         l2tp, trailer = L2TP_TRAILER['payload']
         raw = bytes.fromhex('06a506a5') + (8 + len(l2tp)).to_bytes(2, 'big') + b'\x00\x00' + l2tp
@@ -95,7 +95,7 @@ class TestL2TPv2TrailerKept(unittest.TestCase):
         self.assertEqual(UDP.from_data(parsed.info).data, raw)
 
     def test_make_writes_trailer_outside_the_length(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         made = L2TPv2(length_flag=True, payload=b'ab', trailer=b'\x00\x01')
         self.assertEqual(made.info.length, 10)
@@ -113,7 +113,7 @@ class TestOSPFTrailerKept(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_packet_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         for name, (raw, trailer) in OSPF_TRAILER.items():
             with self.subTest(packet=name):
@@ -123,7 +123,7 @@ class TestOSPFTrailerKept(unittest.TestCase):
                 self.assertEqual(OSPF.from_data(parsed.info).data, raw)
 
     def test_no_trailer_key_without_excess(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         for name, raw in OSPF_NO_TRAILER.items():
             with self.subTest(packet=name):
@@ -132,7 +132,7 @@ class TestOSPFTrailerKept(unittest.TestCase):
                 self.assertEqual(OSPF.from_data(parsed.info).data, raw)
 
     def test_ipv4_carrier_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
 
         ospf, trailer = OSPF_TRAILER['crypto digest']
         raw = (b'\x45\x00' + (20 + len(ospf)).to_bytes(2, 'big') + bytes(4)
@@ -144,7 +144,7 @@ class TestOSPFTrailerKept(unittest.TestCase):
         self.assertEqual(IPv4.from_data(parsed.info).data, raw)
 
     def test_make_writes_trailer_outside_the_length(self) -> None:
-        from pcapkit.protocols.application.ospf import OSPF
+        from pcapkit.protocols.application.ospf.protocol import OSPF
 
         made = OSPF(payload=b'abcd', trailer=b'\x00\x01')
         self.assertEqual(made.info.len, 28)

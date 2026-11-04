@@ -44,8 +44,8 @@ class TestFrameInclLenOverrun(unittest.TestCase):
 
     def parse(self, octets: 'bytes') -> 'tuple[object, list[str]]':
         """The frame parsed from ``octets``, and the warnings it raised."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -53,8 +53,8 @@ class TestFrameInclLenOverrun(unittest.TestCase):
         return frame, [str(item.message) for item in caught]
 
     def test_overrun_warns_and_is_kept_as_captured(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(GLOBAL).info
         for claim in (61, 1000, 0x7FFF_FFFF):

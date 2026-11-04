@@ -2,11 +2,11 @@
 """``_make_data`` returns the keywords ``make()`` takes.
 
 GitHub issue #1097: :meth:`Frame._make_data
-<pcapkit.protocols.misc.pcap.frame.Frame._make_data>` returned ``ts_src`` where
-:meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>` takes
+<pcapkit.protocols.misc.pcap.frame.protocol.Frame._make_data>` returned ``ts_src`` where
+:meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.protocol.Frame.make>` takes
 ``ts_sec``, and :meth:`L2TPv2._make_data
-<pcapkit.protocols.link.l2tpv2.L2TPv2._make_data>` returned ``prio`` where
-:meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.L2TPv2.make>` takes
+<pcapkit.protocols.link.l2tpv2.protocol.L2TPv2._make_data>` returned ``prio`` where
+:meth:`L2TPv2.make <pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.make>` takes
 ``priority``. :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
 discards such a key with an
 :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`, so the field was lost
@@ -39,7 +39,7 @@ class MakeDataKeysTests(unittest.TestCase):
         self.assertEqual(discarded, [])
 
     def test_l2tpv2_priority_survives_from_data(self) -> None:
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         octets = bytes(L2TPv2(version=2, priority=True, tunnel_id=1, session_id=2))
         parsed = L2TPv2(io.BytesIO(octets), len(octets))
@@ -54,8 +54,8 @@ class MakeDataKeysTests(unittest.TestCase):
         self.assertEqual(bytes(rebuilt), octets)
 
     def test_frame_ts_sec_survives_from_data(self) -> None:
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         header = Header(network=1)
         frame = Frame(num=1, header=header.info, ts_sec=1234, ts_usec=5,

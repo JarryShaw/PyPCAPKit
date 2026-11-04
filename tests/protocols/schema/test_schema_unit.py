@@ -28,7 +28,7 @@ class SchemaUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField, SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class NestedSchema(Schema):
@@ -111,7 +111,7 @@ class SchemaUnitTests(unittest.TestCase):
         ``tuple[...]`` (HIP's ``group_id``, MH's ``prefixes``/``fid``/``bid``, and
         others), and ``_read_*`` hands one straight back to ``_make_*`` on a
         parse-then-reconstruct cycle. Without the fix, :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` accepts a :obj:`list` but
+        <pcapkit.protocols.schema.Schema.pack>` accepts a :obj:`list` but
         raises :exc:`ProtocolUnbound` on the tuple -- a case no unit test that
         builds the schema directly with a list could ever see.
 
@@ -152,7 +152,7 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertIn('items=7', str(schema))
         self.assertIn('items=7', repr(schema))
 
-        with mock.patch('pcapkit.protocols.schema.schema.warn') as warn:
+        with mock.patch('pcapkit.protocols.schema.warn') as warn:
             schema.__update__([('missing', 1)])
         self.assertEqual(warn.call_count, 1)
 
@@ -160,7 +160,7 @@ class SchemaUnitTests(unittest.TestCase):
         NestedSchema, _, PayloadOnlySchema, _, _ = self._make_schema_classes()
         from pcapkit.corekit.infoclass import info_final
         from pcapkit.corekit.protochain import ProtoChain
-        from pcapkit.protocols.data.data import Data
+        from pcapkit.protocols.data import Data
         from pcapkit.protocols.protocol import Protocol
         from pcapkit.utilities.exceptions import ProtocolUnbound
 
@@ -179,7 +179,7 @@ class SchemaUnitTests(unittest.TestCase):
                 return 0
 
             def read(self, length: int | None = None, **kwargs: object) -> DummyData:
-                from pcapkit.protocols.misc.no_payload import NoPayload
+                from pcapkit.protocols.misc.no_payload.protocol import NoPayload
                 self._next = NoPayload()
                 self._protos = ProtoChain(self.__class__, self.alias)
                 return DummyData()
@@ -216,7 +216,7 @@ class SchemaUnitTests(unittest.TestCase):
         as_none = FeatureSchema(kind=1, repeated=None, nested=NestedSchema(marker=0x33), payload=b'')
         self.assertEqual(bytes(as_none), b'\x01\x33\x00\x00')
 
-        with mock.patch('pcapkit.protocols.schema.schema.warn') as warn:
+        with mock.patch('pcapkit.protocols.schema.warn') as warn:
             unpacked = ConditionalSchema.unpack(b'\x01', 1, None)
         self.assertEqual(unpacked.flag, 1)
         self.assertEqual(unpacked.maybe, 0)
@@ -224,7 +224,7 @@ class SchemaUnitTests(unittest.TestCase):
 
     def test_from_dict_hooks_schema_final_and_enum_schema_registry(self) -> None:
         NestedSchema, FeatureSchema, _, _, _ = self._make_schema_classes()
-        from pcapkit.protocols.schema.schema import EnumSchema, schema_final
+        from pcapkit.protocols.schema import EnumSchema, schema_final
 
         schema = FeatureSchema.from_dict([
             ('kind', 9),
@@ -242,7 +242,7 @@ class SchemaUnitTests(unittest.TestCase):
         FeatureSchema.pre_unpack(packet)
         self.assertIs(schema.post_process(packet), schema)
 
-        with mock.patch('pcapkit.protocols.schema.schema.warn') as warn:
+        with mock.patch('pcapkit.protocols.schema.warn') as warn:
             schema_final(NestedSchema)
         self.assertEqual(warn.call_count, 1)
 
@@ -294,7 +294,7 @@ class SchemaUnitTests(unittest.TestCase):
 
         """
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class GeneratedInitSchema(Schema):
@@ -311,8 +311,8 @@ class SchemaUnitTests(unittest.TestCase):
     def test_generated_init_is_installed_and_runs_post_init(self) -> None:
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field
-        from pcapkit.protocols.schema.misc.no_payload import NoPayload
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.misc.no_payload.schema import NoPayload
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class HeaderSchema(Schema):
@@ -354,7 +354,7 @@ class SchemaUnitTests(unittest.TestCase):
     def test_post_init_fills_the_unset_and_keeps_an_explicit_none(self) -> None:
         from pcapkit.corekit.fields.misc import ConditionalField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class OptionalSchema(Schema):
@@ -391,7 +391,7 @@ class SchemaUnitTests(unittest.TestCase):
         NestedSchema, FeatureSchema, PayloadOnlySchema, _, _ = self._make_schema_classes()
         from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import ProtocolUnbound
 
         @schema_final
@@ -437,7 +437,7 @@ class SchemaUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import OptionField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import PaddingField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class TinyOption(Schema):
@@ -499,7 +499,7 @@ class SchemaUnitTests(unittest.TestCase):
         :meth:`OptionField.unpack
         <pcapkit.corekit.fields.collections.OptionField.unpack>` is handed a
         :obj:`bytes` buffer by
-        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`, so
+        :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`, so
         its stream starts at zero and the two readings coincide -- but the method
         is public and takes an ``IO[bytes]`` as well, and a
         :class:`~pcapkit.corekit.fields.misc.SchemaField` hands the live file
@@ -541,7 +541,7 @@ class SchemaUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.misc import ForwardMatchField, SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import FieldValueError
 
         @schema_final
@@ -572,22 +572,22 @@ class SchemaUnitTests(unittest.TestCase):
         """A schema whose length is peeked before it is read for real.
 
         Returns:
-            A :class:`~pcapkit.protocols.schema.schema.Schema` subclass with a
+            A :class:`~pcapkit.protocols.schema.Schema` subclass with a
             :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` that previews
             the very octet ``length`` then reads again for real -- the shape
-            :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter`'s
+            :class:`~pcapkit.protocols.internet.mh.schema.CGAParameter`'s
             ``public_key_test`` has, minimised to one octet. ``length_peek``
             consumes nothing from the stream (:meth:`Schema.unpack
-            <pcapkit.protocols.schema.schema.Schema.unpack>` rewinds past it), so
+            <pcapkit.protocols.schema.Schema.unpack>` rewinds past it), so
             an instance built from ``b'\\x02AB'`` reads 3 octets off the wire --
             not 4 -- and :meth:`Schema.__len__
-            <pcapkit.protocols.schema.schema.Schema.__len__>` is expected to agree.
+            <pcapkit.protocols.schema.Schema.__len__>` is expected to agree.
 
         """
         from pcapkit.corekit.fields.misc import ForwardMatchField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.fields.strings import BytesField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class PreviewedItem(Schema):
@@ -604,7 +604,7 @@ class SchemaUnitTests(unittest.TestCase):
         """A ``ForwardMatchField`` reads octets but must not be billed for them.
 
         Without the fix, :meth:`Schema.unpack
-        <pcapkit.protocols.schema.schema.Schema.unpack>` keeps the octets a
+        <pcapkit.protocols.schema.Schema.unpack>` keeps the octets a
         :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` read in
         ``__buffer__`` even though it rewinds the stream past them, so
         ``len(schema)`` double-counts them: the same octet is read once by
@@ -636,9 +636,9 @@ class SchemaUnitTests(unittest.TestCase):
         <pcapkit.corekit.fields.collections.ListField.unpack>` raises
         ``FieldValueError`` on input that is exactly the right length. This is
         the same mechanism that fails
-        :class:`~pcapkit.protocols.schema.internet.mh.CGAParametersOption`'s
+        :class:`~pcapkit.protocols.internet.mh.schema.CGAParametersOption`'s
         ``parameters`` :class:`~pcapkit.corekit.fields.collections.ListField`
-        of :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter` items --
+        of :class:`~pcapkit.protocols.internet.mh.schema.CGAParameter` items --
         each carrying its own load-bearing ``public_key_test``
         ``ForwardMatchField`` -- with the identical
         ``FieldValueError: Field parameters has invalid length.``, minimised so
@@ -647,7 +647,7 @@ class SchemaUnitTests(unittest.TestCase):
         """
         from pcapkit.corekit.fields.collections import ListField
         from pcapkit.corekit.fields.misc import SchemaField
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         PreviewedItem = self._make_previewed_item_schema()
 
@@ -670,7 +670,7 @@ class SchemaUnitTests(unittest.TestCase):
         """A three-octet option area whose first option over-reads by one octet.
 
         Returns:
-            A :class:`~pcapkit.protocols.schema.schema.Schema` subclass carrying a
+            A :class:`~pcapkit.protocols.schema.Schema` subclass carrying a
             single :class:`~pcapkit.corekit.fields.collections.OptionField`.
 
         ``Wrapper`` is the smallest thing that separates the octets an option takes
@@ -682,7 +682,7 @@ class SchemaUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.collections import OptionField
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class Marker(Schema):

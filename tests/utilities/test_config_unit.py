@@ -2,7 +2,7 @@
 """Every tunable limit has one home, :mod:`pcapkit.utilities.config`.
 
 Guards against the limits being spread across packages, with readers such as
-:mod:`pcapkit.protocols.internet.ipv6` and :mod:`pcapkit.toolkit.pypcapfile`
+:mod:`pcapkit.protocols.internet.ipv6.protocol` and :mod:`pcapkit.toolkit.pypcapfile`
 copying them with ``from ... import``, so that patching the defining module leaves
 those readers on a stale value (#1726). Each is a ``PCAPKIT_*`` environment
 variable read once by :mod:`pcapkit.utilities.config`, every reader looks it up
@@ -49,7 +49,7 @@ GLOBAL = bytes.fromhex('d4c3b2a1' '0200' '0400' '00000000' '00000000' 'ffff0000'
 MOVED = {
     'pcapkit.protocols.protocol': ['FRAME_LAYER_LIMIT'],
     'pcapkit.protocols.internet.internet': ['EXTENSION_HEADER_LIMIT'],
-    'pcapkit.protocols.internet.ipv6': ['FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT'],
+    'pcapkit.protocols.internet.ipv6.protocol': ['FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT'],
     'pcapkit.toolkit.pypcapfile': ['EXTENSION_HEADER_LIMIT'],
     'pcapkit.dumpkit.common': ['FALLBACK_LIMIT'],
     'pcapkit.utilities.chardet': ['DETECT_CACHE_SIZE'],
@@ -358,8 +358,8 @@ class ReaderTests(unittest.TestCase):
 
     def frame(self, data: bytes) -> 'tuple[object, list[str]]':
         """The PCAP frame of ``data``, and the messages of the ProtocolWarnings it gave."""
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.warnings import ProtocolWarning
 
         header = Header(GLOBAL).info

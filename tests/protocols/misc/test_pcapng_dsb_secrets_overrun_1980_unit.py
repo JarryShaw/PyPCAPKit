@@ -142,7 +142,7 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
         self.assertEqual(rebuilt.hex(), octets.hex())
 
     def test_edited_secrets_take_their_own_length(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         info = self._parse(_dsb(UNKNOWN_SECRETS, 5, b'abcde')).info
         fields = {key: value for key, value in dict(info).items() if key != 'packet'}

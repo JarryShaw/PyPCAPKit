@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.internet.mh.MH` Vendor Crawlers
-================================================================
+""":class:`~pcapkit.protocols.internet.mh.protocol.MH` Vendor Crawlers
+=========================================================================
 
 .. module:: pcapkit.vendor.mh
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.mh.MH` implementations. Available
+:class:`~pcapkit.protocols.internet.mh.protocol.MH` implementations. Available
 enumerations include:
 
 .. list-table::

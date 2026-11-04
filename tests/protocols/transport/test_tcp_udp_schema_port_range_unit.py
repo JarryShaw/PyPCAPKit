@@ -37,7 +37,7 @@ class SchemaPortRangeTests(unittest.TestCase):
 
     @staticmethod
     def _udp(**ports: 'int') -> 'Any':
-        from pcapkit.protocols.schema.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.schema import UDP
 
         values = {'srcport': 1024, 'dstport': 53, 'len': 8, 'checksum': b'\x00\x00', 'payload': b''}
         values.update(ports)
@@ -45,7 +45,7 @@ class SchemaPortRangeTests(unittest.TestCase):
 
     @staticmethod
     def _tcp(**ports: 'int') -> 'Any':
-        from pcapkit.protocols.schema.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.schema import TCP
 
         flags = dict.fromkeys(('cwr', 'ece', 'urg', 'ack', 'psh', 'rst', 'syn', 'fin'), 0)
         values = {'srcport': 1024, 'dstport': 80, 'seq': 0, 'ack': 0,
@@ -65,8 +65,8 @@ class SchemaPortRangeTests(unittest.TestCase):
                             build(**{field: port}).pack()
 
     def test_the_boundary_ports_round_trip_byte_exact(self) -> None:
-        from pcapkit.protocols.schema.transport.tcp import TCP
-        from pcapkit.protocols.schema.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.schema import TCP
+        from pcapkit.protocols.transport.udp.schema import UDP
 
         for name, schema, build in (('UDP', UDP, self._udp), ('TCP', TCP, self._tcp)):
             for srcport in BOUNDARIES:

@@ -2,7 +2,7 @@
 """The L2TP family base dispatches on both paths. C.f. #2574.
 
 A versioned family's base never yields an instance of itself: parsing octets
-through :class:`~pcapkit.protocols.link.l2tp.L2TP`, constructing it from fields,
+through :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`, constructing it from fields,
 and its ``from_data`` all give the member the version names. The ``version``
 field names it on either path, and it is the only thing that does from fields:
 fields without it are refused. Octets without it are read by the version
@@ -44,8 +44,8 @@ class L2TPBaseDispatchTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_octets_without_version_give_the_member_their_nibble_names(self) -> None:
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for label, octets in OCTETS.items():
             for source in ('bytes', 'stream'):
@@ -58,7 +58,7 @@ class L2TPBaseDispatchTests(unittest.TestCase):
                     self.assertEqual(str(layer.protochain), str(L2TPv2(octets).protochain))
 
     def test_octets_no_member_reads_raise(self) -> None:
-        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for version in (1, 3, 15):
@@ -69,8 +69,8 @@ class L2TPBaseDispatchTests(unittest.TestCase):
             L2TP(b'\x00')
 
     def test_version_picks_the_member_from_octets(self) -> None:
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for label, octets in OCTETS.items():
             for source in ('bytes', 'stream'):
@@ -82,7 +82,7 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
     def test_version_over_octets_of_another_version_is_the_parser_s_error(self) -> None:
         """No cross-check: the member ``version`` names parses, and refuses the nibble."""
-        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for nibble in (1, 3):
@@ -94,8 +94,8 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
     def test_version_picks_the_member_from_fields(self) -> None:
         """Each build is byte-exact against the member's own and parses back unchanged."""
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for fields in ({}, {'tunnel_id': 0x1234, 'session_id': 0x5678}):
             with self.subTest(fields=fields):
@@ -109,7 +109,7 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
     def test_fields_without_version_raise(self) -> None:
         """Even fields only L2TPv2 takes pick nothing."""
-        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for fields in ({}, {'tunnel_id': 0x1234, 'session_id': 0x5678}):
@@ -119,7 +119,7 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
     def test_version_is_the_only_check(self) -> None:
         """A version no member reads raises; a field the member lacks fails its check."""
-        from pcapkit.protocols.link.l2tp import L2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
         from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
         for version in (1, 3, True, '2', 2.0):
@@ -134,8 +134,8 @@ class L2TPBaseDispatchTests(unittest.TestCase):
             L2TP.from_data({})
 
     def test_from_data_on_the_base_gives_the_member(self) -> None:
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
 
         for label, octets in OCTETS.items():
             parsed = L2TPv2(octets)
@@ -148,10 +148,10 @@ class L2TPBaseDispatchTests(unittest.TestCase):
 
     def test_only_the_base_dispatches(self) -> None:
         """A subclass of the base is constructed as itself, abstract or not."""
-        from pcapkit.protocols.data.link.l2tp import L2TP as Data_L2TP
-        from pcapkit.protocols.link.l2tp import L2TP
-        from pcapkit.protocols.link.l2tpv2 import L2TPv2
-        from pcapkit.protocols.schema.link.l2tp import L2TP as Schema_L2TP
+        from pcapkit.protocols.link.l2tp.data import L2TP as Data_L2TP
+        from pcapkit.protocols.link.l2tp.protocol import L2TP
+        from pcapkit.protocols.link.l2tpv2.protocol import L2TPv2
+        from pcapkit.protocols.link.l2tp.schema import L2TP as Schema_L2TP
 
         class Abstract(L2TP):  # type: ignore[type-arg] # pylint: disable=abstract-method
             """A direct subclass of the base, still abstract."""

@@ -82,9 +82,9 @@ class PreserveDefaultsTests(unittest.TestCase):
     def test_aliased_registries_are_named_by_their_class(self) -> 'None':
         """``Enum_TransType`` is the module's private name for ``TransType``."""
         # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        from pcapkit.protocols.internet.ah import AH
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ah.protocol import AH
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for function, expected in ((AH.make, 'next=TransType.UDP'), (HTTPv2.make, 'type=Frame.DATA'),
                                    (PCAPNG._make_option_if_filter,  # pylint: disable=protected-access

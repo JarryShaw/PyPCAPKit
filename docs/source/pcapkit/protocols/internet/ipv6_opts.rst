@@ -2,9 +2,10 @@ IPv6-Opts - Destination Options for IPv6
 ========================================
 
 .. module:: pcapkit.protocols.internet.ipv6_opts
+.. module:: pcapkit.protocols.internet.ipv6_opts.protocol
 
-:mod:`pcapkit.protocols.internet.ipv6_opts` contains
-:class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+:mod:`pcapkit.protocols.internet.ipv6_opts.protocol` contains
+:class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`
 only, which implements the extractor for Destination Options
 for IPv6 (IPv6-Opts) [*]_, whose structure is described
 as below:
@@ -17,7 +18,7 @@ Octets      Bits        Name                    Description
   2          16   ``opts.options``          Options
 ======= ========= =================== =================================
 
-.. autoclass:: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts
    :no-members:
    :show-inheritance:
 
@@ -80,132 +81,137 @@ Octets      Bits        Name                    Description
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipv6_opts
+.. module:: pcapkit.protocols.internet.ipv6_opts.schema
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.IPv6_Opts
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.schema.internet.ipv6_opts``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.IPv6_Opts
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.Option
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.PadOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.PadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.TunnelEncapsulationLimitOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.TunnelEncapsulationLimitOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RouterAlertOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.RouterAlertOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.CALIPSOOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts._SMFDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema._SMFDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.SMFDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.SMFIdentificationBasedDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.SMFHashBasedDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.PDMOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.PDMOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts._QuickStartOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema._QuickStartOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QuickStartOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QuickStartRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QuickStartReportOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.RPLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.MPLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.ILNPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.LineIdentificationOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.LineIdentificationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.JumboPayloadOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.JumboPayloadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.HomeAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.IPDFFOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.IPDFFOption
    :members:
    :show-inheritance:
 
 Type Stubs
 ~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.TaggerIDInfo
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.TaggerIDInfo
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QuickStartFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.RPLFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.MPLFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.DFFFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDTestFlag
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.SMFDPDTestFlag
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QSTestFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QSNonce
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.schema.QSNonce
    :members:
    :show-inheritance:
 
@@ -213,120 +219,125 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 The option helpers are shared with
-:mod:`~pcapkit.protocols.schema.internet.hopopt` and documented in
-:mod:`pcapkit.protocols.schema.internet.ipv6_option`. The functions below bind
+:mod:`~pcapkit.protocols.internet.hopopt.schema` and documented in
+:mod:`pcapkit.protocols.internet.ipv6_ext.schema`. The functions below bind
 them to this module's error prefix and option schemas;
-:func:`~pcapkit.protocols.schema.internet.ipv6_option.rpl_opt_sub_tlv_len` and
-:func:`~pcapkit.protocols.schema.internet.ipv6_option.pad_opt_data_len` are
+:func:`~pcapkit.protocols.internet.ipv6_ext.schema.rpl_opt_sub_tlv_len` and
+:func:`~pcapkit.protocols.internet.ipv6_ext.schema.pad_opt_data_len` are
 used unchanged.
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.calipso_pad_len
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_pad_len
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.mpl_opt_seed_id_len
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.calipso_pad_len
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.mpl_opt_pad_len
 
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_id_len
-.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.quick_start_data_selector
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.smf_dpd_data_selector
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.smf_i_dpd_tid_selector
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.smf_i_dpd_id_len
+.. autofunction:: pcapkit.protocols.internet.ipv6_opts.schema.quick_start_data_selector
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipv6_opts
+.. module:: pcapkit.protocols.internet.ipv6_opts.data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts
+.. versionremoved:: 1.6.0
+
+   ``pcapkit.protocols.data.internet.ipv6_opts``, with no alias: the module moved here
+   (:issue:`2534`).
+
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.IPv6_Opts
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.Option
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.Option
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.UnassignedOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.UnassignedOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PadOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.PadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.TunnelEncapsulationLimitOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.TunnelEncapsulationLimitOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RouterAlertOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.RouterAlertOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.CALIPSOOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.CALIPSOOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.SMFDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFIdentificationBasedDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.SMFIdentificationBasedDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFHashBasedDPDOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.SMFHashBasedDPDOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PDMOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.PDMOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.QuickStartOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartRequestOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.QuickStartRequestOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartReportOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.QuickStartReportOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.RPLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.RPLFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.MPLOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.MPLFlags
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.ILNPOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.ILNPOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.LineIdentificationOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.LineIdentificationOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.JumboPayloadOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.JumboPayloadOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.HomeAddressOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.HomeAddressOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPDFFOption
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.IPDFFOption
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.DFFFlags
+.. autoclass:: pcapkit.protocols.internet.ipv6_opts.data.DFFFlags
    :members:
    :show-inheritance:
 

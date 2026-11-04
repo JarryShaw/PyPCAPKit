@@ -63,7 +63,7 @@ class TestPCAPNGJournalBinaryOverrun(PCAPNGTestCase):
     def test_extraction_continues_past_the_kept_block(self) -> None:
         """The block after the malformed journal entry is still extracted."""
         from pcapkit.foundation.extraction import Extractor
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from tests.protocols.misc.test_pcapng_unit import NamedBuffer
 
         shb = struct.pack('<IIIHHqI', 0x0A0D0D0A, 28, 0x1A2B3C4D, 1, 0, -1, 28)

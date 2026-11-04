@@ -11,9 +11,9 @@ code the field cannot carry raises
 for a field wider than one bit.
 
 :data:`ROWS` holds one row per migrated field of
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
-:class:`~pcapkit.protocols.misc.pcap.header.Header` and
-:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.IP_Pseudo`: the maker, the
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`,
+:class:`~pcapkit.protocols.misc.pcap.header.protocol.Header` and
+:class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`: the maker, the
 field, its enumeration, its width in bits as the schema declares it, the code
 of a member, and the prefix of the refusal's message. The code of each option
 and the type of each name resolution record given to a block maker, as a
@@ -58,17 +58,17 @@ ROWS = (
      0x5A4E574B, 'PCAP-NG: invalid [DSB] secrets_type: '),
     ('PCAPNG._make_option_if_filter', 'filter', 'pcapkit.const.pcapng.filter_type', 'FilterType', 8,
      1, 'PCAP-NG: invalid [if_filter] filter: '),
-    ('PCAPNG._make_option_epb_flags', 'direction', 'pcapkit.protocols.misc.pcapng', 'PacketDirection', 2,
+    ('PCAPNG._make_option_epb_flags', 'direction', 'pcapkit.protocols.misc.pcapng.protocol', 'PacketDirection', 2,
      1, 'PCAP-NG: invalid [epb_flags] direction: '),
-    ('PCAPNG._make_option_epb_flags', 'reception', 'pcapkit.protocols.misc.pcapng', 'PacketReception', 3,
+    ('PCAPNG._make_option_epb_flags', 'reception', 'pcapkit.protocols.misc.pcapng.protocol', 'PacketReception', 3,
      2, 'PCAP-NG: invalid [epb_flags] reception: '),
     ('PCAPNG._make_option_epb_hash', 'algorithm', 'pcapkit.const.pcapng.hash_algorithm', 'HashAlgorithm', 8,
      2, 'PCAP-NG: invalid [epb_hash] algorithm: '),
     ('PCAPNG._make_option_epb_verdict', 'verdict', 'pcapkit.const.pcapng.verdict_type', 'VerdictType', 8,
      1, 'PCAP-NG: invalid [epb_verdict] verdict: '),
-    ('PCAPNG._make_option_pack_flags', 'direction', 'pcapkit.protocols.misc.pcapng', 'PacketDirection', 2,
+    ('PCAPNG._make_option_pack_flags', 'direction', 'pcapkit.protocols.misc.pcapng.protocol', 'PacketDirection', 2,
      2, 'PCAP-NG: invalid [pack_flags] direction: '),
-    ('PCAPNG._make_option_pack_flags', 'reception', 'pcapkit.protocols.misc.pcapng', 'PacketReception', 3,
+    ('PCAPNG._make_option_pack_flags', 'reception', 'pcapkit.protocols.misc.pcapng.protocol', 'PacketReception', 3,
      3, 'PCAP-NG: invalid [pack_flags] reception: '),
     ('PCAPNG._make_option_pack_hash', 'algorithm', 'pcapkit.const.pcapng.hash_algorithm', 'HashAlgorithm', 8,
      2, 'PCAP-NG: invalid [pack_hash] algorithm: '),
@@ -101,7 +101,7 @@ class MiscMakeCodeTests(unittest.TestCase):
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         section = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block, block={})
         context = Context(section.info)  # type: Any
@@ -113,7 +113,7 @@ class MiscMakeCodeTests(unittest.TestCase):
     def _block(self, name: 'str', block: 'dict[str, Any]') -> 'bytes':
         """The octets of the block named ``name``, built from ``block`` in a section."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # the Packet Block is obsolete
@@ -132,9 +132,9 @@ class MiscMakeCodeTests(unittest.TestCase):
 
     def _builder(self, maker: 'str', field: 'str') -> 'Callable[[Any], bytes]':
         """How a caller builds octets with ``value`` for ``field`` of ``maker``."""
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         builders = {
             'PCAPNG.make': lambda value: PCAPNG(num=0, sct=1, ctx=None, type=value, block={}).data,
@@ -214,7 +214,7 @@ class MiscMakeCodeTests(unittest.TestCase):
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         with self.assertRaises(ValueError):
             BlockType.get(0x100)
@@ -243,7 +243,7 @@ class MiscMakeCodeTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         cases = (
             ('Interface_Description_Block', {'linktype': 1, 'snaplen': 0x40000}, 'options',
@@ -266,9 +266,9 @@ class MiscMakeCodeTests(unittest.TestCase):
                     self.assertRefused(build, value, prefix)
 
     def test_no_maker_takes_the_removed_arguments(self) -> None:
-        from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
-        from pcapkit.protocols.misc.pcap.header import Header
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (PCAPNG, Header, IP_Pseudo):
             for name in vars(cls):

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data.dtls import Datagram as DTLS_Datagram
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-    from pcapkit.protocols.data.application.dtls import DTLSHandshake
+    from pcapkit.protocols.application.dtls.data import DTLSHandshake
     from pcapkit.protocols.protocol import ProtocolBase
 
 # registry key an analyser dispatches a reassembled payload on; see ``Deferred``
@@ -50,7 +50,7 @@ class Completion(EnumLookup, StrEnum):
     instead.
 
     It derives from :mod:`pcapkit.utilities.compat`'s ``StrEnum``, as
-    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys what a
+    :class:`~pcapkit.protocols.application.httpv1.protocol.Type` does, which buys what a
     plain :class:`enum.Enum` does not: the value survives
     :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
     :meth:`Datagram.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` hands this
@@ -179,7 +179,7 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
       header as if unfragmented (:rfc:`6347#section-4.2.3`), to the decoder
       :func:`~pcapkit.foundation.analysis.dtls.dtls_handshake` runs,
       :meth:`DTLS.analyze_handshake
-      <pcapkit.protocols.application.dtls.DTLS.analyze_handshake>`, which reads
+      <pcapkit.protocols.application.dtls.protocol.DTLS.analyze_handshake>`, which reads
       the body by its :class:`~pcapkit.const.tls.handshake_type.HandshakeType`.
 
     Those are the cases the type parameter is constrained to. IP's and TCP's are
@@ -191,7 +191,7 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     :meth:`TCP._make_ports <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`
     really answers with -- so what the deferred analysis dispatches on is of a
     piece with what the eager path dispatches on at
-    :attr:`TCP.src <pcapkit.protocols.transport.tcp.TCP.src>`, whichever
+    :attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>`, whichever
     reassembler built it. (Of a piece, not identical: for an *unassigned* port
     the two paths build equal members by different routes, which
     ``TCP.submit``'s own docstring records.)
@@ -228,7 +228,7 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
     .. versionchanged:: 1.6.0
 
        Also constrained to the DTLS handshake header, and the analyser may
-       return a :class:`~pcapkit.protocols.data.application.dtls.DTLSHandshake`
+       return a :class:`~pcapkit.protocols.application.dtls.data.DTLSHandshake`
        (:issue:`2531`). IP's and TCP's analyser is the parse their
        :mod:`pcapkit.foundation.analysis` module runs, bound to the
        reassembly's protocol, rather than that protocol's bound ``analyze``

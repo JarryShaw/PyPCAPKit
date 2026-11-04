@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-""":class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` Vendor Crawlers
-============================================================================
+""":class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` Vendor Crawlers
+=====================================================================================
 
 .. module:: pcapkit.vendor.ieee802_11
 
 This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.ieee802_11.IEEE802_11` implementations.
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` implementations.
 Available vendor crawlers include:
 
 .. list-table::

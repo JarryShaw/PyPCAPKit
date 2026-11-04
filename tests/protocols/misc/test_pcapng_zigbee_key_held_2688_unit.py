@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2688: a held ZigBee key is an ordinary short read.
 
-:func:`~pcapkit.protocols.schema.misc.pcapng.zigbee_key_held` rebuilds a ZigBee
+:func:`~pcapkit.protocols.misc.pcapng.schema.zigbee_key_held` rebuilds a ZigBee
 NWK or APS key schema from the Secrets Data octets a parsed block held. Without
 the fix it zero-fills those octets to the key's fixed width and records the cut
 by hand, so the schema's buffers span the fixed width until it is packed:
@@ -93,7 +93,7 @@ class TestPCAPNGZigBeeKeyHeld(PCAPNGTestCase):
 
     def _cases(self) -> 'Iterator[tuple[Any, int, tuple[tuple[str, int], ...], int]]':
         """Each key's schema, Secrets Type and fields, with every count of octets swept."""
-        from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey, ZigBeeNWKKey
+        from pcapkit.protocols.misc.pcapng.schema import ZigBeeAPSKey, ZigBeeNWKKey
 
         schemas = {0x5A4E574B: ZigBeeNWKKey, 0x5A415053: ZigBeeAPSKey}
         for secrets_type, fields in FIELDS.items():
@@ -105,7 +105,7 @@ class TestPCAPNGZigBeeKeyHeld(PCAPNGTestCase):
 
     def test_schema_holds_the_octets_held(self) -> None:
         """The schema holds exactly the octets given, records their cut, and reports nothing."""
-        from pcapkit.protocols.schema.misc.pcapng import zigbee_key_held
+        from pcapkit.protocols.misc.pcapng.schema import zigbee_key_held
 
         for schema, secrets_type, fields, count in self._cases():
             with self.subTest(secrets_type=hex(secrets_type), count=count):
@@ -126,7 +126,7 @@ class TestPCAPNGZigBeeKeyHeld(PCAPNGTestCase):
     def test_made_block_is_the_captured_block(self) -> None:
         """Made from the parsed key, or rebuilt from the block, it is as captured and quiet."""
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for _, secrets_type, _, count in self._cases():
             with self.subTest(secrets_type=hex(secrets_type), count=count):

@@ -3,7 +3,7 @@
 
 GitHub issues from the internet-v4 round-trip audit (#1202):
 
-* #1313 -- :meth:`HIP.make <pcapkit.protocols.internet.hip.HIP.make>` neither
+* #1313 -- :meth:`HIP.make <pcapkit.protocols.internet.hip.protocol.HIP.make>` neither
   padded nor validated a raw ``bytes`` parameter, so a 12-octet one gave Header
   Length ``5`` over 52 packed octets.
 * #1314 -- a packet with no parameters has no ``parameters`` attribute, and
@@ -52,14 +52,14 @@ class TestHIPRoundTrip(unittest.TestCase):
         reimport_once_per_class(self)
 
     def assertRoundTrips(self, wire: bytes) -> None:  # pylint: disable=invalid-name
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         parsed = HIP(io.BytesIO(wire), len(wire), extension=True)
         self.assertEqual(HIP.from_data(parsed.info).data.hex(), wire.hex())
 
     def test_raw_parameter_is_padded_and_counted(self) -> None:
         """#1313: a raw parameter is padded to 8 octets, and Header Length counts it."""
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for raw, padded in ((b'\x00\x41\x00\x08' + bytes(8), 16),
                             (b'\x00\x41\x00\x03' + bytes(3), 8),
@@ -86,7 +86,7 @@ class TestHIPRoundTrip(unittest.TestCase):
         import datetime
 
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
         from pcapkit.utilities.exceptions import ProtocolError
 
         for octet, lifetime in ((32, datetime.timedelta(seconds=1)),
@@ -121,7 +121,7 @@ class TestHIPRoundTrip(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.hip.registration import Registration
         from pcapkit.const.hip.registration_failure import RegistrationFailure
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         wire = packet(reg_failed(1, [1, 2, 3]))
         param = HIP(io.BytesIO(wire), len(wire), extension=True).info.parameters[Parameter.REG_FAILED]
@@ -150,7 +150,7 @@ class TestHIPRoundTrip(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.hip.registration import Registration
         from pcapkit.const.hip.registration_failure import RegistrationFailure
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for failure_type, reg_types, octets in (
             (RegistrationFailure.Insufficient_resources,

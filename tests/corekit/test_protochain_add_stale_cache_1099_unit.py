@@ -10,9 +10,9 @@ from __future__ import annotations
 import unittest
 
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.internet.ipv4 import IPv4
-from pcapkit.protocols.link.ethernet import Ethernet
-from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.internet.ipv4.protocol import IPv4
+from pcapkit.protocols.link.ethernet.protocol import Ethernet
+from pcapkit.protocols.transport.tcp.protocol import TCP
 
 
 class ProtoChainAddCacheTests(unittest.TestCase):

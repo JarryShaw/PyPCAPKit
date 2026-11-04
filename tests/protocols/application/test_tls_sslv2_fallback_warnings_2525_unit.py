@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2525: an SSLv2 hello on TCP 443 reports nothing of TLS's rejected trial.
 
-:meth:`TLS.unpack <pcapkit.protocols.application.tls.TLS.unpack>` tries TLS
+:meth:`TLS.unpack <pcapkit.protocols.application.tls.protocol.TLS.unpack>` tries TLS
 first, and offers the record to SSLv2 only once TLS rejects it. An SSLv2
 CLIENT-HELLO advertising ``0x0300``, ``0x0301`` or ``0x0303`` puts that version's
 octets where TLS reads its record length, so TLS's header read warns
@@ -58,7 +58,7 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
     @staticmethod
     def _tcp(payload: 'bytes', action: 'str') -> 'tuple[object, list[warnings.WarningMessage]]':
         """Parse ``payload`` on TCP 443 under ``action``, with the warnings it reports."""
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         data = TCP_TO_443 + payload
         with warnings.catch_warnings(record=True) as caught:
@@ -68,7 +68,7 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
 
     def test_tls_header_read_warns_on_each_hello(self) -> None:
         """Premise: TLS's record header alone warns on each hello the issue reports."""
-        from pcapkit.protocols.schema.application.tls import TLS as Schema_TLS
+        from pcapkit.protocols.application.tls.schema import TLS as Schema_TLS
 
         for version in VERSIONS:
             for two_byte_header in (True, False):
@@ -127,7 +127,7 @@ class TestSSLv2FallbackWarnings(unittest.TestCase):
 
     def test_both_trials_rejected_outside_beholder_report_tls_alone(self) -> None:
         """A direct parse raises TLS's error and reports TLS's trial warning, not SSLv2's."""
-        from pcapkit.protocols.application.tls import TLS
+        from pcapkit.protocols.application.tls.protocol import TLS
         from pcapkit.utilities.exceptions import ProtocolError
 
         with warnings.catch_warnings(record=True) as caught:

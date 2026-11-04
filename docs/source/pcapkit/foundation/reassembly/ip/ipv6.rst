@@ -59,7 +59,7 @@ Terminology
 
           ``ihl``, ``header`` and ``tl`` all stop short of the 8-octet Fragment
           header, because :rfc:`8200#section-4.5` says it is not present in the
-          reassembled packet. :attr:`IPv6.hdr_len <pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len>`
+          reassembled packet. :attr:`IPv6.hdr_len <pcapkit.protocols.internet.ipv6.data.IPv6.hdr_len>`
           does count it -- it is a header length, and the Fragment header is one
           of the extension headers it has walked -- so the ``pcap`` and
           ``pcapng`` adapters subtract it back off. The ``dpkt`` and ``scapy``

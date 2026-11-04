@@ -18,7 +18,7 @@ big-endian capture then byte-swaps ``ts_sec``, ``ts_usec``, ``incl_len`` and
 swallows the rest of the file and the read that follows is handed a negative
 payload length, raising
 ``ValueError: read length must be non-negative or -1`` out of
-:file:`pcapkit/protocols/schema/schema.py`. The defect is one character, and
+:file:`pcapkit/protocols/schema.py`. The defect is one character, and
 nothing but these fixtures can tell whether it is present.
 
 =============================== ==========================================
@@ -76,7 +76,7 @@ SAMPLE = ROOT / 'examples' / 'captures'
 
 #: PCAP file magic numbers, keyed by endianness and nanosecond-resolution flag.
 #: The same values as
-#: :data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, which the
+#: :data:`pcapkit.protocols.misc.pcap.header.schema.MAGIC_NUMBER`, which the
 #: reader these fixtures are written for dispatches on; they are repeated
 #: rather than imported so that a fixture stays generatable without
 #: :mod:`pcapkit` importing cleanly.

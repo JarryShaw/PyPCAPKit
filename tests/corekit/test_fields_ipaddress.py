@@ -258,7 +258,7 @@ class IPAddressFieldTests(unittest.TestCase):
         decodes without any exception or warning, silently corrupting the
         addresses to ``0.0.0.1``/``0.0.0.0``. It must raise instead.
         """
-        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
         from pcapkit.utilities.exceptions import BaseError
 
         proto = object.__new__(IPv4)
@@ -466,8 +466,8 @@ class IPAddressFieldTests(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.internet.mh.protocol import MH
         from pcapkit.utilities.exceptions import (BaseError, FieldValueError,
                                                   ProtocolError)
 
@@ -512,7 +512,7 @@ class IPAddressFieldTests(unittest.TestCase):
                 self.assertTrue(issubclass(cls, ValueError))
 
     def test_switch_backed_address_makers_reject_a_bool(self) -> None:
-        """#508's remaining sites, for the protocols outside :mod:`~pcapkit.protocols.internet.mh`.
+        """#508's remaining sites, for the protocols outside :mod:`~pcapkit.protocols.internet.mh.protocol`.
 
         ``HIP``'s locator and ``TCP``'s Multipath ``ADD_ADDR`` address are both
         backed by a :class:`~pcapkit.corekit.fields.misc.SwitchField`, and both
@@ -526,8 +526,8 @@ class IPAddressFieldTests(unittest.TestCase):
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-        from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.internet.hip.protocol import HIP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
         from pcapkit.utilities.exceptions import BaseError, FieldValueError
 
         hip = object.__new__(HIP)

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2649: link type 107 reaches FRAD, and IP protocol 47 reaches GRE.
 
-:class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` bind ``LinkType.FRELAY`` (107) to
-:class:`~pcapkit.protocols.link.frad.FRAD`, and
+:class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` and
+:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` bind ``LinkType.FRELAY`` (107) to
+:class:`~pcapkit.protocols.link.frad.protocol.FRAD`, and
 :class:`~pcapkit.protocols.internet.internet.Internet` binds ``TransType.GRE`` (47)
-to :class:`~pcapkit.protocols.link.gre.GRE`, so IPv4 and IPv6 dispatch it. The
+to :class:`~pcapkit.protocols.link.gre.protocol.GRE`, so IPv4 and IPv6 dispatch it. The
 captures and datagrams here are built octet by octet, from :rfc:`2427` and
 :rfc:`2784`/:rfc:`2890`; each parses through the dissector, every frame and layer
 rebuilds byte-exactly, GRE's checksum (#2618) is verified behind IPv4 and IPv6, and
@@ -153,18 +153,18 @@ class TestFRADAndGREBindings(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.gre import GRE
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.gre.protocol import GRE
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for cls in (Frame, PCAPNG):
             with self.subTest(table=cls.__name__):
                 self.assertEqual(cls.__proto__[LinkType.FRELAY], ModuleDescriptor('pcapkit.protocols.link', 'FRAD'))
                 self.assertIs(cls._lookup_next_layer(cls.__proto__, FRAD.__index__()), FRAD)
-        self.assertEqual(Internet.__proto__[TransType.GRE], ModuleDescriptor('pcapkit.protocols.link.gre', 'GRE'))
+        self.assertEqual(Internet.__proto__[TransType.GRE], ModuleDescriptor('pcapkit.protocols.link.gre.protocol', 'GRE'))
         for cls in (IPv4, IPv6):
             with self.subTest(table=cls.__name__):
                 self.assertIs(cls.__proto__, Internet.__proto__)
@@ -196,8 +196,8 @@ class TestFRADAndGREBindings(unittest.TestCase):
 
     def test_gre_over_ip(self) -> None:
         """IPv4 and IPv6 hand protocol 47 to GRE, which hands its EtherType on."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         cases = [
             (IPv4, _ipv4(47, _gre(INNER)), 4, None, None),
@@ -222,8 +222,8 @@ class TestFRADAndGREBindings(unittest.TestCase):
     def test_gre_checksum_over_ip(self) -> None:
         """The RFC 2784 checksum is verified behind IPv4 and IPv6, and not in a fragment."""
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
         from pcapkit.utilities.warnings import ChecksumWarning
 
         good = _gre(INNER, checksum=True)
@@ -250,8 +250,8 @@ class TestFRADAndGREBindings(unittest.TestCase):
 
     def test_a_refused_gre_header_is_kept_raw(self) -> None:
         """Version 1 is refused, and IPv4 keeps it as Raw, as LinuxSLL does (#2588)."""
-        from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         octets = _ipv4(47, _gre(INNER, version=1))
         layer, messages = self._parse(IPv4, octets)

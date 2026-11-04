@@ -2,9 +2,9 @@
 """A FRAD pad octet is kept, and never invented, through a rebuild.
 
 GitHub issue #2716: :rfc:`2427#section-3` allows a single ``0x00`` pad octet ahead of
-any NLPID, and :class:`~pcapkit.protocols.link.frad.FRAD` reads one ahead of every
+any NLPID, and :class:`~pcapkit.protocols.link.frad.protocol.FRAD` reads one ahead of every
 NLPID, but its data model did not record whether one was there. So
-:meth:`FRAD.make <pcapkit.protocols.link.frad.FRAD.make>` wrote the pad ahead of a
+:meth:`FRAD.make <pcapkit.protocols.link.frad.protocol.FRAD.make>` wrote the pad ahead of a
 SNAP header alone: a pad before a direct NLPID was lost on a rebuild, and one was
 invented ahead of a SNAP header captured without it. The data model's ``pad``
 records it, and ``make()`` takes it, writing the pad ahead of a SNAP header alone
@@ -83,9 +83,9 @@ class FRADPadRebuildTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.frad import FRAD
-        from pcapkit.protocols.link.linux_sll1 import LinuxSLL1
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
+        from pcapkit.protocols.link.frad.protocol import FRAD
+        from pcapkit.protocols.link.linux_sll1.protocol import LinuxSLL1
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.FRAD = FRAD

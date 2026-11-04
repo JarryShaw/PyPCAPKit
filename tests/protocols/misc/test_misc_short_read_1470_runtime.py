@@ -76,7 +76,7 @@ class TestMiscShortRead(unittest.TestCase):
         warnings.simplefilter('ignore')
 
     def test_pcap_header_cut_at_every_offset(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
         from pcapkit.utilities.exceptions import BaseError
 
         names = _captures('.pcap')
@@ -98,7 +98,7 @@ class TestMiscShortRead(unittest.TestCase):
                         self.assertEqual(Header.from_data(header.info.to_dict()).data.hex(), cut.hex())
 
     def test_issue_1470_repro(self) -> None:
-        from pcapkit.protocols.misc.pcap.header import Header
+        from pcapkit.protocols.misc.pcap.header.protocol import Header
 
         raw = (SAMPLE_ROOT / _captures('.pcap')[0]).read_bytes()[:24]
         header = Header(raw[:4])
@@ -111,7 +111,7 @@ class TestMiscShortRead(unittest.TestCase):
         """The first block of each type in each PCAP-NG capture, with its keywords."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.foundation.engines.pcapng import Context
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         names = _captures('.pcapng')
         self.assertGreater(len(names), 2, f'no generated captures under {SAMPLE_ROOT}')
@@ -135,7 +135,7 @@ class TestMiscShortRead(unittest.TestCase):
                     ctx.interfaces.append(whole.info)
 
     def test_pcapng_block_cut_at_every_offset(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
         from pcapkit.utilities.exceptions import StreamEOFError
 
         types = set()
@@ -158,7 +158,7 @@ class TestMiscShortRead(unittest.TestCase):
         self.assertGreaterEqual(len(types), 8, sorted(types))
 
     def test_pcapng_whole_block_is_untouched(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for name, block, raw, kwargs in self._each_block():
             with self.subTest(capture=name, block=block):
@@ -169,7 +169,7 @@ class TestMiscShortRead(unittest.TestCase):
     def test_cut_block_keeps_its_fields(self) -> None:
         # the fields the capture holds still parse, so a cut packet keeps its packet
         from pcapkit.const.pcapng.block_type import BlockType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for name, block, raw, kwargs in self._each_block():
             if block != BlockType.Enhanced_Packet_Block.name:
@@ -192,7 +192,7 @@ class TestKeyLogLines(unittest.TestCase):
     def _unpack(self, schema: 'str', text: 'bytes', length: 'int') -> 'Any':
         import importlib
 
-        cls = getattr(importlib.import_module('pcapkit.protocols.schema.misc.pcapng'), schema)
+        cls = getattr(importlib.import_module('pcapkit.protocols.misc.pcapng.schema'), schema)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             return cls.unpack(text, length)
@@ -217,7 +217,7 @@ class TestKeyLogLines(unittest.TestCase):
 
         from pcapkit.utilities.warnings import ProtocolWarning
 
-        module = importlib.import_module('pcapkit.protocols.schema.misc.pcapng')
+        module = importlib.import_module('pcapkit.protocols.misc.pcapng.schema')
         for schema, text, message in (
             ('TLSKeyLog', b'CLIENT_RANDOM abcd\n',
              "PCAP-NG: invalid TLS key log line for label 'CLIENT_RANDOM'; "

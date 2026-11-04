@@ -30,7 +30,7 @@ DCCP_BASE = {
 
 
 def _dccp_registry() -> 'Any':
-    from pcapkit.protocols.transport.dccp import DCCP
+    from pcapkit.protocols.transport.dccp.protocol import DCCP
     return DCCP.__option__
 
 
@@ -59,12 +59,12 @@ def _dccp_overrides() -> 'dict[Any, dict[str, Any]]':
 
 
 def _dccp_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
-    from pcapkit.protocols.transport.dccp import DCCP
+    from pcapkit.protocols.transport.dccp.protocol import DCCP
     return DCCP(options=[(code, kwargs)], **DCCP_BASE)
 
 
 def _dccp_parse(octets: 'bytes') -> 'Any':
-    from pcapkit.protocols.transport.dccp import DCCP
+    from pcapkit.protocols.transport.dccp.protocol import DCCP
     return DCCP(octets, len(octets))
 
 
@@ -73,7 +73,7 @@ def _dccp_extract(parsed: 'Any') -> 'Any':
 
 
 def _dccp_rebuild(options: 'Any') -> 'Any':
-    from pcapkit.protocols.transport.dccp import DCCP
+    from pcapkit.protocols.transport.dccp.protocol import DCCP
     return DCCP(options=options, **DCCP_BASE)
 
 

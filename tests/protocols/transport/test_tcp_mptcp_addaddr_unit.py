@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """``TCP._make_mptcp_addaddr`` builds an ``ADD_ADDR`` option that packs. GitHub issue #541.
 
-Guards against :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base class
+Guards against :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`, the base class
 every Multipath TCP subtype schema inherits, declaring ``kind`` and ``length`` only under
 :data:`~typing.TYPE_CHECKING` -- annotations for a type checker, not real
 :class:`~pcapkit.corekit.fields.field.FieldBase` descriptors. ``Schema.__update__`` then
@@ -15,10 +15,10 @@ arithmetic differs by IP version and by whether ``port`` is given, but it does n
 ``port`` having already been packed), so with ``length`` a real field that lands before
 ``port`` in field order, the predicate reads a value that is already there. ``MPTCP``
 declares real ``kind``/``length`` fields itself, mirroring how
-:class:`~pcapkit.protocols.schema.transport.tcp.Option` does it for every non-Multipath TCP
-option -- see ``MPTCP`` in :mod:`pcapkit.protocols.schema.transport.tcp`.
+:class:`~pcapkit.protocols.transport.tcp.schema.Option` does it for every non-Multipath TCP
+option -- see ``MPTCP`` in :mod:`pcapkit.protocols.transport.tcp.schema`.
 
-Every other ``_make_mptcp_*`` helper in :mod:`pcapkit.protocols.transport.tcp` passes
+Every other ``_make_mptcp_*`` helper in :mod:`pcapkit.protocols.transport.tcp.protocol` passes
 ``kind=``/``length=`` to its schema the same way (``_make_mptcp_unknown``,
 ``_make_mptcp_capable``, ``_make_join_syn``, ``_make_join_synack``, ``_make_join_ack``,
 ``_make_mptcp_dss``, ``_make_mptcp_remove``, ``_make_mptcp_prio``, ``_make_mptcp_fail`` and
@@ -37,7 +37,7 @@ built through any ``_make_mptcp_*`` maker, so the pack and parse directions cann
 each other's bug out). Misaligned, ``0x1e`` decodes as subtype ``1``, and both cases then
 reach a ``pkt['length']`` read with no ``length`` in the packet mapping:
 :meth:`TCPMPTCPUnpackUnitTests.test_add_addr_spec_octets_parse_correctly` in
-:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`, which takes the
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector`, which takes the
 address family from the option length (#1217), and
 :meth:`TCPMPTCPUnpackUnitTests.test_mp_prio_spec_octets_parse_correctly` in
 ``MPTCPPriority.addr_id``'s own :class:`~pcapkit.corekit.fields.misc.ConditionalField`.
@@ -51,8 +51,8 @@ import unittest
 import warnings
 
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
-from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.tcp.schema import TCP as Schema_TCP
+from pcapkit.protocols.transport.tcp.protocol import TCP
 from pcapkit.utilities.warnings import UnknownFieldWarning
 
 #: A spec-correct ``ADD_ADDR`` option, RFC 8684 section 3.4.1: ``Kind`` ``0x1e``
@@ -60,7 +60,7 @@ from pcapkit.utilities.warnings import UnknownFieldWarning
 #: layout, which :rfc:`8684` reads as reserved bits and ``E``) packed into one
 #: octet as ``0x34``, ``Address ID`` ``1``, then the four octets of ``192.0.2.1``. Built
 #: by hand from the RFC figure, not through :meth:`TCP._make_mptcp_addaddr
-#: <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>` or any other maker, so a
+#: <pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_addaddr>` or any other maker, so a
 #: symmetric pack/parse bug could not cancel itself out here.
 ADD_ADDR_SPEC_OCTETS = bytes([0x1E, 0x08, 0x34, 0x01, 0xC0, 0x00, 0x02, 0x01])
 
@@ -74,7 +74,7 @@ MP_PRIO_SPEC_OCTETS = bytes([0x1E, 0x04, 0x51, 0x05])
 def build_tcp_segment(option_octets: 'bytes') -> 'bytes':
     """Pack a whole TCP segment carrying ``option_octets`` verbatim as its only option.
 
-    Goes through :class:`~pcapkit.protocols.schema.transport.tcp.TCP` (the schema, not
+    Goes through :class:`~pcapkit.protocols.transport.tcp.schema.TCP` (the schema, not
     the protocol) directly, supplying ``option_octets`` to the ``options`` field as raw
     bytes -- which :class:`~pcapkit.corekit.fields.collections.OptionField` packs
     unchanged -- so nothing here calls a ``_make_mptcp_*`` maker. Everything but the
@@ -109,7 +109,7 @@ def make_addaddr(**kwargs: 'object') -> 'bytes':
 
     Args:
         **kwargs: forwarded to :meth:`TCP._make_mptcp_addaddr
-            <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>`.
+            <pcapkit.protocols.transport.tcp.protocol.TCP._make_mptcp_addaddr>`.
 
     Returns:
         The packed option bytes.
@@ -183,7 +183,7 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
         """
         import ipaddress
 
-        from pcapkit.protocols.data.transport.tcp import MPTCPAddAddress as Data_MPTCPAddAddress
+        from pcapkit.protocols.transport.tcp.data import MPTCPAddAddress as Data_MPTCPAddAddress
         from pcapkit.const.tcp.option import Option as Enum_Option
 
         # NOTE: ``opt.addr`` has to already be an ``IPv4Address``/``IPv6Address``, as it
@@ -230,7 +230,7 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
 
         Guards against ``KeyError: 'length'``, raised when ``MPTCPAddAddress.test`` reads
         the ``kind`` octet ``0x1e`` (``0001 1110``) as its own subtype/flags octet and
-        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`, which
+        :func:`~pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector`, which
         takes the address family from the option length (#1217), finds no ``length``
         read ahead of it.
 

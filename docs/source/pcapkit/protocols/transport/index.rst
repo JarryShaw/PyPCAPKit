@@ -2,8 +2,6 @@ Transport Layer
 ===============
 
 .. module:: pcapkit.protocols.transport
-.. module:: pcapkit.protocols.data.transport
-.. module:: pcapkit.protocols.schema.transport
 
 :mod:`pcapkit.protocols.transport` is the collection of all protocols in
 transport layer, with detailed implementation and methods.

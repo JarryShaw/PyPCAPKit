@@ -720,7 +720,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
 
             It would also make the "unknown" reader the formats require
             unreachable for any genuinely unassigned code -- PCAP-NG's
-            :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the
+            :class:`~pcapkit.protocols.misc.pcapng.schema.UnknownBlock`, and the
             ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --
             because the lookup would fail before the dispatch that selects it.
             PCAP-NG repeats a block's total length at both ends precisely so
@@ -854,7 +854,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         Note:
             Building a member this way, rather than as some other type
             altogether, is why :meth:`PortEnumField.post_process` and
-            :meth:`OptionEnumField.post_process <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>`
+            :meth:`OptionEnumField.post_process <pcapkit.protocols.misc.pcapng.schema.OptionEnumField.post_process>`
             need this rather than :meth:`_pseudo_member`:
             the result answers ``isinstance(result, AppType)`` truthfully,
             which :meth:`PortEnumField.pre_process` tests before reading

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     #: A `pcap-ct`_ "frame" -- the ``(timestamp, bytes)`` pair that
     #: ``pcap.pcap`` iteration yields. Deliberately *not* named ``Frame``,
     #: so that it is not mistaken for
-    #: :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is what the
+    #: :class:`pcapkit.protocols.misc.pcap.frame.protocol.Frame`, which is what the
     #: built-in engines return.
     RawFrame = Tuple[float, bytes]
 

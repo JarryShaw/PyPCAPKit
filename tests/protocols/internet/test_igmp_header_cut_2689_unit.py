@@ -6,7 +6,7 @@ length, an IGMPv1, IGMPv2 or IGMPv3 message reads the fields the data never held
 zeros, and verifying that zero-filled checksum would read ``INVALID`` with a
 ``ChecksumWarning``. Every version's checksum covers the whole message
 (:rfc:`2236#section-2.3`, :rfc:`3376#section-4.1.2`), so
-:meth:`IGMP._verify_checksum <pcapkit.protocols.internet.igmp.IGMP._verify_checksum>`
+:meth:`IGMP._verify_checksum <pcapkit.protocols.internet.igmp.protocol.IGMP._verify_checksum>`
 reads the header's own ``__short_read__`` record as ``TRUNCATED``, as GRE does. A
 whole message is verified.
 
@@ -66,9 +66,9 @@ class IGMPHeaderCutTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
         from pcapkit.corekit.checksum.internet import ChecksumStatus
-        from pcapkit.protocols.internet.igmpv1 import IGMPv1
-        from pcapkit.protocols.internet.igmpv2 import IGMPv2
-        from pcapkit.protocols.internet.igmpv3 import IGMPv3
+        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1
+        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2
+        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3
         from pcapkit.utilities import config
         from pcapkit.utilities.warnings import ChecksumWarning
 

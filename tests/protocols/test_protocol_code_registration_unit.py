@@ -185,7 +185,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import \
             PayloadProtocolIdentifier
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
 
         class FakeProtocol:
             pass
@@ -203,8 +203,8 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         """
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         class FakeProtocol:
             pass
@@ -219,7 +219,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         """``ARPHRD`` names ``LinuxSLL``, the family base owning the registry (#2533)."""
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
 
         class FakeProtocol:
             pass
@@ -248,7 +248,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
 
     def test_explicit_dict_registers_named_destination(self) -> None:
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         class FakeProtocol:
             pass
@@ -260,8 +260,8 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
     def test_explicit_dict_spanning_two_destinations(self) -> None:
         """One declaration, e.g. an application port meaningful on both transports."""
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         class FakeProtocol:
             pass
@@ -290,7 +290,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         class FakeL2TPLike:
             pass
@@ -379,9 +379,9 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         import struct
 
         from pcapkit.const.linux.arphrd import ARPHRD
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.linux_sll2 import LinuxSLL2
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertNotIn(ARPHRD.NETROM, LinuxSLL.__proto__)
         frame = struct.pack('>HHIHBB8s', 0x0800, 0, 0, ARPHRD.NETROM, 0, 0, b'') + b'\xaa\xbb'
@@ -443,10 +443,10 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         internet_entry = Internet.__proto__[TransType.IPv4]
         self.assertIsInstance(link_entry, ModuleDescriptor)
         self.assertEqual((link_entry.module, link_entry.name),
-                         ('pcapkit.protocols.internet.ipv4', 'IPv4'))
+                         ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'))
         self.assertIsInstance(internet_entry, ModuleDescriptor)
         self.assertEqual((internet_entry.module, internet_entry.name),
-                         ('pcapkit.protocols.internet.ipv4', 'IPv4'))
+                         ('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -473,14 +473,14 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
     def _assert_rejected_unchanged(self, call: 'Any') -> None:
         from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.transport.sctp import SCTP
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.exceptions import RegistryError
 
         tables = {klass.__name__: klass.__proto__
@@ -505,16 +505,16 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self.assertEqual(TransType.ICMP, LinkType.ETHERNET)
         self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {Frame: TransType.ICMP}))
 
     def test_class_keyword_rejects_a_member_of_another_enum(self) -> None:
         from pcapkit.const.reg.transtype import TransType
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         def define() -> None:
             class Evil(Raw, code={Frame: TransType.ICMP}):
@@ -526,16 +526,16 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         """``Ethernet`` inherits ``Link.__proto__``, so its keys are ``EtherType``s."""
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.link.ethernet import Ethernet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.link.ethernet.protocol import Ethernet
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {Ethernet: TransType.ICMP}))
 
     def test_number_destination_rejects_a_member_of_another_enum(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {UDP: LinkType(53)}))
 
@@ -544,7 +544,7 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
 
         for code in ([TransType.L2TP, 5], [TransType.L2TP, {Internet: 115}]):
             with self.subTest(code=code):
@@ -553,8 +553,8 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
     def test_number_and_own_registry_destinations_still_accept_an_int(self) -> None:
         """A port is a valid ``TCP`` key; ``Loopback`` keeps an unchecked registry of its own."""
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.link.loopback import Loopback
-        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.link.loopback.protocol import Loopback
+        from pcapkit.protocols.transport.tcp.protocol import TCP
 
         class FakeProtocol:
             pass
@@ -601,17 +601,17 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
         from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.linux_sll import LinuxSLL
-        from pcapkit.protocols.link.radiotap import Radiotap
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.pcapng import PCAPNG
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.dccp import DCCP
-        from pcapkit.protocols.transport.sctp import SCTP
-        from pcapkit.protocols.transport.tcp import TCP
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL
+        from pcapkit.protocols.link.radiotap.protocol import Radiotap
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.dccp.protocol import DCCP
+        from pcapkit.protocols.transport.sctp.protocol import SCTP
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+        from pcapkit.protocols.transport.udp.protocol import UDP
 
         # destination -> (kind, number, a member of another enum, a bare int)
         expected = {
@@ -689,7 +689,7 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link`, so it
         registry does accept, and an assertion on :func:`vars` alone passes
         either way.
 
-        :class:`~pcapkit.protocols.internet.ipx.IPX` declares a pairing of its
+        :class:`~pcapkit.protocols.internet.ipx.protocol.IPX` declares a pairing of its
         own instead (#2511), so a bare packet type and a member of its own enum
         both reach it, where :class:`~pcapkit.protocols.internet.internet.Internet`'s
         would refuse the first and misread the second as an IP protocol number.
@@ -697,9 +697,9 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link`, so it
         from pcapkit.const.ipx.packet import Packet
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.ipx import IPX
+        from pcapkit.protocols.internet.ipx.protocol import IPX
         from pcapkit.protocols.link.link import Link
-        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.link.loopback.protocol import Loopback
 
         cases = (
             (Loopback, Link, 2),             # an address family, not an EtherType
@@ -728,9 +728,9 @@ loopback.Loopback` subclasses :class:`~pcapkit.protocols.link.link.Link`, so it
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code
-        from pcapkit.protocols.misc.pcap.frame import Frame
-        from pcapkit.protocols.misc.raw import Raw
-        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.protocols.misc.pcap.frame.protocol import Frame
+        from pcapkit.protocols.misc.raw.protocol import Raw
+        from pcapkit.protocols.transport.udp.protocol import UDP
         from pcapkit.utilities.exceptions import RegistryError
 
         for destination, key in ((Frame, TransType.ICMP), (UDP, LinkType(53))):
@@ -764,12 +764,12 @@ class ProtoDestDeclarationTests(unittest.TestCase):
         ('pcapkit.const.reg.transtype', 'TransType',
          (('pcapkit.protocols.internet.internet', 'Internet'),)),
         ('pcapkit.const.sctp.payload_protocol_identifier', 'PayloadProtocolIdentifier',
-         (('pcapkit.protocols.transport.sctp', 'SCTP'),)),
+         (('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),)),
         ('pcapkit.const.reg.linktype', 'LinkType',
-         (('pcapkit.protocols.misc.pcap.frame', 'Frame'),
-          ('pcapkit.protocols.misc.pcapng', 'PCAPNG'))),
+         (('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+          ('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'))),
         ('pcapkit.const.linux.arphrd', 'ARPHRD',
-         (('pcapkit.protocols.link.linux_sll', 'LinuxSLL'),)),
+         (('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),)),
     )
 
     def test_each_registry_declares_the_destinations_it_keys(self) -> None:

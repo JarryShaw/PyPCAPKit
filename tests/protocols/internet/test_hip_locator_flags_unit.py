@@ -7,7 +7,7 @@ as ``Reserved`` (7 bits) followed by ``P`` (1 bit). Declaring only
 rebuild: flags ``0xfe`` parse and rebuild through ``from_data`` as ``0x00``.
 ``Locator.flags`` names them ``reserved: (0, 7)``, per the #654 per-site policy,
 and carries them through
-:class:`~pcapkit.protocols.data.internet.hip.Locator` and ``make()``.
+:class:`~pcapkit.protocols.internet.hip.data.Locator` and ``make()``.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -38,7 +38,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
     def _frame(self, flags: int) -> bytes:
         """Build a one-locator ``LOCATOR_SET`` packet whose flags octet is ``flags``."""
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         octets = bytearray(HIP(
             parameters=[(Parameter.LOCATOR_SET,
@@ -49,7 +49,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
         return bytes(octets)
 
     def _parse(self, frame: bytes):  # type: ignore[no-untyped-def]
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         with warnings.catch_warnings():
             # Nested ``Locator`` schemas warn about their placeholder length;
@@ -59,7 +59,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
 
     def test_from_data_rebuilds_every_flags_bit(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         for flags in (0x00, 0x01, 0xfe, 0xff, 0x80, 0x55):
             with self.subTest(flags=hex(flags)):
@@ -75,7 +75,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
 
     def test_make_writes_reserved_from_keywords(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(
             parameters=[(Parameter.LOCATOR_SET,
@@ -87,7 +87,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
 
     def test_make_defaults_reserved_to_zero(self) -> None:
         from pcapkit.const.hip.parameter import Parameter
-        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.hip.protocol import HIP
 
         built = HIP(
             parameters=[(Parameter.LOCATOR_SET,

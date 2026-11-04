@@ -2,7 +2,7 @@
 """``from_dict(to_dict())`` rebuilds nested values, and ``len`` matches iteration.
 
 GitHub issue #1290: :meth:`Schema.to_dict
-<pcapkit.protocols.schema.schema.Schema.to_dict>` flattens a nested schema
+<pcapkit.protocols.schema.Schema.to_dict>` flattens a nested schema
 into a :obj:`dict`, and :meth:`SchemaField.pack
 <pcapkit.corekit.fields.misc.SchemaField.pack>` then called ``.pack`` on that
 dict. :meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>` kept
@@ -75,7 +75,7 @@ def release_inline_caches() -> None:
 
 #: PCAP-NG blocks, little-endian, one per block schema that claims a type code.
 #: Each nests its body in :attr:`PCAPNG.block
-#: <pcapkit.protocols.schema.misc.pcapng.PCAPNG.block>`, which is the
+#: <pcapkit.protocols.misc.pcapng.schema.PCAPNG.block>`, which is the
 #: :class:`~pcapkit.corekit.fields.misc.SchemaField` issue #1290 is about.
 PCAPNG_BLOCKS = {
     'shb': '0a0d0d0a' '1c000000' '4d3c2b1a' '0100' '0000' 'ffffffffffffffff' '1c000000',
@@ -105,7 +105,7 @@ class TestSchemaFromDictRoundTrip(unittest.TestCase):
     def _schemas(self):  # type: ignore[no-untyped-def]
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
-        from pcapkit.protocols.schema.schema import Schema, schema_final
+        from pcapkit.protocols.schema import Schema, schema_final
 
         @schema_final
         class In(Schema):
@@ -129,7 +129,7 @@ class TestSchemaFromDictRoundTrip(unittest.TestCase):
         self.assertEqual(Out.from_dict(inner=In(x=3), tail=4).pack(), b'\x03\x04')
 
     def test_pcapng_block_schemas_round_trip(self) -> None:
-        from pcapkit.protocols.schema.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.schema import PCAPNG
 
         for name, hexed in PCAPNG_BLOCKS.items():
             raw = bytes.fromhex(hexed)
@@ -170,7 +170,7 @@ class TestInfoFromDictRoundTrip(unittest.TestCase):
         self.assertEqual(list(rebuilt.to_dict().items(multi=True)), list(info.to_dict().items(multi=True)))
 
     def test_string_annotation_in_a_data_module_is_resolved(self) -> None:
-        from pcapkit.protocols.data.application.httpv2 import DataFrame, DataFrameFlags
+        from pcapkit.protocols.application.httpv2.data import DataFrame, DataFrameFlags
 
         frame = DataFrame.from_dict({'flags': {'END_STREAM': True, 'PADDED': False}})
         self.assertIsInstance(frame.flags, DataFrameFlags)

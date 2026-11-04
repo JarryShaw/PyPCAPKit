@@ -24,7 +24,7 @@ class RegistryGuardWidthTests(unittest.TestCase):
         # The guard tests ProtocolBase because every built-in derives from it
         # and none from Protocol. The message still names Protocol, since its
         # reader is a third party who should subclass the public class (#1016).
-        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.misc.raw.protocol import Raw
         from pcapkit.protocols.protocol import Protocol, ProtocolBase
 
         self.assertFalse(issubclass(Raw, Protocol))

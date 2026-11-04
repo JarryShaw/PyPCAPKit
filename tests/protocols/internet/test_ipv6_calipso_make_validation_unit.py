@@ -27,8 +27,8 @@ __tier__ = 'ALL'
 
 #: The protocol classes sharing the option code, by module and class name.
 PROTOCOLS = (
-    ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),
-    ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
+    ('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
+    ('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
 )
 
 

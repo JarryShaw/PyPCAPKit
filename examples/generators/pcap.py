@@ -18,7 +18,7 @@ specification rather than a suggestion; see the "pinned by" notes.
     A unicast ARP cache-refresh exchange on a private LAN: request from
     ``10.20.30.131`` to ``10.20.30.130`` and the matching reply. Both frames
     are padded to the 60-octet Ethernet minimum, which is what gives the ARP
-    payload its trailing :class:`~pcapkit.protocols.misc.raw.Raw` block.
+    payload its trailing :class:`~pcapkit.protocols.misc.raw.protocol.Raw` block.
     Pinned by ``tests/protocols/link/test_link_runtime.py``,
     ``tests/protocols/misc/pcap/test_frame_runtime.py`` and
     ``tests/integration/test_runtime_extract.py`` (frame count).
@@ -35,7 +35,7 @@ specification rather than a suggestion; see the "pinned by" notes.
     Link-local IPv6 between two hosts: neighbour discovery, ICMPv6 echoes,
     and then a 4778-octet UDP datagram fragmented into four pieces
     (1448/1448/1448/434 octets, identification 110308). Exercises the ICMPv6
-    fall back to :class:`~pcapkit.protocols.misc.raw.Raw` and the IPv6
+    fall back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` and the IPv6
     fragment extension header.
     Pinned by ``tests/protocols/internet/test_ip_runtime.py`` and
     ``tests/protocols/internet/test_ipv6_extension_runtime.py``.
@@ -45,7 +45,7 @@ specification rather than a suggestion; see the "pinned by" notes.
     IPv6, beginning with the server's SYN-ACK (the client's SYN predates the
     excerpt). Exercises the full TCP option set -- MSS, window scale,
     timestamps, SACK permitted, end of option list -- and the fall back to
-    :class:`~pcapkit.protocols.misc.raw.Raw` for an unregistered port.
+    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` for an unregistered port.
     Pinned by ``tests/protocols/transport/test_tcp_runtime.py``.
 
 ``stream.pcap`` (6 frames)
@@ -61,7 +61,7 @@ specification rather than a suggestion; see the "pinned by" notes.
     A page load off ``sina.com.cn`` over HTTP/1.1: short keep-alive-then-close
     connections to several hosts, each a full handshake, request, response and
     teardown. Exercises HTTP request and response parsing (headers, gzip'd and
-    empty bodies) and the fall back to :class:`~pcapkit.protocols.misc.raw.Raw`
+    empty bodies) and the fall back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
     for a continuation segment that carries no header block.
     Pinned by ``tests/protocols/application/test_http_runtime.py``, which
     indexes frames 114, 117, 393, 556, 587, 629 and 1113 directly -- hence

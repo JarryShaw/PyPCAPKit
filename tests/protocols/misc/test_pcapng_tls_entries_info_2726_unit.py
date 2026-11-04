@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """A TLS key log's entries are a data model, not a plain ``dict`` (#2726).
 
-:attr:`TLSKeyLog.entries <pcapkit.protocols.data.misc.pcapng.TLSKeyLog.entries>`
+:attr:`TLSKeyLog.entries <pcapkit.protocols.misc.pcapng.data.TLSKeyLog.entries>`
 maps each label to its client random to secret pairs. It was a plain
 :class:`dict` held on the data model; the owner ruled on #2726 that a field in
 :mod:`pcapkit.protocols.data` holds an ``Info`` or a data model instead, so it is
-a :class:`~pcapkit.protocols.data.misc.pcapng.TLSKeyLogEntries`. These tests pin
+a :class:`~pcapkit.protocols.misc.pcapng.data.TLSKeyLogEntries`. These tests pin
 the model, what ``to_dict`` exports and ``from_dict`` rebuilds, what the dumpers
 write, a byte-exact rebuild, and pickles that hold the entries as the
 :class:`dict`, so they load on either side of the change.
@@ -57,7 +57,7 @@ class _TLSTestCase(PCAPNGTestCase):
     def _assert_entries(self, entries: 'Any') -> None:
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.infoclass import OrderedMultiInfo
-        from pcapkit.protocols.data.misc.pcapng import TLSKeyLogEntries
+        from pcapkit.protocols.misc.pcapng.data import TLSKeyLogEntries
 
         self.assertIs(type(entries), TLSKeyLogEntries)
         self.assertEqual([type(label) for label in entries], [TLSKeyLabel] * len(PAIRS))
@@ -72,7 +72,7 @@ class TLSKeyLogEntriesTests(_TLSTestCase):
 
     def test_entries_are_a_data_model_keyed_by_label(self) -> None:
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
-        from pcapkit.protocols.data.data import Data
+        from pcapkit.protocols.data import Data
         from pcapkit.utilities.exceptions import UnsupportedCall
 
         entries = self._block().secrets_data.entries
@@ -87,7 +87,7 @@ class TLSKeyLogEntriesTests(_TLSTestCase):
     def test_a_mapping_given_for_entries_is_stored_as_the_model(self) -> None:
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.data.misc.pcapng import TLSKeyLog
+        from pcapkit.protocols.misc.pcapng.data import TLSKeyLog
 
         pairs = {TLSKeyLabel[name]: OrderedMultiDict(items) for name, items in PAIRS.items()}
         self._assert_entries(TLSKeyLog(entries=pairs).entries)
@@ -95,7 +95,7 @@ class TLSKeyLogEntriesTests(_TLSTestCase):
     def test_to_dict_exports_the_entries_and_from_dict_rebuilds_them(self) -> None:
         # NOTE: a nested model exports as an OrderedMultiDict at every level (#1484).
         from pcapkit.corekit.infoclass import _OrderedMultiDict
-        from pcapkit.protocols.data.misc.pcapng import TLSKeyLog
+        from pcapkit.protocols.misc.pcapng.data import TLSKeyLog
 
         block = self._block()
         tls = block.secrets_data
@@ -110,7 +110,7 @@ class TLSKeyLogEntriesTests(_TLSTestCase):
         self.assertEqual(rebuilt.entries, tls.entries)
 
     def test_the_block_rebuilds_exactly_from_its_model_and_its_dict(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         block = self._block()
         for path, data in (('model', block), ('dict', block.to_dict())):

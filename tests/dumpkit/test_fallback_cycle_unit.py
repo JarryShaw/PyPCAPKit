@@ -125,13 +125,13 @@ class TestFallbackBounded(unittest.TestCase):
 
     def test_class_is_written_as_its_name(self) -> None:
         """A class, module or function is named, not expanded through ``vars()``."""
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         holder = Node(next_type=IPv6, module=json, func=json.dumps, method=json.JSONEncoder.encode)
         data = self.dump('JSON', {'holder': holder})
         self.assertLess(len(data), 4096)
         self.assertEqual(json.loads(data)['x']['holder'], {
-            'next_type': 'pcapkit.protocols.internet.ipv6.IPv6',
+            'next_type': 'pcapkit.protocols.internet.ipv6.protocol.IPv6',
             'module': 'json',
             'func': 'json.dumps',
             'method': 'json.encoder.JSONEncoder.encode',

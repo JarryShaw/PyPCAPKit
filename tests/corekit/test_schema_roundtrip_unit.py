@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Every protocol schema packs, unpacks and re-packs to the same octets. C.f. #1202.
 
-Each concrete :class:`~pcapkit.protocols.schema.schema.Schema` subclass under
+Each concrete :class:`~pcapkit.protocols.schema.Schema` subclass under
 :mod:`pcapkit.protocols.schema` is enumerated, so a schema added tomorrow gets a
 case tomorrow. For each one a **minimal valid instance** ``s`` is built and
 packed to ``b``, and these must hold:
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 #: Package prefix stripped from a schema's module to make its label.
-PREFIX = 'pcapkit.protocols.schema.'
+PREFIX = 'pcapkit.protocols.'
 
 #: Driver values tried for one driver, for two, and for three or more.
 ONE_DRIVER = tuple(range(65))
@@ -148,8 +148,17 @@ class AutoZero(int):
 
 
 def label_of(cls: 'type') -> 'str':
-    """``module:Qualname``, relative to :data:`PREFIX`."""
-    return f'{cls.__module__.replace(PREFIX, "")}:{cls.__qualname__}'
+    """``module:Qualname``, the module named by its protocol's package.
+
+    ``pcapkit.protocols.link.vlan.schema`` gives ``link.vlan`` and
+    :mod:`pcapkit.protocols.schema` gives ``schema``, the labels the modules had
+    in the ``pcapkit.protocols.schema`` tree before #2534.
+
+    """
+    module = cls.__module__[len(PREFIX):]
+    if module != 'schema':
+        module = module[:-len('.schema')]
+    return f'{module}:{cls.__qualname__}'
 
 
 def overrides_of(cls: 'type') -> 'dict[str, Any]':
@@ -160,12 +169,15 @@ def overrides_of(cls: 'type') -> 'dict[str, Any]':
 
 
 def schema_classes() -> 'dict[str, type]':
-    """Every :class:`Schema` subclass defined under :mod:`pcapkit.protocols.schema`."""
-    import pcapkit.protocols.schema as package
-    from pcapkit.protocols.schema.schema import Schema
+    """Every :class:`Schema` subclass defined in a ``schema`` module under
+    :mod:`pcapkit.protocols`."""
+    import pcapkit.protocols as package
+    from pcapkit.protocols.schema import Schema
 
     found = {}  # type: dict[str, type]
     for info in pkgutil.walk_packages(package.__path__, f'{package.__name__}.'):
+        if not info.name.endswith('.schema'):
+            continue
         module = importlib.import_module(info.name)
         for obj in vars(module).values():
             if inspect.isclass(obj) and issubclass(obj, Schema) and obj.__module__ == module.__name__:
@@ -253,7 +265,7 @@ def drivers(cls: 'type') -> 'list[tuple[str, Optional[str], int]]':
 
 def own_code(cls: 'type') -> 'Any':
     """The registry code ``cls`` is registered under, or an unassigned one."""
-    from pcapkit.protocols.schema.schema import EnumSchema
+    from pcapkit.protocols.schema import EnumSchema
 
     if not issubclass(cls, EnumSchema):
         return None
@@ -296,7 +308,7 @@ def _code_type(cls: 'type') -> 'Optional[type]':
 
 def outer_code(cls: 'type') -> 'Any':
     """The code a dispatcher is registered under in its own module's registries."""
-    from pcapkit.protocols.schema.schema import EnumSchema
+    from pcapkit.protocols.schema import EnumSchema
 
     module = importlib.import_module(cls.__module__)
     for obj in vars(module).values():
@@ -534,7 +546,7 @@ def _referenced(cls: 'type') -> 'set[str]':
     frame reads the frame header's ``flags``.
 
     """
-    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.schema import Schema
 
     names = set(OVERRIDES.get(label_of(cls), ()))
     for obj in vars(importlib.import_module(cls.__module__)).values():

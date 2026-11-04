@@ -50,9 +50,9 @@ class PortEnumFieldTests(unittest.TestCase):
     def test_each_schema_uses_the_shared_field_with_its_own_transport(self) -> None:
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.corekit.fields.numbers import PortEnumField
-        from pcapkit.protocols.schema.transport.sctp import SCTP
-        from pcapkit.protocols.schema.transport.tcp import TCP
-        from pcapkit.protocols.schema.transport.udp import UDP
+        from pcapkit.protocols.transport.sctp.schema import SCTP
+        from pcapkit.protocols.transport.tcp.schema import TCP
+        from pcapkit.protocols.transport.udp.schema import UDP
 
         for schema, proto in ((TCP, TransportProtocol.tcp), (UDP, TransportProtocol.udp),
                               (SCTP, TransportProtocol.sctp)):

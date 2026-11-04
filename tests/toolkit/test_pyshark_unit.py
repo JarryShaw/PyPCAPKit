@@ -556,7 +556,7 @@ class PySharkTraceFieldTests(unittest.TestCase):
         """tshark prints ``frame.time_epoch`` to the nanosecond. The default
         engine computes ``ts_sec + Decimal(ts_usec) / 10**6`` (or ``10**9``)
         and hands the tracer ``float()`` of it
-        (:meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`), so the float must be
+        (:meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.protocol.Frame.read>`), so the float must be
         identical, not just close.
 
         """

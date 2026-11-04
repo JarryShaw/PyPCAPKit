@@ -69,7 +69,7 @@ class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
         """``make`` -> parse -> pack keeps an undefined value."""
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         context = self._context()
         block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
@@ -91,7 +91,7 @@ class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
     def test_make_sets_offload_bits(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
-        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.pcapng.protocol import PCAPNG
 
         for kwargs, word in (({'checksum_not_ready': True}, '00020000'),
                              ({'checksum_valid': True}, '00040000'),
@@ -104,7 +104,7 @@ class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
                 self.assertIn(H('0200 0400' + word), block.data)
 
     def test_out_of_range_value_still_raises(self) -> None:
-        from pcapkit.protocols.misc.pcapng import PacketDirection, PacketReception
+        from pcapkit.protocols.misc.pcapng.protocol import PacketDirection, PacketReception
         from pcapkit.utilities.exceptions import EnumValueError
 
         with self.assertRaises(EnumValueError):

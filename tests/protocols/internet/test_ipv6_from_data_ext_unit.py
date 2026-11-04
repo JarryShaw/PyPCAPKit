@@ -2,7 +2,7 @@
 """IPv6 ``from_data`` keeps the extension-header chain, byte for byte.
 
 GitHub issue #1177: :meth:`IPv6._make_data
-<pcapkit.protocols.internet.ipv6.IPv6._make_data>` rebuilt the payload from
+<pcapkit.protocols.internet.ipv6.protocol.IPv6._make_data>` rebuilt the payload from
 the upper layer alone, so every extension header between the IPv6 header and
 that layer was dropped from the rebuild. An IPv6 header followed by an 8-octet
 Routing header came back as 40 octets instead of 48.
@@ -63,7 +63,7 @@ class TestIPv6FromDataExtensionHeaders(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_from_data_rebuilds_byte_for_byte(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         for name, packet in PACKETS.items():
             with self.subTest(packet=name):
@@ -72,7 +72,7 @@ class TestIPv6FromDataExtensionHeaders(unittest.TestCase):
                 self.assertEqual(IPv6.from_data(parsed.info).data, packet)
 
     def test_repeated_header_keeps_both_instances(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
 
         packet = PACKETS['chain-with-repeated-header']
         parsed = IPv6(packet, len(packet))
@@ -83,8 +83,8 @@ class TestIPv6FromDataExtensionHeaders(unittest.TestCase):
         self.assertEqual(IPv6.from_data(parsed.info).data, packet)
 
     def test_chain_is_carried_by_to_dict_and_hidden_from_repr(self) -> None:
-        from pcapkit.protocols.internet.ipv6 import IPv6
-        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.internet.ipv6.protocol import IPv6
+        from pcapkit.protocols.internet.ipv6_route.protocol import IPv6_Route
 
         packet = PACKETS['routing']
         info = IPv6(packet, len(packet)).info
