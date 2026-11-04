@@ -45,8 +45,29 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: PACKET_TYPES
+   .. autoattribute:: SHORT_HEADER_TYPES
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: __block__
+      :no-value:
+
+   .. autoattribute:: __option__
+      :no-value:
+
+   .. autoattribute:: __record__
+      :no-value:
+
+   .. autoattribute:: __secrets__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
+   .. autoproperty:: packet
    .. autoproperty:: section_context
    .. autoproperty:: byteorder
    .. autoproperty:: nanosecond
@@ -55,41 +76,37 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. autoproperty:: ts_timezone
    .. autoproperty:: linktype
    .. autoproperty:: block
-   .. autoproperty:: packet
 
    .. automethod:: register
    .. automethod:: register_block
    .. automethod:: register_option
    .. automethod:: register_record
    .. automethod:: register_secrets
-
-   .. automethod:: unpack
+   .. automethod:: index
    .. automethod:: pack
-
+   .. automethod:: unpack
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: index
+   .. automethod:: __post_init__
+   .. automethod:: __length_hint__
+   .. automethod:: __index__
 
-   .. automethod:: _decode_next_layer
-   .. automethod:: _dispatch_linktype
-
-   .. automethod:: _get_payload
    .. automethod:: _make_data
-
+   .. automethod:: _read_block_short
+   .. automethod:: _make_block_short
+   .. automethod:: _read_block_short_header
    .. automethod:: _read_block_unknown
-   .. automethod:: _read_block_shb
    .. automethod:: _read_block_idb
-   .. automethod:: _read_block_epb
+   .. automethod:: _read_block_packet
    .. automethod:: _read_block_spb
    .. automethod:: _read_block_nrb
    .. automethod:: _read_block_isb
+   .. automethod:: _read_block_epb
    .. automethod:: _read_block_systemd
    .. automethod:: _read_block_dsb
    .. automethod:: _read_block_cb
-   .. automethod:: _read_block_packet
-
-   .. automethod:: _read_pcapng_options
+   .. automethod:: _read_block_shb
    .. automethod:: _read_option_unknown
    .. automethod:: _read_option_endofopt
    .. automethod:: _read_option_comment
@@ -128,32 +145,26 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. automethod:: _read_option_isb_usrdeliv
    .. automethod:: _read_option_pack_flags
    .. automethod:: _read_option_pack_hash
-
-   .. automethod:: _read_nrb_records
    .. automethod:: _read_record_unknown
    .. automethod:: _read_record_end
    .. automethod:: _read_record_ipv4
    .. automethod:: _read_record_ipv6
-
    .. automethod:: _read_secrets_unknown
    .. automethod:: _read_secrets_tls
    .. automethod:: _read_secrets_wireguard
-   .. automethod:: _read_secrets_zigbee_nwk
    .. automethod:: _read_secrets_zigbee_aps
-
+   .. automethod:: _read_secrets_zigbee_nwk
    .. automethod:: _make_block_unknown
-   .. automethod:: _make_block_shb
    .. automethod:: _make_block_idb
-   .. automethod:: _make_block_epb
+   .. automethod:: _make_block_packet
    .. automethod:: _make_block_spb
    .. automethod:: _make_block_nrb
    .. automethod:: _make_block_isb
+   .. automethod:: _make_block_epb
    .. automethod:: _make_block_systemd
    .. automethod:: _make_block_dsb
    .. automethod:: _make_block_cb
-   .. automethod:: _make_block_packet
-
-   .. automethod:: _make_pcapng_options
+   .. automethod:: _make_block_shb
    .. automethod:: _make_option_unknown
    .. automethod:: _make_option_endofopt
    .. automethod:: _make_option_comment
@@ -192,45 +203,25 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. automethod:: _make_option_isb_usrdeliv
    .. automethod:: _make_option_pack_flags
    .. automethod:: _make_option_pack_hash
-
-   .. automethod:: _make_nrb_records
    .. automethod:: _make_record_unknown
    .. automethod:: _make_record_end
    .. automethod:: _make_record_ipv4
    .. automethod:: _make_record_ipv6
-
    .. automethod:: _make_secrets_unknown
    .. automethod:: _make_secrets_tls
    .. automethod:: _make_secrets_wireguard
-   .. automethod:: _make_secrets_zigbee_nwk
    .. automethod:: _make_secrets_zigbee_aps
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: __block__
-      :no-value:
-   .. autoattribute:: __option__
-      :no-value:
-   .. autoattribute:: __record__
-      :no-value:
-   .. autoattribute:: __secrets__
-      :no-value:
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
-   .. autoattribute:: PACKET_TYPES
-   .. autoattribute:: SHORT_HEADER_TYPES
-   .. automethod:: _get_timezone
-   .. automethod:: _read_block_short
-   .. automethod:: _read_block_short_header
-   .. automethod:: _make_block_short
-   .. automethod:: _make_mac_addr
-
+   .. automethod:: _make_secrets_zigbee_nwk
    .. automethod:: _check_block_floor
-   .. automethod:: __length_hint__
+   .. automethod:: _get_payload
+   .. automethod:: _get_timezone
+   .. automethod:: _make_mac_addr
+   .. automethod:: _decode_next_layer
+   .. automethod:: _dispatch_linktype
+   .. automethod:: _read_pcapng_options
+   .. automethod:: _read_nrb_records
+   .. automethod:: _make_pcapng_options
+   .. automethod:: _make_nrb_records
 
 Auxiliary Data
 --------------

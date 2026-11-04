@@ -4988,6 +4988,37 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
             self.assertIs(option.registry[namespace][OptionType.opt_comment],
                           UnknownOption)
 
+    def test_a_collision_names_its_namespaces_sorted(self) -> None:
+        """The warning names the namespaces sorted, not in the registry's order (#2772).
+
+        A namespace created after the shipped ones is last in the registry, and
+        sorts first in the warning, so the text holds whatever order the registry
+        keeps its namespaces in.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.misc.pcapng.schema import UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        endofopt = dict(option.registry)['opt'].get(OptionType.opt_endofopt)
+        self.assertIsNotNone(endofopt)
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            option.register(OptionType.opt_endofopt, endofopt, ns='brand_new')
+        self.assertEqual(list(option.registry)[-1], 'brand_new')
+        self.assertNotEqual(list(option.registry), sorted(option.registry))
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(OptionType.opt_comment, UnknownOption, ns='opt')
+
+        registry_warnings = [str(entry.message) for entry in caught
+                             if entry.category is RegistryWarning]
+        self.assertEqual(len(registry_warnings), 1)
+        named = ', '.join(repr(namespace) for namespace in sorted(option.registry))
+        self.assertIn(f'namespace(s) {named}, overwriting', registry_warnings[0])
+
     def test_a_namespace_created_by_the_registration_is_not_a_collision(self) -> None:
         """A fresh namespace starts as a copy of ``opt``'s defaults.
 

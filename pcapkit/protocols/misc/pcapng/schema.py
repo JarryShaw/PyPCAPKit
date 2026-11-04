@@ -1090,12 +1090,12 @@ class Option(EnumSchema[Enum_OptionType]):
     #: Mapping of PCAP-NG option type numbers to schemas.
     __enum__: 'DefaultDict[str, DefaultDict[Enum_OptionType, Type[Option]]]' = collections.defaultdict(
         lambda: Option.registry['opt'], {
-            'opt': collections.defaultdict(lambda: UnknownOption),
-            'if': collections.defaultdict(lambda: UnknownOption),
-            'epb': collections.defaultdict(lambda: UnknownOption),
-            'ns': collections.defaultdict(lambda: UnknownOption),
-            'isb': collections.defaultdict(lambda: UnknownOption),
             'dsb': collections.defaultdict(lambda: UnknownOption),
+            'epb': collections.defaultdict(lambda: UnknownOption),
+            'if': collections.defaultdict(lambda: UnknownOption),
+            'isb': collections.defaultdict(lambda: UnknownOption),
+            'ns': collections.defaultdict(lambda: UnknownOption),
+            'opt': collections.defaultdict(lambda: UnknownOption),
             'pack': collections.defaultdict(lambda: UnknownOption),
         },
     )
@@ -1128,7 +1128,8 @@ class Option(EnumSchema[Enum_OptionType]):
         Note:
             ``ns='opt'`` fans one registration out across every namespace, so the
             collision is reported once for the registration and names the
-            namespaces it displaced something in, rather than once per namespace.
+            namespaces it displaced something in, sorted, rather than once per
+            namespace.
 
             A namespace created by this call starts as a copy of ``opt``'s
             defaults, so nothing in it is a prior registration and it is exempt:
@@ -1142,6 +1143,11 @@ class Option(EnumSchema[Enum_OptionType]):
             ``Option.registry[key][code]`` to see whether it is there would
             *insert* :class:`UnknownOption` for a code nobody registered.
 
+        .. versionchanged:: 1.6.0
+
+           The warning names the namespaces sorted, rather than in the order of
+           :attr:`__enum__` (:issue:`2772`).
+
         """
         if ns is None:
             ns = code.name.split('_')[0]
@@ -1153,9 +1159,9 @@ class Option(EnumSchema[Enum_OptionType]):
         targets = list(Option.registry) if ns == 'opt' else [ns]
 
         if not fresh:
-            clash = [key for key in targets
-                     if (incumbent := Option.registry[key].get(code)) is not None
-                     and incumbent is not cls]
+            clash = sorted(key for key in targets
+                           if (incumbent := Option.registry[key].get(code)) is not None
+                           and incumbent is not cls)
             if clash:
                 warn(f'PCAP-NG: [Option {code}] option already registered in '
                      f'namespace(s) {", ".join(repr(key) for key in clash)}, '

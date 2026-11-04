@@ -13,15 +13,16 @@ and :class:`~pcapkit.protocols.link.vlan.protocol.VLAN`.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __layer__
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
    .. autoproperty:: layer
 
    .. automethod:: register
    .. automethod:: from_data
 
    .. automethod:: __post_init__
-
-   .. autoattribute:: __layer__
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:

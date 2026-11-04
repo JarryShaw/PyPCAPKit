@@ -41,21 +41,18 @@ Octets      Bits        Name                    Description
    .. autoproperty:: dst
    .. autoproperty:: extension_headers
 
-   .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
    .. automethod:: unpack
-
-   .. automethod:: _make_data
-
-   .. automethod:: _decode_next_layer
-   .. automethod:: _import_next_layer
+   .. automethod:: id
 
    .. automethod:: __index__
    .. automethod:: __post_init__
 
+   .. automethod:: _make_data
+   .. automethod:: _decode_next_layer
    .. automethod:: _read_ip_hextet
+   .. automethod:: _import_next_layer
 
 Protocol Constants
 ------------------

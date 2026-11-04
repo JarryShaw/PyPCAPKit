@@ -41,9 +41,6 @@ of PCAP, whose structure is described as below:
    :no-members:
    :show-inheritance:
 
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: version
@@ -56,8 +53,10 @@ of PCAP, whose structure is described as below:
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
+   .. automethod:: _make_data
    .. automethod:: _read_protos
 
 Header Schemas
@@ -135,29 +134,28 @@ whose structure is described as below:
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: header
 
    .. automethod:: register
    .. automethod:: index
-
-   .. automethod:: unpack
    .. automethod:: pack
-
+   .. automethod:: unpack
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-   .. automethod:: _dispatch_linktype
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. automethod:: _make_data
+   .. automethod:: _dispatch_linktype
 
 Header Schemas
 --------------

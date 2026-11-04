@@ -242,31 +242,27 @@ Header Schema
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __fields__
+      :no-value:
+
    .. autoattribute:: __payload__
    .. autoattribute:: __additional__
       :no-value:
+
    .. autoattribute:: __excluded__
       :no-value:
-
-   .. automethod:: __init_subclass__
-   .. automethod:: __new__
-
-   .. automethod:: pack
-   .. automethod:: pre_pack
-
-   .. automethod:: unpack
-   .. automethod:: pre_unpack
-
-   .. automethod:: post_process
-   .. automethod:: get_payload
 
    .. automethod:: from_dict
    .. automethod:: to_dict
    .. automethod:: to_bytes
-
-   .. autoattribute:: __fields__
-      :no-value:
-
+   .. automethod:: get_payload
+   .. automethod:: pack
+   .. automethod:: pre_pack
+   .. automethod:: unpack
+   .. automethod:: pre_unpack
+   .. automethod:: post_process
+   .. automethod:: __init_subclass__
+   .. automethod:: __new__
    .. automethod:: _cut_short_read
 
 .. autoclass:: pcapkit.protocols.schema.EnumSchema
@@ -339,6 +335,9 @@ Data Model
    :members:
    :show-inheritance:
 
+   .. autoattribute:: __included__
+      :no-value:
+
    .. autoattribute:: __excluded__
       :no-value:
 
@@ -346,6 +345,3 @@ Data Model
 
          Please refer to :func:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
          for more information with the inserted names to be excluded.
-
-   .. autoattribute:: __included__
-      :no-value:

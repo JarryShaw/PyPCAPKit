@@ -59,17 +59,15 @@ below:
    .. autoproperty:: type
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
    .. automethod:: __index__
 
+   .. automethod:: _make_data
    .. automethod:: _read_addr_resolve
-   .. automethod:: _read_proto_resolve
    .. automethod:: _make_addr_resolve
+   .. automethod:: _read_proto_resolve
    .. automethod:: _make_proto_resolve
 
 Header Schemas

@@ -234,9 +234,11 @@ def _fold_lease(stack: 'list[_NameLease]', index: 'int') -> 'None':
 def _release_name(target: 'tuple[type, Any]') -> 'None':
     """Hand back the lease ``target``'s registration held.
 
-    Once no code holds the lease, it leaves its name's stack. On top, it puts
-    the name back to the entry it displaced, or removes a new name -- unless the
-    name was written by other means since, in which case that write stands.
+    Once no code holds the lease, it leaves its name's stack. On top, it
+    registers the class it displaced back with :func:`register_protocol`, as a
+    code is restored by registering the entry it displaced, or removes a new
+    name -- unless the name was written by other means since, in which case
+    that write stands.
     Buried, it hands what it displaced to the lease above, if that lease
     displaced it.
 
@@ -266,8 +268,10 @@ def _release_name(target: 'tuple[type, Any]') -> 'None':
     elif _denotes(protocol_registry.get(lease.name), lease.protocol):
         if lease.displaced is MISSING:
             protocol_registry.pop(lease.name, None)
+        elif isinstance(lease.displaced, ModuleDescriptor):
+            register_protocol(lease.displaced.klass)
         else:
-            protocol_registry[lease.name] = lease.displaced
+            register_protocol(lease.displaced)
         logger.debug('released protocol: %s', lease.protocol.__name__)
     if not stack:
         _NAME_LEASES.pop(lease.name, None)

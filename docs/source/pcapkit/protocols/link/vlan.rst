@@ -74,9 +74,9 @@ declares no :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, so its
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 Header Schemas
 --------------

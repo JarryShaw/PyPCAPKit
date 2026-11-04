@@ -201,12 +201,13 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
-   .. automethod:: __init_subclass__
-
    .. autoattribute:: __registry__
       :no-value:
+
    .. automethod:: register_protocol
    .. automethod:: get_protocol
+
+   .. automethod:: __init_subclass__
 
    :class:`Protocol` inherits the other members of this class, and they are
    documented under it above; each group below links to its entries.

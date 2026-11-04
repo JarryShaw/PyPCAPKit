@@ -41,6 +41,9 @@ accepting bytes that cannot be a genuine record.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __extension__
+      :no-value:
+
    .. automethod:: id
    .. automethod:: register_extension
 
@@ -52,7 +55,6 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _read_ext_supported_versions
    .. automethod:: _read_ext_key_share
    .. automethod:: _read_ext_connection_id
-
    .. automethod:: _make_ext_unknown
    .. automethod:: _make_ext_server_name
    .. automethod:: _make_ext_supported_groups
@@ -61,31 +63,20 @@ accepting bytes that cannot be a genuine record.
    .. automethod:: _make_ext_supported_versions
    .. automethod:: _make_ext_key_share
    .. automethod:: _make_ext_connection_id
-
    .. automethod:: _validate_tls_record
-
    .. automethod:: _tls_content_is_cleartext
-
    .. automethod:: _read_tls_content
-   .. automethod:: _make_tls_content
-
    .. automethod:: _read_tls_handshake_messages
    .. automethod:: _make_tls_handshake_messages
-
    .. automethod:: _read_tls_client_hello
-   .. automethod:: _make_tls_client_hello
-
    .. automethod:: _read_tls_server_hello
-   .. automethod:: _make_tls_server_hello
-
    .. automethod:: _read_tls_encrypted_extensions
-   .. automethod:: _make_tls_encrypted_extensions
-
    .. automethod:: _read_tls_extensions
+   .. automethod:: _make_tls_content
+   .. automethod:: _make_tls_client_hello
+   .. automethod:: _make_tls_server_hello
+   .. automethod:: _make_tls_encrypted_extensions
    .. automethod:: _make_tls_extensions
-
-   .. autoattribute:: __extension__
-      :no-value:
 
 Data Models
 -----------

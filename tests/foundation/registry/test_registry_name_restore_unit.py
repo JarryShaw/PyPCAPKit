@@ -12,7 +12,8 @@ the built-in displaced.
 :mod:`tests.foundation.registry.test_registry_symmetry_unit` covers the plain
 round trip for every registrar. These pin the cases it does not reach: a
 displaced built-in name, a class still held by a second code, a name that was
-there before the registration, which a restore must not take away, and a
+there before the registration, which a restore must not take away, a restore
+registering the displaced class through ``register_protocol`` (#2773), and a
 built-in retaking its name from a custom class shadowing it -- plus a seeded
 fuzz over all of those, checked after every call.
 
@@ -122,6 +123,23 @@ class TestRegistryNameRestore(unittest.TestCase):
         self.assertIs(self.names['IPV4'], custom)
         self._call(register_tcp, 80, shipped)
         self.assertIs(self._shown(self.names['IPV4']), IPv4)
+        self.assert_names_as_found()
+
+    def test_a_restore_registers_the_displaced_class_by_name(self) -> None:
+        """The name goes back through ``register_protocol``, as a code's entry does (#2773)."""
+        from unittest import mock
+
+        from pcapkit.foundation.registry import register_tcp
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.protocols.transport.tcp.protocol import TCP
+
+        shipped = TCP.__proto__[80]
+        self._call(register_tcp, 80, self._custom('IPv4'))
+        with mock.patch.object(ProtocolBase, 'register_protocol',
+                               wraps=ProtocolBase.register_protocol) as spy:
+            self._call(register_tcp, 80, shipped)
+        self.assertIn(mock.call(IPv4), spy.call_args_list)
         self.assert_names_as_found()
 
     def test_a_name_stays_while_another_code_still_holds_it(self) -> None:

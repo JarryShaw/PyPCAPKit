@@ -23,6 +23,9 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __routing__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -30,31 +33,24 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: id
-
-   .. automethod:: register_routing
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register_routing
+   .. automethod:: id
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
    .. automethod:: _make_hdr_ext_len
-
    .. automethod:: _read_data_type_none
    .. automethod:: _read_data_type_src
    .. automethod:: _read_data_type_2
    .. automethod:: _read_data_type_rpl
-
    .. automethod:: _make_data_type_none
    .. automethod:: _make_data_type_src
    .. automethod:: _make_data_type_2
    .. automethod:: _make_data_type_rpl
-
-   .. autoattribute:: __routing__
-      :no-value:
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
 Header Schemas
 --------------
