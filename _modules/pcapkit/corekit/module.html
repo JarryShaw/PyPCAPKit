@@ -568,6 +568,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_lock</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ModuleDescriptor'</span><span class="p">]</span>
 
@@ -637,6 +638,13 @@
 <span class="sd">            pre-reload class forever, and an instance of it fails</span>
 <span class="sd">            :func:`isinstance` against the live one.</span>
 
+<span class="sd">            A first import, of a module not in :data:`sys.modules` yet, holds</span>
+<span class="sd">            :data:`~pcapkit.utilities.importlib.import_lock`, as the first imports</span>
+<span class="sd">            of :func:`~pcapkit.utilities.importlib.lazy_exports` do: threads</span>
+<span class="sd">            dispatching at once to protocols not imported yet otherwise deadlock</span>
+<span class="sd">            the import system (:issue:`2771`). A module already imported, or</span>
+<span class="sd">            part way through another thread's import, is read without it.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
             <span class="c1"># ``module`` is a ``str`` and the caller never named a class --</span>
@@ -664,7 +672,11 @@
                 <span class="c1"># from the ``getattr`` below instead, with the same message.</span>
                 <span class="k">pass</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+            <span class="c1"># NOTE: the lock lazy_exports holds, so racing first imports cannot deadlock (#2771).</span>
+            <span class="k">with</span> <span class="n">import_lock</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="c1"># GitHub issue #832: a ``register_*`` helper that builds a</span>
             <span class="c1"># descriptor from a bad class name fails here with a bare stdlib</span>

@@ -808,6 +808,20 @@ not given.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.arp.protocol.ARP.__index__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/arp/protocol.html#ARP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.arp.protocol.ARP.__index__" title="Link to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml">IANA</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.arp.protocol.ARP._make_data">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/arp/protocol.html#ARP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.arp.protocol.ARP._make_data" title="Link to this definition">¶</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
@@ -820,20 +834,6 @@ not given.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.arp.protocol.ARP.__index__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/arp/protocol.html#ARP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.arp.protocol.ARP.__index__" title="Link to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml">IANA</a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -855,29 +855,6 @@ not given.</p></li>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Hardware address. If <code class="docutils literal notranslate"><span class="pre">htype</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>, i.e. MAC address,
 returns <code class="docutils literal notranslate"><span class="pre">:</span></code> separated <em>hex</em> encoded MAC address.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.arp.protocol.ARP._read_proto_resolve">
-<span class="sig-name descname"><span class="pre">_read_proto_resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/arp/protocol.html#ARP._read_proto_resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.arp.protocol.ARP._read_proto_resolve" title="Link to this definition">¶</a></dt>
-<dd><p>Resolve protocol address according to protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>addr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Protocol address.</p></li>
-<li><p><strong>ptype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Protocol type.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Protocol address. If <code class="docutils literal notranslate"><span class="pre">ptype</span></code> is <code class="docutils literal notranslate"><span class="pre">0x0800</span></code> (IPv4) and <code class="docutils literal notranslate"><span class="pre">addr</span></code> is
-4 octets, an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>; if <code class="docutils literal notranslate"><span class="pre">0x86dd</span></code> (IPv6)
-and 16 octets, an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>; otherwise, the
-address as a hex <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -919,6 +896,29 @@ returns, and <a class="reference external" href="https://docs.python.org/3/built
 <p>The messages are prefixed with <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#type.__name__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__class__.__name__</span></code></a> rather than <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.alias" title="pcapkit.protocols.protocol.Protocol.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.alias</span></code></a>, for the reason
 <a class="reference internal" href="#pcapkit.protocols.link.arp.protocol.ARP._make_proto_resolve" title="pcapkit.protocols.link.arp.protocol.ARP._make_proto_resolve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_proto_resolve()</span></code></a> gives.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.arp.protocol.ARP._read_proto_resolve">
+<span class="sig-name descname"><span class="pre">_read_proto_resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/arp/protocol.html#ARP._read_proto_resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.arp.protocol.ARP._read_proto_resolve" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve protocol address according to protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>addr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Protocol address.</p></li>
+<li><p><strong>ptype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Protocol type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Protocol address. If <code class="docutils literal notranslate"><span class="pre">ptype</span></code> is <code class="docutils literal notranslate"><span class="pre">0x0800</span></code> (IPv4) and <code class="docutils literal notranslate"><span class="pre">addr</span></code> is
+4 octets, an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>; if <code class="docutils literal notranslate"><span class="pre">0x86dd</span></code> (IPv6)
+and 16 octets, an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>; otherwise, the
+address as a hex <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

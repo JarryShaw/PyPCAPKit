@@ -32,15 +32,14 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
-
-   .. automethod:: _make_data
+   .. automethod:: id
 
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 Header Schemas
 --------------

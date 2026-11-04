@@ -72,14 +72,14 @@ in :mod:`pcapkit.corekit.checksum.internet`.
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
    .. automethod:: _make_data
    .. automethod:: _source
    .. automethod:: _destination
    .. automethod:: _upper_protocol
    .. automethod:: _upper_length
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
 .. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.pseudo_header
 .. autofunction:: pcapkit.protocols.misc.checksum.ip_pseudo.protocol.verify_upper

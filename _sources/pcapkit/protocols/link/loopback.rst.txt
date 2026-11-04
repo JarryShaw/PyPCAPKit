@@ -33,6 +33,9 @@ is kept as ``loopback.byteorder``.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -41,12 +44,9 @@ is kept as ``loopback.byteorder``.
    .. automethod:: make
    .. automethod:: register
 
-   .. automethod:: _make_data
-
    .. automethod:: __index__
 
-   .. autoattribute:: __proto__
-      :no-value:
+   .. automethod:: _make_data
 
 .. autofunction:: pcapkit.protocols.link.loopback.protocol.family_byteorder
 

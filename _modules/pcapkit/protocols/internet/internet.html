@@ -587,6 +587,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Internet'</span><span class="p">]</span>
 
@@ -595,6 +596,12 @@
 <span class="c1">#: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places</span>
 <span class="c1">#: it while parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.</span>
 <span class="n">_exthdr_rebuilt</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_exthdr_rebuilt'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1">#: The IGMP base :meth:`Internet._next_layer_class` hands a message to, to pick its</span>
+<span class="c1">#: version class. Resolved there rather than imported, so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_IGMP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[IGMP]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmp.protocol'</span><span class="p">,</span> <span class="s1">'IGMP'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Internet">
@@ -1024,7 +1031,7 @@
                 <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">IGMPBase</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">IGMPBase</span> <span class="o">=</span> <span class="n">_IGMP</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">proto</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="n">IGMPBase</span><span class="p">:</span>

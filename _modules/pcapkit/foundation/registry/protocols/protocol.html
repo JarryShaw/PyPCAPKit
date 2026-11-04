@@ -789,11 +789,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_release_name</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="s1">'tuple[type, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Hand back the lease ``target``'s registration held.</span>
 
-<span class="sd">    Once no code holds the lease, it leaves its name's stack. On top, it puts</span>
-<span class="sd">    the name back to the entry it displaced, or removes a new name -- unless the</span>
-<span class="sd">    name was written by other means since, in which case that write stands.</span>
-<span class="sd">    Buried, it hands what it displaced to the lease above, if that lease</span>
-<span class="sd">    displaced it.</span>
+<span class="sd">    Once no code holds the lease, it leaves its name's stack. A lease on top</span>
+<span class="sd">    undoes its write, unless the name was written by other means since. A new</span>
+<span class="sd">    name is removed. A displaced class is registered back with</span>
+<span class="sd">    :func:`register_protocol`, the path a code's restore takes, so it warns as</span>
+<span class="sd">    the code's restore does (:issue:`2773`). A buried lease hands what it</span>
+<span class="sd">    displaced to the lease above, if that lease displaced it.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target: The ``(destination, code)`` being registered over.</span>
@@ -821,8 +822,10 @@
     <span class="k">elif</span> <span class="n">_denotes</span><span class="p">(</span><span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
             <span class="n">protocol_registry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">displaced</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
+            <span class="n">register_protocol</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">displaced</span><span class="o">.</span><span class="n">klass</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">protocol_registry</span><span class="p">[</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span>
+            <span class="n">register_protocol</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">displaced</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'released protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">stack</span><span class="p">:</span>
         <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>

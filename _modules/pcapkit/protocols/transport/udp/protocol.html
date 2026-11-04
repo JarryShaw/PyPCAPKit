@@ -598,6 +598,12 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'UDP'</span><span class="p">]</span>
 
+<span class="c1">#: The pseudo-header a payload's checksum is computed over in :meth:`UDP.make`,</span>
+<span class="c1">#: resolved there rather than imported, so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_PSEUDO_HEADER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="UDP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP">[docs]</a>
@@ -862,7 +868,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_checksum_pending</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_checksum</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">pseudo_header</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="n">pseudo_header</span> <span class="o">=</span> <span class="n">_PSEUDO_HEADER</span><span class="o">.</span><span class="n">klass</span>
 
                 <span class="c1"># NOTE: Over the datagram the Length field gives, or all but the trailer</span>
                 <span class="c1"># for a jumbogram's zero one (RFC 2675); a computed zero is all ones.</span>

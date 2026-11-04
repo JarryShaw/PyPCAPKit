@@ -1737,12 +1737,12 @@
     <span class="c1">#: Mapping of PCAP-NG option type numbers to schemas.</span>
     <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[str, DefaultDict[Enum_OptionType, Type[Option]]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'opt'</span><span class="p">],</span> <span class="p">{</span>
-            <span class="s1">'opt'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
-            <span class="s1">'if'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
-            <span class="s1">'epb'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
-            <span class="s1">'ns'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
-            <span class="s1">'isb'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
             <span class="s1">'dsb'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">'epb'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">'if'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">'isb'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">'ns'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">'opt'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
             <span class="s1">'pack'</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
@@ -1777,7 +1777,8 @@
 <span class="sd">        Note:</span>
 <span class="sd">            ``ns='opt'`` fans one registration out across every namespace, so the</span>
 <span class="sd">            collision is reported once for the registration and names the</span>
-<span class="sd">            namespaces it displaced something in, rather than once per namespace.</span>
+<span class="sd">            namespaces it displaced something in, sorted, rather than once per</span>
+<span class="sd">            namespace.</span>
 
 <span class="sd">            A namespace created by this call starts as a copy of ``opt``'s</span>
 <span class="sd">            defaults, so nothing in it is a prior registration and it is exempt:</span>
@@ -1791,6 +1792,11 @@
 <span class="sd">            ``Option.registry[key][code]`` to see whether it is there would</span>
 <span class="sd">            *insert* :class:`UnknownOption` for a code nobody registered.</span>
 
+<span class="sd">        .. versionchanged:: 1.6.0</span>
+
+<span class="sd">           The warning names the namespaces sorted, rather than in the order of</span>
+<span class="sd">           :attr:`__enum__` (:issue:`2772`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ns</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -1802,9 +1808,9 @@
         <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">)</span> <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="s1">'opt'</span> <span class="k">else</span> <span class="p">[</span><span class="n">ns</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fresh</span><span class="p">:</span>
-            <span class="n">clash</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span>
-                     <span class="k">if</span> <span class="p">(</span><span class="n">incumbent</span> <span class="o">:=</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                     <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">]</span>
+            <span class="n">clash</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span>
+                           <span class="k">if</span> <span class="p">(</span><span class="n">incumbent</span> <span class="o">:=</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                           <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">clash</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] option already registered in '</span>
                      <span class="sa">f</span><span class="s1">'namespace(s) </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">clash</span><span class="p">)</span><span class="si">}</span><span class="s1">, '</span>

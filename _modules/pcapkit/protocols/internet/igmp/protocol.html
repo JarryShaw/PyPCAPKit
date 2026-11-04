@@ -583,6 +583,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.igmp.type</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">Data_IGMP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmp.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMP</span> <span class="k">as</span> <span class="n">Schema_IGMP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
@@ -601,6 +602,16 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IGMP'</span><span class="p">]</span>
+
+<span class="c1">#: tuple[tuple[int, ModuleDescriptor[IGMP]], ...]: Each version and the class</span>
+<span class="c1">#: :meth:`IGMP._member_of_version` picks for it, resolved there rather than imported,</span>
+<span class="c1">#: so a version's first import holds :data:`~pcapkit.utilities.importlib.import_lock`</span>
+<span class="c1">#: (:issue:`2771`).</span>
+<span class="n">_MEMBERS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmpv1.protocol'</span><span class="p">,</span> <span class="s1">'IGMPv1'</span><span class="p">)),</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmpv2.protocol'</span><span class="p">,</span> <span class="s1">'IGMPv2'</span><span class="p">)),</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.igmpv3.protocol'</span><span class="p">,</span> <span class="s1">'IGMPv3'</span><span class="p">)),</span>
+<span class="p">)</span>  <span class="c1"># type: tuple[tuple[int, ModuleDescriptor[IGMP]], ...]</span>
 
 
 <div class="viewcode-block" id="IGMP">
@@ -1062,14 +1073,10 @@
 <span class="sd">                where it equals one.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.igmpv3.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IGMPv3</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">IGMPv1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">IGMPv2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">IGMPv3</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">_MEMBERS</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="n">number</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[IGMP]'</span><span class="p">,</span> <span class="n">member</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IGMP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 </div>
 

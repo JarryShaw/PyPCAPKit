@@ -585,6 +585,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.jumbogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
@@ -603,10 +604,20 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_Pseudo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6'</span><span class="p">]</span>
+
+<span class="c1">#: The pseudo-header :meth:`IPv6.make` computes a payload's checksum over, and the</span>
+<span class="c1">#: check :meth:`IPv6.__post_init__` runs on the upper layer, resolved there rather</span>
+<span class="c1">#: than imported, so their first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_IP_PSEUDO</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[IP_Pseudo]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'IP_Pseudo'</span><span class="p">)</span>
+<span class="n">_VERIFY_UPPER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">)</span>
 
 <span class="c1">#: Length of the fixed IPv6 header, i.e. the offset of the first extension</span>
 <span class="c1">#: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it</span>
@@ -897,7 +908,7 @@
         <span class="c1"># pseudo-header; see pcapkit.protocols.misc.checksum.ip_pseudo.protocol (#2471).</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_COMPUTE</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="s1">'_checksum_pending'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span> <span class="o">==</span> <span class="n">next_val</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_Pseudo</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="n">IP_Pseudo</span> <span class="o">=</span> <span class="n">_IP_PSEUDO</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
             <span class="c1"># NOTE: The payload follows this header directly, so no extension</span>
             <span class="c1"># header moves an address; it puts its own length in the pseudo-header.</span>
@@ -991,8 +1002,7 @@
 <span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CHECKSUM_VERIFY</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_upper</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="n">verify_upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+            <span class="n">_VERIFY_UPPER</span><span class="o">.</span><span class="n">klass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
     <span class="c1">##########################################################################</span>

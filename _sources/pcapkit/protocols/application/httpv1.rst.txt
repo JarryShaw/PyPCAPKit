@@ -51,13 +51,11 @@ structure of an HTTP/1.* message is described as below:
    .. autoproperty:: alias
    .. autoproperty:: version
 
-   .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: id
 
    .. automethod:: _make_data
-
    .. automethod:: _read_http_header
    .. automethod:: _read_http_body
 

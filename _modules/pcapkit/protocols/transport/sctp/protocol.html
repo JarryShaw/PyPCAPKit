@@ -2320,6 +2320,878 @@
         <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="SCTP._read_param_donone">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_donone">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP chunk parameter of an unsupported type.</span>
+
+<span class="sd">        This is the fall-through for every chunk parameter type :mod:`pcapkit`</span>
+<span class="sd">        does not implement. The parameter's value is recorded verbatim rather</span>
+<span class="sd">        than raising, so a chunk carrying an unknown parameter still parses.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">Data_UnknownParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_hbinfo">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_hbinfo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hbinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HeartbeatInfoParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HeartbeatInfoParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP heartbeat info parameter.</span>
+
+<span class="sd">        Structure of SCTP heartbeat info parameter [:rfc:`9260#section-3.3.5`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |    Heartbeat Info Type = 1    |        HB Info Length         |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                Sender-Specific Heartbeat Info                 /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_HeartbeatInfoParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_ipv4">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_ipv4">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv4AddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv4AddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP IPv4 address parameter.</span>
+
+<span class="sd">        Structure of SCTP IPv4 address parameter [:rfc:`9260#section-3.3.2.1.1`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 5            |          Length = 8           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                         IPv4 Address                          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_IPv4AddressParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_ipv6">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_ipv6">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv6AddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6AddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP IPv6 address parameter.</span>
+
+<span class="sd">        Structure of SCTP IPv6 address parameter [:rfc:`9260#section-3.3.2.1.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 6            |          Length = 20          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           |                         IPv6 Address                          |</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``20``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_IPv6AddressParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_cookie">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_cookie">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_StateCookieParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_StateCookieParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP state cookie parameter.</span>
+
+<span class="sd">        Structure of SCTP state cookie parameter [:rfc:`9260#section-3.3.3.1.1`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 7            |            Length             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                            Cookie                             /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_StateCookieParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_unrecognized">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_unrecognized">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_unrecognized</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP unrecognized parameter parameter.</span>
+
+<span class="sd">        Structure of SCTP unrecognized parameter [:rfc:`9260#section-3.3.3.1.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 8            |            Length             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                  Unrecognized Parameter                       /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The offending parameter is recorded as raw :obj:`bytes`, complete</span>
+<span class="sd">            with its own type and length, rather than being parsed recursively:</span>
+<span class="sd">            by definition the sender did not recognise it, so neither</span>
+<span class="sd">            interpretation nor validation of its contents would be meaningful.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UnrecognizedParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_preservative">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_preservative">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_preservative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CookiePreservativeParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CookiePreservativeParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP cookie preservative parameter.</span>
+
+<span class="sd">        Structure of SCTP cookie preservative parameter [:rfc:`9260#section-3.3.2.1.3`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 9            |          Length = 8           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |         Suggested Cookie Life-Span Increment (msec.)          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_CookiePreservativeParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">increment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">increment</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_hostname">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_hostname">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HostNameAddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HostNameAddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP host name address parameter.</span>
+
+<span class="sd">        Structure of SCTP host name address parameter [:rfc:`9260#section-3.3.2.1.4`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 11           |            Length             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                           Host Name                           /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The usage of this parameter is deprecated by</span>
+<span class="sd">            :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet</span>
+<span class="sd">            carrying one can still be inspected. The host name is kept as raw</span>
+<span class="sd">            :obj:`bytes`, including any null terminator, since the encoding is</span>
+<span class="sd">            not specified on the wire. A name captured without a terminator is</span>
+<span class="sd">            kept as read and rebuilds as read (:issue:`1482`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_HostNameAddressParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_param_addrtypes">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_addrtypes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_addrtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SupportedAddressTypesParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SupportedAddressTypesParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP supported address types parameter.</span>
+
+<span class="sd">        Structure of SCTP supported address types parameter [:rfc:`9260#section-3.3.2.1.5`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |           Type = 12           |            Length             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Address Type #1        |        Address Type #2        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                            ......                             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed parameter schema</span>
+<span class="sd">            parameters: extracted SCTP chunk parameters</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed parameter data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4`` plus a multiple of</span>
+<span class="sd">                ``2``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_SupportedAddressTypesParameter</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">types</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">types</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_donone">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_donone">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP error cause of an unsupported cause code.</span>
+
+<span class="sd">        This is the fall-through for every error cause code :mod:`pcapkit` does</span>
+<span class="sd">        not implement, e.g. those registered by SCTP extensions. The</span>
+<span class="sd">        cause-specific information is recorded verbatim rather than raising.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">Data_UnknownCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_invalid_stream">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_invalid_stream">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_invalid_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_InvalidStreamIdentifierCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_InvalidStreamIdentifierCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP invalid stream identifier error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.1`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 1         |       Cause Length = 8        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |       Stream Identifier       |          (Reserved)           |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_InvalidStreamIdentifierCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">stream_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_id</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_missing_param">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_missing_param">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_missing_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MissingMandatoryParameterCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MissingMandatoryParameterCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP missing mandatory parameter error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.2`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 2         |   Cause Length = 8 + N * 2    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                 Number of missing params = N                  |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |     Missing Param Type #1     |     Missing Param Type #2     |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` does **NOT** match the declared number</span>
+<span class="sd">                of missing parameters.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">num</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_MissingMandatoryParameterCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">num</span><span class="p">,</span>
+            <span class="n">types</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">types</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_stale_cookie">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_stale_cookie">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_stale_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_StaleCookieCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_StaleCookieCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP stale cookie error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.3`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 3         |       Cause Length = 8        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                 Measure of Staleness (usec.)                  |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_StaleCookieCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">staleness</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">staleness</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_out_of_resource">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_out_of_resource">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_out_of_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_OutOfResourceCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_OutOfResourceCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP out of resource error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.4`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 4         |       Cause Length = 4        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_OutOfResourceCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_unresolvable_addr">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unresolvable_addr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unresolvable_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnresolvableAddressCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnresolvableAddressCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP unresolvable address error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.5`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 5         |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                     Unresolvable Address                      /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UnresolvableAddressCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_unrecognized_chunk">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unrecognized_chunk">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unrecognized_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedChunkTypeCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedChunkTypeCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP unrecognized chunk type error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.6`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 6         |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                      Unrecognized Chunk                       /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UnrecognizedChunkTypeCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_invalid_param">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_invalid_param">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_invalid_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_InvalidMandatoryParameterCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_InvalidMandatoryParameterCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP invalid mandatory parameter error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.7`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 7         |       Cause Length = 4        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_InvalidMandatoryParameterCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_unrecognized_params">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unrecognized_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unrecognized_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedParametersCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedParametersCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP unrecognized parameters error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.8`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 8         |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                    Unrecognized Parameters                    /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UnrecognizedParametersCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_no_user_data">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_no_user_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_no_user_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_NoUserDataCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NoUserDataCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP no user data error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.9`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 9         |       Cause Length = 8        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                              TSN                              |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_NoUserDataCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">tsn</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tsn</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_cookie_shutdown">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_cookie_shutdown">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_cookie_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CookieReceivedWhileShuttingDownCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CookieReceivedWhileShuttingDownCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP cookie received while shutting down error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.10`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 10        |       Cause Length = 4        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_CookieReceivedWhileShuttingDownCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_restart_addr">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_restart_addr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_restart_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RestartOfAnAssociationWithNewAddressesCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RestartOfAnAssociationWithNewAddressesCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP restart of an association with new addresses error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.11`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 11        |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                       New Address TLVs                        /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_RestartOfAnAssociationWithNewAddressesCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_user_abort">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_user_abort">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_user_abort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UserInitiatedAbortCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UserInitiatedAbortCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP user-initiated abort error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.12`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 12        |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                   Upper Layer Abort Reason                    /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UserInitiatedAbortCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SCTP._read_cause_protocol_violation">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_protocol_violation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_protocol_violation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ProtocolViolationCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ProtocolViolationCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Read SCTP protocol violation error cause.</span>
+
+<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.13`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |        Cause Code = 13        |         Cause Length          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           /                    Additional Information                     /</span>
+<span class="sd">           \\                                                               \\</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            schema: parsed error cause schema</span>
+<span class="sd">            causes: extracted SCTP error causes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed error cause data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_ProtocolViolationCause</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="SCTP._make_chunk_donone">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_chunk_donone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_chunk_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Chunk'</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownChunk]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -2987,358 +3859,6 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SCTP._read_param_donone">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_donone">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP chunk parameter of an unsupported type.</span>
-
-<span class="sd">        This is the fall-through for every chunk parameter type :mod:`pcapkit`</span>
-<span class="sd">        does not implement. The parameter's value is recorded verbatim rather</span>
-<span class="sd">        than raising, so a chunk carrying an unknown parameter still parses.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_UnknownParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_hbinfo">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_hbinfo">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hbinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HeartbeatInfoParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HeartbeatInfoParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP heartbeat info parameter.</span>
-
-<span class="sd">        Structure of SCTP heartbeat info parameter [:rfc:`9260#section-3.3.5`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |    Heartbeat Info Type = 1    |        HB Info Length         |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                Sender-Specific Heartbeat Info                 /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_HeartbeatInfoParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_ipv4">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_ipv4">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv4AddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv4AddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP IPv4 address parameter.</span>
-
-<span class="sd">        Structure of SCTP IPv4 address parameter [:rfc:`9260#section-3.3.2.1.1`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 5            |          Length = 8           |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                         IPv4 Address                          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_IPv4AddressParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_ipv6">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_ipv6">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_IPv6AddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6AddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP IPv6 address parameter.</span>
-
-<span class="sd">        Structure of SCTP IPv6 address parameter [:rfc:`9260#section-3.3.2.1.2`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 6            |          Length = 20          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                                                               |</span>
-<span class="sd">           |                         IPv6 Address                          |</span>
-<span class="sd">           |                                                               |</span>
-<span class="sd">           |                                                               |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``20``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_IPv6AddressParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_cookie">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_cookie">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_StateCookieParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_StateCookieParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP state cookie parameter.</span>
-
-<span class="sd">        Structure of SCTP state cookie parameter [:rfc:`9260#section-3.3.3.1.1`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 7            |            Length             |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                            Cookie                             /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_StateCookieParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_unrecognized">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_unrecognized">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_unrecognized</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP unrecognized parameter parameter.</span>
-
-<span class="sd">        Structure of SCTP unrecognized parameter [:rfc:`9260#section-3.3.3.1.2`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 8            |            Length             |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                  Unrecognized Parameter                       /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The offending parameter is recorded as raw :obj:`bytes`, complete</span>
-<span class="sd">            with its own type and length, rather than being parsed recursively:</span>
-<span class="sd">            by definition the sender did not recognise it, so neither</span>
-<span class="sd">            interpretation nor validation of its contents would be meaningful.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_UnrecognizedParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_preservative">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_preservative">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_preservative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CookiePreservativeParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CookiePreservativeParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP cookie preservative parameter.</span>
-
-<span class="sd">        Structure of SCTP cookie preservative parameter [:rfc:`9260#section-3.3.2.1.3`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 9            |          Length = 8           |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |         Suggested Cookie Life-Span Increment (msec.)          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_CookiePreservativeParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">increment</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">increment</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_hostname">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_hostname">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_HostNameAddressParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HostNameAddressParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP host name address parameter.</span>
-
-<span class="sd">        Structure of SCTP host name address parameter [:rfc:`9260#section-3.3.2.1.4`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 11           |            Length             |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                           Host Name                           /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The usage of this parameter is deprecated by</span>
-<span class="sd">            :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet</span>
-<span class="sd">            carrying one can still be inspected. The host name is kept as raw</span>
-<span class="sd">            :obj:`bytes`, including any null terminator, since the encoding is</span>
-<span class="sd">            not specified on the wire. A name captured without a terminator is</span>
-<span class="sd">            kept as read and rebuilds as read (:issue:`1482`).</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_HostNameAddressParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_param_addrtypes">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_addrtypes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_param_addrtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SupportedAddressTypesParameter'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'Parameters'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_SupportedAddressTypesParameter'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP supported address types parameter.</span>
-
-<span class="sd">        Structure of SCTP supported address types parameter [:rfc:`9260#section-3.3.2.1.5`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |           Type = 12           |            Length             |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Address Type #1        |        Address Type #2        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                            ......                             |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed parameter schema</span>
-<span class="sd">            parameters: extracted SCTP chunk parameters</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed parameter data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4`` plus a multiple of</span>
-<span class="sd">                ``2``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_SupportedAddressTypesParameter</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">types</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">types</span><span class="p">),</span>
-        <span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="SCTP._make_param_donone">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_donone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_UnknownParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -3601,526 +4121,6 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">types_value</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'[Param </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] length'</span><span class="p">),</span>
             <span class="n">types</span><span class="o">=</span><span class="n">types_value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_donone">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_donone">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnknownCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP error cause of an unsupported cause code.</span>
-
-<span class="sd">        This is the fall-through for every error cause code :mod:`pcapkit` does</span>
-<span class="sd">        not implement, e.g. those registered by SCTP extensions. The</span>
-<span class="sd">        cause-specific information is recorded verbatim rather than raising.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Data_UnknownCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_invalid_stream">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_invalid_stream">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_invalid_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_InvalidStreamIdentifierCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_InvalidStreamIdentifierCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP invalid stream identifier error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.1`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 1         |       Cause Length = 8        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |       Stream Identifier       |          (Reserved)           |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_InvalidStreamIdentifierCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">stream_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">stream_id</span><span class="p">,</span>
-            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_missing_param">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_missing_param">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_missing_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_MissingMandatoryParameterCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_MissingMandatoryParameterCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP missing mandatory parameter error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.2`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 2         |   Cause Length = 8 + N * 2    |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                 Number of missing params = N                  |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |     Missing Param Type #1     |     Missing Param Type #2     |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` does **NOT** match the declared number</span>
-<span class="sd">                of missing parameters.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">num</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_MissingMandatoryParameterCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">num</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">num</span><span class="p">,</span>
-            <span class="n">types</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">types</span><span class="p">),</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_stale_cookie">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_stale_cookie">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_stale_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_StaleCookieCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_StaleCookieCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP stale cookie error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.3`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 3         |       Cause Length = 8        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                 Measure of Staleness (usec.)                  |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_StaleCookieCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">staleness</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">staleness</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_out_of_resource">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_out_of_resource">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_out_of_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_OutOfResourceCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_OutOfResourceCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP out of resource error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.4`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 4         |       Cause Length = 4        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_OutOfResourceCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_unresolvable_addr">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unresolvable_addr">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unresolvable_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnresolvableAddressCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnresolvableAddressCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP unresolvable address error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.5`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 5         |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                     Unresolvable Address                      /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_UnresolvableAddressCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_unrecognized_chunk">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unrecognized_chunk">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unrecognized_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedChunkTypeCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedChunkTypeCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP unrecognized chunk type error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.6`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 6         |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                      Unrecognized Chunk                       /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_UnrecognizedChunkTypeCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_invalid_param">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_invalid_param">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_invalid_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_InvalidMandatoryParameterCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_InvalidMandatoryParameterCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP invalid mandatory parameter error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.7`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 7         |       Cause Length = 4        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_InvalidMandatoryParameterCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_unrecognized_params">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_unrecognized_params">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_unrecognized_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UnrecognizedParametersCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnrecognizedParametersCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP unrecognized parameters error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.8`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 8         |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                    Unrecognized Parameters                    /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_UnrecognizedParametersCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_no_user_data">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_no_user_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_no_user_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_NoUserDataCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_NoUserDataCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP no user data error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.9`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 9         |       Cause Length = 8        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |                              TSN                              |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``8``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_NoUserDataCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">tsn</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tsn</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_cookie_shutdown">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_cookie_shutdown">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_cookie_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_CookieReceivedWhileShuttingDownCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_CookieReceivedWhileShuttingDownCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP cookie received while shutting down error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.10`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 10        |       Cause Length = 4        |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_CookieReceivedWhileShuttingDownCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_restart_addr">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_restart_addr">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_restart_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_RestartOfAnAssociationWithNewAddressesCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_RestartOfAnAssociationWithNewAddressesCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP restart of an association with new addresses error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.11`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 11        |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                       New Address TLVs                        /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_RestartOfAnAssociationWithNewAddressesCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">value</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_user_abort">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_user_abort">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_user_abort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_UserInitiatedAbortCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UserInitiatedAbortCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP user-initiated abort error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.12`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 12        |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                   Upper Layer Abort Reason                    /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_UserInitiatedAbortCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="SCTP._read_cause_protocol_violation">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_protocol_violation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cause_protocol_violation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_ProtocolViolationCause'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">causes</span><span class="p">:</span> <span class="s1">'Causes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_ProtocolViolationCause'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Read SCTP protocol violation error cause.</span>
-
-<span class="sd">        Structure of the cause [:rfc:`9260#section-3.3.10.13`]:</span>
-
-<span class="sd">        .. code-block:: text</span>
-
-<span class="sd">            0                   1                   2                   3</span>
-<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |        Cause Code = 13        |         Cause Length          |</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           /                    Additional Information                     /</span>
-<span class="sd">           \\                                                               \\</span>
-<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            schema: parsed error cause schema</span>
-<span class="sd">            causes: extracted SCTP error causes</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed error cause data.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** at least ``4``.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Cause </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Data_ProtocolViolationCause</span><span class="p">(</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">info</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

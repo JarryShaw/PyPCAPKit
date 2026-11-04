@@ -572,8 +572,10 @@
 <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0562/"><strong>PEP 562</strong></a> <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__dir__</span></code> that import each name it exports the first
 time the name is reached, rather than with the package itself. Every package under
 <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> imports its enumerations that way (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2729">#2729</a>), so a caller
-pays only for the enumerations it uses. This module imports nothing from
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>; see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
+pays only for the enumerations it uses. Those first imports, and that of a
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, hold <a class="reference internal" href="#pcapkit.utilities.importlib.import_lock" title="pcapkit.utilities.importlib.import_lock"><code class="xref py py-data docutils literal notranslate"><span class="pre">import_lock</span></code></a>, one
+thread at a time (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>). This module imports nothing from <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>;
+see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
@@ -601,6 +603,13 @@ import system binds on the package. So <code class="docutils literal notranslate
 <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">package.submodule</span></code>, attribute access, <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> and the
 <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> of an object defined in a submodule all behave as an eager
 import would, apart from <em>when</em> the import happens.</p>
+<p>That import holds <a class="reference internal" href="#pcapkit.utilities.importlib.import_lock" title="pcapkit.utilities.importlib.import_lock"><code class="xref py py-data docutils literal notranslate"><span class="pre">import_lock</span></code></a>, shared by every package using this
+function, so threads reaching names at once resolve them one at a time and
+a resolution may nest another. Unserialised, they deadlock the import
+system (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>): a family member’s protocol module imports a module of
+its base’s package, taking that module’s import lock before waiting on the
+package, while a thread importing the package takes the two the other way.
+A resolved name is bound in <code class="docutils literal notranslate"><span class="pre">namespace</span></code>, so reaching it again takes no lock.</p>
 <p><code class="docutils literal notranslate"><span class="pre">__dir__</span></code> lists what the eager import would have bound: the names the
 import system sets, <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, every export, every submodule an export
 comes from, and any other submodule already imported. The package’s own
@@ -624,6 +633,20 @@ name in its <code class="docutils literal notranslate"><span class="pre">__all__
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The package’s <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__dir__</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.importlib.import_lock">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.importlib.</span></span><span class="sig-name descname"><span class="pre">import_lock</span></span><a class="headerlink" href="#pcapkit.utilities.importlib.import_lock" title="Link to this definition">¶</a></dt>
+<dd><p>Held by every first import <a class="reference internal" href="#pcapkit.utilities.importlib.lazy_exports" title="pcapkit.utilities.importlib.lazy_exports"><code class="xref py py-func docutils literal notranslate"><span class="pre">lazy_exports()</span></code></a>
+makes, and by <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> when its module is not imported
+yet, so threads make them one at a time; unserialised, they deadlock the import
+system (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2771">#2771</a>). Re-entrant, as one first import can nest another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.RLock" title="(in Python v3.15)">threading.RLock</a></p>
 </dd>
 </dl>
 </dd></dl>

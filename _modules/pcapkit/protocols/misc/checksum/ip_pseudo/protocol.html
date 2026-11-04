@@ -613,6 +613,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.jumbogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
@@ -632,7 +633,14 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ah.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">AH</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP_Pseudo'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">,</span> <span class="s1">'verify_upper'</span><span class="p">]</span>
+
+<span class="c1">#: The Authentication Header :func:`verify_upper` looks past to the upper layer,</span>
+<span class="c1">#: resolved there rather than imported, so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_AH</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AH]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ah.protocol'</span><span class="p">,</span> <span class="s1">'AH'</span><span class="p">)</span>
 
 <span class="c1">#: Extension headers that end the chain, as the upper layer -- the Mobility Header</span>
 <span class="c1">#: (:rfc:`6275#section-6.1.1`) and HIP (:rfc:`7401#section-5.1.1`).</span>
@@ -1253,11 +1261,10 @@
 <span class="sd">        ip: Parsed IPv4 or IPv6 layer.</span>
 
 <span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ah.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">AH</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
+    <span class="n">ah</span> <span class="o">=</span> <span class="n">_AH</span><span class="o">.</span><span class="n">klass</span>
     <span class="n">upper</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
     <span class="c1"># NOTE: IPv6 walks an AH as an extension header; IPv4 carries it as its payload.</span>
-    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">AH</span><span class="p">):</span>
+    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">ah</span><span class="p">):</span>
         <span class="n">upper</span> <span class="o">=</span> <span class="n">upper</span><span class="o">.</span><span class="n">payload</span>
     <span class="n">verify</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="s1">'_verify_pseudo_checksum'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">verify</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

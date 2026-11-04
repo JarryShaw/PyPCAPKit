@@ -650,6 +650,17 @@ accepting bytes that cannot be a genuine record.</p>
 </tbody>
 </table>
 </div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL.__extension__">
+<span class="sig-name descname"><span class="pre">__extension__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ExtensionData" title="pcapkit.protocols.application.ssl.data.ExtensionData"><span class="pre">ExtensionData</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ExtensionData" title="pcapkit.protocols.application.ssl.data.ExtensionData"><span class="pre">ExtensionData</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL.__extension__" title="Link to this definition">¶</a></dt>
+<dd><p>Extension type to method mapping, see <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_extensions()</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_tls_extensions()</span></code></a>. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> value names the methods
+<code class="docutils literal notranslate"><span class="pre">_read_ext_${name}</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_ext_${name}</span></code>, falling back to
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_unknown" title="pcapkit.protocols.application.ssl.protocol.SSL._read_ext_unknown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ext_unknown()</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_unknown" title="pcapkit.protocols.application.ssl.protocol.SSL._make_ext_unknown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ext_unknown()</span></code></a> when the class
+has no such method, as an unregistered type does; any other value is a
+<code class="docutils literal notranslate"><span class="pre">(parser,</span> <span class="pre">constructor)</span></code> pair of callables.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL.id">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL.id" title="Link to this definition">¶</a></dt>
@@ -1282,28 +1293,6 @@ encrypted.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_content">
-<span class="sig-name descname"><span class="pre">_make_tls_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_content" title="Link to this definition">¶</a></dt>
-<dd><p>Encode a record fragment by its content type – the inverse of
-<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_content" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_content"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_content()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>content_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a></span>) – Record content type.</p></li>
-<li><p><strong>content</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Decoded record content, or already-encoded <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p></li>
-<li><p><strong>dtls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether this is a DTLS record.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Encoded record fragment.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_handshake_messages">
 <span class="sig-name descname"><span class="pre">_read_tls_handshake_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fragment</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._read_tls_handshake_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_handshake_messages" title="Link to this definition">¶</a></dt>
 <dd><p>Decode a <code class="docutils literal notranslate"><span class="pre">handshake</span></code> record fragment into its handshake messages.</p>
@@ -1425,28 +1414,6 @@ struct {
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_client_hello">
-<span class="sig-name descname"><span class="pre">_make_tls_client_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_client_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_client_hello" title="Link to this definition">¶</a></dt>
-<dd><p>Encode a <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code> handshake message body – the inverse of
-<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_client_hello" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_client_hello"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_client_hello()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ClientHello" title="pcapkit.protocols.application.ssl.data.ClientHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientHello</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>.</p></li>
-<li><p><strong>dtls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether this is a DTLS <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>, i.e. whether to
-write the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> field.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Encoded message body.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello">
 <span class="sig-name descname"><span class="pre">_read_tls_server_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._read_tls_server_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello" title="Link to this definition">¶</a></dt>
 <dd><p>Decode a <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> handshake message body, or a
@@ -1479,24 +1446,6 @@ write the <code class="docutils literal notranslate"><span class="pre">cookie</s
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_server_hello">
-<span class="sig-name descname"><span class="pre">_make_tls_server_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_server_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_server_hello" title="Link to this definition">¶</a></dt>
-<dd><p>Encode a <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> handshake message body – the inverse of
-<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_server_hello()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ServerHello" title="pcapkit.protocols.application.ssl.data.ServerHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ServerHello</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Encoded message body.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions">
 <span class="sig-name descname"><span class="pre">_read_tls_encrypted_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._read_tls_encrypted_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions" title="Link to this definition">¶</a></dt>
 <dd><p>Decode an <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code> handshake message body.</p>
@@ -1518,24 +1467,6 @@ write the <code class="docutils literal notranslate"><span class="pre">cookie</s
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">body</span></code> is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_encrypted_extensions">
-<span class="sig-name descname"><span class="pre">_make_tls_encrypted_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_encrypted_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_encrypted_extensions" title="Link to this definition">¶</a></dt>
-<dd><p>Encode an <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code> handshake message body – the
-inverse of <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_encrypted_extensions()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.EncryptedExtensions" title="pcapkit.protocols.application.ssl.data.EncryptedExtensions"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Encoded message body.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1581,6 +1512,86 @@ of some extensions depends on; <code class="docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_content">
+<span class="sig-name descname"><span class="pre">_make_tls_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_content" title="Link to this definition">¶</a></dt>
+<dd><p>Encode a record fragment by its content type – the inverse of
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_content" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_content"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_content()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a></span>) – Record content type.</p></li>
+<li><p><strong>content</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Decoded record content, or already-encoded <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p></li>
+<li><p><strong>dtls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether this is a DTLS record.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Encoded record fragment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_client_hello">
+<span class="sig-name descname"><span class="pre">_make_tls_client_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_client_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_client_hello" title="Link to this definition">¶</a></dt>
+<dd><p>Encode a <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code> handshake message body – the inverse of
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_client_hello" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_client_hello"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_client_hello()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ClientHello" title="pcapkit.protocols.application.ssl.data.ClientHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientHello</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>.</p></li>
+<li><p><strong>dtls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether this is a DTLS <code class="docutils literal notranslate"><span class="pre">ClientHello</span></code>, i.e. whether to
+write the <code class="docutils literal notranslate"><span class="pre">cookie</span></code> field.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Encoded message body.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_server_hello">
+<span class="sig-name descname"><span class="pre">_make_tls_server_hello</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_server_hello"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_server_hello" title="Link to this definition">¶</a></dt>
+<dd><p>Encode a <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code> handshake message body – the inverse of
+<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_server_hello"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_server_hello()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ServerHello" title="pcapkit.protocols.application.ssl.data.ServerHello"><code class="xref py py-class docutils literal notranslate"><span class="pre">ServerHello</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">ServerHello</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Encoded message body.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_encrypted_extensions">
+<span class="sig-name descname"><span class="pre">_make_tls_encrypted_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_encrypted_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_encrypted_extensions" title="Link to this definition">¶</a></dt>
+<dd><p>Encode an <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code> handshake message body – the
+inverse of <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_encrypted_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_encrypted_extensions()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.EncryptedExtensions" title="pcapkit.protocols.application.ssl.data.EncryptedExtensions"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code></a></span>) – Decoded <code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Encoded message body.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions">
 <span class="sig-name descname"><span class="pre">_make_tls_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extensions</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ssl/protocol.html#SSL._make_tls_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions" title="Link to this definition">¶</a></dt>
 <dd><p>Encode an extension list – the inverse of <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_extensions()</span></code></a>.</p>
@@ -1607,17 +1618,6 @@ registered constructor to build from.</p></li>
     field cannot carry.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ssl.protocol.SSL.__extension__">
-<span class="sig-name descname"><span class="pre">__extension__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ExtensionData" title="pcapkit.protocols.application.ssl.data.ExtensionData"><span class="pre">ExtensionData</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.extension_type.ExtensionType" title="pcapkit.const.tls.extension_type.ExtensionType"><span class="pre">ExtensionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.ssl.data.ExtensionData" title="pcapkit.protocols.application.ssl.data.ExtensionData"><span class="pre">ExtensionData</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><span class="pre">HandshakeType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.ssl.protocol.SSL.__extension__" title="Link to this definition">¶</a></dt>
-<dd><p>Extension type to method mapping, see <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._read_tls_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tls_extensions()</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions" title="pcapkit.protocols.application.ssl.protocol.SSL._make_tls_extensions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_tls_extensions()</span></code></a>. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> value names the methods
-<code class="docutils literal notranslate"><span class="pre">_read_ext_${name}</span></code> and <code class="docutils literal notranslate"><span class="pre">_make_ext_${name}</span></code>, falling back to
-<a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._read_ext_unknown" title="pcapkit.protocols.application.ssl.protocol.SSL._read_ext_unknown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ext_unknown()</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.application.ssl.protocol.SSL._make_ext_unknown" title="pcapkit.protocols.application.ssl.protocol.SSL._make_ext_unknown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_ext_unknown()</span></code></a> when the class
-has no such method, as an unregistered type does; any other value is a
-<code class="docutils literal notranslate"><span class="pre">(parser,</span> <span class="pre">constructor)</span></code> pair of callables.</p>
 </dd></dl>
 
 </dd></dl>

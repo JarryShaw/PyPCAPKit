@@ -665,6 +665,12 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DCCP'</span><span class="p">]</span>
 
+<span class="c1">#: The pseudo-header a payload's checksum is computed over in :meth:`DCCP.make`,</span>
+<span class="c1">#: resolved there rather than imported, so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_PSEUDO_HEADER</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Any]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.checksum.ip_pseudo.protocol'</span><span class="p">,</span> <span class="s1">'pseudo_header'</span><span class="p">)</span>
+
 <span class="c1">#: Longest a DCCP header can be -- a Data Offset of 255 words, :rfc:`4340#section-5`.</span>
 <span class="n">DCCP_MAX_HEADER_LEN</span> <span class="o">=</span> <span class="mi">1020</span>
 
@@ -1024,7 +1030,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_checksum_pending</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.checksum.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_checksum</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.checksum.ip_pseudo.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">pseudo_header</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+                <span class="n">pseudo_header</span> <span class="o">=</span> <span class="n">_PSEUDO_HEADER</span><span class="o">.</span><span class="n">klass</span>
 
                 <span class="n">octets</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
                 <span class="n">coverage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checksum_coverage</span><span class="p">(</span><span class="n">cscov</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">))</span>

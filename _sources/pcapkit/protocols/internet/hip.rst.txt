@@ -37,6 +37,9 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __parameter__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -44,16 +47,17 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: id
-
-   .. automethod:: register_parameter
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register_parameter
+   .. automethod:: id
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-
    .. automethod:: _read_hip_param
+   .. automethod:: _make_hip_param
    .. automethod:: _read_param_unassigned
    .. automethod:: _read_param_esp_info
    .. automethod:: _read_param_r1_counter
@@ -93,8 +97,8 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_hip_mac_2
    .. automethod:: _read_param_hip_signature_2
    .. automethod:: _read_param_hip_signature
-   .. automethod:: _read_param_echo_request_unsigned
    .. automethod:: _read_param_echo_response_unsigned
+   .. automethod:: _read_param_echo_request_unsigned
    .. automethod:: _read_param_relay_from
    .. automethod:: _read_param_relay_to
    .. automethod:: _read_param_overlay_ttl
@@ -103,9 +107,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_rvs_hmac
    .. automethod:: _read_param_via_rvs
    .. automethod:: _read_param_relay_hmac
-
-   .. automethod:: _make_hip_param
-   .. automethod:: _make_hip_param_data
    .. automethod:: _make_param_unassigned
    .. automethod:: _make_param_esp_info
    .. automethod:: _make_param_r1_counter
@@ -145,8 +146,8 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_hip_mac_2
    .. automethod:: _make_param_hip_signature_2
    .. automethod:: _make_param_hip_signature
-   .. automethod:: _make_param_echo_request_unsigned
    .. automethod:: _make_param_echo_response_unsigned
+   .. automethod:: _make_param_echo_request_unsigned
    .. automethod:: _make_param_relay_from
    .. automethod:: _make_param_relay_to
    .. automethod:: _make_param_overlay_ttl
@@ -155,12 +156,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_param_rvs_hmac
    .. automethod:: _make_param_via_rvs
    .. automethod:: _make_param_relay_hmac
-
-   .. autoattribute:: __parameter__
-      :no-value:
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
+   .. automethod:: _make_hip_param_data
 
 Type Stubs
 ----------

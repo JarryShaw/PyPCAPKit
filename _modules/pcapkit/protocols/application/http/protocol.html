@@ -586,6 +586,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.no_payload.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
@@ -597,9 +598,20 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">,</span> <span class="s1">'test_start_line'</span><span class="p">]</span>
+
+<span class="c1">#: The TCP port registry :meth:`HTTP.__index__` reads its port from, resolved</span>
+<span class="c1">#: there rather than imported, as ``import pcapkit`` leaves it unloaded</span>
+<span class="c1">#: (:issue:`1538`), so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
 
 <span class="c1">#: The HTTP/2 connection preface (:rfc:`9113#section-3.4`). A client opens every</span>
 <span class="c1">#: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --</span>
@@ -697,6 +709,18 @@
 <span class="c1"># ``httpv1.HTTPv1._read_http_header`` and :func:`test_start_line` so that the</span>
 <span class="c1"># preface never parses as HTTP/1.</span>
 <span class="n">_HTTP2_PREFACE_HEADER</span> <span class="o">=</span> <span class="n">_HTTP2_PREFACE</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1">#: The member :class:`HTTP` hands an HTTP/1.* message to; it, the HTTP/2 member and</span>
+<span class="c1">#: their data models are resolved where used rather than imported, so a member's first</span>
+<span class="c1">#: import holds :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_HTTPV1</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[HTTPv1]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv1.protocol'</span><span class="p">,</span> <span class="s1">'HTTPv1'</span><span class="p">)</span>
+<span class="n">_HTTPV2</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[HTTPv2]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv2.protocol'</span><span class="p">,</span> <span class="s1">'HTTPv2'</span><span class="p">)</span>
+<span class="n">_DATA_HTTPV1</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Data_HTTPv1]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv1.data'</span><span class="p">,</span> <span class="s1">'HTTPv1'</span><span class="p">)</span>
+<span class="n">_DATA_HTTPV2</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Data_HTTPv2]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv2.data'</span><span class="p">,</span> <span class="s1">'HTTPv2'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="test_start_line">
@@ -898,9 +922,9 @@
             <span class="n">http</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_version</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># type: Type[HTTP]</span>
             <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -1019,10 +1043,9 @@
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">HTTP</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="n">HTTPv1</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">Data_HTTPv1</span><span class="p">,</span> <span class="n">Data_HTTPv2</span> <span class="o">=</span> <span class="n">_DATA_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_DATA_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv1</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="n">HTTPv1</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
@@ -1060,10 +1083,7 @@
 <span class="sd">           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-
-        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">TCP</span><span class="o">.</span><span class="n">http</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">_TCP</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">http</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
 
 
 <div class="viewcode-block" id="HTTP.__init__">
@@ -1093,8 +1113,7 @@
             <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
             <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_member_of_version</span><span class="p">(</span><span class="n">version</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span><span class="p">)):</span>
@@ -1184,10 +1203,9 @@
         <span class="c1"># HTTP/1.*'s lives in ``receipt`` as the start line's string, and HTTP/2</span>
         <span class="c1"># has none -- so the version is the class of ``data`` that :meth:`read`</span>
         <span class="c1"># returned from the versioned parser.</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="n">HTTPv1</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
+        <span class="n">Data_HTTPv1</span><span class="p">,</span> <span class="n">Data_HTTPv2</span> <span class="o">=</span> <span class="n">_DATA_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_DATA_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_HTTPv1</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="s1">'version'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">HTTPv1</span><span class="o">.</span><span class="n">_make_data</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
@@ -1279,7 +1297,7 @@
         <span class="c1"># preface must not be claimed out of octets outside this payload.</span>
         <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_preface</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+            <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
             <span class="c1"># The preface is not a frame -- the frames begin after it</span>
             <span class="c1"># (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately</span>
@@ -1316,7 +1334,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_preface_length</span> <span class="o">=</span> <span class="n">preface_len</span>
             <span class="k">return</span> <span class="n">http</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="n">HTTPv1</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="c1"># NOTE: The second identification: an HTTP/1 ``request-line`` or</span>
         <span class="c1"># ``status-line``, tested with the very patterns ``httpv1.HTTPv1`` parses</span>
@@ -1382,9 +1400,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_test_http2_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">HTTPv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span></div>
 
@@ -1407,8 +1424,7 @@
 <span class="sd">                :obj:`bool` or a :obj:`float` is refused even where it equals one.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1463,8 +1479,7 @@
 <span class="sd">            So this does not pick that class for it, and the two agree.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>

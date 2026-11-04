@@ -30,6 +30,21 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: __chunk__
+      :no-value:
+
+   .. autoattribute:: __parameter__
+      :no-value:
+
+   .. autoattribute:: __cause__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
@@ -39,31 +54,20 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
-
    .. automethod:: register
    .. automethod:: register_chunk
    .. automethod:: register_parameter
    .. automethod:: register_cause
-
    .. automethod:: crc32c
    .. automethod:: calculate_checksum
    .. automethod:: validate_checksum
 
-   .. automethod:: _make_data
-   .. automethod:: _get_payload
-   .. automethod:: _decode_next_layer
+   .. automethod:: __index__
 
+   .. automethod:: _make_data
    .. automethod:: _read_sctp_chunks
    .. automethod:: _make_sctp_chunks
-   .. automethod:: _make_sctp_chunk
-   .. automethod:: _read_sctp_parameters
-   .. automethod:: _make_sctp_parameters
-   .. automethod:: _make_sctp_parameter
-   .. automethod:: _read_sctp_causes
-   .. automethod:: _make_sctp_causes
-   .. automethod:: _make_sctp_cause
-   .. automethod:: _make_param_types
-
+   .. automethod:: _decode_next_layer
    .. automethod:: _read_chunk_donone
    .. automethod:: _read_chunk_data
    .. automethod:: _read_chunk_init
@@ -78,22 +82,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_chunk_cookie_echo
    .. automethod:: _read_chunk_cookie_ack
    .. automethod:: _read_chunk_shutdown_complete
-
-   .. automethod:: _make_chunk_donone
-   .. automethod:: _make_chunk_data
-   .. automethod:: _make_chunk_init
-   .. automethod:: _make_chunk_init_ack
-   .. automethod:: _make_chunk_sack
-   .. automethod:: _make_chunk_heartbeat
-   .. automethod:: _make_chunk_heartbeat_ack
-   .. automethod:: _make_chunk_abort
-   .. automethod:: _make_chunk_shutdown
-   .. automethod:: _make_chunk_shutdown_ack
-   .. automethod:: _make_chunk_error
-   .. automethod:: _make_chunk_cookie_echo
-   .. automethod:: _make_chunk_cookie_ack
-   .. automethod:: _make_chunk_shutdown_complete
-
    .. automethod:: _read_param_donone
    .. automethod:: _read_param_hbinfo
    .. automethod:: _read_param_ipv4
@@ -103,17 +91,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_preservative
    .. automethod:: _read_param_hostname
    .. automethod:: _read_param_addrtypes
-
-   .. automethod:: _make_param_donone
-   .. automethod:: _make_param_hbinfo
-   .. automethod:: _make_param_ipv4
-   .. automethod:: _make_param_ipv6
-   .. automethod:: _make_param_cookie
-   .. automethod:: _make_param_unrecognized
-   .. automethod:: _make_param_preservative
-   .. automethod:: _make_param_hostname
-   .. automethod:: _make_param_addrtypes
-
    .. automethod:: _read_cause_donone
    .. automethod:: _read_cause_invalid_stream
    .. automethod:: _read_cause_missing_param
@@ -128,7 +105,29 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_cause_restart_addr
    .. automethod:: _read_cause_user_abort
    .. automethod:: _read_cause_protocol_violation
-
+   .. automethod:: _make_chunk_donone
+   .. automethod:: _make_chunk_data
+   .. automethod:: _make_chunk_init
+   .. automethod:: _make_chunk_init_ack
+   .. automethod:: _make_chunk_sack
+   .. automethod:: _make_chunk_heartbeat
+   .. automethod:: _make_chunk_heartbeat_ack
+   .. automethod:: _make_chunk_abort
+   .. automethod:: _make_chunk_shutdown
+   .. automethod:: _make_chunk_shutdown_ack
+   .. automethod:: _make_chunk_error
+   .. automethod:: _make_chunk_cookie_echo
+   .. automethod:: _make_chunk_cookie_ack
+   .. automethod:: _make_chunk_shutdown_complete
+   .. automethod:: _make_param_donone
+   .. automethod:: _make_param_hbinfo
+   .. automethod:: _make_param_ipv4
+   .. automethod:: _make_param_ipv6
+   .. automethod:: _make_param_cookie
+   .. automethod:: _make_param_unrecognized
+   .. automethod:: _make_param_preservative
+   .. automethod:: _make_param_hostname
+   .. automethod:: _make_param_addrtypes
    .. automethod:: _make_cause_donone
    .. automethod:: _make_cause_invalid_stream
    .. automethod:: _make_cause_missing_param
@@ -143,19 +142,15 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_cause_restart_addr
    .. automethod:: _make_cause_user_abort
    .. automethod:: _make_cause_protocol_violation
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: __chunk__
-      :no-value:
-   .. autoattribute:: __parameter__
-      :no-value:
-   .. autoattribute:: __cause__
-      :no-value:
-
-   .. automethod:: __index__
+   .. automethod:: _get_payload
+   .. automethod:: _make_sctp_chunk
+   .. automethod:: _read_sctp_parameters
+   .. automethod:: _make_sctp_parameters
+   .. automethod:: _make_sctp_parameter
+   .. automethod:: _read_sctp_causes
+   .. automethod:: _make_sctp_causes
+   .. automethod:: _make_sctp_cause
+   .. automethod:: _make_param_types
 
 Header Schemas
 --------------

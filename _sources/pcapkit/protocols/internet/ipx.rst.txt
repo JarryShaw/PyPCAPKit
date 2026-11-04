@@ -25,6 +25,12 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -35,15 +41,10 @@ Octets      Bits        Name                    Description
    .. automethod:: make
    .. automethod:: register
 
-   .. automethod:: _make_data
-   .. automethod:: _next_exthdr_depth
-
    .. automethod:: __index__
 
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
+   .. automethod:: _make_data
+   .. automethod:: _next_exthdr_depth
 
 Header Schemas
 --------------

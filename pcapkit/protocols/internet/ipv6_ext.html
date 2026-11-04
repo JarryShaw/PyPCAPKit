@@ -925,29 +925,6 @@ construction check. <code class="docutils literal notranslate"><span class="pre"
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext/protocol.html#IPv6_Ext._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
-<p>Emits the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet and the body as they were read, so
-the rebuild is byte-exact whichever per-protocol length rule
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> applied, and also for an overrun, where <code class="docutils literal notranslate"><span class="pre">data.next</span></code> is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">data.declared_next</span></code> keeps the octet. Hands
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> it resolved as <code class="docutils literal notranslate"><span class="pre">alias</span></code>, which picks
-that rule and the identity again (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a></span>) – protocol data</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__post_init__">
 <span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext/protocol.html#IPv6_Ext.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__post_init__" title="Link to this definition">¶</a></dt>
 <dd><p>Post initialisation hook.</p>
@@ -1024,6 +1001,29 @@ behaviour, with no IPv4-specific code.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext/protocol.html#IPv6_Ext._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext._make_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<p>Emits the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> octet and the body as they were read, so
+the rebuild is byte-exact whichever per-protocol length rule
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> applied, and also for an overrun, where <code class="docutils literal notranslate"><span class="pre">data.next</span></code> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> and <code class="docutils literal notranslate"><span class="pre">data.declared_next</span></code> keeps the octet. Hands
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> it resolved as <code class="docutils literal notranslate"><span class="pre">alias</span></code>, which picks
+that rule and the identity again (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2768">#2768</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.data.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a></span>) – protocol data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
 </dd>
 </dl>
 </dd></dl>

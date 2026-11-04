@@ -574,13 +574,22 @@
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">AppType_TCP</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'FTP_DATA'</span><span class="p">]</span>
+
+<span class="c1">#: The TCP port registry :meth:`FTP_DATA.__index__` reads its port from, resolved</span>
+<span class="c1">#: there rather than imported, as ``import pcapkit`` leaves it unloaded</span>
+<span class="c1">#: (:issue:`1538`), so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FTP_DATA">
@@ -641,10 +650,7 @@
 <span class="sd">           :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-
-        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">TCP</span><span class="o">.</span><span class="n">ftp_data</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">_TCP</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">ftp_data</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
 </div>
 
 </pre></div>

@@ -852,6 +852,33 @@ Report.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/protocol.html#IGMPv3._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.IGMPv3" title="pcapkit.protocols.internet.igmpv3.data.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a></span>) – protocol data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Dispatches on <code class="docutils literal notranslate"><span class="pre">data.type</span></code> rather than on
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance(data,</span> <span class="pre">Data_Report)</span></code></a>, so that a
+hand-built <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> carrying the right <code class="docutils literal notranslate"><span class="pre">type</span></code> but not
+actually one of the two concrete data classes – as a test double
+legitimately might – still rebuilds correctly, the same way
+<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.make" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> itself dispatches on the <code class="docutils literal notranslate"><span class="pre">type</span></code> it is given rather
+than requiring a particular input class.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_group_record">
 <span class="sig-name descname"><span class="pre">_make_group_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RecordType.MODE_IS_INCLUDE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multicast_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'0.0.0.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/protocol.html#IGMPv3._make_group_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_group_record" title="Link to this definition">¶</a></dt>
 <dd><p>Make an IGMPv3 group record (<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.2.4"><strong>RFC 3376 Section 4.2.4</strong></a>).</p>
@@ -885,33 +912,6 @@ IGMPv3 sender to leave this empty.</p></li>
     member or code outside 0 to 255.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/igmpv3/protocol.html#IGMPv3._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3._make_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.data.IGMPv3" title="pcapkit.protocols.internet.igmpv3.data.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a></span>) – protocol data</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction.</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Dispatches on <code class="docutils literal notranslate"><span class="pre">data.type</span></code> rather than on
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance(data,</span> <span class="pre">Data_Report)</span></code></a>, so that a
-hand-built <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> carrying the right <code class="docutils literal notranslate"><span class="pre">type</span></code> but not
-actually one of the two concrete data classes – as a test double
-legitimately might – still rebuilds correctly, the same way
-<a class="reference internal" href="#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.make" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> itself dispatches on the <code class="docutils literal notranslate"><span class="pre">type</span></code> it is given rather
-than requiring a particular input class.</p>
-</div>
 </dd></dl>
 
 </dd></dl>

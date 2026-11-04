@@ -2695,90 +2695,6 @@ included – derive from this class directly. Its metaclass is
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> to create a new protocol stack, or the matching
 layer base class above for a new protocol in an existing layer.</p>
 </div>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="Link to this definition">¶</a></dt>
-<dd><p>Initialisation for subclasses.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_ST</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Schema class.</p></li>
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_PT</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Data class.</p></li>
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Next-layer dispatch registration key(s). <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the
-default) skips registration entirely – see below.</p></li>
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If any unrecognised class keyword is given.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
-</dd>
-</dl>
-<p>This method is called when a subclass of <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> is defined.
-It is used to set the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
-and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__data__" title="pcapkit.protocols.protocol.Protocol.__data__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__data__</span></code></a>
-attributes of the subclass, and, if <code class="docutils literal notranslate"><span class="pre">code</span></code> is given, to register the
-subclass into the next-layer dispatch <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> (or registries) that
-<code class="docutils literal notranslate"><span class="pre">code</span></code> names – e.g. <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">schema</span></code> and/or <code class="docutils literal notranslate"><span class="pre">data</span></code> is not specified, the method looks
-for the class of the subclass’s own name in the <code class="docutils literal notranslate"><span class="pre">schema</span></code> and
-<code class="docutils literal notranslate"><span class="pre">data</span></code> modules beside the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> module that defines it, as
-<a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> finds
-<a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tp.schema.L2TP" title="pcapkit.protocols.link.l2tp.schema.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>). If there is none, the default
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> and
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.
-An explicit <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> keyword is used as given.</p>
-</div>
-<p>Dispatch registration is <strong>opt-in</strong>, like the <code class="docutils literal notranslate"><span class="pre">engine=</span></code>/<code class="docutils literal notranslate"><span class="pre">protocol=</span></code>/
-<code class="docutils literal notranslate"><span class="pre">fmt=</span></code> keywords of <a class="reference internal" href="../foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>,
-<a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>,
-<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> and
-<a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>. Omitting <code class="docutils literal notranslate"><span class="pre">code</span></code> is a
-deliberate way to decline registration, and what every built-in
-protocol class does: the built-in dispatch tables (e.g.
-<a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>) are populated by
-literal assignment in each layer module, not by this hook. A subclass that declines can
-still be registered later via the owning class’s <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> classmethod or the
-matching <code class="docutils literal notranslate"><span class="pre">register_*</span></code> helper in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">code</span></code> accepts:</p>
-<ul class="simple">
-<li><p>a single enum member, whose <em>type</em> determines the destination
-registry (or registries) – e.g. any
-<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> member always means
-<a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, and any
-<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> member means <em>both</em>
-<a class="reference internal" href="misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> <strong>and</strong>
-<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>;</p></li>
-<li><p>a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> mapping a destination class to a key, for a key
-that cannot name its own destination – a raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> port,
-for instance, is ambiguous between
-<a class="reference internal" href="transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
-<a class="reference internal" href="transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>, and <em>must</em> use this
-form;</p></li>
-<li><p>an iterable mixing either of the above, to register the same class
-into several registries from a single declaration – e.g. a
-<a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> subclass reachable both
-by its IP protocol number and by a UDP port.</p></li>
-</ul>
-<p>The explicit mapping form is accepted even for a key whose type could
-be inferred: being more explicit than required is never an error.</p>
-<p>Inference refuses rather than guesses: an enum member whose type
-names no known destination raises
-<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> rather than doing
-nothing or picking an arbitrary registry.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol_code()</span></code></a>
-implements the resolution described above.</p>
-</div>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__registry__">
 <span class="sig-name descname"><span class="pre">__registry__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="Link to this definition">¶</a></dt>
@@ -2862,6 +2778,90 @@ again on each lookup and follows a reloaded module.</p>
 </dl>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#ProtocolBase.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialisation for subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_ST</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Schema class.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_PT</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Data class.</p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Next-layer dispatch registration key(s). <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the
+default) skips registration entirely – see below.</p></li>
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If any unrecognised class keyword is given.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+<p>This method is called when a subclass of <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> is defined.
+It is used to set the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
+and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__data__" title="pcapkit.protocols.protocol.Protocol.__data__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__data__</span></code></a>
+attributes of the subclass, and, if <code class="docutils literal notranslate"><span class="pre">code</span></code> is given, to register the
+subclass into the next-layer dispatch <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> (or registries) that
+<code class="docutils literal notranslate"><span class="pre">code</span></code> names – e.g. <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">schema</span></code> and/or <code class="docutils literal notranslate"><span class="pre">data</span></code> is not specified, the method looks
+for the class of the subclass’s own name in the <code class="docutils literal notranslate"><span class="pre">schema</span></code> and
+<code class="docutils literal notranslate"><span class="pre">data</span></code> modules beside the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> module that defines it, as
+<a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> finds
+<a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tp.schema.L2TP" title="pcapkit.protocols.link.l2tp.schema.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>). If there is none, the default
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> and
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.
+An explicit <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> keyword is used as given.</p>
+</div>
+<p>Dispatch registration is <strong>opt-in</strong>, like the <code class="docutils literal notranslate"><span class="pre">engine=</span></code>/<code class="docutils literal notranslate"><span class="pre">protocol=</span></code>/
+<code class="docutils literal notranslate"><span class="pre">fmt=</span></code> keywords of <a class="reference internal" href="../foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>,
+<a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>,
+<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> and
+<a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>. Omitting <code class="docutils literal notranslate"><span class="pre">code</span></code> is a
+deliberate way to decline registration, and what every built-in
+protocol class does: the built-in dispatch tables (e.g.
+<a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>) are populated by
+literal assignment in each layer module, not by this hook. A subclass that declines can
+still be registered later via the owning class’s <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> classmethod or the
+matching <code class="docutils literal notranslate"><span class="pre">register_*</span></code> helper in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">code</span></code> accepts:</p>
+<ul class="simple">
+<li><p>a single enum member, whose <em>type</em> determines the destination
+registry (or registries) – e.g. any
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> member always means
+<a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, and any
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> member means <em>both</em>
+<a class="reference internal" href="misc/pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> <strong>and</strong>
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>;</p></li>
+<li><p>a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> mapping a destination class to a key, for a key
+that cannot name its own destination – a raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> port,
+for instance, is ambiguous between
+<a class="reference internal" href="transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
+<a class="reference internal" href="transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>, and <em>must</em> use this
+form;</p></li>
+<li><p>an iterable mixing either of the above, to register the same class
+into several registries from a single declaration – e.g. a
+<a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> subclass reachable both
+by its IP protocol number and by a UDP port.</p></li>
+</ul>
+<p>The explicit mapping form is accepted even for a key whose type could
+be inferred: being more explicit than required is never an error.</p>
+<p>Inference refuses rather than guesses: an enum member whose type
+names no known destination raises
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> rather than doing
+nothing or picking an arbitrary registry.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol_code()</span></code></a>
+implements the resolution described above.</p>
 </div>
 </dd></dl>
 

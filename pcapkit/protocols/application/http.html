@@ -612,6 +612,19 @@ give the one <a class="reference internal" href="#pcapkit.protocols.application.
 since no field picks a member (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>). <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.from_data" title="pcapkit.protocols.application.http.protocol.HTTP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> gives the
 member whose data model it is handed, and refuses a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>. See
 <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.__new__" title="pcapkit.protocols.application.http.protocol.HTTP.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._preface_length">
+<span class="sig-name descname"><span class="pre">_preface_length</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._preface_length" title="Link to this definition">¶</a></dt>
+<dd><p>Octets consumed ahead of the identified version’s own header – in practice
+the 24-octet HTTP/2 connection preface, when <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a>
+identified one and parsed the frame that follows it. They belong to this
+packet’s header rather than to its payload, so <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.read" title="pcapkit.protocols.application.http.protocol.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> adds them to
+<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.length" title="pcapkit.protocols.application.http.protocol.HTTP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>; otherwise <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">self._info.__update__(packet=self.packet.payload)</span></code> would slice the
+payload from octet 9 of a buffer whose frame starts at octet 24 and report
+the tail of the preface as packet payload.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Hypertext</span> <span class="pre">Transfer</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP.name" title="Link to this definition">¶</a></dt>
@@ -713,22 +726,27 @@ frame; <code class="xref py py-meth docutils literal notranslate"><span class="p
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._make_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._make_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP.from_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP.from_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create protocol instance from data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – protocol data</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Protocol data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Key-value pairs for protocol construction, including the <code class="docutils literal notranslate"><span class="pre">version</span></code>
-that <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> dispatches on.</p>
+<dd class="field-odd"><p>Protocol instance; on this class, an instance of the member whose data
+model <code class="docutils literal notranslate"><span class="pre">data</span></code> is (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2524">#2524</a>).</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither HTTP/1.* nor HTTP/2 data.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither member’s data model, on this
+    class. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> is refused: it carries no version, and no
+    key picks a member (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -816,6 +834,27 @@ is created as itself.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._make_data">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._make_data" title="Link to this definition">¶</a></dt>
+<dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code></span>) – protocol data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Key-value pairs for protocol construction, including the <code class="docutils literal notranslate"><span class="pre">version</span></code>
+that <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> dispatches on.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither HTTP/1.* nor HTTP/2 data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._guess_version">
 <span class="sig-name descname"><span class="pre">_guess_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._guess_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="Link to this definition">¶</a></dt>
 <dd><p>Identify the HTTP version of the payload, and parse it with that version.</p>
@@ -880,6 +919,28 @@ guessed as HTTP/2.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._member_of_version">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._member_of_version" title="Link to this definition">¶</a></dt>
+<dd><p>The member a <code class="docutils literal notranslate"><span class="pre">version</span></code> of <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Version of HTTP.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code></a> or
+<a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> is neither, or is no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>: a
+    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> is refused even where it equals one.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._dispatch_version">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dispatch_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._dispatch_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._dispatch_version" title="Link to this definition">¶</a></dt>
 <dd><p>Pick the class that parses the HTTP message at the start of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
@@ -925,67 +986,6 @@ frameless segment has no form in it, and
 <a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a> refuses one.
 So this does not pick that class for it, and the two agree.</p>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._member_of_version">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_member_of_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP._member_of_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._member_of_version" title="Link to this definition">¶</a></dt>
-<dd><p>The member a <code class="docutils literal notranslate"><span class="pre">version</span></code> of <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> names.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Version of HTTP.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code></a> or
-<a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">version</span></code> is neither, or is no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>: a
-    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> or a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> is refused even where it equals one.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP._preface_length">
-<span class="sig-name descname"><span class="pre">_preface_length</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP._preface_length" title="Link to this definition">¶</a></dt>
-<dd><p>Octets consumed ahead of the identified version’s own header – in practice
-the 24-octet HTTP/2 connection preface, when <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a>
-identified one and parsed the frame that follows it. They belong to this
-packet’s header rather than to its payload, so <a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.read" title="pcapkit.protocols.application.http.protocol.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> adds them to
-<a class="reference internal" href="#pcapkit.protocols.application.http.protocol.HTTP.length" title="pcapkit.protocols.application.http.protocol.HTTP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>; otherwise <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>’s
-<code class="docutils literal notranslate"><span class="pre">self._info.__update__(packet=self.packet.payload)</span></code> would slice the
-payload from octet 9 of a buffer whose frame starts at octet 24 and report
-the tail of the preface as packet payload.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.http.protocol.HTTP.from_data">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http/protocol.html#HTTP.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.protocol.HTTP.from_data" title="Link to this definition">¶</a></dt>
-<dd><p>Create protocol instance from data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PT</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Protocol data.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Protocol instance; on this class, an instance of the member whose data
-model <code class="docutils literal notranslate"><span class="pre">data</span></code> is (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2524">#2524</a>).</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither member’s data model, on this
-    class. A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> is refused: it carries no version, and no
-    key picks a member (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2574">#2574</a>).</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

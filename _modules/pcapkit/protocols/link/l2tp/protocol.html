@@ -652,6 +652,7 @@
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
@@ -661,7 +662,15 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.l2tpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TPv2</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'L2TP'</span><span class="p">]</span>
+
+<span class="c1">#: The member :meth:`L2TP._member_of_version` picks for version ``2``, resolved</span>
+<span class="c1">#: there rather than imported, so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_L2TPV2</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[L2TPv2]'</span> <span class="o">=</span> \
+    <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2.protocol'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="L2TP">
@@ -848,10 +857,8 @@
 <span class="sd">                implemented.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.l2tpv2.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TPv2</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[L2TP]'</span><span class="p">,</span> <span class="n">L2TPv2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[L2TP]'</span><span class="p">,</span> <span class="n">_L2TPV2</span><span class="o">.</span><span class="n">klass</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'L2TP: invalid version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 </div>
 

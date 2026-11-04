@@ -661,6 +661,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.extension_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionType</span> <span class="k">as</span> <span class="n">Enum_ExtensionType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLS</span> <span class="k">as</span> <span class="n">Data_DTLS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCIDCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCIDCiphertext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.dtls.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTLSCiphertext</span> <span class="k">as</span> <span class="n">Data_DTLSCiphertext</span>
@@ -678,11 +679,18 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span> <span class="k">as</span> <span class="n">AppType_UDP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tls.handshake_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">HandshakeType</span> <span class="k">as</span> <span class="n">Enum_HandshakeType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DTLS'</span><span class="p">,</span> <span class="s1">'DTLSContext'</span><span class="p">]</span>
+
+<span class="c1">#: The UDP port registry :meth:`DTLS.__index__` reads its port from, resolved</span>
+<span class="c1">#: there rather than imported, as ``import pcapkit`` leaves it unloaded</span>
+<span class="c1">#: (:issue:`1538`), so its first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_UDP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_UDP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.udp'</span><span class="p">,</span> <span class="s1">'UDP'</span><span class="p">)</span>
 
 <span class="c1">#: Length of a legacy record header -- content type, legacy version, epoch,</span>
 <span class="c1">#: sequence number and length (:rfc:`9147#section-4`).</span>
@@ -1357,10 +1365,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># imported here, as ``import pcapkit`` leaves the UDP registry unloaded (#1538)</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-
-        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">UDP</span><span class="o">.</span><span class="n">coaps</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">_UDP</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">coaps</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
 
 
     <span class="c1">##########################################################################</span>

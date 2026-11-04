@@ -12,25 +12,28 @@ which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protoc
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __layer__
+      :no-value:
+
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: _exthdr_depth
+
    .. autoproperty:: layer
 
    .. automethod:: register
    .. automethod:: from_data
 
+   .. automethod:: _next_exthdr_depth
+   .. automethod:: _rebuilt_exthdr_depth
+   .. automethod:: _make_payload
+   .. automethod:: _next_layer_class
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
-   .. automethod:: _next_layer_class
-   .. automethod:: _next_exthdr_depth
-   .. automethod:: _make_payload
-   .. automethod:: _rebuilt_exthdr_depth
-
-   .. autoattribute:: __layer__
-      :no-value:
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: _exthdr_depth
 
 .. autodata:: pcapkit.protocols.internet.internet._exthdr_rebuilt
    :no-value:

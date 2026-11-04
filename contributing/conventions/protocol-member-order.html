@@ -601,7 +601,10 @@ default, its fallback for a code with no entry of its own, as
 <code class="docutils literal notranslate"><span class="pre">_read_opt_unassigned()</span></code> opens the readers of
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4" title="pcapkit.protocols.internet.ipv4.protocol.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>; the rest follow the enum value
 of the code or type each handles, not alphabetical order. Ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>.</p></li>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>. A class with several registries puts every registry’s readers
+before any registry’s makers, as <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.MH" title="pcapkit.protocols.internet.mh.protocol.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a>
+and <a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> do, ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2772">#2772</a>.</p></li>
 <li><p><strong>Other helpers.</strong> Every helper that <code class="docutils literal notranslate"><span class="pre">read()</span></code>, <code class="docutils literal notranslate"><span class="pre">make()</span></code> and the registries
 do not reach goes last, including one that only another helper calls, such as
 <code class="docutils literal notranslate"><span class="pre">_decode_text()</span></code> in <a class="reference internal" href="../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code></a>.
@@ -610,16 +613,26 @@ Ruled on <a class="extlink-issue reference external" href="https://github.com/Ja
 </li>
 </ol>
 <p><strong>Registry maps.</strong> The registry maps themselves (<code class="docutils literal notranslate"><span class="pre">__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">__option__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__parameter__</span></code> and similar) are ordered by their enum values, or alphabetically
-by key where there is no enum.</p>
+<code class="docutils literal notranslate"><span class="pre">__parameter__</span></code> and similar) are ordered by their enum values, by key value where
+an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> key has no enum, and alphabetically where the key is a string, as the
+namespaces of
+<a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.Option.__enum__" title="pcapkit.protocols.misc.pcapng.schema.Option.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.__enum__</span></code></a> are.
+<a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PCAPNG.__option__</span></code></a>,
+keyed by an option’s namespace and value, is ordered by namespace, in the order
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> declares them, then by value.
+Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2772">#2772</a>.
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>
+groups its built-in entries by layer under the comments <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Link</span> <span class="pre">Layer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Internet</span> <span class="pre">Layer</span></code>, <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Transport</span> <span class="pre">Layer</span></code>, <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Application</span> <span class="pre">Layer</span></code> and
+<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Miscellaneous</span></code>, in that order, the last holding what belongs to no layer, and
+is alphabetical within each group, ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2773">#2773</a>.</p>
 <p><strong>The guard.</strong> <code class="file docutils literal notranslate"><span class="pre">tests/project/test_protocol_member_order_2490_unit.py</span></code> holds
 every protocol class to the groups, <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code> first, each <code class="docutils literal notranslate"><span class="pre">_read_xxx()</span></code>
 before its <code class="docutils literal notranslate"><span class="pre">_make_xxx()</span></code>, subgroups b, c and d, and the order of the registry
-maps, with a table of known exceptions (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>). It values a key that is an
-enum member or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>; a map with a key of another shape, such as the
-computed keys of
-<a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PCAPNG.__option__</span></code></a>,
-it leaves in its own order, which rule c then follows.</p>
+maps, layer groups included, with a table of known exceptions (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2490">#2490</a>). It
+values a key that is an enum member, an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, a string or a PCAP-NG option
+key, and orders a string-keyed map within each group its comment lines open; a map
+with a key of another shape it leaves in its own order, which rule c then follows.</p>
 </section>
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>

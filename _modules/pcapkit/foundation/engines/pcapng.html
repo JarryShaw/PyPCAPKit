@@ -568,6 +568,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.schema.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
@@ -585,7 +586,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
@@ -601,6 +602,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">SystemdJournalExportBlock</span> <span class="k">as</span> <span class="n">Data_SystemdJournalExportBlock</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownBlock</span> <span class="k">as</span> <span class="n">Data_UnknownBlock</span>
+
+<span class="c1">#: The toolkit functions :meth:`PCAPNG.read_frame` hands each frame to, resolved</span>
+<span class="c1">#: there rather than imported, so their first import holds</span>
+<span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
+<span class="n">_TOOLKIT</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.toolkit.pcapng'</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+    <span class="s1">'dtls_reassembly'</span><span class="p">,</span> <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
+<span class="p">))</span>  <span class="c1"># type: tuple[ModuleDescriptor[Any], ...]</span>
 
 
 <div class="viewcode-block" id="Context">
@@ -773,8 +781,8 @@
 <span class="sd">            Parsed PCAP-NG block.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">dtls_reassembly</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span>
-                                            <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="n">dtls_reassembly</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">descriptor</span><span class="o">.</span><span class="n">klass</span> <span class="k">for</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="n">_TOOLKIT</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>

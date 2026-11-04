@@ -895,6 +895,12 @@ field whose values have a range of their own, such as
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>.</p>
 </div>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__fields__">
+<span class="sig-name descname"><span class="pre">__fields__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><span class="pre">FieldBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__fields__" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of fields.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__payload__">
 <span class="sig-name descname"><span class="pre">__payload__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payload'</span></span><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__payload__" title="Link to this definition">¶</a></dt>
 <dd><p>Field name of the payload.</p>
@@ -913,64 +919,86 @@ field whose values have a range of their own, such as
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__init_subclass__">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__init_subclass__" title="Link to this definition">¶</a></dt>
-<dd><p>Refuse to derive from a finalised schema.</p>
-<p><a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> is a promise to the type
-checker and nothing more: it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> on the class and
-leaves the interpreter free to subclass it anyway. Every schema
-<a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
-from the <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
-subclass adding a field afterwards inherits a constructor that cannot
-set it. This turns that promise into a rule the interpreter keeps.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.from_dict">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new instance.</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is a mapping, then does:
+<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">dict_[k]</span></code>.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is present and not a mapping, then does:
+<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
+<li><p>In either case, and if <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is not present, this is followed
+by: <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">kwargs.items():</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments in class definition.</p></li>
+<li><p><strong>dict_</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Source data.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If any class in <code class="docutils literal notranslate"><span class="pre">cls</span></code>’s ancestry carries the
-    <code class="docutils literal notranslate"><span class="pre">__final__</span></code> marker in its own <code class="docutils literal notranslate"><span class="pre">__dict__</span></code>.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__new__">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__new__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a new instance.</p>
-<p>The class will try to automatically generate <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method with
-one keyword parameter per field in <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a>, which is
-inspired by <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0557/"><strong>PEP 557</strong></a> (<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#module-dataclasses" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dataclasses</span></code></a>).</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Convert <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>We only convert nested <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> if
+they are the direct value of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> object’s attribute.
+Should such <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects be nested within other data
+types, such as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
+leave them intact rather than converting them into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Whether <code class="docutils literal notranslate"><span class="pre">cls</span></code> still needs finalising is read from its <em>own</em>
-<code class="docutils literal notranslate"><span class="pre">__dict__</span></code>, never inherited (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1498">#1498</a>). Each
-class is finalised on its first construction, whatever its
-ancestors’ state, so a subclass of a
-<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.FinalisedState.BASE" title="pcapkit.corekit.infoclass.FinalisedState.BASE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BASE</span></code></a> ancestor
-still gets its own <code class="docutils literal notranslate"><span class="pre">__builtin__</span></code>, <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code> and generated
-<code class="docutils literal notranslate"><span class="pre">__init__</span></code>, and a <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> class under a <code class="docutils literal notranslate"><span class="pre">BASE</span></code> ancestor is
-refused like any other.</p>
+<p>A schema unpacked as the value of a
+<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> that left part of
+the field’s span unread carries those octets under a
+<code class="docutils literal notranslate"><span class="pre">__remainder__</span></code> key, and the number of octets it did read under
+<code class="docutils literal notranslate"><span class="pre">__remainder_offset__</span></code>. <a class="reference internal" href="#pcapkit.protocols.schema.Schema.from_dict" title="pcapkit.protocols.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts both back, so
+that the rebuilt field still packs them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1380">#1380</a>). The keys
+are absent otherwise.</p>
+<p>A schema whose data ended inside one of its fields carries the
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> that <a class="reference internal" href="#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> recorded, and
+<a class="reference internal" href="#pcapkit.protocols.schema.Schema.from_dict" title="pcapkit.protocols.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts it back, likewise.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> was marked with
-    <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> but never finalised by
-    <a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a>, i.e. it carries <code class="docutils literal notranslate"><span class="pre">__final__</span></code> in its own
-    <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> without
-    <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.FinalisedState.FINAL" title="pcapkit.corekit.infoclass.FinalisedState.FINAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FINAL</span></code></a>.</p>
-</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.to_bytes">
+<span class="sig-name descname"><span class="pre">to_bytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.to_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.to_bytes" title="Link to this definition">¶</a></dt>
+<dd><p>Convert <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.get_payload">
+<span class="sig-name descname"><span class="pre">get_payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.get_payload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.get_payload" title="Link to this definition">¶</a></dt>
+<dd><p>Get payload of <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Name of the payload field.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Payload of <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1145,94 +1173,66 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.get_payload">
-<span class="sig-name descname"><span class="pre">get_payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.get_payload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.get_payload" title="Link to this definition">¶</a></dt>
-<dd><p>Get payload of <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Name of the payload field.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Payload of <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.from_dict">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.from_dict" title="Link to this definition">¶</a></dt>
-<dd><p>Create a new instance.</p>
-<ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is a mapping, then does:
-<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">dict_[k]</span></code>.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is present and not a mapping, then does:
-<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">dict_:</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
-<li><p>In either case, and if <code class="docutils literal notranslate"><span class="pre">dict_</span></code> is not present, this is followed
-by: <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">kwargs.items():</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
-</ul>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__init_subclass__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__init_subclass__" title="Link to this definition">¶</a></dt>
+<dd><p>Refuse to derive from a finalised schema.</p>
+<p><a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> is a promise to the type
+checker and nothing more: it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> on the class and
+leaves the interpreter free to subclass it anyway. Every schema
+<a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
+from the <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
+subclass adding a field afterwards inherits a constructor that cannot
+set it. This turns that promise into a rule the interpreter keeps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dict_</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Source data.</p></li>
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments in class definition.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If any class in <code class="docutils literal notranslate"><span class="pre">cls</span></code>’s ancestry carries the
+    <code class="docutils literal notranslate"><span class="pre">__final__</span></code> marker in its own <code class="docutils literal notranslate"><span class="pre">__dict__</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new instance.</p>
+<p>The class will try to automatically generate <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method with
+one keyword parameter per field in <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a>, which is
+inspired by <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0557/"><strong>PEP 557</strong></a> (<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#module-dataclasses" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dataclasses</span></code></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whether <code class="docutils literal notranslate"><span class="pre">cls</span></code> still needs finalising is read from its <em>own</em>
+<code class="docutils literal notranslate"><span class="pre">__dict__</span></code>, never inherited (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1498">#1498</a>). Each
+class is finalised on its first construction, whatever its
+ancestors’ state, so a subclass of a
+<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.FinalisedState.BASE" title="pcapkit.corekit.infoclass.FinalisedState.BASE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BASE</span></code></a> ancestor
+still gets its own <code class="docutils literal notranslate"><span class="pre">__builtin__</span></code>, <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code> and generated
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code>, and a <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> class under a <code class="docutils literal notranslate"><span class="pre">BASE</span></code> ancestor is
+refused like any other.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_VT</span></code></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> was marked with
+    <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> but never finalised by
+    <a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a>, i.e. it carries <code class="docutils literal notranslate"><span class="pre">__final__</span></code> in its own
+    <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> without
+    <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.FinalisedState.FINAL" title="pcapkit.corekit.infoclass.FinalisedState.FINAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FINAL</span></code></a>.</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.to_dict" title="Link to this definition">¶</a></dt>
-<dd><p>Convert <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>We only convert nested <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> if
-they are the direct value of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> object’s attribute.
-Should such <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> objects be nested within other data
-types, such as <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#set" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>, etc., we
-leave them intact rather than converting them into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>A schema unpacked as the value of a
-<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> that left part of
-the field’s span unread carries those octets under a
-<code class="docutils literal notranslate"><span class="pre">__remainder__</span></code> key, and the number of octets it did read under
-<code class="docutils literal notranslate"><span class="pre">__remainder_offset__</span></code>. <a class="reference internal" href="#pcapkit.protocols.schema.Schema.from_dict" title="pcapkit.protocols.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts both back, so
-that the rebuilt field still packs them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1380">#1380</a>). The keys
-are absent otherwise.</p>
-<p>A schema whose data ended inside one of its fields carries the
-<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> that <a class="reference internal" href="#pcapkit.protocols.schema.Schema.unpack" title="pcapkit.protocols.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> recorded, and
-<a class="reference internal" href="#pcapkit.protocols.schema.Schema.from_dict" title="pcapkit.protocols.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts it back, likewise.</p>
-</div>
-<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">_VT</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.to_bytes">
-<span class="sig-name descname"><span class="pre">to_bytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.to_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.to_bytes" title="Link to this definition">¶</a></dt>
-<dd><p>Convert <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__fields__">
-<span class="sig-name descname"><span class="pre">__fields__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><span class="pre">FieldBase</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__fields__" title="Link to this definition">¶</a></dt>
-<dd><p>Mapping of fields.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1669,6 +1669,12 @@ payload layer is dispatched, as for a protocol with no next layer, and
 without <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> no IPv6 extension header is rebuilt
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.Data.__included__">
+<span class="sig-name descname"><span class="pre">__included__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.Data.__included__" title="Link to this definition">¶</a></dt>
+<dd><p>Metadata keys that <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries, for a rebuild to read.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.Data.__excluded__">
 <span class="sig-name descname"><span class="pre">__excluded__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.Data.__excluded__" title="Link to this definition">¶</a></dt>
 <dd><p>Metadata keys that <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps leave out.</p>
@@ -1677,12 +1683,6 @@ without <code class="docutils literal notranslate"><span class="pre">__exthdr__<
 <p>Please refer to <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code></a>
 for more information with the inserted names to be excluded.</p>
 </div>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.data.Data.__included__">
-<span class="sig-name descname"><span class="pre">__included__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.Data.__included__" title="Link to this definition">¶</a></dt>
-<dd><p>Metadata keys that <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries, for a rebuild to read.</p>
 </dd></dl>
 
 </dd></dl>

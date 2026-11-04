@@ -49,9 +49,9 @@ see :ref:`linux-sll-labels`.
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 Header Schemas
 --------------
