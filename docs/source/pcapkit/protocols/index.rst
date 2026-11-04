@@ -196,8 +196,14 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 Protocol Registry
 -----------------
 
+.. module:: pcapkit.protocols.registry
+
 .. autodata:: pcapkit.protocols.__proto__
    :no-value:
+
+   :mod:`pcapkit.protocols.registry` builds it the first time it is reached, and
+   imports every protocol class :mod:`pcapkit.protocols` exports to do so
+   (:issue:`2730`).
 
    .. seealso::
 

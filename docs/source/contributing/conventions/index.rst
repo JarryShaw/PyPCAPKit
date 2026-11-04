@@ -20,8 +20,9 @@ House Conventions
    * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
    * :ref:`protocol-family-grouping` -- how a protocol family's base and members
      spell :meth:`~pcapkit.protocols.protocol.Protocol.id`, how a protocol's
-     package, modules and classes are named, and how quietly a next-layer fallback keeps a
-     refused layer as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`;
+     package, modules and classes are named and imported, and how quietly a
+     next-layer fallback keeps a refused layer as
+     :class:`~pcapkit.protocols.misc.raw.protocol.Raw`;
    * :ref:`protocol-member-order` -- the order of members in a protocol class body;
    * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
    * :ref:`process` -- the repository rather than any of its code;

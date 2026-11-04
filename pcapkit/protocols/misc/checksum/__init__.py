@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import
 """Checksum Pseudo-Headers
 =============================
 
@@ -9,7 +10,19 @@ upper-layer checksums cover,
 :class:`~pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo`. The checksum
 itself is in :mod:`pcapkit.corekit.checksum`.
 
+The pseudo-header is imported the first time it is reached rather than with this
+package, through :func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+
 """
-from pcapkit.protocols.misc.checksum.ip_pseudo.protocol import IP_Pseudo
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.importlib import lazy_exports
+
+if TYPE_CHECKING:
+    from pcapkit.protocols.misc.checksum.ip_pseudo import IP_Pseudo
 
 __all__ = ['IP_Pseudo']
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'IP_Pseudo': ('ip_pseudo', 'IP_Pseudo'),
+})

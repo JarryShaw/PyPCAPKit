@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=unused-wildcard-import
+# pylint: disable=unused-import
 """Auxiliary Protocols
 =========================
 
@@ -11,20 +11,27 @@ protocols, the :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` cl
 indication of empty payload, the PCAP and PCAP-NG file format classes, and the
 checksum pseudo-headers in :mod:`pcapkit.protocols.misc.checksum`.
 
+Each class is imported the first time it is reached rather than with this
+package, through :func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+
 """
+from typing import TYPE_CHECKING
 
-# PCAP Headers
-from pcapkit.protocols.misc.pcap import *
+from pcapkit.utilities.importlib import lazy_exports
 
-# PCAPNG Format
-from pcapkit.protocols.misc.pcapng.protocol import *
+if TYPE_CHECKING:
+    # PCAP Headers
+    from pcapkit.protocols.misc.pcap import Frame, Header
 
-# Miscellaneous Classes for Protocols
-from pcapkit.protocols.misc.raw.protocol import Raw
-from pcapkit.protocols.misc.no_payload.protocol import NoPayload
+    # PCAPNG Format
+    from pcapkit.protocols.misc.pcapng import PCAPNG
 
-# Checksum Pseudo-Headers
-from pcapkit.protocols.misc.checksum import IP_Pseudo
+    # Miscellaneous Classes for Protocols
+    from pcapkit.protocols.misc.raw import Raw
+    from pcapkit.protocols.misc.no_payload import NoPayload
+
+    # Checksum Pseudo-Headers
+    from pcapkit.protocols.misc.checksum import IP_Pseudo
 
 __all__ = [
     # PCAP Headers
@@ -42,3 +49,12 @@ __all__ = [
     # Checksum Pseudo-Headers
     'IP_Pseudo',
 ]
+
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'Header': ('pcap', 'Header'),
+    'Frame': ('pcap', 'Frame'),
+    'PCAPNG': ('pcapng', 'PCAPNG'),
+    'NoPayload': ('no_payload', 'NoPayload'),
+    'Raw': ('raw', 'Raw'),
+    'IP_Pseudo': ('checksum', 'IP_Pseudo'),
+})

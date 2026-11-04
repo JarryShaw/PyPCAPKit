@@ -16,9 +16,8 @@ DCCP, and to every package under :mod:`pcapkit.const`, through
 The subprocess checks run in a fresh interpreter, since the question is what a
 cold import leaves in :data:`sys.modules` and this process has long since
 imported everything. :data:`PRELUDE` imports :mod:`pcapkit`, whose protocol
-modules import the const modules they name at module level --
-:mod:`pcapkit.protocols.application.ngap.protocol` imports SCTP's registry, for one, which
-#2730 is to move -- so a check of the const packages themselves runs on :data:`BARE`, which
+modules import the const modules they name at module level, so a check of the
+const packages themselves runs on :data:`BARE`, which
 binds :mod:`pcapkit` as a bare package and so runs none of
 :file:`pcapkit/__init__.py`. Each check fails on an eager tree at its first
 ``loaded()`` or ``enumerations()``; what follows it pins that nothing a caller
@@ -111,7 +110,7 @@ def emit(**kwargs):
 
 ''' + inspect.getsource(import_system_names)
 
-#: A child that imports :mod:`pcapkit`, protocols and all.
+#: A child that imports :mod:`pcapkit`, and the protocol modules it imports with itself.
 PRELUDE = HELPERS + f'''
 import pcapkit
 assert pcapkit.__file__.startswith({str(ROOT)!r}), pcapkit.__file__
@@ -154,10 +153,10 @@ class LazyAppTypeImportTests(unittest.TestCase):
     """What a cold import loads, and what loads each registry afterwards."""
 
     def test_import_pcapkit_leaves_the_registries_unimported(self) -> 'None':
-        # NOTE: SCTP's is left out: pcapkit.protocols.application.ngap.protocol imports it
-        # at module level, which LazyConstImportTests accounts for (#2730).
+        # NOTE: SCTP's too, since pcapkit.protocols.application.ngap.protocol, which
+        # imports it at module level, loads on first use (#2730).
         out = run_child('''
-            emit(loaded=loaded('tcp', 'udp', 'dccp'),
+            emit(loaded=loaded(),
                  eager='pcapkit.const.reg.apptype.apptype' in sys.modules)
         ''')
         self.assertEqual(out['loaded'], [])
@@ -391,7 +390,8 @@ class LazyConstImportTests(unittest.TestCase):
         const packages imports at module level, or one :data:`EAGER` names.
 
         Those are the protocol, schema and data modules naming the const module
-        they read; moving them is GitHub issue #2730.
+        they read, of the protocols :mod:`pcapkit` imports with itself; the
+        protocol packages load the rest on first use (GitHub issue #2730).
 
         """
         out = run_child('''
@@ -583,9 +583,7 @@ class PackageGetattrTests(unittest.TestCase):
     def test_hooks(self) -> 'None':
         import pcapkit.const.reg.apptype as pkg
 
-        # NOTE: TCP, UDP and DCCP, since pcapkit.protocols.application.ngap.protocol
-        # imports SCTP's submodule at module level (#2730).
-        for name in ('TCP', 'UDP', 'DCCP'):
+        for name in ('TCP', 'UDP', 'SCTP', 'DCCP'):
             self.assertNotIn(name, vars(pkg))
             self.assertNotIn(f'pcapkit.const.reg.apptype.{name.lower()}', sys.modules)
         getattr_ = vars(pkg)['__getattr__']

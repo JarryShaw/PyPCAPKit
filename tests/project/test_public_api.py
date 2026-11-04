@@ -186,7 +186,7 @@ AGGREGATORS = (
 #: build their manager classes. ``TYPE_CHECKING`` is :mod:`typing`'s. Re-exporting
 #: any of them would claim ownership of a name this package does not own.
 #:
-#: **Import-time machinery, and one leaked loop variable.**
+#: **Import-time machinery.**
 #: :mod:`pcapkit` imports ``BaseError``, ``DEVMODE`` and ``DevModeWarning`` to wire
 #: up the ``tbtrim`` excepthook, not to publish them -- the top-level surface is
 #: interface functions, macros and protocols, and those names are documented under
@@ -196,11 +196,7 @@ AGGREGATORS = (
 #: fix for one. :mod:`pcapkit.vendor` likewise imports ``ModuleNotFoundError``,
 #: ``stacklevel``, ``VendorWarning`` and ``warn`` only to warn when ``requests``
 #: or ``bs4`` is missing; they are :mod:`pcapkit.utilities`' names, and listing
-#: them would hand them to that same crawler loop. ``pcapkit.protocols.name`` is
-#: the loop variable of the ``for name in __all__`` that builds ``__proto__``,
-#: left behind in the namespace; renaming it ``_name`` would express that better
-#: than this entry does, but that is a change to a module body rather than to an
-#: export list.
+#: them would hand them to that same crawler loop.
 DELIBERATE_NON_EXPORTS = {
     'pcapkit': ('BaseError', 'DEVMODE', 'DevModeWarning', 'ROOT'),
     'pcapkit.corekit.fields': ('Field',),
@@ -209,7 +205,7 @@ DELIBERATE_NON_EXPORTS = {
                                       'TYPE_CHECKING', 'info_final'),
     'pcapkit.foundation.traceflow': ('Info', 'TYPE_CHECKING', 'TraceFlow',
                                      'info_final'),
-    'pcapkit.protocols': ('Protocol', 'TYPE_CHECKING', 'name'),
+    'pcapkit.protocols': ('Protocol', 'TYPE_CHECKING'),
     'pcapkit.protocols.application': ('Application',),
     'pcapkit.protocols.internet': ('Internet',),
     'pcapkit.protocols.link': ('Link',),

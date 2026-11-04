@@ -663,9 +663,16 @@ class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
     @staticmethod
     def _declaring_classes() -> 'set[type]':
         """Every ``ProtocolBase`` descendant declaring a ``__proto_key__`` of its own."""
-        import pcapkit  # noqa: F401  # pylint: disable=unused-import
+        import importlib
+        import pkgutil
+
+        import pcapkit.protocols as package
         from pcapkit.protocols.protocol import ProtocolBase
 
+        # NOTE: the protocol packages import each protocol on first use (#2730).
+        for info in pkgutil.walk_packages(package.__path__, 'pcapkit.protocols.'):
+            if 'NotImplemented' not in info.name:
+                importlib.import_module(info.name)
         found = set()
         pending = [ProtocolBase]
         while pending:

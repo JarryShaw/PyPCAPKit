@@ -125,11 +125,11 @@ class HTTPMemberNameTests(unittest.TestCase):
     def test_registering_a_member_keeps_the_base_under_http(self) -> None:
         """Each member's own key holds it, and ``'HTTP'`` keeps the base."""
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.foundation.registry.protocols import protocol as reg_protocol
+        from pcapkit.protocols import __proto__ as protocol_registry
         from pcapkit.protocols.application.http.protocol import HTTP
         from pcapkit.utilities.warnings import RegistryWarning
 
-        names = reg_protocol.protocol_registry
+        names = protocol_registry
         before = dict(names)
 
         def restore() -> None:

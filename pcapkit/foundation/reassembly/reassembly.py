@@ -15,7 +15,6 @@ import abc
 import math
 from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
 
-from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw.protocol import Raw
 from pcapkit.utilities.exceptions import FieldValueError, UnsupportedCall
 from pcapkit.utilities.logging import get_logger
@@ -79,6 +78,9 @@ class ReassemblyMeta(abc.ABCMeta):
         """Protocol of current reassembly object."""
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
+        # NOTE: read here, not on import, which would build it and import every protocol (#2730).
+        from pcapkit.protocols import \
+            __proto__ as protocol_registry  # pylint: disable=import-outside-toplevel
         return protocol_registry.get(cls.name.upper(), Raw)
 
     @property

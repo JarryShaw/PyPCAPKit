@@ -8,20 +8,17 @@
 :mod:`pcapkit.protocols` is a collection of all protocol families,
 with detailed implementation and methods.
 
+Each protocol class, and :data:`__proto__`, is imported the first time it is
+reached rather than with this package, through
+:func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+
 """
 from typing import TYPE_CHECKING
 
+# NOTE: ahead of any protocol module: defining ``Protocol`` imports Raw and
+# NoPayload, which import it back, so either imported first is met half-built.
 # Base Class for Protocols
 from pcapkit.protocols.protocol import Protocol
-
-# Utility Classes for Protocols
-from pcapkit.protocols.misc import *
-
-# Protocols & Macros
-from pcapkit.protocols.link import *
-from pcapkit.protocols.internet import *
-from pcapkit.protocols.transport import *
-from pcapkit.protocols.application import *
 
 # Protocol Data
 from pcapkit.protocols import data
@@ -31,10 +28,24 @@ from pcapkit.protocols.data import Data
 from pcapkit.protocols import schema
 from pcapkit.protocols.schema import Schema
 
+from pcapkit.utilities.importlib import lazy_exports
+
 if TYPE_CHECKING:
     from typing import Type
 
     from pcapkit.protocols.protocol import ProtocolBase
+
+    # Utility Classes for Protocols
+    from pcapkit.protocols.misc import *
+
+    # Protocols & Macros
+    from pcapkit.protocols.link import *
+    from pcapkit.protocols.internet import *
+    from pcapkit.protocols.transport import *
+    from pcapkit.protocols.application import *
+
+    #: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.
+    __proto__ = {}  # type: dict[str, Type[ProtocolBase]]
 
 __all__ = [
     # PCAP Headers
@@ -74,14 +85,7 @@ __all__ = [
     'OSPF',
     'RARP', 'DRARP',
     'SSL', 'SSLv2', 'SSLv3', 'TLS', 'DTLS',
-]
 
-#: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.
-__proto__ = {}  # type: dict[str, Type[ProtocolBase]]
-for name in __all__:
-    __proto__[name.upper()] = globals()[name]
-
-__all__.extend((
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',
 
@@ -90,4 +94,10 @@ __all__.extend((
 
     # Protocol Schema
     'Schema', 'schema',
-))
+]
+
+# NOTE: ``Protocol`` is bound above, and named here so that ``dir()`` lists it.
+__getattr__, __dir__ = lazy_exports(__name__, globals(), {
+    'Protocol': ('protocol', 'Protocol'),
+    '__proto__': ('registry', '__proto__'),
+}, packages=('misc', 'link', 'internet', 'transport', 'application'))
