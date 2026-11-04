@@ -608,6 +608,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: it reads the rebuild at. Set between those two calls alone.
     _uncaptured: 'Optional[int]' = None
 
+    #: Whether the data model :meth:`from_data` rebuilds this instance from kept
+    #: a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` next layer past a header
+    #: the capture cut short, which only a parse reading the header short of its
+    #: width does. :meth:`_empty_next_layer` keeps it for the rebuild, read at that
+    #: width (:issue:`2717`). Set for the duration of that call alone, like
+    #: :attr:`__short_read__`.
+    _short_of_header: 'bool' = False
+
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
     #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level
@@ -1194,7 +1202,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         A header the capture cut short, as ``__short_read__`` records, is cut
         back before it is read, and read at the width it declares, so the
         rebuild parses and verifies the octets captured as the capture did
-        (:issue:`2703`).
+        (:issue:`2703`). It keeps the ``Raw`` next layer its data model holds,
+        which a parse reading the header short of that width leaves it
+        (:issue:`2717`).
 
         Args:
             data: Protocol data.
@@ -1236,12 +1246,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).
         self.__reconstructing__ = True
         self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
+        # NOTE: A cut header kept a Raw next layer only where its parse read it short of
+        # its width, which the rebuild, read at that width, is told of (#2717).
+        if self.__short_read__ is not None:
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            next_type = data.get('__next_type__')
+            self._short_of_header = isinstance(next_type, type) and issubclass(next_type, Raw)
         try:
             # initialize protocol instance
             self.__init__(**kwargs)  # type: ignore[misc]
         finally:
             del self.__reconstructing__
             del self.__short_read__
+            vars(self).pop('_short_of_header', None)
 
         return self
 
@@ -2788,8 +2805,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if length is None:
             length = len(file_)
 
-        if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.no_payload.protocol import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+        empty = self._empty_next_layer(file_, length)
+        if empty is not None:
+            protocol = empty
         elif self._sigterm:
             from pcapkit.protocols.misc.raw.protocol import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
@@ -2798,6 +2816,42 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return self._parse_next_layer(protocol, file_, length, alias=proto, packet=packet,
                                       layer=self._exlayer, protocol=self._exproto,
                                       __context__=self._exctx)
+
+    def _empty_next_layer(self, file_: 'bytes', length: 'int') -> 'Optional[Type[ProtocolBase]]':
+        r"""The class a next layer with nothing to parse is kept as.
+
+        Arguments:
+            file\_: payload of the current layer
+            length: valid (*non-padding*) length
+
+        Returns:
+            :data:`None` if octets were captured past the header and it leaves
+            its next layer a length, which is then parsed. Otherwise
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` if no octets were
+            captured past a header leaving its next layer a negative length, and
+            :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` if
+            the header leaves none, or no octets past it.
+
+        Note:
+            A header leaves a negative length when it declares more than it was
+            given: one the capture cut short, read at the octets captured, or an
+            IPv6 extension header overrunning the payload (:issue:`2477`). Such a
+            next layer is kept raw, not dispatched on a code the cut may have
+            read as zeros (:issue:`1170`). :meth:`from_data` reads the rebuild of
+            a cut header at the width it declares (:issue:`2703`), which leaves
+            none, so the rebuild keeps ``Raw`` where its data model did, as
+            :attr:`_short_of_header` says (:issue:`2717`).
+
+        .. versionadded:: 1.6.0
+
+        """
+        if file_ and length != 0:
+            return None
+        if not file_ and (length < 0 or self._short_of_header):
+            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            return Raw
+        from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+        return NoPayload
 
     @staticmethod
     def _parse_next_layer(klass: 'Type[ProtocolBase]', file_: 'bytes', length: 'int',
