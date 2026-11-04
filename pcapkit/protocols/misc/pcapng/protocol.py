@@ -3917,15 +3917,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='if')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return self._make_padding(Schema_InterfaceDescriptionBlock(
+        schema = self._make_padding(Schema_InterfaceDescriptionBlock(
             length=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block],
             linktype=linktype_val,
             snaplen=snaplen,
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block],
         ), block, 'reserved')
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(schema, block, 'padding', 'padding_opts')
 
     def _make_block_packet(self, block: 'Optional[Data_PacketBlock]' = None, *,
                            interface_id: 'int' = 0,
@@ -4001,9 +4003,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='pack')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return self._make_padding(Schema_PacketBlock(
+        schema = self._make_padding(Schema_PacketBlock(
             length=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
             interface_id=interface_id,
             drop_count=drop_count,
@@ -4015,6 +4017,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
         ), block, 'padding_data')
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(schema, block, 'padding_opts')
 
     def _make_block_spb(self, block: 'Optional[Data_SimplePacketBlock]' = None, *,
                         original_len: 'Optional[int]' = None,
@@ -4089,14 +4093,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, options_length = self._make_pcapng_options(options, namespace='ns')
         else:
             options_value, options_length = [], 0
-        options_length += self._make_options_trailer(block, options_value)
+        options_length += self._make_options_trailer(block)
 
-        return Schema_NameResolutionBlock(
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(Schema_NameResolutionBlock(
             length=options_length + records_length + GENERIC_BLOCK_MINIMUM,
             records=records_value,
             options=options_value,
             length2=options_length + records_length + GENERIC_BLOCK_MINIMUM,
-        )
+        ), block, 'padding', 'padding_opts')
 
     def _make_block_isb(self, block: 'Optional[Data_InterfaceStatisticsBlock]' = None, *,
                         interface_id: 'int' = 0,
@@ -4130,16 +4135,17 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='isb')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return Schema_InterfaceStatisticsBlock(
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(Schema_InterfaceStatisticsBlock(
             length=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block],
             interface_id=interface_id,
             timestamp_high=timestamp_high,
             timestamp_low=timestamp_low,
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block],
-        )
+        ), block, 'padding', 'padding_opts')
 
     def _make_block_epb(self, block: 'Optional[Data_EnhancedPacketBlock]' = None, *,
                         interface_id: 'int' = 0,
@@ -4196,9 +4202,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='epb')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return self._make_padding(Schema_EnhancedPacketBlock(
+        schema = self._make_padding(Schema_EnhancedPacketBlock(
             length=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
             interface_id=interface_id,
             timestamp_high=timestamp_high,
@@ -4209,6 +4215,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
         ), block, 'padding_data')
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(schema, block, 'padding_opts')
 
     def _make_block_systemd(self, block: 'Optional[Data_SystemdJournalExportBlock]' = None, *,
                             entries: 'Optional[list[OrderedMultiDict[str, str | bytes]] | bytes]' = None,
@@ -4344,9 +4352,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='dsb')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return self._make_padding(Schema_DecryptionSecretsBlock(
+        schema = self._make_padding(Schema_DecryptionSecretsBlock(
             length=total_length + secrets_padded + BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block],
             secrets_type=secrets_type_val,
             secrets_length=secrets_length,
@@ -4354,6 +4362,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + secrets_padded + BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block],
         ), block, 'padding_data')
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(schema, block, 'padding_opts')
 
     def _make_block_cb(self, block: 'Optional[Data_CustomBlock]' = None, *,
                        pen: 'int' = 0,
@@ -4472,9 +4482,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options_value, total_length = self._make_pcapng_options(options, namespace='opt')
         else:
             options_value, total_length = [], 0
-        total_length += self._make_options_trailer(block, options_value)
+        total_length += self._make_options_trailer(block)
 
-        return Schema_SectionHeaderBlock(
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437, #2776).
+        return self._make_padding(Schema_SectionHeaderBlock(
             length=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
             magic=BYTE_ORDER_MAGIC,
             major=major_version,
@@ -4482,7 +4493,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             section_length=section_length,
             options=options_value,
             length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
-        )
+        ), block, 'padding', 'padding_opts')
 
     def _make_option_unknown(self, type: 'Enum_OptionType', option: 'Optional[Data_UnknownOption]' = None, *,
                              data: 'bytes' = b'',
@@ -6548,26 +6559,31 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             setattr(schema, name, bytes(padding))
         return schema
 
-    def _make_options_trailer(self, block: 'Optional[Data_PCAPNG]',
-                              options: 'list[Schema_Option | bytes]') -> 'int':
-        """Append the octets a parsed block held past its ``opt_endofopt``.
+    def _make_options_trailer(self, block: 'Optional[Data_PCAPNG]') -> 'int':
+        """Count the octets a parsed block held past its ``opt_endofopt``.
 
         Args:
             block: Block data model, if any.
-            options: Constructed options, extended in place.
 
         Returns:
-            Number of octets appended.
+            Number of octets, which the block's length takes in.
 
         An option area ends at its ``opt_endofopt`` and the octets after it are
         read as padding. :meth:`_read_padding` keeps them as ``padding_opts``,
-        and they are written back after the options, verbatim (:issue:`1437`).
+        and :meth:`_make_padding` writes them back into the padding field after
+        the options, verbatim (:issue:`1437`). As an item of the options, they
+        would read as an area kept as captured, and a block rebuilt from its
+        ``info`` would lose its options and ``padding_opts`` (:issue:`2776`).
+
+        .. versionchanged:: 1.6.0
+
+           Takes no ``options``, and no longer appends the octets to them
+           (:issue:`2776`).
 
         """
         trailer = block.get('padding_opts') if block is not None else None
-        if not isinstance(trailer, bytes) or not trailer:
+        if not isinstance(trailer, (bytes, bytearray)) or not trailer:
             return 0
-        options.append(trailer)
         return len(trailer)
 
     @classmethod
