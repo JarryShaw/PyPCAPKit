@@ -300,7 +300,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             self._file.name = file.name
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
-        keep_short_read(self)
+        keep_short_read(self, length)
 
     def __len__(self) -> 'Literal[24]':
         """Total length of corresponding protocol."""

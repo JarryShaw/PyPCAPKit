@@ -6,9 +6,10 @@ to the octets captured, but ``from_data(info).info`` differed from ``info``. The
 was read from the header ``make()`` built, whose Reserved fields are zero-filled past the
 cut and whose option area a ``PadN`` pads out to the length the header declares; the
 parse read the octets captured. Each field the issue names is checked against those
-octets, in the parse and in its rebuild from the data model and from the :obj:`dict`,
-but ``IPv6_Ext``'s ``length``, which :file:`tests/protocols/test_cut_header_values_2761_unit.py`
-records as still divergent.
+octets, in the parse and in its rebuild from the data model and from the :obj:`dict`.
+``IPv6_Ext``'s ``length`` is the width the parse was given where the header overruns
+it, and the rebuild, read at the two octets ``make()`` packs, took that for its own;
+``__short_width__`` now records the width, and the rebuild is read at it.
 
 The octets are built here; this module is unit-tier and reads no capture file.
 
@@ -36,6 +37,13 @@ OPTIONS = bytes([17, 1, 5, 2, 0, 0, 1, 8]) + bytes(8)
 #: The cuts of :data:`OPTIONS` the issue names; cut inside its Opt Data Len, the Router
 #: Alert is refused.
 OPTION_CUTS = (1, 2, 4, 5, 6)
+
+#: A generic extension header (RFC 6564, section 4) cut after its Next Header of UDP,
+#: and the widths it is read at: none, the octet captured, and the eight octets its Hdr
+#: Ext Len of zero declares. The data model's ``length`` is what each width holds of
+#: those eight.
+GENERIC = bytes([17])
+GENERIC_WIDTHS = {None: 1, 1: 1, 8: 8}
 
 
 class CutExtensionHeaderValuesTests(unittest.TestCase):
@@ -80,6 +88,27 @@ class CutExtensionHeaderValuesTests(unittest.TestCase):
                 self.assertEqual(layer.info.reserved_octet, FRAG[1:count])
                 for rebuilt in self.rebuilds(layer, raw):
                     self.assertEqual(rebuilt.info.reserved_octet, FRAG[1:count])
+
+    def test_ipv6_ext_length(self) -> None:
+        # The width is recorded beside the cut, and the rebuild read at it holds the
+        # length its parse read, not the two octets make() packs.
+        from pcapkit.protocols.internet.ipv6_ext.protocol import IPv6_Ext
+
+        for width, length in GENERIC_WIDTHS.items():
+            with self.subTest(width=width):
+                layer = IPv6_Ext(GENERIC) if width is None else IPv6_Ext(GENERIC, width)
+                self.assertEqual((layer.info.length, layer.info.get('__short_width__')), (length, length))
+                self.assertEqual(layer.info.next, None if length < 8 else 17)
+                self.assertIn('__short_width__', layer.info.to_dict())
+                self.assertNotIn('__short_width__', repr(layer.info))
+                for rebuilt in self.rebuilds(layer, GENERIC):
+                    self.assertEqual(rebuilt.info.length, length)
+        with self.subTest(width='whole'):
+            # a header captured whole records no width, nor does its rebuild
+            whole = IPv6_Ext(GENERIC + bytes(7))
+            self.assertEqual(whole.info.length, 8)
+            self.assertNotIn('__short_width__', whole.info.to_dict())
+            self.assertNotIn('__short_width__', IPv6_Ext.from_data(whole.info.to_dict()).info.to_dict())
 
     def test_hopopt_and_ipv6_opts_options(self) -> None:
         # No octet before the seventh is a PadN, so neither parse nor rebuild holds one.

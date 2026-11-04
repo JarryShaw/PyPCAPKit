@@ -211,7 +211,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
         """
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
-        keep_short_read(self)
+        keep_short_read(self, length)
 
     ##########################################################################
     # Utilities.

@@ -7,7 +7,8 @@ GitHub issue #2761: a header cut short rebuilt to the octets captured, but
 :meth:`Protocol._fill_short_read <pcapkit.protocols.protocol.Protocol._fill_short_read>`
 gives a reserved field, a ``PadN`` padding an option area out, a nested schema at its
 full width. The parse read the octets captured. The rebuild now parses those octets
-back, so a round trip reproduces the parsed values as well as the octets.
+back, at the width its parse read them at, so a round trip reproduces the parsed values
+as well as the octets, with no exception.
 
 Every concrete protocol class, found by walking the protocol classes rather than listed,
 is built from its ``make()`` defaults and cut at every octet of that header, and so are
@@ -75,17 +76,6 @@ NOT_CUT = {
         "reads its record by the global header of its savefile",
     'pcapkit.protocols.misc.pcapng.protocol.PCAPNG':
         'reads its block by the section and interfaces before it',
-}
-
-#: Cuts whose rebuild still reads a value its parse did not, by class and the octets
-#: captured, in hex: the keys that differ, and why. An entry whose cut stops differing
-#: so fails, as does one the sweep never reaches.
-KNOWN = {
-    ('pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext', '11'): (
-        ('length',),
-        # Protocol.__post_init__ reads the rebuild at the width make() packs (#2703),
-        # past the octet IPv6_Ext.read was given, and an overrun is that long (#2761).
-        'IPv6_Ext.read takes an overrunning header for the width it is given'),
 }
 
 
@@ -173,17 +163,13 @@ class CutHeaderValuesTests(unittest.TestCase):
                 self.assertEqual(name in NOT_CUT, not built and name not in OCTETS)
 
     def test_every_cut_rebuilds_its_values(self) -> None:
-        reached = set()  # type: set[tuple[str, str]]
+        # read at the width its parse read the header at, as __short_width__ records
         for name, raw, layer in self.cuts():
-            key = (name, raw.hex())
-            fields = KNOWN.get(key, ((),))[0]
-            reached.update({key} & set(KNOWN))
             for path, data in (('model', layer.info), ('dict', layer.info.to_dict())):
                 with self.subTest(protocol=name, captured=raw.hex(), path=path):
                     rebuilt = type(layer).from_data(data)
                     self.assertEqual(rebuilt.data, raw)
-                    self.assertEqual(_differing(layer.info, rebuilt.info), fields)
-        self.assertEqual(reached, set(KNOWN))
+                    self.assertEqual(_differing(layer.info, rebuilt.info), ())
 
 
 if __name__ == '__main__':

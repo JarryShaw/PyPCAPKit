@@ -304,7 +304,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         self._exthdr_depth = depth if file is not None else self._rebuilt_exthdr_depth()
 
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
-        keep_short_read(self)
+        keep_short_read(self, length)
 
         if extension and file is not None and len(self._data) > self.length:
             self._data = self._data[:self.length]

@@ -118,7 +118,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         # NOTE: A header the data ends inside keeps that in its ``info``, so
         # that :meth:`from_data` rebuilds only what was captured (#1458).
-        keep_short_read(self)
+        keep_short_read(self, length)
 
         # ``read`` may have dispatched the undissected remainder through
         # ``_decode_next_layer``, which already set the payload and the chain

@@ -1385,7 +1385,10 @@ class IGMPv3DirectCutTests(unittest.TestCase):
                 carried = IPv4(outer[:len(outer) - len(packet) + keep]).payload
                 direct = self.parse(packet[:keep])
                 self.assertEqual(direct.info['__short_read__'], carried.info['__short_read__'])
-                self.assertEqual(direct.info.to_dict(), carried.info.to_dict())
+                ours, theirs = direct.info.to_dict(), carried.info.to_dict()
+                # each read at its own width, the octets given and IPv4's length (#2761)
+                self.assertEqual((ours.pop('__short_width__'), theirs.pop('__short_width__')), (keep, len(packet)))
+                self.assertEqual(ours, theirs)
 
 
 class IGMPv3RecordCountTests(unittest.TestCase):
