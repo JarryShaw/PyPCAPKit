@@ -165,6 +165,8 @@ class ReportCountCutTests(unittest.TestCase):
                 self.assertIsInstance(carried, self.IGMPv3)
                 ours, theirs = direct.info.to_dict(), carried.info.to_dict()
                 records, filled = ours.pop('records'), theirs.pop('records')
+                # each read at its own width, the octets given and IPv4's length (#2761)
+                self.assertEqual((ours.pop('__short_width__'), theirs.pop('__short_width__')), (keep, len(msg)))
                 self.assertEqual(ours, theirs)
                 self.assertEqual(len(records), sum(start < keep for start in starts(SHAPES[label])))
                 self.assertEqual(records, filled[:len(records)])

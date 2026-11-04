@@ -15,19 +15,23 @@ against :data:`RULES`:
   registry fallback, the default of a ``getattr()`` or ``.get()`` there, is a
   specific reader rather than a helper (#2490);
 * ``specific`` -- rule c: the readers and makers of each method registry follow the
-  helpers, its readers before its makers, each set opening with the registry's
-  default and then in the registry's order;
+  helpers, every registry's readers before any registry's makers (#2772), each set
+  opening with the registry's default and then in the registry's order;
 * ``unreached`` -- subgroup d: every utility that ``read()``, ``make()`` and the
   registries do not reach comes after all those they do;
 * ``registry`` -- a registry map's entries are in the order of their keys' values:
-  an enum member's value, or an :class:`int` key's own.
+  an enum member's value, an :class:`int` key's own, a PCAP-NG option key's
+  namespace and then its value, or a :obj:`str` key alphabetically within the group
+  a comment line opens (#2772, #2773);
+* ``layer`` -- each entry of ``ProtocolBase.__registry__`` is under the comment of
+  its module's layer, the layers in the order of :data:`LAYERS` (#2773).
 
 A method registry is a class-level dunder map, other than ``__proto__``, whose
 :obj:`str` values name the ``_read_*`` and ``_make_*`` methods an f-string in the
 class builds. Ordered by value, a registry also orders rule c by enum value, as the
-page asks. A key the audit cannot value, such as the call that builds each key of
-``PCAPNG.__option__``, leaves its map out of ``registry``, and rule c then follows
-the registry's own order, as the page asks where there is no enum.
+page asks. ``registry`` checks ``__proto__``, every method registry and every map
+keyed by :obj:`str` alone; a key the audit cannot value leaves its map out, and
+rule c then follows the registry's own order.
 
 A class that breaks a rule is an entry in :data:`KNOWN_EXCEPTIONS`, with the rules
 it breaks and the issue or PR whose reorder removes it. The table is checked in
@@ -52,7 +56,7 @@ from tests._tiers import ROOT
 
 if TYPE_CHECKING:
     import pathlib
-    from typing import Any, Callable, Iterator, Optional
+    from typing import Any, Callable, Iterator, Optional, Sequence
 
     #: Resolves a name in a scanned module to the object it imports, else :data:`None`.
     Lookup = Callable[[str], Optional[Any]]
@@ -79,9 +83,23 @@ RULES = {
     'data': '_make_data() is the first utility',
     'pair': 'each _read_xxx() comes before its _make_xxx()',
     'helpers': 'the helpers read() and make() name, in first-use order, each reader then its maker',
-    'specific': "after the helpers, each registry's readers then its makers, default first, in registry order",
+    'specific': "after the helpers, every registry's readers then every registry's makers, default first, "
+                'in registry order',
     'unreached': 'the utilities read(), make() and the registries do not reach come last',
-    'registry': "a registry map's entries in the order of their keys' enum or int values",
+    'registry': "a registry map's entries in the order of their keys: enum or int values, namespace then "
+                'value, or str keys alphabetically within each commented group',
+    'layer': "each __registry__ entry under its layer's comment, the layers in order",
+}
+
+#: The comment each entry of ``ProtocolBase.__registry__`` sits under, by the
+#: subpackage of :mod:`pcapkit.protocols` its module is in, in the order of the
+#: groups (#2773).
+LAYERS = {
+    'link': 'Link Layer',
+    'internet': 'Internet Layer',
+    'transport': 'Transport Layer',
+    'application': 'Application Layer',
+    'misc': 'Miscellaneous',
 }
 
 #: Classes that break the order, as ``qualified name: (rules, remover)``: the
@@ -286,22 +304,92 @@ def specific(cls: 'ast.ClassDef', utilities: 'list[str]') -> 'list[tuple[str, li
     return sets
 
 
-def _key_value(key: 'Optional[ast.expr]', lookup: 'Optional[Lookup]') -> 'Optional[int]':
-    """The value a registry key orders by: an :class:`int` literal, or an enum member's value.
+def _member(node: 'ast.expr', lookup: 'Optional[Lookup]') -> 'Optional[enum.Enum]':
+    """The enum member ``node`` names as ``Enum.MEMBER``, else :data:`None`.
 
-    :data:`None` for a key of any other shape, which no rule on the page orders.
+    Raises:
+        LookupError: If ``Enum`` is not imported from :mod:`pcapkit.const`.
+        TypeError: If ``Enum.MEMBER`` is not an enum member.
 
     """
-    if isinstance(key, ast.Constant) and isinstance(key.value, int) and not isinstance(key.value, bool):
+    if not (isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)) or lookup is None:
+        return None
+    owner = lookup(node.value.id)
+    if owner is None:
+        raise LookupError(f'{node.value.id} is not imported from pcapkit.const')
+    member = getattr(owner, node.attr)
+    if not isinstance(member, enum.Enum):
+        raise TypeError(f'{node.value.id}.{node.attr} is not an enum member')
+    return member
+
+
+def _key_value(key: 'Optional[ast.expr]', lookup: 'Optional[Lookup]') -> 'Optional[Any]':
+    """The value a registry key orders by.
+
+    An :class:`int` literal is its own value, an enum member its member's value and
+    a :obj:`str` literal the string itself. A call on a single PCAP-NG option type,
+    as ``_option_key()`` builds each key of ``PCAPNG.__option__``, is valued by the
+    place of its namespace in :class:`~pcapkit.const.pcapng.option_type.OptionType`
+    and then by its value (#2772). :data:`None` for a key of any other shape, which
+    no rule on the page orders.
+
+    """
+    if isinstance(key, ast.Constant) and isinstance(key.value, (int, str)) and not isinstance(key.value, bool):
         return key.value
-    if isinstance(key, ast.Attribute) and isinstance(key.value, ast.Name) and lookup is not None:
-        owner = lookup(key.value.id)
-        if owner is None:
-            raise LookupError(f'{key.value.id} is not imported from pcapkit.const')
-        member = getattr(owner, key.attr)
-        if not isinstance(member, enum.Enum):
-            raise TypeError(f'{key.value.id}.{key.attr} is not an enum member')
-        return int(member)
+    if isinstance(key, ast.Call):
+        if len(key.args) != 1 or key.keywords:
+            return None
+        try:
+            member = _member(key.args[0], lookup)
+        except (LookupError, TypeError):
+            return None
+        if member is None or not hasattr(member, 'opt_name'):
+            return None
+        spaces = list(dict.fromkeys(item.opt_name.split('_', 1)[0] for item in type(member)))
+        return spaces.index(member.opt_name.split('_', 1)[0]), member.opt_value
+    member = _member(key, lookup) if key is not None else None
+    return None if member is None else int(member)
+
+
+def _groups(node: 'ast.Dict', lines: 'Optional[Sequence[str]]') -> 'list[Optional[str]]':
+    """The text of the comment line each entry of ``node`` sits under, else :data:`None`."""
+    comments = {}  # type: dict[int, str]
+    if lines is not None:
+        for number in range(node.lineno, (node.end_lineno or node.lineno) + 1):
+            text = lines[number - 1].strip()
+            if text.startswith('#'):
+                comments[number] = text[1:].strip()
+    found = []  # type: list[Optional[str]]
+    for key in node.keys:
+        above = [number for number in comments if key is not None and number < key.lineno]
+        found.append(comments[max(above)] if above else None)
+    return found
+
+
+def _layer(value: 'ast.expr') -> 'Optional[str]':
+    """The :data:`LAYERS` comment a ``ModuleDescriptor('pcapkit.protocols.<layer>...', ...)`` entry is under."""
+    if isinstance(value, ast.Call) and getattr(value.func, 'id', None) == 'ModuleDescriptor' and value.args \
+            and isinstance(value.args[0], ast.Constant) and isinstance(value.args[0].value, str):
+        parts = value.args[0].value.split('.')
+        if parts[:2] == ['pcapkit', 'protocols'] and len(parts) > 2:
+            return LAYERS.get(parts[2])
+    return None
+
+
+def _layer_finding(name: 'str', node: 'ast.Dict', groups: 'list[Optional[str]]') -> 'Optional[str]':
+    """What breaks the ``layer`` rule in the ``__registry__`` map ``node``, else :data:`None`."""
+    titles = list(LAYERS.values())
+    rank = 0
+    for key, value, group in zip(node.keys, node.values, groups):
+        expected = _layer(value)
+        text = _key_text(key) if key is not None else '**'
+        if expected is None:
+            return f'{name}: {text} names no module of a pcapkit.protocols layer'
+        if group != expected:
+            return f'{name}: {text} under {group!r}, not {expected!r}'
+        if titles.index(group) < rank:
+            return f'{name}: {group!r} after {titles[rank]!r}'
+        rank = titles.index(group)
     return None
 
 
@@ -321,11 +409,14 @@ def module_lookup(path: 'pathlib.Path') -> 'Lookup':
     return lookup
 
 
-def audit(cls: 'ast.ClassDef', lookup: 'Optional[Lookup]' = None) -> 'dict[str, str]':
+def audit(cls: 'ast.ClassDef', lookup: 'Optional[Lookup]' = None,
+          lines: 'Optional[Sequence[str]]' = None) -> 'dict[str, str]':
     """The rules ``cls`` breaks, as ``kind: detail``; empty when it keeps the order.
 
     ``lookup`` resolves the names a registry key takes its enum from; without it,
-    only :class:`int` keys are valued.
+    only :class:`int` and :obj:`str` keys are valued. ``lines`` is the source
+    ``cls`` was parsed from, whose comment lines group a :obj:`str`-keyed map;
+    without it, such a map is one group.
 
     """
     order = members(cls)
@@ -371,6 +462,13 @@ def audit(cls: 'ast.ClassDef', lookup: 'Optional[Lookup]' = None) -> 'dict[str, 
     for (label, readers), (_, makers) in zip(sets[::2], sets[1::2]):
         if readers and makers and position[readers[-1]] > position[makers[0]]:
             findings.setdefault('specific', f'{label}: {makers[0]} before {readers[-1]}')
+    readers = [name for _, names in sets[::2] for name in names]
+    makers = [name for _, names in sets[1::2] for name in names]
+    if readers and makers:
+        reader = max(readers, key=position.__getitem__)
+        maker = min(makers, key=position.__getitem__)
+        if position[reader] > position[maker]:
+            findings.setdefault('specific', f'{maker} before {reader}: every reader comes before every maker')
     helper = [name for name in expected if name not in registry]
     first = min((position[name] for name in registry), default=None)
     if helper and first is not None and position[helper[-1]] > first:
@@ -382,21 +480,33 @@ def audit(cls: 'ast.ClassDef', lookup: 'Optional[Lookup]' = None) -> 'dict[str, 
     if early:
         findings['unreached'] = f'{early[0]} before {utilities[last]}'
 
+    checked = {'__proto__', *(label.split()[0] for label, _ in sets)}
     for name, node, _ in maps(cls):
-        if name != '__proto__' and name not in {label.split()[0] for label, _ in sets}:
-            continue
         keys = [key for key in node.keys if key is not None]
+        named = bool(keys) and all(isinstance(key, ast.Constant) and isinstance(key.value, str) for key in keys)
+        if (name not in checked and not named) or len(keys) != len(node.keys):
+            continue
         values = [_key_value(key, lookup) for key in keys]
-        if len(keys) == len(node.keys) and None not in values and values != sorted(values):
-            out = next(index for index in range(1, len(values)) if values[index] < values[index - 1])
+        if None in values or len({type(value) for value in values}) > 1:
+            continue
+        groups = _groups(node, lines) if named else [None] * len(keys)
+        out = next((index for index in range(1, len(values))
+                    if groups[index] == groups[index - 1] and values[index] < values[index - 1]), None)
+        if out is not None:
             findings.setdefault('registry', f'{name}: {_key_text(keys[out])} after {_key_text(keys[out - 1])}')
+        if named and name == '__registry__':
+            detail = _layer_finding(name, node, groups)
+            if detail is not None:
+                findings.setdefault('layer', detail)
     return findings
 
 
 def _key_text(key: 'ast.expr') -> 'str':
-    """A valued registry key as written: ``Enum.MEMBER``, or the :class:`int` literal."""
+    """A valued registry key as written: ``Enum.MEMBER``, ``call(Enum.MEMBER)``, or the literal."""
     if isinstance(key, ast.Attribute) and isinstance(key.value, ast.Name):
         return f'{key.value.id}.{key.attr}'
+    if isinstance(key, ast.Call) and isinstance(key.func, ast.Name) and len(key.args) == 1:
+        return f'{key.func.id}({_key_text(key.args[0])})'
     return repr(getattr(key, 'value', key))
 
 
@@ -425,21 +535,36 @@ def classes(path: 'pathlib.Path', root: 'pathlib.Path' = ROOT) -> 'Iterator[tupl
 
 def audit_tree(root: 'pathlib.Path' = ROOT) -> 'dict[str, dict[str, str]]':
     """Every class under ``root``'s protocol package, mapped to what :func:`audit` finds."""
-    return {name: audit(node, module_lookup(path))
-            for path in protocol_modules(root / 'pcapkit' / 'protocols')
-            for name, node in classes(path, root)}
+    found = {}  # type: dict[str, dict[str, str]]
+    for path in protocol_modules(root / 'pcapkit' / 'protocols'):
+        lookup, lines = module_lookup(path), path.read_text(encoding='utf-8').splitlines()
+        found.update((name, audit(node, lookup, lines)) for name, node in classes(path, root))
+    return found
 
 
 class TestAudit(unittest.TestCase):
     """The audit finds each rule broken in a planted class body, and nothing in a sound one."""
 
-    #: A class body in the order: ``_make_data()``, a helper pair, a registry
-    #: fallback, a method registry's readers and makers, and a helper nothing reaches.
+    #: A class body in the order: a by-name registry grouped by layer, ``_make_data()``,
+    #: a helper pair, a registry fallback, the readers of two method registries and
+    #: then their makers, and a helper nothing reaches.
     SOUND = '''
 class Sound:
+    __registry__ = {
+        # Link Layer
+        'ARP': ModuleDescriptor('pcapkit.protocols.link.arp.protocol', 'ARP'),
+        'ETHERNET': ModuleDescriptor('pcapkit.protocols.link.ethernet.protocol', 'Ethernet'),
+        # Transport Layer
+        'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
+        # Miscellaneous
+        'RAW': ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+    }
     __option__ = collections.defaultdict(lambda: 'unknown', {
         E.ALPHA: 'alpha',
         E.BETA: 'beta',
+    })
+    __type__ = collections.defaultdict(lambda: 'none', {
+        1: 'echo',
     })
     @property
     def name(self): ...
@@ -447,6 +572,7 @@ class Sound:
         self._read_addr()
         getattr(self, 'x', self._read_unknown)
         getattr(self, f'_read_opt_{name}')
+        getattr(self, f'_read_type_{name}')
     def make(self):
         self._make_addr()
     def __index__(self): ...
@@ -459,11 +585,23 @@ class Sound:
     def _read_opt_unknown(self): ...
     def _read_opt_alpha(self): ...
     def _read_opt_beta(self): ...
+    def _read_type_none(self): ...
+    def _read_type_echo(self): ...
     def _make_opt_unknown(self): ...
     def _make_opt_alpha(self): ...
     def _make_opt_beta(self): ...
+    def _make_type_none(self): ...
+    def _make_type_echo(self): ...
     def _decode_text(self): ...
 '''
+
+    #: The by-name registry entries of :attr:`SOUND`, by name.
+    ENTRY = {
+        'ARP': "        'ARP': ModuleDescriptor('pcapkit.protocols.link.arp.protocol', 'ARP'),\n",
+        'ETHERNET': "        'ETHERNET': ModuleDescriptor('pcapkit.protocols.link.ethernet.protocol', 'Ethernet'),\n",
+        'TCP': "        'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),\n",
+        'RAW': "        'RAW': ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),\n",
+    }
 
     class Code(enum.IntEnum):
         """The enum :attr:`SOUND`'s registry is keyed by."""
@@ -474,13 +612,14 @@ class Sound:
     def check(self, source: 'str') -> 'dict[str, str]':
         node = ast.parse(source).body[0]
         assert isinstance(node, ast.ClassDef)
-        return audit(node, {'E': self.Code}.get)
+        return audit(node, {'E': self.Code}.get, source.splitlines())
 
     def test_a_sound_class_has_no_finding(self) -> 'None':
         self.assertEqual(self.check(self.SOUND), {})
 
     def test_each_rule_is_found(self) -> 'None':
         readers = '    def _read_opt_alpha(self): ...\n    def _read_opt_beta(self): ...\n'
+        transport = '        # Transport Layer\n' + self.ENTRY['TCP']
         planted = {
             'group': self.SOUND.replace('    def __index__(self): ...\n', '') + '    def __index__(self): ...\n',
             'data': self.SOUND.replace('    @classmethod\n    def _make_data(cls, data): ...\n', '')
@@ -492,16 +631,44 @@ class Sound:
                 '    def _read_addr(self): ...\n', '    def _decode_text(self): ...\n    def _read_addr(self): ...\n'),
             'registry': self.SOUND.replace("        E.ALPHA: 'alpha',\n        E.BETA: 'beta',\n",
                                            "        E.BETA: 'alpha',\n        E.ALPHA: 'beta',\n"),
+            # TCP moves into the Link group, where it still sorts last.
+            'layer': self.SOUND.replace(transport, self.ENTRY['TCP'] + '        # Transport Layer\n'),
         }
         self.assertEqual(sorted(planted), sorted(RULES))
         for kind, source in planted.items():
             with self.subTest(rule=kind):
                 self.assertNotEqual(source, self.SOUND)
                 self.assertIn(kind, self.check(source))
-        # Each of the checks for rule c, subgroup d and the registry order fires alone.
-        for kind in ('specific', 'unreached', 'registry'):
+        # Each of the checks for rule c, subgroup d, the registry order and the layers fires alone.
+        for kind in ('specific', 'unreached', 'registry', 'layer'):
             with self.subTest(alone=kind):
                 self.assertEqual(sorted(self.check(planted[kind])), [kind])
+
+    def test_every_reader_comes_before_every_maker(self) -> 'None':
+        # Each registry keeps its readers before its makers, but __type__'s readers
+        # follow __option__'s makers (#2772).
+        types = '    def _read_type_none(self): ...\n    def _read_type_echo(self): ...\n'
+        source = self.SOUND.replace(types, '').replace('    def _make_opt_beta(self): ...\n',
+                                                       '    def _make_opt_beta(self): ...\n' + types)
+        self.assertNotEqual(source, self.SOUND)
+        found = self.check(source)
+        self.assertEqual(sorted(found), ['specific'])
+        self.assertIn('every reader comes before every maker', found['specific'])
+
+    def test_a_name_key_is_ordered_within_its_group(self) -> 'None':
+        swapped = self.SOUND.replace(self.ENTRY['ARP'] + self.ENTRY['ETHERNET'],
+                                     self.ENTRY['ETHERNET'] + self.ENTRY['ARP'])
+        self.assertNotEqual(swapped, self.SOUND)
+        self.assertEqual(self.check(swapped), {'registry': "__registry__: 'ARP' after 'ETHERNET'"})
+        # Across groups, a name may sort before the one above it: RAW follows TCP.
+        self.assertLess(self.SOUND.index(self.ENTRY['TCP']), self.SOUND.index(self.ENTRY['RAW']))
+
+    def test_the_layers_keep_their_order(self) -> 'None':
+        transport = '        # Transport Layer\n' + self.ENTRY['TCP']
+        misc = '        # Miscellaneous\n' + self.ENTRY['RAW']
+        swapped = self.SOUND.replace(transport + misc, misc + transport)
+        self.assertNotEqual(swapped, self.SOUND)
+        self.assertEqual(self.check(swapped), {'layer': "__registry__: 'Transport Layer' after 'Miscellaneous'"})
 
     def test_the_specific_sets(self) -> 'None':
         node = ast.parse(self.SOUND).body[0]
@@ -510,12 +677,29 @@ class Sound:
         self.assertEqual(specific(node, utilities), [
             ('__option__ _read_opt_*', ['_read_opt_unknown', '_read_opt_alpha', '_read_opt_beta']),
             ('__option__ _make_opt_*', ['_make_opt_unknown', '_make_opt_alpha', '_make_opt_beta']),
+            ('__type__ _read_type_*', ['_read_type_none', '_read_type_echo']),
+            ('__type__ _make_type_*', ['_make_type_none', '_make_type_echo']),
         ])
 
     def test_a_computed_key_is_not_valued(self) -> 'None':
         source = self.SOUND.replace("        E.ALPHA: 'alpha',\n        E.BETA: 'beta',\n",
                                     "        key(E.BETA): 'alpha',\n        key(E.ALPHA): 'beta',\n")
         self.assertEqual(self.check(source), {})
+
+    def test_an_option_key_orders_by_namespace_then_value(self) -> 'None':
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        def value(name: 'str') -> 'Any':
+            return _key_value(ast.parse(f'key(O.{name})', mode='eval').body, {'O': OptionType}.get)
+
+        # Namespaces in the order OptionType declares them, whatever the values.
+        names = ['opt_endofopt', 'opt_custom_19373', 'if_name', 'if_rxspeed', 'epb_flags', 'ns_dnsname',
+                 'isb_starttime', 'pack_flags']
+        values = [value(name) for name in names]
+        self.assertNotIn(None, values)
+        self.assertEqual(values, sorted(values))
+        self.assertLess(value('if_name'), value('if_description'))
+        self.assertLess(value('opt_custom_19373'), value('if_name'))
 
     def test_a_fallback_is_not_a_helper(self) -> 'None':
         node = ast.parse(self.SOUND).body[0]
@@ -562,11 +746,15 @@ class TestMemberOrder(unittest.TestCase):
         self.assertEqual(utilities, ['_make_data', *pairs])
 
     def test_the_reference_registries_are_checked(self) -> 'None':
-        # Every key of these maps is valued, so the registry rule orders them.
+        # Every key of these maps is valued, so the registry rule orders them: by
+        # enum or int value, PCAPNG's option keys by namespace then value, and the
+        # PCAP-NG option schemas' namespaces alphabetically (#2772).
         cases = {
             ('internet/internet.py', 'Internet'): {'__proto__'},
             ('internet/ipv4/protocol.py', 'IPv4'): {'__option__'},
             ('link/link.py', 'Link'): {'__proto__'},
+            ('misc/pcapng/protocol.py', 'PCAPNG'): {'__option__'},
+            ('misc/pcapng/schema.py', 'Option'): {'__enum__'},
             ('transport/tcp/protocol.py', 'TCP'): {'__proto__', '__option__', '__mp_option__'},
             ('transport/udp/protocol.py', 'UDP'): {'__proto__'},
         }
@@ -580,6 +768,53 @@ class TestMemberOrder(unittest.TestCase):
                 for label in expected:
                     self.assertNotIn(None, found[label], label)
                     self.assertEqual(found[label], sorted(found[label]), label)
+
+    @staticmethod
+    def audit_moved(rel: 'str', name: 'str', line: 'str', before: 'str') -> 'dict[str, str]':
+        """What :func:`audit` finds in class ``name`` of module ``rel`` once ``line`` moves above ``before``."""
+        path = PROTOCOLS / rel
+        text = path.read_text(encoding='utf-8')
+        assert text.count(line) == 1 and text.count(before) == 1, (line, before)
+        text = text.replace(line, '').replace(before, line + before)
+        node = next(node for node in ast.parse(text).body if isinstance(node, ast.ClassDef) and node.name == name)
+        return audit(node, module_lookup(path), text.splitlines())
+
+    def test_the_by_name_registry_is_grouped_by_layer(self) -> 'None':
+        node = dict(classes(PROTOCOLS / 'protocol.py'))['pcapkit.protocols.protocol.ProtocolBase']
+        entries = next(entries for label, entries, _ in maps(node) if label == '__registry__')
+        lines = (PROTOCOLS / 'protocol.py').read_text(encoding='utf-8').splitlines()
+        self.assertEqual(list(dict.fromkeys(_groups(entries, lines))), list(LAYERS.values()))
+        self.assertEqual(self.findings['pcapkit.protocols.protocol.ProtocolBase'], {})
+
+        def entry(key: 'str', module: 'str', name: 'str') -> 'str':
+            return f"        '{key}': ModuleDescriptor('pcapkit.protocols.{module}.protocol', '{name}'),\n"
+
+        arp, c_tag = entry('ARP', 'link.arp', 'ARP'), entry('C_TAG', 'link.c_tag', 'C_Tag')
+        ah = entry('AH', 'internet.ah', 'AH')
+        # A misordered entry inside a group fails.
+        self.assertEqual(self.audit_moved('protocol.py', 'ProtocolBase', c_tag, arp),
+                         {'registry': "__registry__: 'ARP' after 'C_TAG'"})
+        # So does an entry in another layer's group, though it sorts first there.
+        self.assertEqual(self.audit_moved('protocol.py', 'ProtocolBase', ah, arp),
+                         {'layer': "__registry__: 'AH' under 'Link Layer', not 'Internet Layer'"})
+
+    def test_the_pcapng_option_maps_are_checked(self) -> 'None':
+        def option(name: 'str', meth: 'str') -> 'str':
+            return f"            _option_key(Enum_OptionType.{name}): '{meth}',\n"
+
+        # PCAPNG.__option__: a namespace in OptionType's order, then each value.
+        rel = 'misc/pcapng/protocol.py'
+        endofopt, if_name = option('opt_endofopt', 'endofopt'), option('if_name', 'if_name')
+        found = self.audit_moved(rel, 'PCAPNG', if_name, endofopt)
+        self.assertEqual(found.get('registry'), '__option__: _option_key(Enum_OptionType.opt_endofopt) '
+                                                'after _option_key(Enum_OptionType.if_name)')
+        found = self.audit_moved(rel, 'PCAPNG', option('if_description', 'if_description'), if_name)
+        self.assertEqual(found.get('registry'), '__option__: _option_key(Enum_OptionType.if_name) '
+                                                'after _option_key(Enum_OptionType.if_description)')
+        # Option.__enum__: its namespaces alphabetically.
+        space = "            '{}': collections.defaultdict(lambda: UnknownOption),\n"
+        self.assertEqual(self.audit_moved('misc/pcapng/schema.py', 'Option', space.format('opt'), space.format('dsb')),
+                         {'registry': "__enum__: 'dsb' after 'opt'"})
 
     def test_the_page_examples(self) -> 'None':
         # Rule c: _read_opt_unassigned() opens the readers of IPv4.

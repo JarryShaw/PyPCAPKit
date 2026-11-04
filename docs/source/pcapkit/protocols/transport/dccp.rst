@@ -35,20 +35,29 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: __option__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
 
-   .. automethod:: register_option
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register_option
+
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-   .. automethod:: _verify_pseudo_checksum
-
    .. automethod:: _read_dccp_options
+   .. automethod:: _make_dccp_options
    .. automethod:: _read_opt_unassigned
    .. automethod:: _read_opt_padding
    .. automethod:: _read_opt_mandatory
@@ -63,8 +72,6 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    .. automethod:: _read_opt_timestamp_echo
    .. automethod:: _read_opt_elapsed_time
    .. automethod:: _read_opt_data_checksum
-
-   .. automethod:: _make_dccp_options
    .. automethod:: _make_opt_unassigned
    .. automethod:: _make_opt_padding
    .. automethod:: _make_opt_mandatory
@@ -79,15 +86,7 @@ header 12 octets long. The fields of the packet type, then the options, follow.
    .. automethod:: _make_opt_timestamp_echo
    .. automethod:: _make_opt_elapsed_time
    .. automethod:: _make_opt_data_checksum
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: __option__
-      :no-value:
-
-   .. automethod:: __index__
+   .. automethod:: _verify_pseudo_checksum
 
 .. autodata:: pcapkit.protocols.transport.dccp.protocol.DCCP_MAX_HEADER_LEN
 

@@ -31,19 +31,22 @@ whose data model it is handed (:issue:`2574`).
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
    .. automethod:: id
    .. automethod:: register
    .. automethod:: from_data
+
    .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
+
    .. automethod:: _import_next_layer
    .. automethod:: _member_of_version
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
 
 Auxiliary Functions
 -------------------

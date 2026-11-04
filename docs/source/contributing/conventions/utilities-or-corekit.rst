@@ -84,6 +84,14 @@ through them, never through an ``unpack`` override of its own or a length callab
 clamped to the octets present, which hides the cut from the record. Ruled in review
 of :pr:`2682` (:issue:`2680`), and applied to option areas on :issue:`2694`.
 
+**A rebuild is read at the width its parse read the header at.**
+:func:`~pcapkit.corekit.schema.shortread.keep_short_read` records that width beside
+the record, as ``__short_width__``, and :meth:`Protocol.from_data
+<pcapkit.protocols.protocol.Protocol.from_data>` reads the rebuild at it, so it holds
+the values and the next layer its parse did. Ruled by the owner on :issue:`2761`, over
+a clamp inside :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`, the one
+protocol whose overrunning ``length`` showed the gap.
+
 A field callback tells a value the cut left as zero from one read through the same
 record: :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>` gives
 it to the fields after the one the data ends inside, as ``__short_read__`` in their

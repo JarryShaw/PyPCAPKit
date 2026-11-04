@@ -72,13 +72,11 @@ as below:
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
-   .. automethod:: _read_encrypt_auth
-   .. automethod:: _make_encrypt_auth
-
    .. automethod:: __index__
 
+   .. automethod:: _make_data
+   .. automethod:: _read_encrypt_auth
+   .. automethod:: _make_encrypt_auth
    .. automethod:: _make_id_numbers
 
 Header Schemas

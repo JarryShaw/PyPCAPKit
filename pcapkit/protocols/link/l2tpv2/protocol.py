@@ -54,6 +54,7 @@ nibble reading ``2``. Its structure is described as below:
 from typing import TYPE_CHECKING
 
 from pcapkit.const.l2tp.type import Type as Enum_Type
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.link.l2tp.data import L2TP as Data_L2TP
 from pcapkit.protocols.link.l2tp.data import Flags as Data_Flags
 from pcapkit.protocols.link.l2tp.protocol import L2TP
@@ -65,10 +66,17 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.const.reg.apptype.udp import UDP as AppType_UDP
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['L2TPv2']
+
+#: The UDP port registry :meth:`L2TPv2.__index__` reads its port from, resolved
+#: there rather than imported, as ``import pcapkit`` leaves it unloaded
+#: (:issue:`1538`), so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_UDP: 'ModuleDescriptor[AppType_UDP]' = ModuleDescriptor('pcapkit.const.reg.apptype.udp', 'UDP')
 
 
 # NOTE: ``schema`` and ``data`` are stated here rather than inherited from
@@ -413,10 +421,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (:issue:`2627`).
 
         """
-        # imported here, as ``import pcapkit`` leaves the UDP registry unloaded (#1538)
-        from pcapkit.const.reg.apptype.udp import UDP  # pylint: disable=import-outside-toplevel
-
-        return int(UDP.l2tp)  # type: ignore[call-overload]
+        return int(_UDP.klass.l2tp)  # type: ignore[call-overload]
 
     ##########################################################################
     # Utilities.

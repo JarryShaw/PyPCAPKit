@@ -35,11 +35,13 @@ if TYPE_CHECKING:
 __all__ = ['keep_short_read', 'replay_short_read']
 
 
-def keep_short_read(protocol: 'ProtocolBase') -> 'None':
+def keep_short_read(protocol: 'ProtocolBase', length: 'Optional[int]' = None) -> 'None':
     """Carry a parsed header's short read into the protocol's info.
 
     Args:
         protocol: Protocol instance, just parsed.
+        length: Length of data the parse was given, :data:`None` for the octets
+            it holds.
 
     Called by the layer base classes, and by the PCAP global
     :class:`~pcapkit.protocols.misc.pcap.header.protocol.Header`, once a parse is done.
@@ -49,11 +51,13 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     <pcapkit.protocols.protocol.Protocol.from_data>` hands it to the rebuild,
     whose :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>` cuts
     the header back to what was captured before it is read (:issue:`1458`,
-    :issue:`2703`). The key is listed
+    :issue:`2703`). Beside it, ``__short_width__`` records the length the parse
+    read the header at, which the rebuild is read at in turn, so that it holds
+    the values its parse read (:issue:`2761`). Both keys are listed
     in :attr:`Data.__included__ <pcapkit.protocols.data.Data.__included__>`,
-    so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries it
-    and ``from_data(info.to_dict())`` cuts its rebuild back too; it is absent for
-    a header that was captured whole.
+    so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries them
+    and ``from_data(info.to_dict())`` cuts its rebuild back too; they are absent
+    for a header that was captured whole.
 
     Where the capture cut the frame short, as
     :data:`~pcapkit.utilities.contextvars.frame_length` gives its lengths, a
@@ -77,7 +81,8 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
             header._note_short_read(name, len(octets) + lengths[1] - lengths[0], octets)  # pylint: disable=protected-access
     record = header.__dict__.get('__short_read__')
     if record is not None:
-        protocol._info.__update__({'__short_read__': record})  # pylint: disable=protected-access
+        width = len(protocol._data) if length is None else length  # pylint: disable=protected-access
+        protocol._info.__update__({'__short_read__': record, '__short_width__': width})  # pylint: disable=protected-access
 
 
 def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
@@ -102,8 +107,9 @@ def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
     :meth:`Protocol.__post_init__
     <pcapkit.protocols.protocol.Protocol.__post_init__>` has
     :meth:`~pcapkit.protocols.protocol.Protocol.read` parse those octets at the
-    width the header declares, so the rebuild is read and verified as its
-    capture was (:issue:`2703`).
+    width ``__short_width__`` records, the one its parse read them at, so the
+    rebuild is read and verified as its capture was (:issue:`2703`,
+    :issue:`2761`).
 
     The record names the field the capture ended inside and how much of it
     there was. Everything in the rebuild from that point on is dropped, which

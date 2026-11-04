@@ -13,6 +13,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcap.frame.protocol import Frame
 from pcapkit.protocols.misc.pcap.frame.schema import RECORD_HEADER_LEN
@@ -23,12 +24,21 @@ from pcapkit.utilities.logging import get_logger
 __all__ = ['PCAP']
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.corekit.version import VersionInfo
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+#: The toolkit functions :meth:`PCAP.read_frame` hands each frame to, resolved
+#: there rather than imported, so their first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TOOLKIT = tuple(ModuleDescriptor('pcapkit.toolkit.pcap', name) for name in (
+    'dtls_reassembly', 'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+))  # type: tuple[ModuleDescriptor[Any], ...]
 
 
 class PCAP(EngineBase[Frame]):
@@ -155,8 +165,8 @@ class PCAP(EngineBase[Frame]):
             Parsed frame instance.
 
         """
-        from pcapkit.toolkit.pcap import (dtls_reassembly, ipv4_reassembly, ipv6_reassembly,
-                                          tcp_reassembly, tcp_traceflow)
+        dtls_reassembly, ipv4_reassembly, ipv6_reassembly, tcp_reassembly, tcp_traceflow = (
+            descriptor.klass for descriptor in _TOOLKIT)
         ext = self._extractor
 
         # read frame header

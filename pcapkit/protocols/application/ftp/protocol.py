@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ftp.command import Command as Enum_Command
 from pcapkit.const.ftp.return_code import ReturnCode as Enum_ReturnCode
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.application.ftp.data import FTP as Data_FTP
 from pcapkit.protocols.application.ftp.data import Request as Data_Request
@@ -49,7 +50,15 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.const.reg.apptype.tcp import TCP as AppType_TCP
+
 __all__ = ['FTP']
+
+#: The TCP port registry :meth:`FTP.__index__` reads its port from, resolved
+#: there rather than imported, as ``import pcapkit`` leaves it unloaded
+#: (:issue:`1538`), so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.apptype.tcp', 'TCP')
 
 # regex for FTP, per :rfc:`959#section-4` (replies) and :rfc:`959#section-5`
 # (commands): a command is ``<command> [<SP> <argument>] <CRLF>``, a reply line is
@@ -290,10 +299,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
            :exc:`~pcapkit.utilities.exceptions.IntError` (:issue:`2627`).
 
         """
-        # imported here, as ``import pcapkit`` leaves the TCP registry unloaded (#1538)
-        from pcapkit.const.reg.apptype.tcp import TCP  # pylint: disable=import-outside-toplevel
-
-        return int(TCP.ftp)  # type: ignore[call-overload]
+        return int(_TCP.klass.ftp)  # type: ignore[call-overload]
 
     ##########################################################################
     # Utilities.

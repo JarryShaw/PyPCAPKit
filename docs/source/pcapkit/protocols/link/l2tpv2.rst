@@ -68,13 +68,13 @@ reading ``2``. It is dispatched from
    .. autoproperty:: length
    .. autoproperty:: type
 
-   .. automethod:: id
    .. automethod:: read
    .. automethod:: make
-
-   .. automethod:: _make_data
+   .. automethod:: id
 
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 Header Schemas
 --------------

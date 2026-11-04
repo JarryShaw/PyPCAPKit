@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.igmp.type import Type as Enum_Type
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.internet.igmp.data import IGMP as Data_IGMP
 from pcapkit.protocols.internet.igmp.schema import IGMP as Schema_IGMP
 from pcapkit.protocols.internet.internet import Internet
@@ -49,6 +50,16 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema import Schema
 
 __all__ = ['IGMP']
+
+#: tuple[tuple[int, ModuleDescriptor[IGMP]], ...]: Each version and the class
+#: :meth:`IGMP._member_of_version` picks for it, resolved there rather than imported,
+#: so a version's first import holds :data:`~pcapkit.utilities.importlib.import_lock`
+#: (:issue:`2771`).
+_MEMBERS = (
+    (1, ModuleDescriptor('pcapkit.protocols.internet.igmpv1.protocol', 'IGMPv1')),
+    (2, ModuleDescriptor('pcapkit.protocols.internet.igmpv2.protocol', 'IGMPv2')),
+    (3, ModuleDescriptor('pcapkit.protocols.internet.igmpv3.protocol', 'IGMPv3')),
+)  # type: tuple[tuple[int, ModuleDescriptor[IGMP]], ...]
 
 
 class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
@@ -473,12 +484,8 @@ class IGMP(Internet[_PT, _ST], Generic[_PT, _ST],
                 where it equals one.
 
         """
-        from pcapkit.protocols.internet.igmpv1.protocol import IGMPv1  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv2.protocol import IGMPv2  # isort: skip # pylint: disable=import-outside-toplevel
-        from pcapkit.protocols.internet.igmpv3.protocol import IGMPv3  # isort: skip # pylint: disable=import-outside-toplevel
-
         if isinstance(version, int) and not isinstance(version, bool):
-            for number, member in ((1, IGMPv1), (2, IGMPv2), (3, IGMPv3)):
+            for number, member in _MEMBERS:
                 if version == number:
-                    return cast('Type[IGMP]', member)
+                    return member.klass
         raise ProtocolError(f'IGMP: invalid version: {version!r}')

@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.enum import EnumRegistry
     from pcapkit.protocols.data import Data
+    from pcapkit.protocols.internet.igmp.protocol import IGMP
 
 __all__ = ['Internet']
 
@@ -43,6 +44,12 @@ __all__ = ['Internet']
 #: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places
 #: it while parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 _exthdr_rebuilt = contextvars.ContextVar('_exthdr_rebuilt', default=0)
+
+#: The IGMP base :meth:`Internet._next_layer_class` hands a message to, to pick its
+#: version class. Resolved there rather than imported, so its first import holds
+#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
+_IGMP: 'ModuleDescriptor[IGMP]' = \
+    ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol', 'IGMP')
 
 
 class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -304,7 +311,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         self._exthdr_depth = depth if file is not None else self._rebuilt_exthdr_depth()
 
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
-        keep_short_read(self)
+        keep_short_read(self, length)
 
         if extension and file is not None and len(self._data) > self.length:
             self._data = self._data[:self.length]
@@ -453,7 +460,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
 
-        from pcapkit.protocols.internet.igmp.protocol import IGMP as IGMPBase  # isort: skip # pylint: disable=import-outside-toplevel
+        IGMPBase = _IGMP.klass  # pylint: disable=invalid-name
 
         protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
         if protocol is IGMPBase:

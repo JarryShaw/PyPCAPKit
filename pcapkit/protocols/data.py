@@ -18,12 +18,14 @@ if TYPE_CHECKING:
 class Data(Info):
     """Base class for data models.
 
-    The ``__next_name__``, ``__next_type__`` and ``__short_read__`` keys are
-    metadata, listed in :attr:`~pcapkit.corekit.infoclass.Info.__included__`
-    and :attr:`~pcapkit.corekit.infoclass.Info.__excluded__`:
+    The ``__next_name__``, ``__next_type__``, ``__short_read__`` and
+    ``__short_width__`` keys are metadata, listed in
+    :attr:`~pcapkit.corekit.infoclass.Info.__included__` and
+    :attr:`~pcapkit.corekit.infoclass.Info.__excluded__`:
     :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`
-    dispatches the payload on the first two and on nothing else, and cuts a
-    short read back on the third. :meth:`to_dict` carries them, so that
+    dispatches the payload on the first two and on nothing else, cuts a short
+    read back on the third, and reads it at the width the fourth records.
+    :meth:`to_dict` carries them, so that
     ``from_data(info.to_dict())`` rebuilds as ``from_data(info)`` does, while
     the dumpers and ``repr`` leave them out. A hand-written :obj:`dict` must
     carry them as well -- and, for IPv6, the extension header chain under
@@ -35,9 +37,9 @@ class Data(Info):
     """
 
     #: Metadata keys that :meth:`to_dict` carries, for a rebuild to read.
-    __included__ = ['__next_name__', '__next_type__', '__short_read__']
+    __included__ = ['__next_name__', '__next_type__', '__short_read__', '__short_width__']
     #: Metadata keys that ``repr``, ``str`` and the dumps leave out.
-    __excluded__ = ['__next_name__', '__next_type__', '__short_read__']
+    __excluded__ = ['__next_name__', '__next_type__', '__short_read__', '__short_width__']
 
     if TYPE_CHECKING:
         #: Next field name, i.e., the name of the payload field.
@@ -50,6 +52,11 @@ class Data(Info):
         #: ``from_data(info)`` does. See
         #: :func:`~pcapkit.corekit.schema.shortread.keep_short_read`.
         __short_read__: 'tuple[str, int]'
+        #: Length of data the parse read the header at, where it recorded
+        #: ``__short_read__``; present only then. ``from_data`` reads the
+        #: rebuild at it, so that the rebuild holds the values its parse read
+        #: (:issue:`2761`).
+        __short_width__: 'int'
 
 
 class Protocol(Data):

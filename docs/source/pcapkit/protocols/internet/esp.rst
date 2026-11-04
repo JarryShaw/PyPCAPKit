@@ -63,21 +63,20 @@ negotiated out of band. Therefore:
 
    .. autoproperty:: name
    .. autoproperty:: alias
-   .. autoproperty:: length
    .. autoproperty:: protocol
-
-   .. automethod:: id
+   .. autoproperty:: length
 
    .. automethod:: read
    .. automethod:: make
-
-   .. automethod:: _make_data
-   .. automethod:: _payload_bytes
-   .. automethod:: _read_trailer
-   .. automethod:: _make_opaque
+   .. automethod:: id
 
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. automethod:: _make_data
+   .. automethod:: _make_opaque
+   .. automethod:: _read_trailer
+   .. automethod:: _payload_bytes
 
 Security Associations
 ---------------------
@@ -117,8 +116,9 @@ in :mod:`pcapkit.corekit.context`:
    .. automethod:: decrypt
    .. automethod:: encrypt
 
-   .. automethod:: _split_key
    .. automethod:: __repr__
+
+   .. automethod:: _split_key
 
 .. autoclass:: pcapkit.protocols.internet.esp.protocol.ESPContext
    :no-members:

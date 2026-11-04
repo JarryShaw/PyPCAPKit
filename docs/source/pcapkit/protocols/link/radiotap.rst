@@ -115,12 +115,20 @@ as ``fields`` and encodes them with zero padding.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: __field__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
@@ -132,7 +140,6 @@ as ``fields`` and encodes them with zero padding.
    .. automethod:: _make_data
    .. automethod:: _read_radiotap_fields
    .. automethod:: _make_radiotap_fields
-
    .. automethod:: _read_field_unknown
    .. automethod:: _read_field_tsft
    .. automethod:: _read_field_flags
@@ -164,7 +171,6 @@ as ``fields`` and encodes them with zero padding.
    .. automethod:: _read_field_s1g
    .. automethod:: _read_field_usig
    .. automethod:: _read_field_eht
-
    .. automethod:: _make_field_unknown
    .. automethod:: _make_field_tsft
    .. automethod:: _make_field_flags
@@ -196,15 +202,7 @@ as ``fields`` and encodes them with zero padding.
    .. automethod:: _make_field_s1g
    .. automethod:: _make_field_usig
    .. automethod:: _make_field_eht
-
    .. automethod:: _get_payload
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: __field__
-      :no-value:
 
 Header Schemas
 --------------

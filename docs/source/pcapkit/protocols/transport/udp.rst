@@ -22,6 +22,12 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
@@ -30,15 +36,10 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: __index__
+
    .. automethod:: _make_data
    .. automethod:: _verify_pseudo_checksum
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-
-   .. automethod:: __index__
 
 Header Schemas
 --------------

@@ -36,7 +36,6 @@ import shutil
 import string
 import struct
 import textwrap
-import threading
 import types
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
@@ -574,34 +573,36 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #:
     #: .. versionadded:: 1.6.0
     __registry__: 'dict[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = {
-        'AH': ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH'),
+        # Link Layer
         'ARP': ModuleDescriptor('pcapkit.protocols.link.arp.protocol', 'ARP'),
         'C_TAG': ModuleDescriptor('pcapkit.protocols.link.c_tag.protocol', 'C_Tag'),
-        'DCCP': ModuleDescriptor('pcapkit.protocols.transport.dccp.protocol', 'DCCP'),
-        'DRARP': ModuleDescriptor('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
-        'DTLS': ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
-        'ESP': ModuleDescriptor('pcapkit.protocols.internet.esp.protocol', 'ESP'),
         'ETHERNET': ModuleDescriptor('pcapkit.protocols.link.ethernet.protocol', 'Ethernet'),
         'FRAD': ModuleDescriptor('pcapkit.protocols.link.frad.protocol', 'FRAD'),
-        'FRAME': ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
-        'FTP': ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
-        'FTP_DATA': ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
         'GRE': ModuleDescriptor('pcapkit.protocols.link.gre.protocol', 'GRE'),
-        'HEADER': ModuleDescriptor('pcapkit.protocols.misc.pcap.header.protocol', 'Header'),
+        'IEEE802_11': ModuleDescriptor('pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11'),
+        'INARP': ModuleDescriptor('pcapkit.protocols.link.inarp.protocol', 'InARP'),
+        'L2TP': ModuleDescriptor('pcapkit.protocols.link.l2tp.protocol', 'L2TP'),
+        'L2TPV2': ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
+        'LINUXSLL': ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
+        'LINUXSLL1': ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1'),
+        'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
+        'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
+        'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
+        'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
+        'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
+        'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),
+        # Internet Layer
+        'AH': ModuleDescriptor('pcapkit.protocols.internet.ah.protocol', 'AH'),
+        'ESP': ModuleDescriptor('pcapkit.protocols.internet.esp.protocol', 'ESP'),
         'HIP': ModuleDescriptor('pcapkit.protocols.internet.hip.protocol', 'HIP'),
         'HOPOPT': ModuleDescriptor('pcapkit.protocols.internet.hopopt.protocol', 'HOPOPT'),
-        'HTTP': ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
-        'HTTPV1': ModuleDescriptor('pcapkit.protocols.application.httpv1.protocol', 'HTTPv1'),
-        'HTTPV2': ModuleDescriptor('pcapkit.protocols.application.httpv2.protocol', 'HTTPv2'),
         'ICMP': ModuleDescriptor('pcapkit.protocols.internet.icmp.protocol', 'ICMP'),
         'ICMPV4': ModuleDescriptor('pcapkit.protocols.internet.icmpv4.protocol', 'ICMPv4'),
         'ICMPV6': ModuleDescriptor('pcapkit.protocols.internet.icmpv6.protocol', 'ICMPv6'),
-        'IEEE802_11': ModuleDescriptor('pcapkit.protocols.link.ieee802_11.protocol', 'IEEE802_11'),
         'IGMP': ModuleDescriptor('pcapkit.protocols.internet.igmp.protocol', 'IGMP'),
         'IGMPV1': ModuleDescriptor('pcapkit.protocols.internet.igmpv1.protocol', 'IGMPv1'),
         'IGMPV2': ModuleDescriptor('pcapkit.protocols.internet.igmpv2.protocol', 'IGMPv2'),
         'IGMPV3': ModuleDescriptor('pcapkit.protocols.internet.igmpv3.protocol', 'IGMPv3'),
-        'INARP': ModuleDescriptor('pcapkit.protocols.link.inarp.protocol', 'InARP'),
         'IP': ModuleDescriptor('pcapkit.protocols.internet.ip.protocol', 'IP'),
         'IPSEC': ModuleDescriptor('pcapkit.protocols.internet.ipsec.protocol', 'IPsec'),
         'IPV4': ModuleDescriptor('pcapkit.protocols.internet.ipv4.protocol', 'IPv4'),
@@ -611,31 +612,34 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         'IPV6_OPTS': ModuleDescriptor('pcapkit.protocols.internet.ipv6_opts.protocol', 'IPv6_Opts'),
         'IPV6_ROUTE': ModuleDescriptor('pcapkit.protocols.internet.ipv6_route.protocol', 'IPv6_Route'),
         'IPX': ModuleDescriptor('pcapkit.protocols.internet.ipx.protocol', 'IPX'),
-        'IP_PSEUDO': ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo'),
-        'L2TP': ModuleDescriptor('pcapkit.protocols.link.l2tp.protocol', 'L2TP'),
-        'L2TPV2': ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
-        'LINUXSLL': ModuleDescriptor('pcapkit.protocols.link.linux_sll.protocol', 'LinuxSLL'),
-        'LINUXSLL1': ModuleDescriptor('pcapkit.protocols.link.linux_sll1.protocol', 'LinuxSLL1'),
-        'LINUXSLL2': ModuleDescriptor('pcapkit.protocols.link.linux_sll2.protocol', 'LinuxSLL2'),
-        'LOOPBACK': ModuleDescriptor('pcapkit.protocols.link.loopback.protocol', 'Loopback'),
         'MH': ModuleDescriptor('pcapkit.protocols.internet.mh.protocol', 'MH'),
-        'NETLINK': ModuleDescriptor('pcapkit.protocols.link.netlink.protocol', 'Netlink'),
-        'NGAP': ModuleDescriptor('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
-        'NOPAYLOAD': ModuleDescriptor('pcapkit.protocols.misc.no_payload.protocol', 'NoPayload'),
-        'OSPF': ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
-        'PCAPNG': ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
-        'RADIOTAP': ModuleDescriptor('pcapkit.protocols.link.radiotap.protocol', 'Radiotap'),
-        'RARP': ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
-        'RAW': ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
+        # Transport Layer
+        'DCCP': ModuleDescriptor('pcapkit.protocols.transport.dccp.protocol', 'DCCP'),
         'SCTP': ModuleDescriptor('pcapkit.protocols.transport.sctp.protocol', 'SCTP'),
+        'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
+        'UDP': ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'),
+        # Application Layer
+        'DRARP': ModuleDescriptor('pcapkit.protocols.application.drarp.protocol', 'DRARP'),
+        'DTLS': ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
+        'FTP': ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
+        'FTP_DATA': ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
+        'HTTP': ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
+        'HTTPV1': ModuleDescriptor('pcapkit.protocols.application.httpv1.protocol', 'HTTPv1'),
+        'HTTPV2': ModuleDescriptor('pcapkit.protocols.application.httpv2.protocol', 'HTTPv2'),
+        'NGAP': ModuleDescriptor('pcapkit.protocols.application.ngap.protocol', 'NGAP'),
+        'OSPF': ModuleDescriptor('pcapkit.protocols.application.ospf.protocol', 'OSPF'),
+        'RARP': ModuleDescriptor('pcapkit.protocols.application.rarp.protocol', 'RARP'),
         'SSL': ModuleDescriptor('pcapkit.protocols.application.ssl.protocol', 'SSL'),
         'SSLV2': ModuleDescriptor('pcapkit.protocols.application.sslv2.protocol', 'SSLv2'),
         'SSLV3': ModuleDescriptor('pcapkit.protocols.application.sslv3.protocol', 'SSLv3'),
-        'S_TAG': ModuleDescriptor('pcapkit.protocols.link.s_tag.protocol', 'S_Tag'),
-        'TCP': ModuleDescriptor('pcapkit.protocols.transport.tcp.protocol', 'TCP'),
         'TLS': ModuleDescriptor('pcapkit.protocols.application.tls.protocol', 'TLS'),
-        'UDP': ModuleDescriptor('pcapkit.protocols.transport.udp.protocol', 'UDP'),
-        'VLAN': ModuleDescriptor('pcapkit.protocols.link.vlan.protocol', 'VLAN'),
+        # Miscellaneous
+        'FRAME': ModuleDescriptor('pcapkit.protocols.misc.pcap.frame.protocol', 'Frame'),
+        'HEADER': ModuleDescriptor('pcapkit.protocols.misc.pcap.header.protocol', 'Header'),
+        'IP_PSEUDO': ModuleDescriptor('pcapkit.protocols.misc.checksum.ip_pseudo.protocol', 'IP_Pseudo'),
+        'NOPAYLOAD': ModuleDescriptor('pcapkit.protocols.misc.no_payload.protocol', 'NoPayload'),
+        'PCAPNG': ModuleDescriptor('pcapkit.protocols.misc.pcapng.protocol', 'PCAPNG'),
+        'RAW': ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
     }
 
     #: Read-only copy of :attr:`__registry__` as shipped, which
@@ -644,12 +648,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :meth:`register` (:issue:`1504`).
     _shipped_registry: 'types.MappingProxyType[str, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
         types.MappingProxyType(dict(__registry__))
-
-    #: Serialises :meth:`get_protocol`'s resolution of a descriptor. Two threads
-    #: importing protocol modules from different points can deadlock, one
-    #: holding a package and the other a module inside it, so a first import is
-    #: made by one thread at a time (:issue:`2763`).
-    _registry_lock: 'threading.RLock' = threading.RLock()
 
     #: Construction keywords this protocol consumes out of ``**kwargs`` instead
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
@@ -705,25 +703,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     #: The ``__short_read__`` record of the data model :meth:`from_data` rebuilds
     #: this instance from. :meth:`pack` cuts the header it makes back to the
-    #: octets captured, and :meth:`__post_init__` reads them at the width the
-    #: header declares, so the rebuild is parsed and verified as its capture was
-    #: (:issue:`2703`). Set for the duration of that call alone, like
-    #: :attr:`__reconstructing__`; the class-level :data:`None` is what every
-    #: other code path sees.
+    #: octets captured, and :meth:`__post_init__` has :meth:`unpack` parse them
+    #: back at the width ``__short_width__`` records beside it, the one their
+    #: parse read them at, so the rebuild is parsed and verified as its capture
+    #: was (:issue:`2703`, :issue:`2761`). Set for the duration of that call
+    #: alone, like :attr:`__reconstructing__`; the class-level :data:`None` is
+    #: what every other code path sees.
     __short_read__: 'Optional[tuple[str, int]]' = None
-
-    #: How many octets of its header :meth:`pack` cut back by
-    #: :attr:`__short_read__`, which :meth:`__post_init__` adds back to the width
-    #: it reads the rebuild at. Set between those two calls alone.
-    _uncaptured: 'Optional[int]' = None
-
-    #: Whether the data model :meth:`from_data` rebuilds this instance from kept
-    #: a :class:`~pcapkit.protocols.misc.raw.protocol.Raw` next layer past a header
-    #: the capture cut short, which only a parse reading the header short of its
-    #: width does. :meth:`_empty_next_layer` keeps it for the rebuild, read at that
-    #: width (:issue:`2717`). Set for the duration of that call alone, like
-    #: :attr:`__short_read__`.
-    _short_of_header: 'bool' = False
 
     #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
@@ -982,12 +968,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             return data
 
         # NOTE: Cut back before ``unpack`` reads and verifies it, at the width
-        # packed here, which ``__post_init__`` passes on (#2703).
+        # ``from_data`` passes on (#2703, #2761).
         header.__dict__['__short_read__'] = target.__short_read__
         header._cut_short_read()  # pylint: disable=protected-access
-        captured = bytes(header)
-        target._uncaptured = len(data) - len(captured)  # pylint: disable=protected-access
-        return captured
+        return bytes(header)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
@@ -1377,8 +1361,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if entry is None:
             return default
         if isinstance(entry, ModuleDescriptor):
-            with ProtocolBase._registry_lock:
-                return entry.klass
+            return entry.klass
         return entry
 
     @classmethod
@@ -1410,7 +1393,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         ``data`` may be the :obj:`dict` that :meth:`Info.to_dict
         <pcapkit.corekit.infoclass.Info.to_dict>` returns, which carries the
         metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
-        which the payload is dispatched on, ``__short_read__``, and, for
+        which the payload is dispatched on, ``__short_read__`` and
+        ``__short_width__``, and, for
         :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`, the extension header
         chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
         too, or no payload (nor IPv6 extension header) is rebuilt and no short
@@ -1418,14 +1402,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         its other keys (:issue:`2003`).
 
         A header the capture cut short, as ``__short_read__`` records, is cut
-        back before it is read, and read at the width it declares, so the
-        rebuild parses and verifies the octets captured as the capture did
-        (:issue:`2703`), holding the values its parse read from them, not those
-        :meth:`make` fills in past the cut (:issue:`2761`). Inside a payload
-        :meth:`_make_payload` rebuilds, which gives only its octets, the header
-        made is read instead. It keeps the ``Raw`` next layer its data model holds,
-        which a parse reading the header short of that width leaves it
-        (:issue:`2717`).
+        back before it is read, and read at the width ``__short_width__``
+        records, the one its parse read it at, so the rebuild parses and
+        verifies the octets captured as the capture did (:issue:`2703`),
+        holding the values its parse read from them, not those :meth:`make`
+        fills in past the cut (:issue:`2761`), and the ``Raw`` next layer a
+        parse reading the header short of its width leaves it (:issue:`2717`).
+        Inside a payload :meth:`_make_payload` rebuilds, which gives only its
+        octets, the header made is read instead.
 
         Args:
             data: Protocol data.
@@ -1467,19 +1451,17 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # built directly. So is ``__short_read__``, which ``pack`` cuts back by (#2703).
         self.__reconstructing__ = True
         self.__short_read__ = cast('Optional[tuple[str, int]]', data.get('__short_read__'))
-        # NOTE: A cut header kept a Raw next layer only where its parse read it short of
-        # its width, which the rebuild, read at that width, is told of (#2717).
-        if self.__short_read__ is not None:
-            from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
-            next_type = data.get('__next_type__')
-            self._short_of_header = isinstance(next_type, type) and issubclass(next_type, Raw)
+        # NOTE: A cut header is read at the width its parse read it at, as recorded, so
+        # the rebuild holds the values and the next layer its parse did (#2717, #2761).
+        width = data.get('__short_width__')
+        if self.__short_read__ is not None and width is not None:
+            kwargs.setdefault('length', width)
         try:
             # initialize protocol instance
             self.__init__(**kwargs)  # type: ignore[misc]
         finally:
             del self.__reconstructing__
             del self.__short_read__
-            vars(self).pop('_short_of_header', None)
 
         return self
 
@@ -1706,14 +1688,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         if file is None:
             _data = self.pack(**kwargs)
-            # NOTE: A header rebuilt from a short read holds only what was captured,
-            # read at the width it declares, as a capture is at its parent's (#2703).
-            uncaptured = vars(self).pop('_uncaptured', None)
-            if uncaptured is not None and length is None:
-                length = len(_data) + uncaptured
-            # NOTE: Parsed back from the octets captured, not read from what ``make`` filled
-            # in past the cut (#2761); a payload ``_make_payload`` rebuilds gives its octets.
-            if uncaptured is not None and not rebuilding.get():
+            # NOTE: A header rebuilt from a short read holds only what was captured, parsed
+            # back at the width ``from_data`` passes, not read from what ``make`` filled in
+            # past the cut (#2703, #2761); a payload ``_make_payload`` rebuilds gives its octets.
+            if self.__short_read__ is not None and not rebuilding.get():
                 self.__header__ = None  # type: ignore[assignment]
         else:
             _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
@@ -3063,16 +3041,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             IPv6 extension header overrunning the payload (:issue:`2477`). Such a
             next layer is kept raw, not dispatched on a code the cut may have
             read as zeros (:issue:`1170`). :meth:`from_data` reads the rebuild of
-            a cut header at the width it declares (:issue:`2703`), which leaves
-            none, so the rebuild keeps ``Raw`` where its data model did, as
-            :attr:`_short_of_header` says (:issue:`2717`).
+            a cut header at the width its parse read it at, which leaves it the
+            same length, so the rebuild keeps ``Raw`` where its data model did
+            (:issue:`2717`, :issue:`2761`).
 
         .. versionadded:: 1.6.0
 
         """
         if file_ and length != 0:
             return None
-        if not file_ and (length < 0 or self._short_of_header):
+        if not file_ and length < 0:
             from pcapkit.protocols.misc.raw.protocol import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             return Raw
         from pcapkit.protocols.misc.no_payload.protocol import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
