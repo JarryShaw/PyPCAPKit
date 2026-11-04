@@ -87,11 +87,15 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
     A list whose octets hold fewer items than ``count`` ended with the data
     before the rest, and reports them as :attr:`shortfall`, so that
     :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
-    records the cut; the items absent are not made up.
+    records the cut; the items absent are not made up. A schema item it counts
+    is read with ``__data_end__`` in its packet, since its octets end where the
+    data does, so an item the data ends inside records the cut as its short
+    read rather than warn that its fields run past the length it was given.
 
     .. versionchanged:: 1.6.0
 
-       Takes ``count`` (:issue:`2711`).
+       Takes ``count`` (:issue:`2711`), and reads a schema item it counts as
+       ending with the data (:issue:`2749`).
 
     """
 
@@ -307,7 +311,10 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             field = item_type(packet)
 
             if is_schema:
-                data = cast('SchemaField', field).unpack(file, packet)
+                # NOTE: A counted list runs to the end of the data, so an item it counts
+                # running past the octets left is cut, not overrunning a length (#2749).
+                context = dict(packet, __data_end__=True) if len(temp) < self._count else packet
+                data = cast('SchemaField', field).unpack(file, context)
 
                 end = file.tell()
                 if end <= offset:
