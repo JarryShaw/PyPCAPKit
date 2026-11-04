@@ -763,6 +763,28 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``ModuleNotFoundError: No module named 'pcapkit.protocols.data.internet'``
   say.
 
+* **Changed** -- **a breaking change to** the registry of protocol classes by
+  name: ``pcapkit.protocols.__proto__``, a :class:`dict` keyed by the
+  upper-cased name in 1.5.x, is removed with no alias, and the registry is
+  :attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`,
+  which lists every built-in protocol as a
+  :class:`~pcapkit.corekit.module.ModuleDescriptor` and imports it on first
+  lookup (:issue:`2763`, :pr:`2770`). So
+  ``from pcapkit.protocols import __proto__`` raises :exc:`ImportError`, and
+  :meth:`ProtocolBase.get_protocol <pcapkit.protocols.protocol.ProtocolBase.get_protocol>`
+  reads a name, in any case, where ``__proto__['IPV4']`` did, returning the
+  class or the ``default`` given.
+  :meth:`ProtocolBase.register_protocol <pcapkit.protocols.protocol.ProtocolBase.register_protocol>`
+  writes an entry, which
+  :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol`
+  calls, and each protocol class's ``registry``, a property of
+  :class:`~pcapkit.protocols.protocol.ProtocolMeta`, is a read-only view of
+  the entries as stored, importing nothing. A concrete subclass of
+  :class:`~pcapkit.protocols.protocol.Protocol` registers itself as it is
+  defined, where 1.5.x registered it only through ``register_protocol``; one
+  whose name is taken keeps the entry there and warns with
+  :exc:`~pcapkit.utilities.warnings.RegistryWarning`.
+
 * **Changed** -- **a breaking change to** the schema helpers that code outside
   the schema layer calls, which move to :mod:`pcapkit.corekit.schema`, a
   package with a module per group, with no re-export at their old paths
@@ -890,8 +912,8 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   :mod:`~pcapkit.protocols.misc.checksum`, each importing a protocol's package
   when its class is first reached, and :mod:`pcapkit` its protocol classes,
   while a protocol's own package imports its modules with itself
-  (:issue:`2730`, :pr:`2757`). :data:`pcapkit.protocols.__proto__` is built by
-  :mod:`pcapkit.protocols.registry` when first read, and ``dir(pcapkit)``
+  (:issue:`2730`, :pr:`2757`), and the registry of protocol classes by name,
+  given above, imports each class when it is first looked up. ``dir(pcapkit)``
   lists no incidental names, where 1.5.x listed ``os``, ``sys``, ``ROOT``,
   ``warnings`` and ``tbtrim``.
 
@@ -1008,7 +1030,10 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   its protocol class and binds its schema and data classes as ``Schema_*``
   and ``Data_*`` outside ``__all__``, which a ``[tool.isort]`` section keeps
   isort off (:issue:`2534`, :pr:`2753`), and the packages above it import it
-  on first use through ``lazy_exports`` (:issue:`2730`, :pr:`2757`).
+  on first use through ``lazy_exports`` (:issue:`2730`, :pr:`2757`). The
+  by-name protocol registry is a class-level map on the internal base, which a
+  concrete subclass of the public one fills as it is defined (:issue:`2763`,
+  :pr:`2770`).
 
 * **Changed** -- a project test fails on a shipped module with no
   documentation entry, the placeholder sources under ``NotImplemented/``

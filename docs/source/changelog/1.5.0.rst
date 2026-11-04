@@ -1083,7 +1083,9 @@ Fixed
   ``except Exception`` handlers are never entered during the spin, and the memory is
   the retry loop's ``EOF reached`` records, which the runner retains (:issue:`620`).
 * ``register_protocol`` displaced one protocol class with another and said nothing.
-  The registry behind :data:`pcapkit.protocols.__proto__` is keyed on
+  The registry behind
+  :attr:`pcapkit.protocols.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`
+  is keyed on
   ``cls.__name__.upper()``, and several dispatchable classes are named ``HTTP``
   (the base :class:`pcapkit.protocols.application.http.protocol.HTTP` and the ``httpv1`` and
   ``httpv2`` implementations), so a bare assignment decided the winner:
