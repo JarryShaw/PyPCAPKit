@@ -121,7 +121,8 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
 
 
 @contextlib.contextmanager
-def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[IO[bytes]]':
+def _zero_filled_items(name: 'str', length: 'int', data: 'bytes',
+                       present: 'int' = -1) -> 'Iterator[IO[bytes]]':
     """Zero-fill the octets of a list of schema items to its declared width.
 
     :meth:`FieldBase.unpack` reads a field the data ends inside as though its
@@ -134,11 +135,14 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[I
     Args:
         name: Field name.
         length: Octets the field declares.
-        data: Octets actually present, fewer than ``length``.
+        data: Octets of the field's buffer, fewer than ``length``, or holding
+            past ``present`` the zeros of an enclosing fill.
+        present: Octets of ``data`` the data holds; negative for all of them.
 
     Yields:
         A stream of ``data``, zero-filled to ``length``. The zeros left unread
-        past where the stream ends up are not counted as octets read.
+        past where the stream ends up are not counted as octets read, an
+        enclosing fill's included (:issue:`2760`).
 
     Raises:
         FieldValueError: If ``length`` is past
@@ -148,11 +152,13 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[I
             octets it has actually read.
 
     """
+    if present < 0:
+        present = len(data)
     ceiling = config.MAX_ZERO_PAD_LENGTH
     if ceiling != -1 and length > ceiling:
         raise FieldValueError(
             f'Field {name} declares a length of {length} octet(s), '
-            f'but only {len(data)} octet(s) are available.'
+            f'but only {present} octet(s) are available.'
         )
 
     ledger = _zero_pad_ledger.get()
@@ -177,8 +183,9 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[I
         ledger[1] += padding
 
     # NOTE: The items credit the zeros they read as octets supplied, so they are taken off in
-    # advance and those left unread given back (#2756); items that fail credit an unknown share,
-    # so the octets read go back as they were.
+    # advance and those left unread given back, an enclosing fill's too, which it took off
+    # (#2756, #2760); items that fail credit an unknown share, so the octets read go back as
+    # they were.
     read = ledger[0]
     ledger[0] -= padding
     filled = io.BytesIO(data + bytes(padding))
@@ -187,7 +194,26 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes') -> 'Iterator[I
     except BaseException:
         ledger[0] = read
         raise
-    ledger[0] += length - max(filled.tell(), len(data))
+    ledger[0] += length - max(filled.tell(), present)
+
+
+def _give_back_fill(count: 'int') -> 'None':
+    """Give back the ``count`` zeros of a fill that a list of plain values left unread.
+
+    Args:
+        count: Zeros of an enclosing fill in the list's buffer that no item
+            read; nothing is given back for none.
+
+    :func:`_zero_filled_items` takes the zeros of its fill off the octets read
+    in advance, as the items reading them credit them, and gives back those its
+    stream is left short of. A list in the item the data ends inside reads none
+    of its buffer past the data (:issue:`2760`), so the zeros it leaves there
+    are given back here.
+
+    """
+    ledger = _zero_pad_ledger.get()
+    if ledger is not None and count > 0:
+        ledger[0] += count
 
 
 #: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative

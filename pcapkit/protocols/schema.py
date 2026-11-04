@@ -767,12 +767,23 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             records, and warn nothing (:issue:`2749`). The key is cleared as
             unpacking starts too.
 
+            A ``__data_present__`` key in ``packet`` says that ``data`` holds
+            the data that many octets in, and past them the zeros a
+            :class:`~pcapkit.corekit.fields.collections.ListField` of schema
+            items filled it out with, as the list says of the item the data
+            ends inside. The field a read crosses them in is given how many of
+            its octets the data holds, under the same key, so that a list there
+            ends with the data, as it does where the data itself ends
+            (:issue:`2760`). The key is cleared as unpacking starts too.
+
         .. versionchanged:: 1.6.0
 
            The field the data ends inside is given to the fields after it, as
-           ``__short_read__`` in ``packet`` (:issue:`2727`), and a schema whose
+           ``__short_read__`` in ``packet`` (:issue:`2727`), a schema whose
            ``length`` ends with the data reads its fields past it as cut, not as
-           a negative length (:issue:`2749`).
+           a negative length (:issue:`2749`), and the field a read crosses the
+           end of the data in, inside zeros filled out past it, is told where it
+           ends (:issue:`2760`).
 
         """
         # force cast arg type since decorator changed their signatures
@@ -787,6 +798,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         # NOTE: Fields running past a length that ends with the data are the cut its
         # short read records, not an overrun (#2749).
         data_end = packet.pop('__data_end__', False)
+        # NOTE: Where ``data`` holds the data ends, past it the zero fill of a list of schema
+        # items the data ends inside, which the field a read crosses it in is told of (#2760).
+        present = cast('int', packet.pop('__data_present__', -1))
+        fill = data.tell() + present if present >= 0 else -1
 
         self = cls.__new__(cls)
         for field in self.__fields__.values():
@@ -850,7 +865,10 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             if not isinstance(field, (ForwardMatchField, OptionField)):
                 self._note_short_read(field.name, length, byte, packet)
 
-            value = field.unpack(byte, packet.copy())
+            context = packet.copy()
+            if 0 <= fill < data.tell():
+                context['__data_present__'] = max(fill - data.tell() + len(byte), 0)
+            value = field.unpack(byte, context)
             if isinstance(field, ListField) and field.shortfall > 0:
                 # NOTE: The data ended before the items the list counts, each at least an
                 # octet, so it declares that many past those read (#2711).

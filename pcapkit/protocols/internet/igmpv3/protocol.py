@@ -25,7 +25,7 @@ Octets      Bits        Name                               Description
   8          68   ``igmpv3.s_flag``                  Suppress Router-Side Processing (S)
   8          69   ``igmpv3.qrv``                     Querier's Robustness Variable (QRV)
   9          72   ``igmpv3.qqic``                    Querier's Query Interval Code
-  10         80                                      Number of Sources (N)
+  10         80   ``igmpv3.num_sources``             Number of Sources (N)
   12         96   ``igmpv3.sources``                 Source Address [1..N]
 ======= ========= ================================== ===================================
 
@@ -50,6 +50,7 @@ and :meth:`id` are this class's own.
 .. versionadded:: 1.6.0
 
 """
+import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.igmp.record_type import RecordType as Enum_RecordType
@@ -275,6 +276,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 qrv=qrv,
                 qqic=qqic,
                 qqi=qqi,
+                num_sources=ext.num_sources,
                 sources=sources,
             )  # type: Data_IGMPv3
         elif isinstance(body, Schema_Report):
@@ -318,6 +320,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
              qqic: 'Optional[int]' = None,
              qqi: 'Optional[int]' = None,
              sources: 'Optional[Iterable[IPv4Address | str | bytes | int]]' = None,
+             num_sources: 'Optional[int]' = None,
              reserved_1: 'int' = 0,
              reserved_2: 'bytes' = b'\x00\x00',
              num_group_records: 'Optional[int]' = None,
@@ -363,6 +366,11 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 is given; only meaningful for a Query.
             sources: Source addresses being queried
                 (:rfc:`3376#section-4.1.9`); only meaningful for a Query.
+            num_sources: Number of sources, as transmitted on the wire
+                (:rfc:`3376#section-4.1.8`); the length of ``sources`` when not
+                given; only meaningful for a Query. A count above the length of
+                ``sources`` is written as given, as on a Query the capture cut
+                inside its sources.
             reserved_1: The reserved octet following ``type``
                 (:rfc:`3376#section-4.2.1`); only meaningful for a Report.
             reserved_2: The reserved 16 bits before the group-record count
@@ -388,7 +396,8 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
                 or code outside 0 to 255, or is neither a Query nor a Report;
                 if ``max_resp_time`` is not an :obj:`int` from 0 to 255; if
                 ``num_group_records`` is not an :obj:`int` from the length of
-                ``records`` to 65535; if ``checksum`` or ``reserved_2`` is not
+                ``records`` to 65535, or ``num_sources`` one from the length of
+                ``sources``; if ``checksum`` or ``reserved_2`` is not
                 two octets; or if a record's ``record_type`` is refused, see
                 :meth:`_make_group_record`.
 
@@ -425,10 +434,15 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             if qqic is None:
                 qqic = _encode_resp_code(0 if qqi is None else qqi)
             source_list = [] if sources is None else list(sources)
+            if num_sources is None:
+                num_sources = len(source_list)
+            elif self._make_uint(num_sources, bits=16, name='num_sources') < len(source_list):
+                raise ProtocolError(f'{self.alias}: invalid num_sources: {num_sources!r} '
+                                    f'for {len(source_list)} source(s)')
             ext = Schema_QueryExtension(
                 flags={'resv': resv, 's_flag': int(bool(s_flag)), 'qrv': qrv},
                 qqic=qqic,
-                num_sources=len(source_list),
+                num_sources=num_sources,
                 sources=source_list,
                 payload=b'',
             )
@@ -493,6 +507,18 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             }
 
         query = cast('Data_Query', data)
+        # NOTE: The count as parsed, while the sources are those a cut begins (11 octets into the body,
+        # octet 12 of the message), zeros past it; the info keeps no octets captured to compare (#2760).
+        num_sources = None
+        record = query.get('__short_read__')
+        if record is not None and record[0] == 'body':
+            cut = max(record[1] - 11, 0)
+            try:
+                packed = b''.join(ipaddress.IPv4Address(source).packed for source in query.sources)
+            except (TypeError, ValueError):  # edited, to be refused by ``make``
+                packed = b''
+            if len(packed) == -(-cut // 4) * 4 and not packed[cut:].strip(b'\x00'):
+                num_sources = query.get('num_sources')
         return {
             'version': query.get('version'),
             'type': query.type,
@@ -504,6 +530,7 @@ class IGMPv3(IGMPBase[Data_IGMPv3, Schema_IGMPv3],
             'qrv': query.qrv,
             'qqic': query.qqic,
             'sources': query.sources,
+            'num_sources': num_sources,
             'payload': cls._make_payload(data),
         }
 
