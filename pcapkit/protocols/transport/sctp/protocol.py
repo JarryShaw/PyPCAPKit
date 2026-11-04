@@ -1682,6 +1682,809 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             ),
         )
 
+    def _read_param_donone(self, schema: 'Schema_UnknownParameter', *, parameters: 'Parameters') -> 'Data_UnknownParameter':  # pylint: disable=unused-argument
+        """Read SCTP chunk parameter of an unsupported type.
+
+        This is the fall-through for every chunk parameter type :mod:`pcapkit`
+        does not implement. The parameter's value is recorded verbatim rather
+        than raising, so a chunk carrying an unknown parameter still parses.
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        """
+        return Data_UnknownParameter(
+            type=schema.type,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_param_hbinfo(self, schema: 'Schema_HeartbeatInfoParameter', *, parameters: 'Parameters') -> 'Data_HeartbeatInfoParameter':  # pylint: disable=unused-argument
+        """Read SCTP heartbeat info parameter.
+
+        Structure of SCTP heartbeat info parameter [:rfc:`9260#section-3.3.5`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    Heartbeat Info Type = 1    |        HB Info Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                Sender-Specific Heartbeat Info                 /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_HeartbeatInfoParameter(
+            type=schema.type,
+            length=schema.length,
+            info=schema.info,
+        )
+
+    def _read_param_ipv4(self, schema: 'Schema_IPv4AddressParameter', *, parameters: 'Parameters') -> 'Data_IPv4AddressParameter':  # pylint: disable=unused-argument
+        """Read SCTP IPv4 address parameter.
+
+        Structure of SCTP IPv4 address parameter [:rfc:`9260#section-3.3.2.1.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 5            |          Length = 8           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                         IPv4 Address                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8``.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_IPv4AddressParameter(
+            type=schema.type,
+            length=schema.length,
+            address=schema.address,
+        )
+
+    def _read_param_ipv6(self, schema: 'Schema_IPv6AddressParameter', *, parameters: 'Parameters') -> 'Data_IPv6AddressParameter':  # pylint: disable=unused-argument
+        """Read SCTP IPv6 address parameter.
+
+        Structure of SCTP IPv6 address parameter [:rfc:`9260#section-3.3.2.1.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 6            |          Length = 20          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                         IPv6 Address                          |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``20``.
+
+        """
+        if schema.length != 20:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_IPv6AddressParameter(
+            type=schema.type,
+            length=schema.length,
+            address=schema.address,
+        )
+
+    def _read_param_cookie(self, schema: 'Schema_StateCookieParameter', *, parameters: 'Parameters') -> 'Data_StateCookieParameter':  # pylint: disable=unused-argument
+        """Read SCTP state cookie parameter.
+
+        Structure of SCTP state cookie parameter [:rfc:`9260#section-3.3.3.1.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 7            |            Length             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                            Cookie                             /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_StateCookieParameter(
+            type=schema.type,
+            length=schema.length,
+            cookie=schema.cookie,
+        )
+
+    def _read_param_unrecognized(self, schema: 'Schema_UnrecognizedParameter', *, parameters: 'Parameters') -> 'Data_UnrecognizedParameter':  # pylint: disable=unused-argument
+        """Read SCTP unrecognized parameter parameter.
+
+        Structure of SCTP unrecognized parameter [:rfc:`9260#section-3.3.3.1.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 8            |            Length             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                  Unrecognized Parameter                       /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        Note:
+            The offending parameter is recorded as raw :obj:`bytes`, complete
+            with its own type and length, rather than being parsed recursively:
+            by definition the sender did not recognise it, so neither
+            interpretation nor validation of its contents would be meaningful.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_UnrecognizedParameter(
+            type=schema.type,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_param_preservative(self, schema: 'Schema_CookiePreservativeParameter', *, parameters: 'Parameters') -> 'Data_CookiePreservativeParameter':  # pylint: disable=unused-argument
+        """Read SCTP cookie preservative parameter.
+
+        Structure of SCTP cookie preservative parameter [:rfc:`9260#section-3.3.2.1.3`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 9            |          Length = 8           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Suggested Cookie Life-Span Increment (msec.)          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8``.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_CookiePreservativeParameter(
+            type=schema.type,
+            length=schema.length,
+            increment=schema.increment,
+        )
+
+    def _read_param_hostname(self, schema: 'Schema_HostNameAddressParameter', *, parameters: 'Parameters') -> 'Data_HostNameAddressParameter':  # pylint: disable=unused-argument
+        """Read SCTP host name address parameter.
+
+        Structure of SCTP host name address parameter [:rfc:`9260#section-3.3.2.1.4`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 11           |            Length             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                           Host Name                           /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        Note:
+            The usage of this parameter is deprecated by
+            :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet
+            carrying one can still be inspected. The host name is kept as raw
+            :obj:`bytes`, including any null terminator, since the encoding is
+            not specified on the wire. A name captured without a terminator is
+            kept as read and rebuilds as read (:issue:`1482`).
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_HostNameAddressParameter(
+            type=schema.type,
+            length=schema.length,
+            name=schema.name,
+        )
+
+    def _read_param_addrtypes(self, schema: 'Schema_SupportedAddressTypesParameter', *, parameters: 'Parameters') -> 'Data_SupportedAddressTypesParameter':  # pylint: disable=unused-argument
+        """Read SCTP supported address types parameter.
+
+        Structure of SCTP supported address types parameter [:rfc:`9260#section-3.3.2.1.5`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Type = 12           |            Length             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Address Type #1        |        Address Type #2        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                            ......                             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed parameter schema
+            parameters: extracted SCTP chunk parameters
+
+        Returns:
+            Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4`` plus a multiple of
+                ``2``.
+
+        """
+        if schema.length < 4 or (schema.length - 4) % 2:
+            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
+
+        return Data_SupportedAddressTypesParameter(
+            type=schema.type,
+            length=schema.length,
+            types=tuple(schema.types),
+        )
+
+    def _read_cause_donone(self, schema: 'Schema_UnknownCause', *, causes: 'Causes') -> 'Data_UnknownCause':  # pylint: disable=unused-argument
+        """Read SCTP error cause of an unsupported cause code.
+
+        This is the fall-through for every error cause code :mod:`pcapkit` does
+        not implement, e.g. those registered by SCTP extensions. The
+        cause-specific information is recorded verbatim rather than raising.
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        """
+        return Data_UnknownCause(
+            code=schema.code,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_cause_invalid_stream(self, schema: 'Schema_InvalidStreamIdentifierCause', *, causes: 'Causes') -> 'Data_InvalidStreamIdentifierCause':  # pylint: disable=unused-argument
+        """Read SCTP invalid stream identifier error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.1`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 1         |       Cause Length = 8        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |       Stream Identifier       |          (Reserved)           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8``.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_InvalidStreamIdentifierCause(
+            code=schema.code,
+            length=schema.length,
+            stream_id=schema.stream_id,
+            reserved=schema.reserved,
+        )
+
+    def _read_cause_missing_param(self, schema: 'Schema_MissingMandatoryParameterCause', *, causes: 'Causes') -> 'Data_MissingMandatoryParameterCause':  # pylint: disable=unused-argument
+        """Read SCTP missing mandatory parameter error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.2`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 2         |   Cause Length = 8 + N * 2    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Number of missing params = N                  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Missing Param Type #1     |     Missing Param Type #2     |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` does **NOT** match the declared number
+                of missing parameters.
+
+        """
+        if schema.length != 8 + schema.num * 2:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_MissingMandatoryParameterCause(
+            code=schema.code,
+            length=schema.length,
+            num=schema.num,
+            types=tuple(schema.types),
+        )
+
+    def _read_cause_stale_cookie(self, schema: 'Schema_StaleCookieCause', *, causes: 'Causes') -> 'Data_StaleCookieCause':  # pylint: disable=unused-argument
+        """Read SCTP stale cookie error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.3`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 3         |       Cause Length = 8        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Measure of Staleness (usec.)                  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8``.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_StaleCookieCause(
+            code=schema.code,
+            length=schema.length,
+            staleness=schema.staleness,
+        )
+
+    def _read_cause_out_of_resource(self, schema: 'Schema_OutOfResourceCause', *, causes: 'Causes') -> 'Data_OutOfResourceCause':  # pylint: disable=unused-argument
+        """Read SCTP out of resource error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.4`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 4         |       Cause Length = 4        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_OutOfResourceCause(
+            code=schema.code,
+            length=schema.length,
+        )
+
+    def _read_cause_unresolvable_addr(self, schema: 'Schema_UnresolvableAddressCause', *, causes: 'Causes') -> 'Data_UnresolvableAddressCause':  # pylint: disable=unused-argument
+        """Read SCTP unresolvable address error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.5`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 5         |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                     Unresolvable Address                      /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_UnresolvableAddressCause(
+            code=schema.code,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_cause_unrecognized_chunk(self, schema: 'Schema_UnrecognizedChunkTypeCause', *, causes: 'Causes') -> 'Data_UnrecognizedChunkTypeCause':  # pylint: disable=unused-argument
+        """Read SCTP unrecognized chunk type error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.6`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 6         |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                      Unrecognized Chunk                       /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_UnrecognizedChunkTypeCause(
+            code=schema.code,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_cause_invalid_param(self, schema: 'Schema_InvalidMandatoryParameterCause', *, causes: 'Causes') -> 'Data_InvalidMandatoryParameterCause':  # pylint: disable=unused-argument
+        """Read SCTP invalid mandatory parameter error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.7`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 7         |       Cause Length = 4        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_InvalidMandatoryParameterCause(
+            code=schema.code,
+            length=schema.length,
+        )
+
+    def _read_cause_unrecognized_params(self, schema: 'Schema_UnrecognizedParametersCause', *, causes: 'Causes') -> 'Data_UnrecognizedParametersCause':  # pylint: disable=unused-argument
+        """Read SCTP unrecognized parameters error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.8`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 8         |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                    Unrecognized Parameters                    /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_UnrecognizedParametersCause(
+            code=schema.code,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_cause_no_user_data(self, schema: 'Schema_NoUserDataCause', *, causes: 'Causes') -> 'Data_NoUserDataCause':  # pylint: disable=unused-argument
+        """Read SCTP no user data error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.9`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 9         |       Cause Length = 8        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                              TSN                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``8``.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_NoUserDataCause(
+            code=schema.code,
+            length=schema.length,
+            tsn=schema.tsn,
+        )
+
+    def _read_cause_cookie_shutdown(self, schema: 'Schema_CookieReceivedWhileShuttingDownCause', *, causes: 'Causes') -> 'Data_CookieReceivedWhileShuttingDownCause':  # pylint: disable=unused-argument
+        """Read SCTP cookie received while shutting down error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.10`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 10        |       Cause Length = 4        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** ``4``.
+
+        """
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_CookieReceivedWhileShuttingDownCause(
+            code=schema.code,
+            length=schema.length,
+        )
+
+    def _read_cause_restart_addr(self, schema: 'Schema_RestartOfAnAssociationWithNewAddressesCause', *, causes: 'Causes') -> 'Data_RestartOfAnAssociationWithNewAddressesCause':  # pylint: disable=unused-argument
+        """Read SCTP restart of an association with new addresses error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.11`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 11        |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                       New Address TLVs                        /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_RestartOfAnAssociationWithNewAddressesCause(
+            code=schema.code,
+            length=schema.length,
+            value=schema.value,
+        )
+
+    def _read_cause_user_abort(self, schema: 'Schema_UserInitiatedAbortCause', *, causes: 'Causes') -> 'Data_UserInitiatedAbortCause':  # pylint: disable=unused-argument
+        """Read SCTP user-initiated abort error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.12`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 12        |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                   Upper Layer Abort Reason                    /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_UserInitiatedAbortCause(
+            code=schema.code,
+            length=schema.length,
+            info=schema.info,
+        )
+
+    def _read_cause_protocol_violation(self, schema: 'Schema_ProtocolViolationCause', *, causes: 'Causes') -> 'Data_ProtocolViolationCause':  # pylint: disable=unused-argument
+        """Read SCTP protocol violation error cause.
+
+        Structure of the cause [:rfc:`9260#section-3.3.10.13`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |        Cause Code = 13        |         Cause Length          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                    Additional Information                     /
+           \\                                                               \\
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            schema: parsed error cause schema
+            causes: extracted SCTP error causes
+
+        Returns:
+            Parsed error cause data.
+
+        Raises:
+            ProtocolError: If ``length`` is **NOT** at least ``4``.
+
+        """
+        if schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
+
+        return Data_ProtocolViolationCause(
+            code=schema.code,
+            length=schema.length,
+            info=schema.info,
+        )
+
     def _make_chunk_donone(self, code: 'Enum_Chunk', chunk: 'Optional[Data_UnknownChunk]' = None, *,
                            flags: 'bytes' = b'\x00',
                            value: 'bytes' = b'',
@@ -2307,331 +3110,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             length=4,
         )
 
-    def _read_param_donone(self, schema: 'Schema_UnknownParameter', *, parameters: 'Parameters') -> 'Data_UnknownParameter':  # pylint: disable=unused-argument
-        """Read SCTP chunk parameter of an unsupported type.
-
-        This is the fall-through for every chunk parameter type :mod:`pcapkit`
-        does not implement. The parameter's value is recorded verbatim rather
-        than raising, so a chunk carrying an unknown parameter still parses.
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        """
-        return Data_UnknownParameter(
-            type=schema.type,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_param_hbinfo(self, schema: 'Schema_HeartbeatInfoParameter', *, parameters: 'Parameters') -> 'Data_HeartbeatInfoParameter':  # pylint: disable=unused-argument
-        """Read SCTP heartbeat info parameter.
-
-        Structure of SCTP heartbeat info parameter [:rfc:`9260#section-3.3.5`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |    Heartbeat Info Type = 1    |        HB Info Length         |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                Sender-Specific Heartbeat Info                 /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_HeartbeatInfoParameter(
-            type=schema.type,
-            length=schema.length,
-            info=schema.info,
-        )
-
-    def _read_param_ipv4(self, schema: 'Schema_IPv4AddressParameter', *, parameters: 'Parameters') -> 'Data_IPv4AddressParameter':  # pylint: disable=unused-argument
-        """Read SCTP IPv4 address parameter.
-
-        Structure of SCTP IPv4 address parameter [:rfc:`9260#section-3.3.2.1.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 5            |          Length = 8           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                         IPv4 Address                          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``8``.
-
-        """
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_IPv4AddressParameter(
-            type=schema.type,
-            length=schema.length,
-            address=schema.address,
-        )
-
-    def _read_param_ipv6(self, schema: 'Schema_IPv6AddressParameter', *, parameters: 'Parameters') -> 'Data_IPv6AddressParameter':  # pylint: disable=unused-argument
-        """Read SCTP IPv6 address parameter.
-
-        Structure of SCTP IPv6 address parameter [:rfc:`9260#section-3.3.2.1.2`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 6            |          Length = 20          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           |                         IPv6 Address                          |
-           |                                                               |
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``20``.
-
-        """
-        if schema.length != 20:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_IPv6AddressParameter(
-            type=schema.type,
-            length=schema.length,
-            address=schema.address,
-        )
-
-    def _read_param_cookie(self, schema: 'Schema_StateCookieParameter', *, parameters: 'Parameters') -> 'Data_StateCookieParameter':  # pylint: disable=unused-argument
-        """Read SCTP state cookie parameter.
-
-        Structure of SCTP state cookie parameter [:rfc:`9260#section-3.3.3.1.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 7            |            Length             |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                            Cookie                             /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_StateCookieParameter(
-            type=schema.type,
-            length=schema.length,
-            cookie=schema.cookie,
-        )
-
-    def _read_param_unrecognized(self, schema: 'Schema_UnrecognizedParameter', *, parameters: 'Parameters') -> 'Data_UnrecognizedParameter':  # pylint: disable=unused-argument
-        """Read SCTP unrecognized parameter parameter.
-
-        Structure of SCTP unrecognized parameter [:rfc:`9260#section-3.3.3.1.2`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 8            |            Length             |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                  Unrecognized Parameter                       /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        Note:
-            The offending parameter is recorded as raw :obj:`bytes`, complete
-            with its own type and length, rather than being parsed recursively:
-            by definition the sender did not recognise it, so neither
-            interpretation nor validation of its contents would be meaningful.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_UnrecognizedParameter(
-            type=schema.type,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_param_preservative(self, schema: 'Schema_CookiePreservativeParameter', *, parameters: 'Parameters') -> 'Data_CookiePreservativeParameter':  # pylint: disable=unused-argument
-        """Read SCTP cookie preservative parameter.
-
-        Structure of SCTP cookie preservative parameter [:rfc:`9260#section-3.3.2.1.3`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 9            |          Length = 8           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |         Suggested Cookie Life-Span Increment (msec.)          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``8``.
-
-        """
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_CookiePreservativeParameter(
-            type=schema.type,
-            length=schema.length,
-            increment=schema.increment,
-        )
-
-    def _read_param_hostname(self, schema: 'Schema_HostNameAddressParameter', *, parameters: 'Parameters') -> 'Data_HostNameAddressParameter':  # pylint: disable=unused-argument
-        """Read SCTP host name address parameter.
-
-        Structure of SCTP host name address parameter [:rfc:`9260#section-3.3.2.1.4`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 11           |            Length             |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                           Host Name                           /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        Note:
-            The usage of this parameter is deprecated by
-            :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet
-            carrying one can still be inspected. The host name is kept as raw
-            :obj:`bytes`, including any null terminator, since the encoding is
-            not specified on the wire. A name captured without a terminator is
-            kept as read and rebuilds as read (:issue:`1482`).
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_HostNameAddressParameter(
-            type=schema.type,
-            length=schema.length,
-            name=schema.name,
-        )
-
-    def _read_param_addrtypes(self, schema: 'Schema_SupportedAddressTypesParameter', *, parameters: 'Parameters') -> 'Data_SupportedAddressTypesParameter':  # pylint: disable=unused-argument
-        """Read SCTP supported address types parameter.
-
-        Structure of SCTP supported address types parameter [:rfc:`9260#section-3.3.2.1.5`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Type = 12           |            Length             |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Address Type #1        |        Address Type #2        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                            ......                             |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed parameter schema
-            parameters: extracted SCTP chunk parameters
-
-        Returns:
-            Parsed parameter data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4`` plus a multiple of
-                ``2``.
-
-        """
-        if schema.length < 4 or (schema.length - 4) % 2:
-            raise ProtocolError(f'{self.alias}: [Param {schema.type}] invalid format')
-
-        return Data_SupportedAddressTypesParameter(
-            type=schema.type,
-            length=schema.length,
-            types=tuple(schema.types),
-        )
-
     def _make_param_donone(self, code: 'Enum_Parameter', param: 'Optional[Data_UnknownParameter]' = None, *,
                            value: 'bytes' = b'',
                            **kwargs: 'Any') -> 'Schema_UnknownParameter':
@@ -2868,484 +3346,6 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             type=code,
             length=self._make_uint(len(types_value) * 2 + 4, bits=16, name=f'[Param {code}] length'),
             types=types_value,
-        )
-
-    def _read_cause_donone(self, schema: 'Schema_UnknownCause', *, causes: 'Causes') -> 'Data_UnknownCause':  # pylint: disable=unused-argument
-        """Read SCTP error cause of an unsupported cause code.
-
-        This is the fall-through for every error cause code :mod:`pcapkit` does
-        not implement, e.g. those registered by SCTP extensions. The
-        cause-specific information is recorded verbatim rather than raising.
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        """
-        return Data_UnknownCause(
-            code=schema.code,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_cause_invalid_stream(self, schema: 'Schema_InvalidStreamIdentifierCause', *, causes: 'Causes') -> 'Data_InvalidStreamIdentifierCause':  # pylint: disable=unused-argument
-        """Read SCTP invalid stream identifier error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.1`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 1         |       Cause Length = 8        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |       Stream Identifier       |          (Reserved)           |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``8``.
-
-        """
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_InvalidStreamIdentifierCause(
-            code=schema.code,
-            length=schema.length,
-            stream_id=schema.stream_id,
-            reserved=schema.reserved,
-        )
-
-    def _read_cause_missing_param(self, schema: 'Schema_MissingMandatoryParameterCause', *, causes: 'Causes') -> 'Data_MissingMandatoryParameterCause':  # pylint: disable=unused-argument
-        """Read SCTP missing mandatory parameter error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.2`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 2         |   Cause Length = 8 + N * 2    |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                 Number of missing params = N                  |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |     Missing Param Type #1     |     Missing Param Type #2     |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` does **NOT** match the declared number
-                of missing parameters.
-
-        """
-        if schema.length != 8 + schema.num * 2:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_MissingMandatoryParameterCause(
-            code=schema.code,
-            length=schema.length,
-            num=schema.num,
-            types=tuple(schema.types),
-        )
-
-    def _read_cause_stale_cookie(self, schema: 'Schema_StaleCookieCause', *, causes: 'Causes') -> 'Data_StaleCookieCause':  # pylint: disable=unused-argument
-        """Read SCTP stale cookie error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.3`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 3         |       Cause Length = 8        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                 Measure of Staleness (usec.)                  |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``8``.
-
-        """
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_StaleCookieCause(
-            code=schema.code,
-            length=schema.length,
-            staleness=schema.staleness,
-        )
-
-    def _read_cause_out_of_resource(self, schema: 'Schema_OutOfResourceCause', *, causes: 'Causes') -> 'Data_OutOfResourceCause':  # pylint: disable=unused-argument
-        """Read SCTP out of resource error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.4`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 4         |       Cause Length = 4        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4``.
-
-        """
-        if schema.length != 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_OutOfResourceCause(
-            code=schema.code,
-            length=schema.length,
-        )
-
-    def _read_cause_unresolvable_addr(self, schema: 'Schema_UnresolvableAddressCause', *, causes: 'Causes') -> 'Data_UnresolvableAddressCause':  # pylint: disable=unused-argument
-        """Read SCTP unresolvable address error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.5`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 5         |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                     Unresolvable Address                      /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_UnresolvableAddressCause(
-            code=schema.code,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_cause_unrecognized_chunk(self, schema: 'Schema_UnrecognizedChunkTypeCause', *, causes: 'Causes') -> 'Data_UnrecognizedChunkTypeCause':  # pylint: disable=unused-argument
-        """Read SCTP unrecognized chunk type error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.6`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 6         |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                      Unrecognized Chunk                       /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_UnrecognizedChunkTypeCause(
-            code=schema.code,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_cause_invalid_param(self, schema: 'Schema_InvalidMandatoryParameterCause', *, causes: 'Causes') -> 'Data_InvalidMandatoryParameterCause':  # pylint: disable=unused-argument
-        """Read SCTP invalid mandatory parameter error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.7`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 7         |       Cause Length = 4        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4``.
-
-        """
-        if schema.length != 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_InvalidMandatoryParameterCause(
-            code=schema.code,
-            length=schema.length,
-        )
-
-    def _read_cause_unrecognized_params(self, schema: 'Schema_UnrecognizedParametersCause', *, causes: 'Causes') -> 'Data_UnrecognizedParametersCause':  # pylint: disable=unused-argument
-        """Read SCTP unrecognized parameters error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.8`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 8         |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                    Unrecognized Parameters                    /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_UnrecognizedParametersCause(
-            code=schema.code,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_cause_no_user_data(self, schema: 'Schema_NoUserDataCause', *, causes: 'Causes') -> 'Data_NoUserDataCause':  # pylint: disable=unused-argument
-        """Read SCTP no user data error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.9`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 9         |       Cause Length = 8        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                              TSN                              |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``8``.
-
-        """
-        if schema.length != 8:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_NoUserDataCause(
-            code=schema.code,
-            length=schema.length,
-            tsn=schema.tsn,
-        )
-
-    def _read_cause_cookie_shutdown(self, schema: 'Schema_CookieReceivedWhileShuttingDownCause', *, causes: 'Causes') -> 'Data_CookieReceivedWhileShuttingDownCause':  # pylint: disable=unused-argument
-        """Read SCTP cookie received while shutting down error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.10`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 10        |       Cause Length = 4        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** ``4``.
-
-        """
-        if schema.length != 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_CookieReceivedWhileShuttingDownCause(
-            code=schema.code,
-            length=schema.length,
-        )
-
-    def _read_cause_restart_addr(self, schema: 'Schema_RestartOfAnAssociationWithNewAddressesCause', *, causes: 'Causes') -> 'Data_RestartOfAnAssociationWithNewAddressesCause':  # pylint: disable=unused-argument
-        """Read SCTP restart of an association with new addresses error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.11`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 11        |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                       New Address TLVs                        /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_RestartOfAnAssociationWithNewAddressesCause(
-            code=schema.code,
-            length=schema.length,
-            value=schema.value,
-        )
-
-    def _read_cause_user_abort(self, schema: 'Schema_UserInitiatedAbortCause', *, causes: 'Causes') -> 'Data_UserInitiatedAbortCause':  # pylint: disable=unused-argument
-        """Read SCTP user-initiated abort error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.12`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 12        |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                   Upper Layer Abort Reason                    /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_UserInitiatedAbortCause(
-            code=schema.code,
-            length=schema.length,
-            info=schema.info,
-        )
-
-    def _read_cause_protocol_violation(self, schema: 'Schema_ProtocolViolationCause', *, causes: 'Causes') -> 'Data_ProtocolViolationCause':  # pylint: disable=unused-argument
-        """Read SCTP protocol violation error cause.
-
-        Structure of the cause [:rfc:`9260#section-3.3.10.13`]:
-
-        .. code-block:: text
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |        Cause Code = 13        |         Cause Length          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           /                    Additional Information                     /
-           \\                                                               \\
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-        Arguments:
-            schema: parsed error cause schema
-            causes: extracted SCTP error causes
-
-        Returns:
-            Parsed error cause data.
-
-        Raises:
-            ProtocolError: If ``length`` is **NOT** at least ``4``.
-
-        """
-        if schema.length < 4:
-            raise ProtocolError(f'{self.alias}: [Cause {schema.code}] invalid format')
-
-        return Data_ProtocolViolationCause(
-            code=schema.code,
-            length=schema.length,
-            info=schema.info,
         )
 
     def _make_cause_donone(self, code: 'Enum_CauseCode', cause: 'Optional[Data_UnknownCause]' = None, *,

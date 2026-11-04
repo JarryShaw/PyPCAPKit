@@ -38,22 +38,34 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+   .. autoattribute:: __proto_key__
+      :no-value:
+
+   .. autoattribute:: __option__
+      :no-value:
+
+   .. autoattribute:: __mp_option__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
    .. autoproperty:: connection
 
+   .. automethod:: read
+   .. automethod:: make
    .. automethod:: register_option
    .. automethod:: register_mp_option
 
-   .. automethod:: read
-   .. automethod:: make
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-   .. automethod:: _verify_pseudo_checksum
-
    .. automethod:: _read_tcp_options
+   .. automethod:: _make_tcp_options
    .. automethod:: _read_mode_donone
    .. automethod:: _read_mode_eool
    .. automethod:: _read_mode_nop
@@ -76,8 +88,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_mode_timeout
    .. automethod:: _read_mode_ao
    .. automethod:: _read_mode_mp
-   .. automethod:: _read_mode_fastopen
-
    .. automethod:: _read_mptcp_unknown
    .. automethod:: _read_mptcp_capable
    .. automethod:: _read_mptcp_join
@@ -87,12 +97,7 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_mptcp_prio
    .. automethod:: _read_mptcp_fail
    .. automethod:: _read_mptcp_fastclose
-
-   .. automethod:: _read_join_syn
-   .. automethod:: _read_join_synack
-   .. automethod:: _read_join_ack
-
-   .. automethod:: _make_tcp_options
+   .. automethod:: _read_mode_fastopen
    .. automethod:: _make_mode_donone
    .. automethod:: _make_mode_eool
    .. automethod:: _make_mode_nop
@@ -115,8 +120,6 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_mode_timeout
    .. automethod:: _make_mode_ao
    .. automethod:: _make_mode_mp
-   .. automethod:: _make_mode_fastopen
-
    .. automethod:: _make_mptcp_unknown
    .. automethod:: _make_mptcp_capable
    .. automethod:: _make_mptcp_join
@@ -126,21 +129,14 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_mptcp_prio
    .. automethod:: _make_mptcp_fail
    .. automethod:: _make_mptcp_fastclose
-
+   .. automethod:: _make_mode_fastopen
+   .. automethod:: _verify_pseudo_checksum
+   .. automethod:: _read_join_syn
+   .. automethod:: _read_join_synack
+   .. automethod:: _read_join_ack
    .. automethod:: _make_join_syn
    .. automethod:: _make_join_synack
    .. automethod:: _make_join_ack
-
-   .. autoattribute:: __proto__
-      :no-value:
-   .. autoattribute:: __proto_key__
-      :no-value:
-   .. autoattribute:: __option__
-      :no-value:
-   .. autoattribute:: __mp_option__
-      :no-value:
-
-   .. automethod:: __index__
 
 Header Schemas
 --------------

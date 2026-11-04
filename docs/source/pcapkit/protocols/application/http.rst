@@ -37,29 +37,26 @@ which tells whether a payload opens with an HTTP/1.* start line.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: _preface_length
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: version
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
-
-   .. automethod:: _make_data
+   .. automethod:: from_data
 
    .. automethod:: __index__
    .. automethod:: __init__
    .. automethod:: __new__
 
+   .. automethod:: _make_data
    .. automethod:: _guess_version
-   .. automethod:: _dispatch_version
    .. automethod:: _member_of_version
-
-   .. autoattribute:: _preface_length
-
-   .. automethod:: from_data
+   .. automethod:: _dispatch_version
 
 .. autofunction:: pcapkit.protocols.application.http.protocol.test_start_line
 

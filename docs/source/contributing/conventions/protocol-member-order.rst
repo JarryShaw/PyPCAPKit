@@ -38,24 +38,37 @@ The Order
       ``_read_opt_unassigned()`` opens the readers of
       :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`; the rest follow the enum value
       of the code or type each handles, not alphabetical order. Ruled on
-      :issue:`2490`.
+      :issue:`2490`. A class with several registries puts every registry's readers
+      before any registry's makers, as :class:`~pcapkit.protocols.internet.mh.protocol.MH`
+      and :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` do, ruled on
+      :issue:`2772`.
    d. **Other helpers.** Every helper that ``read()``, ``make()`` and the registries
       do not reach goes last, including one that only another helper calls, such as
       ``_decode_text()`` in :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`.
       Ruled on :issue:`2490`.
 
 **Registry maps.** The registry maps themselves (``__proto__``, ``__option__``,
-``__parameter__`` and similar) are ordered by their enum values, or alphabetically
-by key where there is no enum.
+``__parameter__`` and similar) are ordered by their enum values, by key value where
+an :class:`int` key has no enum, and alphabetically where the key is a string, as the
+namespaces of
+:attr:`Option.__enum__ <pcapkit.protocols.misc.pcapng.schema.Option.__enum__>` are.
+:attr:`PCAPNG.__option__ <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__>`,
+keyed by an option's namespace and value, is ordered by namespace, in the order
+:class:`~pcapkit.const.pcapng.option_type.OptionType` declares them, then by value.
+Ruled on :issue:`2772`.
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`
+groups its built-in entries by layer under the comments ``# Link Layer``,
+``# Internet Layer``, ``# Transport Layer``, ``# Application Layer`` and
+``# Miscellaneous``, in that order, the last holding what belongs to no layer, and
+is alphabetical within each group, ruled on :issue:`2773`.
 
 **The guard.** :file:`tests/project/test_protocol_member_order_2490_unit.py` holds
 every protocol class to the groups, ``_make_data()`` first, each ``_read_xxx()``
 before its ``_make_xxx()``, subgroups b, c and d, and the order of the registry
-maps, with a table of known exceptions (:issue:`2490`). It values a key that is an
-enum member or an :class:`int`; a map with a key of another shape, such as the
-computed keys of
-:attr:`PCAPNG.__option__ <pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__option__>`,
-it leaves in its own order, which rule c then follows.
+maps, layer groups included, with a table of known exceptions (:issue:`2490`). It
+values a key that is an enum member, an :class:`int`, a string or a PCAP-NG option
+key, and orders a string-keyed map within each group its comment lines open; a map
+with a key of another shape it leaves in its own order, which rule c then follows.
 
 Example
 ~~~~~~~

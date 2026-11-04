@@ -38,60 +38,57 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __option__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
    .. autoproperty:: src
    .. autoproperty:: dst
 
-   .. automethod:: id
-   .. automethod:: register_option
-
    .. automethod:: read
    .. automethod:: make
    .. automethod:: unpack
-
-   .. automethod:: _make_data
-
-   .. automethod:: _read_ipv4_options
-   .. automethod:: _read_opt_unassigned
-   .. automethod:: _read_opt_eool
-   .. automethod:: _read_opt_nop
-   .. automethod:: _read_opt_sec
-   .. automethod:: _read_opt_lsr
-   .. automethod:: _read_opt_ts
-   .. automethod:: _read_opt_e_sec
-   .. automethod:: _read_opt_rr
-   .. automethod:: _read_opt_sid
-   .. automethod:: _read_opt_ssr
-   .. automethod:: _read_opt_mtup
-   .. automethod:: _read_opt_mtur
-   .. automethod:: _read_opt_tr
-   .. automethod:: _read_opt_rtralt
-   .. automethod:: _read_opt_qs
-
-   .. automethod:: _make_ipv4_options
-   .. automethod:: _make_opt_unassigned
-   .. automethod:: _make_opt_eool
-   .. automethod:: _make_opt_nop
-   .. automethod:: _make_opt_sec
-   .. automethod:: _make_opt_lsr
-   .. automethod:: _make_opt_ts
-   .. automethod:: _make_opt_e_sec
-   .. automethod:: _make_opt_rr
-   .. automethod:: _make_opt_sid
-   .. automethod:: _make_opt_ssr
-   .. automethod:: _make_opt_mtup
-   .. automethod:: _make_opt_mtur
-   .. automethod:: _make_opt_tr
-   .. automethod:: _make_opt_rtralt
-   .. automethod:: _make_opt_qs
-
-   .. autoattribute:: __option__
-      :no-value:
+   .. automethod:: id
+   .. automethod:: register_option
 
    .. automethod:: __index__
    .. automethod:: __post_init__
+
+   .. automethod:: _make_data
+   .. automethod:: _read_ipv4_options
+   .. automethod:: _make_ipv4_options
+   .. automethod:: _read_opt_unassigned
+   .. automethod:: _read_opt_eool
+   .. automethod:: _read_opt_nop
+   .. automethod:: _read_opt_rr
+   .. automethod:: _read_opt_mtup
+   .. automethod:: _read_opt_mtur
+   .. automethod:: _read_opt_qs
+   .. automethod:: _read_opt_ts
+   .. automethod:: _read_opt_tr
+   .. automethod:: _read_opt_sec
+   .. automethod:: _read_opt_lsr
+   .. automethod:: _read_opt_e_sec
+   .. automethod:: _read_opt_sid
+   .. automethod:: _read_opt_ssr
+   .. automethod:: _read_opt_rtralt
+   .. automethod:: _make_opt_unassigned
+   .. automethod:: _make_opt_eool
+   .. automethod:: _make_opt_nop
+   .. automethod:: _make_opt_rr
+   .. automethod:: _make_opt_mtup
+   .. automethod:: _make_opt_mtur
+   .. automethod:: _make_opt_qs
+   .. automethod:: _make_opt_ts
+   .. automethod:: _make_opt_tr
+   .. automethod:: _make_opt_sec
+   .. automethod:: _make_opt_lsr
+   .. automethod:: _make_opt_e_sec
+   .. automethod:: _make_opt_sid
+   .. automethod:: _make_opt_ssr
+   .. automethod:: _make_opt_rtralt
 
 Header Schemas
 --------------

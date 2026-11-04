@@ -39,6 +39,15 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __message__
+      :no-value:
+
+   .. autoattribute:: __option__
+      :no-value:
+
+   .. autoattribute:: __extension__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -46,17 +55,17 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: id
-
+   .. automethod:: read
+   .. automethod:: make
    .. automethod:: register_message
    .. automethod:: register_option
    .. automethod:: register_extension
+   .. automethod:: id
 
-   .. automethod:: read
-   .. automethod:: make
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-
    .. automethod:: _read_msg_unknown
    .. automethod:: _read_msg_brr
    .. automethod:: _read_msg_hoti
@@ -70,50 +79,18 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_msg_fback
    .. automethod:: _read_msg_fna
    .. automethod:: _read_msg_emh
+   .. automethod:: _read_msg_has
+   .. automethod:: _read_msg_hb
    .. automethod:: _read_msg_hi
    .. automethod:: _read_msg_hack
    .. automethod:: _read_msg_brm
-   .. automethod:: _read_msg_fbm
-   .. automethod:: _read_msg_has
-   .. automethod:: _read_msg_hb
-   .. automethod:: _read_msg_lra
    .. automethod:: _read_msg_lri
+   .. automethod:: _read_msg_lra
+   .. automethod:: _read_msg_upn
+   .. automethod:: _read_msg_upa
+   .. automethod:: _read_msg_fbm
    .. automethod:: _read_msg_sq
    .. automethod:: _read_msg_sr
-   .. automethod:: _read_msg_upa
-   .. automethod:: _read_msg_upn
-
-   .. automethod:: _make_msg_unknown
-   .. automethod:: _make_msg_brr
-   .. automethod:: _make_msg_hoti
-   .. automethod:: _make_msg_coti
-   .. automethod:: _make_msg_hot
-   .. automethod:: _make_msg_cot
-   .. automethod:: _make_msg_bu
-   .. automethod:: _make_msg_ba
-   .. automethod:: _make_msg_be
-   .. automethod:: _make_msg_fbu
-   .. automethod:: _make_msg_fback
-   .. automethod:: _make_msg_fna
-   .. automethod:: _make_msg_emh
-   .. automethod:: _make_msg_hi
-   .. automethod:: _make_msg_hack
-   .. automethod:: _make_msg_brm
-   .. automethod:: _make_msg_fbm
-   .. automethod:: _make_msg_has
-   .. automethod:: _make_msg_hb
-   .. automethod:: _make_msg_lra
-   .. automethod:: _make_msg_lri
-   .. automethod:: _make_msg_sq
-   .. automethod:: _make_msg_sr
-   .. automethod:: _make_msg_upa
-   .. automethod:: _make_msg_upn
-
-   .. automethod:: _read_mh_options
-   .. automethod:: _read_fid_suboptions
-   .. automethod:: _read_ani_suboptions
-   .. automethod:: _read_qos_attributes
-   .. automethod:: _read_lcmp_suboptions
    .. automethod:: _read_opt_none
    .. automethod:: _read_opt_pad
    .. automethod:: _read_opt_bra
@@ -131,71 +108,88 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_opt_phkt
    .. automethod:: _read_opt_ct_init
    .. automethod:: _read_opt_ct
-   .. automethod:: _read_opt_exp
-   .. automethod:: _read_opt_badf
-   .. automethod:: _read_opt_ipv6_ap
-   .. automethod:: _read_opt_alt_ipv4_coa
-   .. automethod:: _read_opt_ams4
-   .. automethod:: _read_opt_ams6
-   .. automethod:: _read_opt_anchored
-   .. automethod:: _read_opt_ani
-   .. automethod:: _read_opt_att
-   .. automethod:: _read_opt_bid
-   .. automethod:: _read_opt_cr
-   .. automethod:: _read_opt_dlif_lla
-   .. automethod:: _read_opt_dlif_lladdr
-   .. automethod:: _read_opt_dmnp
    .. automethod:: _read_opt_dns
-   .. automethod:: _read_opt_fid
-   .. automethod:: _read_opt_fs
-   .. automethod:: _read_opt_gre
-   .. automethod:: _read_opt_hi
+   .. automethod:: _read_opt_exp
+   .. automethod:: _read_opt_vendor
+   .. automethod:: _read_opt_service
+   .. automethod:: _read_opt_badf
    .. automethod:: _read_opt_hnp
-   .. automethod:: _read_opt_ipv4_ack
-   .. automethod:: _read_opt_ipv4_coa
-   .. automethod:: _read_opt_ipv4_dhcp
-   .. automethod:: _read_opt_ipv4_hoa
-   .. automethod:: _read_opt_ipv4_hoa_rep
-   .. automethod:: _read_opt_ipv4_hoa_req
-   .. automethod:: _read_opt_ipv4_router
-   .. automethod:: _read_opt_lcmp
-   .. automethod:: _read_opt_lla_addr
-   .. automethod:: _read_opt_lma_up
-   .. automethod:: _read_opt_lmaa
-   .. automethod:: _read_opt_load
-   .. automethod:: _read_opt_local_prefix
-   .. automethod:: _read_opt_mag_addr
-   .. automethod:: _read_opt_mag_id
-   .. automethod:: _read_opt_mag_mp
-   .. automethod:: _read_opt_mcast
-   .. automethod:: _read_opt_mcast_ack
-   .. automethod:: _read_opt_mcast_sel
-   .. automethod:: _read_opt_mn_group
-   .. automethod:: _read_opt_mn_lla_iid
+   .. automethod:: _read_opt_hi
+   .. automethod:: _read_opt_att
    .. automethod:: _read_opt_mn_lli
+   .. automethod:: _read_opt_lla_addr
+   .. automethod:: _read_opt_timestamp
+   .. automethod:: _read_opt_restart
+   .. automethod:: _read_opt_ipv4_hoa
+   .. automethod:: _read_opt_ipv4_ack
    .. automethod:: _read_opt_nat
-   .. automethod:: _read_opt_offload
-   .. automethod:: _read_opt_prev_maar
-   .. automethod:: _read_opt_qos
+   .. automethod:: _read_opt_ipv4_coa
+   .. automethod:: _read_opt_gre
+   .. automethod:: _read_opt_ipv6_ap
+   .. automethod:: _read_opt_bid
+   .. automethod:: _read_opt_ipv4_hoa_req
+   .. automethod:: _read_opt_ipv4_hoa_rep
+   .. automethod:: _read_opt_ipv4_router
+   .. automethod:: _read_opt_ipv4_dhcp
+   .. automethod:: _read_opt_cr
+   .. automethod:: _read_opt_lmaa
+   .. automethod:: _read_opt_mn_lla_iid
+   .. automethod:: _read_opt_transient
+   .. automethod:: _read_opt_fs
+   .. automethod:: _read_opt_fid
    .. automethod:: _read_opt_rc
    .. automethod:: _read_opt_redirect
-   .. automethod:: _read_opt_restart
+   .. automethod:: _read_opt_load
+   .. automethod:: _read_opt_alt_ipv4_coa
+   .. automethod:: _read_opt_mn_group
+   .. automethod:: _read_opt_mag_addr
+   .. automethod:: _read_opt_ani
+   .. automethod:: _read_opt_offload
+   .. automethod:: _read_opt_mcast_sel
+   .. automethod:: _read_opt_dmnp
+   .. automethod:: _read_opt_ams4
+   .. automethod:: _read_opt_ams6
+   .. automethod:: _read_opt_qos
+   .. automethod:: _read_opt_lma_up
+   .. automethod:: _read_opt_mcast
+   .. automethod:: _read_opt_mcast_ack
+   .. automethod:: _read_opt_lcmp
+   .. automethod:: _read_opt_mag_mp
+   .. automethod:: _read_opt_mag_id
+   .. automethod:: _read_opt_anchored
+   .. automethod:: _read_opt_local_prefix
+   .. automethod:: _read_opt_prev_maar
    .. automethod:: _read_opt_serv_maar
-   .. automethod:: _read_opt_service
-   .. automethod:: _read_opt_timestamp
-   .. automethod:: _read_opt_transient
-   .. automethod:: _read_opt_vendor
-
-   .. automethod:: _make_mh_options
-   .. automethod:: _make_fid_suboptions
-   .. automethod:: _make_fid_suboption
-   .. automethod:: _make_ani_suboptions
-   .. automethod:: _make_ani_suboption
-   .. automethod:: _make_qos_attributes
-   .. automethod:: _make_qos_attribute
-   .. automethod:: _make_lcmp_suboptions
-   .. automethod:: _make_lcmp_suboption
-   .. automethod:: _seconds
+   .. automethod:: _read_opt_dlif_lla
+   .. automethod:: _read_opt_dlif_lladdr
+   .. automethod:: _read_ext_none
+   .. automethod:: _read_ext_multiprefix
+   .. automethod:: _read_ext_exp
+   .. automethod:: _make_msg_unknown
+   .. automethod:: _make_msg_brr
+   .. automethod:: _make_msg_hoti
+   .. automethod:: _make_msg_coti
+   .. automethod:: _make_msg_hot
+   .. automethod:: _make_msg_cot
+   .. automethod:: _make_msg_bu
+   .. automethod:: _make_msg_ba
+   .. automethod:: _make_msg_be
+   .. automethod:: _make_msg_fbu
+   .. automethod:: _make_msg_fback
+   .. automethod:: _make_msg_fna
+   .. automethod:: _make_msg_emh
+   .. automethod:: _make_msg_has
+   .. automethod:: _make_msg_hb
+   .. automethod:: _make_msg_hi
+   .. automethod:: _make_msg_hack
+   .. automethod:: _make_msg_brm
+   .. automethod:: _make_msg_lri
+   .. automethod:: _make_msg_lra
+   .. automethod:: _make_msg_upn
+   .. automethod:: _make_msg_upa
+   .. automethod:: _make_msg_fbm
+   .. automethod:: _make_msg_sq
+   .. automethod:: _make_msg_sr
    .. automethod:: _make_opt_none
    .. automethod:: _make_opt_pad
    .. automethod:: _make_opt_bra
@@ -213,80 +207,80 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_opt_phkt
    .. automethod:: _make_opt_ct_init
    .. automethod:: _make_opt_ct
-   .. automethod:: _make_opt_exp
-   .. automethod:: _make_opt_badf
-   .. automethod:: _make_opt_ipv6_ap
-   .. automethod:: _make_opt_alt_ipv4_coa
-   .. automethod:: _make_opt_ams4
-   .. automethod:: _make_opt_ams6
-   .. automethod:: _make_opt_anchored
-   .. automethod:: _make_opt_ani
-   .. automethod:: _make_opt_att
-   .. automethod:: _make_opt_bid
-   .. automethod:: _make_opt_cr
-   .. automethod:: _make_opt_dlif_lla
-   .. automethod:: _make_opt_dlif_lladdr
-   .. automethod:: _make_opt_dmnp
    .. automethod:: _make_opt_dns
-   .. automethod:: _make_opt_fid
-   .. automethod:: _make_opt_fs
-   .. automethod:: _make_opt_gre
-   .. automethod:: _make_opt_hi
+   .. automethod:: _make_opt_exp
+   .. automethod:: _make_opt_vendor
+   .. automethod:: _make_opt_service
+   .. automethod:: _make_opt_badf
    .. automethod:: _make_opt_hnp
-   .. automethod:: _make_opt_ipv4_ack
-   .. automethod:: _make_opt_ipv4_coa
-   .. automethod:: _make_opt_ipv4_dhcp
-   .. automethod:: _make_opt_ipv4_hoa
-   .. automethod:: _make_opt_ipv4_hoa_rep
-   .. automethod:: _make_opt_ipv4_hoa_req
-   .. automethod:: _make_opt_ipv4_router
-   .. automethod:: _make_opt_lcmp
-   .. automethod:: _make_opt_lla_addr
-   .. automethod:: _make_opt_lma_up
-   .. automethod:: _make_opt_lmaa
-   .. automethod:: _make_opt_load
-   .. automethod:: _make_opt_local_prefix
-   .. automethod:: _make_opt_mag_addr
-   .. automethod:: _make_opt_mag_id
-   .. automethod:: _make_opt_mag_mp
-   .. automethod:: _make_opt_mcast
-   .. automethod:: _make_opt_mcast_ack
-   .. automethod:: _make_opt_mcast_sel
-   .. automethod:: _make_opt_mn_group
-   .. automethod:: _make_opt_mn_lla_iid
+   .. automethod:: _make_opt_hi
+   .. automethod:: _make_opt_att
    .. automethod:: _make_opt_mn_lli
+   .. automethod:: _make_opt_lla_addr
+   .. automethod:: _make_opt_timestamp
+   .. automethod:: _make_opt_restart
+   .. automethod:: _make_opt_ipv4_hoa
+   .. automethod:: _make_opt_ipv4_ack
    .. automethod:: _make_opt_nat
-   .. automethod:: _make_opt_offload
-   .. automethod:: _make_opt_prev_maar
-   .. automethod:: _make_opt_qos
+   .. automethod:: _make_opt_ipv4_coa
+   .. automethod:: _make_opt_gre
+   .. automethod:: _make_opt_ipv6_ap
+   .. automethod:: _make_opt_bid
+   .. automethod:: _make_opt_ipv4_hoa_req
+   .. automethod:: _make_opt_ipv4_hoa_rep
+   .. automethod:: _make_opt_ipv4_router
+   .. automethod:: _make_opt_ipv4_dhcp
+   .. automethod:: _make_opt_cr
+   .. automethod:: _make_opt_lmaa
+   .. automethod:: _make_opt_mn_lla_iid
+   .. automethod:: _make_opt_transient
+   .. automethod:: _make_opt_fs
+   .. automethod:: _make_opt_fid
    .. automethod:: _make_opt_rc
    .. automethod:: _make_opt_redirect
-   .. automethod:: _make_opt_restart
+   .. automethod:: _make_opt_load
+   .. automethod:: _make_opt_alt_ipv4_coa
+   .. automethod:: _make_opt_mn_group
+   .. automethod:: _make_opt_mag_addr
+   .. automethod:: _make_opt_ani
+   .. automethod:: _make_opt_offload
+   .. automethod:: _make_opt_mcast_sel
+   .. automethod:: _make_opt_dmnp
+   .. automethod:: _make_opt_ams4
+   .. automethod:: _make_opt_ams6
+   .. automethod:: _make_opt_qos
+   .. automethod:: _make_opt_lma_up
+   .. automethod:: _make_opt_mcast
+   .. automethod:: _make_opt_mcast_ack
+   .. automethod:: _make_opt_lcmp
+   .. automethod:: _make_opt_mag_mp
+   .. automethod:: _make_opt_mag_id
+   .. automethod:: _make_opt_anchored
+   .. automethod:: _make_opt_local_prefix
+   .. automethod:: _make_opt_prev_maar
    .. automethod:: _make_opt_serv_maar
-   .. automethod:: _make_opt_service
-   .. automethod:: _make_opt_timestamp
-   .. automethod:: _make_opt_transient
-   .. automethod:: _make_opt_vendor
-
-   .. automethod:: _read_cga_extensions
-   .. automethod:: _read_ext_none
-   .. automethod:: _read_ext_multiprefix
-   .. automethod:: _read_ext_exp
-
-   .. automethod:: _make_cga_extensions
+   .. automethod:: _make_opt_dlif_lla
+   .. automethod:: _make_opt_dlif_lladdr
    .. automethod:: _make_ext_none
    .. automethod:: _make_ext_multiprefix
    .. automethod:: _make_ext_exp
-
-   .. autoattribute:: __message__
-      :no-value:
-   .. autoattribute:: __option__
-      :no-value:
-   .. autoattribute:: __extension__
-      :no-value:
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
+   .. automethod:: _read_mh_options
+   .. automethod:: _read_fid_suboptions
+   .. automethod:: _read_ani_suboptions
+   .. automethod:: _read_qos_attributes
+   .. automethod:: _read_lcmp_suboptions
+   .. automethod:: _read_cga_extensions
+   .. automethod:: _make_mh_options
+   .. automethod:: _make_fid_suboptions
+   .. automethod:: _make_fid_suboption
+   .. automethod:: _make_ani_suboptions
+   .. automethod:: _make_ani_suboption
+   .. automethod:: _make_qos_attributes
+   .. automethod:: _make_qos_attribute
+   .. automethod:: _make_lcmp_suboptions
+   .. automethod:: _seconds
+   .. automethod:: _make_lcmp_suboption
+   .. automethod:: _make_cga_extensions
 
 Auxiliary Data
 --------------

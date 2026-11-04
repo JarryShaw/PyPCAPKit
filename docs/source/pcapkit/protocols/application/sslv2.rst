@@ -75,10 +75,9 @@ a ``CLIENT-MASTER-KEY`` reads ``SSLv2:SSLv2``. The exceptions:
    .. autoproperty:: alias
    .. autoproperty:: length
 
+   .. automethod:: id
    .. automethod:: read
    .. automethod:: make
-
-   .. automethod:: id
 
    .. automethod:: _make_data
    .. automethod:: _make_sslv2_client_hello

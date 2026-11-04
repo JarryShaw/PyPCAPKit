@@ -55,12 +55,11 @@ Octets      Bits        Name                               Description
    .. autoproperty:: length
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_group_record
    .. automethod:: _make_data
+   .. automethod:: _make_group_record
 
 Header Schemas
 --------------

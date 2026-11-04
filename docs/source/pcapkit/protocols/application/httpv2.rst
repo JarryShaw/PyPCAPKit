@@ -66,18 +66,20 @@ exceptions:
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __frame__
+      :no-value:
+
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: version
 
+   .. automethod:: unpack
+   .. automethod:: read
+   .. automethod:: make
    .. automethod:: id
    .. automethod:: register_frame
 
-   .. automethod:: read
-   .. automethod:: make
-
    .. automethod:: _make_data
-
    .. automethod:: _read_http_none
    .. automethod:: _read_http_data
    .. automethod:: _read_http_headers
@@ -89,7 +91,6 @@ exceptions:
    .. automethod:: _read_http_goaway
    .. automethod:: _read_http_window_update
    .. automethod:: _read_http_continuation
-
    .. automethod:: _make_http_none
    .. automethod:: _make_http_data
    .. automethod:: _make_http_headers
@@ -101,11 +102,6 @@ exceptions:
    .. automethod:: _make_http_goaway
    .. automethod:: _make_http_window_update
    .. automethod:: _make_http_continuation
-
-   .. autoattribute:: __frame__
-      :no-value:
-
-   .. automethod:: unpack
 
 Header Schemas
 --------------

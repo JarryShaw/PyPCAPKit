@@ -35,13 +35,15 @@ format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: protocol
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
@@ -50,9 +52,6 @@ format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
    .. automethod:: __index__
 
    .. automethod:: _make_data
-
-   .. autoattribute:: __proto__
-      :no-value:
 
 .. autofunction:: pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder
 

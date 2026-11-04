@@ -22,6 +22,9 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __option__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -29,16 +32,17 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: id
-
-   .. automethod:: register_option
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register_option
+   .. automethod:: id
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-
    .. automethod:: _read_hopopt_options
+   .. automethod:: _make_hopopt_options
    .. automethod:: _read_opt_none
    .. automethod:: _read_opt_pad
    .. automethod:: _read_opt_tun
@@ -46,16 +50,14 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_opt_calipso
    .. automethod:: _read_opt_smf_dpd
    .. automethod:: _read_opt_pdm
-   .. automethod:: _read_opt_qs
    .. automethod:: _read_opt_rpl
+   .. automethod:: _read_opt_qs
    .. automethod:: _read_opt_mpl
    .. automethod:: _read_opt_ilnp
    .. automethod:: _read_opt_lio
    .. automethod:: _read_opt_jumbo
    .. automethod:: _read_opt_home
    .. automethod:: _read_opt_ip_dff
-
-   .. automethod:: _make_hopopt_options
    .. automethod:: _make_opt_none
    .. automethod:: _make_opt_pad
    .. automethod:: _make_opt_tun
@@ -63,20 +65,14 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_opt_calipso
    .. automethod:: _make_opt_smf_dpd
    .. automethod:: _make_opt_pdm
-   .. automethod:: _make_opt_qs
    .. automethod:: _make_opt_rpl
+   .. automethod:: _make_opt_qs
    .. automethod:: _make_opt_mpl
    .. automethod:: _make_opt_ilnp
    .. automethod:: _make_opt_lio
    .. automethod:: _make_opt_jumbo
    .. automethod:: _make_opt_home
    .. automethod:: _make_opt_ip_dff
-
-   .. autoattribute:: __option__
-      :no-value:
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
 Header Schemas
 --------------

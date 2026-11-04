@@ -23,35 +23,32 @@ Octets      Bits        Name                    Description
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __type__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
 
    .. automethod:: id
-   .. automethod:: register_type
-
    .. automethod:: read
    .. automethod:: make
+   .. automethod:: register_type
+
+   .. automethod:: __length_hint__
+   .. automethod:: __index__
 
    .. automethod:: _make_data
-
    .. automethod:: _read_data_type_none
    .. automethod:: _read_data_type_echo
    .. automethod:: _read_data_type_destination_unreachable
    .. automethod:: _read_data_type_time_exceeded
    .. automethod:: _read_data_type_parameter_problem
-
    .. automethod:: _make_data_type_none
    .. automethod:: _make_data_type_echo
    .. automethod:: _make_data_type_destination_unreachable
    .. automethod:: _make_data_type_time_exceeded
    .. automethod:: _make_data_type_parameter_problem
-
-   .. autoattribute:: __type__
-      :no-value:
-
-   .. automethod:: __length_hint__
-   .. automethod:: __index__
 
 Header Schemas
 --------------

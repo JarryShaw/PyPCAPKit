@@ -20,10 +20,10 @@ an extractor for unknown protocols, and constructs a
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 Header Schemas
 --------------

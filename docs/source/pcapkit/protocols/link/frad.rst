@@ -30,13 +30,15 @@ An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: protocol
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
    .. automethod:: register
@@ -46,9 +48,6 @@ An NLPID of ``0x80``, with or without the pad, is followed by a SNAP header, a
 
    .. automethod:: _make_data
    .. automethod:: _import_next_layer
-
-   .. autoattribute:: __proto__
-      :no-value:
 
 Header Schemas
 --------------

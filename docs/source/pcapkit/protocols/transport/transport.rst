@@ -14,6 +14,16 @@ which is a base class for transport layer protocols, e.g.
    :no-members:
    :show-inheritance:
 
+   .. autoattribute:: __proto__
+      :no-value:
+
+      .. important::
+
+         The attribute **must** be defined and maintained in subclass.
+
+   .. autoattribute:: __layer__
+      :no-value:
+
    .. autoproperty:: layer
 
    .. automethod:: register
@@ -24,12 +34,3 @@ which is a base class for transport layer protocols, e.g.
 
    .. automethod:: _make_port
    .. automethod:: _decode_next_layer
-
-   .. autoattribute:: __layer__
-      :no-value:
-   .. autoattribute:: __proto__
-      :no-value:
-
-      .. important::
-
-         The attribute **must** be defined and maintained in subclass.

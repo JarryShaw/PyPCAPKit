@@ -47,14 +47,13 @@ instead of clipping it.
    .. autoproperty:: protochain
 
    .. automethod:: id
-
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_data
-
    .. automethod:: __post_init__
    .. automethod:: __index__
+
+   .. automethod:: _make_data
 
 .. _ipv6-ext-length-rules:
 
