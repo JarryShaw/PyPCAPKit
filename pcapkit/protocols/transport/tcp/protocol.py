@@ -368,6 +368,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          octets, which hold no kind, raise
          :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than an
          :exc:`IndexError` (:issue:`2708`).
+       * A header :meth:`make` builds, such as the one
+         :meth:`~pcapkit.protocols.protocol.Protocol.from_data` rebuilds, reads
+         the octets after its End of Option List as ``padding``, as a parse of
+         its octets does, rather than as empty (:issue:`2769`).
 
     .. versionremoved:: 1.6.0
 
@@ -621,11 +625,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if _optl:
             # NOTE: the octets after an End of Option List option are kept as
             # read, so that :meth:`make` rebuilds the option area -- and the
-            # Data Offset computed from it -- at its original length. A schema
-            # built by hand rather than unpacked carries no ``padding``.
+            # Data Offset computed from it -- at its original length. They are
+            # sliced from the octets, as IPv4 does, since a schema :meth:`make`
+            # built holds them in ``options`` and no ``padding`` (#2769).
+            options = self._read_tcp_options(_optl)
+            _used = sum(opt.length for _, opt in options.items(multi=True))
             tcp.__update__({
-                'options': self._read_tcp_options(_optl),
-                'padding': schema.get('padding', b''),
+                'options': options,
+                'padding': self._data[TCP_MIN_HEADER_LEN + _used:tcp.hdr_len],
             })
 
         return self._decode_next_layer(tcp, (tcp.srcport.port, tcp.dstport.port), length - tcp.hdr_len)
