@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-"""An HTTP/2 ``SETTINGS`` frame cut inside its settings parses and rebuilds (#2659, #2686).
+"""An HTTP/2 ``SETTINGS`` frame cut inside its settings parses and rebuilds (#2659, #2686, #2756).
 
 A capture cut short hands the frame fewer octets than its Length, which the IPv4
 total length still backs. ``SettingsFrame.settings`` is sized by that Length, so past
 the octets present a ``SettingPair`` consumed nothing and ``ListField.unpack`` raised
-``FieldValueError``, leaving the segment ``Raw``. The list now reads its settings
-zero-filled to the Length, as a cut ``DATA`` frame reads its data, so ``make`` keeps
-computing the Length from the frame it builds, and an edited whole frame rebuilds with
-the Length of its edited payload.
+``FieldValueError``, leaving the segment ``Raw``. The list reads the setting the data
+ends inside zero-filled, as a cut ``DATA`` frame reads its data, and makes up none past
+the data from the zeros (#2756). The rebuild of a cut frame packs zeros after its
+settings to the Length it declares, while ``make`` computes the Length of a whole frame
+from the frame it builds, so an edited whole frame rebuilds with the Length of its
+edited payload.
 
 Every case builds its own octets.
 
@@ -41,8 +43,8 @@ def _datagram(app: bytes) -> bytes:
 
 
 def _expected(present: bytes) -> 'list[tuple[int, int]]':
-    """The pairs ``present`` holds, zero-filled to the frame's Length as a short read is."""
-    padded = present + bytes(len(PAIRS) - len(present))
+    """The pairs ``present`` begins, the last zero-filled as a short read is."""
+    padded = present + bytes(-len(present) % 6)
     return [(int.from_bytes(padded[i:i + 2], 'big'), int.from_bytes(padded[i + 2:i + 6], 'big'))
             for i in range(0, len(padded), 6)]
 
@@ -95,17 +97,18 @@ class SettingsCutTests(unittest.TestCase):
                     self.assert_cut(HTTPv2(SETTINGS[:9 + keep], len(SETTINGS)), keep)
                 self.assertEqual(caught, [])
 
-    def test_the_settings_past_the_data_read_as_zeros(self) -> None:
-        """The setting the data ends inside keeps its identifier, and every setting
-        past the data reads as identifier and value zero, as a cut ``DATA`` frame
-        reads its data as zeros (#2686)."""
+    def test_no_setting_is_made_up_past_the_data(self) -> None:
+        """The setting the data ends inside keeps its identifier and reads its value
+        as zeros, as a cut ``DATA`` frame reads its data (#2686), and none past the
+        data is read from the zeros, as identifier and value zero (#2756)."""
         from pcapkit.const.http.setting import Setting
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
 
         http = HTTPv2(SETTINGS[:9 + 9], len(SETTINGS))
         self.assertEqual(list(http.info.settings.items(multi=True)),
-                         [(Setting.HEADER_TABLE_SIZE, 4096), (Setting.MAX_CONCURRENT_STREAMS, 0),
-                          (Setting.get(0), 0)])
+                         [(Setting.HEADER_TABLE_SIZE, 4096), (Setting.MAX_CONCURRENT_STREAMS, 0)])
+        self.assertEqual(list(HTTPv2(SETTINGS[:9 + 12], len(SETTINGS)).info.settings.items(multi=True)),
+                         [(Setting.HEADER_TABLE_SIZE, 4096), (Setting.MAX_CONCURRENT_STREAMS, 100)])
 
         data = HTTPv2(_frame(0x0, 0x1, 1, b'hello')[:9 + 2], 9 + 5)
         self.assertEqual(data.info.data, b'he\x00\x00\x00')
@@ -150,8 +153,8 @@ class SettingsCutTests(unittest.TestCase):
                     self.assertIsNone(rest.info.error)
 
     def test_a_length_no_capture_backs_goes_raw(self) -> None:
-        """A Length the octets read cannot back is refused, as zero-filling it would
-        make a setting per six octets of it, and the segment stays ``Raw`` (#2686)."""
+        """A Length the octets read cannot back is refused, as zero-filling it takes the
+        parse past its padding budget, and the segment stays ``Raw`` (#2686)."""
         from pcapkit.corekit.fields.field import _zero_pad_budget
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.protocols.internet.ipv4.protocol import IPv4
@@ -170,7 +173,7 @@ class SettingsCutTests(unittest.TestCase):
 
 
 class SettingsListTests(unittest.TestCase):
-    """The settings list reads a buffer and a stream alike, zero-filled to its length."""
+    """The settings list reads a buffer and a stream alike, ending with the data."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -187,7 +190,7 @@ class SettingsListTests(unittest.TestCase):
                     warnings.simplefilter('always')
                     parsed = field.unpack(buffer, {})
                 self.assertEqual(caught, [])
-                self.assertEqual([(int(pair.id), pair.value) for pair in parsed], [(1, 4096), (3, 0), (0, 0)])
+                self.assertEqual([(int(pair.id), pair.value) for pair in parsed], [(1, 4096), (3, 0)])
                 self.assertEqual(field.length, len(PAIRS))
         self.assertEqual(stream.tell(), 2 + 9)
 
@@ -264,6 +267,40 @@ class EditedFrameTests(unittest.TestCase):
         self.assertEqual(http.data, _frame(0x4, 0x0, 0, PAIRS[:6]))
         self.assertEqual(http.info.length, 6)
         self.assertNotIn('__short_read__', http.info)
+
+    def test_an_edited_cut_frame_computes_its_length(self) -> None:
+        """A cut frame whose settings are edited, so no longer the pairs its capture began with
+        zeros past the cut, rebuilds with the Length of the edited settings, as an edited whole
+        frame does, not the Length the cut frame declares (#2756)."""
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.application.httpv2.protocol import HTTPv2
+        from pcapkit.protocols.internet.ipv4.protocol import IPv4
+
+        packet = _datagram(SETTINGS)
+        head = len(packet) - len(SETTINGS)
+        whole = HTTPv2(SETTINGS, len(SETTINGS)).info
+        edits = (
+            ('one pair', lambda pairs: pairs[:1]),
+            ('zero pairs', lambda pairs: []),
+            ('a value past the cut', lambda pairs: pairs[:-1] + [(pairs[-1][0], 0x01010101)]),
+        )
+        # Past the first pair, so the pairs begun are more than one.
+        for keep in range(7, len(PAIRS)):
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                cut = IPv4(packet[:head + 9 + keep], head + 9 + keep).payload.payload.info
+            for label, edit in edits:
+                pairs = edit(list(cut.settings.items(multi=True)))
+                with self.subTest(captured=keep, edit=label):
+                    built = {}
+                    for name, info in (('cut', cut), ('whole', whole)):
+                        data = info.to_dict()
+                        data['settings'] = OrderedMultiDict(pairs)
+                        built[name] = HTTPv2.from_data(data)
+                    # The cut frame's record still cuts it back to the octets it captured.
+                    self.assertEqual(built['cut'].info.length, built['whole'].info.length)
+                    self.assertEqual(built['cut'].info.length, 6 * len(pairs))
+                    self.assertEqual(built['cut'].data, built['whole'].data[:9 + keep])
 
     def test_a_dict_with_no_length_computes_it(self) -> None:
         from pcapkit.const.http.frame import Frame

@@ -207,9 +207,10 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
          class, where it was kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
          (:issue:`2536`).
        * A ``SETTINGS`` frame the capture cut inside its settings parses, with the
-         settings past the data read as zeros, as a cut ``DATA`` frame's data is,
-         where it was :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2659`,
-         :issue:`2686`).
+         setting the cut lands inside read as zeros past it, as a cut ``DATA``
+         frame's data is, and no setting past the data, where it was
+         :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2659`,
+         :issue:`2686`, :issue:`2756`).
        * Each enumeration field of :meth:`make` and of the frame makers takes
          a member or an :class:`int` code, resolved with the enumeration's
          ``get``; a name, a :obj:`bool` for a field wider than one bit, or a
@@ -1437,6 +1438,15 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
            frame with no parameters, which :rfc:`9113#section-6.5` permits,
            rather than being rejected (:issue:`2274`).
 
+        .. versionchanged:: 1.6.0
+
+           A ``frame`` the capture cut inside its settings, as its
+           ``__short_read__`` records, packs the settings its parse read from the
+           octets its ``packet`` holds with zeros after them to the Length it
+           declares, since that parse reads no setting past the data, so its
+           rebuild declares that Length too; with its settings edited, the Length
+           is computed as for a whole frame (:issue:`2756`).
+
         """
         if frame is not None:
             ack = frame.flags.ACK
@@ -1477,6 +1487,16 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         else:
             raise ProtocolError(f'HTTP/2: [Type {Enum_Frame.SETTINGS}] invalid settings: '
                                 f'{settings!r}')
+
+        # NOTE: An unedited cut frame packs the octets its ``packet`` captured, zero to the pair, and
+        # keeps its Length in the zeros past them (#2756); a dict rebuilds as the base data model.
+        record = frame.get('__short_read__') if isinstance(frame, Data_HTTP) else None
+        if frame is not None and record is not None and isinstance(settings_val, list):
+            packed = b''.join(pair.pack() for pair in settings_val)
+            # A cut in the frame header leaves no setting captured.
+            read = cast('bytes', frame.get('packet', b''))[:record[1]] if record[0] == 'frame' else b''
+            if packed == read + bytes(-len(read) % 6) and len(packed) < frame.length:
+                settings_val = packed + bytes(frame.length - len(packed))
 
         return Schema_SettingsFrame(
             settings=settings_val,
