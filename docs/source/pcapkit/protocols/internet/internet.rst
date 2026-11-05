@@ -41,16 +41,27 @@ which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protoc
 Extension Header Chains
 -----------------------
 
-A chain of IPv6 extension headers is dissected to at most
-:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` headers in
-a row, whether it follows IPv6 or another layer such as IPv4. What follows is
-kept as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
-:exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The
-``pyshark`` engine leaves the walk to its own parser, which does not stop there,
-so it may still find the upper layer past it (:issue:`1609`). So may the
-``dpkt`` toolkit, which reads the chain as |dpkt|_ decodes it. So does the
-``scapy`` engine behind IPv6, where Scapy dissects each extension header itself;
-behind IPv4, its toolkit steps over them in the octets to find TCP, up to
-:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of them in a row. The
-``pypcapfile`` toolkit walks no extension header chain, so it finds no upper
-layer behind one.
+A chain of IPv6 extension headers, behind IPv6 or another layer such as IPv4,
+is dissected to at most :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
+headers in a row. What follows is kept as
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
+:exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The other
+engines and toolkits:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Engine or toolkit
+     - Behind a chain
+   * - ``pyshark`` engine
+     - Its own parser walks the chain without that limit, so it may still find
+       the upper layer (:issue:`1609`).
+   * - ``dpkt`` toolkit
+     - Reads the chain as |dpkt|_ decodes it, so it may too.
+   * - ``scapy`` engine
+     - Behind IPv6, Scapy dissects each extension header itself, so it may too.
+       Behind IPv4, its toolkit steps over at most
+       :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of them in a row
+       in the octets to find TCP.
+   * - ``pypcapfile`` toolkit
+     - Walks no chain, so it finds no upper layer behind one.

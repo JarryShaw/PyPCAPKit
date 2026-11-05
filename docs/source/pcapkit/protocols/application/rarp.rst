@@ -7,8 +7,7 @@ RARP - Reverse Address Resolution Protocol
 :mod:`pcapkit.protocols.application.rarp.protocol` contains
 :class:`~pcapkit.protocols.application.rarp.protocol.RARP` only,
 which implements an extractor for Reverse Address
-Resolution Protocol (RARP) [*]_, whose structure is
-described as below:
+Resolution Protocol (RARP) [*]_, whose structure is:
 
 ====== ========= ========================= =========================
 Octets      Bits        Name                    Description

@@ -19,13 +19,10 @@ of their own:
      - :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`
      - :rfc:`2661`
 
-Only L2TPv2 is implemented.
-
-The base deliberately parses no header, as
-:class:`~pcapkit.protocols.internet.ip.protocol.IP` does for its family, because the
-versions do not share one. Only the first 16-bit word, with a version nibble at
-bits 12-15, is common to all of them; a base that parsed further would assume one
-version's layout for every version.
+The base parses no header, as :class:`~pcapkit.protocols.internet.ip.protocol.IP`
+does for its family: only the first 16-bit word, with the version nibble at bits
+12-15, is common to every version, so parsing further would impose one version's
+layout on all.
 
 .. autoclass:: pcapkit.protocols.link.l2tp.protocol.L2TP
    :no-members:
@@ -72,14 +69,13 @@ are refused, since no field picks a member (:issue:`2574`).
 :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` and refuses any other version, for
 that field, for the nibble and for the data
 :meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP.from_data` is handed. UDP port 1701 binds
-L2TPv2 itself, the only member. The switch is where a further member goes, and
-binding the port to the base through a hook making the same switch, as
+L2TPv2 itself. A further member goes in that switch, and binding the port to the
+base through a hook making the same switch, as
 :meth:`IGMP._dispatch <pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch>` does for
-IP protocol 2, needs no new registry. L2TP is the easier case beside
+IP protocol 2, needs no new registry. Unlike
 :class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose
 :meth:`~pcapkit.protocols.application.http.protocol.HTTP._guess_version` has to *infer*
-the version, because HTTP's wire format carries no version field, whereas L2TP
-states its version explicitly in those four bits.
+the version, L2TP states it in the version nibble.
 
 .. rubric:: Footnotes
 

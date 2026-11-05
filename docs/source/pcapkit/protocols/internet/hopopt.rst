@@ -7,8 +7,7 @@ HOPOPT - IPv6 Hop-by-Hop Options
 :mod:`pcapkit.protocols.internet.hopopt.protocol` contains
 :class:`~pcapkit.protocols.internet.hopopt.protocol.HOPOPT`
 only, which implements the extractor for IPv6 Hop-by-Hop
-Options header (HOPOPT) [*]_, whose structure is
-described as below:
+Options header (HOPOPT) [*]_, whose structure is:
 
 ======= ========= =================== =================================
 Octets      Bits        Name                    Description

@@ -11,10 +11,9 @@ SCTP - Stream Control Transmission Protocol
    (:issue:`2534`).
 
 :mod:`pcapkit.protocols.transport.sctp.protocol` contains
-:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` only,
+:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`,
 which implements the extractor for Stream Control
-Transmission Protocol (SCTP) [*]_, whose structure is
-described as below:
+Transmission Protocol (SCTP) [*]_, whose structure is:
 
 ======= ========= ========================= =======================================
 Octets      Bits        Name                    Description

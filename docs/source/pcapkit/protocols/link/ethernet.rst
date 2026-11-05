@@ -14,8 +14,7 @@ Ethernet Protocol
 :mod:`pcapkit.protocols.link.ethernet.protocol` contains
 :class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`
 only, which implements the extractor for Ethernet
-Protocol [*]_, whose structure is described as
-below:
+Protocol [*]_, whose structure is:
 
 .. table::
 

@@ -7,15 +7,13 @@ GRE - Generic Routing Encapsulation
 :mod:`pcapkit.protocols.link.gre.protocol` contains
 :class:`~pcapkit.protocols.link.gre.protocol.GRE`
 only, which implements the extractor for the Generic Routing Encapsulation
-base header [*]_ plus the optional Key and Sequence Number extensions [*]_, as
-reached through IP protocol number 47 behind any layer sharing
+base header [*]_ and its optional Key and Sequence Number extensions [*]_. It
+is reached through IP protocol number 47 behind any layer sharing
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`,
-IPv4 and IPv6 among them, or as seen on a
-``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose
-``arphrd_type`` is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE``
-and ``ARPHRD_IP6GRE`` both land on this one class, the "IP"/"IP6" distinction
-being only which outer IP version the tunnel carries. Its structure, with
-every optional field present, is described as below:
+IPv4 and IPv6 among them, or on a ``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2``
+capture whose ``arphrd_type`` is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE``, which
+differ only in the outer IP version. With every optional field present, its
+structure is:
 
 .. table::
 
@@ -41,15 +39,13 @@ every optional field present, is described as below:
    12/8/4 96   ``gre.sequence_number``   Sequence Number, present only if ``S``, :rfc:`2890`
    ====== ==== ========================= ====================================
 
-``C``, ``K`` and ``S`` each gate their own field independently, so the header
-is 4, 8, 12 or 16 octets depending on which are set. The Protocol Type field
-is an EtherType, dispatched onward through
-:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, the same
-family registry Ethernet, VLAN and LinuxSLL already share -- unlike
-:class:`~pcapkit.protocols.link.frad.protocol.FRAD`, this class keeps no registry of
-its own. A nonzero Version Number (RFC 2637's "Enhanced GRE"/PPTP, version 1)
-is a different, incompatible protocol and is refused rather than misread; see
-the module docstring's *Scope* section.
+``C``, ``K`` and ``S`` each gate their own field, so the header is 4, 8, 12 or
+16 octets. The Protocol Type is an EtherType, dispatched through
+:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>` as for
+Ethernet and VLAN; unlike :class:`~pcapkit.protocols.link.frad.protocol.FRAD`, GRE
+keeps no registry of its own. A nonzero Version Number (:rfc:`2637`'s Enhanced
+GRE, version 1) is a different protocol, so it raises
+:exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than being misread.
 
 Flow tracing and TCP reassembly follow the tunnel's inner flow, keyed by the
 IP header nearest the TCP segment as for any tunnel (:issue:`1581`), and IPv4

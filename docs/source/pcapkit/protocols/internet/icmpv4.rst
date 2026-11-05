@@ -6,9 +6,8 @@ ICMPv4 - Internet Control Message Protocol
 
 :mod:`pcapkit.protocols.internet.icmpv4.protocol` contains
 :class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` only,
-which implements extractor for Internet Control
-Message Protocol (ICMP) [*]_, whose structure is
-described as below:
+which implements the extractor for Internet Control
+Message Protocol (ICMP) [*]_, whose structure is:
 
 ======= ========= ======================= ===================================
 Octets      Bits        Name                    Description

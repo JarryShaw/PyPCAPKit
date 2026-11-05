@@ -8,8 +8,7 @@ Linux "Cooked" Capture Encapsulation
 :class:`~pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1`
 only, which implements the extractor for the Linux "cooked" capture
 encapsulation [*]_ of ``LINKTYPE_LINUX_SLL`` -- the header every
-``tcpdump -i any`` capture on Linux uses -- whose structure is described as
-below:
+``tcpdump -i any`` capture on Linux uses -- whose structure is:
 
 .. table::
 

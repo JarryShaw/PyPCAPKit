@@ -3,8 +3,7 @@ Transport Layer
 
 .. module:: pcapkit.protocols.transport
 
-:mod:`pcapkit.protocols.transport` is the collection of all protocols in
-transport layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.transport` holds the transport layer protocols.
 
 .. toctree::
    :maxdepth: 1

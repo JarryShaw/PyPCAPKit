@@ -10,7 +10,7 @@ for the Layer Two Tunnelling Protocol version 2 (L2TPv2) [*]_ as specified by
 :rfc:`2661` -- a 16-bit tunnel ID and a 16-bit session ID, with the version nibble
 reading ``2``. It is dispatched from
 :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>` at port
-1701. Its structure is described as below:
+1701. Its structure is:
 
 .. table::
 

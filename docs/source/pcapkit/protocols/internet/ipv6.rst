@@ -12,10 +12,9 @@ IPv6 - Internet Protocol Version 6
    alone (:issue:`2534`).
 
 :mod:`pcapkit.protocols.internet.ipv6.protocol` contains
-:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` only,
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`,
 which implements the extractor for Internet Protocol
-version 6 (IPv6) [*]_, whose structure is described
-as below:
+version 6 (IPv6) [*]_, whose structure is:
 
 ======= ========= ===================== =======================================
 Octets      Bits        Name                    Description

@@ -7,8 +7,7 @@ IPv6-Opts - Destination Options for IPv6
 :mod:`pcapkit.protocols.internet.ipv6_opts.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.protocol.IPv6_Opts`
 only, which implements the extractor for Destination Options
-for IPv6 (IPv6-Opts) [*]_, whose structure is described
-as below:
+for IPv6 (IPv6-Opts) [*]_, whose structure is:
 
 ======= ========= =================== =================================
 Octets      Bits        Name                    Description

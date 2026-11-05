@@ -84,11 +84,10 @@ and keeps its encrypted content as octets. The context reaches DTLS through
 
 The connection IDs a
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext` learns belong to that
-instance. A new instance starts with none, and one the caller reuses keeps
-what it has learned. An extraction given none gets its own in its own
-registry, so it carries what its handshakes negotiate across its capture and
-no further. A registry passed as ``__context__`` to several parses carries
-its instance across them.
+instance: a new one starts with none, and a reused one keeps what it learned.
+An extraction given none keeps its own in its own registry, so what its
+handshakes negotiate lasts for its capture only. A registry passed as
+``__context__`` to several parses carries its instance across them.
 
 Matching by value relies on IDs being self-delineating
 (:rfc:`9146#section-4`): with ``c1c2c3c4`` registered, a record whose ID is

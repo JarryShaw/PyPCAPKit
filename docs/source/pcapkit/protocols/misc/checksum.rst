@@ -24,7 +24,7 @@ IP Pseudo-Header
 which implements the pseudo-header of the IP protocol family
 that the upper-layer checksums cover, and :func:`pseudo_header` and
 :func:`verify_upper`, through which the IP layers use it. The
-pseudo-header's structure is described as below:
+pseudo-header's structure is:
 
 IPv4 (:rfc:`793#section-3.1`, :rfc:`768`):
 

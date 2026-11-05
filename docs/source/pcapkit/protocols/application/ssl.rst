@@ -5,7 +5,7 @@ SSL - Secure Sockets Layer
 .. module:: pcapkit.protocols.application.ssl.protocol
 
 :mod:`pcapkit.protocols.application.ssl.protocol` contains
-:class:`~pcapkit.protocols.application.ssl.protocol.SSL` only,
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL`,
 which is the umbrella base class for the Secure Sockets Layer protocol
 family [*]_ -- the SSL versions, Transport Layer Security and Datagram TLS:
 
@@ -26,7 +26,7 @@ the same fields plus an epoch and a 48-bit sequence number *between* the
 version and the length, and DTLS adds a fragment header to each handshake
 message. Each record header is declared in its subclass's own schema, and
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` reads the epoch and sequence
-number. This base class carries the logic the two share -- content-type
+number. This base class carries the logic TLS and DTLS share -- content-type
 dispatch, handshake-message decoding (including the DTLS fragment header), the
 extension registry, and the record-level validation that keeps dispatch from
 accepting bytes that cannot be a genuine record.

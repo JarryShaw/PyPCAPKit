@@ -7,8 +7,7 @@ TCP - Transmission Control Protocol
 :mod:`pcapkit.protocols.transport.tcp.protocol` contains
 :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` only,
 which implements the extractor for Transmission Control
-Protocol (TCP) [*]_, whose structure is described as
-below:
+Protocol (TCP) [*]_, whose structure is:
 
 ======= ========= ========================= =======================================
 Octets      Bits        Name                    Description

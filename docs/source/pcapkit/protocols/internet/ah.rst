@@ -7,8 +7,7 @@ AH - Authentication Header
 :mod:`pcapkit.protocols.internet.ah.protocol` contains
 :class:`~pcapkit.protocols.internet.ah.protocol.AH` only,
 which implements the extractor for Authentication
-Header (AH) [*]_, whose structure is described
-as below:
+Header (AH) [*]_, whose structure is:
 
 ======= ========= ======================= ===================================
 Octets      Bits        Name                    Description

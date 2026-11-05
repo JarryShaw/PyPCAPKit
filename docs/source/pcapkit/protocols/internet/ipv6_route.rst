@@ -7,7 +7,7 @@ IPv6-Route - Routing Header for IPv6
 :mod:`pcapkit.protocols.internet.ipv6_route.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route`
 only, which implements the extractor for Routing Header for IPv6
-(IPv6-Route) [*]_, whose structure is described as below:
+(IPv6-Route) [*]_, whose structure is:
 
 ======= ========= ==================== ===============================
 Octets      Bits        Name                    Description

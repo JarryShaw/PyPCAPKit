@@ -9,13 +9,11 @@ IGMPv3 - Internet Group Management Protocol Version 3
 extractor for Internet Group Management Protocol version 3 (IGMPv3)
 [:rfc:`3376`]. Unlike :class:`IGMPv1 <pcapkit.protocols.internet.igmpv1.protocol.IGMPv1>`
 and :class:`IGMPv2 <pcapkit.protocols.internet.igmpv2.protocol.IGMPv2>`, which reuse the
-abstract base's own 8-octet schema and data model (see
-:mod:`~pcapkit.protocols.internet.igmp.protocol`), IGMPv3 defines two message shapes
-of its own:
+abstract base's 8-octet schema and data model (see
+:mod:`~pcapkit.protocols.internet.igmp.protocol`), IGMPv3 defines its own.
 
-An IGMPv3 Membership Query (type ``0x11``, shared with v1/v2) reuses the
-8-octet layout IGMPv1/v2 share and, when at least 12 octets long overall,
-appends a source-list extension:
+A Membership Query (type ``0x11``, shared with v1/v2) is that 8-octet layout,
+followed by a source-list extension when at least 12 octets long overall:
 
 ======= ========= ================================== ===================================
 Octets      Bits        Name                               Description
@@ -32,8 +30,7 @@ Octets      Bits        Name                               Description
   12         96   ``igmpv3.sources``                 Source Address [1..N]
 ======= ========= ================================== ===================================
 
-An IGMPv3 Membership Report (type ``0x22``) has an unrelated, materially
-different shape of its own:
+A Membership Report (type ``0x22``) has a different shape:
 
 ======= ========= ================================== ===================================
 Octets      Bits        Name                               Description

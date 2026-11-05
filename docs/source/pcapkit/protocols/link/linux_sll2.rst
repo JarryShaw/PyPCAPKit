@@ -7,8 +7,7 @@ Linux "Cooked" Capture Encapsulation v2
 :mod:`pcapkit.protocols.link.linux_sll2.protocol` contains
 :class:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2`
 only, which implements the extractor for the Linux "cooked" capture
-encapsulation v2 [*]_ of ``LINKTYPE_LINUX_SLL2``, whose structure is described
-as below:
+encapsulation v2 [*]_ of ``LINKTYPE_LINUX_SLL2``, whose structure is:
 
 .. table::
 
