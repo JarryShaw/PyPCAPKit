@@ -39,11 +39,11 @@ needed by the test suite.
 The Option Round-Trip Generator
 -------------------------------
 
-One generator works differently from the rest.
-:file:`examples/generators/options.py` does not describe packets it wants; it asks
-the library which option, chunk, parameter, message, frame and block codes it
-registers, and then constructs one of each through the public construction API,
-parses it back, and constructs it again from what was parsed. The
+:file:`examples/generators/options.py` differs from the other generators: rather
+than describing the packets it wants, it asks the library which option, chunk,
+parameter, message, frame and block codes it registers, constructs one of each
+through the public construction API, parses it back, and constructs it again from
+what was parsed. The
 :file:`options-*.pcap` captures are the cases that survive that round trip, so
 they record what this version of :mod:`pcapkit` builds rather than what a
 third-party tool builds.
