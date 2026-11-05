@@ -622,74 +622,55 @@ commit the result to <code class="docutils literal notranslate"><span class="pre
 While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is a <code class="docutils literal notranslate"><span class="pre">.devN</span></code> one it only advances that counter
 (<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), producing another blocked dev version, not a
 release (see the dev-release note below).</p>
-<p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without also moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">version</span></code> field to match is <strong>not</strong> a safe shortcut: it blocks the release.
+<p>Editing <code class="docutils literal notranslate"><span class="pre">__version__</span></code> by hand without moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s <code class="docutils literal notranslate"><span class="pre">version</span></code>
+field to match <strong>blocks the release</strong>.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">RepositoryCitationTests.test_the_citation_file_names_the_packaged_version</span></code>
 asserts the two agree, and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job calls
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
-<code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs the <strong>full</strong> suite rather than the tiered
-subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job).
-That gate runs whenever a release will – a moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is exactly
-what makes <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence read “not yet published” – and every
-publishing job’s <code class="docutils literal notranslate"><span class="pre">needs:</span></code> requires it to have succeeded, so a
-citation left behind fails the gate well before any approval is requested.
-Either run the script, or move both fields by hand in the same commit.</p>
-<p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
-the Release, and every upload are the workflow’s job from here. Other
-checks run unconditionally on the same path, though none is a step in <em>this</em>
-process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job’s “Check CHANGELOG.md is in step with its source
-entry” step fails outright if <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
-<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and <code class="docutils literal notranslate"><span class="pre">github</span></code>’s “Select release body” step
-warns, without failing, if that entry’s heading still reads “unreleased”. Each
-enforces what the changelog convention
-already asks for.</p>
-<p>Owner ruling, 2026-10-30: while a version is still under active development,
-<code class="docutils literal notranslate"><span class="pre">__version__</span></code> should carry that <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a> <code class="docutils literal notranslate"><span class="pre">devN</span></code> suffix itself, as a plain
-work-in-progress signal distinct from a deliberately-tagged alpha, beta or
-release candidate – this project has shipped those for real (e.g.
-<code class="docutils literal notranslate"><span class="pre">1.5.0b14</span></code>), and they must stay publishable. <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEV_RELEASE</span></code> output reads <code class="docutils literal notranslate"><span class="pre">Version(__version__).is_devrelease</span></code>,
-never <code class="docutils literal notranslate"><span class="pre">is_prerelease</span></code> (which a real beta sets too), and <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all refuse to run while it is <code class="docutils literal notranslate"><span class="pre">true</span></code> – so a scheduled
-Vendor Update reaching this workflow (see below) can never tag or publish a dev
-version on the strength of <code class="docutils literal notranslate"><span class="pre">github-release</span></code>’s one reviewer approval alone
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, below). That approval still exists and still matters, but it is one
-person approving a diff for reasons usually unrelated to the version string, so
-a stray <code class="docutils literal notranslate"><span class="pre">.devN</span></code> is easy to miss there; and a re-run of a job that already
-skipped <code class="docutils literal notranslate"><span class="pre">github</span></code> once does not ask for a fresh approval at all. This gate
-closes that in code rather than leaving it to review.</p>
-<p>The suffix comes off only by hand: <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> has no option
-to drop it – run on a dev version it only advances the <code class="docutils literal notranslate"><span class="pre">devN</span></code> counter
-(<code class="docutils literal notranslate"><span class="pre">1.6.0.dev2</span></code> to <code class="docutils literal notranslate"><span class="pre">1.6.0.dev3</span></code>), never past it. Finishing a dev version
-means editing the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in <code class="file docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code>
-to the real final string by hand, and moving <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s matching
-<code class="docutils literal notranslate"><span class="pre">version</span></code> field in the same commit, once that version is actually ready to
-ship.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, whose <code class="docutils literal notranslate"><span class="pre">gate</span></code> job runs the <strong>full</strong>
+suite rather than an ordinary push’s tiered subset. That gate runs whenever a
+release will, since a moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is what makes <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s
+evidence read “not yet published”, and every publishing job <code class="docutils literal notranslate"><span class="pre">needs:</span></code> it, so a
+stale citation fails before any approval is requested. Run the script, or move both
+fields in the same commit.</p>
+<p>Other checks run on the same path without being steps of this process: the
+<code class="docutils literal notranslate"><span class="pre">changelog</span></code> job’s “Check CHANGELOG.md is in step with its source entry” step fails
+if <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
+<code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and <code class="docutils literal notranslate"><span class="pre">github</span></code>’s “Select release body” step warns,
+without failing, if that entry’s heading still reads “unreleased”.</p>
+<p>By the owner’s ruling, a version under active development carries the <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a>
+<code class="docutils literal notranslate"><span class="pre">devN</span></code> suffix, a work-in-progress signal distinct from a deliberately tagged
+alpha, beta or release candidate, which this project ships for real (<code class="docutils literal notranslate"><span class="pre">1.5.0b14</span></code>)
+and must keep publishable. <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEV_RELEASE</span></code> output reads
+<code class="docutils literal notranslate"><span class="pre">Version(__version__).is_devrelease</span></code>, never <code class="docutils literal notranslate"><span class="pre">is_prerelease</span></code> (which a real beta
+sets too), and <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> all refuse to run while it
+is <code class="docutils literal notranslate"><span class="pre">true</span></code>, so a scheduled Vendor Update can never tag or publish a dev version on
+<code class="docutils literal notranslate"><span class="pre">github-release</span></code>’s one approval alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>, below). That approval is one
+person approving a diff, usually for reasons unrelated to the version string, so a
+stray <code class="docutils literal notranslate"><span class="pre">.devN</span></code> is easy to miss there, and a re-run of a job that already skipped
+<code class="docutils literal notranslate"><span class="pre">github</span></code> asks for no fresh approval; the gate closes that in code.</p>
+<p>The suffix comes off only by hand, since <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> never drops it:
+once the version is ready to ship, edit the <code class="docutils literal notranslate"><span class="pre">__version__</span></code> assignment in
+<code class="file docutils literal notranslate"><span class="pre">pcapkit/__init__.py</span></code> to the final string, and <code class="file docutils literal notranslate"><span class="pre">CITATION.cff</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">version</span></code> field in the same commit.</p>
 </section>
 <section id="ways-to-start-a-release">
 <h2>Ways to Start a Release<a class="headerlink" href="#ways-to-start-a-release" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">on:</span></code> triggers are all first-class – none is a
+<p><code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">on:</span></code> triggers are all first-class; none is a
 workaround for another:</p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">push:</span> <span class="pre">tags:</span> <span class="pre">['v*']</span></code></dt><dd><p>Pushing a tag matching <code class="docutils literal notranslate"><span class="pre">v*</span></code> yourself. This chooses <strong>which commit</strong> to
-release, not which version: <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s “Checkout code” step pins
-<code class="docutils literal notranslate"><span class="pre">ref:</span> <span class="pre">${{</span> <span class="pre">github.sha</span> <span class="pre">}}</span></code>, which on this trigger is the commit the pushed
-tag points at, and its “Get Version” step reads <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>
-out of <em>that</em> tree. Every downstream tag and release name is built
-from that output – <code class="docutils literal notranslate"><span class="pre">v${{</span> <span class="pre">needs.version_check.outputs.PCAPKIT_VERSION</span> <span class="pre">}}</span></code>
-is the <code class="docutils literal notranslate"><span class="pre">tag_name</span></code> of <code class="docutils literal notranslate"><span class="pre">github</span></code>’s “Create Release” step and the release
-<code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> upload to, always from
-<code class="docutils literal notranslate"><span class="pre">PCAPKIT_VERSION</span></code>, never from <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> – so the version
-actually released is whatever <code class="docutils literal notranslate"><span class="pre">__version__</span></code> says on the tagged commit,
-not the name of the tag that was pushed. The two agree only if the tag
-was named to match. Push <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> at a commit whose <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is
+<dt><code class="docutils literal notranslate"><span class="pre">push:</span> <span class="pre">tags:</span> <span class="pre">['v*']</span></code></dt><dd><p>Pushing a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag yourself. This chooses <strong>which commit</strong> to release, not
+which version: <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s “Checkout code” step pins
+<code class="docutils literal notranslate"><span class="pre">ref:</span> <span class="pre">${{</span> <span class="pre">github.sha</span> <span class="pre">}}</span></code>, the commit the tag points at, and its “Get Version”
+step reads <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> from that tree. Every downstream tag and
+release name comes from that <code class="docutils literal notranslate"><span class="pre">PCAPKIT_VERSION</span></code> output, never from
+<code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code>: <code class="docutils literal notranslate"><span class="pre">v${{</span> <span class="pre">needs.version_check.outputs.PCAPKIT_VERSION</span> <span class="pre">}}</span></code> is
+the <code class="docutils literal notranslate"><span class="pre">tag_name</span></code> of <code class="docutils literal notranslate"><span class="pre">github</span></code>’s “Create Release” step and the release <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
+and <code class="docutils literal notranslate"><span class="pre">conda</span></code> upload to. Push <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> at a commit whose <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is
 still <code class="docutils literal notranslate"><span class="pre">1.5.0b5</span></code> and <code class="docutils literal notranslate"><span class="pre">softprops/action-gh-release</span></code> creates a <em>new</em>
-<code class="docutils literal notranslate"><span class="pre">v1.5.0b5</span></code> tag and names the Release after it; the <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> tag that
-was actually pushed is left dangling, attached to nothing.
-<a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a> calls this workflow “version-driven rather than tag-driven”
-for the same reason – name the tag to match the version you intend, and
-the two conveniently coincide, but nothing enforces that they do.</p>
+<code class="docutils literal notranslate"><span class="pre">v1.5.0b5</span></code> tag and names the Release after it, leaving <code class="docutils literal notranslate"><span class="pre">v1.6.0</span></code> dangling.
+<a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a> calls this workflow “version-driven rather than tag-driven” for that
+reason: name the tag to match the version, since nothing enforces it.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> after <strong>Vendor Update</strong> completes</dt><dd><p>The path a version bump on <code class="docutils literal notranslate"><span class="pre">main</span></code> takes without anyone pushing a tag:
 a push to <code class="docutils literal notranslate"><span class="pre">main</span></code> completes <strong>Unit Tests</strong>, whose completion triggers
@@ -703,9 +684,9 @@ while <code class="docutils literal notranslate"><span class="pre">github.event.
 ran <em>on</em> – was the bump’s parent, <code class="docutils literal notranslate"><span class="pre">945c3c3d8</span></code>.</p>
 </dd>
 </dl>
-<p>The paths converge on the same job graph from <code class="docutils literal notranslate"><span class="pre">version_check</span></code> onward; only
-the trigger and <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> differ, which is what the guards below
-read. The release test gate runs only once <code class="docutils literal notranslate"><span class="pre">version_check</span></code> has passed, and
+<p>The paths converge on the same job graph from <code class="docutils literal notranslate"><span class="pre">version_check</span></code> onward; only the
+trigger and <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code>, which the guards below read, differ. The release
+test gate runs only once <code class="docutils literal notranslate"><span class="pre">version_check</span></code> has passed, and
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> itself skips the release App’s own tag push and a Vendor
 Update that did not conclude <code class="docutils literal notranslate"><span class="pre">success</span></code> or skipped <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> (below).
 Past it, a <code class="docutils literal notranslate"><span class="pre">v*</span></code> ref always runs the gate; on <code class="docutils literal notranslate"><span class="pre">main</span></code> it
@@ -722,10 +703,9 @@ conclude <code class="docutils literal notranslate"><span class="pre">success</s
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1705">#1705</a>). It releases
 nothing, so it neither waits behind a release nor displaces a run waiting
 there; only a newer run that may release, reading <code class="docutils literal notranslate"><span class="pre">main</span></code>’s newer tip, can.
-A Vendor Update that concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped –
-its Unit Tests verdict was for another commit – releases nothing either since
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>: the
-<code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads that run’s jobs, and
+A Vendor Update that concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped, its
+Unit Tests verdict being for another commit, releases nothing either
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>): the <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads that run’s jobs, and
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> skips. The group cannot see that, so such a run still joins
 the ref’s group; if it displaces a pending run, that release waits for the
 next Vendor Update on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
@@ -1106,9 +1086,9 @@ publishes through PyPI’s OIDC trusted publishing (the job’s
 configuration can be scoped to a GitHub Actions environment name. If this
 project’s publisher on PyPI is scoped that way, removing the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> name
 – not just its reviewer – would break the upload with a claim mismatch;
-this is standard OIDC trusted-publishing behaviour, not something the
-publisher’s actual PyPI-side configuration was read to confirm here. Keep
-the name regardless, since there is no upside to removing it.</p>
+this is standard OIDC trusted-publishing behaviour, not checked against the
+publisher’s PyPI-side configuration. Keep the name regardless: removing it gains
+nothing.</p>
 <p><code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> <strong>writes to</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code><strong>, so a release is not read-only on the
 branch.</strong> After cutting <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> at the run’s commit, the
 <code class="docutils literal notranslate"><span class="pre">tag</span></code> job pushes a commit setting <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code> on top of
@@ -1123,8 +1103,7 @@ and last warn. <a class="extlink-issue reference external" href="https://github.
 left untagged – gets
 the reset: <code class="docutils literal notranslate"><span class="pre">main</span></code>’s 3 becomes 0. A rejected push is retried from a fresh
 fetch, three times at most. Approving <code class="docutils literal notranslate"><span class="pre">github-release</span></code> therefore also
-approves a commit landing on the default branch, not only the artefacts that
-sound like they are the point.</p>
+approves a commit landing on the default branch, not only the artefacts.</p>
 </section>
 <section id="recovery">
 <h2>Recovery<a class="headerlink" href="#recovery" title="Link to this heading">¶</a></h2>
@@ -1133,11 +1112,11 @@ that run (<strong>Re-run failed jobs</strong>), not deleting and re-pushing a ta
 for the reasons above; a run created for a later commit will not finish it
 (<a class="reference internal" href="#one-commit-per-release">One Commit per Release</a>). A run whose <code class="docutils literal notranslate"><span class="pre">github</span></code> was refused created no
 tag, so re-running it once the App is set up (<a class="reference internal" href="#the-release-app">The Release App</a>) starts its
-release rather than re-tagging it. This is the actual fix rather than a
-best-effort suggestion: <a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a> above means <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check whether
-<em>their own</em> artefact is missing, so a re-run finishes whichever jobs did not
-complete last time instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere
-existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> is safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>), and so is
+release rather than re-tagging it. A re-run is a real fix, since under
+<a class="reference internal" href="#per-job-evidence-not-a-shared-proxy">Per-Job Evidence, Not a Shared Proxy</a> <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each check
+whether <em>their own</em> artefact is missing, so it finishes whichever jobs did not
+complete instead of skipping them on the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag’s mere existence. <code class="docutils literal notranslate"><span class="pre">pypi</span></code> is
+safe to re-run (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code>), and so is
 <code class="docutils literal notranslate"><span class="pre">conda</span></code>, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg’s
 upload if it is already there. Neither replaces a file the GitHub Release
@@ -1177,11 +1156,9 @@ itself fails) – the shape
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a> was actually
 about.</p></li>
 </ul>
-<p>That last case should be unreachable given the
-evidence-based guards above, since a target’s own incomplete evidence is
-what makes its job run rather than skip; reaching it anyway is a signal that
-those checks themselves need attention, not that the release needs a
-hand-rolled recovery.</p>
+<p>That last case should be unreachable, since a target’s own incomplete evidence
+is what makes its job run rather than skip; reaching it means those checks need
+attention, not that the release needs a hand-rolled recovery.</p>
 </section>
 </section>
 

@@ -734,17 +734,8 @@
 <span class="s1">        try:</span>
 <span class="s1">            return super().get(key)</span>
 <span class="s1">        except KeyError:</span>
-<span class="s1">            # NOTE: the value is ``default`` if the caller supplied one, or</span>
-<span class="s1">            # else ``key`` exactly as given -- never its upper-cased form --</span>
-<span class="s1">            # so an unregistered member's value is the caller's own casing,</span>
-<span class="s1">            # the same convention :meth:`_unregistered_member` documents and</span>
-<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` follows.</span>
-<span class="s1">            # The name is always the canonical upper-case form, matching</span>
-<span class="s1">            # :meth:`_missing_` and every registered member's own name. Two</span>
-<span class="s1">            # calls naming the same method in different case, e.g.</span>
-<span class="s1">            # ``get('frob')`` and ``get('FROB')``, therefore build results</span>
-<span class="s1">            # that are *not* equal -- each is exactly what its own caller</span>
-<span class="s1">            # passed, since ``get`` does not mint (GitHub issue #860).</span>
+<span class="s1">            # NOTE: the value keeps the caller's casing (``default`` or ``key``); the name is the</span>
+<span class="s1">            # upper-case form :meth:`_missing_` uses. ``get`` does not mint (GitHub issue #860).</span>
 <span class="s1">            return cls._unregistered_member(default if default is not None else key, key.upper())</span>
 
 <span class="s1">    @classmethod</span>

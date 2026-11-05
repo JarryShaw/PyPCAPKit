@@ -573,11 +573,9 @@
 <h1>GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
-the chain that results is not visible from any single file – reading one
-<code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
-to start. This page is the repository-wide graph. The release <em>pipeline</em>
-itself, job by job from a version bump to a published package, is on
+<p>The workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and no
+single <code class="docutils literal notranslate"><span class="pre">on:</span></code> block shows what another workflow’s completion starts. This
+page is the repository-wide graph; the release pipeline, job by job, is on
 <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>.</p>
 </div>
 <section id="at-a-glance">
@@ -744,12 +742,11 @@ itself, job by job from a version bump to a published package, is on
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Only Coverage Comment and CI Reports fire <em>exclusively</em> on <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>:
-neither has anything to do without a completed run to report. Each of the others
-that carry one pairs it with a direct trigger of its own – a Saturday
-<code class="docutils literal notranslate"><span class="pre">schedule</span></code> for Vendor Update, Conda Update and GitHub Pages, a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag
-push for Create Release – for the path where no upstream run exists yet to
-chain from.</p>
+<p>Only Coverage Comment and CI Reports fire <em>exclusively</em> on <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>,
+having nothing to do without a completed run to report. Every other workflow
+with one pairs it with a direct trigger – a Saturday <code class="docutils literal notranslate"><span class="pre">schedule</span></code> for Vendor
+Update, Conda Update and GitHub Pages, a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag push for Create Release –
+for when no upstream run exists to chain from.</p>
 </div>
 </section>
 <section id="the-graph">
@@ -757,11 +754,10 @@ chain from.</p>
 <p>Solid arrows are direct triggers (<code class="docutils literal notranslate"><span class="pre">push</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request</span></code>, <code class="docutils literal notranslate"><span class="pre">schedule</span></code>,
 <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">issues</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code>), drawn in the first
 graph with a node for each schedule day. The second graph is the edges from one
-workflow to another. Thick arrows are <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> edges – a
-<em>separate</em> run, started only after the upstream workflow’s run has fully
-completed. Dotted arrows are <code class="docutils literal notranslate"><span class="pre">uses:</span></code> edges – a reusable-workflow call that
-runs synchronously <em>inside</em> the caller’s own run, sharing its run id rather
-than starting a new one.</p>
+workflow to another. Thick arrows are <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> edges, a <em>separate</em> run
+started only once the upstream run has completed. Dotted arrows are <code class="docutils literal notranslate"><span class="pre">uses:</span></code>
+edges, a reusable-workflow call that runs <em>inside</em> the caller’s run, sharing its
+run id.</p>
 <pre  class="mermaid">
         flowchart LR
     PUSH[&quot;push: main&quot;]
@@ -880,8 +876,7 @@ flowchart TD
     CC ~~~ VU ~~~ CU ~~~ GP
     CH ~~~ EX &amp; PC
     </pre><p>The double relationship between <strong>Unit Tests</strong> and the dependants that also
-call it is the part that reading a single file cannot show, and it is
-deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
+call it is deliberate, not redundant. Vendor Update, Conda Update and GitHub Pages
 each call <strong>Cron Head</strong> as their <code class="docutils literal notranslate"><span class="pre">head</span></code> job (dotted, above), and its test gate
 calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> <strong>only when the caller’s
 trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> or <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code> – the gate’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> skips
@@ -942,23 +937,20 @@ checkout, so it applies the same rule a second time: its push rebases onto
 <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip only when the commits that brings in pass it, and otherwise
 pushes nothing, and Conda Tag tags the commit that push landed rather than the
 tip (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1632">#1632</a>).</p>
-<p>Vendor Update’s own commit raises it again: the push gets a Unit Tests run, whose
-completion starts another crawl. The commit bumps the version only when the crawl
-changed code. If every change is to comments or docstrings, the commit is “Updated
-vendor documentation without a version bump”, and the Create Release run that
-follows sees the same version, so it has nothing new to publish
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A crawl raised by
-such a commit’s own Unit Tests run does not commit comment changes on top of it,
-so documentation commits cannot chain. The rule is in
+<p>Vendor Update’s own commit raises it again, through the Unit Tests run of its push.
+The commit bumps the version only when the crawl changed code; a comment- or
+docstring-only commit is “Updated vendor documentation without a version bump”, so
+the Create Release run that follows has nothing new to publish (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A
+crawl raised by such a commit does not commit comment changes on top of it, so
+documentation commits cannot chain. The rule is in
 <code class="docutils literal notranslate"><span class="pre">util/vendor_code_changed.py</span></code>. A bump commit carries every module the crawl
 wrote, a new one included, so the crawl it raises does not find one untracked
 and bump again (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>).</p>
 </section>
 <section id="reusable-workflow-calls-uses">
 <h2>Reusable-Workflow Calls (<code class="docutils literal notranslate"><span class="pre">uses:</span></code>)<a class="headerlink" href="#reusable-workflow-calls-uses" title="Link to this heading">¶</a></h2>
-<p>A <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call is a different relationship from triggering: it runs inside
-the caller’s own workflow run, as one of the caller’s own jobs, rather than
-starting an independent run after the caller finishes. The calls target
+<p>A <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call runs as one of the caller’s own jobs, inside its run, rather than
+starting a separate run once the caller finishes. The calls target
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, always with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">cron-head.yml</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code>, job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> – calls
@@ -992,11 +984,10 @@ GitHub Pages anyway, as a Unit Tests run whose completion raises both on the
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path. Create Release reads only the Vendor Update run that
 triggered it, through its <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job, so the time of the others
 does not matter to it.</p></li>
-<li><p>Aligned, they cost more. With Vendor Update and Conda Update both at 10:00,
-each scheduled pair read back from 2026-09-26 on checked out the same commit
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>) – on 2026-10-17, Conda Update 39023770904 and Vendor Update
-39023891165 both gated 44ed96fc3, their <code class="docutils literal notranslate"><span class="pre">Gate</span> <span class="pre">(full</span> <span class="pre">suite,</span> <span class="pre">…)</span></code> jobs taking
-twelve and ten minutes. Their writing jobs share the <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code>
+<li><p>Aligned, they cost more. With Vendor Update and Conda Update both at 10:00, each
+scheduled pair gated the same commit (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>): Conda Update 39023770904 and
+Vendor Update 39023891165 both gated 44ed96fc3, for twelve and ten minutes. Their
+writing jobs share the <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code>
 group, so <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> waited for <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> to finish, and a third
 job joining that group cancels the one pending there.</p></li>
 </ul>
@@ -1024,15 +1015,28 @@ bumped regardless: <code class="docutils literal notranslate"><span class="pre">
 so <code class="docutils literal notranslate"><span class="pre">Bump</span> <span class="pre">Version</span></code>, <code class="docutils literal notranslate"><span class="pre">Commit</span> <span class="pre">Changes</span></code> and <code class="docutils literal notranslate"><span class="pre">Push</span> <span class="pre">Changes</span></code> run, <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>
 tags the pushed commit, every <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg uploads it, the GitHub
 Release steps run, and <code class="docutils literal notranslate"><span class="pre">discussion</span></code> posts the report as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code>. The
-<code class="docutils literal notranslate"><span class="pre">mode</span></code> job is the one place the input is read: its <code class="docutils literal notranslate"><span class="pre">publishes</span></code> output is
-<code class="docutils literal notranslate"><span class="pre">'true'</span></code> on the schedule, on a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and on such a run, and
-<code class="docutils literal notranslate"><span class="pre">'false'</span></code> on any other manual run, and every step or job that publishes or
-names an environment requires it to be <code class="docutils literal notranslate"><span class="pre">'true'</span></code>. On any ref but <code class="docutils literal notranslate"><span class="pre">main</span></code>,
-<code class="docutils literal notranslate"><span class="pre">publish</span></code> fails <code class="docutils literal notranslate"><span class="pre">mode</span></code> with an <code class="docutils literal notranslate"><span class="pre">::error</span></code>, so the run fails and
-<code class="docutils literal notranslate"><span class="pre">conda-update</span></code> never starts. The workflow-level concurrency group stays keyed
-on the run, so a manual run never displaces a pending scheduled one.
-No later run repeats a forced bump, so where <code class="docutils literal notranslate"><span class="pre">Push</span> <span class="pre">Changes</span></code> does not push it
-because <code class="docutils literal notranslate"><span class="pre">main</span></code> moved past the checkout or during the push, the run stays
+<code class="docutils literal notranslate"><span class="pre">mode</span></code> job is the one place the input is read, and every step or job that
+publishes or names an environment requires its <code class="docutils literal notranslate"><span class="pre">publishes</span></code> output to be
+<code class="docutils literal notranslate"><span class="pre">'true'</span></code>:</p>
+<pre  class="mermaid">
+        flowchart TD
+    EV{&quot;mode: a manual run?&quot;}
+    PUB{&quot;publish set?&quot;}
+    REF{&quot;dispatched on main?&quot;}
+    T[&quot;publishes: 'true'&quot;]
+    F[&quot;publishes: 'false'&lt;br/&gt;build-only&quot;]
+    ERR[&quot;::error, the run fails&lt;br/&gt;and conda-update never starts&quot;]
+
+    EV --&gt;|&quot;no: schedule or workflow_run&quot;| T
+    EV --&gt;|yes| PUB
+    PUB --&gt;|no| F
+    PUB --&gt;|yes| REF
+    REF --&gt;|yes| T
+    REF --&gt;|no| ERR
+    </pre><p>The workflow-level concurrency group stays keyed on the run, so a manual run
+never displaces a pending scheduled one. No later run repeats a forced bump,
+so where <code class="docutils literal notranslate"><span class="pre">Push</span> <span class="pre">Changes</span></code> does not push it because <code class="docutils literal notranslate"><span class="pre">main</span></code> moved past the
+checkout or during the push, the run stays
 green having published nothing, and says so in a warning and in its report
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>); the remedy is to dispatch Conda Update again with <code class="docutils literal notranslate"><span class="pre">publish</span></code>
 on <code class="docutils literal notranslate"><span class="pre">main</span></code>. Where another run already pushed the same build, that run tags and
@@ -1045,30 +1049,24 @@ source entry) and <code class="docutils literal notranslate"><span class="pre">p
 <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a job per engine, each looping over its Python versions),
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, each of which
-has already run once for this commit from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and,
-all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its
-<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so running any of them again per caller would test
-the same commit several times over. It also skips <code class="docutils literal notranslate"><span class="pre">changes</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>,
-which combines what <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> measured,
+has already run for this commit from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but
+<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its
+<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so a caller would only retest the commit. It also skips
+<code class="docutils literal notranslate"><span class="pre">changes</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, which combines what <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">test-latest-tier</span></code> measured,
 <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, whose project pins <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs too (see
 <a class="reference internal" href="#project-pins">Project Pins</a> below), and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
 Checks</a> below), which are gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
-already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
-<code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per the comment
-above the job: <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
-<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
-where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
-schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
-<span class="pre">(full</span> <span class="pre">suite,</span> <span class="pre">Python</span> <span class="pre">3.14)</span></code> succeeded, with the matrix jobs that
-existed then – <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, <code class="docutils literal notranslate"><span class="pre">Integration</span>
-<span class="pre">Python</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">Engines</span> <span class="pre">Python</span> <span class="pre">…</span></code> and <code class="docutils literal notranslate"><span class="pre">PyPCAP/PyPCAPFile</span> <span class="pre">parity</span> <span class="pre">Python</span>
-<span class="pre">…</span></code> – all reporting <code class="docutils literal notranslate"><span class="pre">skipped</span></code>.</p>
+already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no <code class="docutils literal notranslate"><span class="pre">if:</span></code> and runs on every path, deliberately,
+per the comment above the job: <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the
+GitHub Release body, so the release path is where a drifted file must not go
+unchecked. On run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a>, a scheduled
+GitHub Pages run, <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span> <span class="pre">(full</span> <span class="pre">suite,</span> <span class="pre">Python</span> <span class="pre">3.14)</span></code>
+succeeded and every matrix job reported <code class="docutils literal notranslate"><span class="pre">skipped</span></code>.</p>
 </section>
 <section id="the-skip-cascade-888">
 <h2>The Skip Cascade (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
-<p>The relationships above compose into a failure mode worth seeing on its
-own graph. Create Release’s <code class="docutils literal notranslate"><span class="pre">version_check</span></code> – ahead of the <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call
-above – carries:</p>
+<p>The relationships above compose into a failure mode of their own. Create Release’s
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code>, ahead of the <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call above, carries:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
 <span class="w">  </span><span class="no">${{ !cancelled() &amp;&amp;</span>
 <span class="w">  </span><span class="no">(github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' &amp;&amp;</span>
@@ -1120,32 +1118,23 @@ every job past it is gated the same way: <code class="docutils literal notransla
     classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
     class UTX,VC,GH,TAGJ,PY,CD skipped
     </pre><p>This is a transitive reduction, as in <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and
-<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>,
-but <code class="docutils literal notranslate"><span class="pre">github</span></code>
-already implies those edges, since it depends on both itself. Drawing them
-would add lines without changing which job can start before which, or which
-job a skip in <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reaches.</p>
-<p>The whole run then reports <strong>skipped</strong>, not failed – there is no red X to
-notice. Observed in production on runs <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36511610205">36511610205</a> and
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776">36510774776</a>, both
-<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-triggered <strong>Create Release</strong> runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> that concluded
-<code class="docutils literal notranslate"><span class="pre">skipped</span></code> with every one of their jobs – <code class="docutils literal notranslate"><span class="pre">Release</span> <span class="pre">test</span> <span class="pre">gate</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">Version</span></code>, <code class="docutils literal notranslate"><span class="pre">GitHub</span> <span class="pre">Release</span></code>, <code class="docutils literal notranslate"><span class="pre">Conda</span> <span class="pre">Tag</span> <span class="pre">(release)</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPI</span>
-<span class="pre">distribution</span> <span class="pre">for</span> <span class="pre">Python</span> <span class="pre">…</span></code> and <code class="docutils literal notranslate"><span class="pre">Conda</span> <span class="pre">deployment</span> <span class="pre">(release)</span> <span class="pre">…</span></code> – reporting
-<code class="docutils literal notranslate"><span class="pre">skipped</span></code> in turn.</p>
-<p>This is a distinct mechanism from the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS</span></code> skip
-<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> already documents under “Precautions” (a <em>later</em> run
-skipping because the tag a <em>previous</em> run already created still exists): this
-one can skip the very first attempt, before any tag is ever created, purely
-because the upstream Vendor Update run did not itself conclude <code class="docutils literal notranslate"><span class="pre">success</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, but
+<code class="docutils literal notranslate"><span class="pre">github</span></code> depends on both and so already implies those edges.</p>
+<p>The whole run then reports <strong>skipped</strong>, not failed, so there is no red X to notice:
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> Create Release runs <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36511610205">36511610205</a> and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776">36510774776</a> on <code class="docutils literal notranslate"><span class="pre">main</span></code>
+concluded <code class="docutils literal notranslate"><span class="pre">skipped</span></code> with every job skipped.</p>
+<p>This differs from the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS</span></code> skip under “Precautions” on
+<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>, where a later run skips on the tag an earlier one created: this one
+can skip the first attempt, before any tag exists, because the upstream Vendor Update
+run did not conclude <code class="docutils literal notranslate"><span class="pre">success</span></code>.</p>
 <p>Such a run is also kept out of the release’s concurrency group
 (its <code class="docutils literal notranslate"><span class="pre">concurrency</span></code> block,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1705">#1705</a>). It is keyed on
 its own <code class="docutils literal notranslate"><span class="pre">github.run_id</span></code> rather than on the ref, so it cannot cancel a run
-waiting there with release work. Keyed on the ref, run 38499295798 joined at
-02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
-succeeded, was cancelled a second later. A run whose Vendor Update concluded
-<code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>) is still keyed on the ref:
+waiting there with release work: keyed on the ref, run 38499295798 cancelled the
+pending 38499150441, whose Vendor Update had succeeded. A run whose Vendor Update
+concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>) is still keyed on the ref:
 the group reads only the event, which does not say which jobs ran. It can still
 displace a run pending there, and releases nothing in its place, so that
 release waits for the next Vendor Update on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
@@ -1247,11 +1236,11 @@ workflow can only narrow the token its caller passes, and every caller grants
 <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>, so a <code class="docutils literal notranslate"><span class="pre">pull-requests:</span> <span class="pre">write</span></code> job there would break them.
 Coverage Comment runs no tests. On <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> it uses the default
 branch’s file and its own token, so fork pull requests get a comment too. It
-treats the artifact as untrusted: it never checks out pull-request code. It
-takes the PR number from the API, as the open PR whose head is the run’s head
-sha, and renders its own Markdown from validated numbers. It edits one comment,
-found by a hidden marker, on each push. The first line says when the tests
-failed. <code class="docutils literal notranslate"><span class="pre">coverage</span></code> gates through <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>, as the coverage legs
+treats the artifact as untrusted and never checks out pull-request code: it takes
+the PR number from the API, as the open PR whose head is the run’s head sha, and
+renders its own Markdown from validated numbers. It edits one comment, found by a
+hidden marker, on each push, whose first line says when the tests failed.
+<code class="docutils literal notranslate"><span class="pre">coverage</span></code> gates through <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>, as the coverage legs
 do; Coverage Comment is not a required check. A push run has no pull request, so its
 report goes to Discussions instead (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p>
 </section>
@@ -1262,10 +1251,10 @@ or on dispatch with a <code class="docutils literal notranslate"><span class="pr
 measurement. Through the API it lists every completed run in the window of Unit Tests,
 Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, so
 its long legs stay measured), a day per query because a filtered listing stops
-at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
+at 1,000 runs (Pages has completed 1,154 in a week). It then reads the
 jobs of an evenly spaced sample – 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow – and the summary says how many runs each sample
-holds and which span they cover. For the week to 2026-10-19 that was 677 calls
+holds and which span they cover. One week’s review made 677 calls
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1930">#1930</a>: 49 listing pages,
 one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
 the JUnit artifacts; 12 workflow-file reads) of <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s 1,000 an hour, on
@@ -1377,9 +1366,9 @@ baseline)</p></td>
 <p>The cap line sits at 50% because at the fastest growth measured, +1.27 min/day on
 <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.14</span></code>, crossing it leaves 12-18 days before the cap: one review and one
 fixing pull request. Time to <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is HARD only as a regression
-because its p90 measures runner-queue load as much as test time: it was 19.6 min when
-the line was set and 36.7 min in the two days to 2026-10-10 with the pool saturated,
-so an absolute HARD line would email about the queue every week. The 25% rise is a
+because its p90 measures runner-queue load as much as test time, 19.6 min when the
+line was set against 36.7 min over two days with the pool saturated, so an absolute
+HARD line would email about the queue every week. The 25% rise is a
 starting value, to be tuned against the weekly reports. <code class="docutils literal notranslate"><span class="pre">W9</span></code> is therefore expected to
 fire while the pool stays saturated, and the JUnit timings are what show whether
 <code class="docutils literal notranslate"><span class="pre">W7</span></code>’s 10-second test line needs raising. What to do when one fires is on
@@ -1440,8 +1429,27 @@ runs under, such as <code class="file docutils literal notranslate"><span class=
 </ul>
 <p>Anything else, and a diff the script cannot list, is code: <code class="docutils literal notranslate"><span class="pre">code:</span> <span class="pre">true</span></code> and
 <code class="docutils literal notranslate"><span class="pre">test-only:</span> <span class="pre">false</span></code>. A rename lists both of its paths, so moving a code file under
-<code class="docutils literal notranslate"><span class="pre">docs/</span></code> or <code class="docutils literal notranslate"><span class="pre">tests/</span></code> is code too.</p>
-<div class="table-wrapper docutils container">
+<code class="docutils literal notranslate"><span class="pre">docs/</span></code> or <code class="docutils literal notranslate"><span class="pre">tests/</span></code> is code too. Any run but the workflow’s own <code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
+one runs everything:</p>
+<pre  class="mermaid">
+        flowchart TD
+    OWN{&quot;the workflow's own&lt;br/&gt;pull_request run?&quot;}
+    LIST{&quot;the diff of&lt;br/&gt;HEAD^1..HEAD listed?&quot;}
+    ANY{&quot;any file code?&quot;}
+    TEST{&quot;any file under tests/?&quot;}
+    CODE[&quot;code: true&lt;br/&gt;test-only: false&quot;]
+    DOCS[&quot;docs-only&lt;br/&gt;code: false&lt;br/&gt;test-only: false&quot;]
+    TONLY[&quot;test-only&lt;br/&gt;code: true&lt;br/&gt;test-only: true&quot;]
+
+    OWN --&gt;|no| CODE
+    OWN --&gt;|yes| LIST
+    LIST --&gt;|fails or empty| CODE
+    LIST --&gt;|yes| ANY
+    ANY --&gt;|yes| CODE
+    ANY --&gt;|no| TEST
+    TEST --&gt;|yes| TONLY
+    TEST --&gt;|no| DOCS
+    </pre><div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Workflow and job</p></th>
@@ -1601,8 +1609,8 @@ Requests (#2243)</a>); <code class="docutils literal notranslate"><span class="p
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-its <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code>, so it is never
-produced – and never expected – on those paths.</p>
+its <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code>, so it is neither
+produced nor expected on those paths.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">needs:</span></code> graph of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, as a transitive reduction (<code class="docutils literal notranslate"><span class="pre">changes</span></code> is
 also a direct need of <code class="docutils literal notranslate"><span class="pre">coverage</span></code> and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code>); a dashed job reaches no
 required context:</p>
@@ -1638,7 +1646,7 @@ The <strong>supported</strong> tier, 3.11-3.15, blocks: a failed leg fails <code
 required <code class="docutils literal notranslate"><span class="pre">Compat</span></code> context. The <strong>KTLO</strong> (<em>keep the lights on</em>) tier – end-of-life 3.8-3.10, still built and
 tested – never blocks, is never a required context, and never shows a commit or a
 pull request red (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>). In <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> the KTLO legs are jobs of their own
-since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a>: <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>,
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a>): <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>,
 <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code>, which neither <code class="docutils literal notranslate"><span class="pre">required-checks</span></code>
 nor <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> <code class="docutils literal notranslate"><span class="pre">needs:</span></code>, so not even a failure no step can contain, such
 as a lost runner or the job cap, reaches a gate. Each runs its gating twin’s steps,
@@ -1662,8 +1670,8 @@ job-summary line, through
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ KTLO cells, a step of their own with <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>,
 report the same way.</p></li>
 <li><p>Never job-level <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> alone: it passes the <em>run</em>, but the leg’s
-check run still concludes <code class="docutils literal notranslate"><span class="pre">failure</span></code>, which showed every commit red while
-the <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.7</span> <span class="pre">(KTLO)</span></code> leg carried it. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s KTLO jobs
+check run still concludes <code class="docutils literal notranslate"><span class="pre">failure</span></code>, which shows the commit red.
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s KTLO jobs
 carry it on top of the step-level guards, as a backstop for the failures no step
 contains, as <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s job does; it “prevents a workflow run from
 failing when a job fails” (<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error">Workflow syntax</a>),
@@ -2107,9 +2115,9 @@ interpreter that cannot import <code class="docutils literal notranslate"><span 
 </section>
 <section id="file-size-caps-1969">
 <h2>File Size Caps (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1969">#1969</a>)<a class="headerlink" href="#file-size-caps-1969" title="Link to this heading">¶</a></h2>
-<p>A test that writes without bound fills the runner’s disk rather than failing: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1372">#1372</a>’s
-<code class="docutils literal notranslate"><span class="pre">out.json</span></code> grew to
-several gigabytes on every run. So every pytest and unittest command in
+<p>A test that writes without bound fills the runner’s disk rather than failing, as
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1372">#1372</a>’s <code class="docutils literal notranslate"><span class="pre">out.json</span></code> did at several gigabytes a run. So every pytest and
+unittest command in
 <code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code> runs as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/cap_file_size.py</span>
 <span class="pre">python</span> <span class="pre">-m</span> <span class="pre">...</span></code>: <code class="docutils literal notranslate"><span class="pre">test</span></code>’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code>; <code class="docutils literal notranslate"><span class="pre">integration</span></code>’s,
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>’s and <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">full</span> <span class="pre">test</span> <span class="pre">suite</span></code>; the KTLO twins of
@@ -2132,9 +2140,9 @@ without the script, and runs the script against a small limit.</p>
 </section>
 <section id="workflow-scripts-1967">
 <h2>Workflow Scripts (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-scripts-1967" title="Link to this heading">¶</a></h2>
-<p>Shell that several steps repeat, or that has real logic – branches, or a bug
-history a test should pin – lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script, which the steps run,
-rather than in a composite action: a composite action’s inner steps cannot take
+<p>Shell that several steps repeat, or that has real logic – branches, or a bug a
+test should pin – lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script the steps run, rather than in a
+composite action: a composite action’s inner steps cannot take
 <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code>, so each calling step keeps its own, with its <code class="docutils literal notranslate"><span class="pre">shell:</span></code>,
 <code class="docutils literal notranslate"><span class="pre">if:</span></code>, <code class="docutils literal notranslate"><span class="pre">env:</span></code> and <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. A few plain commands stay inline even
 where repeated, as the apt seed steps do, since they read more easily than a call
@@ -2584,8 +2592,8 @@ against <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_
 it. Dependabot does not read this pin, so a bump changes both. The workflows use YAML anchors, which actionlint reads from
 1.7.10 on, and the pin is 1.7.12 or newer.</p>
 <p>actionlint runs the image’s shellcheck over each <code class="docutils literal notranslate"><span class="pre">run:</span></code> block. Unlike Lint’s
-other steps, this one blocks: a finding fails the job, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>
-once every finding it reported had been fixed. It runs last and
+other steps, this one blocks, by the owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>: a finding fails
+the job. It runs last and
 on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so a finding skips none of the advisory steps and a failed
 Python setup does not skip it. <code class="docutils literal notranslate"><span class="pre">Lint</span></code> is a required check of ruleset 23497679
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>), so a red Lint
@@ -2602,7 +2610,7 @@ pins an older release or no checksum, unpacks before it verifies, passes an
 <code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern other than that, or stops blocking: when it carries
 <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>, exits with a status other than actionlint’s, or sits above
 an advisory step or a failed setup would skip it. It fails too when no workflow
-sets <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code> any more.</p>
+sets <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code>.</p>
 </section>
 <section id="dependency-updates-1968">
 <h2>Dependency Updates (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
@@ -2611,7 +2619,7 @@ sets <code class="docutils literal notranslate"><span class="pre">concurrency.qu
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/docs</span></code> and <code class="docutils literal notranslate"><span class="pre">/examples/benchmark</span></code>. The docs build pins
 Sphinx and sphinx-autodoc-typehints exactly in <code class="file docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code>, and
-Dependabot proposes bumps to both pins; the owner accepted that, so each bump is
+Dependabot proposes bumps to both, which the owner accepted, so each bump is
 reviewed against the docs build rather than held back. The benchmark’s
 <code class="file docutils literal notranslate"><span class="pre">requirements-*.txt</span></code> files are watched because nothing else moves them.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">github-actions</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, per <a class="reference internal" href="#action-pins">Action Pins</a> above.</p></li>

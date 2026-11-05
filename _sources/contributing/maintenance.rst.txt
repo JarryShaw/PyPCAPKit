@@ -85,8 +85,8 @@ The Recurring Loops
 -------------------
 
 Each loop is a scheduled prompt that only points at a policy file, so the file is what
-gets edited. The scheduler silently expires a recurring job after seven days, which
-once left the owner's answers unread, so the sweep checks every loop is scheduled and
+gets edited. The scheduler silently expires a recurring job after seven days, leaving
+the owner's answers unread, so the sweep checks every loop is scheduled and
 re-creates a missing one from its file.
 
 .. list-table::
@@ -152,22 +152,22 @@ re-creates a missing one from its file.
        end
 
 **Every tick runs its reads before it reports.** A report of *nothing changed* is
-honest only once that tick's enumeration has returned; ticks answered from memory once
-hid a run of merges and a conflicting pull request until the owner asked. A tick never
-says it *will* dispatch: it dispatches, or says it did not.
+honest only once that tick's enumeration has returned, since a tick answered from
+memory can hide merges and conflicts. A tick never says it *will* dispatch: it
+dispatches, or says it did not.
 
 Decision Watch
 ~~~~~~~~~~~~~~
 
-#. **Read past the watermark**, which is a comment id rather than a timestamp: comment
-   timestamps went non-monotonic across a daylight-saving change, and a time cutoff
-   hid new comments. The watermark only ever advances to the highest id a *read*
-   returned, never to the id of a post just made, since a ruling can land between the
+#. **Read past the watermark**, which is a comment id rather than a timestamp, since
+   comment timestamps can go non-monotonic across a daylight-saving change and a
+   time cutoff then hides new comments. The watermark only ever advances to the
+   highest id a *read* returned, never to the id of a post just made, since a ruling can land between the
    read and the post.
 #. **Read every open** ``needs: decision`` **item and every open pull request by
    number**, taking its last human comment, whatever the watermark says. A repo-wide
-   newest-first read is buried by the coordinator's own bursts of posts; this read is
-   what caught a ruling the watermark missed.
+   newest-first read is buried by the coordinator's own bursts of posts, and this read
+   catches a ruling the watermark misses.
 #. **Read the other channels.** Inline review comments and review bodies have their
    own endpoints, and a comment in an unsubmitted review is visible only through
    GraphQL. Read each inline comment's body, not its count, including on a pull
@@ -182,8 +182,8 @@ Board Sweep
 #. **Read every channel first**, as the decision watch does.
 #. **Enumerate, never remember.** List the open issues and pull requests every tick,
    with ``state`` and ``mergedAt`` -- the mergeability fields never say *merged* -- even
-   while one pull request is absorbing the attention; a remembered list once reported
-   merged pull requests as open for hours.
+   while one pull request is absorbing the attention, since a remembered list can
+   report merged pull requests as open.
 #. **Labels.** Every open issue carries one state label (:ref:`process`); an issue
    with none is a gap to close. Re-check each ``blocked`` issue's condition, and on the
    tick it clears swap the label and dispatch. Strip state and ``review:`` labels from
@@ -377,15 +377,15 @@ on it carries on.
        C->>A: dispatch the work
 
 *  **The question stands alone**: what needs deciding, the options, and the
-   recommendation, on the same item that carries the label -- a question posted on a
-   pull request while its issue holds the label once left the owner asking what was
+   recommendation, on the same item that carries the label; a question posted on a
+   pull request while its issue holds the label can leave the owner asking what is
    wanted.
 *  **A one-line ruling is not tentative.** It is unambiguous only when one proposal is
    in play, though; with two, name both, recommend one and ask which.
 *  **Re-read the channels in the same call as any post**, and abort the post on
-   anything new. The gap between reading and posting is where the coordinator posted
-   over the owner's fresh comment, more than once; the post gate closes it in code
-   rather than by care.
+   anything new. The gap between reading and posting is where the coordinator can
+   post over the owner's fresh comment, so the post gate closes it in code rather
+   than by care.
 *  **Record a ruling paraphrased, never quoted** -- the rule on
    :ref:`documentation` -- and reconcile it on the item: what it answers, what it
    leaves open, what it changes. A partial answer gets the open part restated with
@@ -406,8 +406,8 @@ After every merge the sweep runs, in order:
 #. **Superseded runs on** ``main``: cancel the queued and running push runs of Unit
    Tests, Python Compatibility, CodeQL and Experimental Tests on every ``main`` sha
    older than the head, whose results the head makes moot. The head is read afresh
-   inside the cancelling script -- a stale local ``origin/main`` once cancelled the
-   real head's runs -- and when the head is docs-only, the newest code-changing
+   inside the cancelling script, since a stale local ``origin/main`` would cancel the
+   real head's runs, and when the head is docs-only, the newest code-changing
    commit keeps its runs. **Never cancelled**: Create Release, Project Status,
    Milestone, CI Reports, any scheduled run, and the head's own runs.
 #. **The latest-tier sweeps, locally**: the project modules that only CI's

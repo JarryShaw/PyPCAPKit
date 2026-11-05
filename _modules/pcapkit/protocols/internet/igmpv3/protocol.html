@@ -810,9 +810,8 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">!r}</span><span class="s1"> is not an </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> '</span>
                                     <span class="sa">f</span><span class="s1">'message (</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: The classify check above only accepts a Query of 12 or more</span>
-            <span class="c1"># octets, which is exactly when ``query_extension_present`` parses</span>
-            <span class="c1"># ``ext`` -- so it is never ``None`` here.</span>
+            <span class="c1"># NOTE: The classify check above accepts only a Query of 12 or more octets, exactly when</span>
+            <span class="c1"># ``query_extension_present`` parses ``ext``, so it is never ``None`` here.</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QueryExtension'</span><span class="p">,</span> <span class="n">body</span><span class="o">.</span><span class="n">ext</span><span class="p">)</span>
             <span class="n">resv</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'resv'</span><span class="p">]</span>
             <span class="n">s_flag</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'s_flag'</span><span class="p">])</span>

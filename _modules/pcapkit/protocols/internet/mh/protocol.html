@@ -2350,9 +2350,8 @@
             <span class="k">return</span> <span class="n">data</span>
 
         <span class="n">options</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="c1"># NOTE: The ``isinstance`` test comes first so that the type checker can</span>
-        <span class="c1"># narrow ``data`` for the assignment below; at runtime ``getattr`` has</span>
-        <span class="c1"># already covered the :obj:`bytes` case by returning :obj:`None`.</span>
+        <span class="c1"># NOTE: The ``isinstance`` test narrows ``data`` for the type checker; at runtime ``getattr``</span>
+        <span class="c1"># has already covered :obj:`bytes` by returning :obj:`None`.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: message data of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets carries no '</span>
                  <span class="sa">f</span><span class="s1">'mobility options to hold padding, so </span><span class="si">{</span><span class="n">pad_len</span><span class="si">}</span><span class="s1"> octet(s) were '</span>
@@ -2374,9 +2373,8 @@
             <span class="n">data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span> <span class="o">*</span> <span class="n">pad_len</span>
             <span class="k">return</span> <span class="n">data</span>
 
-        <span class="c1"># NOTE: Rebinding the attribute rather than mutating the list in place is</span>
-        <span class="c1"># what marks the schema as updated, so that ``len()`` and ``pack()`` take</span>
-        <span class="c1"># the padding into account.</span>
+        <span class="c1"># NOTE: Rebinding the attribute, not mutating the list, marks the schema updated, so ``len()``</span>
+        <span class="c1"># and ``pack()`` count the padding.</span>
         <span class="n">data</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad_opts</span>
         <span class="k">return</span> <span class="n">data</span>
 
@@ -3950,10 +3948,8 @@
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The prefix and its length stay apart, as captured: an IPv6Network</span>
-        <span class="c1"># holds neither bits set past the length nor a length past 128. RFC 3963</span>
-        <span class="c1"># section 6.2 reads both fields as given, and answers a prefix the home</span>
-        <span class="c1"># agent cannot use with a status rather than discarding the option (#2702).</span>
+        <span class="c1"># NOTE: Prefix and length stay apart, as captured: an IPv6Network holds neither bits past the</span>
+        <span class="c1"># length nor a length past 128; RFC 3963 section 6.2 answers a bad prefix with a status (#2702).</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MobileNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
@@ -4614,9 +4610,8 @@
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213</span>
-        <span class="c1"># section 5.3.2 answers a prefix the local mobility anchor cannot</span>
-        <span class="c1"># authorise with a status rather than discarding the option (#2702).</span>
+        <span class="c1"># NOTE: A prefix length past 128 is kept, as for option 6: RFC 5213 section 5.3.2 answers an</span>
+        <span class="c1"># unauthorisable prefix with a status rather than discarding the option (#2702).</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
@@ -8587,9 +8582,8 @@
             <span class="n">prefix_addr</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># NOTE: An interface, unlike a network, keeps the bits past its</span>
-                <span class="c1"># length, and takes an address, a network or text alike. A bool</span>
-                <span class="c1"># is refused first, as it would pass for the address ``::1``.</span>
+                <span class="c1"># NOTE: An interface keeps bits past its length, unlike a network, and takes an address,</span>
+                <span class="c1"># network or text alike; a bool is refused first, as it would pass for ``::1``.</span>
                 <span class="n">prefix_val</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="k">else</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Interface</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">prefix_val</span> <span class="o">=</span> <span class="kc">None</span>
@@ -10192,10 +10186,8 @@
         <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
             <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: RFC 5949 ties each code to one address family, so a code the</span>
-        <span class="c1"># caller did not choose is the family's own, and one they did choose has</span>
-        <span class="c1"># to agree with it (#2280). A data model passed as ``option`` skips the</span>
-        <span class="c1"># check, so that a captured mismatch still rebuilds byte for byte.</span>
+        <span class="c1"># NOTE: RFC 5949 ties each code to one address family, so an unset code is the family's and a</span>
+        <span class="c1"># set one must agree (#2280). A data model as ``option`` skips this, so a captured mismatch rebuilds.</span>
         <span class="n">family_code</span> <span class="o">=</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">IPv4_LMAA</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">IPv6_LMAA</span>
         <span class="k">if</span> <span class="n">code_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">family_code</span><span class="p">)</span>
@@ -11697,9 +11689,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
-                <span class="c1"># NOTE: Fields are read at their own widths, so a length they do not</span>
-                <span class="c1"># fill exactly reads octets not the option's, and rebuilds as another</span>
-                <span class="c1"># (#2684).</span>
+                <span class="c1"># NOTE: Fields are read at their own widths, so a length they do not fill exactly reads</span>
+                <span class="c1"># octets not the option's, and rebuilds as another (#2684).</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid option length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -12467,10 +12458,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">address</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'address'</span><span class="p">,</span> <span class="s1">'::'</span><span class="p">)</span>
                 <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">))</span>
-            <span class="c1"># NOTE: Through ``parse_ip_address`` because the sub-option length</span>
-            <span class="c1"># below is derived from the family here, ahead of the schema, so a</span>
-            <span class="c1"># bare ``ipaddress.ip_address`` would launder a ``bool`` past the</span>
-            <span class="c1"># schema's guard, packing ``address=True`` as ``0506000000000001``.</span>
+            <span class="c1"># NOTE: The sub-option length below is derived ahead of the schema, so a bare ``ip_address``</span>
+            <span class="c1"># would launder a ``bool`` past its guard: ``address=True`` packs as ``0506000000000001``.</span>
             <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid target care-of address'</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Schema_TargetCareofAddressSuboption</span><span class="p">(</span>

@@ -1002,17 +1002,8 @@
 <span class="s1">            return super().get(key)  # type: ignore[unreachable]</span>
 <span class="s1">        name = key.upper()</span>
 <span class="s1">        if name not in cls._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            # NOTE: the value is ``default`` if the caller supplied one, or</span>
-<span class="s1">            # else ``key`` exactly as given -- never ``name`` -- so an</span>
-<span class="s1">            # unregistered member's value is the caller's own casing, the</span>
-<span class="s1">            # same convention :meth:`_unregistered_member` documents and</span>
-<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` follows</span>
-<span class="s1">            # unchanged. Two calls naming the same command in different</span>
-<span class="s1">            # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build</span>
-<span class="s1">            # results that are *not* equal -- each is exactly what its own</span>
-<span class="s1">            # caller passed. Minting instead would return, through the</span>
-<span class="s1">            # ``_member_map_`` cache, the *first* casing seen for every later</span>
-<span class="s1">            # call regardless of case (GitHub issue #860).</span>
+<span class="s1">            # NOTE: the value keeps the caller's casing (``default`` or ``key``), not ``name``;</span>
+<span class="s1">            # minting would cache the first casing seen for every later call (GitHub issue #860).</span>
 <span class="s1">            return cls._unregistered_member(default if default is not None else key, name)</span>
 <span class="s1">        return cls._member_map_[name]  # pylint: disable=no-member</span>
 
@@ -1100,10 +1091,8 @@
             <span class="c1">#    temp.append(f'[{rfc[:3]} {rfc[3:]}]')</span>
             <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_references</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">])):</span>
                 <span class="k">if</span> <span class="s1">'RFC'</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\d+'</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
-                    <span class="c1"># NOTE: IANA has put a section inside the citation since</span>
-                    <span class="c1"># 2026-10-13 -- ``ALGS`` cites ``[RFC 6384, Section 11]``,</span>
-                    <span class="c1"># formerly ``[RFC6384] Section 11`` -- and the whole of</span>
-                    <span class="c1"># ``rfc[3:]`` would make that a role no RFC answers (#1664).</span>
+                    <span class="c1"># NOTE: ``ALGS`` cites ``[RFC 6384, Section 11]``, and the whole of ``rfc[3:]``</span>
+                    <span class="c1"># would make that a role no RFC answers (#1664).</span>
                     <span class="n">num</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sec</span> <span class="o">=</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">', Section '</span><span class="p">)</span>
                     <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s1">#section-</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s1">`]'</span> <span class="k">if</span> <span class="n">sec</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s1">`]'</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1114,14 +1103,8 @@
                 <span class="n">cmmd</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'str'</span><span class="p">,</span> <span class="n">feat</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="c1"># NOTE: GitHub issue #860. Every FEAT code the registry</span>
-                <span class="c1"># names -- lower-case group marker or upper-case per-command</span>
-                <span class="c1"># keyword alike -- is a declared member of FEATCode (see</span>
-                <span class="c1"># feat_codes below and FEATCode's own template), so both</span>
-                <span class="c1"># cases resolve by plain attribute access, and nothing calls</span>
-                <span class="c1"># FEATCode(...) at import time, which would mint the</span>
-                <span class="c1"># upper-case ones as a side effect of evaluating this very</span>
-                <span class="c1"># module.</span>
+                <span class="c1"># NOTE: GitHub issue #860. Every FEAT code, in either case, is a declared FEATCode</span>
+                <span class="c1"># member, so nothing mints one by calling FEATCode(...) at import time.</span>
                 <span class="k">if</span> <span class="n">feat</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feat_codes</span><span class="p">:</span>
                     <span class="n">feat_codes</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">'</span>
                 <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'FEATCode.</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">'</span>

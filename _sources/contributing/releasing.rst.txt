@@ -59,79 +59,60 @@ While ``main``'s version is a ``.devN`` one it only advances that counter
 (``1.6.0.dev2`` to ``1.6.0.dev3``), producing another blocked dev version, not a
 release (see the dev-release note below).
 
-Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
-``version`` field to match is **not** a safe shortcut: it blocks the release.
+Editing ``__version__`` by hand without moving :file:`CITATION.cff`'s ``version``
+field to match **blocks the release**.
 ``tests/project/test_bump_version.py``'s
 ``RepositoryCitationTests.test_the_citation_file_names_the_packaged_version``
 asserts the two agree, and ``create-release.yml``'s ``unit-tests`` job calls
-``unit-tests.yml`` with
-``gate-only: true``, which runs the **full** suite rather than the tiered
-subset an ordinary push runs (its ``gate`` job).
-That gate runs whenever a release will -- a moved ``__version__`` is exactly
-what makes ``version_check``'s evidence read "not yet published" -- and every
-publishing job's ``needs:`` requires it to have succeeded, so a
-citation left behind fails the gate well before any approval is requested.
-Either run the script, or move both fields by hand in the same commit.
+``unit-tests.yml`` with ``gate-only: true``, whose ``gate`` job runs the **full**
+suite rather than an ordinary push's tiered subset. That gate runs whenever a
+release will, since a moved ``__version__`` is what makes ``version_check``'s
+evidence read "not yet published", and every publishing job ``needs:`` it, so a
+stale citation fails before any approval is requested. Run the script, or move both
+fields in the same commit.
 
-This is the **only** edit a person makes to get a release started -- the tag,
-the Release, and every upload are the workflow's job from here. Other
-checks run unconditionally on the same path, though none is a step in *this*
-process: the ``changelog`` job's "Check CHANGELOG.md is in step with its source
-entry" step fails outright if ``CHANGELOG.md`` has drifted from its source entry under
-:file:`docs/source/changelog/`, and ``github``'s "Select release body" step
-warns, without failing, if that entry's heading still reads "unreleased". Each
-enforces what the changelog convention
-already asks for.
+Other checks run on the same path without being steps of this process: the
+``changelog`` job's "Check CHANGELOG.md is in step with its source entry" step fails
+if ``CHANGELOG.md`` has drifted from its source entry under
+:file:`docs/source/changelog/`, and ``github``'s "Select release body" step warns,
+without failing, if that entry's heading still reads "unreleased".
 
-Owner ruling, 2026-10-30: while a version is still under active development,
-``__version__`` should carry that :pep:`440` ``devN`` suffix itself, as a plain
-work-in-progress signal distinct from a deliberately-tagged alpha, beta or
-release candidate -- this project has shipped those for real (e.g.
-``1.5.0b14``), and they must stay publishable. ``version_check``'s
-``PCAPKIT_DEV_RELEASE`` output reads ``Version(__version__).is_devrelease``,
-never ``is_prerelease`` (which a real beta sets too), and ``github``, ``tag``,
-``pypi`` and ``conda`` all refuse to run while it is ``true`` -- so a scheduled
-Vendor Update reaching this workflow (see below) can never tag or publish a dev
-version on the strength of ``github-release``'s one reviewer approval alone
-(:issue:`887`, below). That approval still exists and still matters, but it is one
-person approving a diff for reasons usually unrelated to the version string, so
-a stray ``.devN`` is easy to miss there; and a re-run of a job that already
-skipped ``github`` once does not ask for a fresh approval at all. This gate
-closes that in code rather than leaving it to review.
+By the owner's ruling, a version under active development carries the :pep:`440`
+``devN`` suffix, a work-in-progress signal distinct from a deliberately tagged
+alpha, beta or release candidate, which this project ships for real (``1.5.0b14``)
+and must keep publishable. ``version_check``'s ``PCAPKIT_DEV_RELEASE`` output reads
+``Version(__version__).is_devrelease``, never ``is_prerelease`` (which a real beta
+sets too), and ``github``, ``tag``, ``pypi`` and ``conda`` all refuse to run while it
+is ``true``, so a scheduled Vendor Update can never tag or publish a dev version on
+``github-release``'s one approval alone (:issue:`887`, below). That approval is one
+person approving a diff, usually for reasons unrelated to the version string, so a
+stray ``.devN`` is easy to miss there, and a re-run of a job that already skipped
+``github`` asks for no fresh approval; the gate closes that in code.
 
-The suffix comes off only by hand: :file:`util/bump_version.py` has no option
-to drop it -- run on a dev version it only advances the ``devN`` counter
-(``1.6.0.dev2`` to ``1.6.0.dev3``), never past it. Finishing a dev version
-means editing the ``__version__`` assignment in :file:`pcapkit/__init__.py`
-to the real final string by hand, and moving :file:`CITATION.cff`'s matching
-``version`` field in the same commit, once that version is actually ready to
-ship.
+The suffix comes off only by hand, since :file:`util/bump_version.py` never drops it:
+once the version is ready to ship, edit the ``__version__`` assignment in
+:file:`pcapkit/__init__.py` to the final string, and :file:`CITATION.cff`'s
+``version`` field in the same commit.
 
 Ways to Start a Release
 -----------------------
 
-``create-release.yml``'s ``on:`` triggers are all first-class -- none is a
+``create-release.yml``'s ``on:`` triggers are all first-class; none is a
 workaround for another:
 
 ``push: tags: ['v*']``
-   Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
-   release, not which version: ``version_check``'s "Checkout code" step pins
-   ``ref: ${{ github.sha }}``, which on this trigger is the commit the pushed
-   tag points at, and its "Get Version" step reads :data:`pcapkit.__version__`
-   out of *that* tree. Every downstream tag and release name is built
-   from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
-   is the ``tag_name`` of ``github``'s "Create Release" step and the release
-   ``pypi`` and ``conda`` upload to, always from
-   ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
-   actually released is whatever ``__version__`` says on the tagged commit,
-   not the name of the tag that was pushed. The two agree only if the tag
-   was named to match. Push ``v1.6.0`` at a commit whose ``__version__`` is
+   Pushing a ``v*`` tag yourself. This chooses **which commit** to release, not
+   which version: ``version_check``'s "Checkout code" step pins
+   ``ref: ${{ github.sha }}``, the commit the tag points at, and its "Get Version"
+   step reads :data:`pcapkit.__version__` from that tree. Every downstream tag and
+   release name comes from that ``PCAPKIT_VERSION`` output, never from
+   ``github.ref_name``: ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}`` is
+   the ``tag_name`` of ``github``'s "Create Release" step and the release ``pypi``
+   and ``conda`` upload to. Push ``v1.6.0`` at a commit whose ``__version__`` is
    still ``1.5.0b5`` and ``softprops/action-gh-release`` creates a *new*
-   ``v1.5.0b5`` tag and names the Release after it; the ``v1.6.0`` tag that
-   was actually pushed is left dangling, attached to nothing.
-   :doc:`pep` calls this workflow "version-driven rather than tag-driven"
-   for the same reason -- name the tag to match the version you intend, and
-   the two conveniently coincide, but nothing enforces that they do.
+   ``v1.5.0b5`` tag and names the Release after it, leaving ``v1.6.0`` dangling.
+   :doc:`pep` calls this workflow "version-driven rather than tag-driven" for that
+   reason: name the tag to match the version, since nothing enforces it.
 
 ``workflow_run`` after **Vendor Update** completes
    The path a version bump on ``main`` takes without anyone pushing a tag:
@@ -145,9 +126,9 @@ workaround for another:
    while ``github.event.workflow_run.head_sha`` -- the commit Vendor Update
    ran *on* -- was the bump's parent, ``945c3c3d8``.
 
-The paths converge on the same job graph from ``version_check`` onward; only
-the trigger and ``github.ref_name`` differ, which is what the guards below
-read. The release test gate runs only once ``version_check`` has passed, and
+The paths converge on the same job graph from ``version_check`` onward; only the
+trigger and ``github.ref_name``, which the guards below read, differ. The release
+test gate runs only once ``version_check`` has passed, and
 ``version_check`` itself skips the release App's own tag push and a Vendor
 Update that did not conclude ``success`` or skipped ``vendor-update`` (below).
 Past it, a ``v*`` ref always runs the gate; on ``main`` it
@@ -165,10 +146,9 @@ conclude ``success`` is keyed on its own ``github.run_id`` instead
 (:issue:`1705`). It releases
 nothing, so it neither waits behind a release nor displaces a run waiting
 there; only a newer run that may release, reading ``main``'s newer tip, can.
-A Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
-its Unit Tests verdict was for another commit -- releases nothing either since
-:issue:`1748`: the
-``vendor_update`` job reads that run's jobs, and
+A Vendor Update that concluded ``success`` with ``vendor-update`` skipped, its
+Unit Tests verdict being for another commit, releases nothing either
+(:issue:`1748`): the ``vendor_update`` job reads that run's jobs, and
 ``version_check`` skips. The group cannot see that, so such a run still joins
 the ref's group; if it displaces a pending run, that release waits for the
 next Vendor Update on ``main``.
@@ -577,9 +557,9 @@ publishes through PyPI's OIDC trusted publishing (the job's
 configuration can be scoped to a GitHub Actions environment name. If this
 project's publisher on PyPI is scoped that way, removing the ``pypi`` name
 -- not just its reviewer -- would break the upload with a claim mismatch;
-this is standard OIDC trusted-publishing behaviour, not something the
-publisher's actual PyPI-side configuration was read to confirm here. Keep
-the name regardless, since there is no upside to removing it.
+this is standard OIDC trusted-publishing behaviour, not checked against the
+publisher's PyPI-side configuration. Keep the name regardless: removing it gains
+nothing.
 
 ``conda-tag`` **writes to** ``main``\ **, so a release is not read-only on the
 branch.** After cutting ``conda-<version>+0`` at the run's commit, the
@@ -595,8 +575,7 @@ and last warn. :issue:`1634`'s own shape -- three Conda Update bumps that :issue
 left untagged -- gets
 the reset: ``main``'s 3 becomes 0. A rejected push is retried from a fresh
 fetch, three times at most. Approving ``github-release`` therefore also
-approves a commit landing on the default branch, not only the artefacts that
-sound like they are the point.
+approves a commit landing on the default branch, not only the artefacts.
 
 Recovery
 --------
@@ -606,11 +585,11 @@ that run (**Re-run failed jobs**), not deleting and re-pushing a tag by hand,
 for the reasons above; a run created for a later commit will not finish it
 (`One Commit per Release`_). A run whose ``github`` was refused created no
 tag, so re-running it once the App is set up (`The Release App`_) starts its
-release rather than re-tagging it. This is the actual fix rather than a
-best-effort suggestion: `Per-Job Evidence, Not a Shared Proxy`_ above means ``tag``, ``pypi`` and ``conda`` each check whether
-*their own* artefact is missing, so a re-run finishes whichever jobs did not
-complete last time instead of skipping them on the ``v*`` tag's mere
-existence. ``pypi`` is safe to re-run (``skip-existing: true``), and so is
+release rather than re-tagging it. A re-run is a real fix, since under
+`Per-Job Evidence, Not a Shared Proxy`_ ``tag``, ``pypi`` and ``conda`` each check
+whether *their own* artefact is missing, so it finishes whichever jobs did not
+complete instead of skipping them on the ``v*`` tag's mere existence. ``pypi`` is
+safe to re-run (``skip-existing: true``), and so is
 ``conda``, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there. Neither replaces a file the GitHub Release
@@ -653,8 +632,6 @@ With that reconciliation, ``release_status`` reports exactly one of:
   :issue:`888` was actually
   about.
 
-That last case should be unreachable given the
-evidence-based guards above, since a target's own incomplete evidence is
-what makes its job run rather than skip; reaching it anyway is a signal that
-those checks themselves need attention, not that the release needs a
-hand-rolled recovery.
+That last case should be unreachable, since a target's own incomplete evidence
+is what makes its job run rather than skip; reaching it means those checks need
+attention, not that the release needs a hand-rolled recovery.

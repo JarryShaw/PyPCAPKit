@@ -3,11 +3,9 @@ GitHub Actions Workflows
 
 .. important::
 
-   The workflows under :file:`.github/workflows/` trigger each other, and
-   the chain that results is not visible from any single file -- reading one
-   ``on:`` block never shows what a *different* workflow's completion goes on
-   to start. This page is the repository-wide graph. The release *pipeline*
-   itself, job by job from a version bump to a published package, is on
+   The workflows under :file:`.github/workflows/` trigger each other, and no
+   single ``on:`` block shows what another workflow's completion starts. This
+   page is the repository-wide graph; the release pipeline, job by job, is on
    :doc:`releasing`.
 
 At a Glance
@@ -152,12 +150,11 @@ At a Glance
 
 .. note::
 
-   Only Coverage Comment and CI Reports fire *exclusively* on ``workflow_run``:
-   neither has anything to do without a completed run to report. Each of the others
-   that carry one pairs it with a direct trigger of its own -- a Saturday
-   ``schedule`` for Vendor Update, Conda Update and GitHub Pages, a ``v*`` tag
-   push for Create Release -- for the path where no upstream run exists yet to
-   chain from.
+   Only Coverage Comment and CI Reports fire *exclusively* on ``workflow_run``,
+   having nothing to do without a completed run to report. Every other workflow
+   with one pairs it with a direct trigger -- a Saturday ``schedule`` for Vendor
+   Update, Conda Update and GitHub Pages, a ``v*`` tag push for Create Release --
+   for when no upstream run exists to chain from.
 
 The Graph
 ---------
@@ -165,11 +162,10 @@ The Graph
 Solid arrows are direct triggers (``push``, ``pull_request``, ``schedule``,
 ``workflow_dispatch``, ``issues``, ``pull_request_target``), drawn in the first
 graph with a node for each schedule day. The second graph is the edges from one
-workflow to another. Thick arrows are ``workflow_run`` edges -- a
-*separate* run, started only after the upstream workflow's run has fully
-completed. Dotted arrows are ``uses:`` edges -- a reusable-workflow call that
-runs synchronously *inside* the caller's own run, sharing its run id rather
-than starting a new one.
+workflow to another. Thick arrows are ``workflow_run`` edges, a *separate* run
+started only once the upstream run has completed. Dotted arrows are ``uses:``
+edges, a reusable-workflow call that runs *inside* the caller's run, sharing its
+run id.
 
 .. mermaid::
 
@@ -293,8 +289,7 @@ than starting a new one.
        CH ~~~ EX & PC
 
 The double relationship between **Unit Tests** and the dependants that also
-call it is the part that reading a single file cannot show, and it is
-deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
+call it is deliberate, not redundant. Vendor Update, Conda Update and GitHub Pages
 each call **Cron Head** as their ``head`` job (dotted, above), and its test gate
 calls ``unit-tests.yml`` with ``gate-only: true`` **only when the caller's
 trigger is** ``schedule`` or ``workflow_dispatch`` -- the gate's ``if:`` skips
@@ -358,14 +353,12 @@ checkout, so it applies the same rule a second time: its push rebases onto
 pushes nothing, and Conda Tag tags the commit that push landed rather than the
 tip (:issue:`1632`).
 
-Vendor Update's own commit raises it again: the push gets a Unit Tests run, whose
-completion starts another crawl. The commit bumps the version only when the crawl
-changed code. If every change is to comments or docstrings, the commit is "Updated
-vendor documentation without a version bump", and the Create Release run that
-follows sees the same version, so it has nothing new to publish
-(:issue:`1674`). A crawl raised by
-such a commit's own Unit Tests run does not commit comment changes on top of it,
-so documentation commits cannot chain. The rule is in
+Vendor Update's own commit raises it again, through the Unit Tests run of its push.
+The commit bumps the version only when the crawl changed code; a comment- or
+docstring-only commit is "Updated vendor documentation without a version bump", so
+the Create Release run that follows has nothing new to publish (:issue:`1674`). A
+crawl raised by such a commit does not commit comment changes on top of it, so
+documentation commits cannot chain. The rule is in
 ``util/vendor_code_changed.py``. A bump commit carries every module the crawl
 wrote, a new one included, so the crawl it raises does not find one untracked
 and bump again (:issue:`1685`).
@@ -373,9 +366,8 @@ and bump again (:issue:`1685`).
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------
 
-A ``uses:`` call is a different relationship from triggering: it runs inside
-the caller's own workflow run, as one of the caller's own jobs, rather than
-starting an independent run after the caller finishes. The calls target
+A ``uses:`` call runs as one of the caller's own jobs, inside its run, rather than
+starting a separate run once the caller finishes. The calls target
 ``unit-tests.yml``, always with ``gate-only: true``, and ``cron-head.yml``:
 
 * ``.github/workflows/create-release.yml``, job ``unit-tests`` -- calls
@@ -410,11 +402,10 @@ orders them:
   ``workflow_run`` path. Create Release reads only the Vendor Update run that
   triggered it, through its ``vendor_update`` job, so the time of the others
   does not matter to it.
-* Aligned, they cost more. With Vendor Update and Conda Update both at 10:00,
-  each scheduled pair read back from 2026-09-26 on checked out the same commit
-  (:issue:`1967`) -- on 2026-10-17, Conda Update 39023770904 and Vendor Update
-  39023891165 both gated 44ed96fc3, their ``Gate (full suite, …)`` jobs taking
-  twelve and ten minutes. Their writing jobs share the ``repository-maintenance``
+* Aligned, they cost more. With Vendor Update and Conda Update both at 10:00, each
+  scheduled pair gated the same commit (:issue:`1967`): Conda Update 39023770904 and
+  Vendor Update 39023891165 both gated 44ed96fc3, for twelve and ten minutes. Their
+  writing jobs share the ``repository-maintenance``
   group, so ``conda-update`` waited for ``vendor-update`` to finish, and a third
   job joining that group cancels the one pending there.
 
@@ -444,15 +435,31 @@ bumped regardless: ``Decide whether to bump`` says so although nothing changed,
 so ``Bump Version``, ``Commit Changes`` and ``Push Changes`` run, ``conda-tag``
 tags the pushed commit, every ``conda-dist`` leg uploads it, the GitHub
 Release steps run, and ``discussion`` posts the report as ``scheduled``. The
-``mode`` job is the one place the input is read: its ``publishes`` output is
-``'true'`` on the schedule, on a ``workflow_run`` and on such a run, and
-``'false'`` on any other manual run, and every step or job that publishes or
-names an environment requires it to be ``'true'``. On any ref but ``main``,
-``publish`` fails ``mode`` with an ``::error``, so the run fails and
-``conda-update`` never starts. The workflow-level concurrency group stays keyed
-on the run, so a manual run never displaces a pending scheduled one.
-No later run repeats a forced bump, so where ``Push Changes`` does not push it
-because ``main`` moved past the checkout or during the push, the run stays
+``mode`` job is the one place the input is read, and every step or job that
+publishes or names an environment requires its ``publishes`` output to be
+``'true'``:
+
+.. mermaid::
+
+   flowchart TD
+       EV{"mode: a manual run?"}
+       PUB{"publish set?"}
+       REF{"dispatched on main?"}
+       T["publishes: 'true'"]
+       F["publishes: 'false'<br/>build-only"]
+       ERR["::error, the run fails<br/>and conda-update never starts"]
+
+       EV -->|"no: schedule or workflow_run"| T
+       EV -->|yes| PUB
+       PUB -->|no| F
+       PUB -->|yes| REF
+       REF -->|yes| T
+       REF -->|no| ERR
+
+The workflow-level concurrency group stays keyed on the run, so a manual run
+never displaces a pending scheduled one. No later run repeats a forced bump,
+so where ``Push Changes`` does not push it because ``main`` moved past the
+checkout or during the push, the run stays
 green having published nothing, and says so in a warning and in its report
 (:issue:`2060`); the remedy is to dispatch Conda Update again with ``publish``
 on ``main``. Where another run already pushed the same build, that run tags and
@@ -466,32 +473,26 @@ source entry) and ``python-versions``, which reads ``gate``'s version (see
 ``test-ktlo``, ``test-latest-tier``, ``integration``, ``integration-ktlo``,
 ``engine-tests`` (a job per engine, each looping over its Python versions),
 ``pypcap-parity``, ``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which
-has already run once for this commit from Unit Tests' own ``push`` trigger (and,
-all but ``unittest-ordering``, which runs on ``main`` pushes only, from its
-``pull_request`` trigger), so running any of them again per caller would test
-the same commit several times over. It also skips ``changes``, ``coverage``,
-which combines what ``test`` and ``test-latest-tier`` measured,
+has already run for this commit from Unit Tests' own ``push`` trigger (and, all but
+``unittest-ordering``, which runs on ``main`` pushes only, from its
+``pull_request`` trigger), so a caller would only retest the commit. It also skips
+``changes``, ``coverage``, which combines what ``test`` and ``test-latest-tier`` measured,
 ``project-tests``, whose project pins ``gate``'s full suite runs too (see
 `Project Pins`_ below), and ``required-checks`` (see `Required Status
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
-already run. ``changelog`` carries no
-``if:`` at all and runs on every path regardless -- deliberately, per the comment
-above the job: ``create-release.yml`` feeds
-``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
-where a drifted file must not go unchecked. Confirmed on run `36210743295
-<https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
-schedule-triggered GitHub Pages run): both ``Changelog drift`` and ``Gate
-(full suite, Python 3.14)`` succeeded, with the matrix jobs that
-existed then -- ``Python ${{ matrix.python-version }}``, ``Integration
-Python …``, ``Engines Python …`` and ``PyPCAP/PyPCAPFile parity Python
-…`` -- all reporting ``skipped``.
+already run. ``changelog`` carries no ``if:`` and runs on every path, deliberately,
+per the comment above the job: ``create-release.yml`` feeds ``CHANGELOG.md`` to the
+GitHub Release body, so the release path is where a drifted file must not go
+unchecked. On run `36210743295
+<https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__, a scheduled
+GitHub Pages run, ``Changelog drift`` and ``Gate (full suite, Python 3.14)``
+succeeded and every matrix job reported ``skipped``.
 
 The Skip Cascade (:issue:`888`)
 -------------------------------------------------------------------------------
 
-The relationships above compose into a failure mode worth seeing on its
-own graph. Create Release's ``version_check`` -- ahead of the ``uses:`` call
-above -- carries:
+The relationships above compose into a failure mode of their own. Create Release's
+``version_check``, ahead of the ``uses:`` call above, carries:
 
 .. code-block:: yaml
 
@@ -548,37 +549,28 @@ version_check ]``.
        class UTX,VC,GH,TAGJ,PY,CD skipped
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
-``unit-tests`` are also direct ``needs:`` of ``tag``, ``pypi`` and ``conda``,
-but ``github``
-already implies those edges, since it depends on both itself. Drawing them
-would add lines without changing which job can start before which, or which
-job a skip in ``version_check`` reaches.
+``unit-tests`` are also direct ``needs:`` of ``tag``, ``pypi`` and ``conda``, but
+``github`` depends on both and so already implies those edges.
 
-The whole run then reports **skipped**, not failed -- there is no red X to
-notice. Observed in production on runs `36511610205
+The whole run then reports **skipped**, not failed, so there is no red X to notice:
+``workflow_run`` Create Release runs `36511610205
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36511610205>`__ and
 `36510774776
-<https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776>`__, both
-``workflow_run``-triggered **Create Release** runs on ``main`` that concluded
-``skipped`` with every one of their jobs -- ``Release test gate``,
-``Check Version``, ``GitHub Release``, ``Conda Tag (release)``, ``PyPI
-distribution for Python …`` and ``Conda deployment (release) …`` -- reporting
-``skipped`` in turn.
+<https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776>`__ on ``main``
+concluded ``skipped`` with every job skipped.
 
-This is a distinct mechanism from the ``PCAPKIT_TAG_EXISTS`` skip
-:doc:`releasing` already documents under "Precautions" (a *later* run
-skipping because the tag a *previous* run already created still exists): this
-one can skip the very first attempt, before any tag is ever created, purely
-because the upstream Vendor Update run did not itself conclude ``success``.
+This differs from the ``PCAPKIT_TAG_EXISTS`` skip under "Precautions" on
+:doc:`releasing`, where a later run skips on the tag an earlier one created: this one
+can skip the first attempt, before any tag exists, because the upstream Vendor Update
+run did not conclude ``success``.
 
 Such a run is also kept out of the release's concurrency group
 (its ``concurrency`` block,
 :issue:`1705`). It is keyed on
 its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
-waiting there with release work. Keyed on the ref, run 38499295798 joined at
-02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
-succeeded, was cancelled a second later. A run whose Vendor Update concluded
-``success`` with ``vendor-update`` skipped (:issue:`1748`) is still keyed on the ref:
+waiting there with release work: keyed on the ref, run 38499295798 cancelled the
+pending 38499150441, whose Vendor Update had succeeded. A run whose Vendor Update
+concluded ``success`` with ``vendor-update`` skipped (:issue:`1748`) is still keyed on the ref:
 the group reads only the event, which does not say which jobs ran. It can still
 displace a run pending there, and releases nothing in its place, so that
 release waits for the next Vendor Update on ``main``.
@@ -689,11 +681,11 @@ workflow can only narrow the token its caller passes, and every caller grants
 ``contents: read``, so a ``pull-requests: write`` job there would break them.
 Coverage Comment runs no tests. On ``workflow_run`` it uses the default
 branch's file and its own token, so fork pull requests get a comment too. It
-treats the artifact as untrusted: it never checks out pull-request code. It
-takes the PR number from the API, as the open PR whose head is the run's head
-sha, and renders its own Markdown from validated numbers. It edits one comment,
-found by a hidden marker, on each push. The first line says when the tests
-failed. ``coverage`` gates through ``Required checks passed``, as the coverage legs
+treats the artifact as untrusted and never checks out pull-request code: it takes
+the PR number from the API, as the open PR whose head is the run's head sha, and
+renders its own Markdown from validated numbers. It edits one comment, found by a
+hidden marker, on each push, whose first line says when the tests failed.
+``coverage`` gates through ``Required checks passed``, as the coverage legs
 do; Coverage Comment is not a required check. A push run has no pull request, so its
 report goes to Discussions instead (see `CI Reports`_).
 
@@ -705,10 +697,10 @@ or on dispatch with a ``days`` window and an optional ``concurrency_hours`` runn
 measurement. Through the API it lists every completed run in the window of Unit Tests,
 Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (:issue:`1732`, so
 its long legs stay measured), a day per query because a filtered listing stops
-at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
+at 1,000 runs (Pages has completed 1,154 in a week). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow -- and the summary says how many runs each sample
-holds and which span they cover. For the week to 2026-10-19 that was 677 calls
+holds and which span they cover. One week's review made 677 calls
 (:issue:`1930`: 49 listing pages,
 one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
 the JUnit artifacts; 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on
@@ -801,9 +793,9 @@ measured on the issue:
 The cap line sits at 50% because at the fastest growth measured, +1.27 min/day on
 ``Python 3.14``, crossing it leaves 12-18 days before the cap: one review and one
 fixing pull request. Time to ``Required checks passed`` is HARD only as a regression
-because its p90 measures runner-queue load as much as test time: it was 19.6 min when
-the line was set and 36.7 min in the two days to 2026-10-10 with the pool saturated,
-so an absolute HARD line would email about the queue every week. The 25% rise is a
+because its p90 measures runner-queue load as much as test time, 19.6 min when the
+line was set against 36.7 min over two days with the pool saturated, so an absolute
+HARD line would email about the queue every week. The 25% rise is a
 starting value, to be tuned against the weekly reports. ``W9`` is therefore expected to
 fire while the pool stays saturated, and the JUnit timings are what show whether
 ``W7``'s 10-second test line needs raising. What to do when one fires is on
@@ -868,7 +860,28 @@ own ``pull_request`` run alone. It writes two outputs:
 
 Anything else, and a diff the script cannot list, is code: ``code: true`` and
 ``test-only: false``. A rename lists both of its paths, so moving a code file under
-``docs/`` or ``tests/`` is code too.
+``docs/`` or ``tests/`` is code too. Any run but the workflow's own ``pull_request``
+one runs everything:
+
+.. mermaid::
+
+   flowchart TD
+       OWN{"the workflow's own<br/>pull_request run?"}
+       LIST{"the diff of<br/>HEAD^1..HEAD listed?"}
+       ANY{"any file code?"}
+       TEST{"any file under tests/?"}
+       CODE["code: true<br/>test-only: false"]
+       DOCS["docs-only<br/>code: false<br/>test-only: false"]
+       TONLY["test-only<br/>code: true<br/>test-only: true"]
+
+       OWN -->|no| CODE
+       OWN -->|yes| LIST
+       LIST -->|fails or empty| CODE
+       LIST -->|yes| ANY
+       ANY -->|yes| CODE
+       ANY -->|no| TEST
+       TEST -->|yes| TONLY
+       TEST -->|no| DOCS
 
 .. list-table::
    :header-rows: 1
@@ -1013,8 +1026,8 @@ Requests (#2243)`_); ``project-tests`` must pass on every diff. The ``Compat`` l
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-its ``if: ${{ always() && inputs.gate-only != true }}``, so it is never
-produced -- and never expected -- on those paths.
+its ``if: ${{ always() && inputs.gate-only != true }}``, so it is neither
+produced nor expected on those paths.
 
 The ``needs:`` graph of ``unit-tests.yml``, as a transitive reduction (``changes`` is
 also a direct need of ``coverage`` and ``required-checks``); a dashed job reaches no
@@ -1056,7 +1069,7 @@ The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks 
 required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.8-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (:issue:`1672`). In ``unit-tests.yml`` the KTLO legs are jobs of their own
-since :issue:`1738`: ``test-ktlo``,
+(:issue:`1738`): ``test-ktlo``,
 ``integration-ktlo`` and ``pypcap-parity-ktlo``, which neither ``required-checks``
 nor ``unittest-ordering`` ``needs:``, so not even a failure no step can contain, such
 as a lost runner or the job cap, reaches a gate. Each runs its gating twin's steps,
@@ -1081,8 +1094,8 @@ with supported legs. Every job holding KTLO legs works the same way:
   ``engine-tests``' KTLO cells, a step of their own with ``continue-on-error: true``,
   report the same way.
 * Never job-level ``continue-on-error`` alone: it passes the *run*, but the leg's
-  check run still concludes ``failure``, which showed every commit red while
-  the ``Compat Python 3.7 (KTLO)`` leg carried it. ``unit-tests.yml``'s KTLO jobs
+  check run still concludes ``failure``, which shows the commit red.
+  ``unit-tests.yml``'s KTLO jobs
   carry it on top of the step-level guards, as a backstop for the failures no step
   contains, as ``experimental.yml``'s job does; it "prevents a workflow run from
   failing when a job fails" (`Workflow syntax
@@ -1545,9 +1558,9 @@ interpreter that cannot import ``tomllib``.
 File Size Caps (:issue:`1969`)
 -------------------------------------------------------------------------------
 
-A test that writes without bound fills the runner's disk rather than failing: :issue:`1372`'s
-``out.json`` grew to
-several gigabytes on every run. So every pytest and unittest command in
+A test that writes without bound fills the runner's disk rather than failing, as
+:issue:`1372`'s ``out.json`` did at several gigabytes a run. So every pytest and
+unittest command in
 :file:`.github/workflows/unit-tests.yml` runs as ``python util/cap_file_size.py
 python -m ...``: ``test``'s ``Run unit tests``; ``integration``'s,
 ``pypcap-parity``'s and ``gate``'s ``Run full test suite``; the KTLO twins of
@@ -1573,9 +1586,9 @@ without the script, and runs the script against a small limit.
 Workflow Scripts (:issue:`1967`)
 ---------------------------------------------------------------------------------
 
-Shell that several steps repeat, or that has real logic -- branches, or a bug
-history a test should pin -- lives in a :file:`util/` script, which the steps run,
-rather than in a composite action: a composite action's inner steps cannot take
+Shell that several steps repeat, or that has real logic -- branches, or a bug a
+test should pin -- lives in a :file:`util/` script the steps run, rather than in a
+composite action: a composite action's inner steps cannot take
 ``timeout-minutes``, so each calling step keeps its own, with its ``shell:``,
 ``if:``, ``env:`` and ``continue-on-error``. A few plain commands stay inline even
 where repeated, as the apt seed steps do, since they read more easily than a call
@@ -2017,8 +2030,8 @@ it. Dependabot does not read this pin, so a bump changes both. The workflows use
 1.7.10 on, and the pin is 1.7.12 or newer.
 
 actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
-other steps, this one blocks: a finding fails the job, as the owner ruled on :issue:`1967`
-once every finding it reported had been fixed. It runs last and
+other steps, this one blocks, by the owner's ruling on :issue:`1967`: a finding fails
+the job. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
 Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
 (:issue:`1967`), so a red Lint
@@ -2038,7 +2051,7 @@ pins an older release or no checksum, unpacks before it verifies, passes an
 ``-ignore`` pattern other than that, or stops blocking: when it carries
 ``continue-on-error``, exits with a status other than actionlint's, or sits above
 an advisory step or a failed setup would skip it. It fails too when no workflow
-sets ``concurrency.queue`` any more.
+sets ``concurrency.queue``.
 
 Dependency Updates (:issue:`1968`)
 -----------------------------------------------------------------------------------
@@ -2048,7 +2061,7 @@ Dependabot opens every dependency bump, weekly, from :file:`.github/dependabot.y
 
 * ``pip`` over ``/``, ``/docs`` and ``/examples/benchmark``. The docs build pins
   Sphinx and sphinx-autodoc-typehints exactly in :file:`docs/requirements.txt`, and
-  Dependabot proposes bumps to both pins; the owner accepted that, so each bump is
+  Dependabot proposes bumps to both, which the owner accepted, so each bump is
   reviewed against the docs build rather than held back. The benchmark's
   :file:`requirements-*.txt` files are watched because nothing else moves them.
 * ``github-actions`` over ``/``, per `Action Pins`_ above.

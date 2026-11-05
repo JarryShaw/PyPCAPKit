@@ -1194,9 +1194,7 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="c1"># NOTE: The two fixed bits "MUST be ignored when receiving" (:rfc:`7401#section-5.1`),</span>
-        <span class="c1"># so they are kept as read rather than validated.</span>
-        <span class="c1"># Header Length below 4 cannot cover the two HITs, and would leave a</span>
-        <span class="c1"># negative parameter length below.</span>
+        <span class="c1"># so they are kept as read. A Header Length below 4 cannot cover the two HITs.</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid header length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -1229,9 +1227,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
             <span class="k">return</span> <span class="n">hip</span>
 
-        <span class="c1"># NOTE: ``_decode_next_layer`` builds the protocol chain from</span>
-        <span class="c1"># :attr:`self.alias &lt;HIP.alias&gt;`, which reads ``self._info``, and</span>
-        <span class="c1"># ``__post_init__`` assigns that only once this method returns.</span>
+        <span class="c1"># NOTE: ``_decode_next_layer`` builds the chain from :attr:`self.alias &lt;HIP.alias&gt;`, which</span>
+        <span class="c1"># reads ``self._info``, and ``__post_init__`` assigns that only after this method returns.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">hip</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hip</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
@@ -1511,10 +1508,8 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on</span>
-            <span class="c1"># the data model only when it is not all zeros -- the form a fresh</span>
-            <span class="c1"># build writes -- so that a rebuild reproduces it (#1223).</span>
-            <span class="c1"># :meth:`_make_hip_param` writes it back.</span>
+            <span class="c1"># NOTE: Padding (:rfc:`7401#section-5.2.1`) is kept on the data model unless all zeros, a</span>
+            <span class="c1"># fresh build's form, so that :meth:`_make_hip_param` writes it back (#1223).</span>
             <span class="n">padding</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">):</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="n">padding</span><span class="p">)])</span>
