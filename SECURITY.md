@@ -3,7 +3,7 @@
 ## Supported Versions
 
 Security fixes land on the current stable line, and on a development line while
-one is in pre-release. Older lines are not patched -- upgrading is the fix.
+one is in pre-release. Older lines are not patched; upgrade instead.
 
 | Version         | Supported          | Notes                                   |
 | --------------- | ------------------ | --------------------------------------- |
@@ -18,17 +18,15 @@ still welcome; it may be fixed by raising the floor rather than by patching.
 
 ## Reporting a Vulnerability
 
-**Please do not open a public issue for a security problem.** Public issues are
-for ordinary bugs, not anything exploitable.
-
-Use GitHub's private vulnerability reporting, which is enabled on this repository:
+**Please do not open a public issue for a security problem.** Use GitHub's private
+vulnerability reporting instead:
 
 - <https://github.com/JarryShaw/PyPCAPKit/security/advisories/new>
 
-It opens a private advisory visible only to the maintainer, lets patches be
-prepared before anything is public, and issues a CVE if one is warranted. If you
-cannot use it, email the project contact listed in
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) and say the report is a security issue.
+It opens an advisory visible only to the maintainer, so a patch can be prepared
+before anything is public, and a CVE issued if one is warranted. If you cannot use
+it, email the maintainer address in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) and
+say the report is a security issue.
 
 Please include whatever you have:
 
@@ -40,17 +38,15 @@ Please include whatever you have:
 
 ## What to expect
 
-This is a single-maintainer project, so response is best-effort rather than
-contractual:
+This is a single-maintainer project, so response is best-effort:
 
 - an acknowledgement that the report arrived, normally within a week,
 - once reproduced, an assessment of whether it is accepted and a rough severity,
 - a fix on the supported lines above, released as a patch version, with credit in
   the changelog unless you would rather not be named.
 
-If a report is declined, you will be told why -- most often that it describes
-expected behaviour for a packet parser. Check the threat model below before
-deciding whether you have a finding.
+If a report is declined, you are told why -- most often that it describes expected
+behaviour for a packet parser, which the threat model below covers.
 
 ## Threat model
 
@@ -59,10 +55,9 @@ stream off the wire is untrusted input. Vulnerabilities in that parsing are in
 scope, in particular:
 
 - memory exhaustion, unbounded allocation, or a hang on a malformed packet,
-- an uncaught exception escaping the public API where a `pcapkit` exception was
-  promised -- parse errors are meant to arrive as `pcapkit.utilities.exceptions`
-  types rather than an arbitrary traceback. That is the intent, not something the
-  parser manages everywhere, so report it even though some cases are known,
+- a parse error escaping the public API as anything but the
+  `pcapkit.utilities.exceptions` type it is meant to be -- report it even though some
+  cases are known,
 - anything that executes code, writes outside the requested output path, or reads
   an unrelated file as a result of the *contents* of a capture.
 
@@ -78,11 +73,9 @@ Out of scope:
 
 ## Handling untrusted captures
 
-Hardening a parser against hostile input is ongoing work, and some of it is limited
-by what a layer can tell apart -- a capture legitimately truncated in transit and
-one crafted to look that way are not always separable from inside the field that
-declares the length. So if the captures you hand `pcapkit` are not ones you
-produced yourself:
+The parser cannot always tell a capture truncated in transit from one crafted to
+look that way, from inside the field that declares the length. So for captures you
+did not produce yourself:
 
 - **Bound the memory.** A malformed or hostile capture can expand to far more than
   its size on disk. Parse in a subprocess under an address-space limit
@@ -95,7 +88,3 @@ produced yourself:
 - **Do not trust a field more than the capture it came from.** A truncated or
   malformed field may parse to a value rather than raise, so a value that carries
   a security decision deserves its own validation.
-
-None of this is peculiar to `pcapkit`; it is the ordinary posture for giving
-attacker-controlled bytes to any parser, written down here because parsing them is
-what `pcapkit` is for.

@@ -1,49 +1,43 @@
 # How to contribute
 
-This document covers the development workflow, commit message format and the repository-specific
-rules that are easy to trip over — the test tiers and the generated changelog especially. The README
-is the authority on installing and building; this file covers what happens after that.
+This document covers the development workflow, the commit message format, and the repository rules
+that are easy to trip over — the test tiers and the generated changelog especially. The README
+covers installation.
 
 ## Getting started
 
 - Fork the repository on GitHub.
-- Read the README for installation and build instructions, and the *Testing* page it links
+- Read the README for installation, and the *Testing* page it links
   (`docs/source/contributing/testing.rst`) for the test commands.
 - Set up a development environment with `make setup`, which runs `pipenv install --skip-lock --dev`.
   The `Makefile` exports `PIPENV_VENV_IN_PROJECT=1`, so the environment lands in `.venv/` inside the
   checkout. **Only that environment has the dependencies**: the `make` targets below run through
   `pipenv run`, and `pytest` or `sphinx` from a system interpreter fails on missing imports rather
   than on anything you changed.
-- Looking for something to pick up? `docs/source/contributing/pep.rst`, rendered as the *Help Wanted*
-  page, is the maintained list of open proposals.
-- Play with the project, submit bugs, submit patches!
+- For something to pick up, `docs/source/contributing/pep.rst`, rendered as the *Help Wanted* page,
+  lists the open proposals.
 
 ## Contribution flow
-
-A rough outline:
 
 - Create a topic branch, usually from `main`.
 - Make commits of logical units, and add a test case if the change fixes a bug or adds functionality.
 - Run the tests and make sure they pass (see below).
-- If the change is user-visible, describe it in the pull request and leave its changelog entry to
-  the maintainer (see below).
-- Make sure your commit messages are in the proper format (see below).
-- Push your changes to a topic branch in your fork of the repository.
-- Submit a pull request to the repo.
-
-Thanks for your contributions!
+- Describe a user-visible change in the pull request, and leave its changelog entry to the
+  maintainer (see below).
+- Format the commit messages as below.
+- Push the branch to your fork and open a pull request.
 
 ## Running the tests
 
-The suite runs in a unit tier and a fixture-dependent tier. The tier is a property of a module's
-*path*, not of the command that collects it; `tests/_tiers.py` is the rule.
+The suite has a unit tier and a fixture-dependent tier. The tier is a property of a module's *path*,
+not of the command that collects it; `tests/_tiers.py` is the rule.
 
 ```shell
 make test        # the unit tier -- the selection CI runs
 make test-all    # everything, regenerating the sample captures first
 ```
 
-`make test` is the selection `.github/workflows/unit-tests.yml` runs: everything under `tests/` except
+`make test` runs what `.github/workflows/unit-tests.yml` runs: everything under `tests/` except
 `tests/integration/` and the `*_runtime.py` / `*_regression.py` modules. It must pass on a fresh
 clone with only the package and its test extra installed.
 
@@ -57,17 +51,17 @@ shapes of it at collection time and say what to do; `tests/_tiers.py` has the re
 ## Changelog entries
 
 Entries live in `docs/source/changelog/<version>.rst`, one file per version, listed newest-first in
-the toctree of `docs/source/changelog.rst`. That tree is the single source of the project's history.
+the toctree of `docs/source/changelog.rst`, which is the single source of the project's history.
 
-**Pull requests for user-visible changes do not add their own bullet.** While a version is
-unreleased, its entry is written centrally by the maintainer once a change is ready to merge or has
-merged. Pull requests that each edit the same file conflict on every merge, so leave
+**Pull requests for user-visible changes do not add their own bullet.** An unreleased version's
+entry is written by the maintainer once a change is ready to merge or has merged, because pull
+requests that each edit the same file conflict on every merge. Leave
 `docs/source/changelog/<version>.rst` and `CHANGELOG.md` out of the diff.
 
 **`CHANGELOG.md` is generated — never edit it by hand.** `util/changelog_md.py` derives it from the
-newest entry alone, because its consumers (the `Create Release` workflow's release body and the
-source distribution) read Markdown rather than reStructuredText. The maintainer adds the bullet to
-the `.rst` entry, then regenerates:
+newest entry alone, for consumers that read Markdown rather than reStructuredText: the
+`Create Release` workflow's release body and the source distribution. The maintainer adds the
+bullet to the `.rst` entry, then regenerates:
 
 ```shell
 python util/changelog_md.py            # rewrite CHANGELOG.md from the newest entry
@@ -83,27 +77,26 @@ the pages deploy and the release), with no `gate-only` guard to opt out. A hand-
 ## Documentation
 
 Documentation is reStructuredText under `docs/source/`, built with `make docs`. Docstrings in
-`pcapkit/` are reStructuredText too, and they are what the API reference renders from.
+`pcapkit/` are reStructuredText too, and the API reference renders from them.
 
 The Markdown files at the repository root — this one, `CODE_OF_CONDUCT.md`, `SECURITY.md`,
-`CHANGELOG.md` and the README — are a deliberate exception, because their consumers are GitHub's
-rendering and the release body rather than Sphinx. The issue and pull-request templates under
-`.github/` are Markdown for the same reason. Anything added under `docs/source/` is `.rst`.
+`CHANGELOG.md` and the README — are a deliberate exception, because GitHub and the release body
+render them rather than Sphinx. The issue and pull-request templates under `.github/` are Markdown
+for the same reason. Anything added under `docs/source/` is `.rst`.
 
 ### What belongs in the API reference: document the contract, hide the recipe
 
 The tenet: **keep the usage and extensibility clear and straightforward, while hiding the recipe**.
-A member earns an autodoc directive because a reader needs it, not because of its spelling — a
-leading underscore is not by itself a reason to leave something out, and being public is not by
-itself a reason to put it in.
+A member earns an autodoc directive because a reader needs it: a leading underscore is not by itself
+a reason to leave it out, and being public is not by itself a reason to put it in.
 
 **Contract — document it.** Anything a *caller* needs in order to use a class, and anything an
 *implementer* needs in order to subclass it:
 
 - **Per-option and per-parameter `_read_*` / `_make_*` pairs.** These publish the data format: the
-  keyword arguments a caller passes to construct that option, and the fields they get back when
-  parsing it. There is nowhere else to look them up, so they stay documented even though dispatch
-  reaches them through `getattr` rather than by name.
+  keyword arguments a caller passes to construct that option, and the fields parsing it returns.
+  Nothing else documents them, so they stay documented even though dispatch reaches them through
+  `getattr` rather than by name.
 - **Most class private attributes.** A private attribute that carries a subclass's state, or that a
   subclass sets or reads, is contract. Keep it unless there is a specific reason not to.
 - **Anything abstract, or implemented across subclasses.** An `@abstractmethod`, or an overridable
@@ -117,35 +110,34 @@ itself a reason to put it in.
 lock, a private wrapper class nobody constructs or subclasses. Removing one takes its members with
 it, which is correct — they are reachable only through that class.
 
-The sweep runs **in both directions**: a must-implement member with no directive is the same defect as
-a recipe body with one, only quieter. Add the missing directive rather than aiming for a small diff.
+The rule cuts **both ways**: a must-implement member with no directive is the same defect as a
+recipe body with one, only quieter. Add the missing directive rather than aiming for a small diff.
 
 Mechanical points that decide real cases:
 
-- **A private base class must stay documented when a documented subclass carries
+- **A private base class stays documented when a documented subclass carries
   `:show-inheritance:`.** Sphinx renders that subclass's `Bases:` line as a link into the private
-  class's page, so dropping the directive breaks a link a public page renders. This keeps
+  class's entry, so dropping the directive breaks a link on a public page. This keeps
   `pcapkit.protocols.misc.pcapng.schema._OPT_Option` and the other per-block option bases with
   documented subclasses, plus `_IPField`, `_IPInterfaceField` and `_TextField`.
 - **Dunders keep their directives.** A `__dunder__` is reached through public syntax, not by name
   (`len()` calls `__len__`, `obj[key]` calls `__getitem__`), so overriding one changes behaviour a
   caller observes without writing the name. PyPCAPKit's own `__proto__`, `__option__`, `__schema__`
-  and `__protocol_name__` family is the documented extension contract that subclass authors and the
+  and `__protocol_name__` family is the extension contract that subclass authors and the
   `register_*` functions write to: public API in everything but spelling.
 
-One invisible shape: the `pcapkit/const/` enums carry a `_missing_` fallback that resolves an
-unregistered value rather than raising as a plain `enum` would. This is deliberate
-and is the extensibility behaviour of the whole `pcapkit.const` package, so it is documented once on
-the package's landing page rather than on each of the registries that implement it.
-`docs/source/conf.py` already names `_missing_` in `autodoc_default_options['exclude-members']`, so a
-per-class directive would argue with the project's own configuration.
+One exception by design: the `pcapkit/const/` enums carry a `_missing_` fallback that resolves an
+unregistered value rather than raising as a plain `enum` would. That is the extensibility behaviour
+of the whole `pcapkit.const` package, so it is documented once on the package's landing page rather
+than on each registry. `docs/source/conf.py` names `_missing_` in
+`autodoc_default_options['exclude-members']`, so a per-class directive would contradict the
+project's own configuration.
 
 ## Coding style
 
-[PEP 8](https://peps.python.org/pep-0008/) is the baseline, but the repository's own linters are the
-authority where they differ from it — notably on line length, which is 120 for `pylint` and 100 for
-`isort`, not PEP 8's 79. Run them through the `Makefile`, which carries the flags they are meant to
-be run with:
+[PEP 8](https://peps.python.org/pep-0008/) is the baseline, and the repository's own linters win
+where they differ from it — notably on line length, which is 120 for `pylint` and 100 for `isort`,
+not PEP 8's 79. Run them through the `Makefile`, which carries their flags:
 
 ```shell
 make isort     # import ordering
@@ -155,42 +147,37 @@ make bandit    # security lint
 make vermin    # minimum-Python-version check
 ```
 
-`pylint`, `mypy`, `bandit` and `vermin` also run in CI as the `Lint` job in
-`.github/workflows/lint.yml`: on every pull request against `main`, on a weekly Saturday schedule
-and on demand through `workflow_dispatch`, on the newest supported Python alone (`latest` in
-`.github/python-versions.toml`) rather than across the test matrix.
-The job drives them through the `Makefile` rather than restating their flags (`vermin` by its
-`vermin-ci` variant), with `RUN=` emptying the `pipenv run` prefix. Both paths read the same flag
-variables, so a check cannot come out clean locally and red in CI because the two drifted.
+`pylint`, `mypy`, `bandit` and `vermin` also run as the `Lint` job in `.github/workflows/lint.yml`:
+on every pull request against `main`, on a weekly Saturday schedule and through
+`workflow_dispatch`, on the newest supported Python alone (`latest` in
+`.github/python-versions.toml`). The job drives them through the `Makefile` (`vermin` by its
+`vermin-ci` variant), with `RUN=` emptying the `pipenv run` prefix, so local and CI runs read the
+same flags.
 
 **Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
 as a non-blocking annotation and a red linter will not fail your pull request. The workflow's
-header records which of them are clean and what each of the others would need before its
-`continue-on-error` line could be deleted. Read the job's run summary, where each step writes
-its verdict, and try not to add to the numbers.
+header records which of them are clean and what each of the others needs before its
+`continue-on-error` line can go. Each step writes its verdict to the job's run summary; try not to
+add to the numbers.
 
-**The job is not entirely advisory, though.** It carries one more step, `actionlint`, which lints
-the workflow YAML rather than `pcapkit/`, and that one has no `continue-on-error` and no
-`Makefile` target — so a change under `.github/` can turn `Lint` red even though none of the
-linters above can. The header records that split, and asks for a promoted step to be moved below
-the advisory ones, since a failed step skips every step after it.
+**One step does gate:** `actionlint`, which lints the workflow YAML rather than `pcapkit/`, has no
+`continue-on-error` and no `Makefile` target, so a change under `.github/` can turn `Lint` red. The
+header records that split, and asks for a promoted step to be moved below the advisory ones, since a
+failed step skips every step after it.
 
-`isort` is absent from the job altogether: no `Lint` step runs it. It appears in `cron-vendor.yml`
-as a formatter that rewrites the regenerated constants, and `tests/project/test_isort_clean.py`,
-which the `test` extra's `isort` lets run, fails on a file whose imports `make isort` would reorder.
+No `Lint` step runs `isort`. It runs in `cron-vendor.yml` as a formatter over the regenerated
+constants, and `tests/project/test_isort_clean.py`, which the `test` extra's `isort` lets run, fails
+on a file whose imports `make isort` would reorder.
 
-One trap: `make vermin` redirects its report into `temp/vermin.txt` rather than to your terminal,
-so when vermin finds code that misses `vermin.ini`'s `targets = 3.8` and exits 1,
-Make gives up at the redirect with `make: *** [vermin] Error 1`, the report left in the file and the line
-that would have opened it never reached. `make vermin-ci` runs the same flags to stdout, which is why
-CI uses it and why it is easier to read at a desk. Running the lot before you push still saves a
-review round.
+One trap: `make vermin` redirects its report into `temp/vermin.txt`, so when vermin finds code that
+misses `vermin.ini`'s `targets = 3.8` and exits 1, Make stops at the redirect with
+`make: *** [vermin] Error 1` and the report unread in the file. `make vermin-ci` runs the same flags
+to stdout, which is why CI uses it. Running the lot before you push saves a review round.
 
 ### Format of the Commit Message
 
-We follow a rough convention designed to answer two questions: what changed and why. The subject
-line carries the what, and the body of the commit describes the why. A real one from the history,
-with its body abridged and its line anchors replaced by names:
+The subject line says what changed, and the body says why. A real one from the history, with its
+body abridged and its line anchors replaced by names:
 
 ```
 fix(tcp): resolve the connection flags before building the options (#587) (#597)
@@ -212,19 +199,16 @@ footer (optional)
 ```
 
 `type` is one of `feat`, `fix`, `docs`, `test`, `perf`, `refactor`, `ci`, `chore` or `release` —
-those are the ones in use. `const` is not a type: it is a label for regenerated constant tables,
-going on alongside the type label. `scope` names the part of the package affected — `tcp`, `corekit`,
-`schema`, `ipv4`, `vendor` — and several are separated by commas inside the parentheses, as in `fix(link,internet):`
-or `test(utilities,foundation):`. The scope may be omitted where nothing narrower than the whole
-project applies, as in `docs:`.
-
-Older commits may carry a bare `protocols:` or `corekit:` subsystem prefix; follow the form above.
+the ones in use. `const` is not a type: it is a label for regenerated constant tables, applied
+alongside the type label. `scope` names the part of the package affected — `tcp`, `corekit`,
+`schema`, `ipv4`, `vendor` — with several separated by commas, as in `fix(link,internet):` or
+`test(utilities,foundation):`. Omit the scope where nothing narrower than the whole project applies,
+as in `docs:`. Older commits may carry a bare `protocols:` or `corekit:` prefix; follow the form
+above.
 
 Reference issues and pull requests as `#nnn`, in the subject where they fit and in the body
-otherwise. Keep the subject to one line and as short as clarity allows; there is no hard column
-limit, and the history routinely runs past 70 characters and up to about 120, so do not truncate the
-meaning to hit a number.
+otherwise. Keep the subject to one line and as short as clarity allows. There is no hard column
+limit — the history routinely runs past 70 characters — so do not truncate the meaning to hit one.
 
-Say why in the body rather than falling back on a generic line. "Improve documentation." tells a
-future reader nothing that the diff does not already show; the defect that was observed, or the
-behaviour that was wrong, does.
+Say why in the body. "Improve documentation." tells a reader nothing the diff does not already
+show; the defect observed, or the behaviour that was wrong, does.

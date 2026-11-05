@@ -5,16 +5,15 @@
 
 PyPCAPKit is an open-source Python library for parsing, constructing and analysing
 network packets and [PCAP](https://en.wikipedia.org/wiki/Pcap) files, with
-[DictDumper](https://github.com/JarryShaw/DictDumper) as its formatted output dumper.
+[DictDumper](https://github.com/JarryShaw/DictDumper) as its output dumper.
 
-Unlike popular PCAP extractors such as [Scapy](https://scapy.net),
-[DPKT](https://dpkt.readthedocs.io) and [PyShark](https://kiminewt.github.io/pyshark),
-`pcapkit` reports more detail about each packet through a more *Pythonic* interface.
-Where that depth is not needed, the same interface also drives third-party extraction
-engines.
+Compared with [Scapy](https://scapy.net), [DPKT](https://dpkt.readthedocs.io) and
+[PyShark](https://kiminewt.github.io/pyshark), `pcapkit` reports more detail about each
+packet through a more *Pythonic* interface. Where that depth is not needed, the same
+interface drives those tools as third-party extraction engines.
 
-The whole project requires **Python 3.8** or later. CI supports 3.11 to 3.15, and
-still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
+Requires **Python 3.8** or later. CI supports 3.11 to 3.15, and tests the end-of-life
+3.8 to 3.10 without letting a failure block anything.
 
 ## Installation
 
@@ -22,7 +21,7 @@ still tests the end-of-life 3.8 to 3.10 without letting a failure block anything
 pip install pypcapkit
 ```
 
-Or from a clone, for the latest version and for development:
+Or from a clone, for unreleased changes and development:
 
 ```shell
 git clone https://github.com/JarryShaw/PyPCAPKit.git
@@ -39,14 +38,12 @@ pip install pypcapkit[cli]          # command line interface
 pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
 ```
 
-Engines are on demand; `all` bundles only the core addons the library needs for
-full functionality. Some engines also need something beyond `pip install` -- a
-`tshark` binary, a C compiler, `libpcap` headers, or an older interpreter -- and
-`pypcap`/`pcap-ct` must never be installed together. The
+Each engine is a separate extra; `all` bundles only the core addons. Some engines
+need more than `pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or
+an older interpreter -- and `pypcap` and `pcap-ct` must not be installed together. The
 [engine prerequisites](https://jarryshaw.github.io/PyPCAPKit/engines.html#engine-prerequisites)
-give each constraint and its reason. `pcapkit` enforces them in code: asking for an engine
-that cannot run in the current environment warns with the cause and falls back to
-its own parser.
+give each constraint and its reason. Asking for an engine that cannot run here warns
+with the cause and falls back to `pcapkit`'s own parser.
 
 ## Usage
 
@@ -64,8 +61,7 @@ datetime.datetime(2017, 11, 19, 15, 49, 5, 471719, tzinfo=datetime.timezone.utc)
 IPv6Address('fe80::a6:87f9:2793:16ee')
 ```
 
-The output is from the committed `examples/captures/in.pcap`, so it is reproducible
-from a clone.
+The output is from the committed `examples/captures/in.pcap`.
 
 Reassembly, TCP flow tracing and the engine are keyword arguments to the same call:
 
@@ -82,8 +78,8 @@ More examples, including the command line interface, are in
 
 ## Documentation
 
-The [official documentation](https://jarryshaw.github.io/PyPCAPKit/) is the
-reference. Pages worth knowing by name:
+Pages of the [official documentation](https://jarryshaw.github.io/PyPCAPKit/) worth
+knowing by name:
 
 | Page | What is in it |
 |---|---|
@@ -97,4 +93,4 @@ reference. Pages worth knowing by name:
 | [Extensions](https://jarryshaw.github.io/PyPCAPKit/ext.html) | Registering your own protocols, engines and dumpers |
 
 The newest changelog entry is in [CHANGELOG.md](CHANGELOG.md), which links to the
-full history, and contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md).
+full history; contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md).

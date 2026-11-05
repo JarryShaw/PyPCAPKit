@@ -1,7 +1,6 @@
-.. The engine comparison, moved off the root document so the landing page stays
-   short: which engines exist, what each costs in support, where each runs, what
-   each needs installed, and how fast each is. ``index.rst`` keeps a summary and a
-   link here.
+.. The engine comparison: which engines exist, what each costs in support,
+   where each runs, what each needs installed, and how fast each is.
+   ``index.rst`` keeps a summary and a link here.
 
    The Test Environment, Test Results and Test Results (Relative) sections are
    pasted from ``examples/benchmark/report.py``'s snippets. Its row markers are
@@ -13,30 +12,41 @@ Engine Comparison
 
 Being a **comprehensive** packet processor costs speed: :mod:`pcapkit`'s own
 engine is slower than every third-party engine below except `PyShark`_, as
-`Test Results`_ measures.
+`Test Results`_ measures. ``engine=`` selects the engine:
 
-:mod:`pcapkit` also supports alternative extraction engines for speed:
-`Scapy`_, `DPKT`_, `PyShark`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_,
-selected through ``engine='scapy'``, ``'dpkt'``, ``'pyshark'``, ``'pypcap'``,
-``'pcap_ct'`` and ``'pypcapfile'`` respectively; ``engine='default'`` (also
-spelled ``'pcapkit'``) is :mod:`pcapkit`'s own parser and the only one with no
-third-party requirement.
+.. list-table::
+   :header-rows: 1
 
-`PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
-:manpage:`libpcap(3)` interface and both install a top-level |pcap|_ module,
-so they are two engines rather than one: upstream `PyPCAP`_ stops at Python 3.11,
-`pcap-ct`_ covers 3.10 and newer. **Install exactly one of them** -- with both
-present, ``pcap-ct`` wins the import and the other becomes unselectable.
+   * - ``engine=``
+     - Engine
+   * - ``'default'`` or ``'pcapkit'``
+     - :mod:`pcapkit`'s own parser, the only one with no third-party requirement
+   * - ``'scapy'``
+     - `Scapy`_
+   * - ``'dpkt'``
+     - `DPKT`_
+   * - ``'pyshark'``
+     - `PyShark`_
+   * - ``'pypcap'``
+     - `PyPCAP`_
+   * - ``'pcap_ct'``
+     - `pcap-ct`_
+   * - ``'pypcapfile'``
+     - `PyPCAPFile`_
 
-Speed is not free. Every third-party engine supports **less** than the
-``default`` one, and the newest ones support markedly less --
+`PyPCAP`_ and `pcap-ct`_ are independent distributions of the same
+:manpage:`libpcap(3)` interface, and both install a top-level |pcap|_ module:
+upstream `PyPCAP`_ stops at Python 3.11, `pcap-ct`_ covers 3.10 and newer.
+**Install exactly one of them** -- with both present, ``pcap-ct`` wins the
+import and the other becomes unselectable.
+
+Every third-party engine supports **less** than the ``default`` one.
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` perform no protocol
 dissection at all, so they offer neither reassembly nor flow tracing, and
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
-exception rather than silently returning nothing, except for these, which pass
-without a warning:
+exception, except for these, which pass without a warning:
 
 - :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
   VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in
@@ -50,14 +60,34 @@ without a warning:
 
 :doc:`pcapkit/foundation/engines/index` tabulates them.
 
-Every engine also answers a preflight check --
+Every engine also answers a preflight check,
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
-before anything is imported -- so asking for one that cannot run in the current
-environment gives a single warning naming the actual cause (a Python version, a
-missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong |pcap|_
-distribution) and a clean fall back, rather than an error from inside the
-third-party package.
+before importing the engine. An engine that cannot run here therefore gives one
+warning naming the cause (a Python version, a missing :program:`tshark`, a
+missing :manpage:`libpcap(3)`, the wrong |pcap|_ distribution) and falls back
+to the :term:`default engine`, rather than raising from inside the third-party
+package:
+
+.. mermaid::
+
+   flowchart TD
+       REQ["engine=..."] --> KNOWN{"registered in<br/>Extractor.\_\_engine\_\_?"}
+       KNOWN -->|no| OWN{"'default' or 'pcapkit'?"}
+       OWN -->|no| W1["EngineWarning:<br/>unsupported extraction engine"]
+       OWN -->|yes| DEFAULT["default engine"]
+       W1 --> DEFAULT
+       KNOWN -->|yes| REASON{"unsupported_reason()<br/>gives a reason?"}
+       REASON -->|yes| W2["EngineWarning:<br/>not supported on this interpreter"]
+       W2 --> DEFAULT
+       REASON -->|no| IMPORT{"engine package imports?"}
+       IMPORT -->|no| W3["EngineWarning:<br/>not installed"]
+       W3 --> DEFAULT
+       IMPORT -->|yes| THIRD["third-party engine"]
+       DEFAULT --> MAGIC{"input's magic number"}
+       MAGIC -->|PCAP| PCAP["PCAP"]
+       MAGIC -->|PCAP-NG| PCAPNG["PCAPNG"]
+       MAGIC -->|other| ERR["FormatError"]
 
 .. note::
 
@@ -65,20 +95,19 @@ third-party package.
    `Test Results (Relative)`_ are copied here by hand from a benchmark report;
    nothing regenerates them on this page. The ``Engine Benchmark`` workflow,
    :file:`.github/workflows/benchmark.yml`, measures every engine on every
-   interpreter they are tested on, weekly and on dispatch, and posts its
+   interpreter it is tested on, weekly and on dispatch, and posts its
    environment and ratio tables to the ``benchmark: weekly engine benchmark
    report`` thread in the ``CI reports`` Discussions category (see
    :ref:`ci reports`); the per-version table is in the run's job summary and its
    ``benchmark-out`` artifact. :file:`examples/benchmark/run.sh` produces the same
    tables on any machine with Docker, and :file:`examples/benchmark/README.md`
-   explains what each one measures. `Test Environment`_ records where the
-   figures on this page came from.
+   explains what each one measures.
 
 Engine Support by Python Version
 --------------------------------
 
-Which engines can run at all, by interpreter. Verified by installing each engine
-and extracting a capture on 3.10 through 3.15.
+Which engines can run, by interpreter, verified by installing each engine and
+extracting a capture on 3.10 through 3.15.
 
 ================== ======== ======== ======== ======== ======== ========
 Engine              3.10     3.11     3.12     3.13     3.14     3.15
@@ -94,25 +123,23 @@ Engine              3.10     3.11     3.12     3.13     3.14     3.15
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
 reasons under `Engine Prerequisites`_. **Python 3.11 is the last version on which
-every engine can run** -- and even there ``pypcap`` and ``pcap_ct`` remain
-mutually exclusive for the reason given above, so no single environment ever has
-every engine at once.
+every engine can run** -- though ``pypcap`` and ``pcap_ct`` are mutually
+exclusive there too, so no single environment has every engine at once.
 
 .. _engine-prerequisites:
 
 Engine Prerequisites
 --------------------
 
-Some of the engines need something beyond a ``pip install``. Each constraint
-below is also enforced in code, by the
+Some engines need more than a ``pip install``. The
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
-preflight described at the top of this page.
+preflight above enforces each constraint below in code.
 
 :class:`~pcapkit.foundation.engines.pyshark.PyShark`
    None of its requirements is visible to an import: the package imports
    cleanly and then fails when used.
 
-   - Drives Wireshark's :program:`tshark` binary. It need not be on ``PATH``:
+   - Drives Wireshark's :program:`tshark` binary, which need not be on ``PATH``:
      |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` first, then
      ``PATH`` on POSIX, both Program Files directories on Windows, and
      :file:`/Applications/Wireshark.app` on macOS. Install Wireshark (or just
@@ -120,11 +147,9 @@ preflight described at the top of this page.
    - Requires Python **3.13 or older**. |pyshark|_ 0.6 builds its event loop
      with ``asyncio.get_event_loop_policy().get_event_loop()``, and from Python
      **3.14** :func:`asyncio.get_event_loop` raises :exc:`RuntimeError` when there
-     is no current event loop instead of quietly creating one. Measured: a loop is
-     returned silently on 3.10 and 3.11, returned with a
-     :exc:`DeprecationWarning` on 3.12, and refused on 3.14. 3.13 sits on the
-     deprecated-but-functional side of that change, and |pyshark|_ extracted a
-     capture there.
+     is no current event loop instead of creating one. Measured: a loop is
+     returned silently on 3.10 and 3.11, with a :exc:`DeprecationWarning` on
+     3.12, and refused on 3.14; |pyshark|_ extracted a capture on 3.13.
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`
    `PyPCAP`_ ships **no wheels** -- only an sdist -- so :program:`pip` compiles
@@ -140,21 +165,19 @@ preflight described at the top of this page.
       # macOS
       brew install libpcap
 
-   Caveats, each an upstream packaging problem rather than a :mod:`pcapkit` one:
+   Caveats, each an upstream packaging problem:
 
    - ``pypcap`` 1.3.0 ships a **pre-generated** :file:`pcap.c` produced by Cython
-     0.29.x, which does not compile against the Python **3.12+** C API. Having
-     `libpcap`_ installed is therefore necessary but *not* sufficient: on 3.12 or
-     newer the build fails whatever else is present. Use Python **3.11 or older**
-     for this engine, or regenerate :file:`pcap.c` with Cython 3 yourself.
+     0.29.x, which does not compile against the Python **3.12+** C API, so on
+     3.12 or newer the build fails whatever else is present. Use Python **3.11 or
+     older** for this engine, or regenerate :file:`pcap.c` with Cython 3 yourself.
    - Its :file:`setup.py` does not consult ``CFLAGS``/``LDFLAGS`` or
      :program:`pkg-config`. It searches a fixed list of prefixes --
      :file:`/usr`, :data:`sys.prefix`, :file:`/opt/libpcap*`,
      :file:`../libpcap*`, :file:`../wpdpack*` and the macOS SDKs -- so a
      `libpcap`_ installed anywhere else, notably Homebrew's keg-only prefix on
-     Apple Silicon (:file:`/opt/homebrew/opt/libpcap`), is not found even though
-     it is installed. Installing into :data:`sys.prefix`, or into
-     :file:`/opt/libpcap`, is what that search will pick up.
+     Apple Silicon (:file:`/opt/homebrew/opt/libpcap`), is not found. Install it
+     into :data:`sys.prefix` or :file:`/opt/libpcap` instead.
 
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`
    The way to drive the same `libpcap`_ interface on Python **3.12 and newer**,
@@ -174,26 +197,24 @@ preflight described at the top of this page.
      ``LIBPCAP = tcpdump`` in :file:`libpcap.cfg` to use the vendored copy instead.
    - Both distributions are **pre-releases**, and ``pcap-ct`` documents itself as
      tracking the ``pypcap`` *1.2.3* interface. Every attribute the engine uses was
-     measured behaving identically to ``pypcap`` 1.3.0, but that is a statement
-     about the versions tested.
+     measured behaving identically to ``pypcap`` 1.3.0, on the versions tested.
 
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
    `PyPCAPFile`_ 0.12.0 imports the ``imp`` module, which was **removed in
    Python 3.12**, so ``pcapfile.savefile`` -- the module needed to read a
-   capture -- cannot be imported at all on 3.12 or newer. Upstream ``master``
-   has fixed this but no release carries the fix, so this engine also
-   requires Python **3.11 or older** until 0.12.1 is published.
+   capture -- cannot be imported on 3.12 or newer. Upstream ``master`` has fixed
+   this, but no release carries the fix, so this engine requires Python **3.11
+   or older**.
 
 .. note::
 
-   Only the engines above carry extra constraints. :mod:`pcapkit` itself and
-   its ``default``, ``dpkt`` and ``scapy`` engines need nothing beyond their
-   ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy`` 2.8.0 were both measured
-   reading a capture on Python 3.14. The ``scapy`` engine needs **scapy 2.6.0 or
-   newer**, which the ``Scapy`` extra requires: 2.5.0 can drop a PCAP-NG
-   interface's timestamp resolution, reading nanoseconds as microseconds
-   (:issue:`1572`). :mod:`pcapkit` does not check the version at run time, so
-   upgrade a scapy installed some other way.
+   :mod:`pcapkit` itself and its ``default``, ``dpkt`` and ``scapy`` engines
+   need nothing beyond their ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy``
+   2.8.0 were both measured reading a capture on Python 3.14. The ``scapy``
+   engine needs **scapy 2.6.0 or newer**, which the ``Scapy`` extra requires:
+   2.5.0 can drop a PCAP-NG interface's timestamp resolution, reading
+   nanoseconds as microseconds (:issue:`1572`). :mod:`pcapkit` does not check
+   the version at run time, so upgrade a scapy installed some other way.
 
 Test Environment
 ----------------
