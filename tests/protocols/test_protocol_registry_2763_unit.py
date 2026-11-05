@@ -11,10 +11,11 @@ with ``register_protocol``:
   and class, and no entry names anything else.
 * :class:`AutoRegistrationTests` pins what defining a subclass does: a concrete
   :class:`~pcapkit.protocols.protocol.Protocol` subclass names itself, an abstract
-  one does not, nor does a class deriving ``ProtocolBase`` alone, as every built-in
-  does; a clash keeps the entry and warns, a class meeting its own descriptor is
-  silent, and only ``register_protocol`` replaces an entry, putting a built-in's
-  descriptor back as shipped.
+  one does not, and keeps its abstract flag where ``__flags__`` freezes at the first
+  read, as on GraalPy (#2784), nor does a class deriving ``ProtocolBase`` alone, as
+  every built-in does; a clash keeps the entry and warns, a class meeting its own
+  descriptor is silent, and only ``register_protocol`` replaces an entry, putting a
+  built-in's descriptor back as shipped.
 * :class:`GetterTests` pins the lookup and the removal of the module dict.
 * :class:`RegistryViewTests` pins ``AnyProtocol.registry``, the read-only view of the
   entries as stored.
@@ -190,13 +191,27 @@ class AutoRegistrationTests(_RegistryTestCase):
         from pcapkit.protocols.protocol import Protocol
 
         bare = type('W2763Bare', (Protocol,), {'__module__': __name__})
-        self.assertTrue(inspect.isabstract(bare))
+        self.assertTrue(bare.__abstractmethods__)
         self.assertNotIn('W2763BARE', self.registry)
 
         # A concrete subclass of an abstract one is still named.
         member = _concrete('W2763Member', base=bare)
-        self.assertFalse(inspect.isabstract(member))
+        self.assertFalse(member.__abstractmethods__)
         self.assertIs(self.registry['W2763MEMBER'], member)
+
+    def test_an_abstract_subclass_keeps_its_abstract_flag(self) -> 'None':
+        """#2784: the hook reads no ``__flags__``, which GraalPy freezes at the first read."""
+        from pcapkit.protocols.protocol import Protocol
+        from tests.utilities.test_inspect_isabstract_2784_unit import frozen_flags
+
+        bare = frozen_flags(type(Protocol))('W2784Bare', (Protocol,), {'__module__': __name__})
+        self.assertTrue(bare.__abstractmethods__)
+        self.assertNotIn('W2784BARE', self.registry)
+        self.assertTrue(inspect.isabstract(bare))
+
+        member = _concrete('W2784Member', base=bare)
+        self.assertFalse(member.__abstractmethods__)
+        self.assertIs(self.registry['W2784MEMBER'], member)
 
     def test_a_clash_keeps_the_entry_and_warns(self) -> 'None':
         shipped = self.registry['IPV4']
@@ -231,7 +246,7 @@ class AutoRegistrationTests(_RegistryTestCase):
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             redefined = _concrete('NGAP', module=NGAP.__module__)
-        self.assertFalse(inspect.isabstract(redefined))
+        self.assertFalse(redefined.__abstractmethods__)
         self.assertEqual(_registry_warnings(caught), [])
         self.assertIs(self.registry['NGAP'], shipped)
         self.assertIs(self.ProtocolBase.get_protocol('NGAP'), NGAP)

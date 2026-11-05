@@ -60,6 +60,7 @@ from pcapkit.utilities.contextvars import beholding, frame_depth, rebuilding
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
                                           UnsupportedCall, stacklevel)
+from pcapkit.utilities.inspect import isabstract
 from pcapkit.utilities.warnings import (ProtocolWarning, RegistryWarning, UnknownFieldWarning,
                                         hold_warnings, warn)
 
@@ -3286,11 +3287,11 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         under its upper-cased class name, once
         :meth:`ProtocolBase.__init_subclass__` has accepted its ``code``,
         whereas ``code``'s next-layer dispatch registration is opt-in. An
-        abstract subclass, as :func:`inspect.isabstract` reports it, is not
-        named, and nor is a class deriving :class:`ProtocolBase` without this
-        class, as every built-in protocol does. A name already holding another
-        entry keeps it, and the clash is reported as a
-        :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
+        abstract subclass, as :func:`~pcapkit.utilities.inspect.isabstract`
+        reports it, is not named, and nor is a class deriving
+        :class:`ProtocolBase` without this class, as every built-in protocol
+        does. A name already holding another entry keeps it, and the clash is
+        reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`; only
         :meth:`ProtocolBase.register_protocol
         <pcapkit.protocols.protocol.ProtocolBase.register_protocol>` replaces an
         entry. A class meeting the :class:`~pcapkit.corekit.module.ModuleDescriptor`
@@ -3314,7 +3315,9 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         # once its ``code`` is accepted, so a refused one names nothing, and
         # keeps off a name already held. A class meeting the descriptor naming
         # its own module and name leaves it, to be resolved on lookup.
-        if not inspect.isabstract(cls):
+        # #2784: not inspect.isabstract, which reads __flags__: GraalPy freezes them
+        # at that read, so the abstract flag ABCMeta sets next would never show.
+        if not isabstract(cls):
             name = cls.__name__.upper()
             incumbent = ProtocolBase.__registry__.setdefault(name, cls)
             if incumbent is not cls and not (isinstance(incumbent, ModuleDescriptor)
