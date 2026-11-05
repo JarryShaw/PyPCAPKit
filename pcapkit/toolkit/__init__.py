@@ -5,8 +5,8 @@
 
 .. module:: pcapkit.toolkit
 
-:mod:`pcapkit.toolkit` provides several utility functions for
-compatibility of multiple engine support.
+:mod:`pcapkit.toolkit` holds the per-engine adapters that feed the
+reassembly and flow tracing of :mod:`pcapkit.foundation`.
 
 """
 # tools for default engine

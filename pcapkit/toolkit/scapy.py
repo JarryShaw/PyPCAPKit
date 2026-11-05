@@ -15,22 +15,14 @@ cannot be used for it.
 
 .. note::
 
-   Several functions here import a `Scapy`_ layer module lazily, inside the
-   function body -- :func:`ipv6_reassembly` needs
-   :class:`scapy.layers.inet6.IPv6ExtHdrFragment`, for instance. Those imports are
-   for the *classes* they name and nothing more. They must not be mistaken for how
-   `Scapy`_'s layer registries get populated, even though they do populate them as
-   a side effect, because by the time any of these functions runs the engine has
-   already called ``sniff`` and every frame has already been dissected -- or not.
-
-   That distinction is what makes :issue:`406` hard to see. Reaching
-   :func:`ipv6_reassembly` populates ``conf.l2types`` mid-run, one call too late to
-   affect the frames being reassembled, so relying on it would make whether a
-   process dissects correctly depend on what had imported `Scapy`_ earlier.
-   Populating the registries before
-   ``sniff`` is
-   :class:`~pcapkit.foundation.engines.scapy.Scapy`'s job, and it does it by
-   importing ``scapy.all`` in its constructor.
+   The `Scapy`_ layer modules imported inside functions here, such as
+   :class:`scapy.layers.inet6.IPv6ExtHdrFragment` in :func:`ipv6_reassembly`,
+   are imported for the classes they name. The layer registries they populate
+   as a side effect are filled too late, after ``sniff`` has dissected every
+   frame, so relying on them would make dissection depend on what imported
+   `Scapy`_ earlier (:issue:`406`).
+   :class:`~pcapkit.foundation.engines.scapy.Scapy` imports ``scapy.all`` in
+   its constructor instead.
 
 """
 import decimal
@@ -744,31 +736,17 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     if (found := _tcp_carrier(packet)) is not None:
         ip, tcp, header, payload = found
 
-        # NOTE: the link type of the interface the packet was read from, which
-        # :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with
-        # :func:`attach_linktype` -- not one inferred from the first layer,
-        # which a raw IPv4 interface's packets share with no link type (#1517).
+        # NOTE: the link type the Scapy engine attaches with ``attach_linktype``,
+        # not one inferred from the first layer, which a raw IPv4 interface's
+        # packets share with no link type (#1517).
         linktype = getattr(packet, LINKTYPE_ATTR, None)
         if linktype is not None:
             protocol = Enum_LinkType.get(linktype)
         else:
-            # A packet built by hand carries none, so it is looked up by its
-            # first layer's name -- with no default, deliberately. ``get()``
-            # with no default raises on an unresolvable name rather than minting
-            # one (#775). NULL and RAW are genuine DLTs -- BSD loopback and raw
-            # IP framing, respectively -- each meant to go with its own handler
-            # protocol class, so neither is an honest stand-in for "unknown link
-            # type" and this must not paper over the miss with either. An
-            # IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which
-            # is not a LinkType member name, and raises. Note the asymmetry,
-            # which is not a choice made here: an IPv6-rooted packet's name
-            # uppercases to ``'IPV6'``, which *is* a member (``LinkType.IPV6``,
-            # 229), so it resolves silently -- to a DLT the caller never chose.
-            # Only the v4 name happens to miss. The ``KeyError`` from
-            # :meth:`LinkType.get` is caught and re-raised as
-            # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
-            # package's own house exception for a lookup miss -- rather than
-            # letting it escape this public function.
+            # A packet built by hand carries none, so its first layer's name is
+            # looked up with no default, raising ``MissingKeyError`` rather than
+            # substituting a DLT (#775), since ``NULL`` and ``RAW`` are real DLTs.
+            # ``'IP'`` misses, but ``'IPV6'`` silently resolves to ``LinkType.IPV6``.
             name = packet.name.upper()
             try:
                 protocol = Enum_LinkType.get(name)
@@ -786,11 +764,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             dst=ipaddress.ip_address(ip.dst),                    # destination IP
             srcport=tcp.sport,                                   # TCP source port
             dstport=tcp.dport,                                   # TCP destination port
-            # NOTE: the *capture's* clock, not the host's. ``time.time()`` would
-            # put the moment of parsing into every flow label -- so the same
-            # capture traced twice would produce different label strings and
-            # different output filenames. Scapy carries the record's
-            # own timestamp on ``Packet.time``, so that is what is reported.
+            # NOTE: the capture's clock, not ``time.time()``, so tracing a capture
+            # twice gives the same flow labels and output filenames.
             timestamp=float(packet.time),                        # capture timestamp
             seq=tcp.seq,                                         # TCP sequence number
             ack=tcp.ack,                                         # TCP acknowledgement number

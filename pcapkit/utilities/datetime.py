@@ -22,25 +22,13 @@ if TYPE_CHECKING:
 
 __all__ = ['fromtimestamp', 'totimestamp']
 
-# A UNIX timestamp as an aware datetime, without the C library (#2099).
-# :meth:`datetime.datetime.fromtimestamp` breaks the instant down with the
-# platform's ``gmtime()`` when given a ``tz``, so its range is the C library's
-# rather than ``datetime``'s: the Windows CRT's ``gmtime_s`` takes no time before
-# 1970 and none after 3000, and CPython raises :exc:`OSError` there for instants
-# ``datetime`` holds. This splits a float into whole seconds and microseconds
-# exactly as CPython does -- :func:`math.modf`, the fraction times ``1e6``
-# rounded half to even, then carried into ``[0, 1e6)`` -- and adds them to the
-# epoch, so every instant gets the result glibc's ``gmtime_r`` gives. It is not
-# a version gate: the same arithmetic runs on every interpreter.
-#
-# The errors are CPython's on 64-bit Linux, by class: :exc:`ValueError` for NaN
-# or a year outside 1 to 9999, and :exc:`OverflowError` for whole seconds past
-# a 64-bit ``time_t`` or a ``tz`` offset that pushes the result out of range.
-# The one exception is a year past what a C ``int`` holds, from about 6.7e16
-# seconds, where glibc's own ``gmtime_r`` fails first and CPython raises
-# :exc:`OSError` instead; this raises :exc:`ValueError` there too. On GraalPy a
-# :class:`~datetime.timezone` whose offset pushes the result out of range raises
-# :exc:`ValueError` from its own ``fromutc``, which this does not change (#2134).
+# Avoids the platform ``gmtime()``, narrower than ``datetime``'s on Windows (#2099).
+# ``fromtimestamp`` splits a float as CPython does (``math.modf``, the fraction
+# times ``1e6`` rounded half to even, carried into ``[0, 1e6)``) on every
+# interpreter, so every instant gets glibc ``gmtime_r``'s result. Its
+# errors are CPython's on 64-bit Linux, except past a C ``int`` year (about 6.7e16
+# seconds), where CPython raises ``OSError`` and this ``ValueError``. On GraalPy,
+# a ``tz`` offset out of range raises ``ValueError`` from its ``fromutc`` (#2134).
 _EPOCH = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
 #: First and last whole second since the UNIX epoch in years 1 to 9999.
 _EPOCH_MIN = -62_135_596_800
@@ -50,15 +38,10 @@ _MICROSECONDS = datetime.timedelta(seconds=1) // datetime.timedelta(microseconds
 #: A 64-bit ``time_t`` holds ``[-_TIME_T, _TIME_T)``.
 _TIME_T = 2**63
 
-# GraalPy's :meth:`datetime.datetime.timestamp` of an aware datetime counts the
-# whole seconds since the epoch toward zero and then adds the fraction, so an
-# instant before 1970 that has one comes out a second late: 23:59:59.5 on
-# December 31, 1969, UTC, gives ``0.5``, not ``-0.5`` (#2134, measured on
-# GraalPy 25.4.4). ``TimestampNode`` takes ``ChronoUnit.SECONDS.between`` of the
-# epoch and the instant, which truncates (graalpython, DateTimeBuiltins.java, at
-# graal-25.4.4, with no upstream issue filed). CPython and PyPy compute
-# ``(dt - epoch).total_seconds()`` for an aware datetime, which is right, so
-# there :func:`totimestamp` is the stdlib call itself.
+# GraalPy 25.4.4 truncates an aware datetime's whole seconds toward zero, so
+# 23:59:59.5 on 1969-12-31 UTC gives ``0.5``, not ``-0.5`` (#2134): its
+# ``TimestampNode`` uses ``ChronoUnit.SECONDS.between`` (DateTimeBuiltins.java,
+# no upstream issue filed). Elsewhere ``totimestamp`` is the stdlib call itself.
 _TIMESTAMP_TRUNCATES = sys.implementation.name == 'graalpy'
 
 

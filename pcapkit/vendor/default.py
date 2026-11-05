@@ -4,8 +4,8 @@
 
 .. module:: pcapkit.vendor.default
 
-:mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`
-only, which is the base class for all vendor crawlers.
+:mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`,
+the base class of every vendor crawler.
 
 """
 import abc
@@ -652,8 +652,7 @@ class Vendor(metaclass=VendorMeta):
         crawler's destination *without* instantiating it, and so without triggering
         :meth:`Vendor.__init__`'s network fetch, render and write --
         the pre-run snapshot that ``run()`` in :mod:`pcapkit.vendor.__main__`
-        takes (GitHub issue :issue:`872`) is exactly such a caller. Every crawler defined in this
-        codebase inherits this implementation unchanged; none overrides
+        takes (:issue:`872`) is such a caller. No crawler overrides
         ``_dest_path``, so the classmethod is authoritative for all of them.
 
         Returns:
@@ -777,11 +776,8 @@ class Vendor(metaclass=VendorMeta):
                     raise
 
                 if not stdin_is_interactive():
-                    # NOTE: manual intervention needs an operator, and a process
-                    # with no terminal has none -- nobody to read the instructions
-                    # below, nobody to save the page, so the wait it ends in could
-                    # only ever time out the whole run. Fail exactly as CI_MODE
-                    # does rather than prompting into the void; see #522.
+                    # NOTE: with no terminal, nobody can save the page, so fail as
+                    # CI_MODE does rather than wait (#522).
                     warn('Connection failed; exit as stdin is not interactive...',
                          VendorRequestWarning, stacklevel=2)
                     raise
@@ -810,19 +806,11 @@ class Vendor(metaclass=VendorMeta):
                         try:
                             input('Press ENTER to continue...')  # nosec
                         except Exception as exc:
-                            # NOTE: whatever stopped the prompt, ``input()`` is no
-                            # longer waiting -- and this loop only waits because
-                            # ``input()`` does, so the file it waits for can never
-                            # arrive. Discarding the exception would leave a
-                            # ``while True`` printing three lines per iteration at
-                            # full speed: 26.7 million lines and 2.6 GB measured in
-                            # #522. The terminal this started on can
-                            # still go away mid-wait -- a closed ``stdin`` raises
-                            # :exc:`ValueError`, a dropped one :exc:`EOFError`, a
-                            # vanished :data:`sys.stdin` :exc:`RuntimeError` -- so the
-                            # check before the prompt does not make this redundant.
-                            # ``KeyboardInterrupt`` is not an :exc:`Exception` and so
-                            # still aborts as itself.
+                            # NOTE: once ``input()`` fails, this loop would spin at
+                            # full speed (26.7 million lines, 2.6 GB measured in #522).
+                            # The terminal can still go mid-wait: a closed ``stdin``
+                            # raises ``ValueError``, a dropped one ``EOFError``, a
+                            # vanished ``sys.stdin`` ``RuntimeError``.
                             warn(f'Connection failed; cannot prompt for manual intervene ({exc})...',
                                  VendorRequestWarning, stacklevel=2)
                             raise error from exc

@@ -4,9 +4,7 @@
 
 .. module:: pcapkit.dumpkit.pcap
 
-:mod:`pcapkit.dumpkit.pcap` is the dumper for :mod:`pcapkit` implementation,
-specifically for PCAP format, like those described in
-:mod:`dictdumper`.
+:mod:`pcapkit.dumpkit.pcap` holds the PCAP file dumper, :class:`PCAPIO`.
 
 """
 import decimal
@@ -215,34 +213,24 @@ class PCAPIO(DumperBase):
             name: name of current content block
 
         Notes:
-            A PCAP record is a 16-octet header followed by the packet octets, and
-            both are already in hand: the header fields are ``value.frame_info``,
-            with the fraction in this file's resolution (see
-            :meth:`self._make_timestamp <_make_timestamp>`), and the octets are
-            exactly ``value.packet``. So this writes them directly, rather than
-            handing them to
-            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose constructor
-            packs the record and then **dissects it again** through the whole
-            protocol stack to arrive at bytes it was given. That round trip
-            measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,
-            1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms
-            without, over a 1030 ms untraced baseline.
+            A PCAP record is a 16-octet header, from ``value.frame_info`` with
+            the fraction in this file's resolution (see
+            :meth:`self._make_timestamp <_make_timestamp>`), followed by
+            ``value.packet``. Both are written directly rather than through
+            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose
+            constructor **dissects the record again** through the whole
+            protocol stack. That round trip measured about 82% of the cost of a
+            flow-traced extraction (``http.pcap``, 1117 frames, best of 7:
+            2319 ms with it, 1263 ms without, over a 1030 ms untraced
+            baseline), and re-emits every parse warning the frame raised, such
+            as ``SchemaWarning: packet length < 0: -3`` for a 3-octet payload.
 
-            Skipping it is not only cheaper. The re-dissection would re-emit
-            every parse warning the frame had already produced once, and warn
-            about payloads it has no business parsing at all -- writing a
-            3-octet payload would raise ``SchemaWarning: packet length < 0: -3``
-            from a dumper that only has to copy it.
-
-            ``incl_len`` is written as ``len(value.packet)``, the octets that
-            follow it, not as ``value.frame_info.incl_len``. The two are equal
-            for every record a file holds whole. A record whose captured length
-            runs past the end of its file, or a PCAP-NG block whose captured
-            length runs past the block (:issue:`1405`), is *kept as captured*
-            by its reader: the declared length stays in ``frame_info``, so the
-            source rebuilds byte-exactly, and ``packet`` is the octets present.
-            Copying that declared length would claim octets the trace does not
-            hold, and a reader would run off the end of the file (:issue:`1541`).
+            ``incl_len`` is written as ``len(value.packet)``, not as
+            ``value.frame_info.incl_len``. They differ only for a record kept
+            as captured whose declared length runs past the end of its file, or
+            past its PCAP-NG block (:issue:`1405`); copying that length would
+            claim octets the trace does not hold, and a reader would run off
+            the end of the file (:issue:`1541`).
 
         """
         # NOTE: The payload is read before the metadata so that a caller passing a

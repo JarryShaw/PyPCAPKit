@@ -5,9 +5,8 @@
 
 .. module:: pcapkit.interface
 
-:mod:`pcapkit.interface` defines the user-oriented
-interfaces and constants. These interfaces are
-designed to help and simplify the usage of :mod:`pcapkit`.
+:mod:`pcapkit.interface` defines the user-facing functions and
+macros of :mod:`pcapkit`.
 
 """
 

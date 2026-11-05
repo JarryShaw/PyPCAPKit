@@ -5,15 +5,25 @@
 
 .. module:: pcapkit.utilities
 
-:mod:`pcapkit.utilities` holds the cross-cutting services
-:mod:`pcapkit` is built with: user-refined exceptions and
-warnings, logging, the tunable limits of
-:mod:`~pcapkit.utilities.config`, a compatibility layer,
-timestamp conversion, pickle reductions, the context
-variables its modules share, lazy imports for a package's
-exports, an abstract-class check that reads no interpreter
-flag, and wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
-outside itself (:issue:`1712`).
+:mod:`pcapkit.utilities` holds the cross-cutting services :mod:`pcapkit`
+is built with, and imports nothing from :mod:`pcapkit` outside itself
+(:issue:`1712`):
+
+============================================ ================================================
+Module                                       Service
+============================================ ================================================
+:mod:`~pcapkit.utilities.exceptions`         user-refined exceptions
+:mod:`~pcapkit.utilities.warnings`           user-refined warnings
+:mod:`~pcapkit.utilities.logging`            logging
+:mod:`~pcapkit.utilities.config`             tunable limits and flags
+:mod:`~pcapkit.utilities.compat`             compatibility layer
+:mod:`~pcapkit.utilities.datetime`           timestamp conversion
+:mod:`~pcapkit.utilities.pickle`             shared pickle reductions
+:mod:`~pcapkit.utilities.contextvars`        context variables shared across modules
+:mod:`~pcapkit.utilities.importlib`          lazy imports of a package's exports
+:mod:`~pcapkit.utilities.inspect`            abstract-class check
+:mod:`~pcapkit.utilities.chardet`            `chardet`_ wrapper
+============================================ ================================================
 
 .. versionremoved:: 1.5.0
 

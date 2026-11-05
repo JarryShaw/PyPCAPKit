@@ -8,26 +8,21 @@
 
 .. important::
 
-   `pcap-ct`_ is a :mod:`ctypes` reimplementation of the `PyPCAP`_ interface over
-   :manpage:`libpcap(3)`: it hands back the ``(timestamp, bytes)`` pair that
-   :c:func:`pcap_next_ex` produced and performs **no protocol dissection
-   whatsoever**. There is therefore no IP or TCP layer for this module to read,
-   and the reassembly and flow tracing adapters that :mod:`pcapkit.toolkit.dpkt`
-   and :mod:`pcapkit.toolkit.scapy` provide cannot be implemented here.
-
-   They are still defined below, but only so that reaching for one fails loudly
-   with :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than with an
-   :exc:`ImportError` that says nothing about why. Dissecting the raw bytes with
-   :mod:`pcapkit`'s own parsers would defeat the point of selecting a third-party
-   engine, so it is deliberately not done.
+   `pcap-ct`_ is a :mod:`ctypes` reimplementation of the `PyPCAP`_ interface
+   over :manpage:`libpcap(3)`: it hands back the ``(timestamp, bytes)`` pair
+   :c:func:`pcap_next_ex` produced and performs **no protocol dissection**, so
+   there is no IP or TCP layer to reassemble or trace. The reassembly and flow
+   tracing adapters raise :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`
+   rather than an :exc:`ImportError` that says nothing about why; dissecting
+   the bytes with :mod:`pcapkit`'s own parsers would defeat the point of a
+   third-party engine.
 
 .. seealso::
 
-   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_,
-   kept apart from this module because the engines are: the distributions are
-   independent projects that happen to share the |pcap|_ module name, and
-   each engine names its own adapter so that a change made for one cannot
-   quietly alter the other.
+   :mod:`pcapkit.toolkit.pypcap`, the same adapter for upstream `PyPCAP`_. The
+   two distributions are independent projects sharing the |pcap|_ module name,
+   and each engine names its own adapter, so a change to one cannot alter the
+   other.
 
 """
 from typing import TYPE_CHECKING

@@ -9,9 +9,9 @@ cannot be used for it.
 
 .. note::
 
-   Due to the lack of functionality of `PyShark`_, some
-   functions of :mod:`pcapkit` may not be available with
-   the `PyShark`_ engine.
+   `PyShark`_ reports dissected fields, not octets, so this module has no
+   reassembly adapter, and :func:`tcp_traceflow` reports an empty header and
+   payload.
 
 """
 import decimal
@@ -577,35 +577,14 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     ip, tcp = _carrier(packet)
     if ip is not None and tcp is not None and _has_fixed_header(tcp) and _has_addresses(ip):
 
-        # NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's
-        # internal ``WTAP_ENCAP_*`` number -- through
-        # ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the
-        # PDML root layer's *filter* name when the frame layer has no such
-        # field. That name cannot do the job on its own: one filter name
-        # serves several DLTs, so keying on it would answer ``RAW`` (101) for a
-        # ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid
-        # DLTs, wrong ones, and silent (#843). ``frame.encap_type``
-        # distinguishes them; see that table's comment for the measurements.
+        # NOTE: the link type is keyed on ``frame.encap_type`` (``WTAP_ENCAP_*``)
+        # through ``ENCAP_TYPE_TO_LINKTYPE``, and on the root layer's filter name
+        # only when that field is absent: one filter name serves several DLTs, so
+        # it alone gives ``RAW`` for ``rawip6`` and ``NULL`` for ``DLT_LOOP`` (#843).
         #
-        # PyShark reports every field as ``LayerFieldsContainer``, a ``str``
-        # subclass, so the number arrives as text and needs ``int()``; and a
-        # field the frame layer does not carry raises ``AttributeError`` out
-        # of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is
-        # what the ``getattr`` default absorbs here.
-        #
-        # Neither path substitutes a DLT on a miss. A lookup raises on an
-        # unresolvable key rather than minting one (#775), and
-        # NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,
-        # respectively -- each meant to go with its own handler protocol
-        # class, so neither is an honest stand-in for "unknown link type".
-        # The bare ``KeyError``/``ValueError`` is re-raised as
-        # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
-        # package's own house exception for a lookup miss -- rather than
-        # letting it escape this public function.
-        #
-        # The frame layer is found by name, not taken as ``frame_info``, which
-        # is ``pkt_comment`` on a commented packet; the root layer is then the
-        # first layer that is not the frame layer.
+        # A miss raises ``MissingKeyError`` rather than substituting a DLT (#775),
+        # since ``NULL`` and ``RAW`` are real DLTs. The frame layer is found by
+        # name, as ``frame_info`` is ``pkt_comment`` on a commented packet.
         frame = _frame_layer(packet)
         if frame is None:
             raise ProtocolError(f'{_ENGINE}: packet {packet.number} has no frame layer')
@@ -644,11 +623,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             timestamp=_parse_epoch(epoch),                                       # timestamp
             seq=_absolute(tcp, 'seq'),                                           # TCP sequence number
             ack=_absolute(tcp, 'ack'),                                           # TCP acknowledgement number
-            # NOTE: PyShark reports dissected *fields*, not the octets behind
-            # them, so there is no header or payload to hand over -- which is
-            # the same reason this module carries no ``tcp_reassembly`` at all.
-            # ``Extractor`` refuses ``trace_analyse=True`` on this engine, so
-            # nothing reads them.
+            # NOTE: PyShark reports fields, not octets, so both are empty;
+            # ``Extractor`` refuses ``trace_analyse=True`` on this engine.
             header=b'',                                                          # unavailable
             payload=bytearray(),                                                 # unavailable
         )

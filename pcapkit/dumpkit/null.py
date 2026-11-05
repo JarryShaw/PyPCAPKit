@@ -4,13 +4,8 @@
 
 .. module:: pcapkit.dumpkit.null
 
-:mod:`pcapkit.dumpkit.null` is the dumper for :mod:`pcapkit` implementation,
-specifically for **NotImplemented** format, like those described in
-:mod:`dictdumper`.
-
-Notes:
-   This dumper is used when the given format is not supported, as a fallback.
-   It shall not produce any output.
+:mod:`pcapkit.dumpkit.null` holds :class:`NotImplementedIO`, the fallback
+dumper for an unsupported output format, which writes nothing.
 
 """
 from typing import TYPE_CHECKING

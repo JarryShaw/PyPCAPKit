@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.vendor.__main__
 
-:mod:`pcapkit.vendor.__main__` is a command line tool for updating
+:mod:`pcapkit.vendor.__main__` is the command line tool that updates the
 constant enumerations.
 
 """
@@ -143,23 +143,13 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     try:  # pylint: disable=no-else-raise
         yield
     except BaseException:
-        # os.replace() disposes of the backup by moving it back onto
-        # const_file -- but only once it succeeds. If it does not, the
-        # original exception is masked (it survives only as __context__ on
-        # whatever os.replace raises) and the backup is left orphaned; ``raise``
-        # is unconditional here on purpose, since a failed restore is still a
-        # failure the target must report, not a success to fall through to.
+        # os.replace() moves the backup back onto const_file; if it fails, the
+        # original exception survives only as __context__ and the backup is
+        # orphaned. ``raise`` is unconditional: a failed restore is still a failure.
         #
-        # The `else:` below is deliberate, not a style default pylint would
-        # pick: collapsing it into an unindented statement after this whole
-        # `try` makes "cleanup only runs on success" a fact that has to be
-        # re-derived from "`raise` never falls through", rather than one the
-        # structure states directly -- and it would silently stop being true the
-        # moment someone deleted that `raise`.  A mutation test showed it: with the
-        # `raise` gone, the unindented `os.remove(backup)` still ran, after
-        # `os.replace` had already renamed the backup away, so it raised
-        # FileNotFoundError instead of the crawler's real error -- and the rest
-        # of the suite passed regardless, because run() catches that too.
+        # The ``else:`` below states "cleanup only on success" structurally; an
+        # unindented ``os.remove(backup)`` would rely on ``raise`` and, without
+        # it, raise FileNotFoundError over the crawler's real error.
         os.replace(backup, const_file)
         raise
     else:

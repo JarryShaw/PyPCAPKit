@@ -8,58 +8,22 @@
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
 
-Unlike popular PCAP file extractors, such as `Scapy`_,
-`DPKT`_ and `PyShark`_, :mod:`pcapkit` uses streaming
-strategy to read input files. That is to read frame by
-frame, decrease occupation on memory, as well as enhance
-efficiency in some way.
+Unlike `Scapy`_, `DPKT`_ and `PyShark`_, :mod:`pcapkit` reads
+input files as a stream, frame by frame, to keep memory use low.
 
-In :mod:`pcapkit`, all files can be described as the following
-components.
-
-- Interface (:mod:`pcapkit.interface`)
-
-  User interface for the :mod:`pcapkit` library, which
-  standardises and simplifies the usage of this library.
-
-- Foundation (:mod:`pcapkit.foundation`)
-
-  Synthesises file I/O and protocol analysis, coordinates
-  information exchange in all network layers, as well as
-  provides the fundamental functions for :mod:`pcapkit`.
-
-- Protocols (:mod:`pcapkit.protocols`)
-
-  Collection of all protocol families, with detailed
-  implementation and methods.
-
-- Utilities (:mod:`pcapkit.utilities`)
-
-  Auxiliary functions and tools for :mod:`pcapkit`.
-
-- CoreKit (:mod:`pcapkit.corekit`)
-
-  Core utilities for :mod:`pcapkit` implementation, mainly
-  for internal data structure and processing.
-
-- ToolKit (:mod:`pcapkit.toolkit`)
-
-  Auxiliary tools for :mod:`pcapkit` to support the multiple
-  extraction engines with a unified interface.
-
-- DumpKit (:mod:`pcapkit.dumpkit`)
-
-  File output formatters for :mod:`pcapkit`.
-
-- Constants (:mod:`pcapkit.const`)
-
-  Constant enumerations used in :mod:`pcapkit` for protocol
-  family extraction and representation.
-
-- Vendor Crawlers (:mod:`pcapkit.vendor`)
-
-  Web crawlers that generate the constant enumerations in
-  :mod:`pcapkit.const`.
+============================================= =================================================
+Subpackage                                    Contents
+============================================= =================================================
+Interface (:mod:`pcapkit.interface`)          user-facing functions and macros
+Foundation (:mod:`pcapkit.foundation`)        extraction, flow tracing, reassembly and registry APIs
+Protocols (:mod:`pcapkit.protocols`)          protocol dissectors
+Utilities (:mod:`pcapkit.utilities`)          auxiliary functions and tools
+CoreKit (:mod:`pcapkit.corekit`)              core data structures
+ToolKit (:mod:`pcapkit.toolkit`)              per-engine reassembly and flow-tracing helpers
+DumpKit (:mod:`pcapkit.dumpkit`)              output file formatters
+Constants (:mod:`pcapkit.const`)              protocol enumeration registries
+Vendor Crawlers (:mod:`pcapkit.vendor`)       crawlers that generate :mod:`pcapkit.const`
+============================================= =================================================
 
 """
 ###############################################################################

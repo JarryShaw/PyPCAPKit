@@ -126,7 +126,7 @@ concurrency:
 #
 # Owner ruling, 2026-10-30: ``__version__`` carries a PEP 440 dev-release
 # suffix (``X.Y.Z.devN``) while a version is still under active development, a
-# work-in-progress signal with no gate of its own until now -- and the
+# work-in-progress signal with no gate of its own -- and the
 # ``workflow_run`` trigger above means a scheduled Vendor Update can reach this
 # workflow and carry that dev version all the way to ``github``'s one reviewer
 # approval (#887, below). That approval is not nothing, but it is one person

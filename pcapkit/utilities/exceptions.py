@@ -269,7 +269,7 @@ class BaseError(Exception):
         * The hooks still do not cover *every* path an exception can take.
           A traceback a caller formats itself with :mod:`traceback` -- rather
           than letting it reach the top level uncaught -- passes through
-          neither. See GitHub issue :issue:`719`.
+          neither (:issue:`719`).
         * The ``stacklevel`` of the log record is the relative level
           :func:`stacklevel` computes, so the record is attributed to the caller
           whose operation failed rather than to this module. It must not be
@@ -802,7 +802,7 @@ class EnumKeyError(BaseError, KeyError):
     :exc:`ValueError`, so a lookup that misses by *name* is
     :exc:`KeyError`-derived and one that misses by *value* is
     :exc:`ValueError`-derived. That is a ruling given in review of :issue:`877`'s
-    phase-2 re-parenting, carried out by GitHub issue :issue:`923`: raise
+    phase-2 re-parenting, carried out by :issue:`923`: raise
     whichever of the two stdlib :class:`~enum.Enum` would raise in the same
     circumstances, and raise it from this module rather than as a builtin.
 

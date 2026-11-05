@@ -109,14 +109,8 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
             return None
         ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info
 
-        # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, since
-        # :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`
-        # adds each extension header's length before the Fragment-header check
-        # breaks its loop. That is correct for a header length, but the
-        # reassembled packet carries no Fragment header at all
-        # (:rfc:`8200#section-4.5`), so the boundary wanted here is the one
-        # *before* it -- which is that same length less the Fragment header's,
-        # undoing the addition that included it.
+        # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, which the
+        # reassembled packet does not carry (RFC 8200, section 4.5), so subtract it.
         hdr_len = ipv6_info.hdr_len - cast('IPv6_Frag', ipv6_frag).length
         # NOTE: The reassembly machinery writes the payload into its datagram
         # buffer over the span ``tl - ihl``, so ``tl`` is derived from the
@@ -211,6 +205,8 @@ def dtls_reassembly(frame: 'PCAPNG') -> 'Optional[tuple[DTLS_Packet, ...]]':
 
     See Also:
         :class:`pcapkit.foundation.reassembly.dtls.DTLS`
+
+    .. versionadded:: 1.6.0
 
     """
     frame_info = cast('Packet', frame.info)

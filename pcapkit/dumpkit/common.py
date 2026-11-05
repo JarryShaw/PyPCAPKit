@@ -4,10 +4,9 @@
 
 .. module:: pcapkit.dumpkit.common
 
-:mod:`pcapkit.dumpkit.common` is the collection of common utility
-functions for :mod:`pcapkit.dumpkit` implementation, which is
-generally the customised hooks for :class:`dictdumper.dumper.Dumper`
-classes.
+:mod:`pcapkit.dumpkit.common` holds the customised hooks
+:mod:`pcapkit.dumpkit` builds its :class:`dictdumper.dumper.Dumper`
+classes with.
 
 """
 import collections
@@ -75,10 +74,8 @@ class DumperBase(dictdumper.dumper.Dumper):
 class Dumper(DumperBase):
     """Base :class:`~dictdumper.dumper.Dumper` object.
 
-    This class is a customised :class:`~dictdumper.dumper.Dumper` for the
-    :mod:`pcapkit.dumpkit` implementation, which is generally customised
-    for opt-in registration to the
-    :class:`~pcapkit.foundation.extraction.Extractor` and
+    A :class:`~dictdumper.dumper.Dumper` that registers itself, on request,
+    in the :class:`~pcapkit.foundation.extraction.Extractor` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output
     dumper registries.
 
@@ -99,9 +96,9 @@ class Dumper(DumperBase):
            class MyMixin(Dumper):  # not registered
                ...
 
-        Such a class can still be registered later, on demand. Note this hook
-        writes every output registry, so the equivalent manual call is the
-        module-level one that does the same, not any one class' own method:
+        Such a class can be registered later. The hook writes every output
+        registry, so the manual equivalent is the module-level registrar, not
+        one class' own method:
 
         .. code-block:: python
 
@@ -122,7 +119,7 @@ class Dumper(DumperBase):
                           ext: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialise subclass.
 
-        This method is used to register the subclass to the
+        Registers the subclass in the
         :class:`~pcapkit.foundation.extraction.Extractor` and
         :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
         output dumper registries.
@@ -140,18 +137,15 @@ class Dumper(DumperBase):
                 unrecognised class keyword is given.
 
         Registration is **opt-in**: the subclass is registered if and only if
-        ``fmt`` is given. This is what lets a subclass decline registration
-        rather than having to inherit :class:`DumperBase` to avoid it, and it
-        matches :meth:`EnumSchema.__init_subclass__
-        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>`, which
-        guards on its own ``code`` keyword the same way.
+        ``fmt`` is given, so a subclass can decline it without inheriting
+        :class:`DumperBase`, as :meth:`EnumSchema.__init_subclass__
+        <pcapkit.protocols.schema.EnumSchema.__init_subclass__>` guards on its
+        ``code`` keyword.
 
         Note:
-            Inferring ``fmt`` from the subclass'
-            :attr:`~dictdumper.dumper.Dumper.kind` property would need an
-            *instance*, hence a :func:`tempfile.NamedTemporaryFile` created while
-            the ``class`` statement is still executing. Guarding on ``fmt``
-            avoids that: a class definition does not touch the filesystem.
+            ``fmt`` is not inferred from :attr:`~dictdumper.dumper.Dumper.kind`,
+            which needs an *instance*, hence a file created while the ``class``
+            statement runs.
 
         See Also:
             - :func:`pcapkit.foundation.registry.foundation.register_dumper`
@@ -161,15 +155,13 @@ class Dumper(DumperBase):
             - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`
 
         """
-        # NOTE: as in the sibling hooks, an unrecognised class keyword would
-        # otherwise land in ``**kwargs`` and be dropped by the bare
-        # ``super().__init_subclass__()`` below, silently skipping registration.
+        # NOTE: an unrecognised class keyword would otherwise be dropped by the
+        # bare ``super().__init_subclass__()`` below, skipping registration.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
             raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
-        # NOTE: ``ext`` alone cannot register anything -- there is no format to
-        # register it against -- so it would silently do nothing. Say so instead.
+        # NOTE: ``ext`` alone has no format to register against.
         if fmt is None:
             if ext is not None:
                 raise UnsupportedCall(f'{cls.__name__}: ext={ext!r} given without fmt')
@@ -195,12 +187,10 @@ class Dumper(DumperBase):
 def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
     """Render an enumeration member as ``Type::name [value]``.
 
-    This is the spelling every dumped enumeration carries in the ``json``,
+    This is the spelling of every dumped enumeration in the ``json``,
     ``tree``, ``text``, ``txt``, ``plist`` and ``xml`` output of both
     :class:`~pcapkit.foundation.extraction.Extractor` and
-    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, so it lives in
-    one function rather than being spelled out at each place
-    :func:`make_dumper`'s hook needs it.
+    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`.
 
     Args:
         o: Enumeration member to render.
@@ -209,36 +199,18 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         The member's ``Type::name [value]`` rendering.
 
     Note:
-        A :class:`~enum.Flag` value composed **entirely of undeclared bits** has
-        no name at all -- :attr:`~enum.Enum.name` is :data:`None`, not a string --
-        so interpolating it unguarded would put the literal four characters
-        ``None`` into the name half and render
-        :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as ``'Flags::None [0]'``
-        (GitHub issue :issue:`648`).
-
-        That is worth a guard rather than a shrug. ``'None'`` is a
-        plausible member name, so a consumer splitting the rendering on ``::``
-        cannot tell it from a member genuinely so named -- and ``NONE`` *is* a
-        declared name elsewhere in the library. And the defect is not confined to
-        zero: a registry whose field has undeclared bits, such as
-        :class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`, is
-        every bit as nameless at ``1`` or ``8``, so a guard written against
-        ``value == 0`` would fix one case and leave the rest.
-
-        The fallback is the value's own decimal spelling, which is what the
-        enumeration libraries themselves already use for an undeclared residue:
-        ``BindingUpdateFlag(32777).name`` is ``'A|9'``, naming the declared bit
-        and giving the leftovers as one number. A wholly-undeclared value is that
-        same rendering with no declared bit to precede it, so
-        ``BindingUpdateFlag(9)`` becomes ``'BindingUpdateFlag::9 [9]'`` and
-        ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also
-        cannot be mistaken for a member name, since a Python identifier may not
-        begin with a digit.
-
-        This is *not* an |aenum|_ quirk. A stdlib :class:`enum.IntFlag` built
-        from the same members answers ``name is None`` identically on CPython
-        3.14.7, so the guard belongs here rather than in a choice of enumeration
-        library.
+        A :class:`~enum.Flag` value made **entirely of undeclared bits**, at
+        zero or not, has :attr:`~enum.Enum.name` :data:`None`, which would
+        render :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as
+        ``'Flags::None [0]'``, indistinguishable from a member named ``None``
+        (:issue:`648`). Its decimal value is used instead, as the enumeration
+        libraries spell an undeclared residue
+        (:class:`~pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`
+        ``(32777).name`` is ``'A|9'``), and no identifier begins with a digit:
+        ``BindingUpdateFlag(9)`` renders as ``'BindingUpdateFlag::9 [9]'`` and
+        ``Flags(0)`` as ``'Flags::0 [0]'``. A stdlib :class:`enum.IntFlag`
+        answers ``name is None`` identically on CPython 3.14.7, so this is not
+        an |aenum|_ quirk.
 
     """
     name = o.name
@@ -315,8 +287,8 @@ def _surrogate_pairs(text: 'str') -> 'str':
     Note:
         This is for :mod:`dictdumper.json`'s *key* path, which escapes a
         mapping key through its module-level :func:`~dictdumper.json.encode_string`
-        directly rather than through an overridable method (GitHub issue
-        :issue:`1261`). That function already escapes a lone surrogate as a
+        directly rather than through an overridable method (:issue:`1261`).
+        That function already escapes a lone surrogate as a
         four-digit ``\\uXXXX`` sequence -- it is only a *pair* of code points
         above ``U+FFFF`` it cannot spell -- so splitting first and handing it
         the pair is enough; no change to :func:`~dictdumper.json.encode_string`
@@ -369,50 +341,20 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
        rather than by its attributes (:issue:`2733`).
 
     """
-    # NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what
-    # :attr:`Extractor.__output__ <pcapkit.foundation.extraction.Extractor.__output__>`
-    # maps the ``'xml'`` format to, so the two are the same writer under two
-    # names here -- used to interpolate every ``<string>``/``<key>`` value into
-    # its XML-shaped markup with no entity escaping at all: neither ``&``,
-    # ``<`` nor ``>`` was escaped anywhere in :mod:`dictdumper`. Filed upstream
-    # as JarryShaw/DictDumper#125 and tracked here as GitHub issue #772 -- along
-    # with the sibling ``json`` key-quoting defect, DictDumper#121 -- and both
-    # halves are now fixed upstream in ``dictdumper`` 0.8.5 (DictDumper#123):
-    # :func:`dictdumper.plist.encode_xml` and :func:`dictdumper.json.encode_string`
-    # each escape a mapping key exactly as they escape the value beside it, so
-    # the escaping this module used to do for both is removed rather than
-    # doubled up on top of the upstream fix.
-    #
-    # ``is_plist_output`` survives under its own name for two narrower,
-    # still-unfixed reasons: a string holding a character XML 1.0 cannot spell
-    # at all (GitHub issue #1262, below) still has to be written as
-    # :class:`bytes` instead, and an aware :class:`~datetime.datetime` still has
-    # to be converted to UTC before the (now upstream-fixed) ``<date>``
-    # formatting runs, which neither :mod:`dictdumper` nor
-    # :func:`plistlib.dump` does on its own (GitHub issue #1448, below).
+    # NOTE: ``dictdumper`` 0.8.5 escapes keys and values itself (DictDumper#123,
+    # #772). The ``plist`` writer, which ``'xml'`` maps to as well, still needs a
+    # string XML 1.0 cannot spell written as bytes (#1262), and an aware datetime
+    # converted to UTC before ``<date>`` (#1448).
     is_plist_output = issubclass(output, dictdumper.plist.PLIST)
-    # NOTE: :meth:`~dictdumper.json.JSON._append_string` and the module-level
-    # :func:`dictdumper.json.encode_string` it shares with
-    # :meth:`~dictdumper.json.JSON._append_object` both escape a character
-    # above ``U+FFFF`` as a single five- or six-digit ``\uXXXX`` escape, which a
-    # reader takes as one four-digit escape followed by literal text (GitHub
-    # issue #1261). Unlike the key-escaping defect above, ``dictdumper`` 0.8.5
-    # left this one alone -- confirmed by reading the installed package's
-    # :func:`dictdumper.json.encode_string` -- so the surrogate-pair workarounds
-    # on :meth:`DictDumper._append_string` (values) and
-    # :meth:`DictDumper._append_object` (keys) below still apply.
+    # NOTE: ``dictdumper.json`` escapes a character above ``U+FFFF`` as one five-
+    # or six-digit ``\uXXXX``, misread as a four-digit escape and text (#1261);
+    # ``_append_string`` and ``_append_object`` below write a surrogate pair.
     is_json_output = issubclass(output, dictdumper.json.JSON)
-    # NOTE: :meth:`~dictdumper.plist.PLIST._append_dict` and
-    # :meth:`~dictdumper.plist.PLIST._append_array` skip every :data:`None`
-    # value and item outright, so a ``plist`` report lacks keys the ``json``
-    # report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, and
-    # ``dictdumper`` 0.8.5 did not touch it, so it is still worked around here.
+    # NOTE: ``dictdumper.plist`` skips every ``None`` value and item, so a
+    # ``plist`` report would lack keys the ``json`` one has (#1257).
     keep_none = issubclass(output, dictdumper.plist.PLIST)
-    # NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to
-    # :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`
-    # one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there
-    # (GitHub issue #1266). The defect is :mod:`dictdumper`'s, and ``dictdumper``
-    # 0.8.5 did not touch it, so it is still worked around here.
+    # NOTE: ``dictdumper.tree`` hands a ``complex`` to ``math.isnan``, which
+    # raises ``TypeError`` (#1266).
     tree_numbers = issubclass(output, dictdumper.tree.Tree)
 
     def excluded(info: 'Info | MultiDict[Any, Any]') -> 'Collection[Any]':
@@ -450,12 +392,11 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 :attr:`~pcapkit.protocols.protocol.Protocol.info`.
 
         Returns:
-            One entry per field, in order, with its key unchanged -- the writer
-            itself now escapes a mapping key where ``output`` needs that
-            (``dictdumper`` 0.8.5, DictDumper#123). A field held once maps to
-            its value; a field held more than once, such as a repeated IPv6
-            extension header, maps to the :class:`list` of all its values, in
-            order (GitHub issue :issue:`1484`). The values are left as they
+            One entry per field, in order, with its key unchanged, since the
+            writer escapes keys itself. A field held once maps to its value; a
+            field held more than once, such as a repeated IPv6 extension
+            header, maps to the :class:`list` of all its values, in order
+            (:issue:`1484`). The values are left as they
             are, so each comes back through :meth:`DictDumper.object_hook` when
             written. The keys :func:`excluded` names are left out.
 
@@ -528,19 +469,15 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 o: object to convert
 
             Returns:
-                Converted object. Escaping a string or a mapping key for
-                XML-shaped output is the writer's own job since ``dictdumper``
-                0.8.5 (DictDumper#123); this method no longer does it.
+                Converted object, unescaped; the writer escapes it.
 
             Notes:
                 :meth:`~dictdumper.dumper.Dumper._encode_value` -- and so this
                 method -- is called once per node the dumper writes, however
                 deeply nested. A mapping *key* never reaches this method at
                 all: :meth:`~dictdumper.plist.PLIST._append_dict` and
-                :meth:`~dictdumper.json.JSON._append_object` write a key
-                straight from the mapping, and now escape it themselves where
-                ``output`` needs that, exactly as they escape the value beside
-                it. An :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+                :meth:`~dictdumper.json.JSON._append_object` write and escape a
+                key straight from the mapping. An :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
                 becomes a :class:`list` of single-key :class:`dict` objects,
                 each of which comes back through the :class:`dict` branch, and
                 so does an :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`,
@@ -574,22 +511,17 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             elif isinstance(o, NoValueType):
                 result = '<NO_VALUE>'
             elif isinstance(o, OrderedMultiDict):
-                # NOTE: one single-key mapping per entry, in insertion order --
-                # i.e. wire order for the option lists -- since a mapping keyed
-                # by name could only gather the repeats of a key under its first
-                # occurrence (GitHub issue #1263). Each single-key mapping comes
-                # back through the :class:`dict` branch below, which is where the
-                # writer itself now escapes the key, where ``output`` needs that.
-                # The keys an export of an :class:`Info` excludes are left out,
-                # as :func:`fields` leaves them out (#2003).
+                # NOTE: one single-key mapping per entry, in wire order, since a
+                # mapping keyed by name would group repeats under the first (#1263);
+                # keys an ``Info`` export excludes are left out, as in ``fields`` (#2003).
                 skip = excluded(o)
                 result = [
                     {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}
                     for key, val in o.items(multi=True) if key not in skip
                 ]
             elif isinstance(o, MultiDict):
-                # NOTE: a :class:`MultiDict` keeps no order across keys, only
-                # among the values of each, so grouping by key loses nothing.
+                # NOTE: a ``MultiDict`` keeps no order across keys, only among
+                # the values of each, so grouping by key loses nothing.
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
                 for key, val in o.items(multi=True):
                     if isinstance(key, (enum.Enum, aenum.Enum)):
@@ -597,10 +529,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     temp[key].append(val)
                 result = temp
             elif isinstance(o, dict):
-                # NOTE: never rebuilt -- the writer now escapes a key itself
-                # where ``output`` needs that (``dictdumper`` 0.8.5,
-                # DictDumper#123), so every output is handed the caller's own
-                # mapping, with the caller's own key objects in it.
+                # NOTE: never rebuilt; the writer escapes keys itself.
                 result = o
             elif isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
@@ -614,11 +543,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             else:
                 result = super().object_hook(o)
 
-            # NOTE: XML 1.0 has no spelling at all for some characters, not
-            # even a character reference, so a PLIST string holding one is
-            # written as ``<data>``, the way :class:`bytes` already is (GitHub
-            # issue #1262). Any escaping the string itself still needs --
-            # ``&``, ``<`` and ``>`` -- is now the writer's own job.
+            # NOTE: XML 1.0 cannot spell some characters, even as a reference, so
+            # a PLIST string holding one is written as ``<data>``, as bytes are (#1262).
             if is_plist_output and isinstance(result, str) and _XML_ILLEGAL.search(result) is not None:
                 return result.encode('utf-8', 'surrogatepass')
             return result
@@ -633,22 +559,16 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     file: Output file.
 
                 Notes:
-                    An aware value is converted to UTC first, a naive one is
-                    taken as UTC already -- neither :mod:`dictdumper` nor
+                    An aware value is converted to UTC first, and a naive one
+                    is taken as UTC; neither :mod:`dictdumper` nor
                     :func:`plistlib.dump` (without its 3.13+ ``aware_datetime``
-                    flag) does this conversion on its own, so it stays pcapkit's
-                    own addition on top of the upstream writer. The exact value
-                    is not lost: every timestamp pcapkit reports sits next to a
-                    field that carries it exactly -- a :class:`~decimal.Decimal`
-                    ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.
-                    ``time_epoch``, and the raw ``ntp_timestamp`` or
-                    ``pmip_timestamp`` for the MH options that carry one.
-
-                    Formatting to whole seconds -- the property list ``<date>``
-                    grammar has no fractional part (GitHub issue :issue:`1448`) -- is now
-                    :meth:`~dictdumper.plist.PLIST._append_date`'s own job, fixed
-                    upstream in ``dictdumper`` 0.8.5 (DictDumper#124), so it is
-                    left to :meth:`super`.
+                    flag) converts it. :meth:`super` formats it to whole
+                    seconds, as the ``<date>`` grammar has no fractional part
+                    (:issue:`1448`); the exact value stays in a neighbouring
+                    field, a :class:`~decimal.Decimal` ``*_epoch`` such as
+                    ``time_epoch`` for frames and PCAP-NG blocks and options,
+                    and the raw ``ntp_timestamp`` or ``pmip_timestamp`` for MH
+                    options.
 
                 """
                 if isinstance(value, datetime.datetime) and value.tzinfo is not None:
@@ -700,18 +620,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
                 Notes:
                     :meth:`dictdumper.json.JSON._append_object` escapes each key
-                    through the module-level :func:`dictdumper.json.encode_string`
-                    directly, not through :meth:`_append_string`, so the
-                    surrogate-pair handling there never reaches a key -- a
-                    :class:`str` key holding a character above ``U+FFFF`` is
-                    still written as the single five- or six-digit escape
-                    :func:`~dictdumper.json.encode_string` always wrote (GitHub
-                    issue :issue:`1261`). Splitting such a key into its UTF-16
-                    surrogate pair first, with :func:`_surrogate_pairs`, makes
-                    :func:`~dictdumper.json.encode_string` emit the same pair of
-                    four-digit escapes it already writes for a lone surrogate,
-                    matching what :func:`json.dumps` writes and what
-                    :meth:`_append_string` above already does for a value.
+                    through :func:`dictdumper.json.encode_string`, not
+                    :meth:`_append_string`, and it writes a character above
+                    ``U+FFFF`` as one five- or six-digit escape
+                    (:issue:`1261`). Each such key is split into its UTF-16
+                    surrogate pair first, with :func:`_surrogate_pairs`, so it
+                    is written as :func:`json.dumps` writes it.
 
                 """
                 if any(isinstance(key, str) and any(ord(char) > 0xFFFF for char in key)
@@ -735,7 +649,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     other character as ``'\\u{0:04x}'.format(ord(char))``, which
                     for a code point above ``U+FFFF`` yields five or six hex
                     digits that a reader takes as one escape and literal text
-                    (GitHub issue :issue:`1261`). This writes such a character as a
+                    (:issue:`1261`). This writes such a character as a
                     UTF-16 surrogate pair instead, as :func:`json.dumps` does, and
                     every other character exactly as the upstream writer does.
 
@@ -782,10 +696,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 Fallback string.
 
             Notes:
-                This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
-                It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
-                to find a suitable function for dumping and it should pair with
-                ``_append_fallback`` for use.
+                Called when :meth:`dictdumper.dumper.Dumper.default` finds no
+                suitable function for dumping; pairs with ``_append_fallback``.
 
             """
             return 'fallback'
@@ -799,14 +711,12 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 file: File object to write.
 
             Notes:
-                This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
-                It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
-                to find a suitable function for dumping and it should pair with
-                ``default`` for use.
+                Called when :meth:`dictdumper.dumper.Dumper.default` finds no
+                suitable function for dumping; pairs with ``default``.
 
                 A class, module or routine is written as its name rather than
                 expanded, since its attributes reach the whole type graph
-                (GitHub issue :issue:`1372`). Every other object is expanded in full
+                (:issue:`1372`). Every other object is expanded in full
                 each time it is met, except one that encloses itself: there
                 it is written as a ``<circular reference: ...>`` marker, so a
                 reference cycle terminates.
@@ -864,8 +774,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 file: File object to write.
 
             """
-            # NOTE: through :meth:`object_hook` as every other value is, so that
-            # the keys and strings built here are escaped like theirs.
+            # NOTE: through ``object_hook``, so the keys and strings built here are
+            # converted as every other value is.
             value = self.object_hook(value)
             func = self._encode_func(value)
             func(value, file)

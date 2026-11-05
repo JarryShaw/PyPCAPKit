@@ -4,9 +4,8 @@
 
 .. module:: pcapkit.interface.core
 
-:mod:`pcapkit.interface.core` defines core user-oriented
-interfaces and variables, which wrap around the
-foundation classes from :mod:`pcapkit.foundation`.
+:mod:`pcapkit.interface.core` defines the user-facing functions and
+macros, which wrap the classes of :mod:`pcapkit.foundation`.
 
 """
 import io
@@ -54,14 +53,8 @@ APP = 'application'
 
 # extraction engines
 #
-# NOTE: each third-party engine's value is the key it is registered under in
-# :attr:`Extractor.__engine__ <pcapkit.foundation.extraction.Extractor.__engine__>`,
-# not its display name -- ``Extractor`` looks the requested engine up in that
-# mapping, and an unknown key only warns and falls back to the default engine, so a
-# constant whose value does not match the key would silently do nothing.
-# ``PCAPKit`` is ``'default'``, which ``Extractor`` resolves to its built-in engine
-# without a lookup. The third-party identifiers, by contrast, follow each engine's
-# ``__engine_name__``, which is why the casing of the two sides differs.
+# NOTE: a third-party value is the engine's key in ``Extractor.__engine__``, not
+# its display name; an unknown key only warns and falls back to ``'default'``.
 DPKT = 'dpkt'
 Scapy = 'scapy'
 PCAPKit = 'default'

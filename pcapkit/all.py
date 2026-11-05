@@ -5,10 +5,10 @@
 
 .. module:: pcapkit.all
 
-:mod:`pcapkit` has defined various and numerous functions
-and classes, which have different features and purposes.
-To make a simple index for this library, :mod:`pcapkit.all`
-contains all things from :mod:`pcapkit`.
+:mod:`pcapkit.all` gathers the public names of the :mod:`pcapkit`
+subpackages, bar :mod:`pcapkit.vendor`, into one namespace. Each
+third-party engine's :mod:`~pcapkit.toolkit` helpers carry the engine's
+name as a prefix, such as ``scapy_packet2dict``.
 
 """
 from pcapkit import const

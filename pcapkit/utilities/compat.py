@@ -28,18 +28,12 @@ __all__ = [
     'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias', 'UnionType',
 ]
 
-# PyPy 8.0 binds ``NoneType`` in :mod:`builtins`, which CPython does not, and
-# its own stdlib relies on it (``_sqlite3``, which aenum imports). aenum 3.1.17's
-# ``_common`` binds a ``NoneType`` of its own only on a ``NameError``, so there it
-# binds none, and the ``from ._common import *`` in aenum's ``__init__`` fails on
-# the name ``__all__`` lists: ``AttributeError: module 'aenum._common' has no
-# attribute 'NoneType'``. Unhandled, that leaves pcapkit unimportable on PyPy 8.0
-# (#1958).
-# ``aenum._common`` itself ran to its end and stays in :data:`sys.modules`, so
-# binding the name there and importing aenum again completes it, leaving
-# :mod:`builtins` as PyPy has it. This module runs before any of pcapkit's that
-# imports aenum: pcapkit/__init__.py reaches it through
-# pcapkit.utilities.exceptions, ahead of pcapkit.corekit.
+# PyPy 8.0 binds ``NoneType`` in ``builtins``, so aenum 3.1.17's ``_common``,
+# which binds its own only on a ``NameError``, binds none, and importing aenum
+# fails with ``AttributeError: module 'aenum._common' has no attribute
+# 'NoneType'`` (#1958). ``aenum._common`` stays in ``sys.modules``, so binding the
+# name there and importing again completes it. This module is imported before
+# any pcapkit module that imports aenum.
 if sys.implementation.name == 'pypy':
     try:
         import aenum  # pylint: disable=unused-import
@@ -75,43 +69,21 @@ if sys.version_info < (3, 9):
 else:
     from urllib.parse import unquote
 
-# The ``else`` branch of each ``sys.version_info`` guard below imports a name
-# that only exists on the newer interpreter, so it never executes on the older
-# one the guard is there to support. Vermin's analysis is static and cannot see
-# that, so it counts these imports anyway and reports the whole library as
-# requiring 3.11 on the strength of lines that never run below it.
-# ``# novermin`` is Vermin's documented escape hatch for precisely this shape.
-# It is applied per line rather than by turning on ``lax`` mode, so that an
-# *unguarded* use of a new feature anywhere else is still caught.
+# Vermin cannot see that the ``else`` branch of a ``sys.version_info`` guard never
+# runs on the older interpreter, so each such import carries ``# novermin``, per
+# line rather than ``lax`` mode, which would also hide an unguarded use.
 #
-# ``auto`` rides the same branch as ``StrEnum`` rather than a guard of its own,
-# because the two are not interchangeable across implementations: an
-# ``aenum.auto`` value in a stdlib ``enum.StrEnum`` class body raises
-# ``TypeError: auto(<no_value>, *(), **{}) is not a string``, and an
-# ``enum.auto`` value in an ``aenum.StrEnum`` body raises ``TypeError: values
-# must be str [auto(_auto_null) is a <class 'enum.auto'>]`` (both measured) --
-# each metaclass only recognises its own library's sentinel class. Splitting
-# ``auto`` onto a second, parallel ``sys.version_info`` check would let it
-# drift from whichever library ``StrEnum`` actually resolved to; sharing this
-# branch makes that impossible by construction.
+# ``auto`` shares ``StrEnum``'s branch because each metaclass accepts only its
+# own library's ``auto``: mixing them raises ``TypeError`` (measured both ways).
 if sys.version_info < (3, 11):
     from aenum import StrEnum, auto
 else:
     from enum import StrEnum, auto  # novermin
 
-# The guard is 3.11 rather than 3.8, which is when the *name* arrived, because
-# what this library needs from ``final`` is not the name but the side effect:
-# from 3.11 on (gh-90500) ``typing.final`` records ``__final__ = True`` on the
-# decorated object, and before that it is a pure annotation for the type checker
-# leaving no runtime trace at all. That dunder is *read* --
-# :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__` and
-# :meth:`pcapkit.protocols.schema.Schema.__init_subclass__` refuse to
-# derive from a class carrying it in its own ``__dict__`` -- so on 3.8 to 3.10,
-# all in the CI matrix, keying the guard on 3.8 would leave the runtime check
-# reading an attribute nothing had set: a silent no-op on those interpreters and
-# an enforced rule on the rest. ``typing_extensions`` is a declared dependency
-# for exactly ``python_version < '3.11'`` and its ``final`` sets the attribute on
-# every version, so asking for it below 3.11 costs nothing and closes the gap.
+# The guard is 3.11, not 3.8, because only from 3.11 (gh-90500) does
+# ``typing.final`` set ``__final__ = True``, which ``Info.__init_subclass__`` and
+# ``Schema.__init_subclass__`` read to refuse a subclass; ``typing_extensions``,
+# a dependency below 3.11, sets it on every version.
 if sys.version_info < (3, 11):
     from typing_extensions import final
 else:
@@ -171,36 +143,21 @@ if sys.version_info < (3, 10):
 else:
     from typing import TypeAlias  # novermin
 
-# The interpreter's own default :data:`threading.excepthook`, as it stood before
-# anything replaced it, which :data:`threading.__excepthook__` names only from
-# 3.10 (issue #1691). The object itself is older: CPython 3.8 and 3.9 start
-# :data:`threading.excepthook` as ``_thread._excepthook``, the same function 3.10
-# and later bind as ``__excepthook__`` (checked with ``is`` on 3.8.20, 3.9.25,
-# 3.10.21 and 3.14.8). Importing it from :mod:`_thread`, rather than reading
-# whatever :data:`threading.excepthook` holds when this module loads, keeps it the
-# real default on 3.8 and 3.9 even when a host application, or an earlier loaded
-# copy of :mod:`pcapkit.utilities.exceptions`, has already replaced the hook --
-# as it is on 3.10 and later.
-#
-# The stdlib name is not reused as it stands, unlike every other name here: a
-# bare ``__excepthook__`` imported into a module reads as
-# :data:`sys.__excepthook__`, which takes three arguments rather than one, and
-# :mod:`pcapkit.utilities.exceptions` uses both. ``default_`` is the word that
-# module's docstrings already use for this object.
+# The interpreter's default ``threading.excepthook``, which
+# ``threading.__excepthook__`` names only from 3.10 (#1691). On 3.8 and 3.9 it is
+# ``_thread._excepthook`` (checked with ``is`` on 3.8.20, 3.9.25, 3.10.21 and
+# 3.14.8), imported from there so a hook replaced before this module loads is
+# not taken for the default. Renamed, since a bare ``__excepthook__`` reads as
+# ``sys.__excepthook__``, which ``pcapkit.utilities.exceptions`` also uses.
 if sys.version_info < (3, 10):
     from _thread import _excepthook as default_threading_excepthook
 else:
     from threading import __excepthook__ as default_threading_excepthook  # novermin
 
-# A class's own annotations, never a base's (issue #1692). Below 3.10
-# (bpo-43901), ``cls.__annotations__`` of a class whose body declares none is
-# its nearest base's, so the fallback reads the class's own ``__dict__``, where
-# its body put them, and returns that mapping itself rather than a copy.
-# :func:`inspect.get_annotations` reads the same place for a class on 3.10 to
-# 3.13; from 3.14 a body without ``from __future__ import annotations`` leaves
-# them out of ``__dict__``, so it is the only reader that sees them. Only what
-# this library asks of it is backported: a class, without ``globals``,
-# ``locals`` or ``eval_str``.
+# A class's own annotations, never a base's (#1692). Below 3.10 (bpo-43901),
+# ``cls.__annotations__`` of a class declaring none is its base's, so the backport
+# reads the class's own ``__dict__``; from 3.14 only ``inspect.get_annotations``
+# sees them. Only a class is backported, without ``globals``, ``locals`` or ``eval_str``.
 if sys.version_info < (3, 10):
     def get_annotations(obj: 'type') -> 'dict[str, Any]':
         """Return the annotations a class's own body declares, which may be empty."""
@@ -208,10 +165,8 @@ if sys.version_info < (3, 10):
 else:
     from inspect import get_annotations  # novermin
 
-# The :pep:`604` union type, i.e. the origin of ``int | None``, which is the
-# same object as :data:`typing.Union` from 3.14. Below 3.10 only
-# :data:`typing.Union` spells a union, so the name is :data:`None` there rather
-# than a failed import.
+# The PEP 604 union type, the origin of ``int | None``, which is ``typing.Union``
+# from 3.14; ``None`` below 3.10, where only ``typing.Union`` spells a union.
 if sys.version_info < (3, 10):
     UnionType = None
 else:

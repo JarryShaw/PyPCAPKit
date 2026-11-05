@@ -6,12 +6,11 @@
 
 :mod:`pcapkit.utilities.importlib` holds :func:`lazy_exports`, which gives a package
 the :pep:`562` ``__getattr__`` and ``__dir__`` that import each name it exports
-the first time the name is reached, rather than with the package itself. Every
-package under :mod:`pcapkit.const` imports its enumerations that way
-(:issue:`2729`), the mechanism :mod:`pcapkit.const.reg.apptype` had for its TCP
-and UDP registries (:issue:`1538`) made general. It also holds :data:`import_lock`,
-which every such first import, and that of a
-:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made under.
+the first time the name is reached, rather than with the package itself. The
+:mod:`pcapkit.const` packages (:issue:`2729`) and the :mod:`pcapkit.protocols`
+packages (:issue:`2730`) import their exports that way. It also holds
+:data:`import_lock`, under which every such first import, and that of a
+:class:`~pcapkit.corekit.module.ModuleDescriptor`, is made.
 
 .. versionadded:: 1.6.0
 

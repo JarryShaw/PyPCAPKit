@@ -4,9 +4,8 @@
 
 .. module:: pcapkit.dumpkit
 
-:mod:`pcapkit.dumpkit` is the collection of dumpers for
-:mod:`pcapkit` implementation, like those described
-in :mod:`dictdumper`.
+:mod:`pcapkit.dumpkit` holds the output dumpers :mod:`pcapkit` adds to
+those of :mod:`dictdumper`.
 
 """
 from pcapkit.dumpkit.null import NotImplementedIO

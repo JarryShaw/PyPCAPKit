@@ -374,19 +374,10 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
     return target
 
 
-# NOTE: Import must not disturb configuration the application has already
-# made -- that is the whole point of the NullHandler convention -- so this only
-# guarantees the logger has *a* handler, and leaves level and propagation
-# alone. Calling reset() here instead would detach a host application's
-# handlers merely because it imported pcapkit after configuring logging.
-#
-# Re-execution has to be idempotent too, which the test suite relies on when it
-# exercises import-time behaviour. That rules out an identity test for the
-# devmode handler: ``handler`` is built when this module runs, so re-executing
-# it yields a *new* object every time and ``handler not in logger.handlers``
-# would be true on each pass, stacking one stderr handler per reload. The test
-# is therefore on what would actually duplicate -- a stream handler already
-# writing to the same stream.
+# NOTE: import only guarantees the logger *a* handler, leaving the application's
+# level, propagation and handlers alone, as ``reset()`` would not. Re-execution is
+# idempotent, so the devmode handler is tested by stream, not identity (each run
+# builds a new one).
 if not logger.handlers:
     logger.addHandler(logging.NullHandler())
 
