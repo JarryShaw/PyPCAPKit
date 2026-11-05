@@ -467,6 +467,16 @@ HTTP/1 and HTTP/2 classes under the RFC names.
   ``pcapkit.corekit.fields.numbers._reduce_unregistered_member`` is removed
   with no alias, ``reduce_to`` installing the reduction it built.
 
+* **Added** -- :mod:`pcapkit.utilities.inspect`, holding
+  :func:`~pcapkit.utilities.inspect.isabstract`, which tells an abstract class
+  from a concrete one from its own namespace and its bases'
+  ``__abstractmethods__``, as :class:`abc.ABCMeta` computes them, rather than
+  from the interpreter's abstract flag, so it answers alike on every
+  interpreter, while :meth:`~object.__init_subclass__` runs and once the class
+  is made (:issue:`2784`, :pr:`2785`). A
+  :class:`~pcapkit.protocols.protocol.Protocol` subclass's registration, below,
+  decides with it.
+
 * **Changed** -- **a breaking change to** the IPv6 extension-header walk: a
   known extension header whose dedicated parser raises is now the upper layer,
   parsed once as :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and the walk stops
