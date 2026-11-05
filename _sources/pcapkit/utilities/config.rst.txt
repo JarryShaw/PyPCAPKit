@@ -25,10 +25,9 @@ here reaches every engine and protocol that reads it.
 
 The :mod:`pcapkit.vendor` crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`,
 :envvar:`PCAPKIT_CI_MODE`, :envvar:`PCAPKIT_HTTP_PROXY` and
-:envvar:`PCAPKIT_HTTPS_PROXY` are not held here. They are read by
-:mod:`pcapkit.vendor.default` and documented with it under
-:ref:`vendor-variables`; it reads :envvar:`PCAPKIT_VENDOR_RETRY` and
-:envvar:`PCAPKIT_CI_MODE` with the :ref:`readers <config-readers>` below.
+:envvar:`PCAPKIT_HTTPS_PROXY` are documented under :ref:`vendor-variables`.
+:mod:`pcapkit.vendor.default` reads them, the retry and CI ones with the
+:ref:`readers <config-readers>` below.
 
 :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE` and :envvar:`PCAPKIT_SPHINX`
 are read by :mod:`pcapkit.utilities.logging`, which needs them while it loads
@@ -108,6 +107,8 @@ Limits
 
    Sets :data:`~pcapkit.utilities.config.TCP_GAP_LIMIT`.
 
+   .. versionadded:: 1.6.0
+
 .. envvar:: PCAPKIT_FALLBACK_LIMIT
 
    Sets :data:`~pcapkit.utilities.config.FALLBACK_LIMIT`.
@@ -150,6 +151,8 @@ Flags
 The checksum flags (:issue:`2471`) take the values :func:`read_flag` accepts,
 and a bad value warns and falls back to the default.
 
+.. versionadded:: 1.6.0
+
 .. list-table::
    :header-rows: 1
 
@@ -179,8 +182,8 @@ and a bad value warns and falls back to the default.
 Readers
 -------
 
-The variables above are read with these, and a module that keeps a variable of
-its own reads it with them too, so that a bad value is reported the same way.
+Every variable above, and any a module keeps of its own, is read with these, so
+a bad value is reported the same way.
 
 .. autofunction:: pcapkit.utilities.config.read_limit
 .. autofunction:: pcapkit.utilities.config.read_flag

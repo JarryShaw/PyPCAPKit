@@ -43,6 +43,27 @@ The subpackages, functionally rather than by carrier:
      - file formats, layerless sentinels, and the checksum pseudo-headers in
        :mod:`~pcapkit.protocols.misc.checksum`
 
+The rule and the sections below it, as a decision:
+
+.. mermaid::
+
+   flowchart TD
+       NEW["a new dissector"] --> WIRE{"a layer on the wire?"}
+       WIRE -->|"no: a file format, a layerless sentinel<br/>or a checksum pseudo-header"| MISC["misc"]
+       WIRE -->|yes| FN{"by its designed function, per RFC 1122<br/>and RFC 1812: a user of the stack,<br/>or part of its forwarding path?"}
+       REG["an IANA assignment: Protocol Numbers,<br/>Ether Types or a port"] -.->|"encapsulation only,<br/>not evidence"| FN
+       TIE["tie-break, in order: its RFC's<br/>functional self-description,<br/>its closest functional peers here,<br/>encapsulation last"] -.->|"an ambiguous case"| FN
+       FN -->|"a user, routing's<br/>control plane included"| APP["application<br/>e.g. OSPF, RARP"]
+       FN -->|"forwarding path"| FWD{"by its own function"}
+       FWD -->|"frames, link-address, tagging;<br/>a tunnel, by its payload"| LINK["link<br/>e.g. L2TP, L2TPv2"]
+       FWD -->|"layer-3 addressing,<br/>the forwarding path itself"| INET["internet<br/>IP, ICMP, IGMP, IPX,<br/>IPsec, IPv6 extension headers"]
+       FWD -->|"an IANA transport protocol"| TRANS["transport"]
+       APP --> BASES
+       LINK --> BASES
+       INET --> BASES
+       TRANS --> BASES
+       BASES["bases: the layer base first, then the family<br/>e.g. FTP\_DATA(Application, Raw)"]
+
 .. important::
 
    :mod:`~pcapkit.protocols.application` is **not** "payloads reached by port or SCTP

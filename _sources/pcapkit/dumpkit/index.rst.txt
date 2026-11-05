@@ -20,7 +20,12 @@ hierarchy:
 
 .. mermaid::
 
-   flowchart LR
+   ---
+   config:
+     flowchart:
+       nodeSpacing: 30
+   ---
+   flowchart TD
        A{{Dumper}} --> D([other customisation ...])
 
        subgraph builtins [Built-in Dumpers]
@@ -35,6 +40,8 @@ hierarchy:
            DumperBase --> Dumper --> E([user customisation ...])
        end
        A --> DumperBase
+       PLIST ~~~ DumperBase
+       NotImplementedIO ~~~ Dumper
 
        click A "https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper"
 

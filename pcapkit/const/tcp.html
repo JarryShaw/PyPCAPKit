@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/tcp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
-<meta name="description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
+<meta property="og:description" content=",, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Option Kind Numbers ‡,, TCP_Flags, TCP Header Flags §,,,, TCP Checksum: Generated from pcapkit.vendor.tcp..." />
+<meta name="description" content=",, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Option Kind Numbers ‡,, TCP_Flags, TCP Header Flags §,,,, TCP Checksum: Generated from pcapkit.vendor.tcp..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="FTP Constant Enumerations" href="ftp.html"><link rel="prev" title="SCTP Constant Enumerations" href="sctp.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.const.tcp">
 <span id="tcp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.tcp" title="Link to this heading">¶</a></h1>
-<p>This module contains all constant enumerations of
-<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> implementations. Available
-enumerations include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -593,8 +590,7 @@ enumerations include:</p>
 </div>
 <section id="module-pcapkit.const.tcp.checksum">
 <span id="tcp-checksum"></span><h2>TCP Checksum<a class="headerlink" href="#module-pcapkit.const.tcp.checksum" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>TCP Checksum</strong>,
-which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.checksum.Checksum" title="pcapkit.vendor.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.checksum.Checksum</span></code></a>.</p>
+<p>Generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.checksum.Checksum" title="pcapkit.vendor.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.checksum.Checksum</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum" title="Link to this definition">¶</a></dt>
@@ -660,8 +656,7 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 </section>
 <section id="module-pcapkit.const.tcp.mp_tcp_option">
 <span id="multipath-tcp-options"></span><h2>Multipath TCP Options<a class="headerlink" href="#module-pcapkit.const.tcp.mp_tcp_option" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>Multipath TCP options</strong>,
-which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption</span></code></a>.</p>
+<p>Generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">MPTCPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/mp_tcp_option.html#MPTCPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="Link to this definition">¶</a></dt>
@@ -768,8 +763,7 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 </section>
 <section id="module-pcapkit.const.tcp.option">
 <span id="tcp-option-kind-numbers"></span><h2>TCP Option Kind Numbers<a class="headerlink" href="#module-pcapkit.const.tcp.option" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>TCP Option Kind Numbers</strong>,
-which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.option.Option" title="pcapkit.vendor.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.option.Option</span></code></a>.</p>
+<p>Generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.option.Option" title="pcapkit.vendor.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.option.Option</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option" title="Link to this definition">¶</a></dt>
@@ -1087,10 +1081,10 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 </section>
 <section id="module-pcapkit.const.tcp.flags">
 <span id="tcp-header-flags"></span><h2>TCP Header Flags<a class="headerlink" href="#module-pcapkit.const.tcp.flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>TCP Header Flags</strong>,
-which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.flags.Flags" title="pcapkit.vendor.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.flags.Flags</span></code></a>.</p>
+<p>Generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.flags.Flags" title="pcapkit.vendor.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.flags.Flags</span></code></a>.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>A value outside the 16-bit field raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, where
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>A value outside <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">0xFFF</span></code>, the flag bits of their 16-bit header word,
+raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, where
 <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> composed a pseudo-member for any integer.</p>
 </div>
 <dl class="py class">

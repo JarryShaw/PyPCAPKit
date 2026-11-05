@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,14 +558,13 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.http.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.http.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.http.protocol.HTTP`,</span>
-<span class="sd">which is a base class for Hypertext Transfer</span>
-<span class="sd">Protocol (HTTP) [*]_ family, e.g.</span>
-<span class="sd">:class:`HTTP/1.* &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1&gt;`</span>
-<span class="sd">and :class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2&gt;`,</span>
-<span class="sd">and :func:`~pcapkit.protocols.application.http.protocol.test_start_line`,</span>
-<span class="sd">which tells whether a payload opens with an HTTP/1.* start line.</span>
+<span class="sd">:mod:`pcapkit.protocols.application.http.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.http.protocol.HTTP`, the base class of the</span>
+<span class="sd">Hypertext Transfer Protocol (HTTP) [*]_ family --</span>
+<span class="sd">:class:`HTTP/1.* &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1&gt;` and</span>
+<span class="sd">:class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2&gt;` -- and</span>
+<span class="sd">:func:`~pcapkit.protocols.application.http.protocol.test_start_line`, which tells</span>
+<span class="sd">whether a payload opens with an HTTP/1.* start line.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol</span>
 
@@ -615,15 +614,10 @@
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
 
-<span class="c1">#: The HTTP/2 connection preface (:rfc:`9113#section-3.4`). A client opens every</span>
-<span class="c1">#: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --</span>
-<span class="c1">#: by sending exactly these 24 octets, and the sequence is *designed* to be</span>
-<span class="c1">#: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose</span>
-<span class="c1">#: method ``PRI`` is registered as one no actual client uses</span>
-<span class="c1">#: (:rfc:`7540#section-11.6`), so no genuine HTTP/1 message begins with it and a</span>
-<span class="c1">#: prefix compare cannot false-positive on one.</span>
-<span class="c1">#: That makes it a positive identification rather than a heuristic, which is why</span>
-<span class="c1">#: :meth:`HTTP._guess_version` tests it before attempting any parse.</span>
+<span class="c1">#: The HTTP/2 connection preface (:rfc:`9113#section-3.4`), which opens every</span>
+<span class="c1">#: HTTP/2 connection. Its method ``PRI`` is registered as one no actual client</span>
+<span class="c1">#: uses (:rfc:`7540#section-11.6`), so a prefix match identifies HTTP/2, and</span>
+<span class="c1">#: :meth:`HTTP._guess_version` tests it before any parse.</span>
 <span class="n">_HTTP2_PREFACE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'PRI * HTTP/2.0</span><span class="se">\r\n\r\n</span><span class="s1">SM</span><span class="se">\r\n\r\n</span><span class="s1">'</span>
 
 <span class="c1">#: What :rfc:`9113#section-6` allows a sender to put in the frame header of each</span>
@@ -648,9 +642,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_test_http2_frame</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Test whether ``data`` opens with a frame header a conforming sender could write.</span>
 
-<span class="sd">    This is a plausibility test for :meth:`HTTP._guess_version`'s fall-through</span>
-<span class="sd">    only. :class:`httpv2.HTTPv2 &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2&gt;` itself parses every frame</span>
-<span class="sd">    :rfc:`9113` lets a receiver accept, which includes frames this test turns down.</span>
+<span class="sd">    A plausibility test for :meth:`HTTP._guess_version`'s fall-through only:</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` itself parses</span>
+<span class="sd">    every frame :rfc:`9113` lets a receiver accept, including frames this refuses.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Payload, starting at the frame header.</span>
@@ -661,14 +655,12 @@
 <span class="sd">        reserved bit clear, and names a stream that type may be sent on.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        Undefined flags and the reserved bit "MUST be left unset (0x00) when</span>
-<span class="sd">        sending" (:rfc:`9113#section-4.1`), and each stream rule is one a</span>
-<span class="sd">        receiver "MUST treat as a connection error" when broken (e.g. ``DATA``</span>
-<span class="sd">        on stream 0, :rfc:`9113#section-6.1`), so no frame a conforming peer</span>
-<span class="sd">        sends fails here. Frame types :rfc:`9113` does not define</span>
-<span class="sd">        are legal and ignored by a receiver (:rfc:`9113#section-5.5`), but on a</span>
-<span class="sd">        payload with no other evidence they are what arbitrary binary looks</span>
-<span class="sd">        like most of the time, so they are not guessed.</span>
+<span class="sd">        No frame a conforming peer sends fails: undefined flags and the reserved</span>
+<span class="sd">        bit "MUST be left unset (0x00) when sending" (:rfc:`9113#section-4.1`),</span>
+<span class="sd">        and breaking a stream rule is a connection error (e.g. ``DATA`` on</span>
+<span class="sd">        stream 0, :rfc:`9113#section-6.1`). Frame types :rfc:`9113` does not</span>
+<span class="sd">        define are legal (:rfc:`9113#section-5.5`) but not guessed: on a payload</span>
+<span class="sd">        with no other evidence they are mostly arbitrary binary.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
@@ -686,30 +678,19 @@
     <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span> <span class="ow">is</span> <span class="n">stream</span>
 
 
-<span class="c1"># Regular expression to match HTTP methods. Anchored at both ends: :func:`re.match`</span>
-<span class="c1"># anchors only at the start, so an unanchored pattern prefix-matches and accepts the</span>
-<span class="c1"># leading ``G`` of ``Get`` as a whole method token. Method tokens are case-sensitive</span>
-<span class="c1"># per :rfc:`9110#section-9.1`, so ``Get`` is not ``GET`` and must not parse as one.</span>
+<span class="c1"># HTTP method token, case-sensitive (RFC 9110, section 9.1). Anchored at the end</span>
+<span class="c1"># too, as ``re.match`` anchors only at the start and would take ``G`` of ``Get``.</span>
 <span class="n">_RE_METHOD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"(?P&lt;method&gt;[A-Z][A-Z-]*)\Z"</span><span class="p">)</span>  <span class="c1"># RFC 9110, section 16.1.1, 9.1, 5.6.2</span>
 <span class="c1"># Regular expression to match HTTP version string.</span>
 <span class="n">_RE_VERSION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"HTTP/(?P&lt;version&gt;\d\.\d)"</span><span class="p">)</span>
-<span class="c1"># Regular expression to match HTTP status code. Anchored for the same reason as</span>
-<span class="c1"># ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and</span>
-<span class="c1"># ``httpv1.HTTPv1`` takes the value from ``int(para2)`` on the raw token, so an</span>
-<span class="c1"># unanchored prefix match would let ``200x`` and ``2000`` past the guard and then</span>
-<span class="c1"># out of ``int()`` as a bare ``ValueError`` -- where ``_read_http_header``</span>
-<span class="c1"># documents ``ProtocolError``.</span>
-<span class="c1"># :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the</span>
-<span class="c1"># grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``</span>
-<span class="c1"># production; :rfc:`9110#section-15` covers the code semantics and registry, not</span>
-<span class="c1"># the syntax.</span>
+<span class="c1"># HTTP status code, ``3DIGIT`` (RFC 9112, section 4). Anchored as ``_RE_METHOD``</span>
+<span class="c1"># is: ``HTTPv1`` takes ``int()`` of the raw token, so a prefix match would let</span>
+<span class="c1"># ``200x`` through to a bare ``ValueError`` rather than a ``ProtocolError``.</span>
 <span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
 
-<span class="c1"># The HTTP/2 connection preface's header block, as ``httpv1.HTTPv1.read`` splits it</span>
-<span class="c1"># off at the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field</span>
-<span class="c1"># lines, so the patterns above accept it; it is refused by name in</span>
-<span class="c1"># ``httpv1.HTTPv1._read_http_header`` and :func:`test_start_line` so that the</span>
-<span class="c1"># preface never parses as HTTP/1.</span>
+<span class="c1"># The HTTP/2 preface's header block, ``PRI * HTTP/2.0``, as ``HTTPv1.read`` splits</span>
+<span class="c1"># it off at the first CRLFCRLF. The patterns above accept it, so</span>
+<span class="c1"># ``HTTPv1._read_http_header`` and ``test_start_line`` refuse it by name.</span>
 <span class="n">_HTTP2_PREFACE_HEADER</span> <span class="o">=</span> <span class="n">_HTTP2_PREFACE</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1">#: The member :class:`HTTP` hands an HTTP/1.* message to; it, the HTTP/2 member and</span>
@@ -730,11 +711,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">test_start_line</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Whether ``data`` opens with an HTTP/1.* start line.</span>
 
-<span class="sd">    This is a *classification* predicate and parses nothing: it answers "is this</span>
-<span class="sd">    HTTP/1?" for :meth:`HTTP._guess_version</span>
-<span class="sd">    &lt;pcapkit.protocols.application.http.protocol.HTTP._guess_version&gt;`. Classifying by</span>
-<span class="sd">    trial-parsing every version in the family would decide a payload that is</span>
-<span class="sd">    not HTTP at all by which parser happened to fail less loudly.</span>
+<span class="sd">    A classification predicate for :meth:`HTTP._guess_version</span>
+<span class="sd">    &lt;pcapkit.protocols.application.http.protocol.HTTP._guess_version&gt;`; it parses</span>
+<span class="sd">    nothing. Trial-parsing every version instead would classify a non-HTTP payload</span>
+<span class="sd">    by which parser failed less loudly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Payload to classify.</span>
@@ -744,34 +724,27 @@
 <span class="sd">        ``status-line`` (:rfc:`9112#section-2.1`).</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The acceptance rule is deliberately the *same* one</span>
-<span class="sd">        :meth:`HTTP._read_http_header</span>
-<span class="sd">        &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1._read_http_header&gt;` applies</span>
-<span class="sd">        -- ``_RE_METHOD`` with ``_RE_VERSION`` for a request, ``_RE_VERSION``</span>
-<span class="sd">        with ``_RE_STATUS`` for a response -- which is why those patterns</span>
-<span class="sd">        are defined beside this predicate and</span>
-<span class="sd">        :mod:`~pcapkit.protocols.application.httpv1.protocol` imports them from here. The</span>
-<span class="sd">        two must accept the same start lines: a predicate looser than the parser</span>
-<span class="sd">        classifies payloads the parser then refuses, and one tighter than the</span>
-<span class="sd">        parser hands real HTTP/1 to a later arm.</span>
-<span class="sd">        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that</span>
+<span class="sd">        It accepts exactly what :meth:`HTTPv1._read_http_header</span>
+<span class="sd">        &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1._read_http_header&gt;`</span>
+<span class="sd">        accepts -- ``_RE_METHOD`` with ``_RE_VERSION`` for a request,</span>
+<span class="sd">        ``_RE_VERSION`` with ``_RE_STATUS`` for a response -- which is why</span>
+<span class="sd">        :mod:`~pcapkit.protocols.application.httpv1.protocol` imports those patterns</span>
+<span class="sd">        from here. A looser predicate classifies payloads the parser refuses; a</span>
+<span class="sd">        tighter one hands real HTTP/1 to a later arm.</span>
+<span class="sd">        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins the</span>
 <span class="sd">        agreement.</span>
 
-<span class="sd">        The checks the parser performs *before* those patterns are mirrored too,</span>
-<span class="sd">        and this is not pedantry -- they are the whole reason the HTTP/2</span>
-<span class="sd">        connection preface is not claimed here. ``PRI *</span>
-<span class="sd">        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed</span>
-<span class="sd">        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that</span>
-<span class="sd">        tested only the first line would answer :data:`True` for it. Split at the</span>
-<span class="sd">        header/body separator first, as :meth:`HTTP.read</span>
-<span class="sd">        &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1.read&gt;` does, and the preface's</span>
-<span class="sd">        header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which</span>
-<span class="sd">        the parser refuses by name and so does this. Any *other* header with no</span>
-<span class="sd">        CRLF in it is a start line with zero field lines, which</span>
+<span class="sd">        It mirrors the parser's earlier checks too, which keep out the HTTP/2</span>
+<span class="sd">        connection preface, itself a well-formed HTTP/1.1 request line</span>
+<span class="sd">        (:rfc:`9113#section-3.4`). Split at the header/body separator, as</span>
+<span class="sd">        :meth:`HTTPv1.read</span>
+<span class="sd">        &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1.read&gt;` does, the</span>
+<span class="sd">        preface's header is exactly ``PRI * HTTP/2.0``</span>
+<span class="sd">        (``_HTTP2_PREFACE_HEADER``), which both refuse by name. Any other header</span>
+<span class="sd">        with no CRLF is a start line with zero field lines, which</span>
 <span class="sd">        :rfc:`9112#section-2.1` allows and both accept (:issue:`1041`).</span>
 
-<span class="sd">        An HTTP/0.9 request line carries only two tokens and so is not recognised</span>
-<span class="sd">        here either, matching the parser, which raises on fewer than three.</span>
+<span class="sd">        An HTTP/0.9 request line has only two tokens, so both refuse it.</span>
 
 <span class="sd">    """</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -818,26 +791,20 @@
         <span class="c1">#: Saved subclass protocol data (only for HTTP base class).</span>
         <span class="n">_http</span><span class="p">:</span> <span class="s1">'HTTP[_PT, _ST]'</span>
 
-    <span class="c1">#: Octets consumed ahead of the identified version's own header -- in practice</span>
-    <span class="c1">#: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`</span>
-    <span class="c1">#: identified one and parsed the frame that follows it. They belong to this</span>
-    <span class="c1">#: packet's header rather than to its payload, so :meth:`read` adds them to</span>
-    <span class="c1">#: :attr:`length`; otherwise :meth:`Protocol.__init__ &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`'s</span>
-    <span class="c1">#: ``self._info.__update__(packet=self.packet.payload)`` would slice the</span>
-    <span class="c1">#: payload from octet 9 of a buffer whose frame starts at octet 24 and report</span>
-    <span class="c1">#: the tail of the preface as packet payload.</span>
+    <span class="c1">#: Octets consumed ahead of the identified version's header -- the HTTP/2</span>
+    <span class="c1">#: connection preface, when :meth:`_guess_version` found one. They are header,</span>
+    <span class="c1">#: so :meth:`read` adds them to :attr:`length`; otherwise</span>
+    <span class="c1">#: :meth:`Protocol.__init__ &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`</span>
+    <span class="c1">#: would report the tail of the preface as the packet payload.</span>
     <span class="n">_preface_length</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: This class is a version dispatcher rather than a protocol with a header of</span>
-    <span class="c1">#: its own, so its construction keywords cannot be enumerated: :meth:`make`</span>
-    <span class="c1">#: declares only ``version`` and forwards everything else to</span>
+    <span class="c1">#: :obj:`None`, opting out of the construction keyword check of</span>
+    <span class="c1">#: :meth:`Protocol.__init__ &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;`:</span>
+    <span class="c1">#: :meth:`make` declares only ``version`` and forwards the rest to</span>
     <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.protocol.HTTPv1.make&gt;` or</span>
-    <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2.make&gt;`</span>
-    <span class="c1">#: according to that value, so the correct set of names depends on an</span>
-    <span class="c1">#: argument. :obj:`None` therefore opts out of the construction keyword check</span>
-    <span class="c1">#: that :meth:`Protocol.__init__</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol.__init__&gt;` performs; the</span>
-    <span class="c1">#: versioned classes are checked normally when constructed directly.</span>
+    <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2.make&gt;`,</span>
+    <span class="c1">#: so the valid names depend on an argument. The versioned classes are</span>
+    <span class="c1">#: checked when constructed directly.</span>
     <span class="n">__keywords__</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">##########################################################################</span>
@@ -934,11 +901,8 @@
                 <span class="n">http</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
-            <span class="c1"># NOTE: :exc:`struct.error` alongside :exc:`ValueError` because the</span>
-            <span class="c1"># two are disjoint -- it derives straight from :exc:`Exception` --</span>
-            <span class="c1"># and a payload too short for a versioned parser's fixed header can</span>
-            <span class="c1"># raise the former from inside the schema machinery. A caller cannot</span>
-            <span class="c1"># catch that as a protocol error, so it is converted too.</span>
+            <span class="c1"># NOTE: ``struct.error`` is no ``ValueError``, and a payload too</span>
+            <span class="c1"># short for a versioned parser's fixed header can raise it.</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -990,18 +954,8 @@
         <span class="k">if</span> <span class="n">preface</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: connection preface is HTTP/2 only'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``protocol.make`` is an ordinary instance method (the abstract</span>
-        <span class="c1"># declaration at ``ProtocolBase.make`` takes ``self``, and the</span>
-        <span class="c1"># versioned overrides use instance-bound helpers such as</span>
-        <span class="c1"># ``self._make_index``/``self.__frame__``), so it cannot be called on the</span>
-        <span class="c1"># class itself. There is no ``file`` or ``length`` to construct with here,</span>
-        <span class="c1"># since building a packet from keyword arguments is the inverse of</span>
-        <span class="c1"># parsing one, so a bare instance via ``protocol.__new__`` -- bypassing</span>
-        <span class="c1"># ``__init__``'s parse/pack machinery entirely -- is what the versioned</span>
-        <span class="c1"># ``make`` is called on. This is safe only while the versioned ``make``</span>
-        <span class="c1"># reads no state that ``__init__``/``__post_init__`` would otherwise have</span>
-        <span class="c1"># established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does); a</span>
-        <span class="c1"># ``make`` override that did would need a different dispatch here.</span>
+        <span class="c1"># NOTE: With no file to build from, versioned ``make`` runs on a bare ``__new__``</span>
+        <span class="c1"># instance, which is safe while neither version's ``make`` reads ``__init__`` state.</span>
         <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -1068,13 +1022,9 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_ service names and</span>
-<span class="sd">            port numbers: TCP port 80, the port of</span>
+<span class="sd">            port numbers: TCP port 80, i.e.</span>
 <span class="sd">            :attr:`TCP.http &lt;pcapkit.const.reg.apptype.tcp.TCP.http&gt;` as an</span>
-<span class="sd">            :class:`int`, which</span>
-<span class="sd">            :attr:`TCP.__proto__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto__&gt;`</span>
-<span class="sd">            dispatches here, as it does port 8080 and as</span>
-<span class="sd">            :attr:`UDP.__proto__ &lt;pcapkit.protocols.transport.udp.protocol.UDP.__proto__&gt;`</span>
-<span class="sd">            does both (:ref:`registry-protocol-index`). The versioned classes</span>
+<span class="sd">            :class:`int` (:ref:`registry-protocol-index`). The versioned classes</span>
 <span class="sd">            inherit it.</span>
 
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml</span>
@@ -1201,10 +1151,8 @@
 <span class="sd">            ProtocolError: If ``data`` is neither HTTP/1.* nor HTTP/2 data.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: Neither versioned data class carries a ``version`` field --</span>
-        <span class="c1"># HTTP/1.*'s lives in ``receipt`` as the start line's string, and HTTP/2</span>
-        <span class="c1"># has none -- so the version is the class of ``data`` that :meth:`read`</span>
-        <span class="c1"># returned from the versioned parser.</span>
+        <span class="c1"># NOTE: Neither versioned data model has a ``version`` field, so the</span>
+        <span class="c1"># version is the class of ``data``.</span>
         <span class="n">HTTPv1</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
         <span class="n">Data_HTTPv1</span><span class="p">,</span> <span class="n">Data_HTTPv2</span> <span class="o">=</span> <span class="n">_DATA_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_DATA_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
@@ -1236,11 +1184,17 @@
 <span class="w">        </span><span class="sd">"""Identify the HTTP version of the payload, and parse it with that version.</span>
 
 <span class="sd">        The payload is *identified* first and trial-parsed only as a last resort.</span>
-<span class="sd">        Trying each version in turn and taking whichever parser does not object</span>
-<span class="sd">        answers "did a parser accept this?" where the question is "what is</span>
-<span class="sd">        this?": the HTTP/2 preface reads as a frame whose declared length is</span>
-<span class="sd">        5,263,945 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at</span>
-<span class="sd">        all can be accepted the same way.</span>
+<span class="sd">        A parser accepting a payload does not make it that version: the HTTP/2</span>
+<span class="sd">        preface reads as a frame of declared length 5,263,945 (``b'PRI'`` as a</span>
+<span class="sd">        24-bit integer), and non-HTTP text can be accepted the same way.</span>
+
+<span class="sd">        Neither HTTP/1 arm absorbs :exc:`struct.error`, so it and its subclass</span>
+<span class="sd">        ``StructError``, whose ``eof`` ``NoPayload`` handling reads, reach the</span>
+<span class="sd">        caller. Absorbed on the trial arm, they would hand valid HTTP/1 to the</span>
+<span class="sd">        HTTP/2 arm, mislabelling it; escaping, they make it ``Raw`` under</span>
+<span class="sd">        ``beholder`` instead. The final HTTP/2 trial absorbs it only as a backstop:</span>
+<span class="sd">        ``HTTPv2.unpack`` and ``FieldBase.length`` already raise</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a short buffer.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -1260,75 +1214,45 @@
 <span class="sd">                arm, or from that HTTP/2 trial, propagates unconverted.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This deliberately does **not** decide the following, because one</span>
-<span class="sd">            payload with no flow context cannot:</span>
+<span class="sd">            One payload with no flow context cannot decide these, so this does</span>
+<span class="sd">            not:</span>
 
 <span class="sd">            * **An** ``Upgrade: h2c`` **exchange** (:rfc:`7540#section-3.2`,</span>
-<span class="sd">              deprecated but not removed by :rfc:`9113#section-3.1`) stays</span>
-<span class="sd">              HTTP/1.1 here, and is *correctly* HTTP/1.1: on the wire the upgrade</span>
-<span class="sd">              request and its ``101 Switching Protocols`` response are HTTP/1.1</span>
-<span class="sd">              messages and parse as such. The switch takes effect only *after*</span>
-<span class="sd">              the ``101``, so deciding that later segments of the same connection</span>
-<span class="sd">              are HTTP/2 needs per-connection state keyed on the 4-tuple, and</span>
-<span class="sd">              this method is handed a single payload with no such context.</span>
-<span class="sd">              Recognising the ``Upgrade: h2c`` field is possible; acting on it is</span>
-<span class="sd">              not, so it is left alone rather than half-implemented.</span>
+<span class="sd">              deprecated by :rfc:`9113#section-3.1`) parses as the HTTP/1.1 it is</span>
+<span class="sd">              on the wire. HTTP/2 starts only after the ``101 Switching</span>
+<span class="sd">              Protocols`` response, and telling that needs per-connection state</span>
+<span class="sd">              keyed on the 4-tuple.</span>
 <span class="sd">            * **A mid-stream segment** -- a bare HTTP/2 frame header with no</span>
-<span class="sd">              preface ahead of it, or an opaque HTTP/1 message body -- is</span>
-<span class="sd">              genuinely undecidable from one payload, and the honest answer is</span>
-<span class="sd">              the :class:`~pcapkit.protocols.misc.raw.protocol.Raw` that an escaping</span>
-<span class="sd">              :exc:`~pcapkit.utilities.exceptions.ProtocolError` becomes under</span>
-<span class="sd">              :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame header is therefore</span>
-<span class="sd">              never used to *identify* HTTP/2 ahead of HTTP/1: as identification it misfires on</span>
-<span class="sd">              binary HTTP/1 bodies, and classifies garbage text as HTTP/2. A bare frame is parsed</span>
-<span class="sd">              as HTTP/2 only by the fall-through below, and only if its header is one a conforming</span>
-<span class="sd">              sender could write (see ``_test_http2_frame()``): a frame type :rfc:`9113` defines,</span>
-<span class="sd">              no undefined flag, and a stream that type may be sent on. Nine zero octets -- a</span>
-<span class="sd">              ``DATA`` frame on stream 0, a protocol error under :rfc:`9113#section-6.1` -- are not</span>
-<span class="sd">              guessed as HTTP/2.</span>
+<span class="sd">              preface, or an opaque HTTP/1 body -- is undecidable, and becomes</span>
+<span class="sd">              the :class:`~pcapkit.protocols.misc.raw.protocol.Raw` an escaping</span>
+<span class="sd">              :exc:`~pcapkit.utilities.exceptions.ProtocolError` turns into under</span>
+<span class="sd">              :func:`~pcapkit.corekit.decorators.beholder`. A frame header never</span>
+<span class="sd">              identifies HTTP/2 ahead of HTTP/1, as it misfires on binary HTTP/1</span>
+<span class="sd">              bodies and garbage text. A bare frame is parsed as HTTP/2 only by</span>
+<span class="sd">              the fall-through, and only if ``_test_http2_frame()`` accepts its</span>
+<span class="sd">              header, so nine zero octets -- ``DATA`` on stream 0, a protocol</span>
+<span class="sd">              error under :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: Positive identification, before any parse attempt. The preface is</span>
-        <span class="c1"># a fixed 24-octet sequence that only an HTTP/2 client sends and that no</span>
-        <span class="c1"># valid HTTP/1 message can begin with (see ``_HTTP2_PREFACE``), so a</span>
-        <span class="c1"># prefix compare is an *answer* rather than evidence: it cannot</span>
-        <span class="c1"># false-positive on HTTP/1, and it needs no parse to reach.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``length`` bounds the compare as well as ``self._data``, because a</span>
-        <span class="c1"># caller may hand this method fewer octets than the buffer holds, and a</span>
-        <span class="c1"># preface must not be claimed out of octets outside this payload.</span>
+        <span class="c1"># NOTE: Identified before any parse, as no HTTP/1 message begins with the preface;</span>
+        <span class="c1"># ``length`` bounds the compare, so octets past the payload cannot make a preface.</span>
         <span class="n">preface_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_HTTP2_PREFACE</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_preface</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
             <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
-            <span class="c1"># The preface is not a frame -- the frames begin after it</span>
-            <span class="c1"># (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately</span>
-            <span class="c1"># following), so it is skipped rather than fed to ``httpv2.HTTPv2``,</span>
-            <span class="c1"># which would misread it as framing.</span>
+            <span class="c1"># The preface is not a frame, so it is skipped rather than parsed;</span>
+            <span class="c1"># the frames follow it (RFC 9113, section 3.4).</span>
             <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="n">preface_len</span><span class="p">:</span>
-                <span class="c1"># A preface with nothing after it *is* HTTP/2, but this library's</span>
-                <span class="c1"># HTTP/2 data model is one frame per packet and has no</span>
-                <span class="c1"># representation for a frameless segment, so there is nothing to</span>
-                <span class="c1"># return. Refused with a message that says so -- an HTTP/2</span>
-                <span class="c1"># connection opening truncated at the preface, not an</span>
-                <span class="c1"># unrecognised payload -- because that distinction is the point</span>
-                <span class="c1"># of identifying before parsing.</span>
+                <span class="c1"># HTTP/2, but the data model holds one frame per packet, so a</span>
+                <span class="c1"># frameless segment is refused, as such rather than as unknown.</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: connection preface with no frame'</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">http</span> <span class="o">=</span> <span class="n">HTTPv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">preface_len</span><span class="p">:</span><span class="n">length</span><span class="p">],</span> <span class="n">length</span> <span class="o">-</span> <span class="n">preface_len</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
-            <span class="c1"># NOTE: Converted, unlike the HTTP/1 commit below, because this route</span>
-            <span class="c1"># has no escaping-error contract to keep: a preface followed by a</span>
-            <span class="c1"># malformed frame must reach the caller as something it can catch,</span>
-            <span class="c1"># not as a bare stdlib error. The schema machinery raises</span>
-            <span class="c1"># ``ProtocolError`` itself for a short inner field (e.g. a 16-octet</span>
-            <span class="c1"># ``GOAWAY``, via ``FieldBase.length``), which the ``except</span>
-            <span class="c1"># ProtocolError: raise`` above passes through, so this clause is a</span>
-            <span class="c1"># backstop for any :exc:`ValueError` or :exc:`struct.error` it has</span>
-            <span class="c1"># not been shown never to raise. Same normalisation as ``read``'s</span>
-            <span class="c1"># explicit ``version=`` path above.</span>
+            <span class="c1"># NOTE: Converted, unlike on the HTTP/1 arm, so a bad frame is catchable; only a</span>
+            <span class="c1"># backstop, as the schema raises ``ProtocolError`` for a short field itself.</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -1338,67 +1262,18 @@
 
         <span class="n">HTTPv1</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
 
-        <span class="c1"># NOTE: The second identification: an HTTP/1 ``request-line`` or</span>
-        <span class="c1"># ``status-line``, tested with the very patterns ``httpv1.HTTPv1`` parses</span>
-        <span class="c1"># with (``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS`` above, all</span>
-        <span class="c1"># anchored, which ``httpv1.py`` imports from this module), so the</span>
-        <span class="c1"># predicate and the parser cannot disagree about what HTTP/1 looks like.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Identified means *committed*: a malformed HTTP/1 message is reported as</span>
-        <span class="c1"># such instead of being handed to the HTTP/2 arm, which accepts any</span>
-        <span class="c1"># self-consistent buffer of nine octets or more whose header passes</span>
-        <span class="c1"># :func:`_test_http2_frame`. Retrying an identified HTTP/1 payload as</span>
-        <span class="c1"># HTTP/2 is how HTTP/1 traffic acquires a confident HTTP/2 mislabel.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Nothing is suppressed on this arm, deliberately: it is not a candidate</span>
-        <span class="c1"># to be declined, so there is nothing to decline *to*, and</span>
-        <span class="c1"># ``test_guess_version_does_not_suppress_struct_error_on_the_http1_arm``</span>
-        <span class="c1"># pins that a :exc:`struct.error` -- or pcapkit's own ``StructError``,</span>
-        <span class="c1"># whose ``eof`` flag ``NoPayload`` handling reads -- reaches the caller</span>
-        <span class="c1"># from this route rather than being converted or swallowed.</span>
+        <span class="c1"># NOTE: A start line, matched with ``HTTPv1``'s own patterns, identifies HTTP/1; a</span>
+        <span class="c1"># malformed one is then reported, not retried as HTTP/2, which would mislabel it.</span>
         <span class="k">if</span> <span class="n">test_start_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Neither identification matched, so this is the fall-through: a</span>
-        <span class="c1"># trial parse, kept because a *mid-stream* payload carries no start line</span>
-        <span class="c1"># and no preface, and a self-consistent HTTP/2 frame is still the best</span>
-        <span class="c1"># answer available for one. It is the last resort, not the whole method.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The arms of this trial suppress different sets, deliberately. Only the *last*</span>
-        <span class="c1"># arm also suppresses :exc:`struct.error`, as defence in depth: a payload</span>
-        <span class="c1"># too short for HTTP/2's nine-octet frame header, or whose frame-specific</span>
-        <span class="c1"># fields exceed what the buffer holds, must not escape as a stdlib</span>
-        <span class="c1"># exception that no caller of this method can catch. Such payloads raise</span>
-        <span class="c1"># ``ProtocolError`` at the source -- ``httpv2.HTTPv2.unpack`` rejects a</span>
-        <span class="c1"># buffer under nine octets, and :attr:`FieldBase.length</span>
-        <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` re-raises a</span>
-        <span class="c1"># negative-length template as</span>
-        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.ProtocolError` -- so the</span>
-        <span class="c1"># suppression only guards whatever path is not known to do likewise.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Suppressing it on the *first* arm is wrong: nine byte patterns over</span>
-        <span class="c1"># lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTPv1``, so</span>
-        <span class="c1"># it buys nothing, and</span>
-        <span class="c1"># :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*</span>
-        <span class="c1"># :exc:`struct.error`, so suppressing it on a non-final arm swallows</span>
-        <span class="c1"># pcapkit's own signal and hands the payload to the arm below, which</span>
-        <span class="c1"># accepts any self-consistent buffer whose header passes</span>
-        <span class="c1"># :func:`_test_http2_frame`. With a fault injected at arm 1 and without</span>
-        <span class="c1"># that test, a *valid* HTTP/1.1 request came back ``version='2'``, and</span>
-        <span class="c1"># over UDP port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident</span>
-        <span class="c1"># HTTP/2 mislabel of HTTP/1 traffic is worse than letting the error</span>
-        <span class="c1"># escape to ``beholder``, which turns it into ``Raw``; it would also</span>
-        <span class="c1"># erase ``StructError.eof``, which ``NoPayload`` handling reads.</span>
+        <span class="c1"># NOTE: Trial parse for a mid-stream payload; ``struct.error`` escapes it, since</span>
+        <span class="c1"># absorbing its subclass ``StructError`` would hand valid HTTP/1 to the HTTP/2 arm.</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The HTTP/2 trial runs only on a header that passes</span>
-        <span class="c1"># :func:`_test_http2_frame`. Since a frame's Length counts the payload</span>
-        <span class="c1"># alone (:rfc:`9113#section-4.1`), any nine octets with a small enough</span>
-        <span class="c1"># Length are self-consistent, so the parser's own checks accept most</span>
-        <span class="c1"># zero-heavy binary as a ``DATA`` frame or a frame of unknown type. The</span>
-        <span class="c1"># test rejects only headers that no conforming sender writes, and it</span>
-        <span class="c1"># gates this guess alone: an explicit ``version=2`` is not affected.</span>
+        <span class="c1"># NOTE: Nine octets with a small Length parse as a frame (RFC 9113, section 4.1), so</span>
+        <span class="c1"># this guess, unlike an explicit ``version=2``, first needs ``_test_http2_frame``.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_test_http2_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">length</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: unknown version'</span><span class="p">)</span>
 
@@ -1452,9 +1327,8 @@
 <span class="sd">        (:issue:`2524`).</span>
 
 <span class="sd">        It is the counterpart of :meth:`IGMP._dispatch</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch&gt;`, named apart from it</span>
-<span class="sd">        because, in the transport layer, ``_dispatch`` names</span>
-<span class="sd">        :meth:`AppType._dispatch</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch&gt;`, named apart</span>
+<span class="sd">        because ``_dispatch`` already names :meth:`AppType._dispatch</span>
 <span class="sd">        &lt;pcapkit.const.reg.apptype.apptype.AppType._dispatch&gt;`, the port</span>
 <span class="sd">        registries' lookup hook.</span>
 
@@ -1469,16 +1343,12 @@
 <span class="sd">            for one it does not, which then keeps its octets undissected.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            A connection preface with no frame after it is HTTP/2, and can be</span>
-<span class="sd">            real traffic, since a client may send the preface and its</span>
-<span class="sd">            ``SETTINGS`` frame in separate segments. It is</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` here, because the HTTP/2</span>
-<span class="sd">            data model holds one frame per packet: the frame header's Length,</span>
-<span class="sd">            Type, Flags and Stream Identifier are required fields of</span>
-<span class="sd">            :class:`~pcapkit.protocols.application.httpv2.data.HTTPv2`, so a</span>
-<span class="sd">            frameless segment has no form in it, and</span>
-<span class="sd">            :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` refuses one.</span>
-<span class="sd">            So this does not pick that class for it, and the two agree.</span>
+<span class="sd">            A connection preface with no frame after it, which a client may send</span>
+<span class="sd">            in a segment of its own, is</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.protocol.Raw` here: the HTTP/2</span>
+<span class="sd">            data model holds one frame per packet, with its frame header fields</span>
+<span class="sd">            required, and :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`</span>
+<span class="sd">            refuses a frameless segment.</span>
 
 <span class="sd">        """</span>
         <span class="n">HTTPv1</span><span class="p">,</span> <span class="n">HTTPv2</span> <span class="o">=</span> <span class="n">_HTTPV1</span><span class="o">.</span><span class="n">klass</span><span class="p">,</span> <span class="n">_HTTPV2</span><span class="o">.</span><span class="n">klass</span>  <span class="c1"># pylint: disable=invalid-name</span>
@@ -1857,7 +1727,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1883,7 +1753,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/httpv2.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.httpv2.protocol contains HTTPv2 only, which implements an extractor for Hypertext Transfer Protocol (HTTP/2)*, whose structure is described as below:,,,, Octets, Bits,..." />
-<meta name="description" content="pcapkit.protocols.application.httpv2.protocol contains HTTPv2 only, which implements an extractor for Hypertext Transfer Protocol (HTTP/2)*, whose structure is described as below:,,,, Octets, Bits,..." />
+<meta property="og:description" content="pcapkit.protocols.application.httpv2.protocol contains HTTPv2 only, which implements an extractor for Hypertext Transfer Protocol (HTTP/2)*, whose structure is:,,,, Octets, Bits, Name, Description,..." />
+<meta name="description" content="pcapkit.protocols.application.httpv2.protocol contains HTTPv2 only, which implements an extractor for Hypertext Transfer Protocol (HTTP/2)*, whose structure is:,,,, Octets, Bits, Name, Description,..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="FTP - File Transfer Protocol" href="ftp.html"><link rel="prev" title="HTTP/1.* - Hypertext Transfer Protocol" href="httpv1.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,8 +573,7 @@
 <p id="module-pcapkit.protocols.application.httpv2.protocol"><a class="reference internal" href="#module-pcapkit.protocols.application.httpv2.protocol" title="pcapkit.protocols.application.httpv2.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv2.protocol</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>
 only, which implements an extractor for Hypertext Transfer
-Protocol (HTTP/2) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as
-below:</p>
+Protocol (HTTP/2) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -657,9 +656,7 @@ after its module (<a class="extlink-issue reference external" href="https://gith
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.protocol.</span></span><span class="sig-name descname"><span class="pre">HTTPv2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv2/protocol.html#HTTPv2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.protocol.HTTPv2" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.application.httpv2.data.HTTPv2" title="pcapkit.protocols.application.httpv2.data.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.application.httpv2.schema.HTTPv2" title="pcapkit.protocols.application.httpv2.schema.HTTPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv2</span></code></a>]</p>
 <p>This class implements Hypertext Transfer Protocol (HTTP/2).</p>
-<p>This class supports parsing of the following HTTP/2 frames,
-which are directly mapped to the <a class="reference internal" href="../../const/http.html#pcapkit.const.http.frame.Frame" title="pcapkit.const.http.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.http.frame.Frame</span></code></a>
-enumeration:</p>
+<p>The HTTP/2 frames it parses, by <a class="reference internal" href="../../const/http.html#pcapkit.const.http.frame.Frame" title="pcapkit.const.http.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.http.frame.Frame</span></code></a> type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.pcapng
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`PCAPNG_BlockType <pcapkit.const.pcapng.block_type.BlockType>`
@@ -32,8 +28,7 @@ Block Types
 
 .. module:: pcapkit.const.pcapng.block_type
 
-This module contains the constant enumeration for **Block Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.block_type.BlockType`.
+Generated from :class:`pcapkit.vendor.pcapng.block_type.BlockType`.
 
 .. autoclass:: pcapkit.const.pcapng.block_type.BlockType
    :members:
@@ -45,8 +40,7 @@ Hash Algorithms
 
 .. module:: pcapkit.const.pcapng.hash_algorithm
 
-This module contains the constant enumeration for **Hash Algorithms**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm`.
+Generated from :class:`pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm`.
 
 .. autoclass:: pcapkit.const.pcapng.hash_algorithm.HashAlgorithm
    :members:
@@ -58,8 +52,7 @@ Option Types
 
 .. module:: pcapkit.const.pcapng.option_type
 
-This module contains the constant enumeration for **Option Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.option_type.OptionType`.
+Generated from :class:`pcapkit.vendor.pcapng.option_type.OptionType`.
 
 .. versionchanged:: 1.1.0.post1
 
@@ -80,8 +73,7 @@ Record Types
 
 .. module:: pcapkit.const.pcapng.record_type
 
-This module contains the constant enumeration for **Record Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.record_type.RecordType`.
+Generated from :class:`pcapkit.vendor.pcapng.record_type.RecordType`.
 
 .. autoclass:: pcapkit.const.pcapng.record_type.RecordType
    :members:
@@ -93,8 +85,7 @@ Secrets Types
 
 .. module:: pcapkit.const.pcapng.secrets_type
 
-This module contains the constant enumeration for **Secrets Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.secrets_type.SecretsType`.
+Generated from :class:`pcapkit.vendor.pcapng.secrets_type.SecretsType`.
 
 .. autoclass:: pcapkit.const.pcapng.secrets_type.SecretsType
    :members:
@@ -106,8 +97,7 @@ Verdict Types
 
 .. module:: pcapkit.const.pcapng.verdict_type
 
-This module contains the constant enumeration for **Verdict Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.verdict_type.VerdictType`.
+Generated from :class:`pcapkit.vendor.pcapng.verdict_type.VerdictType`.
 
 .. autoclass:: pcapkit.const.pcapng.verdict_type.VerdictType
    :members:
@@ -119,8 +109,7 @@ Filter Types
 
 .. module:: pcapkit.const.pcapng.filter_type
 
-This module contains the constant enumeration for **Filter Types**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.filter_type.FilterType`.
+Generated from :class:`pcapkit.vendor.pcapng.filter_type.FilterType`.
 
 .. autoclass:: pcapkit.const.pcapng.filter_type.FilterType
    :members:
@@ -132,8 +121,7 @@ TLS Key Log Labels
 
 .. module:: pcapkit.const.pcapng.tls_key_label
 
-This module contains the constant enumeration for **TLS Key Log Labels**,
-which is automatically generated from :class:`pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel`.
+Generated from :class:`pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel`.
 
 .. versionadded:: 1.5.0
 
@@ -155,4 +143,4 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.tls_key_labe
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block
-.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, c.f., :rfc:`9850#section-4.2`
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, cf. :rfc:`9850#section-4.2`

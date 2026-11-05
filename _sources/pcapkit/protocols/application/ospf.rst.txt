@@ -7,8 +7,7 @@ OSPF - Open Shortest Path First
 :mod:`pcapkit.protocols.application.ospf.protocol` contains
 :class:`~pcapkit.protocols.application.ospf.protocol.OSPF` only,
 which implements an extractor for Open Shortest Path
-First (OSPF) [*]_, whose structure is described
-as below:
+First (OSPF) [*]_, whose structure is:
 
 .. table::
 

@@ -3,12 +3,11 @@ Auxiliary Protocols
 
 .. module:: pcapkit.protocols.misc
 
-:mod:`pcapkit.protocols.misc` contains the auxiliary protocol implementations.
-These include the PCAP header classes, the PCAP-NG
-:class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` class, the
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` class for not-supported protocols, and
-the :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` class for indication of
-empty payload.
+:mod:`pcapkit.protocols.misc` holds the auxiliary protocols: the PCAP header
+classes, :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`,
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` for unsupported protocols,
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` for an empty
+payload, and the checksum pseudo-headers.
 
 .. toctree::
    :maxdepth: 1

@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -574,9 +574,7 @@
 capture through to the protocol’s info, by which a protocol rebuilt from that info
 is cut back to the octets its header had (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>), for the layer base classes
 and the PCAP global header alike. It names the protocol and schema classes for type
-checking only, since those import it. It is one of the <a class="reference internal" href="index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.schema</span></code></a>
-helpers shared across the schema layer, not part of the header schema framework in
-<a class="reference internal" href="../../protocols/index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema</span></code></a>; see <a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
+checking only, since those import it.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0: </span>Moved here from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.schema</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2674">#2674</a>).</p>
 </div>

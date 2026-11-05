@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,9 +558,8 @@
 
 <span class="sd">.. module:: pcapkit.interface.core</span>
 
-<span class="sd">:mod:`pcapkit.interface.core` defines core user-oriented</span>
-<span class="sd">interfaces and variables, which wrap around the</span>
-<span class="sd">foundation classes from :mod:`pcapkit.foundation`.</span>
+<span class="sd">:mod:`pcapkit.interface.core` defines the user-facing functions and</span>
+<span class="sd">macros, which wrap the classes of :mod:`pcapkit.foundation`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
@@ -608,14 +607,8 @@
 
 <span class="c1"># extraction engines</span>
 <span class="c1">#</span>
-<span class="c1"># NOTE: each third-party engine's value is the key it is registered under in</span>
-<span class="c1"># :attr:`Extractor.__engine__ &lt;pcapkit.foundation.extraction.Extractor.__engine__&gt;`,</span>
-<span class="c1"># not its display name -- ``Extractor`` looks the requested engine up in that</span>
-<span class="c1"># mapping, and an unknown key only warns and falls back to the default engine, so a</span>
-<span class="c1"># constant whose value does not match the key would silently do nothing.</span>
-<span class="c1"># ``PCAPKit`` is ``'default'``, which ``Extractor`` resolves to its built-in engine</span>
-<span class="c1"># without a lookup. The third-party identifiers, by contrast, follow each engine's</span>
-<span class="c1"># ``__engine_name__``, which is why the casing of the two sides differs.</span>
+<span class="c1"># NOTE: a third-party value is the engine's key in ``Extractor.__engine__``, not</span>
+<span class="c1"># its display name; an unknown key only warns and falls back to ``'default'``.</span>
 <span class="n">DPKT</span> <span class="o">=</span> <span class="s1">'dpkt'</span>
 <span class="n">Scapy</span> <span class="o">=</span> <span class="s1">'scapy'</span>
 <span class="n">PCAPKit</span> <span class="o">=</span> <span class="s1">'default'</span>
@@ -1196,7 +1189,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1222,7 +1215,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

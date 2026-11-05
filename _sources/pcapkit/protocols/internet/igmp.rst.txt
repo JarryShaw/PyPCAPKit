@@ -24,6 +24,43 @@ the message classifies as, and fields are refused. Its
 ``3``, set by the class that read or built the message and on no octet, so an
 IGMPv1 and an IGMPv2 message read alike apart from it (:issue:`2574`).
 
+Octets are given a member, or :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, by
+:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch`, which
+:meth:`~pcapkit.protocols.internet.igmp.protocol.IGMP._classify` decides:
+
+.. mermaid::
+
+   flowchart TD
+       NEW["IGMP(octets) with no version=<br/>IGMP.\_\_new\_\_"] --> DISP
+       NET["an IP layer's IGMP payload<br/>Internet.\_next\_layer\_class"] --> DISP
+       DISP{"\_dispatch: at least 2 octets?"}
+       DISP -->|yes| TYPE{"\_classify: the Type"}
+       DISP -->|no| RAW
+       TYPE -->|"0x12, v1 Report"| V1
+       TYPE -->|"0x16, v2 Report<br/>0x17, Leave Group"| V2
+       TYPE -->|"0x22, v3 Report"| V3
+       TYPE -->|"0x11, Membership Query"| LEN{"the message length?"}
+       TYPE -->|"any other"| RAW
+       LEN -->|"8 octets"| MRT{"Max Resp Time zero?"}
+       LEN -->|"12 or more"| V3
+       LEN -->|"any other"| RAW
+       MRT -->|yes| V1
+       MRT -->|no| V2
+       V1["IGMPv1"]
+       V2["IGMPv2"]
+       V3["IGMPv3"]
+       RAW["Raw"]
+       RAW -->|"from IGMP.\_\_new\_\_"| ERR["ProtocolError: unknown version"]
+       RAW -->|"from Internet"| KEPT["parsed as Raw, the next layer"]
+
+       click NEW "igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP.__new__"
+       click NET "internet.html#pcapkit.protocols.internet.internet.Internet._next_layer_class"
+       click DISP "igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch"
+       click TYPE "igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._classify"
+       click V1 "igmpv1.html#pcapkit.protocols.internet.igmpv1.protocol.IGMPv1"
+       click V2 "igmpv2.html#pcapkit.protocols.internet.igmpv2.protocol.IGMPv2"
+       click V3 "igmpv3.html#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3"
+
 The structure is keyed as for IGMPv1; an IGMPv2 message's keys start ``igmpv2``
 instead:
 

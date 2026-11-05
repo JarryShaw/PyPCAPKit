@@ -19,8 +19,8 @@ packages of their own:
    * - ``0x88A8`` (service tag, 802.1ad)
      - :class:`~pcapkit.protocols.link.s_tag.protocol.S_Tag`
 
-The tag structure is described as below, keyed as for a customer tag; a service
-tag's keys start ``s_tag`` instead:
+The tag structure, keyed as for a customer tag (a service tag's keys start
+``s_tag``), is:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
@@ -32,16 +32,14 @@ Octets      Bits        Name                    Description
   2          16   ``c_tag.type``            Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
-The two tags carry an identical tag control information layout and differ only
-in the tag protocol identifier (TPID) that selected them -- ``0x8100`` for the
-customer tag, ``0x88A8`` for the service tag. The TPID is not part of either tag:
-it is the EtherType field of whatever encapsulates the tag. Both classes read the
-same four octets and share all parsing and construction code, which this base
-holds.
+The two tags differ only in the tag protocol identifier (TPID) that selects
+them, which is not part of either tag but the EtherType field of whatever
+encapsulates it. Both read the same four octets with the parsing and
+construction code this base holds.
 
-They are still distinct classes rather than one class bound at two EtherTypes,
-because 802.1ad *stacks* them. In a Q-in-Q frame the service tag's own
-next-EtherType is ``0x8100``, which selects a customer tag in turn:
+They are distinct classes, not one class bound at two EtherTypes, because
+802.1ad *stacks* them: in a Q-in-Q frame the service tag's next EtherType,
+``0x8100``, selects a customer tag:
 
 .. code-block:: text
 
@@ -52,10 +50,9 @@ next-EtherType is ``0x8100``, which selects a customer tag in turn:
    ethernet.s_tag.c_tag.type    = 0x0800
 
 :attr:`~pcapkit.protocols.protocol.Protocol.info_name` -- ``s_tag`` against
-``c_tag`` -- is what keeps the two apart in the parsed
-:class:`~pcapkit.corekit.infoclass.Info`. One class bound at both EtherTypes
-would nest a ``c_tag`` inside a ``c_tag``, leaving nothing to say which was the
-service tag.
+``c_tag`` -- keeps the two apart in the parsed
+:class:`~pcapkit.corekit.infoclass.Info`; one class would nest a ``c_tag`` inside
+a ``c_tag``, leaving nothing to say which was the service tag.
 
 Each tag has a package of its own because a package holds one protocol class,
 named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`

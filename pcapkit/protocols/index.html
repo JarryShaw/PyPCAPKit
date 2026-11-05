@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type Variables., Link Layer- Link Layer Base Protoco..." />
-<meta name="description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type Variables., Link Layer- Link Layer Base Protoco..." />
+<meta property="og:description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type ..." />
+<meta name="description" content="pcapkit.protocols is the collection of all protocol families. Root Protocol- Parsing and Construction, Next-Layer Dispatch, Layers per Frame, Value Helpers, Data Models, Internal Definitions, Type ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Root Protocol" href="protocol.html"><link rel="prev" title="Registry Management" href="../foundation/registry.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -574,6 +574,8 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Root Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="protocol.html#parsing-and-construction">Parsing and Construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocol.html#next-layer-dispatch">Next-Layer Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocol.html#layers-per-frame">Layers per Frame</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocol.html#value-helpers">Value Helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocol.html#data-models">Data Models</a></li>
@@ -893,8 +895,7 @@ out-of-range integer to its width on packing, so e.g. <code class="docutils lite
 two-octet field packs as <code class="docutils literal notranslate"><span class="pre">0x1170</span></code>. The range checks live in each
 protocol’s <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>, and in a
 field whose values have a range of their own, such as
-<a class="reference internal" href="../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a>. See GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>.</p>
+<a class="reference internal" href="../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2314">#2314</a>).</p>
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__fields__">
@@ -1068,68 +1069,51 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">__length__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> records the length of the
-remaining data, which is used to determine the length of the
-payload field.</p>
-<p>When this schema is nested – unpacked through a
-<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> rather than
-directly – <code class="docutils literal notranslate"><span class="pre">packet</span></code> is not the enclosing schema’s own data, but
-a context built by
-<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.nested_packet_context" title="pcapkit.corekit.fields.misc.nested_packet_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">nested_packet_context()</span></code></a>: a name
-this schema does not itself
-declare falls through to the enclosing schema, and the enclosing
-schema is also reachable unconditionally under a <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>
-key. See that function for the exact lookup, write and iteration
-semantics.</p>
-<p>We also use an <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record how
-much of an
-<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>’s declared
-area it did not consume. What follows that area decides what the
-remainder means: usually padding, to be skipped, but a schema may
-equally read it as further options, as the PCAP-NG name resolution
-block does with its records and options.</p>
-<p>An <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>
-declares the size of the whole area it may read, but stops at the
-end-of-option-list marker and reports the unconsumed remainder
-through <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code>. Since that remainder has not been
-parsed, we rewind <code class="docutils literal notranslate"><span class="pre">data</span></code> by as much of it as was read, so that the
-fields which size themselves from <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> read the
-remainder itself rather than the same number of octets from beyond
-it, and record a cut inside it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2685">#2685</a>).</p>
-<p>A payload field of a declared length the data ends inside is a cut
-like any other field’s, so a layer whose octets fall short of the
-length it declares records it, and its rebuild reads as cut
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). One declaring no length takes what the message
-leaves, as a trailer or the next record does, which is no part of
-the layer, and records nothing. A
-<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> whose octets
-hold fewer items than it counts records the cut too, the items
-absent being its
-<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.shortfall" title="pcapkit.corekit.fields.collections.ListField.shortfall"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shortfall</span></code></a>.</p>
-<p>The fields after the one the data ends inside find it in <code class="docutils literal notranslate"><span class="pre">packet</span></code>
-as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>: the <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">octets</span> <span class="pre">read)</span></code> pair recorded as
-the short read, or that of a
+<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> carries the bookkeeping keys below. For a nested schema,
+unpacked through a <a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>,
+it is the context
+<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.nested_packet_context" title="pcapkit.corekit.fields.misc.nested_packet_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">nested_packet_context()</span></code></a> builds: a
+name this schema does not declare falls through to the enclosing
+schema, which <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> also holds.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__length__</span></code> – the length of the remaining data, which sizes
+the payload field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> – how much of an
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>’s
+declared area it left after its end-of-option-list marker.
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is rewound by as much of that unparsed remainder as was
+read, so the fields sized from this key read the remainder itself
+and record a cut inside it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2685">#2685</a>). What follows decides
+what it is: usually padding, but the PCAP-NG name resolution block
+reads further options from it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> – for the fields after the one the data ends
+inside, the <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">octets</span> <span class="pre">read)</span></code> pair recorded, or that of a
 <a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ForwardMatchField" title="pcapkit.corekit.fields.misc.ForwardMatchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardMatchField</span></code></a> the data
 ends inside first, which the record leaves out as it consumes
-nothing. So a field callback can tell a value the end of the data
-left as zero from one read, and leave such a value to the short
-read rather than refuse it. The key is cleared as unpacking starts,
-so a nested schema finds only its own.</p>
-<p>Fields running past <code class="docutils literal notranslate"><span class="pre">length</span></code> warn that <code class="docutils literal notranslate"><span class="pre">__length__</span></code> fell below
-zero, unless a <code class="docutils literal notranslate"><span class="pre">__data_end__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> says that
-<code class="docutils literal notranslate"><span class="pre">length</span></code> ends where the data does, as a
+nothing. A field callback can so tell a value the end of the data
+left as zero from one read, and leave it to the short read.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__data_end__</span></code> – that <code class="docutils literal notranslate"><span class="pre">length</span></code> ends where the data does, as a
 <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> says of an
-item it counts. The fields past it are then the cut the short read
-records, and warn nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>). The key is cleared as
-unpacking starts too.</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">__data_present__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> says that <code class="docutils literal notranslate"><span class="pre">data</span></code> holds
-the data that many octets in, and past them the zeros a
+item it counts. Fields running past <code class="docutils literal notranslate"><span class="pre">length</span></code> are then the cut
+the short read records, and do not warn that <code class="docutils literal notranslate"><span class="pre">__length__</span></code> fell
+below zero (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2749">#2749</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__data_present__</span></code> – that <code class="docutils literal notranslate"><span class="pre">data</span></code> holds the data that many
+octets in, and past them the zeros a
 <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> of schema
-items filled it out with, as the list says of the item the data
-ends inside. The field a read crosses them in is given how many of
-its octets the data holds, under the same key, so that a list there
-ends with the data, as it does where the data itself ends
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>). The key is cleared as unpacking starts too.</p>
+items filled it out with. The field a read crosses them in is given
+how many of its octets the data holds, under the same key, so a
+list there ends with the data (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2760">#2760</a>).</p></li>
+</ul>
+<p>The last three are cleared as unpacking starts, so a nested schema
+finds only its own.</p>
+<p>A payload field of a declared length the data ends inside records a
+cut like any other field, so its layer’s rebuild reads as cut
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>); one declaring no length takes what the message
+leaves, as a trailer does, and records nothing. A
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField" title="pcapkit.corekit.fields.collections.ListField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListField</span></code></a> whose octets
+hold fewer items than it counts records the cut too, the missing
+items being its
+<a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.ListField.shortfall" title="pcapkit.corekit.fields.collections.ListField.shortfall"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shortfall</span></code></a>.</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.6.0: </span>The field the data ends inside is given to the fields after it, as
@@ -1178,13 +1162,11 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.Schema.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#Schema.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.Schema.__init_subclass__" title="Link to this definition">¶</a></dt>
 <dd><p>Refuse to derive from a finalised schema.</p>
-<p><a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> is a promise to the type
-checker and nothing more: it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> on the class and
-leaves the interpreter free to subclass it anyway. Every schema
-<a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
-from the <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
-subclass adding a field afterwards inherits a constructor that cannot
-set it. This turns that promise into a rule the interpreter keeps.</p>
+<p><a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> only informs the type checker:
+it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> and leaves the class subclassable. A schema
+<a class="reference internal" href="#pcapkit.protocols.schema.schema_final" title="pcapkit.protocols.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries an <code class="docutils literal notranslate"><span class="pre">__init__</span></code> generated from
+its <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> at that moment, which cannot set a field a
+subclass adds, so the subclass is refused.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1337,27 +1319,15 @@ registered, naming the displaced schema and its replacement.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Every public registrar in
-<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> that accepts a
-<code class="docutils literal notranslate"><span class="pre">schema</span></code> registers two halves of one binding – a parser class
-through e.g. <a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option" title="pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.register_option</span></code></a>, and a
-schema class through this method. Both warn on an overwrite, so one
-<code class="docutils literal notranslate"><span class="pre">register_ipv4_option</span></code> call replacing a built-in reports the
-schema it displaced as well as the parser.</p>
-<p>The warning fires only when the incumbent differs from the
-replacement: a repeat call that names the exact same schema object
-is a caller replaying a registration, not a mistake, so it is a
-silent no-op.</p>
-<p>Presence is a faithful “was this really registered” test only because
-<a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> returns a miss without recording it. A plain
-<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would insert <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a> the
-first time any unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> was looked up, so parsing a
-single packet carrying an unknown code would make the next legitimate
-registration for that code warn about an entry no caller ever asked
-for.</p>
+<p>Each registrar in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> that
+takes a <code class="docutils literal notranslate"><span class="pre">schema</span></code> registers both halves of one binding, a parser
+through e.g. <a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option" title="pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.register_option</span></code></a> and
+a schema through this method, and both warn on an overwrite.</p>
+<p>Registering the same schema object again is a silent no-op.
+Presence is a faithful test only because <a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a>
+does not record a miss.</p>
 <p><a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.Option" title="pcapkit.protocols.misc.pcapng.schema.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.schema.Option</span></code></a> overrides this
-method with a namespaced registry of its own and does not delegate
-here, so it is guarded separately.</p>
+method with a namespaced registry of its own, guarded separately.</p>
 </div>
 </dd></dl>
 
@@ -1378,32 +1348,26 @@ or a list of enumerations.</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
-<p>If <code class="docutils literal notranslate"><span class="pre">code</span></code> is provided, the subclass will be registered to the
-<a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.registry" title="pcapkit.protocols.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> mapping with the given <code class="docutils literal notranslate"><span class="pre">code</span></code>. If <code class="docutils literal notranslate"><span class="pre">code</span></code> is
-not given, the subclass will not be registered.</p>
+<p>A subclass given <code class="docutils literal notranslate"><span class="pre">code</span></code> is registered under it in <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.registry" title="pcapkit.protocols.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a>;
+one without is not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If any of <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 already registered, naming the displaced schema and its
-replacement. This is the guard <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.register" title="pcapkit.protocols.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> applies, repeated
-here because a class declaration is the <em>other</em> way into
-<a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a>: <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MyOption(Option,</span> <span class="pre">code=...)</span></code> writes the
-registry without calling <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.register" title="pcapkit.protocols.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+replacement, as <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.register" title="pcapkit.protocols.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> does: a class declaration such
+as <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MyOption(Option,</span> <span class="pre">code=...)</span></code> writes the registry
+without calling it.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>If <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> is not yet defined at function call,
-it will automatically be defined as a <a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a>
-object, with the default value set to <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a>.</p>
-<p>If intended to customise the <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping,
-it is possible to override the <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> method and
-define <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually. Such a manual definition may use
-a plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> – e.g. to seed a
-namespaced or nested mapping such as
-<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.Option" title="pcapkit.protocols.misc.pcapng.schema.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.schema.Option</span></code></a>’s – so it is
-swapped for the retention-safe <a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> below, before
-anything else can hold a reference to the original object.</p>
+<p>An undefined <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> becomes an <a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a>
+defaulting to <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a>.</p>
+<p>To customise the mapping, override this method and define
+<a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually. A plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
+defined so, as for the namespaced mapping of
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.schema.Option" title="pcapkit.protocols.misc.pcapng.schema.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.schema.Option</span></code></a>, is swapped
+for an <a class="reference internal" href="#pcapkit.protocols.schema._EnumRegistry" title="pcapkit.protocols.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> before anything else can hold it.</p>
 </div>
 </dd></dl>
 
@@ -1413,28 +1377,21 @@ anything else can hold a reference to the original object.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema_final">
 <span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.</span></span><span class="sig-name descname"><span class="pre">schema_final</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">_finalised</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#schema_final"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema_final" title="Link to this definition">¶</a></dt>
 <dd><p>Finalise schema class.</p>
-<p>This decorator function is used to generate necessary
-attributes and methods for the decorated <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>
-class. It can be useful to reduce runtime generation
-time as well as caching already generated attributes.</p>
+<p>This decorator generates the attributes and methods of the decorated
+<a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> class once, rather than at runtime.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>The decorator should only be used on the <em>final</em> class. Applying it
-with <code class="docutils literal notranslate"><span class="pre">_finalised=True</span></code> seals the class against <em>subclassing</em>, which
-<a class="reference internal" href="#pcapkit.protocols.schema.Schema.__init_subclass__" title="pcapkit.protocols.schema.Schema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__init_subclass__()</span></code></a> enforces, and marks it with
-<a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> – so <code class="docutils literal notranslate"><span class="pre">&#64;schema_final</span></code> implies
-<code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> and there is never a reason to write both. Writing both is
-harmless in either order, though; what is not is <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> <em>without</em>
-this decorator, which <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__new__" title="pcapkit.protocols.schema.Schema.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a> refuses – provided
-<code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> is <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> (or, on Python
-3.11 and up, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> directly). Below 3.11, plain
-<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> does not set <code class="docutils literal notranslate"><span class="pre">__final__</span></code> at all (gh-90500), so a
-class marked with a user’s own <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">typing</span> <span class="pre">import</span> <span class="pre">final</span></code> on 3.10 is
-not refused: there is nothing on the class for <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__new__" title="pcapkit.protocols.schema.Schema.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a> to
-read.</p>
-<p>Applying this decorator to the same class a second time only warns: the
-first application already did the work, so the duplicate is redundant
-rather than wrong, and the class comes back finalised and usable.</p>
+<p>Use it on the <em>final</em> class only. With <code class="docutils literal notranslate"><span class="pre">_finalised=True</span></code> it seals the
+class against <em>subclassing</em>, which <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__init_subclass__" title="pcapkit.protocols.schema.Schema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__init_subclass__()</span></code></a>
+enforces, and marks it with <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a>, so
+<code class="docutils literal notranslate"><span class="pre">&#64;schema_final</span></code> implies <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>; writing both is harmless.
+<a class="reference internal" href="#pcapkit.protocols.schema.Schema.__new__" title="pcapkit.protocols.schema.Schema.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a> refuses <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> <em>without</em> this decorator,
+where <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> is <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a>, or
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> on Python 3.11 and up. Below 3.11,
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> sets no <code class="docutils literal notranslate"><span class="pre">__final__</span></code> (gh-90500), so a class
+marked with it is not refused.</p>
+<p>Applying it to the same class a second time only warns, and the class
+comes back finalised and usable.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1472,38 +1429,26 @@ instantiated (<a class="extlink-issue reference external" href="https://github.c
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.</span></span><span class="sig-name descname"><span class="pre">SchemaMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#SchemaMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.SchemaMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
 <p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> class. It can be useful to reduce runtime generation
-cost as well as caching already generated attributes.</p>
+<p>It generates the attributes of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> class:</p>
 <ul>
-<li><p><a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__fields__</span></code></a> is a dictionary of field names and their
-corresponding <a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> objects,
-which are used to define and parse the protocol headers. The field
-dictionary will automatically be populated from the class attributes
-of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> class, and the field names will be the same
-as the attribute names.</p>
+<li><p><a class="reference internal" href="#pcapkit.protocols.schema.Schema.__fields__" title="pcapkit.protocols.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__fields__</span></code></a> maps each field name, the attribute name, to
+its <a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> object, which defines
+and parses the header. It is populated from the class attributes.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>This is implemented through setting up the initial field dictionary
-in the <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#preparing-the-class-namespace"><a class="reference internal" href="#pcapkit.protocols.schema.SchemaMeta.__prepare__" title="pcapkit.protocols.schema.SchemaMeta.__prepare__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__prepare__()</span></code></a></a> method, and then inherit the field
-dictionaries from the base classes.</p>
-<p>Later, during the class creation, the
+<p>The <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#preparing-the-class-namespace"><a class="reference internal" href="#pcapkit.protocols.schema.SchemaMeta.__prepare__" title="pcapkit.protocols.schema.SchemaMeta.__prepare__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__prepare__()</span></code></a></a> method sets up the initial field dictionary from
+those of the base classes; during class creation,
 <a class="reference internal" href="../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.__set_name__" title="pcapkit.corekit.fields.field.FieldBase.__set_name__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Field.__set_name__</span></code></a>
-method will be called to set the field name for each field object,
-as well as to add the field object to the field dictionary.</p>
+names each field object and adds it to the dictionary.</p>
 </div>
 </li>
-<li><p><a class="reference internal" href="#pcapkit.protocols.schema.Schema.__additional__" title="pcapkit.protocols.schema.Schema.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__additional__</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__excluded__" title="pcapkit.protocols.schema.Schema.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__excluded__</span></code></a> are
-lists of additional and excluded field names, which are used to
-determine certain names to be included or excluded from the field
-dictionary. They will be automatically populated from the class
-attributes of the <a class="reference internal" href="#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> class and its base classes.</p>
+<li><p><a class="reference internal" href="#pcapkit.protocols.schema.Schema.__additional__" title="pcapkit.protocols.schema.Schema.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__additional__</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.Schema.__excluded__" title="pcapkit.protocols.schema.Schema.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema.__excluded__</span></code></a> list
+names to include in or exclude from the field dictionary, populated
+from the class attributes of the class and its bases.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This is implemented through the <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__new__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> method, which
-will inherit the additional and excluded field names from the base
-classes, as well as populating the additional and excluded field
-from the subclass attributes.</p>
+<p>This metaclass’s <code class="docutils literal notranslate"><span class="pre">__new__</span></code> inherits both lists from the base
+classes and extends them with the subclass’s own.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">A</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">]</span>
 
@@ -1548,14 +1493,8 @@ from the subclass attributes.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.</span></span><span class="sig-name descname"><span class="pre">EnumMeta</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_ET</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Enum</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#EnumMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.EnumMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.SchemaMeta" title="pcapkit.protocols.schema.SchemaMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema._ET" title="pcapkit.protocols.schema._ET"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ET</span></code></a>]</p>
 <p>Meta class to add dynamic support for <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema" title="pcapkit.protocols.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema" title="pcapkit.protocols.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a> class. It can be useful to reduce runtime generation
-cost as well as caching already generated attributes.</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.registry" title="pcapkit.protocols.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> is added to subclasses as an <em>immutable</em>
-proxy (similar to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#property" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">property</span></code></a>, but on class variables) to the
-<a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.__enum__</span></code></a> mapping.</p></li>
-</ul>
+<p>It adds <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.registry" title="pcapkit.protocols.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> to subclasses: a read-only class
+property returning the <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.__enum__</span></code></a> mapping.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.EnumMeta.registry">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">registry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema._ET" title="pcapkit.protocols.schema._ET"><span class="pre">_ET</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema" title="pcapkit.protocols.schema.EnumSchema"><span class="pre">EnumSchema</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.EnumMeta.registry" title="Link to this definition">¶</a></dt>
@@ -1579,21 +1518,17 @@ for why that distinction matters.</p>
 <p>A registry <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> that never inserts a miss.</p>
 <p><a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.registry" title="pcapkit.protocols.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.registry</span></code></a> (and its class-level twin,
 <a class="reference internal" href="#pcapkit.protocols.schema.EnumMeta.registry" title="pcapkit.protocols.schema.EnumMeta.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code></a>) is read with a bare
-<code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> at many call sites across the schema layer, e.g.
-<code class="docutils literal notranslate"><span class="pre">Option.registry[type]</span></code>. A
-plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> inserts whatever
-<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict.default_factory" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_factory</span></code></a> returns the <em>first time</em>
-an unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> is looked up – and since the registry lives on
-the <em>class</em>, that insertion is permanent and shared by every instance of
-every subclass in the process. Parsing one packet carrying an unrecognised
-code would therefore grow the registry for the remainder of the process,
-and make a later, entirely legitimate <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.register" title="pcapkit.protocols.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call
-report an overwrite that never happened.</p>
-<p>The fallback itself is deliberate – it is how an unknown option, chunk or
-block falls back to its <code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this
-subclass keeps returning it and just stops recording it.
-<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._lookup_registry</span></code></a>
-does the same for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family.</p>
+<code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> across the schema layer, e.g.
+<code class="docutils literal notranslate"><span class="pre">Option.registry[type]</span></code>. A plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would
+insert what <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict.default_factory" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_factory</span></code></a> returns on
+the first miss, and the registry lives on the <em>class</em>, so one packet with
+an unrecognised code would grow it for the rest of the process, and make a
+later, legitimate <a class="reference internal" href="#pcapkit.protocols.schema.EnumSchema.register" title="pcapkit.protocols.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> report an overwrite that
+never happened.</p>
+<p>The fallback is how an unknown option, chunk or block gets its
+<code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema, so this subclass still returns it,
+without recording it, as <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._lookup_registry</span></code></a> does for the
+<code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema._EnumRegistry.__missing__">
 <span class="sig-name descname"><span class="pre">__missing__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema.html#_EnumRegistry.__missing__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema._EnumRegistry.__missing__" title="Link to this definition">¶</a></dt>
@@ -1658,17 +1593,15 @@ no alias: each protocol’s are in the <code class="docutils literal notranslate
 <p>The <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code>, <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>, <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and
 <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> keys are metadata, listed in
 <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a> and
-<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>:
+<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>.
 <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>
-dispatches the payload on the first two and on nothing else, cuts a short
-read back on the third, and reads it at the width the fourth records.
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries them, so that
-<code class="docutils literal notranslate"><span class="pre">from_data(info.to_dict())</span></code> rebuilds as <code class="docutils literal notranslate"><span class="pre">from_data(info)</span></code> does, while
-the dumpers and <code class="docutils literal notranslate"><span class="pre">repr</span></code> leave them out. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> must
-carry them as well – and, for IPv6, the extension header chain under
-<code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> – to be rebuilt the same way: without the first two, no
-payload layer is dispatched, as for a protocol with no next layer, and
-without <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> no IPv6 extension header is rebuilt
+dispatches the payload on the first two alone, cuts a short read back on
+the third, and reads it at the width the fourth records.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries them, so <code class="docutils literal notranslate"><span class="pre">from_data(info.to_dict())</span></code> rebuilds as
+<code class="docutils literal notranslate"><span class="pre">from_data(info)</span></code> does; the dumpers and <code class="docutils literal notranslate"><span class="pre">repr</span></code> leave them out. A
+hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> needs them too, and for IPv6 the extension header
+chain under <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code>: without the first two no payload layer is
+dispatched, and without <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> no IPv6 extension header is rebuilt
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.Data.__included__">
@@ -2097,7 +2030,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2123,7 +2056,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

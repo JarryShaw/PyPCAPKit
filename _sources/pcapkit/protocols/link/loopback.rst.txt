@@ -11,10 +11,10 @@ BSD Loopback Encapsulation
    (:issue:`2534`).
 
 :mod:`pcapkit.protocols.link.loopback.protocol` contains
-:class:`~pcapkit.protocols.link.loopback.protocol.Loopback`
-only, which implements the extractor for the BSD loopback
+:class:`~pcapkit.protocols.link.loopback.protocol.Loopback`,
+which implements the extractor for the BSD loopback
 encapsulation [*]_ of ``LINKTYPE_NULL`` and ``LINKTYPE_LOOP``,
-whose structure is described as below:
+whose structure is:
 
 .. table::
 

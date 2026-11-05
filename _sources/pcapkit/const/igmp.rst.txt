@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.igmp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.igmp.protocol.IGMP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`IGMP_Type <pcapkit.const.igmp.type.Type>`
@@ -22,8 +18,7 @@ IGMP Type Numbers
 
 .. module:: pcapkit.const.igmp.type
 
-This module contains the constant enumeration for **IGMP Type Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.igmp.type.Type`.
+Generated from :class:`pcapkit.vendor.igmp.type.Type`.
 
 .. autoclass:: pcapkit.const.igmp.type.Type
    :members:
@@ -35,9 +30,7 @@ IGMP Group Record Types
 
 .. module:: pcapkit.const.igmp.record_type
 
-This module contains the constant enumeration for **IGMP Group Record
-Types**, which is automatically generated from
-:class:`pcapkit.vendor.igmp.record_type.RecordType`.
+Generated from :class:`pcapkit.vendor.igmp.record_type.RecordType`.
 
 .. autoclass:: pcapkit.const.igmp.record_type.RecordType
    :members:

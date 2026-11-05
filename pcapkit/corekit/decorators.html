@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/decorators.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables:" />
-<meta name="description" content="pcapkit.corekit.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables:" />
+<meta property="og:description" content="pcapkit.corekit.decorators contains the decorators seekset(), beholder() and prepare(). Type Variables:" />
+<meta name="description" content="pcapkit.corekit.decorators contains the decorators seekset(), beholder() and prepare(). Type Variables:" />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Enumeration Base" href="enum.html"><link rel="prev" title="Parsing Context" href="context.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,8 +570,8 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.decorators">
 <span id="decorator-functions"></span><h1>Decorator Functions<a class="headerlink" href="#module-pcapkit.corekit.decorators" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.decorators</span></code></a> contains several useful
-decorators, including <a class="reference internal" href="#pcapkit.corekit.decorators.seekset" title="pcapkit.corekit.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>,
+<p><a class="reference internal" href="#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.decorators</span></code></a> contains the decorators
+<a class="reference internal" href="#pcapkit.corekit.decorators.seekset" title="pcapkit.corekit.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>,
 <a class="reference internal" href="#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and
 <a class="reference internal" href="#pcapkit.corekit.decorators.prepare" title="pcapkit.corekit.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a>.</p>
 <div class="versionadded">
@@ -736,11 +736,9 @@ arguments would.</p>
 
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The decorators above are designed for decorating <em>methods</em>: an instance
-method of a protocol for <a class="reference internal" href="#pcapkit.corekit.decorators.seekset" title="pcapkit.corekit.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and a
-classmethod of a schema for <a class="reference internal" href="#pcapkit.corekit.decorators.prepare" title="pcapkit.corekit.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a>.
-For more information, please refer to the documentation of each
-decorator function.</p>
+<p>The decorators above decorate <em>methods</em>: an instance method of a protocol
+for <a class="reference internal" href="#pcapkit.corekit.decorators.seekset" title="pcapkit.corekit.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and a classmethod of a schema for
+<a class="reference internal" href="#pcapkit.corekit.decorators.prepare" title="pcapkit.corekit.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a>.</p>
 </div>
 <section id="type-variables">
 <h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>

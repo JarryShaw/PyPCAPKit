@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -566,15 +566,10 @@
 <span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`,</span>
 <span class="sd">IPv4 and IPv6 among them, and on a</span>
 <span class="sd">``LINKTYPE_LINUX_SLL``/``LINKTYPE_LINUX_SLL2`` capture whose ``arphrd_type``</span>
-<span class="sd">is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE`` -- ``ARPHRD_IPGRE`` and</span>
-<span class="sd">``ARPHRD_IP6GRE`` both land on this one class:</span>
-<span class="sd">:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` dispatches here instead</span>
-<span class="sd">of falling back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` for either case;</span>
-<span class="sd">see :attr:`LinuxSLL.__proto__ &lt;pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__&gt;`. The</span>
-<span class="sd">"IP"/"IP6" distinction in the two ``arphrd_type`` names is about which IP</span>
-<span class="sd">version the tunnel carries on its *outer* layer -- i.e. which ``arphrd_type``</span>
-<span class="sd">fired -- not a different GRE header shape; the GRE framing itself is</span>
-<span class="sd">identical either way.</span>
+<span class="sd">is ``ARPHRD_IPGRE`` or ``ARPHRD_IP6GRE``; see</span>
+<span class="sd">:attr:`LinuxSLL.__proto__ &lt;pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__&gt;`.</span>
+<span class="sd">The two names differ only in the tunnel's outer IP version; the GRE framing is</span>
+<span class="sd">the same.</span>
 
 <span class="sd">Structure, the base header plus every optional field (:rfc:`2784` section</span>
 <span class="sd">2.1, :rfc:`2890` section 2):</span>
@@ -594,32 +589,26 @@
 <span class="sd">   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
 <span class="sd">``C`` gates the Checksum/Reserved1 pair, ``K`` gates the Key field and ``S``</span>
-<span class="sd">gates the Sequence Number field, each independently -- so the header is</span>
-<span class="sd">4, 8, 12 or 16 octets depending on which of the three are set. ``Ver`` is</span>
-<span class="sd">:rfc:`2784`'s 3-bit Version Number, which MUST be ``0``; a nonzero version is</span>
-<span class="sd">a different protocol entirely (RFC 2637's "Enhanced GRE", the PPTP variant,</span>
-<span class="sd">is version ``1``) and is not implemented here. The Protocol Type field is an</span>
-<span class="sd">EtherType selecting the encapsulated payload -- resolved through</span>
-<span class="sd">:attr:`Link.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`, the same</span>
-<span class="sd">family registry Ethernet, VLAN and LinuxSLL already share, exactly as</span>
-<span class="sd">:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` resolves its own ``type`` field.</span>
-<span class="sd">This class therefore keeps no registry of its own.</span>
+<span class="sd">gates the Sequence Number field, each independently, so the header is 4, 8,</span>
+<span class="sd">12 or 16 octets. ``Ver`` is :rfc:`2784`'s 3-bit Version Number, which MUST be</span>
+<span class="sd">``0``. The Protocol Type field is an EtherType selecting the payload, resolved</span>
+<span class="sd">through :attr:`Link.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;` as</span>
+<span class="sd">:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` resolves its ``type`` field,</span>
+<span class="sd">so this class keeps no registry of its own.</span>
 
 <span class="sd">Scope</span>
 <span class="sd">-----</span>
 
 <span class="sd">Only the framing above is dissected. The Key and Sequence Number fields are</span>
-<span class="sd">recorded but not interpreted further -- their meaning (which traffic flow, and</span>
-<span class="sd">where in its sequence) is a matter for the tunnel endpoints, not something a</span>
-<span class="sd">passive dissector can resolve from the header alone. The Checksum, when ``C``</span>
-<span class="sd">is set, covers the header and the payload with no pseudo-header</span>
-<span class="sd">(:rfc:`2784#section-2.5`); :meth:`~pcapkit.protocols.link.gre.protocol.GRE.read`</span>
-<span class="sd">verifies it and :meth:`~pcapkit.protocols.link.gre.protocol.GRE.make` computes it</span>
-<span class="sd">(:issue:`2618`). RFC 2637's Enhanced GRE</span>
-<span class="sd">(version 1, used by PPTP) has a different, incompatible layout from this point</span>
-<span class="sd">on -- a Key field split into Payload Length and Call ID, and an optional</span>
-<span class="sd">Acknowledgment Number -- and is out of scope; :meth:`read` refuses it rather</span>
-<span class="sd">than misreading it as RFC 2784/2890 GRE.</span>
+<span class="sd">recorded but not interpreted: their meaning is a matter for the tunnel</span>
+<span class="sd">endpoints. The Checksum, when ``C`` is set, covers the header and the payload</span>
+<span class="sd">with no pseudo-header (:rfc:`2784#section-2.5`);</span>
+<span class="sd">:meth:`~pcapkit.protocols.link.gre.protocol.GRE.read` verifies it and</span>
+<span class="sd">:meth:`~pcapkit.protocols.link.gre.protocol.GRE.make` computes it</span>
+<span class="sd">(:issue:`2618`). RFC 2637's Enhanced GRE (version 1, used by PPTP) has an</span>
+<span class="sd">incompatible layout -- a Key field split into Payload Length and Call ID, and</span>
+<span class="sd">an optional Acknowledgment Number -- so :meth:`read` refuses any nonzero</span>
+<span class="sd">version rather than misreading it as RFC 2784/2890 GRE.</span>
 
 <span class="sd">.. versionadded:: 1.6.0</span>
 
@@ -1343,7 +1332,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1369,7 +1358,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

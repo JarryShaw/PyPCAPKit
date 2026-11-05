@@ -110,6 +110,23 @@ Terminology
        of the capture. Telling that SYN from the peer's SYN-ACK is what the
        recorded teardown is for.
 
+       .. mermaid::
+
+          stateDiagram-v2
+              direction TB
+              state "open" as O
+              state "torn down" as T
+              state "finalised" as F
+              O : each packet recorded in index, and in forward or reverse
+              O : a FIN adds its sender to fin, a RST sets reset and finalises nothing
+              T : not stored, derived by _ended() from fin and reset
+              T : the closing ACK and its duplicates still recorded
+              [*] --> O : first packet on a BUFID,<br/>buffer created, label and origin from it
+              O --> T : bidirectional only,<br/>FIN from both endpoints, or a RST
+              T --> F : a new connection's SYN on the same BUFID,<br/>or TCP.finish() at the end of the capture
+              O --> F : TCP.finish() at the end of the capture, either mode,<br/>or this direction's FIN, when unidirectional
+              F --> [*] : \_finalise pops the buffer, builds its Index,<br/>calls each \_\_callback\_fn\_\_
+
        .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
 
    trace.tcp.index

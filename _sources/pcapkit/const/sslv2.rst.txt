@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.sslv2
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`SSLv2_HandshakeType <pcapkit.const.sslv2.handshake_type.HandshakeType>`
@@ -22,11 +18,9 @@ SSLv2 Handshake Message Type
 
 .. module:: pcapkit.const.sslv2.handshake_type
 
-This module contains the constant enumeration for **SSLv2 Handshake Message
-Type**, which is automatically generated from
-:class:`pcapkit.vendor.sslv2.handshake_type.HandshakeType`. Its source is the
-expired SSLv2 draft linked above, not a live registry, so the crawler reads a
-``DATA`` attribute instead of fetching a URL.
+Generated from :class:`pcapkit.vendor.sslv2.handshake_type.HandshakeType`. Its
+source is the expired SSLv2 draft linked above, not a live registry, so the crawler
+reads its module's ``DATA`` mapping instead of fetching a URL.
 
 .. autoclass:: pcapkit.const.sslv2.handshake_type.HandshakeType
    :members:
@@ -38,10 +32,8 @@ SSLv2 Protocol Version
 
 .. module:: pcapkit.const.sslv2.version
 
-This module contains the constant enumeration for **SSLv2 Protocol
-Version**, which is automatically generated from
-:class:`pcapkit.vendor.sslv2.version.Version`, for the same reason
-:class:`~pcapkit.const.sslv2.handshake_type.HandshakeType` is.
+Generated from :class:`pcapkit.vendor.sslv2.version.Version`, which reads ``DATA``
+for the same reason.
 
 .. autoclass:: pcapkit.const.sslv2.version.Version
    :members:

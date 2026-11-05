@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all web crawlers of pcapkit, which automatically generate the pcapkit.const module’s constant enumerations. The crawlers need the vendor extra, pip install &quot;pypcapkit[vend..." />
-<meta name="description" content="This module contains all web crawlers of pcapkit, which automatically generate the pcapkit.const module’s constant enumerations. The crawlers need the vendor extra, pip install &quot;pypcapkit[vend..." />
+<meta property="og:description" content="The crawlers that generate pcapkit.const. They need the vendor extra, pip install &quot;pypcapkit[vendor]&quot;. Crawler Implementations: Base Crawler- Running a Crawler, Environment Variables, Int..." />
+<meta name="description" content="The crawlers that generate pcapkit.const. They need the vendor extra, pip install &quot;pypcapkit[vendor]&quot;. Crawler Implementations: Base Crawler- Running a Crawler, Environment Variables, Int..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Base Crawler" href="default.html"><link rel="prev" title="PCAPNG Constant Enumerations" href="../const/pcapng.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,25 +570,23 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor">
 <span id="vendor-crawlers"></span><h1>Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor" title="Link to this heading">¶</a></h1>
-<p>This module contains all web crawlers of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which
-automatically generate the <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> module’s constant
-enumerations.</p>
-<p>The crawlers need the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> extra, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pypcapkit[vendor]&quot;</span></code>.</p>
+<p>The crawlers that generate <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>. They need the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> extra,
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pypcapkit[vendor]&quot;</span></code>.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Without <code class="docutils literal notranslate"><span class="pre">requests</span></code> or <code class="docutils literal notranslate"><span class="pre">beautifulsoup4</span></code>, which the crawlers import at
-module scope, importing this package succeeds and imports no crawler.
-Reading any name in its <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, or
-<a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a>, then raises
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> naming the missing packages and the extra to
-install (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1850">#1850</a>). Importing a crawler module directly, such as
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Without <code class="docutils literal notranslate"><span class="pre">requests</span></code> or <code class="docutils literal notranslate"><span class="pre">beautifulsoup4</span></code>, importing this package succeeds
+but imports no crawler, where it used to raise. Reading a name in its
+<code class="docutils literal notranslate"><span class="pre">__all__</span></code>, or <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a>, raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> naming the missing packages and the extra
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1850">#1850</a>). Importing a crawler module directly, such as
 <a class="reference internal" href="reg.html#module-pcapkit.vendor.reg" title="pcapkit.vendor.reg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg</span></code></a>, still raises the missing package’s own
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>. Before, importing this package raised it.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>.</p>
 </div>
 <section id="crawler-implementations">
 <h2>Crawler Implementations<a class="headerlink" href="#crawler-implementations" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="default.html">Base Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="default.html#running-a-crawler">Running a Crawler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="default.html#environment-variables">Environment Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="default.html#internal-definitions">Internal Definitions</a></li>
 </ul>
@@ -827,7 +825,7 @@ install (<a class="extlink-issue reference external" href="https://github.com/Ja
 <h3>Application Layer<a class="headerlink" href="#application-layer" title="Link to this heading">¶</a></h3>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.vendor.ftp.command">FTP Command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.vendor.ftp.return_code">FTP Server Return Code</a></li>
 </ul>
@@ -885,8 +883,7 @@ install (<a class="extlink-issue reference external" href="https://github.com/Ja
 </section>
 <section id="module-pcapkit.vendor.__main__">
 <span id="command-line-tool"></span><h2>Command Line Tool<a class="headerlink" href="#module-pcapkit.vendor.__main__" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.vendor.__main__" title="pcapkit.vendor.__main__"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.__main__</span></code></a> is a command line tool for updating
-constant enumerations.</p>
+<p><strong class="program">pcapkit-vendor</strong> regenerates the constant enumerations.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">pcapkit</span><span class="o">-</span><span class="n">vendor</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">V</span><span class="p">]</span> <span class="o">...</span>
 
 <span class="n">update</span> <span class="n">constant</span> <span class="n">enumerations</span>

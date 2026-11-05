@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -604,29 +604,22 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'_ST'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_finalised</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Finalise schema class.</span>
 
-<span class="sd">    This decorator function is used to generate necessary</span>
-<span class="sd">    attributes and methods for the decorated :class:`Schema`</span>
-<span class="sd">    class. It can be useful to reduce runtime generation</span>
-<span class="sd">    time as well as caching already generated attributes.</span>
+<span class="sd">    This decorator generates the attributes and methods of the decorated</span>
+<span class="sd">    :class:`Schema` class once, rather than at runtime.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        The decorator should only be used on the *final* class. Applying it</span>
-<span class="sd">        with ``_finalised=True`` seals the class against *subclassing*, which</span>
-<span class="sd">        :meth:`Schema.__init_subclass__` enforces, and marks it with</span>
-<span class="sd">        :func:`~pcapkit.utilities.compat.final` -- so ``@schema_final`` implies</span>
-<span class="sd">        ``@final`` and there is never a reason to write both. Writing both is</span>
-<span class="sd">        harmless in either order, though; what is not is ``@final`` *without*</span>
-<span class="sd">        this decorator, which :meth:`Schema.__new__` refuses -- provided</span>
-<span class="sd">        ``@final`` is :func:`~pcapkit.utilities.compat.final` (or, on Python</span>
-<span class="sd">        3.11 and up, :func:`typing.final` directly). Below 3.11, plain</span>
-<span class="sd">        :func:`typing.final` does not set ``__final__`` at all (gh-90500), so a</span>
-<span class="sd">        class marked with a user's own ``from typing import final`` on 3.10 is</span>
-<span class="sd">        not refused: there is nothing on the class for :meth:`Schema.__new__` to</span>
-<span class="sd">        read.</span>
+<span class="sd">        Use it on the *final* class only. With ``_finalised=True`` it seals the</span>
+<span class="sd">        class against *subclassing*, which :meth:`Schema.__init_subclass__`</span>
+<span class="sd">        enforces, and marks it with :func:`~pcapkit.utilities.compat.final`, so</span>
+<span class="sd">        ``@schema_final`` implies ``@final``; writing both is harmless.</span>
+<span class="sd">        :meth:`Schema.__new__` refuses ``@final`` *without* this decorator,</span>
+<span class="sd">        where ``@final`` is :func:`~pcapkit.utilities.compat.final`, or</span>
+<span class="sd">        :func:`typing.final` on Python 3.11 and up. Below 3.11,</span>
+<span class="sd">        :func:`typing.final` sets no ``__final__`` (gh-90500), so a class</span>
+<span class="sd">        marked with it is not refused.</span>
 
-<span class="sd">        Applying this decorator to the same class a second time only warns: the</span>
-<span class="sd">        first application already did the work, so the duplicate is redundant</span>
-<span class="sd">        rather than wrong, and the class comes back finalised and usable.</span>
+<span class="sd">        Applying it to the same class a second time only warns, and the class</span>
+<span class="sd">        comes back finalised and usable.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Schema class.</span>
@@ -649,25 +642,15 @@
 
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,</span>
-    <span class="c1"># and read out of ``cls.__dict__`` rather than through ``getattr``, for the</span>
-    <span class="c1"># reasons given in :func:`pcapkit.corekit.infoclass.info_final`, which</span>
-    <span class="c1"># makes both choices: only ``__finalised__`` records *this function* having</span>
-    <span class="c1"># run, so a ``__final__`` test would make ``@schema_final`` over ``@final``</span>
-    <span class="c1"># skip the generation while the opposite order did the work; and</span>
-    <span class="c1"># ``__finalised__`` is inherited, so ``getattr`` would skip a subclass</span>
-    <span class="c1"># declared before its parent was finalised.</span>
+    <span class="c1"># NOTE: Keyed on ``__finalised__``, which only this function sets, and read from</span>
+    <span class="c1"># ``cls.__dict__``, since it is inherited; as in ``info_final``.</span>
     <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: schema has been finalised; now skipping'</span><span class="p">,</span>
              <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
-    <span class="c1"># NOTE: short-circuit for ``Schema`` itself, as in</span>
-    <span class="c1"># :func:`pcapkit.corekit.infoclass.info_final`: ``Schema`` never reaches</span>
-    <span class="c1"># ``FinalisedState.BASE``, so a bare ``Schema()`` would otherwise re-enter</span>
-    <span class="c1"># this function, and redo the ``dir()``-over-the-MRO scan below, on *every*</span>
-    <span class="c1"># call. ``__base_ready__`` is</span>
-    <span class="c1"># its own marker, own-``__dict__`` only, so it never touches ``__finalised__``.</span>
+    <span class="c1"># NOTE: ``Schema`` never reaches ``FinalisedState.BASE``, so without its own</span>
+    <span class="c1"># ``__base_ready__`` marker every bare ``Schema()`` would redo the scan below.</span>
     <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">Schema</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__base_ready__'</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
@@ -684,34 +667,14 @@
     <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NO_VALUE'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
-    <span class="c1"># NOTE: We shall only generate ``__init__`` if the class does not define one,</span>
-    <span class="c1"># which is a test on ``cls.__dict__``, not on ``hasattr``: every class</span>
-    <span class="c1"># inherits ``__init__`` from :obj:`object`, so ``hasattr(cls, '__init__')``</span>
-    <span class="c1"># is always true. Without the generated method, ``Schema(...)`` would run</span>
-    <span class="c1"># :meth:`Schema.__update__` alone and never reach</span>
-    <span class="c1"># :meth:`Schema.__post_init__`, leaving a schema built from a subset of its</span>
-    <span class="c1"># fields holding :class:`~pcapkit.corekit.fields.field.FieldBase` objects in</span>
-    <span class="c1"># place of the omitted values, so that it could not be packed at all and</span>
-    <span class="c1"># failed with an error naming a field class rather than a field.</span>
-    <span class="c1">#</span>
-    <span class="c1"># :class:`~pcapkit.protocols.misc.no_payload.schema.NoPayload` is what the test</span>
-    <span class="c1"># protects: it declares an argument-less ``__init__`` of its own so that no</span>
-    <span class="c1"># generated one displaces it.</span>
+    <span class="c1"># NOTE: Only where the class defines none (``hasattr`` is always true). Without it,</span>
+    <span class="c1"># ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.</span>
+    <span class="c1"># ``NoPayload`` declares an argument-less ``__init__`` so that none is generated.</span>
     <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-        <span class="c1"># NOTE: We only generate typed ``__init__`` method if only the class</span>
-        <span class="c1"># has field definition from any of itself and its base classes.</span>
+        <span class="c1"># NOTE: A typed ``__init__`` only for a class with fields, own or inherited.</span>
         <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
-            <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
-            <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
-            <span class="c1">#</span>
-            <span class="c1"># ``**kwargs`` is forwarded rather than rejected, so that a keyword</span>
-            <span class="c1"># naming something other than a field reaches</span>
-            <span class="c1"># :meth:`Schema.__update__` and draws its</span>
-            <span class="c1"># :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`. Several</span>
-            <span class="c1"># schemas are constructed that way on purpose -- the Multipath TCP</span>
-            <span class="c1"># options take a ``kind`` and a ``length`` that the enclosing option</span>
-            <span class="c1"># owns and that ``MPTCP`` declares only for the type checker -- so a</span>
-            <span class="c1"># strict signature would turn a warning into a :exc:`TypeError`.</span>
+            <span class="c1"># NOTE: After ``dataclasses._create_fn``. ``**kwargs`` reaches ``__update__``, which</span>
+            <span class="c1"># warns of a non-field; the MPTCP options take ``kind``/``length`` that way on purpose.</span>
             <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'def __create_fn__():</span><span class="se">\n</span><span class="s1">'</span>
                 <span class="sa">f</span><span class="s1">'    def __init__(self, </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">, *, __packet__=None, **kwargs):</span><span class="se">\n</span><span class="s1">'</span>
@@ -735,18 +698,8 @@
         <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__'</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_finalised</span><span class="p">:</span>
-        <span class="c1"># NOTE: ``Schema`` itself must never receive this promotion, for the same</span>
-        <span class="c1"># reason ``Info`` must not -- see :func:`pcapkit.corekit.infoclass.info_final`.</span>
-        <span class="c1"># This branch binds ``cls`` to ``Schema``</span>
-        <span class="c1"># only when something bare-constructs ``Schema()`` directly, and writing</span>
-        <span class="c1"># ``BASE`` onto ``Schema.__dict__`` there would make every subclass declared</span>
-        <span class="c1"># afterwards inherit ``BASE`` and skip :meth:`Schema.__new__`'s own</span>
-        <span class="c1"># ``FinalisedState.NONE`` branch -- silently defeating the bare-``@final``</span>
-        <span class="c1"># guard nested inside it for the rest of the process.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``__base_ready__`` is set instead, for the short-circuit at the top of</span>
-        <span class="c1"># this function -- own-``__dict__`` only, so it is not inherited and</span>
-        <span class="c1"># does not touch ``__finalised__``.</span>
+        <span class="c1"># NOTE: Never ``BASE`` on ``Schema`` itself, as for ``Info`` (see ``info_final``):</span>
+        <span class="c1"># subclasses would inherit it and skip the bare-``@final`` guard of ``Schema.__new__``.</span>
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Schema</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
         <span class="k">else</span><span class="p">:</span>
@@ -763,43 +716,30 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SchemaMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Meta class to add dynamic support to :class:`Schema`.</span>
 
-<span class="sd">    This meta class is used to generate necessary attributes for the</span>
-<span class="sd">    :class:`Schema` class. It can be useful to reduce runtime generation</span>
-<span class="sd">    cost as well as caching already generated attributes.</span>
+<span class="sd">    It generates the attributes of the :class:`Schema` class:</span>
 
-<span class="sd">    * :attr:`Schema.__fields__` is a dictionary of field names and their</span>
-<span class="sd">      corresponding :class:`~pcapkit.corekit.fields.field.Field` objects,</span>
-<span class="sd">      which are used to define and parse the protocol headers. The field</span>
-<span class="sd">      dictionary will automatically be populated from the class attributes</span>
-<span class="sd">      of the :class:`Schema` class, and the field names will be the same</span>
-<span class="sd">      as the attribute names.</span>
+<span class="sd">    * :attr:`Schema.__fields__` maps each field name, the attribute name, to</span>
+<span class="sd">      its :class:`~pcapkit.corekit.fields.field.Field` object, which defines</span>
+<span class="sd">      and parses the header. It is populated from the class attributes.</span>
 
 <span class="sd">      .. seealso::</span>
 
-<span class="sd">         This is implemented through setting up the initial field dictionary</span>
-<span class="sd">         in the |prepare|_ method, and then inherit the field</span>
-<span class="sd">         dictionaries from the base classes.</span>
-
-<span class="sd">         Later, during the class creation, the</span>
+<span class="sd">         The |prepare|_ method sets up the initial field dictionary from</span>
+<span class="sd">         those of the base classes; during class creation,</span>
 <span class="sd">         :meth:`Field.__set_name__ &lt;pcapkit.corekit.fields.field.FieldBase.__set_name__&gt;`</span>
-<span class="sd">         method will be called to set the field name for each field object,</span>
-<span class="sd">         as well as to add the field object to the field dictionary.</span>
+<span class="sd">         names each field object and adds it to the dictionary.</span>
 
 <span class="sd">         .. |prepare| replace:: :meth:`__prepare__`</span>
 <span class="sd">         .. _prepare: https://docs.python.org/3/reference/datamodel.html#preparing-the-class-namespace</span>
 
-<span class="sd">    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` are</span>
-<span class="sd">      lists of additional and excluded field names, which are used to</span>
-<span class="sd">      determine certain names to be included or excluded from the field</span>
-<span class="sd">      dictionary. They will be automatically populated from the class</span>
-<span class="sd">      attributes of the :class:`Schema` class and its base classes.</span>
+<span class="sd">    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` list</span>
+<span class="sd">      names to include in or exclude from the field dictionary, populated</span>
+<span class="sd">      from the class attributes of the class and its bases.</span>
 
 <span class="sd">      .. note::</span>
 
-<span class="sd">         This is implemented through the :meth:`~object.__new__` method, which</span>
-<span class="sd">         will inherit the additional and excluded field names from the base</span>
-<span class="sd">         classes, as well as populating the additional and excluded field</span>
-<span class="sd">         from the subclass attributes.</span>
+<span class="sd">         This metaclass's ``__new__`` inherits both lists from the base</span>
+<span class="sd">         classes and extends them with the subclass's own.</span>
 
 <span class="sd">         .. code-block:: python</span>
 
@@ -841,50 +781,19 @@
 
 
     <span class="c1">#: Class keywords that collide with a parameter this class does not</span>
-    <span class="c1">#: control, so a schema class declared with one fails with an opaque</span>
-    <span class="c1">#: ``TypeError`` from several frames away instead of a clear message here.</span>
-    <span class="c1">#: Collisions of different kinds, all reserved:</span>
+    <span class="c1">#: control, which would fail with an opaque ``TypeError`` frames away:</span>
     <span class="c1">#:</span>
-    <span class="c1">#: ``mcls``, ``name``, ``bases``, ``namespace`` collide with</span>
-    <span class="c1">#: ``abc.ABCMeta.__new__`` -- a *different* function from this one, one</span>
-    <span class="c1">#: level up the ``super().__new__(...)`` call below. Before Python 3.11</span>
-    <span class="c1">#: those are positional-or-keyword there (from 3.11 they are</span>
-    <span class="c1">#: positional-only, ``def __new__(mcls, name, bases, namespace, /,</span>
-    <span class="c1">#: **kwargs)``), so a class keyword spelled the same as any of them binds</span>
-    <span class="c1">#: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple</span>
-    <span class="c1">#: values for argument '...'``. ``namespace`` collides this way, which is why</span>
-    <span class="c1">#: :mod:`pcapkit.protocols.misc.pcapng.schema`'s :class:`~pcapkit.protocols.misc.pcapng.schema.Option` subclasses</span>
-    <span class="c1">#: spell it ``ns=`` instead.</span>
+    <span class="c1">#: * ``mcls``, ``name``, ``bases`` and ``namespace`` are</span>
+    <span class="c1">#:   positional-or-keyword parameters of ``abc.ABCMeta.__new__`` before</span>
+    <span class="c1">#:   Python 3.11, so a class keyword of the same name binds one twice;</span>
+    <span class="c1">#:   hence ``ns=`` on the</span>
+    <span class="c1">#:   :class:`~pcapkit.protocols.misc.pcapng.schema.Option` subclasses.</span>
+    <span class="c1">#: * ``cls`` is bound first by every ``__init_subclass__``, in any class.</span>
     <span class="c1">#:</span>
-    <span class="c1">#: ``cls`` collides one level *later*: every ``__init_subclass__`` is an</span>
-    <span class="c1">#: implicit classmethod, so ``cls`` is always bound as its first argument,</span>
-    <span class="c1">#: and a class keyword also spelled ``cls`` binds it twice there --</span>
-    <span class="c1">#: ``TypeError: Generic.__init_subclass__() got multiple values for</span>
-    <span class="c1">#: argument 'cls'`` for a :class:`Schema` subclass (:class:`Schema`</span>
-    <span class="c1">#: inherits :class:`typing.Generic`), or the equivalent from whichever</span>
-    <span class="c1">#: class in the MRO defines ``__init_subclass__`` first. This one is not</span>
-    <span class="c1">#: specific to ``abc.ABCMeta`` or to this metaclass at all -- it holds for</span>
-    <span class="c1">#: *any* Python class with any ``__init_subclass__`` in its MRO -- but it</span>
-    <span class="c1">#: is reserved here anyway since it is exactly the class of mistake this</span>
-    <span class="c1">#: guard exists to catch early and legibly.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: Listed explicitly rather than derived from</span>
-    <span class="c1">#: :func:`inspect.signature(abc.ABCMeta.__new__) &lt;inspect.signature&gt;` at</span>
-    <span class="c1">#: import time: the signature's positional-only marker differs across</span>
-    <span class="c1">#: Python versions, introspecting a CPython internal's exact shape to</span>
-    <span class="c1">#: guard against a CPython internal's exact shape is circular, and</span>
-    <span class="c1">#: names that will not change are cheaper to read than the machinery to</span>
-    <span class="c1">#: recompute them.</span>
-    <span class="c1">#:</span>
-    <span class="c1">#: ``name``, ``bases`` and ``attrs`` -- *this* method's own parameters --</span>
-    <span class="c1">#: collide the same way one level earlier than ``ABCMeta.__new__``, on</span>
-    <span class="c1">#: every Python version, and are not in this set for that reason alone:</span>
-    <span class="c1">#: they are made positional-only below instead (the same fix CPython gave</span>
-    <span class="c1">#: ``ABCMeta.__new__`` in 3.11), which removes the collision rather than</span>
-    <span class="c1">#: merely naming it. ``name`` and ``bases`` stay in this set regardless,</span>
-    <span class="c1">#: because they still collide with ``ABCMeta.__new__``'s parameters of the</span>
-    <span class="c1">#: same name one level up; ``attrs`` does not appear anywhere downstream</span>
-    <span class="c1">#: and so needs no entry once it is positional-only here.</span>
+    <span class="c1">#: Listed rather than derived from :func:`inspect.signature`, whose shape</span>
+    <span class="c1">#: for ``ABCMeta.__new__`` varies across Python versions. ``attrs`` needs</span>
+    <span class="c1">#: no entry, being positional-only below, as are ``name`` and ``bases``,</span>
+    <span class="c1">#: which still collide one level up.</span>
     <span class="n">_RESERVED_CLASS_KWARGS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'mcls'</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="s1">'bases'</span><span class="p">,</span> <span class="s1">'namespace'</span><span class="p">,</span> <span class="s1">'cls'</span><span class="p">})</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Schema]'</span><span class="p">:</span>
@@ -927,13 +836,8 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">])</span>
 
-        <span class="c1"># NOTE: ``ABCMeta.__new__`` is called unconditionally, on every supported</span>
-        <span class="c1"># version. Dodging the ``namespace`` collision described above by calling</span>
-        <span class="c1"># ``type.__new__`` directly would skip ``ABCMeta.__new__``'s call to</span>
-        <span class="c1"># ``abc._abc_init(cls)``, so no :class:`Schema` subclass would get its</span>
-        <span class="c1"># own ``_abc_impl`` and every one of them would fall through the MRO to</span>
-        <span class="c1"># :class:`collections.abc.Mapping`'s -- corrupting ``isinstance`` against</span>
-        <span class="c1"># *any* of them for as long as the process ran.</span>
+        <span class="c1"># NOTE: Never ``type.__new__``: skipping ``abc._abc_init`` would leave every Schema</span>
+        <span class="c1"># subclass on the ``_abc_impl`` of ``Mapping``, corrupting ``isinstance`` against them.</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -950,8 +854,7 @@
 <span class="sd">        two-octet field packs as ``0x1170``. The range checks live in each</span>
 <span class="sd">        protocol's :meth:`~pcapkit.protocols.protocol.Protocol.make`, and in a</span>
 <span class="sd">        field whose values have a range of their own, such as</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.numbers.PortEnumField`. See GitHub issue</span>
-<span class="sd">        :issue:`2314`.</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.numbers.PortEnumField` (:issue:`2314`).</span>
 
 <span class="sd">    """</span>
 
@@ -1110,13 +1013,8 @@
             <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-        <span class="c1"># NOTE: ``pre_unpack`` is called here as well as from the unpacking path</span>
-        <span class="c1"># since a schema may seed ``packet`` keys that both paths need, as</span>
-        <span class="c1"># ``pcapkit.protocols.internet.hip.schema.EncryptedParameter`` does.</span>
-        <span class="c1"># ``pre_pack`` is what carries the packing-only preparation, such as the</span>
-        <span class="c1"># PCAP-NG section header block's byte order magic, which no field of the</span>
-        <span class="c1"># schema holds and which therefore cannot be recovered from</span>
-        <span class="c1"># ``self.__dict__`` above.</span>
+        <span class="c1"># NOTE: ``pre_unpack`` seeds keys both paths need, as HIP's ``EncryptedParameter``</span>
+        <span class="c1"># does; ``pre_pack`` adds packing-only ones no field holds, e.g. the PCAP-NG SHB magic.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pre_pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -1126,29 +1024,13 @@
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Read from the instance rather than with :func:`getattr`, which</span>
-            <span class="c1"># finds the *class* attribute when the instance has none -- and a</span>
-            <span class="c1"># schema's class attribute for a field is the</span>
-            <span class="c1"># :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A</span>
-            <span class="c1"># field the caller never set would arrive below as the field rather</span>
-            <span class="c1"># than as a value: ``getattr(self, name, None)`` could not return its</span>
-            <span class="c1"># ``None``, so the absent-value branches would not fire, and packing</span>
-            <span class="c1"># would fail from inside a field object -- naming a field *class*, and</span>
-            <span class="c1"># so saying nothing about which field had been left out.</span>
+            <span class="c1"># NOTE: From ``__dict__``, not ``getattr``, which returns the class's field</span>
+            <span class="c1"># object for a field never set, so the absent-value branches would not fire.</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
-                <span class="c1"># NOTE: ``ProtocolBase``, not ``Protocol``: ``Protocol`` is a thin</span>
-                <span class="c1"># subclass that only adds auto-registration for externally defined</span>
-                <span class="c1"># protocols, and no protocol in the library subclasses it. Testing</span>
-                <span class="c1"># against it would send any protocol instance -- which is exactly</span>
-                <span class="c1"># what :meth:`ProtocolBase._make_payload</span>
-                <span class="c1"># &lt;pcapkit.protocols.protocol.ProtocolBase._make_payload&gt;` returns,</span>
-                <span class="c1"># and what ``make``'s own ``bytes | Protocol | Schema`` signature</span>
-                <span class="c1"># advertises -- to the ``ProtocolUnbound`` below instead of packing</span>
-                <span class="c1"># it, and ``from_data`` could not reconstruct a parsed packet. An</span>
-                <span class="c1"># external ``Protocol`` subclass is still a ``ProtocolBase``. The</span>
-                <span class="c1"># import is inside the method rather than at module level.</span>
+                <span class="c1"># NOTE: ``ProtocolBase``, not ``Protocol``, which no built-in protocol</span>
+                <span class="c1"># derives, so the payloads ``_make_payload`` returns pack.</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> \
                     <span class="n">ProtocolBase</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
@@ -1170,28 +1052,15 @@
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-                    <span class="c1"># NOTE: a data model may declare a field ``tuple[...]``</span>
-                    <span class="c1"># rather than ``list[...]`` -- e.g. HIP's ``group_id:</span>
-                    <span class="c1"># 'tuple[Group, ...]'`` in</span>
-                    <span class="c1"># pcapkit/protocols/internet/hip/data.py -- and ``_read_*`` then hands one straight back</span>
-                    <span class="c1"># here on reconstruction. ``ListField.pack`` only ever</span>
-                    <span class="c1"># iterates its argument, so it accepts either, and</span>
-                    <span class="c1"># rejecting the tuple would break parse-then-reconstruct for</span>
-                    <span class="c1"># such a field. ``list(data)`` is a no-op for an actual list</span>
-                    <span class="c1"># and keeps ``ListField.pack``'s own ``Optional[list[_TL]]``</span>
-                    <span class="c1"># signature honest rather than widening it too.</span>
+                    <span class="c1"># NOTE: A data model may hold a tuple, as HIP's ``group_id``; ``list()``</span>
+                    <span class="c1"># keeps the signature of ``ListField.pack``, which only iterates it.</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">):</span>
-                    <span class="c1"># NOTE: The packing mirror of the ``__option_padding__`` that</span>
-                    <span class="c1"># :meth:`unpack` records: whatever of the declared option area</span>
-                    <span class="c1"># the packed options do not fill. Without it every padding</span>
-                    <span class="c1"># field sized from that key packs nothing, and the header</span>
-                    <span class="c1"># comes out shorter than its own length field says</span>
-                    <span class="c1"># (#1289). An undeclared area (a negative length)</span>
-                    <span class="c1"># leaves no remainder.</span>
+                    <span class="c1"># NOTE: Mirrors the ``__option_padding__`` of ``unpack``, so padding fills</span>
+                    <span class="c1"># the declared option area (#1289); an undeclared one leaves none.</span>
                     <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="k">continue</span>
 
@@ -1209,10 +1078,7 @@
                 <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
-                <span class="c1"># NOTE: a forward match consumes nothing, so it contributes no</span>
-                <span class="c1"># octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`</span>
-                <span class="c1"># mirrors this for the same reason -- see the ``ForwardMatchField``</span>
-                <span class="c1"># branch there.</span>
+                <span class="c1"># NOTE: A forward match consumes nothing, here as in ``unpack``.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">continue</span>
 
@@ -1222,24 +1088,9 @@
                 <span class="n">temp</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-                <span class="c1"># NOTE: :meth:`unpack` hands a nested schema its whole declared</span>
-                <span class="c1"># span, and the schema may read less of it than that. The octets</span>
-                <span class="c1"># it left unread travel with the nested value as its</span>
-                <span class="c1"># ``__remainder__`` -- on the schema itself, or as a key of the</span>
-                <span class="c1"># mapping :meth:`to_dict` made of it -- so they are re-emitted</span>
-                <span class="c1"># from there, as long as the nested schema still packs to the</span>
-                <span class="c1"># ``__remainder_offset__`` octets it was parsed at. Re-emitting</span>
-                <span class="c1"># them after a nested schema that has shrunk or grown would put</span>
-                <span class="c1"># stale octets at a shifted offset, so then, or for a schema that</span>
-                <span class="c1"># never had any, the rest of the span is zero-filled.</span>
-                <span class="c1"># Either way the field keeps the width its length field declares</span>
-                <span class="c1"># (#1292), and a schema rebuilt through :meth:`from_dict`</span>
-                <span class="c1"># packs what the parsed one did (#1380).</span>
-                <span class="c1">#</span>
-                <span class="c1"># A field reached through a</span>
-                <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled</span>
-                <span class="c1"># here: the PCAP-NG block selector declares the rest of the</span>
-                <span class="c1"># *stream* as its span, which is no part of the field.</span>
+                <span class="c1"># NOTE: Re-emit the ``__remainder__`` a nested schema left unread while it still</span>
+                <span class="c1"># packs to its ``__remainder_offset__``; else zero-fill, keeping the declared</span>
+                <span class="c1"># width (#1292, #1380). Not for a SwitchField: PCAP-NG's spans the whole stream.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                     <span class="n">record</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>  <span class="c1"># type: Mapping[str, Any]</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
@@ -1291,75 +1142,52 @@
 <span class="sd">            Unpacked data as :class:`Schema`.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            A ``__length__`` key in ``packet`` records the length of the</span>
-<span class="sd">            remaining data, which is used to determine the length of the</span>
-<span class="sd">            payload field.</span>
+<span class="sd">            ``packet`` carries the bookkeeping keys below. For a nested schema,</span>
+<span class="sd">            unpacked through a :class:`~pcapkit.corekit.fields.misc.SchemaField`,</span>
+<span class="sd">            it is the context</span>
+<span class="sd">            :func:`~pcapkit.corekit.fields.misc.nested_packet_context` builds: a</span>
+<span class="sd">            name this schema does not declare falls through to the enclosing</span>
+<span class="sd">            schema, which ``__packet__`` also holds.</span>
 
-<span class="sd">            When this schema is nested -- unpacked through a</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than</span>
-<span class="sd">            directly -- ``packet`` is not the enclosing schema's own data, but</span>
-<span class="sd">            a context built by</span>
-<span class="sd">            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`: a name</span>
-<span class="sd">            this schema does not itself</span>
-<span class="sd">            declare falls through to the enclosing schema, and the enclosing</span>
-<span class="sd">            schema is also reachable unconditionally under a ``__packet__``</span>
-<span class="sd">            key. See that function for the exact lookup, write and iteration</span>
-<span class="sd">            semantics.</span>
+<span class="sd">            * ``__length__`` -- the length of the remaining data, which sizes</span>
+<span class="sd">              the payload field.</span>
+<span class="sd">            * ``__option_padding__`` -- how much of an</span>
+<span class="sd">              :class:`~pcapkit.corekit.fields.collections.OptionField`'s</span>
+<span class="sd">              declared area it left after its end-of-option-list marker.</span>
+<span class="sd">              ``data`` is rewound by as much of that unparsed remainder as was</span>
+<span class="sd">              read, so the fields sized from this key read the remainder itself</span>
+<span class="sd">              and record a cut inside it (:issue:`2685`). What follows decides</span>
+<span class="sd">              what it is: usually padding, but the PCAP-NG name resolution block</span>
+<span class="sd">              reads further options from it.</span>
+<span class="sd">            * ``__short_read__`` -- for the fields after the one the data ends</span>
+<span class="sd">              inside, the ``(name, octets read)`` pair recorded, or that of a</span>
+<span class="sd">              :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` the data</span>
+<span class="sd">              ends inside first, which the record leaves out as it consumes</span>
+<span class="sd">              nothing. A field callback can so tell a value the end of the data</span>
+<span class="sd">              left as zero from one read, and leave it to the short read.</span>
+<span class="sd">            * ``__data_end__`` -- that ``length`` ends where the data does, as a</span>
+<span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` says of an</span>
+<span class="sd">              item it counts. Fields running past ``length`` are then the cut</span>
+<span class="sd">              the short read records, and do not warn that ``__length__`` fell</span>
+<span class="sd">              below zero (:issue:`2749`).</span>
+<span class="sd">            * ``__data_present__`` -- that ``data`` holds the data that many</span>
+<span class="sd">              octets in, and past them the zeros a</span>
+<span class="sd">              :class:`~pcapkit.corekit.fields.collections.ListField` of schema</span>
+<span class="sd">              items filled it out with. The field a read crosses them in is given</span>
+<span class="sd">              how many of its octets the data holds, under the same key, so a</span>
+<span class="sd">              list there ends with the data (:issue:`2760`).</span>
 
-<span class="sd">            We also use an ``__option_padding__`` key in ``packet`` to record how</span>
-<span class="sd">            much of an</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared</span>
-<span class="sd">            area it did not consume. What follows that area decides what the</span>
-<span class="sd">            remainder means: usually padding, to be skipped, but a schema may</span>
-<span class="sd">            equally read it as further options, as the PCAP-NG name resolution</span>
-<span class="sd">            block does with its records and options.</span>
+<span class="sd">            The last three are cleared as unpacking starts, so a nested schema</span>
+<span class="sd">            finds only its own.</span>
 
-<span class="sd">            An :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
-<span class="sd">            declares the size of the whole area it may read, but stops at the</span>
-<span class="sd">            end-of-option-list marker and reports the unconsumed remainder</span>
-<span class="sd">            through ``__option_padding__``. Since that remainder has not been</span>
-<span class="sd">            parsed, we rewind ``data`` by as much of it as was read, so that the</span>
-<span class="sd">            fields which size themselves from ``__option_padding__`` read the</span>
-<span class="sd">            remainder itself rather than the same number of octets from beyond</span>
-<span class="sd">            it, and record a cut inside it (:issue:`2685`).</span>
-
-<span class="sd">            A payload field of a declared length the data ends inside is a cut</span>
-<span class="sd">            like any other field's, so a layer whose octets fall short of the</span>
-<span class="sd">            length it declares records it, and its rebuild reads as cut</span>
-<span class="sd">            (:issue:`2711`). One declaring no length takes what the message</span>
-<span class="sd">            leaves, as a trailer or the next record does, which is no part of</span>
-<span class="sd">            the layer, and records nothing. A</span>
+<span class="sd">            A payload field of a declared length the data ends inside records a</span>
+<span class="sd">            cut like any other field, so its layer's rebuild reads as cut</span>
+<span class="sd">            (:issue:`2711`); one declaring no length takes what the message</span>
+<span class="sd">            leaves, as a trailer does, and records nothing. A</span>
 <span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` whose octets</span>
-<span class="sd">            hold fewer items than it counts records the cut too, the items</span>
-<span class="sd">            absent being its</span>
+<span class="sd">            hold fewer items than it counts records the cut too, the missing</span>
+<span class="sd">            items being its</span>
 <span class="sd">            :attr:`~pcapkit.corekit.fields.collections.ListField.shortfall`.</span>
-
-<span class="sd">            The fields after the one the data ends inside find it in ``packet``</span>
-<span class="sd">            as ``__short_read__``: the ``(name, octets read)`` pair recorded as</span>
-<span class="sd">            the short read, or that of a</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` the data</span>
-<span class="sd">            ends inside first, which the record leaves out as it consumes</span>
-<span class="sd">            nothing. So a field callback can tell a value the end of the data</span>
-<span class="sd">            left as zero from one read, and leave such a value to the short</span>
-<span class="sd">            read rather than refuse it. The key is cleared as unpacking starts,</span>
-<span class="sd">            so a nested schema finds only its own.</span>
-
-<span class="sd">            Fields running past ``length`` warn that ``__length__`` fell below</span>
-<span class="sd">            zero, unless a ``__data_end__`` key in ``packet`` says that</span>
-<span class="sd">            ``length`` ends where the data does, as a</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` says of an</span>
-<span class="sd">            item it counts. The fields past it are then the cut the short read</span>
-<span class="sd">            records, and warn nothing (:issue:`2749`). The key is cleared as</span>
-<span class="sd">            unpacking starts too.</span>
-
-<span class="sd">            A ``__data_present__`` key in ``packet`` says that ``data`` holds</span>
-<span class="sd">            the data that many octets in, and past them the zeros a</span>
-<span class="sd">            :class:`~pcapkit.corekit.fields.collections.ListField` of schema</span>
-<span class="sd">            items filled it out with, as the list says of the item the data</span>
-<span class="sd">            ends inside. The field a read crosses them in is given how many of</span>
-<span class="sd">            its octets the data holds, under the same key, so that a list there</span>
-<span class="sd">            ends with the data, as it does where the data itself ends</span>
-<span class="sd">            (:issue:`2760`). The key is cleared as unpacking starts too.</span>
 
 <span class="sd">        .. versionchanged:: 1.6.0</span>
 
@@ -1395,19 +1223,14 @@
             <span class="c1"># NOTE: ``Field.length`` recomputes struct.calcsize() on every read,</span>
             <span class="c1"># so it is read once per field here rather than at each use.</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
-                <span class="c1"># NOTE: A negative length is the unset default and takes what</span>
-                <span class="c1"># the declared length leaves, never less than nothing; a</span>
-                <span class="c1"># computed zero is an empty payload, not an unset one, or it</span>
-                <span class="c1"># would swallow the fields after it (#1275).</span>
+                <span class="c1"># NOTE: A negative length is the unset default and takes what is left, at</span>
+                <span class="c1"># least nothing; a computed zero is an empty payload, not an unset one (#1275).</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">declared</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
 
-                <span class="c1"># NOTE: A declared length is asked for no further than one read</span>
-                <span class="c1"># can go, :data:`sys.maxsize`; past it the read raises</span>
-                <span class="c1"># :exc:`OverflowError` rather than coming back short, which is</span>
-                <span class="c1"># how every other overrun is reported. No stream holds more than</span>
-                <span class="c1"># that, so the bounded read is the same short read (#1975).</span>
+                <span class="c1"># NOTE: Bounded at ``sys.maxsize``, past which the read raises OverflowError</span>
+                <span class="c1"># rather than coming back short, as every other overrun does (#1975).</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
                 <span class="c1"># NOTE: A payload of a declared length the data ends inside is recorded as</span>
@@ -1459,11 +1282,8 @@
                 <span class="c1"># octet, so it declares that many past those read (#2711).</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">shortfall</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-                <span class="c1"># NOTE: Kept on the nested schema rather than only in</span>
-                <span class="c1"># ``__buffer__``, so that the octets it left unread go wherever</span>
-                <span class="c1"># the value goes, :meth:`to_dict` included; see :meth:`pack`.</span>
-                <span class="c1"># The width read is summed from the nested buffers rather than</span>
-                <span class="c1"># taken with :func:`len`, which may pack the schema again.</span>
+                <span class="c1"># NOTE: On the nested schema, so the unread octets go wherever the value goes</span>
+                <span class="c1"># (see ``pack``); summed from its buffers, as ``len`` may pack it again.</span>
                 <span class="n">consumed</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">__buffer__</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">consumed</span><span class="p">:</span>
                     <span class="n">value</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__remainder__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span><span class="p">[</span><span class="n">consumed</span><span class="p">:]</span>
@@ -1476,25 +1296,9 @@
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
-                <span class="c1"># NOTE: a forward match reads ``length`` octets so a later field</span>
-                <span class="c1"># can size itself from them, but consumes neither the stream</span>
-                <span class="c1"># (the rewind below) nor ``__length__`` (no decrement in this</span>
-                <span class="c1"># branch). ``self.__buffer__[field.name]`` above still holds the</span>
-                <span class="c1"># octets just read, so it is zeroed here, as :meth:`pack` does for</span>
-                <span class="c1"># the same field type: ``__bytes__``/``__len__`` concatenate every</span>
-                <span class="c1"># slot in ``__buffer__``, and the octets are read again, for real,</span>
-                <span class="c1"># by whichever field actually needs them, so keeping them would</span>
-                <span class="c1"># over-report the schema's length by the forward match's width.</span>
-                <span class="c1"># Zeroing is also what lets a declared area checked against</span>
-                <span class="c1"># ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
-                <span class="c1"># and :class:`~pcapkit.corekit.fields.collections.ListField` both</span>
-                <span class="c1"># do this -- see the octets actually consumed.</span>
-                <span class="c1">#</span>
-                <span class="c1"># The rewind is by the octets actually read, not by ``length``:</span>
-                <span class="c1"># near the end of the stream the read comes back short, and</span>
-                <span class="c1"># rewinding the full width would move the stream *before* the</span>
-                <span class="c1"># forward match, so the fields after it would re-read the</span>
-                <span class="c1"># preceding octet as their first.</span>
+                <span class="c1"># NOTE: A forward match consumes neither the stream nor ``__length__``, and its</span>
+                <span class="c1"># buffer is zeroed, as in ``pack``, so ``len(self)`` counts consumed octets only.</span>
+                <span class="c1"># The rewind is by the octets read, which come back short near the stream's end.</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
 
@@ -1504,10 +1308,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
                     <span class="n">packet</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">,</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)))</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">OptionField</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># NOTE: The option list ended before the declared area did, and</span>
-                <span class="c1"># ``option_padding`` is the rest of that area; give back as much</span>
-                <span class="c1"># of it as was read, so that the following fields read it and</span>
-                <span class="c1"># record a cut inside it themselves (#2685).</span>
+                <span class="c1"># NOTE: The option list ended before its declared area: give back what was read</span>
+                <span class="c1"># of the rest, for the following fields to read and record a cut in (#2685).</span>
                 <span class="n">consumed</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">option_padding</span>
                 <span class="n">kept</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">consumed</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">kept</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">):</span>
@@ -1566,13 +1368,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Refuse to derive from a finalised schema.</span>
 
-<span class="sd">        :func:`~pcapkit.utilities.compat.final` is a promise to the type</span>
-<span class="sd">        checker and nothing more: it records ``__final__`` on the class and</span>
-<span class="sd">        leaves the interpreter free to subclass it anyway. Every schema</span>
-<span class="sd">        :func:`schema_final` finalises carries a generated ``__init__`` built</span>
-<span class="sd">        from the :attr:`__fields__` that were declared at that moment, so a</span>
-<span class="sd">        subclass adding a field afterwards inherits a constructor that cannot</span>
-<span class="sd">        set it. This turns that promise into a rule the interpreter keeps.</span>
+<span class="sd">        :func:`~pcapkit.utilities.compat.final` only informs the type checker:</span>
+<span class="sd">        it records ``__final__`` and leaves the class subclassable. A schema</span>
+<span class="sd">        :func:`schema_final` finalises carries an ``__init__`` generated from</span>
+<span class="sd">        its :attr:`__fields__` at that moment, which cannot set a field a</span>
+<span class="sd">        subclass adds, so the subclass is refused.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
@@ -1583,21 +1383,14 @@
 <span class="sd">                ``__final__`` marker in its own ``__dict__``.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: the whole ancestry rather than ``cls.__bases__``, and</span>
-        <span class="c1"># ``base.__dict__`` rather than ``getattr`` -- see</span>
-        <span class="c1"># :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__`, which makes</span>
-        <span class="c1"># the same choices for the same reasons.</span>
+        <span class="c1"># NOTE: The whole MRO, each read from its ``__dict__``, as ``Info.__init_subclass__`` does.</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: cannot subclass </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, '</span>
                                   <span class="s1">'which is final'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: forwarded rather than swallowed, so that a class keyword nobody</span>
-        <span class="c1"># accepts still reaches ``object`` and fails there.</span>
-        <span class="c1"># :meth:`EnumSchema.__init_subclass__` is the one caller that reaches here</span>
-        <span class="c1"># with nothing: it consumes its own ``code`` keyword and discards the</span>
-        <span class="c1"># rest, which is why a stray class keyword is tolerated on an</span>
-        <span class="c1"># :class:`EnumSchema` subclass and rejected on a plain one.</span>
+        <span class="c1"># NOTE: Forwarded, so an unaccepted class keyword fails in ``object``. ``EnumSchema``</span>
+        <span class="c1"># consumes ``code`` and discards the rest, so tolerates a stray one.</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -1632,25 +1425,10 @@
 <span class="sd">                :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: first instantiation is the earliest point a bare ``@final`` can</span>
-        <span class="c1"># be caught -- ``final`` runs after the class object exists, so</span>
-        <span class="c1"># :meth:`__init_subclass__` has already returned. Nested inside the NONE</span>
-        <span class="c1"># branch, which is already one-shot per class, so a finalised schema pays</span>
-        <span class="c1"># nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,</span>
-        <span class="c1"># which carries the full reasoning; on this side the missing generated</span>
-        <span class="c1"># ``__init__`` is the one built from :attr:`__fields__`.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Both lookups read ``cls.__dict__`` rather than ``getattr``, because</span>
-        <span class="c1"># both markers are ordinary, inherited class attributes. The outer one:</span>
-        <span class="c1"># :func:`schema_final` writes ``BASE`` onto the class it finalises, and a</span>
-        <span class="c1"># subclass reading that state through inheritance was never finalised</span>
-        <span class="c1"># itself -- it would keep the ``__excluded__`` it copied at declaration,</span>
-        <span class="c1"># without the names :func:`schema_final` adds, and leak ``__map__``,</span>
-        <span class="c1"># ``__map_reverse__``, ``__buffer__`` and ``__updated__`` from</span>
-        <span class="c1"># :meth:`to_dict` (GitHub issue #1498). The inner one: an ancestor</span>
-        <span class="c1"># hand-marked bare ``@final`` passes its marker to every subclass</span>
-        <span class="c1"># declared before it landed, and ``getattr`` would blame such a subclass</span>
-        <span class="c1"># for a mismarking that is its ancestor's.</span>
+        <span class="c1"># NOTE: The earliest a bare ``@final`` can be caught, once per class, as in</span>
+        <span class="c1"># ``Info.__new__``. Both markers are inherited, so read from ``cls.__dict__``:</span>
+        <span class="c1"># an inherited ``BASE`` would skip finalising and leak bookkeeping from</span>
+        <span class="c1"># ``to_dict`` (#1498), and an inherited ``__final__`` would blame a subclass.</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">,</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
@@ -1658,14 +1436,11 @@
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_finalised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes</span>
-        <span class="c1"># here under ``self`` to avoid them being considered as class variables</span>
-        <span class="c1"># and thus being shared by all instances.</span>
+        <span class="c1"># NOTE: Set on ``self``, so they are not class variables shared by all instances.</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map__'</span><span class="p">,</span> <span class="p">{})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="c1"># NOTE: We only create the attributes for the instance itself,</span>
-        <span class="c1"># to avoid creating shared attributes for the class.</span>
+        <span class="c1"># NOTE: Per instance too, not shared through the class.</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__buffer__'</span><span class="p">,</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -1682,23 +1457,9 @@
 
 <span class="sd">        """</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># NOTE: Read with a fallback rather than by subscript, since the</span>
-            <span class="c1"># generated ``__init__`` is not the only caller: :meth:`from_dict`</span>
-            <span class="c1"># seeds only the keys its argument carries, so a field the caller left</span>
-            <span class="c1"># out is missing from ``__dict__`` entirely rather than holding</span>
-            <span class="c1"># ``NO_VALUE``.</span>
-            <span class="c1">#</span>
-            <span class="c1"># What is tested is ``NO_VALUE`` alone, not ``NO_VALUE`` or ``None``.</span>
-            <span class="c1"># This method fills in what the caller did not say, and a ``None`` the</span>
-            <span class="c1"># caller passed *is* something said: on an optional field it is the</span>
-            <span class="c1"># chosen value, meaning this packet does not carry the field. It is</span>
-            <span class="c1"># also what :meth:`unpack` stores for a</span>
-            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.ConditionalField` whose test</span>
-            <span class="c1"># fails -- including one that declares a default of its own -- so</span>
-            <span class="c1"># substituting the default here would leave a constructed schema</span>
-            <span class="c1"># disagreeing with a parsed one about the same packet, and</span>
-            <span class="c1"># ``from_dict(parsed.to_dict())`` no longer reproducing what it was</span>
-            <span class="c1"># given. Telling the two apart is what ``NO_VALUE`` is for.</span>
+            <span class="c1"># NOTE: With a fallback, as ``from_dict`` seeds only the keys it is given. Only</span>
+            <span class="c1"># ``NO_VALUE`` is unset: a ``None`` is a chosen absence, as ``unpack`` stores</span>
+            <span class="c1"># for a failed ConditionalField, so a default here would break the round trip.</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">NO_VALUE</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -1707,26 +1468,12 @@
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: Nothing to fill an unset field with, so the ``NO_VALUE``</span>
-                <span class="c1"># the generated ``__init__`` seeded it with is dropped rather than</span>
-                <span class="c1"># kept: it is a *field* sentinel, not a value a schema may hold.</span>
-                <span class="c1"># Dropping it rather than storing ``None`` also keeps the name out</span>
-                <span class="c1"># of the context :meth:`pack` builds from ``__dict__``, which a</span>
-                <span class="c1"># schema may be relying on to seed for itself -- the PCAP-NG</span>
-                <span class="c1"># section header block reads its Byte-Order Magic from a ``match``</span>
-                <span class="c1"># its own :meth:`pre_pack` supplies, and only when the context</span>
-                <span class="c1"># does not name one already. :meth:`pack` reads an absent field as</span>
-                <span class="c1"># ``None`` regardless.</span>
+                <span class="c1"># NOTE: Dropped, not stored as ``None``, so ``pack``'s context leaves the name</span>
+                <span class="c1"># for the schema to seed, as the PCAP-NG SHB's ``pre_pack`` seeds its magic.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: Packed here only when a packet context was actually handed over.</span>
-        <span class="c1"># A schema is not in general packable from its own fields alone: a field</span>
-        <span class="c1"># callback may read a key that the *enclosing* layer owns, as the</span>
-        <span class="c1"># Multipath TCP options do with the ``length`` of the TCP option that</span>
-        <span class="c1"># carries them, and packing without it raises rather than producing</span>
-        <span class="c1"># octets. ``__updated__`` is still set, so a schema left unpacked here is</span>
-        <span class="c1"># packed by :meth:`__bytes__` on first use -- by which time the enclosing</span>
-        <span class="c1"># layer has supplied the context.</span>
+        <span class="c1"># NOTE: Only with a context: a field callback may read the enclosing layer's keys,</span>
+        <span class="c1"># as the MPTCP options do; otherwise ``__bytes__`` packs it on first use.</span>
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -1747,10 +1494,8 @@
             <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iter</span><span class="p">:</span>
-            <span class="c1"># NOTE: Not a field, but what :meth:`to_dict` emits for the octets an</span>
-            <span class="c1"># enclosing ``SchemaField`` span held beyond this schema, and where,</span>
-            <span class="c1"># so that a rebuilt schema still re-emits them (#1380).</span>
-            <span class="c1"># NOTE: Nor is the short read :meth:`unpack` records (#1458).</span>
+            <span class="c1"># NOTE: Not fields: the unread octets of an enclosing ``SchemaField`` span,</span>
+            <span class="c1"># which a rebuild re-emits (#1380), and the short read ``unpack`` records (#1458).</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">continue</span>
@@ -1828,12 +1573,8 @@
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_VT'</span><span class="p">:</span>
-        <span class="c1"># NOTE: Serves every key :meth:`__iter__` yields, not only the declared</span>
-        <span class="c1"># fields: a ``post_process`` may store derived values on the instance,</span>
-        <span class="c1"># as :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption` does, and</span>
-        <span class="c1"># iteration reports them, so ``dict(schema)`` must be able to read them</span>
-        <span class="c1"># back (#1291). A mangled key is reachable only under the name</span>
-        <span class="c1"># it was mangled from, as in iteration.</span>
+        <span class="c1"># NOTE: Every key ``__iter__`` yields, so ``dict(schema)`` reads the values a</span>
+        <span class="c1"># ``post_process`` stores, as IPv4's ``TSOption`` does (#1291); mangled keys by origin.</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -1843,11 +1584,7 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="c1"># NOTE: ``self.__updated__ = True`` would re-enter this method once</span>
-            <span class="c1"># per field assigned, only to miss the ``__fields__`` test and fall</span>
-            <span class="c1"># through to ``object.__setattr__``. ``__updated__`` is an instance</span>
-            <span class="c1"># attribute established in ``__new__``, so the direct store is the same</span>
-            <span class="c1"># write with none of the round trip.</span>
+            <span class="c1"># NOTE: Stored directly, rather than re-entering this method, as ``__new__`` set it.</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__updated__'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -1958,23 +1695,19 @@
 <span class="sd">    :attr:`EnumSchema.registry` (and its class-level twin,</span>
 <span class="sd">    :attr:`EnumMeta.registry</span>
 <span class="sd">    &lt;pcapkit.protocols.schema.EnumMeta.registry&gt;`) is read with a bare</span>
-<span class="sd">    ``registry[code]`` at many call sites across the schema layer, e.g.</span>
-<span class="sd">    ``Option.registry[type]``. A</span>
-<span class="sd">    plain :class:`collections.defaultdict` inserts whatever</span>
-<span class="sd">    :attr:`~collections.defaultdict.default_factory` returns the *first time*</span>
-<span class="sd">    an unregistered ``code`` is looked up -- and since the registry lives on</span>
-<span class="sd">    the *class*, that insertion is permanent and shared by every instance of</span>
-<span class="sd">    every subclass in the process. Parsing one packet carrying an unrecognised</span>
-<span class="sd">    code would therefore grow the registry for the remainder of the process,</span>
-<span class="sd">    and make a later, entirely legitimate :meth:`EnumSchema.register` call</span>
-<span class="sd">    report an overwrite that never happened.</span>
+<span class="sd">    ``registry[code]`` across the schema layer, e.g.</span>
+<span class="sd">    ``Option.registry[type]``. A plain :class:`collections.defaultdict` would</span>
+<span class="sd">    insert what :attr:`~collections.defaultdict.default_factory` returns on</span>
+<span class="sd">    the first miss, and the registry lives on the *class*, so one packet with</span>
+<span class="sd">    an unrecognised code would grow it for the rest of the process, and make a</span>
+<span class="sd">    later, legitimate :meth:`EnumSchema.register` report an overwrite that</span>
+<span class="sd">    never happened.</span>
 
-<span class="sd">    The fallback itself is deliberate -- it is how an unknown option, chunk or</span>
-<span class="sd">    block falls back to its ``Unknown*``/``Unassigned*`` schema -- so this</span>
-<span class="sd">    subclass keeps returning it and just stops recording it.</span>
-<span class="sd">    :meth:`Protocol._lookup_registry</span>
-<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol._lookup_registry&gt;`</span>
-<span class="sd">    does the same for the protocol-layer ``__proto__`` family.</span>
+<span class="sd">    The fallback is how an unknown option, chunk or block gets its</span>
+<span class="sd">    ``Unknown*``/``Unassigned*`` schema, so this subclass still returns it,</span>
+<span class="sd">    without recording it, as :meth:`Protocol._lookup_registry</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.Protocol._lookup_registry&gt;` does for the</span>
+<span class="sd">    ``__proto__`` family.</span>
 
 <span class="sd">    """</span>
 
@@ -2007,13 +1740,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Meta class to add dynamic support for :class:`EnumSchema`.</span>
 
-<span class="sd">    This meta class is used to generate necessary attributes for the</span>
-<span class="sd">    :class:`EnumSchema` class. It can be useful to reduce runtime generation</span>
-<span class="sd">    cost as well as caching already generated attributes.</span>
-
-<span class="sd">    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*</span>
-<span class="sd">      proxy (similar to :class:`property`, but on class variables) to the</span>
-<span class="sd">      :attr:`EnumSchema.__enum__` mapping.</span>
+<span class="sd">    It adds :attr:`~EnumSchema.registry` to subclasses: a read-only class</span>
+<span class="sd">    property returning the :attr:`EnumSchema.__enum__` mapping.</span>
 
 <span class="sd">    """</span>
 
@@ -2126,31 +1854,18 @@
 <span class="sd">                registered, naming the displaced schema and its replacement.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Every public registrar in</span>
-<span class="sd">            :mod:`pcapkit.foundation.registry.protocols` that accepts a</span>
-<span class="sd">            ``schema`` registers two halves of one binding -- a parser class</span>
+<span class="sd">            Each registrar in :mod:`pcapkit.foundation.registry.protocols` that</span>
+<span class="sd">            takes a ``schema`` registers both halves of one binding, a parser</span>
 <span class="sd">            through e.g. :meth:`IPv4.register_option</span>
-<span class="sd">            &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option&gt;`, and a</span>
-<span class="sd">            schema class through this method. Both warn on an overwrite, so one</span>
-<span class="sd">            ``register_ipv4_option`` call replacing a built-in reports the</span>
-<span class="sd">            schema it displaced as well as the parser.</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.ipv4.protocol.IPv4.register_option&gt;` and</span>
+<span class="sd">            a schema through this method, and both warn on an overwrite.</span>
 
-<span class="sd">            The warning fires only when the incumbent differs from the</span>
-<span class="sd">            replacement: a repeat call that names the exact same schema object</span>
-<span class="sd">            is a caller replaying a registration, not a mistake, so it is a</span>
-<span class="sd">            silent no-op.</span>
-
-<span class="sd">            Presence is a faithful "was this really registered" test only because</span>
-<span class="sd">            :class:`_EnumRegistry` returns a miss without recording it. A plain</span>
-<span class="sd">            :class:`collections.defaultdict` would insert :attr:`__default__` the</span>
-<span class="sd">            first time any unregistered ``code`` was looked up, so parsing a</span>
-<span class="sd">            single packet carrying an unknown code would make the next legitimate</span>
-<span class="sd">            registration for that code warn about an entry no caller ever asked</span>
-<span class="sd">            for.</span>
+<span class="sd">            Registering the same schema object again is a silent no-op.</span>
+<span class="sd">            Presence is a faithful test only because :class:`_EnumRegistry`</span>
+<span class="sd">            does not record a miss.</span>
 
 <span class="sd">            :class:`pcapkit.protocols.misc.pcapng.schema.Option` overrides this</span>
-<span class="sd">            method with a namespaced registry of its own and does not delegate</span>
-<span class="sd">            here, so it is guarded separately.</span>
+<span class="sd">            method with a namespaced registry of its own, guarded separately.</span>
 
 <span class="sd">        """</span>
         <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -2172,71 +1887,45 @@
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        If ``code`` is provided, the subclass will be registered to the</span>
-<span class="sd">        :attr:`registry` mapping with the given ``code``. If ``code`` is</span>
-<span class="sd">        not given, the subclass will not be registered.</span>
+<span class="sd">        A subclass given ``code`` is registered under it in :attr:`registry`;</span>
+<span class="sd">        one without is not.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If any of ``code`` is</span>
 <span class="sd">                already registered, naming the displaced schema and its</span>
-<span class="sd">                replacement. This is the guard :meth:`register` applies, repeated</span>
-<span class="sd">                here because a class declaration is the *other* way into</span>
-<span class="sd">                :attr:`__enum__`: ``class MyOption(Option, code=...)`` writes the</span>
-<span class="sd">                registry without calling :meth:`register`.</span>
+<span class="sd">                replacement, as :meth:`register` does: a class declaration such</span>
+<span class="sd">                as ``class MyOption(Option, code=...)`` writes the registry</span>
+<span class="sd">                without calling it.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            If :attr:`__enum__` is not yet defined at function call,</span>
-<span class="sd">            it will automatically be defined as a :class:`_EnumRegistry`</span>
-<span class="sd">            object, with the default value set to :attr:`__default__`.</span>
+<span class="sd">            An undefined :attr:`__enum__` becomes an :class:`_EnumRegistry`</span>
+<span class="sd">            defaulting to :attr:`__default__`.</span>
 
-<span class="sd">            If intended to customise the :attr:`__enum__` mapping,</span>
-<span class="sd">            it is possible to override the :meth:`__init_subclass__` method and</span>
-<span class="sd">            define :attr:`__enum__` manually. Such a manual definition may use</span>
-<span class="sd">            a plain :class:`collections.defaultdict` -- e.g. to seed a</span>
-<span class="sd">            namespaced or nested mapping such as</span>
-<span class="sd">            :class:`pcapkit.protocols.misc.pcapng.schema.Option`'s -- so it is</span>
-<span class="sd">            swapped for the retention-safe :class:`_EnumRegistry` below, before</span>
-<span class="sd">            anything else can hold a reference to the original object.</span>
+<span class="sd">            To customise the mapping, override this method and define</span>
+<span class="sd">            :attr:`__enum__` manually. A plain :class:`collections.defaultdict`</span>
+<span class="sd">            defined so, as for the namespaced mapping of</span>
+<span class="sd">            :class:`pcapkit.protocols.misc.pcapng.schema.Option`, is swapped</span>
+<span class="sd">            for an :class:`_EnumRegistry` before anything else can hold it.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: the base hook goes first, before any of the registry work below.</span>
-        <span class="c1"># :meth:`Schema.__init_subclass__` is what refuses to derive from a</span>
-        <span class="c1"># finalised schema, and a refusal has to land before this method writes</span>
-        <span class="c1"># ``cls`` into ``__enum__``: raising afterwards would discard the class</span>
-        <span class="c1"># object while leaving the registry pointing at it, so a rejected</span>
-        <span class="c1"># declaration would still have displaced a built-in schema. It takes no</span>
-        <span class="c1"># arguments: ``code`` is this method's own and the rest are deliberately</span>
-        <span class="c1"># dropped.</span>
+        <span class="c1"># NOTE: First, so a refused subclass of a finalised schema never reaches the</span>
+        <span class="c1"># registry; ``code`` is consumed here and the rest are dropped.</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__enum__'</span><span class="p">):</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
         <span class="k">elif</span> <span class="s1">'__enum__'</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__enum__'</span><span class="p">],</span> <span class="n">_EnumRegistry</span><span class="p">):</span>
-            <span class="c1"># ``cls`` set its own ``__enum__`` in the class body, as a plain</span>
-            <span class="c1"># ``collections.defaultdict`` -- swap it for the retention-safe</span>
-            <span class="c1"># variant now, while ``cls`` is still being constructed and no</span>
-            <span class="c1"># external code has had a chance to capture a reference to the</span>
-            <span class="c1"># original dict. Every later access, through :attr:`registry` or</span>
-            <span class="c1"># otherwise, then sees the same safe object, and identity across</span>
-            <span class="c1"># repeated ``.registry`` reads is preserved.</span>
+            <span class="c1"># A plain ``defaultdict`` from the class body, swapped while nothing else</span>
+            <span class="c1"># can hold it, so every later read sees the same safe object.</span>
             <span class="n">manual</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__enum__'</span><span class="p">]</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">manual</span><span class="p">,</span> <span class="s1">'default_factory'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">manual</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># One loop over both shapes, so the overwrite guard below is written</span>
-            <span class="c1"># once rather than once per branch. ``register`` cannot be delegated</span>
-            <span class="c1"># to here: :class:`pcapkit.protocols.misc.pcapng.schema.Option`</span>
-            <span class="c1"># overrides it with an incompatible signature, so ``cls.register``</span>
-            <span class="c1"># does not mean the same thing for every subclass.</span>
+            <span class="c1"># Not ``cls.register``, which the PCAP-NG ``Option`` overrides incompatibly.</span>
             <span class="n">codes</span> <span class="o">=</span> <span class="n">code</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">code</span><span class="p">,)</span>
             <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">:</span>
-                <span class="c1"># A repeated member of an iterable ``code`` -- or two members that</span>
-                <span class="c1"># are the same object, as an :class:`enum.Enum` alias makes</span>
-                <span class="c1"># possible -- reaches this twice for the same key with ``cls`` on</span>
-                <span class="c1"># both sides: incumbent on the first pass, replacement on the</span>
-                <span class="c1"># second. So ordinary subclassing syntax reaches this guard, e.g.</span>
-                <span class="c1"># ``class X(Base, code=[A, A])`` or ``code=[A, B]`` with</span>
-                <span class="c1"># ``A is B``.</span>
+                <span class="c1"># A repeated member, as ``code=[A, A]`` or an enum alias makes, meets</span>
+                <span class="c1"># ``cls`` as its own incumbent, which is no overwrite.</span>
                 <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                 <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
                     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">_code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
@@ -2607,7 +2296,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2633,7 +2322,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

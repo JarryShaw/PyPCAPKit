@@ -7,8 +7,7 @@ IPX - Internetwork Packet Exchange
 :mod:`pcapkit.protocols.internet.ipx.protocol` contains
 :class:`~pcapkit.protocols.internet.ipx.protocol.IPX` only,
 which implements the extractor for Internetwork Packet
-Exchange (IPX) [*]_, whose structure is described
-as below:
+Exchange (IPX) [*]_, whose structure is:
 
 ======= ========= ====================== =====================================
 Octets      Bits        Name                    Description

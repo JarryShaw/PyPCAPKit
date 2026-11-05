@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -559,10 +559,9 @@
 
 <span class="sd">.. module:: pcapkit.protocols.transport.udp.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.transport.udp.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.udp.protocol.UDP` only,</span>
-<span class="sd">which implements the extractor for User Datagram Protocol</span>
-<span class="sd">(UDP) [*]_, whose structure is described as below:</span>
+<span class="sd">:mod:`pcapkit.protocols.transport.udp.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.udp.protocol.UDP`, the extractor for the</span>
+<span class="sd">User Datagram Protocol (UDP) [*]_, whose header is:</span>
 
 <span class="sd">======= ========= ===================== ===============================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -613,9 +612,8 @@
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_UDP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_UDP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements User Datagram Protocol.</span>
 
-<span class="sd">    This class supports parsing of the following protocols, which are</span>
-<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.udp.protocol.UDP.__proto__&gt;`</span>
-<span class="sd">    attribute:</span>
+<span class="sd">    The :attr:`self.__proto__ &lt;pcapkit.protocols.transport.udp.protocol.UDP.__proto__&gt;`</span>
+<span class="sd">    registry binds these ports:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -626,17 +624,18 @@
 <span class="sd">         - :class:`pcapkit.protocols.application.http.protocol.HTTP`</span>
 <span class="sd">       * - 1701</span>
 <span class="sd">         - :class:`pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`</span>
+<span class="sd">       * - 5684</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.dtls.protocol.DTLS`</span>
 <span class="sd">       * - 8080</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.http.protocol.HTTP`</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        The HTTP ports resolve to</span>
-<span class="sd">        :class:`pcapkit.protocols.application.http.protocol.HTTP`, whose</span>
-<span class="sd">        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` picks</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or</span>
-<span class="sd">        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the payload.</span>
-<span class="sd">        :attr:`TCP.__proto__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto__&gt;`</span>
-<span class="sd">        binds the same class for its HTTP ports.</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.http.protocol.HTTP`, bound as in</span>
+<span class="sd">        :attr:`TCP.__proto__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto__&gt;`,</span>
+<span class="sd">        picks :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or</span>
+<span class="sd">        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the</span>
+<span class="sd">        payload through</span>
+<span class="sd">        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version`.</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -648,6 +647,9 @@
 
 <span class="sd">    .. versionchanged:: 1.6.0</span>
 
+<span class="sd">       * Port 5684 binds</span>
+<span class="sd">         :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`</span>
+<span class="sd">         (:issue:`2437`).</span>
 <span class="sd">       * The checksum is computed when :meth:`make` is given none, over the</span>
 <span class="sd">         ``pseudo`` it is given or by the enclosing IP layer, and verified by</span>
 <span class="sd">         that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`</span>
@@ -679,25 +681,19 @@
             <span class="c1">#   5684  coaps      CoAP over DTLS</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
-            <span class="c1"># The HTTP entries bind the version-dispatching</span>
-            <span class="c1"># :class:`pcapkit.protocols.application.http.protocol.HTTP`, as TCP's table</span>
-            <span class="c1"># does. See the note in the class docstring.</span>
+            <span class="c1"># The HTTP entries bind the version-dispatching HTTP base, as TCP's</span>
+            <span class="c1"># table does.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http.protocol'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
 
-            <span class="c1"># L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version</span>
-            <span class="c1"># implemented, so the concrete class is bound rather than the</span>
-            <span class="c1"># abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)</span>
-            <span class="c1"># stays unbound because that version has no class; once it has,</span>
-            <span class="c1"># it takes 115 and this entry becomes a version switch on the Ver</span>
-            <span class="c1"># nibble. See pcapkit.protocols.link.l2tp.protocol.</span>
+            <span class="c1"># L2TPv2 (RFC 2661) is the only L2TP version implemented, so the</span>
+            <span class="c1"># concrete class is bound rather than the abstract L2TP base.</span>
+            <span class="c1"># L2TPv3 (RFC 3931, IANA protocol number 115) has no class. See</span>
+            <span class="c1"># pcapkit.protocols.link.l2tp.protocol.</span>
             <span class="mi">1701</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2.protocol'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">),</span>
 
-            <span class="c1"># CoAP over DTLS (RFC 7252) is bound here, but it is not the only</span>
-            <span class="c1"># fixed port a DTLS-borne protocol is registered at -- IANA also</span>
-            <span class="c1"># registers DTLS at 853 (domain-s), 4740 (ipfixs), 5349</span>
-            <span class="c1"># (stuns/turns), 6514 (syslog-tls) and 10161/10162 (snmpdtls),</span>
-            <span class="c1"># among others -- and plenty of deployments negotiate DTLS on a</span>
-            <span class="c1"># dynamic port no registry can name. See</span>
+            <span class="c1"># CoAP over DTLS (RFC 7252). IANA registers DTLS-borne protocols at</span>
+            <span class="c1"># other ports too, such as 853 (domain-s) and 6514 (syslog-tls),</span>
+            <span class="c1"># and DTLS often runs on a dynamic port. See</span>
             <span class="c1"># pcapkit.protocols.application.dtls.protocol.</span>
             <span class="mi">5684</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.dtls.protocol'</span><span class="p">,</span> <span class="s1">'DTLS'</span><span class="p">),</span>
 
@@ -706,14 +702,13 @@
     <span class="p">)</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_udp` checks its own</span>
-    <span class="c1">#: -- a bare :class:`int` is accepted because the registry is keyed by</span>
-    <span class="c1">#: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
-    <span class="c1">#: member carries one (:issue:`2268`).</span>
+    <span class="c1">#: and whether a bare :class:`int` is valid too. Read by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`</span>
+    <span class="c1">#: to check a ``code=`` key as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_udp` checks</span>
+    <span class="c1">#: its own; a bare :class:`int` is a port number, which an</span>
+    <span class="c1">#: :class:`~pcapkit.const.reg.apptype.apptype.AppType` member carries</span>
+    <span class="c1">#: (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_AppType</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#: Whether :meth:`make` left the checksum for the enclosing IP layer to</span>
@@ -789,8 +784,7 @@
         <span class="p">)</span>
 
         <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
-        <span class="c1"># since its own length field is what leaves them out of the payload,</span>
-        <span class="c1"># and the rebuild keeps them as captured (#1461).</span>
+        <span class="c1"># which leaves them out of the payload; rebuilt as captured (#1461).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">udp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -846,11 +840,8 @@
 <span class="sd">           instead.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: An explicit ``total_length`` is written as given, so that a</span>
-        <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
-        <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (#1155). Computed from the octets at hand otherwise, which is</span>
-        <span class="c1"># what a plain ``UDP(payload=...)`` wants.</span>
+        <span class="c1"># NOTE: An explicit ``total_length`` is written as given, so a</span>
+        <span class="c1"># snaplen-truncated capture rebuilds with its declared length (#1155).</span>
         <span class="k">if</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total_length</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">total_length</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'length'</span><span class="p">)</span>
@@ -925,9 +916,8 @@
             <span class="s1">'srcport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>
             <span class="s1">'dstport'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
-            <span class="c1"># NOTE: The parsed length is passed through rather than left to</span>
-            <span class="c1"># ``make`` to recompute, so that a truncated capture rebuilds with</span>
-            <span class="c1"># the length that was on the wire (#1155).</span>
+            <span class="c1"># NOTE: Passed through so a truncated capture rebuilds with the</span>
+            <span class="c1"># length on the wire (#1155).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="c1"># NOTE: And the octets captured past the Length field (#1461).</span>
@@ -1328,7 +1318,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1354,7 +1344,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

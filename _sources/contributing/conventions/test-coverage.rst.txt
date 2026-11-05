@@ -3,12 +3,11 @@
 Testing a Change
 ----------------
 
-The pages before this one rule on the library, the repository and the prose. This one
-rules on what the test suite has to prove, and what a change has to bring to it. The
-owner set the direction on :issue:`1203`, paraphrased here as on the other pages: every
-round trip the library offers must pass and match exactly, the tests must cover all of
-them, and the rules belong on a page rather than in review threads. :issue:`1202`
-extended round-trip coverage past the :term:`registries <registry>`, to the
+What the test suite has to prove, and what a change has to bring to it. The owner
+set the direction on :issue:`1203`: every round trip the library offers must pass and
+match exactly, the tests must cover all of them, and the rules belong on a page rather
+than in review threads. :issue:`1202` extended round-trip coverage past the
+:term:`registries <registry>`, to the
 :mod:`pcapkit.corekit` fields, schemas and ``Info``, the :mod:`pcapkit.foundation`
 reassembly, flow tracing, engines and :term:`registries <registry>`, and the output
 formats.
@@ -200,8 +199,7 @@ Running the Tests
 Adding a Protocol, Option or Dumper
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-What each must bring in tests before it merges, on top of the fail-without-fix proof
-above:
+What each must bring in tests, on top of the fail-without-fix proof above:
 
 .. list-table::
    :header-rows: 1

@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="FTP Vendor Crawler" />
+<meta property="og:title" content="FTP Vendor Crawlers" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/ftp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of FTP implementations. Available crawlers include:,, FTP_Command, FTP Commands*,, FTP_ReturnCode, FTP Return Codes †,,,, FTP Command: This module contains ..." />
-<meta name="description" content="This module contains all vendor crawlers of FTP implementations. Available crawlers include:,, FTP_Command, FTP Commands*,, FTP_ReturnCode, FTP Return Codes †,,,, FTP Command: This module contains ..." />
+<meta property="og:description" content=",, FTP_Command, FTP Commands*,, FTP_ReturnCode, FTP Return Codes †,,,, FTP Command: Generates pcapkit.const.ftp.command.Command. FTP Server Return Code: Generates pcapkit.const.ftp.return_code.Retu..." />
+<meta name="description" content=",, FTP_Command, FTP Commands*,, FTP_ReturnCode, FTP Return Codes †,,,, FTP Command: Generates pcapkit.const.ftp.command.Command. FTP Server Return Code: Generates pcapkit.const.ftp.return_code.Retu..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="HTTP Vendor Crawler" href="http.html"><link rel="prev" title="TCP Vendor Crawlers" href="tcp.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
-        <title>FTP Vendor Crawler - PyPCAPKit</title>
+        <title>FTP Vendor Crawlers - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -569,10 +569,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.ftp">
-<span id="ftp-vendor-crawler"></span><h1><a class="reference internal" href="../protocols/application/ftp.html#pcapkit.protocols.application.ftp.protocol.FTP" title="pcapkit.protocols.application.ftp.protocol.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.ftp" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/application/ftp.html#pcapkit.protocols.application.ftp.protocol.FTP" title="pcapkit.protocols.application.ftp.protocol.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> implementations. Available
-crawlers include:</p>
+<span id="ftp-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/application/ftp.html#pcapkit.protocols.application.ftp.protocol.FTP" title="pcapkit.protocols.application.ftp.protocol.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ftp" title="Link to this heading">¶</a></h1>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -587,8 +584,7 @@ crawlers include:</p>
 </div>
 <section id="module-pcapkit.vendor.ftp.command">
 <span id="ftp-command"></span><h2>FTP Command<a class="headerlink" href="#module-pcapkit.vendor.ftp.command" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>FTP Command</strong>,
-which is automatically generating <a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command.Command</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command.Command</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.Command">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">Command</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ftp/command.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command" title="Link to this definition">¶</a></dt>
@@ -627,8 +623,7 @@ evaluated at import time.</p>
 </section>
 <section id="module-pcapkit.vendor.ftp.return_code">
 <span id="ftp-server-return-code"></span><h2>FTP Server Return Code<a class="headerlink" href="#module-pcapkit.vendor.ftp.return_code" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>FTP Server Return Code</strong>,
-which is automatically generating <a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ftp.return_code.ReturnCode</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ftp.return_code.ReturnCode</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.return_code.</span></span><span class="sig-name descname"><span class="pre">ReturnCode</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode" title="Link to this definition">¶</a></dt>
@@ -717,7 +712,7 @@ which is automatically generating <a class="reference internal" href="../const/f
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a><ul>
+<li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.vendor.ftp.command">FTP Command</a></li>
 <li><a class="reference internal" href="#module-pcapkit.vendor.ftp.return_code">FTP Server Return Code</a></li>
 </ul>

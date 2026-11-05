@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -605,9 +605,8 @@ subtree can be addressed on its own:</p>
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">'pcapkit.foundation.extraction'</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Logger names are the module paths, e.g. <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.transport</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.reassembly</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code>.</p>
+<p>Logger names are the module paths, e.g. <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap</span></code> or
+<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.tcp</span></code>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.get_logger">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/logging.html#get_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.logging.get_logger" title="Link to this definition">¶</a></dt>
@@ -660,14 +659,15 @@ were read, and when cleanup ran. Reassembly reports datagram counts on flush and
 flow tracing reports flows opening and closing.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>No record is logged for each frame parsed or each field read, so
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> on a million-packet capture does not yield a million
-records. What is logged per item is what gets dropped: the PyShark engine
-logs a line for each tshark record it skips as not a packet
-(<code class="docutils literal notranslate"><span class="pre">skipping</span> <span class="pre">tshark</span> <span class="pre">frame</span></code>), and reassembly logs a line for each buffer it
-abandons on timeout (<code class="docutils literal notranslate"><span class="pre">abandoning</span> <span class="pre">buffer</span></code>). Registration bookkeeping in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is
-at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> rather than <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">INFO</span></code></a>, since a library
-announcing its own registry entries is not news to its consumer.</p>
+<p>Nothing is logged per frame parsed or per field read, so
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> on a large capture stays small. What is logged per
+item is what gets dropped: the PyShark engine logs each tshark record it
+skips as not a packet (<code class="docutils literal notranslate"><span class="pre">skipping</span> <span class="pre">tshark</span> <span class="pre">frame</span></code>), and reassembly each buffer
+it abandons, on timeout or, for IP, on an overlapping fragment
+(<code class="docutils literal notranslate"><span class="pre">abandoning</span> <span class="pre">buffer</span></code>). Registration bookkeeping in
+<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a> is at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">DEBUG</span></code></a> rather than
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.INFO" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">INFO</span></code></a>, since a library announcing its own registry entries is
+not news to its consumer.</p>
 </div>
 </section>
 <section id="configuring-the-output">
@@ -897,7 +897,7 @@ pre-1.5 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Set through the environment variable <span class="target" id="index-3"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>.</p>
+<p>Set by <span class="target" id="index-3"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -912,7 +912,7 @@ pre-1.5 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Set through the environment variable <span class="target" id="index-4"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a>.</p>
+<p>Set by <span class="target" id="index-4"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -927,7 +927,7 @@ pre-1.5 default output.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Set through the environment variable <span class="target" id="index-5"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>.</p>
+<p>Set by <span class="target" id="index-5"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -970,9 +970,9 @@ from both <a class="reference internal" href="#module-pcapkit.utilities.logging"
 named <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>; <span class="target" id="index-8"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> attaches the stderr handler at
 <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>; and <code class="docutils literal notranslate"><span class="pre">Extractor(verbose=True)</span></code> – like the CLI’s
 <code class="docutils literal notranslate"><span class="pre">-v</span></code> – prints a line per frame to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>. That output is a
-feature of the tool rather than diagnostics, so it deliberately stays on
-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#print" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>: routing it through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> would move it to another
-stream and hide it until the consumer configured a handler.</p>
+feature of the tool rather than diagnostics, so it stays on <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#print" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>:
+through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> it would move to another stream and stay hidden until
+the consumer configured a handler.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

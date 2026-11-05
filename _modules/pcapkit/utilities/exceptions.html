@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -831,7 +831,7 @@
 <span class="sd">        * The hooks still do not cover *every* path an exception can take.</span>
 <span class="sd">          A traceback a caller formats itself with :mod:`traceback` -- rather</span>
 <span class="sd">          than letting it reach the top level uncaught -- passes through</span>
-<span class="sd">          neither. See GitHub issue :issue:`719`.</span>
+<span class="sd">          neither (:issue:`719`).</span>
 <span class="sd">        * The ``stacklevel`` of the log record is the relative level</span>
 <span class="sd">          :func:`stacklevel` computes, so the record is attributed to the caller</span>
 <span class="sd">          whose operation failed rather than to this module. It must not be</span>
@@ -1517,7 +1517,7 @@
 <span class="sd">    :exc:`ValueError`, so a lookup that misses by *name* is</span>
 <span class="sd">    :exc:`KeyError`-derived and one that misses by *value* is</span>
 <span class="sd">    :exc:`ValueError`-derived. That is a ruling given in review of :issue:`877`'s</span>
-<span class="sd">    phase-2 re-parenting, carried out by GitHub issue :issue:`923`: raise</span>
+<span class="sd">    phase-2 re-parenting, carried out by :issue:`923`: raise</span>
 <span class="sd">    whichever of the two stdlib :class:`~enum.Enum` would raise in the same</span>
 <span class="sd">    circumstances, and raise it from this module rather than as a builtin.</span>
 
@@ -1928,7 +1928,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1954,7 +1954,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

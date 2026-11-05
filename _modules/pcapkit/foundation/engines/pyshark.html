@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -703,10 +703,8 @@
 <span class="sd">        running loop. Measured: 3.10 and 3.11 return a loop</span>
 <span class="sd">        silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14</span>
 <span class="sd">        raises ``RuntimeError: There is no current event loop in thread</span>
-<span class="sd">        'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was</span>
-<span class="sd">        not measured; it is expected to work, since it is on the</span>
-<span class="sd">        deprecated-but-functional side of that progression, and that expectation</span>
-<span class="sd">        is the one thing here that is inferred rather than observed.</span>
+<span class="sd">        'MainThread'``; on 3.13 |pyshark|_ extracted a capture. Hence</span>
+<span class="sd">        :attr:`PYTHON_CEILING` is ``(3, 14)``.</span>
 
 <span class="sd">        **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around</span>
 <span class="sd">        Wireshark's command-line tool and does no parsing itself, so it is useless</span>
@@ -1318,7 +1316,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1344,7 +1342,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

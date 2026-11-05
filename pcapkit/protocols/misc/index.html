@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc contains the auxiliary protocol implementations. These include the PCAP header classes, the PCAP-NG PCAPNG class, the Raw class for not-supported protocols, and the NoPayload..." />
-<meta name="description" content="pcapkit.protocols.misc contains the auxiliary protocol implementations. These include the PCAP header classes, the PCAP-NG PCAPNG class, the Raw class for not-supported protocols, and the NoPayload..." />
+<meta property="og:description" content="pcapkit.protocols.misc holds the auxiliary protocols: the PCAP header classes, PCAPNG, Raw for unsupported protocols, NoPayload for an empty payload, and the checksum pseudo-headers. PCAP File Head..." />
+<meta name="description" content="pcapkit.protocols.misc holds the auxiliary protocols: the PCAP header classes, PCAPNG, Raw for unsupported protocols, NoPayload for an empty payload, and the checksum pseudo-headers. PCAP File Head..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="PCAP File Headers" href="pcap.html"><link rel="prev" title="DTLS - Datagram Transport Layer Security" href="../application/dtls.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,12 +570,11 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.misc">
 <span id="auxiliary-protocols"></span><h1>Auxiliary Protocols<a class="headerlink" href="#module-pcapkit.protocols.misc" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a> contains the auxiliary protocol implementations.
-These include the PCAP header classes, the PCAP-NG
-<a class="reference internal" href="pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> class, the
-<a class="reference internal" href="raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> class for not-supported protocols, and
-the <a class="reference internal" href="no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> class for indication of
-empty payload.</p>
+<p><a class="reference internal" href="#module-pcapkit.protocols.misc" title="pcapkit.protocols.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc</span></code></a> holds the auxiliary protocols: the PCAP header
+classes, <a class="reference internal" href="pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>,
+<a class="reference internal" href="raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> for unsupported protocols,
+<a class="reference internal" href="no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> for an empty
+payload, and the checksum pseudo-headers.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pcap.html">PCAP File Headers</a></li>

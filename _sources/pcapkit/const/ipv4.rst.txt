@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.ipv4
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`IPv4_ClassificationLevel <pcapkit.const.ipv4.classification_level.ClassificationLevel>`
@@ -40,8 +36,7 @@ Classification Level Encodings
 
 .. module:: pcapkit.const.ipv4.classification_level
 
-This module contains the constant enumeration for **Classification Level Encodings**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.classification_level.ClassificationLevel`.
+Generated from :class:`pcapkit.vendor.ipv4.classification_level.ClassificationLevel`.
 
 .. autoclass:: pcapkit.const.ipv4.classification_level.ClassificationLevel
    :members:
@@ -53,8 +48,7 @@ Option Classes
 
 .. module:: pcapkit.const.ipv4.option_class
 
-This module contains the constant enumeration for **Option Classes**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.option_class.OptionClass`.
+Generated from :class:`pcapkit.vendor.ipv4.option_class.OptionClass`.
 
 .. autoclass:: pcapkit.const.ipv4.option_class.OptionClass
    :members:
@@ -66,8 +60,7 @@ IP Option Numbers
 
 .. module:: pcapkit.const.ipv4.option_number
 
-This module contains the constant enumeration for **IP Option Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.option_number.OptionNumber`.
+Generated from :class:`pcapkit.vendor.ipv4.option_number.OptionNumber`.
 
 .. autoclass:: pcapkit.const.ipv4.option_number.OptionNumber
    :members:
@@ -79,8 +72,7 @@ Protection Authority Bit Assignments
 
 .. module:: pcapkit.const.ipv4.protection_authority
 
-This module contains the constant enumeration for **Protection Authority Bit Assignments**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority`.
+Generated from :class:`pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority`.
 
 .. autoclass:: pcapkit.const.ipv4.protection_authority.ProtectionAuthority
    :members:
@@ -92,8 +84,7 @@ QS Functions
 
 .. module:: pcapkit.const.ipv4.qs_function
 
-This module contains the constant enumeration for **QS Functions**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.qs_function.QSFunction`.
+Generated from :class:`pcapkit.vendor.ipv4.qs_function.QSFunction`.
 
 .. autoclass:: pcapkit.const.ipv4.qs_function.QSFunction
    :members:
@@ -105,8 +96,7 @@ IPv4 Router Alert Option Values
 
 .. module:: pcapkit.const.ipv4.router_alert
 
-This module contains the constant enumeration for **IPv4 Router Alert Option Values**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.router_alert.RouterAlert`.
+Generated from :class:`pcapkit.vendor.ipv4.router_alert.RouterAlert`.
 
 .. autoclass:: pcapkit.const.ipv4.router_alert.RouterAlert
    :members:
@@ -118,8 +108,7 @@ ToS (DS Field) Delay
 
 .. module:: pcapkit.const.ipv4.tos_del
 
-This module contains the constant enumeration for **ToS (DS Field) Delay**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_del.ToSDelay`.
+Generated from :class:`pcapkit.vendor.ipv4.tos_del.ToSDelay`.
 
 .. autoclass:: pcapkit.const.ipv4.tos_del.ToSDelay
    :members:
@@ -131,8 +120,7 @@ ToS ECN Field
 
 .. module:: pcapkit.const.ipv4.tos_ecn
 
-This module contains the constant enumeration for **ToS ECN Field**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_ecn.ToSECN`.
+Generated from :class:`pcapkit.vendor.ipv4.tos_ecn.ToSECN`.
 
 .. autoclass:: pcapkit.const.ipv4.tos_ecn.ToSECN
    :members:
@@ -144,8 +132,7 @@ ToS (DS Field) Precedence
 
 .. module:: pcapkit.const.ipv4.tos_pre
 
-This module contains the constant enumeration for **ToS (DS Field) Precedence**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence`.
+Generated from :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence`.
 
 .. autoclass:: pcapkit.const.ipv4.tos_pre.ToSPrecedence
    :members:
@@ -157,8 +144,7 @@ ToS (DS Field) Reliability
 
 .. module:: pcapkit.const.ipv4.tos_rel
 
-This module contains the constant enumeration for **ToS (DS Field) Reliability**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_rel.ToSReliability`.
+Generated from :class:`pcapkit.vendor.ipv4.tos_rel.ToSReliability`.
 
 .. autoclass:: pcapkit.const.ipv4.tos_rel.ToSReliability
    :members:
@@ -170,8 +156,7 @@ ToS (DS Field) Throughput
 
 .. module:: pcapkit.const.ipv4.tos_thr
 
-This module contains the constant enumeration for **ToS (DS Field) Throughput**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_thr.ToSThroughput`.
+Generated from :class:`pcapkit.vendor.ipv4.tos_thr.ToSThroughput`.
 
 .. autoclass:: pcapkit.const.ipv4.tos_thr.ToSThroughput
    :members:
@@ -183,8 +168,7 @@ TS Flag
 
 .. module:: pcapkit.const.ipv4.ts_flag
 
-This module contains the constant enumeration for **TS Flag**,
-which is automatically generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag`.
+Generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag`.
 
 .. autoclass:: pcapkit.const.ipv4.ts_flag.TSFlag
    :members:

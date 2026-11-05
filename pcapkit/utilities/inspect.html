@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -574,9 +574,9 @@
 class from a concrete one without the interpreter’s abstract flag, so the answer is the
 same on every interpreter, during <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__init_subclass__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> and after the class
 is made (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2784">#2784</a>). <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__" title="pcapkit.protocols.protocol.Protocol.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init_subclass__</span></code></a> decides with it whether a
-class names itself in the by-name registry. It is a helper that behaves the same
-everywhere rather than a version gate, so it has a module of its own rather than a
-place in <a class="reference internal" href="index.html#module-pcapkit.utilities.compat" title="pcapkit.utilities.compat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compat</span></code></a>; see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
+class names itself in the by-name registry. It behaves the same everywhere rather
+than gating on a version, so it is not in <a class="reference internal" href="index.html#module-pcapkit.utilities.compat" title="pcapkit.utilities.compat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compat</span></code></a>; see
+<a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>

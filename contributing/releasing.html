@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -609,7 +609,22 @@ finds nothing commits nothing. The bump commit carries every module the crawl
 wrote under <code class="docutils literal notranslate"><span class="pre">pcapkit/const/</span></code>, new and deleted ones included
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>), and is what
 starts the automated path described below.</p>
-<p>The same script is also the manual entry point: run
+<p>The steps of a <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> run, from the crawl to the push:</p>
+<pre  class="mermaid">
+        flowchart TD
+    CRAWL[&quot;Update Vendor&lt;br/&gt;crawls the registries&quot;] --&gt; TEST{&quot;Test the regenerated&lt;br/&gt;tree: finished?&quot;}
+    TEST --&gt;|&quot;yes: failing modules go&lt;br/&gt;back to HEAD's copy&quot;| VERIFY
+    TEST --&gt;|&quot;no: failed or timed out&quot;| DISCARD[&quot;Discard untested const changes&quot;]
+    DISCARD --&gt; VERIFY{&quot;Verify Changed files&lt;br/&gt;anything changed?&quot;}
+    VERIFY --&gt;|no| NONE[&quot;commits nothing&quot;]
+    VERIFY --&gt;|yes| CLASSIFY{&quot;Classify Changed files&lt;br/&gt;vendor_code_changed.py&quot;}
+    CLASSIFY --&gt;|&quot;comments and docstrings only&quot;| DOCS[&quot;Commit documentation&lt;br/&gt;changes, no bump&quot;]
+    CLASSIFY --&gt;|&quot;any other change,&lt;br/&gt;or the step failing&quot;| BUMP[&quot;Bump Version&lt;br/&gt;util/bump_version.py&quot;]
+    DOCS --&gt;|&quot;held: raised by its own&lt;br/&gt;documentation commit&quot;| NONE
+    BUMP --&gt; COMMIT[&quot;Commit changes, new&lt;br/&gt;const modules too&quot;]
+    DOCS --&gt;|committed| PUSH[&quot;Push changes to main&lt;br/&gt;not on a manual run&quot;]
+    COMMIT --&gt; PUSH
+    </pre><p>The same script is also the manual entry point: run
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/bump_version.py</span></code> and commit the result to <code class="docutils literal notranslate"><span class="pre">main</span></code> for a
 release that is not a vendor-registry refresh – a feature or a fix that has
 landed and is ready to go out. Running it while <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version is still a
@@ -1586,7 +1601,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1612,7 +1627,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

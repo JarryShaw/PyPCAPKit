@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,12 +558,11 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.httpv1.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.httpv1.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`,</span>
-<span class="sd">which implements an extractor for Hypertext Transfer</span>
-<span class="sd">Protocol (HTTP/1.*) [*]_, and its</span>
-<span class="sd">:class:`~pcapkit.protocols.application.httpv1.protocol.Type` enumeration. The</span>
-<span class="sd">structure of an HTTP/1.* message is described as below:</span>
+<span class="sd">:mod:`pcapkit.protocols.application.httpv1.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`, the extractor for</span>
+<span class="sd">the Hypertext Transfer Protocol (HTTP/1.*) [*]_, and its</span>
+<span class="sd">:class:`~pcapkit.protocols.application.httpv1.protocol.Type` enumeration. An</span>
+<span class="sd">HTTP/1.* message is:</span>
 
 <span class="sd">.. code-block:: text</span>
 
@@ -622,10 +621,8 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTPv1'</span><span class="p">]</span>
 
-<span class="c1"># NOTE: The start-line patterns ``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS``,</span>
-<span class="c1"># and ``_HTTP2_PREFACE_HEADER``, are imported from ``http.py``, where</span>
-<span class="c1"># :func:`~pcapkit.protocols.application.http.protocol.test_start_line` classifies with</span>
-<span class="c1"># them; one copy keeps that predicate and this parser in agreement.</span>
+<span class="c1"># NOTE: The start-line patterns and ``_HTTP2_PREFACE_HEADER`` come from</span>
+<span class="c1"># ``http.py``, so ``test_start_line`` there and this parser agree.</span>
 
 
 <div class="viewcode-block" id="Type">
@@ -729,15 +726,8 @@
 
         <span class="n">packet</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="c1"># NOTE: A payload carrying no header/body separator at all unpacks short</span>
-        <span class="c1"># here. It must surface as ``ProtocolError``, not a bare ``ValueError``:</span>
-        <span class="c1"># ``HTTP._guess_version`` falls through to its HTTP/2 arm on</span>
-        <span class="c1"># ``ProtocolError`` alone, so any other exception from an HTTP/1 attempt</span>
-        <span class="c1"># on HTTP/2 wire bytes would abort the guess instead of failing it.</span>
-        <span class="c1"># ``ProtocolError`` is also what the ``Raises:`` section above promises,</span>
-        <span class="c1"># and the same conversion the explicit ``version=`` path of</span>
-        <span class="c1"># ``HTTP.read`` performs; chained, so the unpacking error stays</span>
-        <span class="c1"># reachable as ``__cause__``.</span>
+        <span class="c1"># NOTE: Unpacking short with no header/body separator raises ``ProtocolError``,</span>
+        <span class="c1"># the only error ``HTTP._guess_version`` falls through to its HTTP/2 arm on.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">header</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -833,9 +823,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_check_raw</span><span class="p">(</span><span class="n">raw_line</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">header_line</span> <span class="o">=</span> <span class="n">raw_line</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span>
 
-        <span class="c1"># NOTE: Field lines are matched to the header fields by content, in</span>
-        <span class="c1"># order, rather than by position, so that adding or removing a field</span>
-        <span class="c1"># leaves the field lines around it as they were received.</span>
+        <span class="c1"># NOTE: Field lines are matched to the header fields by content, in order, not by</span>
+        <span class="c1"># position, so adding or removing a field leaves the lines around it as received.</span>
         <span class="n">received_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Optional[tuple[str, str]]]</span>
         <span class="k">for</span> <span class="n">raw_field</span> <span class="ow">in</span> <span class="n">raw_header</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -899,9 +888,8 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``read`` records an empty body as :obj:`None`, which is the</span>
-        <span class="c1"># public ``info.body`` value; ``make`` takes ``bytes`` and concatenates</span>
-        <span class="c1"># it, so the read-side ``None`` is translated back here (#1050).</span>
+        <span class="c1"># NOTE: ``read`` records an empty body as :obj:`None`, the public ``info.body``;</span>
+        <span class="c1"># ``make`` concatenates ``bytes``, so ``None`` is translated back here (#1050).</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'http_version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined]</span>
             <span class="s1">'method'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">receipt</span><span class="p">,</span> <span class="s1">'method'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
@@ -940,13 +928,8 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: A header with no CRLF is a start line with zero field lines,</span>
-        <span class="c1"># which :rfc:`9112#section-2.1` allows (``*( field-line CRLF )``). The</span>
-        <span class="c1"># one such header refused by name is the HTTP/2 connection preface's:</span>
-        <span class="c1"># ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`` splits in ``read`` to exactly</span>
-        <span class="c1"># ``PRI * HTTP/2.0``, which ``_RE_METHOD`` and ``_RE_VERSION`` would</span>
-        <span class="c1"># otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER`` in</span>
-        <span class="c1"># ``http.py``).</span>
+        <span class="c1"># NOTE: A header with no CRLF is a bare start line (RFC 9112, section 2.1), so the</span>
+        <span class="c1"># HTTP/2 preface's ``PRI * HTTP/2.0`` is refused by name, or it parses as a request.</span>
         <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
         <span class="n">startline</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
@@ -991,15 +974,8 @@
 <span class="sd">                continuation.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: A field line beginning with SP or HTAB is an ``obs-fold``</span>
-        <span class="c1"># continuation of the line before it (:rfc:`9112#section-5.2`), so it is</span>
-        <span class="c1"># kept with that line rather than treated as a field line of its own,</span>
-        <span class="c1"># and unfolded by ``_read_field_line``. Deprecated, but present in real</span>
-        <span class="c1"># captures. Treating a continuation as a field line of its own goes wrong</span>
-        <span class="c1"># twice: one carrying no colon fails the colon check, so a valid message</span>
-        <span class="c1"># is refused; one that happens to contain a colon parses silently into a</span>
-        <span class="c1"># spurious extra field (``X-Long: a`` plus ``b: c``, for a folded</span>
-        <span class="c1"># ``X-Long: a b``).</span>
+        <span class="c1"># NOTE: A line led by SP or HTAB continues the one before (``obs-fold``, RFC 9112,</span>
+        <span class="c1"># section 5.2); alone it would refuse a valid message or parse as a spurious field.</span>
         <span class="n">raw_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span> <span class="k">if</span> <span class="n">headerfield</span> <span class="k">else</span> <span class="p">():</span>
             <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
@@ -1026,10 +1002,8 @@
 <span class="sd">                line.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: Short for a start line of fewer than three whitespace-separated</span>
-        <span class="c1"># tokens. Raised as ``ProtocolError`` for the reason ``read`` gives,</span>
-        <span class="c1"># with the same message this method uses below for a start line it</span>
-        <span class="c1"># cannot recognise.</span>
+        <span class="c1"># NOTE: Short for fewer than three tokens; ``ProtocolError`` for the</span>
+        <span class="c1"># reason ``read`` gives.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -1170,22 +1144,16 @@
 <span class="sd">            ProtocolError: If the line is not a field line.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: The accumulator is right-stripped as well as the continuation,</span>
-        <span class="c1"># because the production is ``obs-fold = OWS CRLF RWS`` and it is the</span>
-        <span class="c1"># *whole* obs-fold that is replaced by a single space -- the RFC's own</span>
-        <span class="c1"># remedy (:rfc:`9112#section-5.2`). The OWS before the CRLF belongs to</span>
-        <span class="c1"># the fold, not to the value, so ``X: a \t\r\n\tb`` unfolds to ``'a b'``.</span>
+        <span class="c1"># NOTE: The whole ``obs-fold = OWS CRLF RWS`` becomes one space (RFC</span>
+        <span class="c1"># 9112, section 5.2), so the OWS before the CRLF is stripped too.</span>
         <span class="n">field</span><span class="p">,</span> <span class="o">*</span><span class="n">continuations</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">continuation</span> <span class="ow">in</span> <span class="n">continuations</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">continuation</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">continuation</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c1"># NOTE: Checked rather than left to ``item[1]``, and refused rather than</span>
-        <span class="c1"># skipped: a field line with no colon is not a header field, and dropping</span>
-        <span class="c1"># it would hand back a message whose fields are quietly not the ones on</span>
-        <span class="c1"># the wire. ``ProtocolError`` for the reason ``read`` gives, and to the</span>
-        <span class="c1"># same message.</span>
+        <span class="c1"># NOTE: A field line with no colon is refused, not skipped, so the</span>
+        <span class="c1"># fields stay the ones on the wire; ``ProtocolError`` as in ``read``.</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
@@ -1581,7 +1549,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1607,7 +1575,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

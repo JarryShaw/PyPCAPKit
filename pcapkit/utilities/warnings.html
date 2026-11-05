@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -592,11 +592,10 @@ the filters – so <a class="reference external" href="https://docs.python.org/3
 exactly as they govern any other library’s (with one wrinkle in naming a
 category on the command line, noted below).</p></li>
 </ol>
-<p>The counts are the same in development mode as outside it:
-<span class="target" id="index-1"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> changes where the log records go, and
-<span class="target" id="index-2"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a> how much detail they carry, never how many records
-there are. Constructing a warning class is not an act of reporting one – it
-emits nothing and has no side effects.</p>
+<p>Neither flag changes how many records there are: <span class="target" id="index-1"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>
+changes where the log records go, and <span class="target" id="index-2"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a> how much detail
+they carry. Constructing a warning class reports nothing and has no side
+effects.</p>
 <p>A next layer is parsed on trial, and replaced with
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when its header was not captured or its
 parse raises. The trial’s warnings are held back by
@@ -710,8 +709,8 @@ follows the thread, not the frame.</p>
 </section>
 <section id="silencing-pcapkit-warnings">
 <h2>Silencing pcapkit Warnings<a class="headerlink" href="#silencing-pcapkit-warnings" title="Link to this heading">¶</a></h2>
-<p>Filter them like any other library’s, at the level of granularity you want –
-<a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> for all of them, or a single
+<p>Filter them like any other library’s, by
+<a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> for all of them, or by a single
 category:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
@@ -734,14 +733,13 @@ select a family:</p>
 <p><a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-W" title="(in Python v3.15)"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span></code></a> and <span class="target" id="index-3"></span><a class="reference external" href="https://docs.python.org/3/using/cmdline.html#envvar-PYTHONWARNINGS" title="(in Python v3.15)"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONWARNINGS</span></code></a> cannot name a <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
 category directly: <code class="docutils literal notranslate"><span class="pre">-W</span> <span class="pre">ignore::pcapkit.utilities.warnings.BaseWarning</span></code> is
 rejected with <code class="docutils literal notranslate"><span class="pre">Invalid</span> <span class="pre">-W</span> <span class="pre">option</span> <span class="pre">ignored:</span> <span class="pre">invalid</span> <span class="pre">module</span> <span class="pre">name</span></code>. CPython
-imports the category while parsing the option, and that happens before
-<a class="reference external" href="https://docs.python.org/3/library/site.html#module-site" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">site</span></code></a> has added <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.path" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a>, so no installed
-package’s own category can be named there – this is not specific to
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>. Use a standard category on the command line, or install a
-precise filter in code as above.</p>
+imports the category while parsing the option, before <a class="reference external" href="https://docs.python.org/3/library/site.html#module-site" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">site</span></code></a> has added
+<code class="docutils literal notranslate"><span class="pre">site-packages</span></code> to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.path" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a>, so no installed package’s category can
+be named there. Use a standard category on the command line, or a filter in
+code as above.</p>
 </div>
-<p>All of that governs the <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> channel. The <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger is
-configured separately, through the <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> module:</p>
+<p>That governs the <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> channel. The <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger is configured
+through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">'pcapkit'</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>   <span class="c1"># drop WARNING records</span>

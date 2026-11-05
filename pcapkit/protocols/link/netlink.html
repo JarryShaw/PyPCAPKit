@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -575,8 +575,7 @@
 only, which implements the extractor for the <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">nlmsghdr</span></code> framing of
 Linux’s own kernel/user IPC transport, as seen on a
 <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LINUX_SLL</span></code>/<code class="docutils literal notranslate"><span class="pre">LINKTYPE_LINUX_SLL2</span></code> capture whose <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code>
-is <code class="docutils literal notranslate"><span class="pre">ARPHRD_NETLINK</span></code> (an <code class="docutils literal notranslate"><span class="pre">nlmon</span></code> interface). Its structure is described as
-below:</p>
+is <code class="docutils literal notranslate"><span class="pre">ARPHRD_NETLINK</span></code> (an <code class="docutils literal notranslate"><span class="pre">nlmon</span></code> interface). Its structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -615,11 +614,12 @@ below:</p>
 </tbody>
 </table>
 </div>
-<p>Only this fixed 16-octet header is dissected; per-family message payloads and
-multiple messages packed into one capture are out of scope for this first
-cut – see the module docstring’s <em>Scope</em> section. The byte order the header
-was written in is ambiguous (Netlink <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> is kernel/userspace IPC, not wire
-format) and is guessed by <a class="reference internal" href="#pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder" title="pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlmsg_byteorder()</span></code></a>; either way it is kept as
+<p>Only the first message’s fixed 16-octet header is dissected. The rest of the
+frame – that message’s per-family payload and any further messages – is its
+payload, kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> unless the
+<code class="docutils literal notranslate"><span class="pre">nlmsg_type</span></code> is registered. The header is in the capturing host’s byte order,
+which nothing records (Netlink <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> is kernel/userspace IPC, not a wire format),
+so <a class="reference internal" href="#pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder" title="pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlmsg_byteorder()</span></code></a> guesses it; either way it is kept as
 <code class="docutils literal notranslate"><span class="pre">netlink.byteorder</span></code>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>

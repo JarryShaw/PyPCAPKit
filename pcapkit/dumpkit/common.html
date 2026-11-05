@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -617,10 +617,8 @@ rather than by its attributes (<a class="extlink-issue reference external" href=
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">Dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#Dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.Dumper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a></p>
 <p>Base <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
-<p>This class is a customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> for the
-<a class="reference internal" href="index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> implementation, which is generally customised
-for opt-in registration to the
-<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
+<p>A <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> that registers itself, on request,
+in the <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> output
 dumper registries.</p>
 <div class="admonition-example admonition">
@@ -636,9 +634,9 @@ definition to register the dumper under that output format:</p>
     <span class="o">...</span>
 </pre></div>
 </div>
-<p>Such a class can still be registered later, on demand. Note this hook
-writes every output registry, so the equivalent manual call is the
-module-level one that does the same, not any one class’ own method:</p>
+<p>Such a class can be registered later. The hook writes every output
+registry, so the manual equivalent is the module-level registrar, not
+one class’ own method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.foundation</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_dumper</span>
 
 <span class="n">register_dumper</span><span class="p">(</span><span class="s1">'my_mixin'</span><span class="p">,</span> <span class="n">MyMixin</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">'.mine'</span><span class="p">)</span>
@@ -655,7 +653,7 @@ registered every subclass, under its
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.Dumper.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#Dumper.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.Dumper.__init_subclass__" title="Link to this definition">¶</a></dt>
 <dd><p>Initialise subclass.</p>
-<p>This method is used to register the subclass to the
+<p>Registers the subclass in the
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>
 output dumper registries.</p>
@@ -679,17 +677,14 @@ Only meaningful alongside <code class="docutils literal notranslate"><span class
 </dd>
 </dl>
 <p>Registration is <strong>opt-in</strong>: the subclass is registered if and only if
-<code class="docutils literal notranslate"><span class="pre">fmt</span></code> is given. This is what lets a subclass decline registration
-rather than having to inherit <a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a> to avoid it, and it
-matches <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
-guards on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword the same way.</p>
+<code class="docutils literal notranslate"><span class="pre">fmt</span></code> is given, so a subclass can decline it without inheriting
+<a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a>, as <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a> guards on its
+<code class="docutils literal notranslate"><span class="pre">code</span></code> keyword.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Inferring <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the subclass’
-<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property would need an
-<em>instance</em>, hence a <a class="reference external" href="https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">tempfile.NamedTemporaryFile()</span></code></a> created while
-the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement is still executing. Guarding on <code class="docutils literal notranslate"><span class="pre">fmt</span></code>
-avoids that: a class definition does not touch the filesystem.</p>
+<p><code class="docutils literal notranslate"><span class="pre">fmt</span></code> is not inferred from <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a>,
+which needs an <em>instance</em>, hence a file created while the <code class="docutils literal notranslate"><span class="pre">class</span></code>
+statement runs.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -711,12 +706,10 @@ avoids that: a class definition does not touch the filesystem.</p>
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.render_enum">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">render_enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">o</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#render_enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.render_enum" title="Link to this definition">¶</a></dt>
 <dd><p>Render an enumeration member as <code class="docutils literal notranslate"><span class="pre">Type::name</span> <span class="pre">[value]</span></code>.</p>
-<p>This is the spelling every dumped enumeration carries in the <code class="docutils literal notranslate"><span class="pre">json</span></code>,
+<p>This is the spelling of every dumped enumeration in the <code class="docutils literal notranslate"><span class="pre">json</span></code>,
 <code class="docutils literal notranslate"><span class="pre">tree</span></code>, <code class="docutils literal notranslate"><span class="pre">text</span></code>, <code class="docutils literal notranslate"><span class="pre">txt</span></code>, <code class="docutils literal notranslate"><span class="pre">plist</span></code> and <code class="docutils literal notranslate"><span class="pre">xml</span></code> output of both
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
-<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>, so it lives in
-one function rather than being spelled out at each place
-<a class="reference internal" href="#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_dumper()</span></code></a>’s hook needs it.</p>
+<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>o</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code></span>) – Enumeration member to render.</p>
@@ -730,33 +723,18 @@ one function rather than being spelled out at each place
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>A <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Flag" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></a> value composed <strong>entirely of undeclared bits</strong> has
-no name at all – <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum.name" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, not a string –
-so interpolating it unguarded would put the literal four characters
-<code class="docutils literal notranslate"><span class="pre">None</span></code> into the name half and render
-<a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> <code class="docutils literal notranslate"><span class="pre">(0)</span></code> as <code class="docutils literal notranslate"><span class="pre">'Flags::None</span> <span class="pre">[0]'</span></code>
-(GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a>).</p>
-<p>That is worth a guard rather than a shrug. <code class="docutils literal notranslate"><span class="pre">'None'</span></code> is a
-plausible member name, so a consumer splitting the rendering on <code class="docutils literal notranslate"><span class="pre">::</span></code>
-cannot tell it from a member genuinely so named – and <code class="docutils literal notranslate"><span class="pre">NONE</span></code> <em>is</em> a
-declared name elsewhere in the library. And the defect is not confined to
-zero: a registry whose field has undeclared bits, such as
-<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.binding_update_flag.BindingUpdateFlag" title="pcapkit.const.mh.binding_update_flag.BindingUpdateFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingUpdateFlag</span></code></a>, is
-every bit as nameless at <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">8</span></code>, so a guard written against
-<code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">==</span> <span class="pre">0</span></code> would fix one case and leave the rest.</p>
-<p>The fallback is the value’s own decimal spelling, which is what the
-enumeration libraries themselves already use for an undeclared residue:
-<code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag(32777).name</span></code> is <code class="docutils literal notranslate"><span class="pre">'A|9'</span></code>, naming the declared bit
-and giving the leftovers as one number. A wholly-undeclared value is that
-same rendering with no declared bit to precede it, so
-<code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag(9)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'BindingUpdateFlag::9</span> <span class="pre">[9]'</span></code> and
-<code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. It also
-cannot be mistaken for a member name, since a Python identifier may not
-begin with a digit.</p>
-<p>This is <em>not</em> an <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> quirk. A stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntFlag</span></code></a> built
-from the same members answers <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> identically on CPython
-3.14.7, so the guard belongs here rather than in a choice of enumeration
-library.</p>
+<p>A <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Flag" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></a> value made <strong>entirely of undeclared bits</strong>, at
+zero or not, has <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum.name" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, which would
+render <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> <code class="docutils literal notranslate"><span class="pre">(0)</span></code> as
+<code class="docutils literal notranslate"><span class="pre">'Flags::None</span> <span class="pre">[0]'</span></code>, indistinguishable from a member named <code class="docutils literal notranslate"><span class="pre">None</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a>). Its decimal value is used instead, as the enumeration
+libraries spell an undeclared residue
+(<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.binding_update_flag.BindingUpdateFlag" title="pcapkit.const.mh.binding_update_flag.BindingUpdateFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingUpdateFlag</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">(32777).name</span></code> is <code class="docutils literal notranslate"><span class="pre">'A|9'</span></code>), and no identifier begins with a digit:
+<code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag(9)</span></code> renders as <code class="docutils literal notranslate"><span class="pre">'BindingUpdateFlag::9</span> <span class="pre">[9]'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> as <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. A stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntFlag</span></code></a>
+answers <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> identically on CPython 3.14.7, so this is not
+an <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> quirk.</p>
 </div>
 </dd></dl>
 

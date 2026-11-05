@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.hip
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.hip.protocol.HIP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`HIP_Certificate <pcapkit.vendor.hip.certificate.Certificate>`
@@ -52,8 +48,7 @@ HIP Certificate Types
 
 .. module:: pcapkit.vendor.hip.certificate
 
-This module contains the vendor crawler for **HIP Certificate Types**,
-which is automatically generating :class:`pcapkit.const.hip.certificate.Certificate`.
+Generates :class:`pcapkit.const.hip.certificate.Certificate`.
 
 .. autoclass:: pcapkit.vendor.hip.certificate.Certificate
    :members: FLAG, LINK
@@ -64,8 +59,7 @@ Cipher IDs
 
 .. module:: pcapkit.vendor.hip.cipher
 
-This module contains the vendor crawler for **Cipher IDs**,
-which is automatically generating :class:`pcapkit.const.hip.cipher.Cipher`.
+Generates :class:`pcapkit.const.hip.cipher.Cipher`.
 
 .. autoclass:: pcapkit.vendor.hip.cipher.Cipher
    :members: FLAG, LINK
@@ -76,8 +70,7 @@ DI-Types
 
 .. module:: pcapkit.vendor.hip.di
 
-This module contains the vendor crawler for **DI-Types**,
-which is automatically generating :class:`pcapkit.const.hip.di.DITypes`.
+Generates :class:`pcapkit.const.hip.di.DITypes`.
 
 .. autoclass:: pcapkit.vendor.hip.di.DITypes
    :members: FLAG, LINK
@@ -88,8 +81,7 @@ ECDSA Curve Label
 
 .. module:: pcapkit.vendor.hip.ecdsa_curve
 
-This module contains the vendor crawler for **ECDSA Curve Label**,
-which is automatically generating :class:`pcapkit.const.hip.ecdsa_curve.ECDSACurve`.
+Generates :class:`pcapkit.const.hip.ecdsa_curve.ECDSACurve`.
 
 .. autoclass:: pcapkit.vendor.hip.ecdsa_curve.ECDSACurve
    :members: FLAG, LINK
@@ -100,8 +92,7 @@ ECDSA_LOW Curve Label
 
 .. module:: pcapkit.vendor.hip.ecdsa_low_curve
 
-This module contains the vendor crawler for **ECDSA_LOW Curve Label**,
-which is automatically generating :class:`pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve`.
+Generates :class:`pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve`.
 
 .. autoclass:: pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve
    :members: FLAG, LINK
@@ -112,8 +103,7 @@ EdDSA Curve Label
 
 .. module:: pcapkit.vendor.hip.eddsa_curve
 
-This module contains the vendor crawler for **EdDSA Curve Label**,
-which is automatically generating :class:`pcapkit.const.hip.eddsa_curve.EdDSACurve`.
+Generates :class:`pcapkit.const.hip.eddsa_curve.EdDSACurve`.
 
 .. autoclass:: pcapkit.vendor.hip.eddsa_curve.EdDSACurve
    :members: FLAG, LINK
@@ -124,8 +114,7 @@ ESP Transform Suite IDs
 
 .. module:: pcapkit.vendor.hip.esp_transform_suite
 
-This module contains the vendor crawler for **ESP Transform Suite IDs**,
-which is automatically generating :class:`pcapkit.const.hip.esp_transform_suite.ESPTransformSuite`.
+Generates :class:`pcapkit.const.hip.esp_transform_suite.ESPTransformSuite`.
 
 .. autoclass:: pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite
    :members: FLAG, LINK
@@ -136,8 +125,7 @@ Group IDs
 
 .. module:: pcapkit.vendor.hip.group
 
-This module contains the vendor crawler for **Group IDs**,
-which is automatically generating :class:`pcapkit.const.hip.group.Group`.
+Generates :class:`pcapkit.const.hip.group.Group`.
 
 .. autoclass:: pcapkit.vendor.hip.group.Group
    :members: FLAG, LINK
@@ -148,8 +136,7 @@ HI Algorithm
 
 .. module:: pcapkit.vendor.hip.hi_algorithm
 
-This module contains the vendor crawler for **HI Algorithm**,
-which is automatically generating :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
+Generates :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
 
 .. autoclass:: pcapkit.vendor.hip.hi_algorithm.HIAlgorithm
    :members: FLAG, LINK
@@ -160,8 +147,7 @@ HIT Suite ID
 
 .. module:: pcapkit.vendor.hip.hit_suite
 
-This module contains the vendor crawler for **HIT Suite ID**,
-which is automatically generating :class:`pcapkit.const.hip.hit_suite.HITSuite`.
+Generates :class:`pcapkit.const.hip.hit_suite.HITSuite`.
 
 .. autoclass:: pcapkit.vendor.hip.hit_suite.HITSuite
    :members: FLAG, LINK
@@ -172,8 +158,7 @@ HIP NAT Traversal Modes
 
 .. module:: pcapkit.vendor.hip.nat_traversal
 
-This module contains the vendor crawler for **HIP NAT Traversal Modes**,
-which is automatically generating :class:`pcapkit.const.hip.nat_traversal.NATTraversal`.
+Generates :class:`pcapkit.const.hip.nat_traversal.NATTraversal`.
 
 .. autoclass:: pcapkit.vendor.hip.nat_traversal.NATTraversal
    :members: FLAG, LINK
@@ -184,8 +169,7 @@ Notify Message Types
 
 .. module:: pcapkit.vendor.hip.notify_message
 
-This module contains the vendor crawler for **Notify Message Types**,
-which is automatically generating :class:`pcapkit.const.hip.notify_message.NotifyMessage`.
+Generates :class:`pcapkit.const.hip.notify_message.NotifyMessage`.
 
 .. autoclass:: pcapkit.vendor.hip.notify_message.NotifyMessage
    :members: FLAG, LINK
@@ -196,8 +180,7 @@ HIP Packet Types
 
 .. module:: pcapkit.vendor.hip.packet
 
-This module contains the vendor crawler for **HIP Packet Types**,
-which is automatically generating :class:`pcapkit.const.hip.packet.Packet`.
+Generates :class:`pcapkit.const.hip.packet.Packet`.
 
 .. autoclass:: pcapkit.vendor.hip.packet.Packet
    :members: FLAG, LINK
@@ -208,8 +191,7 @@ HIP Parameter Types
 
 .. module:: pcapkit.vendor.hip.parameter
 
-This module contains the vendor crawler for **HIP Parameter Types**,
-which is automatically generating :class:`pcapkit.const.hip.parameter.Parameter`.
+Generates :class:`pcapkit.const.hip.parameter.Parameter`.
 
 .. autoclass:: pcapkit.vendor.hip.parameter.Parameter
    :members: FLAG, LINK
@@ -220,8 +202,7 @@ Registration Failure Types
 
 .. module:: pcapkit.vendor.hip.registration_failure
 
-This module contains the vendor crawler for **Registration Failure Types**,
-which is automatically generating :class:`pcapkit.const.hip.registration_failure.RegistrationFailure`.
+Generates :class:`pcapkit.const.hip.registration_failure.RegistrationFailure`.
 
 .. autoclass:: pcapkit.vendor.hip.registration_failure.RegistrationFailure
    :members: FLAG, LINK
@@ -232,8 +213,7 @@ Registration Types
 
 .. module:: pcapkit.vendor.hip.registration
 
-This module contains the vendor crawler for **Registration Types**,
-which is automatically generating :class:`pcapkit.const.hip.registration.Registration`.
+Generates :class:`pcapkit.const.hip.registration.Registration`.
 
 .. autoclass:: pcapkit.vendor.hip.registration.Registration
    :members: FLAG, LINK
@@ -244,8 +224,7 @@ Suite IDs
 
 .. module:: pcapkit.vendor.hip.suite
 
-This module contains the vendor crawler for **Suite IDs**,
-which is automatically generating :class:`pcapkit.const.hip.suite.Suite`.
+Generates :class:`pcapkit.const.hip.suite.Suite`.
 
 .. autoclass:: pcapkit.vendor.hip.suite.Suite
    :members: FLAG, LINK
@@ -256,8 +235,7 @@ HIP Transport Modes
 
 .. module:: pcapkit.vendor.hip.transport
 
-This module contains the vendor crawler for **HIP Transport Modes**,
-which is automatically generating :class:`pcapkit.const.hip.transport.Transport`.
+Generates :class:`pcapkit.const.hip.transport.Transport`.
 
 .. autoclass:: pcapkit.vendor.hip.transport.Transport
    :members: FLAG, LINK

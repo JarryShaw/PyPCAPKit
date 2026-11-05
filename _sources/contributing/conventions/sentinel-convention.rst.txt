@@ -6,15 +6,14 @@ Naming a Sentinel
 A *sentinel* here is a module-level singleton whose only job is to be recognised by
 identity -- ``value is SENTINEL`` -- so that it can never be confused with a value a
 caller might legitimately pass. The house rule, from the maintainer, covers the type:
-the sentinel object's type class is named ``<SENTINEL>Type``.
+the sentinel object's type class is named ``<SENTINEL>Type``, the instance's name in
+CamelCase with ``Type`` appended.
 
-That is, the class takes the instance's name in CamelCase with ``Type`` appended. It
-says nothing about the **object**'s own name, which is what let the casings diverge
-with no rule naming any of them wrong. GitHub issue :issue:`937` closed that gap: the
-owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
-no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
-derives from it mechanically -- title-case each underscore-separated word and append
-``Type``, no per-sentinel exception needed. The sentinels in the tree follow it:
+That rule says nothing about the **object**'s own name, which let the casings diverge
+with no rule naming any of them wrong. :issue:`937` closed that gap: the owner ruled
+for SCREAMING_SNAKE and accepted the breaking change outright, with no backport. So the
+type name derives from the object's mechanically -- title-case each
+underscore-separated word and append ``Type``, with no per-sentinel exception:
 
 .. list-table::
    :header-rows: 1
@@ -39,8 +38,8 @@ derives from it mechanically -- title-case each underscore-separated word and ap
      - :class:`~pcapkit.corekit.sentinels.MissingType`
      - :mod:`pcapkit.corekit.sentinels`
 
-GitHub issue :issue:`911`'s housing ruling -- one module for all of them -- is why the table
-names a single defining module, and it is the only import path. The modules that *use* a
+:issue:`911`'s housing ruling -- one module for all of them -- is why the table names a
+single defining module, and it is the only import path. The modules that *use* a
 sentinel import it from there but do not re-export it: :issue:`1744` dropped the
 per-module re-exports, under the ruling that a moved name keeps no re-export at its old
 path. It was ruled in review of :pr:`1715` (:issue:`1711`), overturning the re-export
@@ -59,18 +58,18 @@ private and not for public use, which is what this page and
 **privacy here is documentation-only**, and nothing in the name marks it out: when
 adding a sentinel, add it to the table above whether or not it is public.
 
-What reaches users is the **object only**. The owner ruled on GitHub issue :issue:`911`
+What reaches users is the **object only**. The owner ruled on :issue:`911`
 that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a
 public sentinel names its instance in :mod:`pcapkit.corekit.sentinels`'s ``__all__`` and
 leaves the type out of it. The type stays importable by its dotted path there, for an
 annotation or an ``is`` guard; it is only ``import *`` that does not offer it. The
 ``__all__`` there does name :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
-base every sentinel type shares, since that is no sentinel's own type. A private
-sentinel such as ``ABSENT`` is in neither, which is what private means here, and
-:class:`~pcapkit.corekit.sentinels.AbsentType` and
-:data:`~pcapkit.corekit.sentinels.ABSENT` are documented on
-:doc:`the sentinels API page </pcapkit/corekit/sentinels>` as private and not for
-public use rather than left off it, since nothing in the name says so.
+base every sentinel type shares, since that is no sentinel's own type. The private
+sentinels, ``ABSENT`` and ``MISSING``, are in neither, which is what private means
+here. :class:`~pcapkit.corekit.sentinels.AbsentType`,
+:data:`~pcapkit.corekit.sentinels.ABSENT` and their ``MISSING`` counterparts are
+documented on :doc:`the sentinels API page </pcapkit/corekit/sentinels>` as private
+rather than left off it, since nothing in the name says so.
 
 .. note::
 

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.vlan
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.link.vlan.protocol.VLAN` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`VLAN_PriorityLevel <pcapkit.const.vlan.priority_level.PriorityLevel>`
@@ -18,8 +14,7 @@ Priority Levels Defined in IEEE 802.1p
 
 .. module:: pcapkit.const.vlan.priority_level
 
-This module contains the constant enumeration for **Priority levels defined in IEEE 802.1p**,
-which is automatically generated from :class:`pcapkit.vendor.vlan.priority_level.PriorityLevel`.
+Generated from :class:`pcapkit.vendor.vlan.priority_level.PriorityLevel`.
 
 .. autoclass:: pcapkit.const.vlan.priority_level.PriorityLevel
    :members:

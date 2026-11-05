@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -574,21 +574,20 @@
 caller-supplied information that a protocol needs to parse a packet but that
 is <strong>not</strong> carried on the wire.</p>
 <p>Most protocols are self-describing: every length, offset and type needed to
-walk a packet is in the packet. A few are not, and
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> is the motivating example:
-<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> deliberately leaves the payload length, the position of the
+walk a packet is in the packet. A few are not, such as
+<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>:
+<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a> leaves the payload length, the position of the
 <code class="docutils literal notranslate"><span class="pre">Pad</span> <span class="pre">Length</span></code> / <code class="docutils literal notranslate"><span class="pre">Next</span> <span class="pre">Header</span></code> trailer and the length of the <code class="docutils literal notranslate"><span class="pre">Integrity</span>
 <span class="pre">Check</span> <span class="pre">Value</span></code> to the Security Association (SA), which is negotiated out of band
 and known only to the caller.</p>
-<p>Rather than adding protocol-specific keyword arguments to
+<p>Rather than as protocol-specific keyword arguments to
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, such information is passed
 as a <a class="reference internal" href="#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> – a mapping of protocol
 index ID (cf. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code></a>) to
-a <a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> instance. It is handed to
-<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> once and propagated down the
-protocol stack by
-<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a>,
-so that a protocol nested arbitrarily deep can reach it through
+a <a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> instance. The extractor
+takes it once, and
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a>
+passes it down the stack, so a protocol at any depth reaches it through
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._get_context</span></code></a>.</p>
 <p>Decoding an ESP tunnel end to end:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
@@ -604,13 +603,12 @@ so that a protocol nested arbitrarily deep can reach it through
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>A context often holds secrets, such as ESP encryption and integrity keys.
-Contexts are therefore plain instance attributes on the protocol object and
-are <strong>never</strong> written into its data model, which is the only thing that
-reaches <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> and,
-from there, the output dumpers.
-<a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> implementations are
-expected to keep secrets out of their <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__repr__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> as well.</p>
+<p>A context often holds secrets, such as ESP encryption and integrity keys, so
+it is a plain instance attribute on the protocol object and is <strong>never</strong>
+written into its data model, the only thing that reaches
+<a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> and the output
+dumpers. A <a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> implementation
+should keep secrets out of its <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__repr__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> too.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.context.ProtocolContext">

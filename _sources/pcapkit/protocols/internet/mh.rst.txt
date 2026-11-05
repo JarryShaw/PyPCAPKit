@@ -16,7 +16,7 @@ MH - Mobility Header
 :mod:`pcapkit.protocols.internet.mh.protocol` contains
 :class:`~pcapkit.protocols.internet.mh.protocol.MH`,
 which implements the extractor for Mobility Header
-(MH) [*]_, whose structure is described as below:
+(MH) [*]_, whose structure is:
 
 ======= ========= ================== ===============================
 Octets      Bits        Name                    Description

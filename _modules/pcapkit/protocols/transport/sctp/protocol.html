@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -559,11 +559,9 @@
 
 <span class="sd">.. module:: pcapkit.protocols.transport.sctp.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.transport.sctp.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` only,</span>
-<span class="sd">which implements the extractor for Stream Control</span>
-<span class="sd">Transmission Protocol (SCTP) [*]_, whose structure is</span>
-<span class="sd">described as below:</span>
+<span class="sd">:mod:`pcapkit.protocols.transport.sctp.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`, the extractor for the</span>
+<span class="sd">Stream Control Transmission Protocol (SCTP) [*]_, whose common header is:</span>
 
 <span class="sd">======= ========= ========================= =======================================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -872,12 +870,10 @@
 <span class="w">    </span><span class="sd">"""This class implements Stream Control Transmission Protocol.</span>
 
 <span class="sd">    Unlike :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and</span>
-<span class="sd">    :class:`~pcapkit.protocols.transport.udp.protocol.UDP`, SCTP does **not** dispatch</span>
-<span class="sd">    the next layer on port numbers: user data travels inside DATA chunks, and</span>
-<span class="sd">    each DATA chunk names its upper layer through its *payload protocol</span>
-<span class="sd">    identifier* (PPID). The :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` registry is</span>
-<span class="sd">    therefore keyed by PPID rather than by port number, and is populated through</span>
-<span class="sd">    :meth:`SCTP.register`::</span>
+<span class="sd">    :class:`~pcapkit.protocols.transport.udp.protocol.UDP`, SCTP dispatches the next</span>
+<span class="sd">    layer on the *payload protocol identifier* (PPID) each DATA chunk carries, not</span>
+<span class="sd">    on a port, so :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` is keyed by PPID and</span>
+<span class="sd">    populated through :meth:`SCTP.register`::</span>
 
 <span class="sd">       &gt;&gt;&gt; from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier</span>
 <span class="sd">       &gt;&gt;&gt; SCTP.register(PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)</span>
@@ -889,18 +885,13 @@
 <span class="sd">    :class:`~pcapkit.protocols.application.ngap.protocol.NGAP`, and every other PPID</span>
 <span class="sd">    resolves to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.</span>
 
-<span class="sd">    Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in</span>
-<span class="sd">    a DTLS record, and this registry maps it straight to</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.ngap.protocol.NGAP` rather than through</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`, so the bytes are not</span>
-<span class="sd">    aligned PER and the parse always degrades to</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. It is registered so that the</span>
-<span class="sd">    PPID is *named* in the protochain rather than reported as an unassigned</span>
-<span class="sd">    number.</span>
+<span class="sd">    Only PPID 60 decodes. A PPID 66 payload is an NGAP PDU in a DTLS record,</span>
+<span class="sd">    mapped straight to :class:`~pcapkit.protocols.application.ngap.protocol.NGAP`</span>
+<span class="sd">    rather than through :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`,</span>
+<span class="sd">    so it always degrades to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`; it</span>
+<span class="sd">    is registered so that the protochain names the PPID.</span>
 
-<span class="sd">    This class supports parsing of the following SCTP chunks, which</span>
-<span class="sd">    are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    The SCTP chunks it parses, by :class:`pcapkit.const.sctp.chunk.Chunk` type:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -953,9 +944,8 @@
 <span class="sd">    :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_donone`, which</span>
 <span class="sd">    records the chunk's raw flags and value verbatim rather than raising.</span>
 
-<span class="sd">    This class supports parsing of the following chunk parameters,</span>
-<span class="sd">    which are directly mapped to the</span>
-<span class="sd">    :class:`pcapkit.const.sctp.parameter.Parameter` enumeration:</span>
+<span class="sd">    The chunk parameters it parses, by</span>
+<span class="sd">    :class:`pcapkit.const.sctp.parameter.Parameter` type:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -1052,24 +1042,19 @@
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="c1"># PPID 66 is NGAP wrapped in a DTLS record rather than a bare</span>
-            <span class="c1"># NGAP-PDU, and this table maps it to NGAP rather than through</span>
-            <span class="c1"># DTLS. It is registered so that the PPID is</span>
-            <span class="c1"># *named*: the payload fails in NGAP's own decoder and</span>
-            <span class="c1"># `beholder` degrades it to Raw, as an unregistered PPID would.</span>
+            <span class="c1"># PPID 66 is NGAP in a DTLS record, mapped to NGAP only so the PPID</span>
+            <span class="c1"># is named: NGAP's decoder fails and `beholder` degrades it to Raw.</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap.protocol'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP</span>
             <span class="n">Enum_PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ngap.protocol'</span><span class="p">,</span> <span class="s1">'NGAP'</span><span class="p">),</span>  <span class="c1"># NGAP over DTLS</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp` checks its own</span>
-    <span class="c1">#: -- a bare :class:`int` is accepted because the registry is keyed by</span>
-    <span class="c1">#: payload protocol identifier, which is a number in its own right (:issue:`2268`).</span>
+    <span class="c1">#: and whether a bare :class:`int` is valid too. Read by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`</span>
+    <span class="c1">#: to check a ``code=`` key as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp` checks</span>
+    <span class="c1">#: its own; a bare :class:`int` is a PPID (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_PayloadProtocolIdentifier</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and</span>
@@ -1238,18 +1223,15 @@
             <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_chunks</span><span class="p">(),</span>
         <span class="p">)</span>
 
-        <span class="c1"># NOTE: With no packet length field, octets after the last whole chunk</span>
-        <span class="c1"># cannot be told apart from a chunk cut short, so they are kept as</span>
-        <span class="c1"># captured rather than rejected (#1468).</span>
+        <span class="c1"># NOTE: No length field tells octets after the last whole chunk from a cut chunk, so</span>
+        <span class="c1"># they are kept as captured rather than rejected (#1468).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">sctp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
             <span class="p">])</span>
 
-        <span class="c1"># NOTE: The next layer is named by the DATA chunk's payload protocol</span>
-        <span class="c1"># identifier, not by a port number. A packet may bundle several DATA</span>
-        <span class="c1"># chunks; we dispatch on the first one, and the rest stay recorded in</span>
-        <span class="c1"># the chunk list.</span>
+        <span class="c1"># NOTE: The first DATA chunk's payload protocol identifier, not a port, picks the</span>
+        <span class="c1"># next layer; further bundled DATA chunks stay recorded in the chunk list.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ppid</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
@@ -5166,7 +5148,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -5192,7 +5174,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/toolkit/builtin.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="PCAP Tools: pcapkit.toolkit.pcap contains the adapters for the PCAP format. The reassembly and flow tracing adapters return the data their pcapkit.foundation counterpart consumes, or None if the fr..." />
-<meta name="description" content="PCAP Tools: pcapkit.toolkit.pcap contains the adapters for the PCAP format. The reassembly and flow tracing adapters return the data their pcapkit.foundation counterpart consumes, or None if the fr..." />
+<meta property="og:description" content="Each reassembly or flow tracing adapter below returns the data its pcapkit.foundation counterpart consumes, or None for a frame it cannot use. PCAP Tools: pcapkit.toolkit.pcap contains the adapters..." />
+<meta name="description" content="Each reassembly or flow tracing adapter below returns the data its pcapkit.foundation counterpart consumes, or None for a frame it cannot use. PCAP Tools: pcapkit.toolkit.pcap contains the adapters..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="3rd-Party Support" href="3rdparty.html"><link rel="prev" title="Compatibility Tools" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,12 +570,13 @@
         <article role="main" id="furo-main-content">
           <section id="built-in-support">
 <h1>Built-in Support<a class="headerlink" href="#built-in-support" title="Link to this heading">¶</a></h1>
+<p>Each reassembly or flow tracing adapter below returns the data its
+<a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for a frame it
+cannot use.</p>
 <section id="module-pcapkit.toolkit.pcap">
 <span id="pcap-tools"></span><h2>PCAP Tools<a class="headerlink" href="#module-pcapkit.toolkit.pcap" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pcap" title="pcapkit.toolkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap</span></code></a> contains the adapters for the PCAP format.
-The reassembly and flow tracing adapters return the data their
-<a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the frame
-cannot be used for it. The TCP adapters here and in
+<p><a class="reference internal" href="#module-pcapkit.toolkit.pcap" title="pcapkit.toolkit.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap</span></code></a> contains the adapters for the PCAP format. The TCP
+adapters here and in
 <a class="reference internal" href="#module-pcapkit.toolkit.pcapng" title="pcapkit.toolkit.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcapng</span></code></a> read the segment with
 <a class="reference internal" href="#pcapkit.toolkit.pcap.tcp_segment" title="pcapkit.toolkit.pcap.tcp_segment"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_segment()</span></code></a>, and the DTLS ones the record with
 <a class="reference internal" href="#pcapkit.toolkit.pcap._dtls_fragments" title="pcapkit.toolkit.pcap._dtls_fragments"><code class="xref py py-func docutils literal notranslate"><span class="pre">_dtls_fragments()</span></code></a>.</p>
@@ -682,6 +683,9 @@ message, if the <code class="docutils literal notranslate"><span class="pre">fra
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS" title="pcapkit.foundation.reassembly.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.dtls.DTLS</span></code></a></p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
 </dd></dl>
 
@@ -811,6 +815,9 @@ it and it is a cleartext <code class="docutils literal notranslate"><span class=
 the record, with its epoch (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6347.html#section-4.1"><strong>RFC 6347 Section 4.1</strong></a>).</p>
 </dd>
 </dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py class">
@@ -885,10 +892,7 @@ the record, with its epoch (<span class="target" id="index-6"></span><a class="r
 </section>
 <section id="module-pcapkit.toolkit.pcapng">
 <span id="pcap-ng-tools"></span><h2>PCAP-NG Tools<a class="headerlink" href="#module-pcapkit.toolkit.pcapng" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pcapng" title="pcapkit.toolkit.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcapng</span></code></a> contains the adapters for the PCAP-NG format.
-The reassembly and flow tracing adapters return the data their
-<a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the frame
-cannot be used for it.</p>
+<p><a class="reference internal" href="#module-pcapkit.toolkit.pcapng" title="pcapkit.toolkit.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcapng</span></code></a> contains the adapters for the PCAP-NG format.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcapng.ipv4_reassembly">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcapng.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcapng.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcapng.ipv4_reassembly" title="Link to this definition">¶</a></dt>
@@ -993,6 +997,9 @@ message, if the <code class="docutils literal notranslate"><span class="pre">fra
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../foundation/reassembly/dtls.html#pcapkit.foundation.reassembly.dtls.DTLS" title="pcapkit.foundation.reassembly.dtls.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.dtls.DTLS</span></code></a></p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
 </dd></dl>
 

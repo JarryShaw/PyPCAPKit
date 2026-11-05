@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -689,14 +689,13 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` checks its own --</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG` keeps a registry of its own,</span>
-    <span class="c1">#: keyed by the same enum, and so declares the same pairing rather than</span>
-    <span class="c1">#: sharing this one (:issue:`2268`).</span>
+    <span class="c1">#: and whether a bare :class:`int` is a valid key too. Declared by the class</span>
+    <span class="c1">#: *owning* the registry, so</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`</span>
+    <span class="c1">#: checks a ``code=`` key as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap` does;</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.pcapng.protocol.PCAPNG`, whose registry</span>
+    <span class="c1">#: is keyed by the same enum, declares its own (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
@@ -742,14 +741,11 @@
 <span class="sd">                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
 
 <span class="sd">        Warns:</span>
-<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this link type is</span>
-<span class="sd">                already registered against PCAP frames, naming the displaced</span>
-<span class="sd">                entry and its replacement so a caller can tell *what* was lost.</span>
-<span class="sd">                Fires only when the incumbent differs from the replacement --</span>
-<span class="sd">                see :meth:`Protocol.register</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.register&gt;` for the</span>
-<span class="sd">                guard this shares with ``register_protocol``, and for the</span>
-<span class="sd">                shipped descriptor a restore puts back (:issue:`1504`).</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this link type holds</span>
+<span class="sd">                a different entry for PCAP frames, naming the displaced one and</span>
+<span class="sd">                its replacement; see :meth:`Protocol.register</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.Protocol.register&gt;` for the guard and</span>
+<span class="sd">                for the shipped descriptor a restore puts back (:issue:`1504`).</span>
 
 <span class="sd">        """</span>
         <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
@@ -792,9 +788,9 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods, for when the current instance</span>
+<span class="sd">            does not have it.</span>
 
 <span class="sd">            As in :meth:`Protocol.pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;`,</span>
 <span class="sd">            the header is made on a copy outside construction, so the instance</span>
@@ -824,9 +820,9 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods, for when the current instance</span>
+<span class="sd">            does not have it.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema_Frame]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -878,16 +874,8 @@
         <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># NOTE: Aware and anchored to UTC, not naive. ``ts_sec`` is an offset</span>
-            <span class="c1"># from the UNIX epoch, so the instant it names must not depend on</span>
-            <span class="c1"># where the file is read; a bare ``fromtimestamp`` renders it in the</span>
-            <span class="c1"># reading host's zone, drops the offset, and cannot be compared</span>
-            <span class="c1"># against an aware datetime. The ``except`` branch below returns an</span>
-            <span class="c1"># aware UTC datetime too, and so does the PCAP-NG reader, which fills</span>
-            <span class="c1"># the same</span>
-            <span class="c1"># :attr:`Data_Frame.time &lt;pcapkit.protocols.misc.pcap.frame.data.Frame.time&gt;`</span>
-            <span class="c1"># field through :func:`pcapkit.toolkit.pcapng.block2frame`. Converted</span>
-            <span class="c1"># without the C library, as the PCAP-NG reader does (#2099).</span>
+            <span class="c1"># NOTE: Aware UTC, not the reading host's zone, as in the ``except`` below and the</span>
+            <span class="c1"># PCAP-NG reader; converted without the C library, as it is there (#2099).</span>
             <span class="n">_time</span> <span class="o">=</span> <span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: invalid timestamp: </span><span class="si">{</span><span class="n">_epch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -903,16 +891,8 @@
             <span class="n">time</span><span class="o">=</span><span class="n">_time</span><span class="p">,</span>
             <span class="n">number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
             <span class="n">time_epoch</span><span class="o">=</span><span class="n">_epch</span><span class="p">,</span>
-            <span class="c1"># NOTE: ``len`` is the on-wire length (``orig_len``) and ``cap_len``</span>
-            <span class="c1"># the captured one (``incl_len``). The two differ only for a frame</span>
-            <span class="c1"># the snapshot length cut short.</span>
-            <span class="c1">#</span>
-            <span class="c1"># The names are Wireshark's: its ``packet-frame.c`` registers</span>
-            <span class="c1"># ``frame.len`` as "Frame length on the wire" and ``frame.cap_len``</span>
-            <span class="c1"># as "Frame length stored into the capture file", and raises</span>
-            <span class="c1"># ``frame.len_lt_caplen`` (``PI_MALFORMED``) on ``frame_len &lt;</span>
-            <span class="c1"># cap_len``, which could not be malformed if ``len`` were the smaller,</span>
-            <span class="c1"># captured one. The PCAP-NG reader uses the same convention.</span>
+            <span class="c1"># NOTE: On-wire ``len`` (``orig_len``) and captured ``cap_len`` (``incl_len``), as</span>
+            <span class="c1"># Wireshark's ``frame.len``/``frame.cap_len`` and the PCAP-NG reader name them.</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
             <span class="n">cap_len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
         <span class="p">)</span>
@@ -921,19 +901,9 @@
             <span class="c1"># move backward to the beginning of the packet</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: We create a copy of the frame data here for parsing</span>
-            <span class="c1"># scenarios to keep the original frame data intact.</span>
-            <span class="c1">#</span>
-            <span class="c1"># NOTE: The record spans ``self.length + incl_len`` octets, and</span>
-            <span class="c1"># :meth:`self.unpack &lt;unpack&gt;` has consumed *all* of them by now --</span>
-            <span class="c1"># the schema's payload field carries the ``incl_len`` octets of</span>
-            <span class="c1"># packet data, not just the 16-octet record header. Seeking back</span>
-            <span class="c1"># over ``self.length`` alone would land ``incl_len`` octets too late,</span>
-            <span class="c1"># on the tail of this record followed by the head of the next one.</span>
-            <span class="c1"># So the start is recorded before the unpack, in</span>
-            <span class="c1"># :meth:`self.__post_init__ &lt;__post_init__&gt;`, and seeked to</span>
-            <span class="c1"># absolutely, as the PCAP-NG reader does; see</span>
-            <span class="c1"># :meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`.</span>
+            <span class="c1"># NOTE: Copied, to keep the original frame data intact. ``unpack`` has consumed</span>
+            <span class="c1"># the whole record, packet data included, so seek to the start ``__post_init__``</span>
+            <span class="c1"># recorded, as ``PCAPNG.read`` does, not back over ``self.length``.</span>
             <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span>
 
             <span class="c1"># move backward to the beginning of the frame</span>
@@ -941,32 +911,21 @@
 
             <span class="c1">#: bytes: Raw frame data.</span>
             <span class="c1">#</span>
-            <span class="c1"># NOTE: Asked for no further than one read can go, :data:`sys.maxsize`.</span>
-            <span class="c1"># Past it the read raises :exc:`OverflowError` instead of coming back</span>
-            <span class="c1"># short, so a record claiming more than that would never reach the</span>
-            <span class="c1"># overrun handling below (#1975).</span>
+            <span class="c1"># NOTE: Bounded at ``sys.maxsize``, past which the read raises OverflowError</span>
+            <span class="c1"># rather than reaching the overrun handling below (#1975).</span>
             <span class="n">bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: A record whose ``incl_len`` runs past the end of the data is</span>
-            <span class="c1"># kept as captured, as the PCAP-NG reader keeps a captured length</span>
-            <span class="c1"># running past its block (#1405): ``incl_len`` and ``cap_len``</span>
-            <span class="c1"># stay as declared, so the record rebuilds byte-exactly, and the</span>
-            <span class="c1"># packet is the octets present. A writer must not copy the declared</span>
-            <span class="c1"># length; see :meth:`PCAPIO._append_value</span>
-            <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` (#1541).</span>
+            <span class="c1"># NOTE: An ``incl_len`` past the data is kept as declared, as in PCAP-NG (#1405), so</span>
+            <span class="c1"># the record rebuilds byte-exactly; a writer must not copy it (see ``PCAPIO``, #1541).</span>
             <span class="n">held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
             <span class="k">if</span> <span class="n">held</span> <span class="o">&lt;</span> <span class="n">_ilen</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: [Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">_ilen</span><span class="si">}</span><span class="s1"> runs past the data, '</span>
                      <span class="sa">f</span><span class="s1">'which holds </span><span class="si">{</span><span class="n">held</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
                      <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-            <span class="c1"># NOTE: A read that came back whole at the bound stopped there, not</span>
-            <span class="c1"># at the end of the data: the record runs on past it, and the next</span>
-            <span class="c1"># one starts where this one declares it ends, so the stream is</span>
-            <span class="c1"># moved over the rest (#1975). A shorter read met the end of the</span>
-            <span class="c1"># data, where a seek past :data:`sys.maxsize` could not go either,</span>
-            <span class="c1"># so the next frame then starts where the octets read end.</span>
+            <span class="c1"># NOTE: A whole read at the bound skips the rest of the record (#1975); a shorter</span>
+            <span class="c1"># one met the end of the data, where the next frame then starts.</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">==</span> <span class="n">bound</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span><span class="p">:</span>
                 <span class="n">advance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span> <span class="o">-</span> <span class="n">bound</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -979,17 +938,8 @@
             <span class="c1">#: io.BytesIO: Source data stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The dissector is handed the octets actually *present*, i.e.</span>
-        <span class="c1"># ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame the</span>
-        <span class="c1"># snapshot length cut short the latter exceeds what the file holds, and</span>
-        <span class="c1"># handing it over is the declared-length-exceeds-available-octets fault.</span>
-        <span class="c1">#</span>
-        <span class="c1"># A frame cut inside its IPv4 header keeps IPv4 as ``Raw``, whose</span>
-        <span class="c1"># ``error`` names the cut, for either length: the trial parse of IPv4</span>
-        <span class="c1"># raises, and its ``packet length &lt; 0`` warnings go with the layer</span>
-        <span class="c1"># (#2308). As the dissection does not tell the two apart,</span>
-        <span class="c1"># ``test_truncated_ipv4_header_is_raw_with_its_error`` pins the argument</span>
-        <span class="c1"># where it is passed (#2236).</span>
+        <span class="c1"># NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` a snapshot cut</span>
+        <span class="c1"># exceeds; ``test_truncated_ipv4_header_is_raw_with_its_error`` pins it (#2236).</span>
         <span class="c1">#</span>
         <span class="c1"># NOTE: A layer that states no length cannot see the cut, so the layers</span>
         <span class="c1"># below are told both lengths (#2653).</span>
@@ -1030,11 +980,8 @@
         <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">incl_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: A snaplen of 0 is no limit, not a limit of zero octets. The</span>
-            <span class="c1"># PCAP draft says the field "MUST NOT be zero" (draft-ietf-opsawg-pcap,</span>
-            <span class="c1"># section 4), and libpcap reads such a bogus value as the maximum for</span>
-            <span class="c1"># the link type (``pcapint_adjust_snapshot`` in ``savefile.c``); the</span>
-            <span class="c1"># PCAP-NG reader treats a zero ``SnapLen`` the same way.</span>
+            <span class="c1"># NOTE: A snaplen of 0 is no limit: draft-ietf-opsawg-pcap section 4 forbids it, and</span>
+            <span class="c1"># libpcap (``pcapint_adjust_snapshot``) and the PCAP-NG reader read it as none.</span>
             <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">snaplen</span>
             <span class="n">incl_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="n">snaplen</span><span class="p">)</span> <span class="k">if</span> <span class="n">snaplen</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">orig_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1683,7 +1630,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1709,7 +1656,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

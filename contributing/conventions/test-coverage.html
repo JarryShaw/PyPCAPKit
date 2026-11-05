@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/test-coverage.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The pages before this one rule on the library, the repository and the prose. This one rules on what the test suite has to prove, and what a change has to bring to it. The owner set the direction on..." />
-<meta name="description" content="The pages before this one rule on the library, the repository and the prose. This one rules on what the test suite has to prove, and what a change has to bring to it. The owner set the direction on..." />
+<meta property="og:description" content="What the test suite has to prove, and what a change has to bring to it. The owner set the direction on#1203: every round trip the library offers must pass and match exactly, the tests must cover al..." />
+<meta name="description" content="What the test suite has to prove, and what a change has to bring to it. The owner set the direction on#1203: every round trip the library offers must pass and match exactly, the tests must cover al..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Choosing Between utilities and corekit" href="utilities-or-corekit.html"><link rel="prev" title="Writing the Documentation" href="documentation.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,12 +570,11 @@
         <article role="main" id="furo-main-content">
           <section id="testing-a-change">
 <span id="test-coverage"></span><h1>Testing a Change<a class="headerlink" href="#testing-a-change" title="Link to this heading">¶</a></h1>
-<p>The pages before this one rule on the library, the repository and the prose. This one
-rules on what the test suite has to prove, and what a change has to bring to it. The
-owner set the direction on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1203">#1203</a>, paraphrased here as on the other pages: every
-round trip the library offers must pass and match exactly, the tests must cover all of
-them, and the rules belong on a page rather than in review threads. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1202">#1202</a>
-extended round-trip coverage past the <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registries</span></a>, to the
+<p>What the test suite has to prove, and what a change has to bring to it. The owner
+set the direction on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1203">#1203</a>: every round trip the library offers must pass and
+match exactly, the tests must cover all of them, and the rules belong on a page rather
+than in review threads. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1202">#1202</a> extended round-trip coverage past the
+<a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registries</span></a>, to the
 <a class="reference internal" href="../../pcapkit/corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> fields, schemas and <code class="docutils literal notranslate"><span class="pre">Info</span></code>, the <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>
 reassembly, flow tracing, engines and <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registries</span></a>, and the output
 formats.</p>
@@ -768,8 +767,7 @@ left out (<a class="extlink-issue reference external" href="https://github.com/J
 </section>
 <section id="adding-a-protocol-option-or-dumper">
 <h2>Adding a Protocol, Option or Dumper<a class="headerlink" href="#adding-a-protocol-option-or-dumper" title="Link to this heading">¶</a></h2>
-<p>What each must bring in tests before it merges, on top of the fail-without-fix proof
-above:</p>
+<p>What each must bring in tests, on top of the fail-without-fix proof above:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>

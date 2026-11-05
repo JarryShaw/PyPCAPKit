@@ -34,9 +34,8 @@ subtree can be addressed on its own:
    # or follow just the extraction path
    logging.getLogger('pcapkit.foundation.extraction').setLevel(logging.DEBUG)
 
-Logger names are the module paths, e.g. ``pcapkit.foundation.extraction``,
-``pcapkit.foundation.registry.protocols.transport``, ``pcapkit.foundation.engines.pcap``, ``pcapkit.foundation.reassembly.reassembly``,
-``pcapkit.foundation.traceflow.tcp``, ``pcapkit.utilities.warnings``.
+Logger names are the module paths, e.g. ``pcapkit.foundation.engines.pcap`` or
+``pcapkit.foundation.traceflow.tcp``.
 
 .. autofunction:: pcapkit.utilities.logging.get_logger
 
@@ -55,14 +54,15 @@ flow tracing reports flows opening and closing.
 
 .. note::
 
-   No record is logged for each frame parsed or each field read, so
-   :data:`~logging.DEBUG` on a million-packet capture does not yield a million
-   records. What is logged per item is what gets dropped: the PyShark engine
-   logs a line for each tshark record it skips as not a packet
-   (``skipping tshark frame``), and reassembly logs a line for each buffer it
-   abandons on timeout (``abandoning buffer``). Registration bookkeeping in :mod:`pcapkit.foundation.registry` is
-   at :data:`~logging.DEBUG` rather than :data:`~logging.INFO`, since a library
-   announcing its own registry entries is not news to its consumer.
+   Nothing is logged per frame parsed or per field read, so
+   :data:`~logging.DEBUG` on a large capture stays small. What is logged per
+   item is what gets dropped: the PyShark engine logs each tshark record it
+   skips as not a packet (``skipping tshark frame``), and reassembly each buffer
+   it abandons, on timeout or, for IP, on an overlapping fragment
+   (``abandoning buffer``). Registration bookkeeping in
+   :mod:`pcapkit.foundation.registry` is at :data:`~logging.DEBUG` rather than
+   :data:`~logging.INFO`, since a library announcing its own registry entries is
+   not news to its consumer.
 
 Configuring the Output
 ======================
@@ -125,21 +125,21 @@ Environment Variables
 
    .. seealso::
 
-      Set through the environment variable :envvar:`PCAPKIT_DEVMODE`.
+      Set by :envvar:`PCAPKIT_DEVMODE`.
 
 .. autodata:: pcapkit.utilities.logging.VERBOSE
    :no-value:
 
    .. seealso::
 
-      Set through the environment variable :envvar:`PCAPKIT_VERBOSE`.
+      Set by :envvar:`PCAPKIT_VERBOSE`.
 
 .. autodata:: pcapkit.utilities.logging.SPHINX_TYPE_CHECKING
    :no-value:
 
    .. seealso::
 
-      Set through the environment variable :envvar:`PCAPKIT_SPHINX`.
+      Set by :envvar:`PCAPKIT_SPHINX`.
 
 .. _logging-compatibility:
 
@@ -185,9 +185,9 @@ Compatibility Note
    named ``pcapkit``; :envvar:`PCAPKIT_DEVMODE` attaches the stderr handler at
    :data:`logging.DEBUG`; and ``Extractor(verbose=True)`` -- like the CLI's
    ``-v`` -- prints a line per frame to :data:`sys.stdout`. That output is a
-   feature of the tool rather than diagnostics, so it deliberately stays on
-   :func:`print`: routing it through :mod:`logging` would move it to another
-   stream and hide it until the consumer configured a handler.
+   feature of the tool rather than diagnostics, so it stays on :func:`print`:
+   through :mod:`logging` it would move to another stream and stay hidden until
+   the consumer configured a handler.
 
 .. note::
 

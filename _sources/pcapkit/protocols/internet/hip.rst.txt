@@ -13,8 +13,7 @@ HIP - Host Identity Protocol
 :mod:`pcapkit.protocols.internet.hip.protocol` contains
 :class:`~pcapkit.protocols.internet.hip.protocol.HIP` only,
 which implements the extractor for Host Identity
-Protocol (HIP) [*]_, whose structure is described
-as below:
+Protocol (HIP) [*]_, whose structure is:
 
 ======= ========= ====================== ==================================
 Octets      Bits        Name                    Description

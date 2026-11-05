@@ -15,7 +15,7 @@ HTTP/1.* - Hypertext Transfer Protocol
 which implements an extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, and its
 :class:`~pcapkit.protocols.application.httpv1.protocol.Type` enumeration. The
-structure of an HTTP/1.* message is described as below:
+structure of an HTTP/1.* message is:
 
 .. code-block:: text
 

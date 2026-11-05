@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,12 +558,10 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.ftp.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.ftp.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.ftp.protocol.FTP`,</span>
-<span class="sd">which implements an extractor for File Transfer Protocol</span>
-<span class="sd">(FTP) [*]_, the control channel; the data channel is</span>
-<span class="sd">:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`, in</span>
-<span class="sd">:mod:`pcapkit.protocols.application.ftp_data.protocol`.</span>
+<span class="sd">:mod:`pcapkit.protocols.application.ftp.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.ftp.protocol.FTP`, the extractor for the</span>
+<span class="sd">control channel of the File Transfer Protocol (FTP) [*]_; the data channel is</span>
+<span class="sd">:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol</span>
 
@@ -614,13 +612,10 @@
 <span class="c1">#: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).</span>
 <span class="n">_TCP</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[AppType_TCP]'</span> <span class="o">=</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.const.reg.apptype.tcp'</span><span class="p">,</span> <span class="s1">'TCP'</span><span class="p">)</span>
 
-<span class="c1"># regex for FTP, per :rfc:`959#section-4` (replies) and :rfc:`959#section-5`</span>
-<span class="c1"># (commands): a command is ``&lt;command&gt; [&lt;SP&gt; &lt;argument&gt;] &lt;CRLF&gt;``, a reply line is</span>
-<span class="c1"># ``&lt;code&gt; [&lt;SP&gt; &lt;text&gt;] &lt;CRLF&gt;``, and the first line of a multi-line reply is</span>
-<span class="c1"># ``&lt;code&gt;-&lt;text&gt; &lt;CRLF&gt;`` with the text following the hyphen immediately. Only</span>
-<span class="c1"># the one separating SP is syntax; anything after it is the argument verbatim, so</span>
-<span class="c1"># that ``make`` writes back exactly the line that was read. ``\Z`` rather than</span>
-<span class="c1"># ``$``, which would also match before a trailing ``\n`` left outside the match.</span>
+<span class="c1"># FTP lines (RFC 959, sections 4 and 5): a command is ``&lt;command&gt; [&lt;SP&gt;</span>
+<span class="c1"># &lt;argument&gt;] &lt;CRLF&gt;``, a reply ``&lt;code&gt; [&lt;SP&gt; &lt;text&gt;] &lt;CRLF&gt;``, and a multi-line</span>
+<span class="c1"># reply opens ``&lt;code&gt;-&lt;text&gt; &lt;CRLF&gt;``. Only the one SP is syntax, so ``make``</span>
+<span class="c1"># writes back the line as read. ``\Z``, as ``$`` also matches before a ``\n``.</span>
 <span class="n">FTP_REQUEST</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'^(?P&lt;cmmd&gt;[A-Z]{3,4})(?: (?P&lt;args&gt;.*))?\r\n\Z'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
 <span class="n">FTP_RESPONSE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'^(?P&lt;code&gt;[0-9]</span><span class="si">{3}</span><span class="s1">)'</span>
                           <span class="sa">rb</span><span class="s1">'(?:(?P&lt;more&gt;-)(?P&lt;text&gt;.*)|(?: (?P&lt;args&gt;.*))?)\r\n\Z'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
@@ -694,10 +689,8 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
-        <span class="c1"># NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive whole in one</span>
-        <span class="c1"># segment. Its first line is parsed as any reply line, and the lines</span>
-        <span class="c1"># after it are kept as received in ``lines``. A segment holding anything</span>
-        <span class="c1"># else -- no closing line, or more after it -- is refused.</span>
+        <span class="c1"># NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive in one segment; its</span>
+        <span class="c1"># first line is parsed, the rest kept in ``lines``, and anything else refused.</span>
         <span class="n">line</span><span class="p">,</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span> <span class="p">()</span>  <span class="c1"># type: bytes, tuple[bytes, ...]</span>
         <span class="k">if</span> <span class="n">FTP_RESPONSE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">):</span>
             <span class="n">first</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
@@ -820,9 +813,8 @@
         <span class="k">if</span> <span class="n">lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mf</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_lines</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">lines</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'FTP: lines must close a multi-line reply'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: bytes and a bytearray are written verbatim and only a ``str`` is</span>
-        <span class="c1"># encoded; anything else is the wrong type, as it is for ``cmmd`` above</span>
-        <span class="c1"># (#2410).</span>
+        <span class="c1"># NOTE: bytes and a bytearray are written verbatim and only a ``str`` is encoded;</span>
+        <span class="c1"># anything else is the wrong type, as it is for ``cmmd`` above (#2410).</span>
         <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
@@ -971,10 +963,8 @@
 <span class="sd">                included, or does not fit in three digits.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``ReturnCode`` is an ``IntEnum``, so a member takes the ``int``</span>
-        <span class="c1"># branch. ``bool`` is an ``int`` subclass, so without the explicit check</span>
-        <span class="c1"># ``True`` would write code 001, and ``int()`` alone would raise a bare</span>
-        <span class="c1"># ValueError or TypeError rather than a ProtocolError (#2416).</span>
+        <span class="c1"># NOTE: ``bool`` is refused first, or ``True`` would write 001; a bare ``int()``</span>
+        <span class="c1"># would raise ValueError or TypeError rather than ProtocolError (#2416).</span>
         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">pass</span>
@@ -1353,7 +1343,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1379,7 +1369,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.ospf
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ospf.protocol.OSPF` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`OSPF_Authentication <pcapkit.const.ospf.authentication.Authentication>`
@@ -20,8 +16,7 @@ Authentication Types
 
 .. module:: pcapkit.const.ospf.authentication
 
-This module contains the constant enumeration for **Authentication Types**,
-which is automatically generated from :class:`pcapkit.vendor.ospf.authentication.Authentication`.
+Generated from :class:`pcapkit.vendor.ospf.authentication.Authentication`.
 
 .. autoclass:: pcapkit.const.ospf.authentication.Authentication
    :members:
@@ -33,8 +28,7 @@ OSPF Packet Types
 
 .. module:: pcapkit.const.ospf.packet
 
-This module contains the constant enumeration for **OSPF Packet Types**,
-which is automatically generated from :class:`pcapkit.vendor.ospf.packet.Packet`.
+Generated from :class:`pcapkit.vendor.ospf.packet.Packet`.
 
 .. autoclass:: pcapkit.const.ospf.packet.Packet
    :members:

@@ -3,8 +3,7 @@ Internet Layer
 
 .. module:: pcapkit.protocols.internet
 
-:mod:`pcapkit.protocols.internet` is the collection of all protocols in
-internet layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.internet` holds the internet layer protocols.
 
 .. toctree::
    :maxdepth: 1

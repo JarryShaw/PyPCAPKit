@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -662,11 +662,8 @@
 <span class="sd">    """</span>
     <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Frame'</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">])</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">FrameType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
-    <span class="c1"># The frame payload is bounded by the declared Length, so anything after</span>
-    <span class="c1"># it -- typically the next frame -- is left for :attr:`HTTPv2.payload`. It is</span>
-    <span class="c1"># bounded by the buffer as well, so that a Length the buffer cannot back</span>
-    <span class="c1"># reaches :meth:`HTTPv2.read &lt;pcapkit.protocols.application.httpv2.protocol.HTTPv2.read&gt;`,</span>
-    <span class="c1"># which rejects it with :exc:`~pcapkit.utilities.exceptions.ProtocolError`.</span>
+    <span class="c1"># Bounded by the declared Length, leaving the next frame for the payload,</span>
+    <span class="c1"># and by the buffer, so ``HTTPv2.read`` rejects a Length nothing backs.</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -748,24 +745,11 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># Seed the accumulator with the frame's own ``Flags`` rather than a bare</span>
-        <span class="c1"># ``0``, so that a frame with no bit set still reports ``__flags__`` as</span>
-        <span class="c1"># the ``Flags`` both this schema and :class:`~pcapkit.protocols.data.\</span>
-        <span class="c1"># application.httpv2.Flags` declare it to be. ``|=`` promotes a plain</span>
-        <span class="c1"># ``0`` only as a side effect, so without this a flags octet of ``0x00``</span>
-        <span class="c1"># -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and</span>
-        <span class="c1"># a membership test against it raises :exc:`TypeError` rather than</span>
-        <span class="c1"># answering. This mirrors the construct path, which seeds</span>
-        <span class="c1"># ``Flags(0)`` at every site that builds one.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``FrameType.Flags`` itself declares no members, and from Python 3.11</span>
-        <span class="c1"># the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse</span>
-        <span class="c1"># ``Flags(0)`` outright with a ``TypeError`` that it has no members</span>
-        <span class="c1"># (3.10 and earlier hand back a pseudo-member instead), so</span>
-        <span class="c1"># the frame schemas that inherit it unchanged -- ``UnassignedFrame``,</span>
-        <span class="c1"># ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and</span>
-        <span class="c1"># ``WindowUpdateFrame`` -- keep the plain ``int``, which is what their</span>
-        <span class="c1"># data objects' bare ``Flags`` carries as ``__value__``.</span>
+        <span class="c1"># Seeded with ``Flags(0)``, as the construct path is, so a frame with no</span>
+        <span class="c1"># flag set, routine in HTTP/2, still reports ``__flags__`` as ``Flags``:</span>
+        <span class="c1"># an ``in`` test on a plain ``int`` raises TypeError. The memberless</span>
+        <span class="c1"># ``FrameType.Flags``, which Python 3.11+ refuses to call, keeps the</span>
+        <span class="c1"># plain ``int`` for the frame schemas that inherit it unchanged.</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'BIT_'</span><span class="p">),</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
@@ -773,9 +757,8 @@
             <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
                 <span class="n">flags</span> <span class="o">|=</span> <span class="n">val</span>
 
-        <span class="c1"># Bits the frame type leaves undefined are kept as well: a receiver</span>
-        <span class="c1"># ignores them (:rfc:`9113#section-4.1`), but a rebuild must not erase</span>
-        <span class="c1"># them. ``Flags`` keeps such bits as pseudo-members.</span>
+        <span class="c1"># Undefined bits are kept as pseudo-members: a receiver ignores them</span>
+        <span class="c1"># (RFC 9113, section 4.1), but a rebuild must not erase them.</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="sa">f</span><span class="s1">'bit_</span><span class="si">{</span><span class="n">bit</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__flags__</span> <span class="o">=</span> <span class="n">flags</span> <span class="o">|</span> <span class="p">(</span><span class="n">raw</span> <span class="o">&amp;</span> <span class="o">~</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -817,19 +800,8 @@
         <span class="n">UInt8Field</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
-    <span class="c1"># NOTE: the conditional subtracts the padding length, it does not *replace*</span>
-    <span class="c1"># the whole expression. A conditional expression binds looser than ``-``, so</span>
-    <span class="c1"># writing ``pkt['__length__'] - pkt['pad_len'] if &lt;test&gt; else 0`` groups as</span>
-    <span class="c1"># ``(pkt['__length__'] - pkt['pad_len']) if &lt;test&gt; else 0`` and hands back ``0``</span>
-    <span class="c1"># -- "read no payload at all" -- for every frame without the ``PADDED``</span>
-    <span class="c1"># flag. ``__length__`` is the *remaining* declared length at this field, so</span>
-    <span class="c1"># the unpadded arm wants ``__length__`` itself, which is what subtracting a</span>
-    <span class="c1"># zero padding length gives. Padding is rare in HTTP/2, so that arm would be</span>
-    <span class="c1"># the common one: an unpadded ``DATA`` frame would parse with ``data`` as</span>
-    <span class="c1"># ``b''`` and nothing would raise or warn. The parentheses also keep</span>
-    <span class="c1"># ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where</span>
-    <span class="c1"># the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left</span>
-    <span class="c1"># it as :data:`~pcapkit.corekit.sentinels.NO_VALUE`.</span>
+    <span class="c1"># NOTE: Parenthesised, or ``a - b if t else 0`` reads as ``(a - b) if t else 0`` and an</span>
+    <span class="c1"># unpadded frame reads no data; the guard leaves ``pad_len`` (``NO_VALUE``) unread.</span>
     <span class="c1">#: Data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
         <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
@@ -880,10 +852,7 @@
         <span class="n">UInt8Field</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_5'</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
     <span class="p">)</span>
-    <span class="c1"># NOTE: the conditional subtracts the padding length rather than replacing</span>
-    <span class="c1"># the whole expression -- see :attr:`DataFrame.data` for why the outer</span>
-    <span class="c1"># parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame</span>
-    <span class="c1"># would read its header block fragment as ``b''``.</span>
+    <span class="c1"># NOTE: Parenthesised as in ``DataFrame.data``.</span>
     <span class="c1">#: Header block fragment.</span>
     <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
         <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
@@ -998,10 +967,7 @@
         <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1"># NOTE: the conditional subtracts the padding length rather than replacing</span>
-    <span class="c1"># the whole expression -- see :attr:`DataFrame.data` for why the outer</span>
-    <span class="c1"># parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``</span>
-    <span class="c1"># frame would read its header block fragment as ``b''``.</span>
+    <span class="c1"># NOTE: Parenthesised as in ``DataFrame.data``.</span>
     <span class="c1">#: Header block fragment.</span>
     <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
         <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
@@ -1460,7 +1426,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1486,7 +1452,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

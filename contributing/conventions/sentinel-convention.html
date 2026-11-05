@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,14 +573,13 @@
 <p>A <em>sentinel</em> here is a module-level singleton whose only job is to be recognised by
 identity – <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">is</span> <span class="pre">SENTINEL</span></code> – so that it can never be confused with a value a
 caller might legitimately pass. The house rule, from the maintainer, covers the type:
-the sentinel object’s type class is named <code class="docutils literal notranslate"><span class="pre">&lt;SENTINEL&gt;Type</span></code>.</p>
-<p>That is, the class takes the instance’s name in CamelCase with <code class="docutils literal notranslate"><span class="pre">Type</span></code> appended. It
-says nothing about the <strong>object</strong>’s own name, which is what let the casings diverge
-with no rule naming any of them wrong. GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> closed that gap: the
-owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
-no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
-derives from it mechanically – title-case each underscore-separated word and append
-<code class="docutils literal notranslate"><span class="pre">Type</span></code>, no per-sentinel exception needed. The sentinels in the tree follow it:</p>
+the sentinel object’s type class is named <code class="docutils literal notranslate"><span class="pre">&lt;SENTINEL&gt;Type</span></code>, the instance’s name in
+CamelCase with <code class="docutils literal notranslate"><span class="pre">Type</span></code> appended.</p>
+<p>That rule says nothing about the <strong>object</strong>’s own name, which let the casings diverge
+with no rule naming any of them wrong. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a> closed that gap: the owner ruled
+for SCREAMING_SNAKE and accepted the breaking change outright, with no backport. So the
+type name derives from the object’s mechanically – title-case each
+underscore-separated word and append <code class="docutils literal notranslate"><span class="pre">Type</span></code>, with no per-sentinel exception:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -618,8 +617,8 @@ derives from it mechanically – title-case each underscore-separated word and a
 </tbody>
 </table>
 </div>
-<p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s housing ruling – one module for all of them – is why the table
-names a single defining module, and it is the only import path. The modules that <em>use</em> a
+<p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s housing ruling – one module for all of them – is why the table names a
+single defining module, and it is the only import path. The modules that <em>use</em> a
 sentinel import it from there but do not re-export it: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a> dropped the
 per-module re-exports, under the ruling that a moved name keeps no re-export at its old
 path. It was ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1715">#1715</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1711">#1711</a>), overturning the re-export
@@ -635,18 +634,18 @@ private and not for public use, which is what this page and
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>’s own docstring do in its place. So
 <strong>privacy here is documentation-only</strong>, and nothing in the name marks it out: when
 adding a sentinel, add it to the table above whether or not it is public.</p>
-<p>What reaches users is the <strong>object only</strong>. The owner ruled on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>
+<p>What reaches users is the <strong>object only</strong>. The owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>
 that the objects alone – <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and its siblings – are exported to users, so a
 public sentinel names its instance in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> and
 leaves the type out of it. The type stays importable by its dotted path there, for an
 annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it is only <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that does not offer it. The
 <code class="docutils literal notranslate"><span class="pre">__all__</span></code> there does name <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>, the abstract
-base every sentinel type shares, since that is no sentinel’s own type. A private
-sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in neither, which is what private means here, and
-<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and
-<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are documented on
-<a class="reference internal" href="../../pcapkit/corekit/sentinels.html"><span class="doc">the sentinels API page</span></a> as private and not for
-public use rather than left off it, since nothing in the name says so.</p>
+base every sentinel type shares, since that is no sentinel’s own type. The private
+sentinels, <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> and <code class="docutils literal notranslate"><span class="pre">MISSING</span></code>, are in neither, which is what private means
+here. <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>,
+<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> and their <code class="docutils literal notranslate"><span class="pre">MISSING</span></code> counterparts are
+documented on <a class="reference internal" href="../../pcapkit/corekit/sentinels.html"><span class="doc">the sentinels API page</span></a> as private
+rather than left off it, since nothing in the name says so.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Every sentinel type subclasses <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>, the public

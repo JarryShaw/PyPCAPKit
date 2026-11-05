@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -1420,16 +1420,8 @@
 <span class="sd">        """</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="c1"># NOTE: Only attributes that the construction path sets too are assigned</span>
-        <span class="c1"># here, so that a schema parsed off the wire carries exactly the same</span>
-        <span class="c1"># attributes as one built in memory by ``TCP._make_mode_mp`` (#2293). An</span>
-        <span class="c1"># earlier revision also set ``ret.option = Enum_Option.Multipath_TCP``,</span>
-        <span class="c1"># which no maker mirrored and nothing ever read: ``MPTCP`` declares no</span>
-        <span class="c1"># ``option`` field, and its real ``kind`` field already carries</span>
-        <span class="c1"># ``Multipath_TCP``. ``subtype`` is the one attribute that genuinely has</span>
-        <span class="c1"># to be assigned on both paths -- see the NOTE on :class:`MPTCP` for why</span>
-        <span class="c1"># it cannot be a field -- and ``TCP._make_mode_mp`` makes the matching</span>
-        <span class="c1"># assignment for construction.</span>
+        <span class="c1"># NOTE: Only what ``TCP._make_mode_mp`` sets is assigned, so a parsed schema</span>
+        <span class="c1"># matches a built one (#2293); ``subtype`` is no field, per the NOTE on ``MPTCP``.</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'subtype'</span><span class="p">])</span>
 
@@ -1455,49 +1447,24 @@
 <span class="sd">       which registers :class:`~pcapkit.protocols.transport.tcp.schema._MPTCP`</span>
 <span class="sd">       under ``Multipath_TCP`` instead.</span>
 
+<span class="sd">    Each subtype schema is handed the whole option from its first octet, through</span>
+<span class="sd">    ``mptcp_data_selector``, so a subclass's ``test`` field starts at the third</span>
+<span class="sd">    octet, after ``kind`` and ``length``, and its conditions can read</span>
+<span class="sd">    ``pkt['length']``.</span>
+
 <span class="sd">    """</span>
 
     <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">MPTCPUnknown</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: ``_MPTCP.data`` (a :class:`~pcapkit.corekit.fields.misc.SwitchField`,</span>
-    <span class="c1"># via :func:`mptcp_data_selector`) hands each subtype schema below the</span>
-    <span class="c1"># *whole* option -- ``kind``, ``length`` and all -- starting at the same</span>
-    <span class="c1"># first octet ``_MPTCP.test`` peeked and rewound past, rather than the</span>
-    <span class="c1"># bytes left over after some outer field already consumed a header. So</span>
-    <span class="c1"># unlike :class:`MPTCP`'s siblings that inherit :class:`Option`, which</span>
-    <span class="c1"># declares ``kind``/``length`` for exactly this reason, this base class</span>
-    <span class="c1"># has to declare its own -- unconditionally, since every Multipath TCP</span>
-    <span class="c1"># subtype carries an explicit length octet (no EOOL/NOP-style exception</span>
-    <span class="c1"># applies here). Every subclass's own leading field starts at the third</span>
-    <span class="c1"># octet as a result, which is where its ``test`` (subtype/flags) field</span>
-    <span class="c1"># expects to read from.</span>
-    <span class="c1">#</span>
-    <span class="c1"># Without them, packing would reject ``kind=``/``length=`` from the</span>
-    <span class="c1"># ``_make_mptcp_*`` makers with ``UnknownFieldWarning`` and then</span>
-    <span class="c1"># ``KeyError: 'length'`` the moment a sibling field's condition (e.g.</span>
-    <span class="c1"># ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read ``pkt['length']``;</span>
-    <span class="c1"># unpacking would misread the ``kind`` octet as the subtype/flags octet,</span>
-    <span class="c1"># since nothing had consumed it first.</span>
+    <span class="c1"># NOTE: ``kind`` and ``length`` are declared on the base, as on ``Option``, since every</span>
+    <span class="c1"># subtype is handed the whole option and carries a length octet.</span>
     <span class="c1">#: Option kind.</span>
     <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
     <span class="c1">#: MPTCP length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
 
-    <span class="c1"># NOTE: ``subtype`` stays an annotation rather than becoming a real field</span>
-    <span class="c1"># alongside ``kind``/``length`` above -- deliberately, and the difference</span>
-    <span class="c1"># from those fields is why. ``kind`` and ``length`` are each the</span>
-    <span class="c1"># *sole* source of their own octet: nothing else in the schema packs them,</span>
-    <span class="c1"># so declaring them as real fields was the only way to get them onto the</span>
-    <span class="c1"># wire at all. ``subtype`` is not like that: every concrete subclass</span>
-    <span class="c1"># already encodes it as 4 bits of its own ``test`` :class:`BitField` (e.g.</span>
-    <span class="c1"># ``MPTCPCapable.test['subtype']``), which is what actually gets packed.</span>
-    <span class="c1"># A real ``Field`` for ``subtype`` on top of that would either pack the</span>
-    <span class="c1"># same 4 bits twice under two names, or need a "derive, don't pack" kind</span>
-    <span class="c1"># of field that this library's :mod:`~pcapkit.corekit.fields` does not</span>
-    <span class="c1"># have. So this attribute is populated by the *construction* path instead</span>
-    <span class="c1"># -- :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp` sets it</span>
-    <span class="c1"># right after building the subtype-specific schema, mirroring exactly what</span>
-    <span class="c1"># :meth:`_MPTCP.post_process` already does for real unpacking.</span>
+    <span class="c1"># NOTE: ``subtype`` is no field, as each subclass's ``test`` bit field packs it and a</span>
+    <span class="c1"># field would pack it twice; ``TCP._make_mode_mp`` and ``_MPTCP.post_process`` set it.</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: MPTCP subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span></div>
@@ -1542,10 +1509,8 @@
         <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
         <span class="s1">'hsa'</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1"># NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --</span>
-    <span class="c1"># 4 (SYN, header only), 12 (sender's key), 20 (both keys), 22 (both keys</span>
-    <span class="c1"># and Data-Level Length) and 24 (that plus the Checksum) -- so each field</span>
-    <span class="c1"># below is present from the length that first carries it.</span>
+    <span class="c1"># NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE the lengths 4, 12, 20, 22 and</span>
+    <span class="c1"># 24, so each field below is present from the length that first carries it.</span>
     <span class="c1">#: Option sender's key (if option length &gt; 4).</span>
     <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt64Field</span><span class="p">(),</span>
@@ -2266,7 +2231,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2292,7 +2257,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

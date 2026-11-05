@@ -139,6 +139,92 @@ Internal Definitions below.
    .. autoattribute:: _exproto
    .. autoattribute:: _exctx
 
+Parsing and Construction
+------------------------
+
+Parsing, construction, :meth:`~Protocol.from_schema` and :meth:`~Protocol.from_data`
+all run through one path:
+
+.. mermaid::
+
+   flowchart TD
+       FS["from\_schema(schema)"] -->|"\_\_header\_\_ = schema,<br/>then its octets"| P
+       FD["from\_data(data)"] -->|"\_make\_data(data) gives the fields,<br/>\_\_reconstructing\_\_ set"| C
+       P["Proto(file, length, ...)<br/>parse"] --> INIT
+       C["Proto(field=value, ...)<br/>construct"] --> INIT
+       INIT["\_\_init\_\_<br/>consumes \_layer, \_protocol and \_\_context\_\_"]
+       INIT -->|construct| CHK["\_check\_construction\_keywords<br/>an undeclared keyword: UnsupportedCall,<br/>or a warning when reconstructing"]
+       CHK --> PACK["\_\_post\_init\_\_: pack(...)<br/>make() gives the schema, kept as \_\_header\_\_,<br/>and its octets"]
+       INIT -->|parse| OCT["\_\_post\_init\_\_: the octets given,<br/>or file.read(length)"]
+       PACK --> DATA["\_data, and \_file over it"]
+       OCT --> DATA
+       DATA --> UNP{"unpack: \_\_header\_\_ set?"}
+       UNP -->|no| SCH["\_\_schema\_\_.unpack(\_file, length, packet)"]
+       UNP -->|yes| KEPT["kept, or replaced by the parse of its octets<br/>where it holds raw items"]
+       SCH --> READ
+       KEPT --> READ
+       READ["read(): the data model,<br/>calling \_decode\_next\_layer"] --> INFO["\_\_init\_\_: \_info updated with packet"]
+
+       click FS "protocol.html#pcapkit.protocols.protocol.Protocol.from_schema"
+       click FD "protocol.html#pcapkit.protocols.protocol.Protocol.from_data"
+       click INIT "protocol.html#pcapkit.protocols.protocol.Protocol.__init__"
+       click PACK "protocol.html#pcapkit.protocols.protocol.Protocol.pack"
+       click UNP "protocol.html#pcapkit.protocols.protocol.Protocol.unpack"
+       click READ "protocol.html#protocol-next-layer-dispatch"
+
+A rebuild of a header the capture cut short drops the header :meth:`~Protocol.pack`
+made, so :meth:`~Protocol.unpack` parses its octets back (:issue:`2761`), and inside a
+payload being rebuilt the parse's warnings are held and dropped (:issue:`2711`).
+
+.. _protocol-next-layer-dispatch:
+
+Next-Layer Dispatch
+-------------------
+
+How a layer picks and builds the layer it carries, and where it keeps
+:class:`~pcapkit.protocols.misc.raw.protocol.Raw` or
+:class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` instead:
+
+.. mermaid::
+
+   flowchart TD
+       DEC["\_decode\_next\_layer(dict\_, proto, length)<br/>called from read()"] --> IMP["\_import\_next\_layer, wrapped by beholder"]
+       IMP --> EMP{"\_empty\_next\_layer"}
+       EMP -->|"octets and a non-zero length"| TERM{"layer= or protocol= reached?"}
+       EMP -->|"no octets, length &lt; 0"| KRAW["Raw"]
+       EMP -->|"otherwise: no octets,<br/>or a length of 0"| KNOP["NoPayload"]
+       TERM -->|yes| KRAW
+       TERM -->|no| LOOK["\_lookup\_next\_layer(\_\_proto\_\_, proto)<br/>the registered class, or the registry's fallback,<br/>normally Raw"]
+       KRAW --> LIM
+       KNOP --> LIM
+       LOOK --> LIM
+       LIM{"\_parse\_next\_layer:<br/>past FRAME\_LAYER\_LIMIT,<br/>and not already Raw or NoPayload?"}
+       LIM -->|yes| RAWL["Raw, marked \_past\_layer\_limit<br/>one ProtocolWarning"]
+       LIM -->|no| NEW["klass(file\_, length, ...)"]
+       NEW -->|raises| BEH["beholder: NoPayload for an end-of-file StructError,<br/>else Raw carrying the error"]
+       NEW -->|parsed| SHORT{"captured fewer octets than both<br/>\_\_length\_hint\_\_() and its length?"}
+       SHORT -->|yes| RAWS["Raw, its held warnings dropped"]
+       SHORT -->|no| KEEP["the parsed layer"]
+       RAWL --> WRITE
+       BEH --> WRITE
+       RAWS --> WRITE
+       KEEP --> WRITE
+       WRITE["dict\_ gets its info, \_\_next\_type\_\_ and \_\_next\_name\_\_<br/>self.\_next and self.\_protos set"]
+
+       click DEC "protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer"
+       click IMP "protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer"
+       click EMP "protocol.html#pcapkit.protocols.protocol.Protocol._empty_next_layer"
+       click LOOK "protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer"
+       click LIM "protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer"
+       click BEH "../corekit/decorators.html#pcapkit.corekit.decorators.beholder"
+
+Some layers add steps of their own:
+:class:`~pcapkit.protocols.internet.internet.Internet` the
+:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` bound and IGMP's dispatch,
+:class:`~pcapkit.protocols.transport.transport.Transport` a family base's dispatch, and
+:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` the walk drawn under
+:ref:`ipv6-ext-walk`.
+
 Layers per Frame
 ----------------
 

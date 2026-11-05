@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/traceflow/traceflow.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.traceflow.traceflow contains TraceFlow only, which is an abstract base class for all flow tracing classes. Internal Definitions: Type Variables:" />
-<meta name="description" content="pcapkit.foundation.traceflow.traceflow contains TraceFlow only, which is an abstract base class for all flow tracing classes. Internal Definitions: Type Variables:" />
+<meta property="og:description" content="pcapkit.foundation.traceflow.traceflow contains TraceFlow, the abstract base class of a custom flow tracing class, and TraceFlowBase, which it and the built-in TCP flow tracing class derive from. I..." />
+<meta name="description" content="pcapkit.foundation.traceflow.traceflow contains TraceFlow, the abstract base class of a custom flow tracing class, and TraceFlowBase, which it and the built-in TCP flow tracing class derive from. I..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Follow TCP Stream" href="tcp.html"><link rel="prev" title="Flow Tracing" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -571,8 +571,10 @@
           <section id="module-pcapkit.foundation.traceflow.traceflow">
 <span id="flow-tracing-base-class"></span><h1>Flow Tracing Base Class<a class="headerlink" href="#module-pcapkit.foundation.traceflow.traceflow" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.traceflow.traceflow" title="pcapkit.foundation.traceflow.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.traceflow</span></code></a> contains
-<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> only,
-which is an abstract base class for all flow tracing classes.</p>
+<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>, the abstract base
+class of a custom flow tracing class, and
+<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlowBase" title="pcapkit.foundation.traceflow.traceflow.TraceFlowBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowBase</span></code></a>, which it and the
+built-in TCP flow tracing class derive from.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.traceflow.</span></span><span class="sig-name descname"><span class="pre">TraceFlow</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_DT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_BT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_IT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="Link to this definition">¶</a></dt>
@@ -626,8 +628,7 @@ are added, and a flow covers both directions of a conversation unless
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For more information on customisation and extension, please
-refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
+<p>For customisation and extension, see <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.name">
@@ -635,8 +636,7 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 <dd><p>Protocol name of current class.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is also available as a class variable. Its
-value can be set by <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -646,8 +646,7 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.trac
 <dd><p>Protocol of current class.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is also available as a class variable. Its
-value can be set by <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -657,12 +656,11 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.trac
 <dd><p>Mapping of protocol names to flow tracing classes.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is only available as a class variable, since it is
-defined on <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a>. It reads
-<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__traceflow__" title="pcapkit.foundation.extraction.Extractor.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a>, the
-single table every flow tracing registration lands in, so it is not a
-per-class mapping. It is <em>not</em> <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__output__</span></code></a>, which is the
-separate output-dumper table this class also owns.</p>
+<p>A class variable only, defined on <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a>. It is not
+per-class: it reads
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__traceflow__" title="pcapkit.foundation.extraction.Extractor.__traceflow__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__traceflow__</span></code></a>, the one
+table every flow tracing registration lands in. It is <em>not</em>
+<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__output__</span></code></a>, the separate output-dumper table this class owns.</p>
 </div>
 </dd></dl>
 
@@ -1062,9 +1060,9 @@ registered; only the keyword decides registration.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.traceflow.</span></span><span class="sig-name descname"><span class="pre">TraceFlowMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/traceflow/traceflow.html#TraceFlowMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
 <p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> class. It can be useful to reduce unnecessary
-registry calls and simplify the customisation process.</p>
+<p>It provides <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.name" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.name</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.protocol" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.protocol</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.registry" title="pcapkit.foundation.traceflow.traceflow.TraceFlow.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TraceFlow.registry</span></code></a> as class properties, the first two read from
+<code class="docutils literal notranslate"><span class="pre">__protocol_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> where a subclass sets them.</p>
 </dd></dl>
 
 </section>

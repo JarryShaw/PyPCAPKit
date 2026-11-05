@@ -5,10 +5,9 @@ Help Wanted
 
    This page is the maintained copy of the project's enhancement proposals, kept
    in step with the code. The `discussion thread
-   <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ holds them as they
-   were first raised; here an implemented proposal is described as implemented,
-   and only genuinely open work is asked for. Please leave notes in the thread
-   rather than against this page.
+   <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ holds them as first
+   raised; here an implemented proposal is described as implemented, and only open
+   work is asked for. Leave notes in the thread rather than against this page.
 
 Pull requests for anything still open, and new ideas of your own, are very
 welcome. For questions, leave a note in the `discussion thread
@@ -17,28 +16,23 @@ category <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
 
 .. note::
 
-   This page tracks **feature requests** -- what is not implemented yet, and
-   what a contributor could pick up. It is not an issue tracker. Where work on
-   something listed here turns up a **defect** in code that already exists, the
-   defect belongs in `the issue tracker
-   <https://github.com/JarryShaw/PyPCAPKit/issues>`__ and is linked from here,
-   not written up as prose on this page. A design question that needs a decision
-   before anyone can implement it -- as against something simply being broken --
-   is a request and does belong here.
+   This page tracks **feature requests**, not defects. A defect that work on an
+   item turns up goes in `the issue tracker
+   <https://github.com/JarryShaw/PyPCAPKit/issues>`__ and is linked from here. A
+   design question that needs a decision before anyone can implement it is a
+   request, and belongs here.
 
 Wish you enjoy **PyPCAPKit**!!!
 
 More Protocols, More!!!
 -----------------------
 
-Plenty of protocols are not decoded yet, and every one of them is wanted.
-Adding one is about the most self-contained contribution there is: a schema
-class, a data class and a protocol class, as sketched in
-`discussion #251 <https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__.
-The reply in that thread is the closest thing the project has to a
-step-by-step guide for adding a protocol, and is worth reading before starting
-one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
-the ones outstanding are,
+Every protocol not decoded is wanted. Adding one is self-contained: a package
+holding a protocol, a schema and a data class (:ref:`protocol-family-grouping`),
+as sketched in
+`discussion #251 <https://github.com/JarryShaw/PyPCAPKit/discussions/251>`__,
+whose reply is the closest thing to a step-by-step guide. Outstanding, by TCP/IP
+layer and alphabetically:
 
 * Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP
 * Internet Layer: ECN, Shim6
@@ -85,20 +79,19 @@ transport layer protocol implemented per :rfc:`9260`: the common header, every
 chunk type, chunk parameter and error cause the RFC defines, and CRC32c checksum
 verification.
 
-One note on how it differs from its siblings. The next layer is dispatched
-on the DATA chunk's *payload protocol identifier* through
+Unlike its siblings, it dispatches the next layer on the DATA chunk's *payload
+protocol identifier* through
 :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp`, not on port
 numbers, so :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype`
 deliberately does not fan out to it.
 
-What is still wanted is the registered-but-unimplemented type codes. IANA
-registers considerably more than :rfc:`9260` defines, and the surplus falls
-through to the generic handlers rather than failing the extraction -- so a
-capture using one parses, but yields an opaque chunk instead of its fields.
-That is true of many of the registered chunk types, chunk parameters and error
-causes; :doc:`/pcapkit/const/sctp` lists them all.
+Still wanted are the registered-but-unimplemented type codes. IANA registers
+more chunk types, chunk parameters and error causes than :rfc:`9260` defines
+(:doc:`/pcapkit/const/sctp` lists them), and the surplus falls through to the
+generic handlers: a capture using one parses, but yields an opaque chunk
+instead of its fields.
 
-The other thing wanted for SCTP is reassembly, which
+SCTP also wants reassembly, which
 :mod:`pcapkit.foundation.reassembly` has only for IP, TCP and DTLS handshake
 messages -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
 :mod:`pcapkit.foundation` rather than in the protocol.
@@ -110,7 +103,7 @@ ESP
 decrypts when a Security Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
-What is still wanted there is wider algorithm coverage. The enumerations
+Still wanted is wider algorithm coverage. The enumerations
 under :doc:`/pcapkit/const/esp` --
 :class:`~pcapkit.const.esp.cipher.Cipher` and
 :class:`~pcapkit.const.esp.integrity.Integrity` -- carry every transform IANA has
@@ -166,8 +159,9 @@ The sub-registries are the easy half: binding revocation types and triggers,
 handoff indicators, access network identifier sub-options, flow identification
 and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
 traffic selector formats and QoS attributes are all generated in full under
-:doc:`/pcapkit/const/mh`. Value sets that IANA does not register live in ``mh.py`` itself rather than
-in :mod:`pcapkit.const.mh`: the localized routing acknowledgment status codes of
+:doc:`/pcapkit/const/mh`. Value sets that IANA does not register live in
+:mod:`pcapkit.protocols.internet.mh.protocol` rather than in :mod:`pcapkit.const.mh`:
+the localized routing acknowledgment status codes of
 :rfc:`6705#section-10.2`
 (:class:`~pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus`) and the local
 mobility anchor address option codes of :rfc:`5949#section-6.2.2`
@@ -295,9 +289,9 @@ needs a decision on what an undecrypted DTLS-wrapped NGAP PDU reports.
 Registered, but Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A different shape of gap from the empty stubs, and easy to miss because nothing
-announces it. The :doc:`/pcapkit/const/reg` enumerations are complete, but only a
-small part of each is bound to a dissector; everything else resolves to
+A gap easy to miss, because nothing announces it. The
+:doc:`/pcapkit/const/reg` enumerations are complete, but only a small part of
+each is bound to a dissector; everything else resolves to
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, so the capture parses without
 complaint and yields nothing useful.
 
@@ -338,8 +332,7 @@ complaint and yields nothing useful.
   payload is :class:`~pcapkit.protocols.misc.raw.protocol.Raw` until something calls
   :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp`.
 
-How much of each registry is bound is measurable, so measure it rather than
-trust a figure written down here:
+How much of each registry is bound is measurable:
 
 .. code-block:: shell
 
@@ -445,8 +438,7 @@ suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 ``%s``. The IO-batching idea the thread proposed was never the bottleneck.
 
-The larger costs this section listed all lie outside the parse path, and each is
-addressed in full or in part:
+The larger costs lie outside the parse path:
 
 * **The flow dumper reopens its output file once per frame**, in
   :class:`~pcapkit.dumpkit.pcap.PCAPIO`'s ``__call__``. It does not
@@ -649,7 +641,7 @@ Test Cases
 in CI against Python 3.11 through 3.15, per
 ``.github/workflows/unit-tests.yml``, and against the end-of-life 3.8 through 3.10
 on legs whose failures block nothing.
-The module count is measurable rather than worth writing down:
+The module count is measurable:
 
 .. code-block:: shell
 
@@ -885,18 +877,16 @@ cleanly as an intact one.
 of them is cryptographic and the distinction decides what is actually hard.
 
 **The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
-DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography at all — it is sixteen-bit addition
-with end-around carry, and implementing it is an afternoon. What blocks it is the
-**IP pseudo-header**: the TCP, UDP, DCCP and ICMPv6 checksums are computed over source
-and destination addresses, the protocol number and the payload length, all of
-which live in the *enclosing* layer. So verification needs a parsed protocol to
-reach back to its parent, which is a structural question about
+DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography: it is sixteen-bit
+addition with end-around carry. The hard part is the **IP pseudo-header**: the
+TCP, UDP, DCCP and ICMPv6 checksums cover source and destination addresses, the
+protocol number and the payload length, all of which live in the *enclosing*
+layer, so verification is a structural question about
 :class:`~pcapkit.protocols.protocol.Protocol` rather than an arithmetic one.
-That is precisely why SCTP came first and is not evidence the rest are easy:
-:rfc:`9260#section-6.8` defines its CRC32c over the common header and chunks with
-the checksum field zeroed and **no pseudo-header**, so it can be verified from
-the SCTP packet alone. Note also that SCTP's CRC32c is a hand-rolled lookup table
-in :mod:`pcapkit.protocols.transport.sctp.protocol`, not a library call, so it is not
+SCTP has no such dependency: :rfc:`9260#section-6.8` defines its CRC32c over the
+common header and chunks with the checksum field zeroed and **no pseudo-header**,
+so the SCTP packet alone verifies it. Its CRC32c is a hand-rolled lookup table in
+:mod:`pcapkit.protocols.transport.sctp.protocol`, not a library call, so it is no
 precedent for a dependency either.
 
 **The cryptographic integrity checks** are where the |cryptography|_
@@ -937,12 +927,11 @@ owner, and each lands on a precedent the library already has:
   what the construction side needs in order to *emit* a correct checksum, and
   the two paths then share one definition instead of agreeing by coincidence.
 
-One case was left to implementation time, since it is about wording rather
-than design: **checksum offload**. A capture taken on the sending
-host routinely contains checksums the NIC had not computed yet, so the field is
-zero or garbage on the wire and "invalid" is the wrong word for it. The status
-has to say *not computed* distinctly from *wrong*, or it cries wolf on the
-commonest capture there is; it is settled below as ``NOT_COMPUTED``, spelled after
+**Checksum offload** was left to implementation, being about wording rather than
+design. A capture taken on the sending host routinely holds checksums the NIC
+had not computed, zero or garbage on the wire, so the status has to say *not
+computed* distinctly from *wrong*, or it cries wolf on the commonest capture
+there is. It is ``NOT_COMPUTED`` below, spelled after
 :class:`~pcapkit.protocols.internet.esp.protocol.ESPStatus`'s ``NO_SA``.
 
 **The one's-complement half is done** for every protocol named above
@@ -1016,10 +1005,9 @@ HIP's cryptographic half is open, on the groundwork ESP has already laid.
 Deterministic Construction Arguments
 ------------------------------------
 
-This opens a broader run of proposals for the construction (``make()``)
-workflow in general -- more go under this heading as they get scoped -- and
-its first item, making a ``make()`` call's own argument list deterministic, is
-**done for 1.6.0** (:issue:`2594`).
+**Done** in 1.6.0 (:issue:`2594`): a ``make()`` call's argument list is
+deterministic. Further proposals for the construction workflow go under this
+heading.
 
 Inferring a namespace from the caller's frame, for a conventional
 four-argument group -- ``X``, ``X_default``, ``X_namespace`` and
@@ -1062,19 +1050,17 @@ keyword set once at class-definition time, and
   :meth:`~pcapkit.protocols.protocol.Protocol.unquote`, rather than a module of
   its own, since it serves ``make()`` alone.
 
-The trade-off: a bare string for these fields is a pattern the docs and the
-examples relied on, so the change breaks every ``make()`` call site that
-relies on the inference. That is why it is one change across
-:file:`pcapkit/protocols/` rather than folded into the next defect fix on this
-family, and it removes the root cause of the :issue:`2356`/:issue:`2394`
-family rather than leaving its next instance to be found and patched the same
-way.
+The trade-off: the docs and the examples relied on a bare string for these
+fields, so the change breaks every ``make()`` call site that relies on the
+inference. That is why it is one change across :file:`pcapkit/protocols/`: it
+removes the root cause of the :issue:`2356`/:issue:`2394` family rather than
+leaving its next instance to be found and patched.
 
 Release Plan
 ------------
 
-:data:`pcapkit.__version__` is the current version, and editing it is what starts
-a release.
+Editing :data:`pcapkit.__version__` is what starts a release; :doc:`releasing`
+covers the workflow it drives.
 
 1.6.0, in One Step
 ~~~~~~~~~~~~~~~~~~
@@ -1088,66 +1074,17 @@ release, as step 2 of `1.5.0, in Two Steps`_ did.
 1.5.0, in Two Steps
 ~~~~~~~~~~~~~~~~~~~
 
-The 1.5.0 release came in two deliberate steps:
+#. **A beta,** ``1.5.0b1``, **once the remaining defects were closed.** A beta
+   rather than a final release, because the consistency sweep of step 2 had not
+   run and was expected to find things.
+#. **The official** ``1.5.0`` **once a library-wide consistency sweep was done.**
+   The sweep checked prose against code, missing tests, unaligned changes, packet
+   formats against the specifications, and duplicated logic, reproducing each
+   finding before filing it: :issue:`490` to :issue:`496`, and the prose strand,
+   :issue:`719` and its second pass :issue:`1103`.
 
-#. **A beta —** ``1.5.0b1`` **— when the remaining defects are closed.**
-   *Done.* The feature work had landed already; what remained was the
-   defect tail in `the issue tracker
-   <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
-   beta rather than a final release, because the consistency sweep of step 2 had
-   not run yet and was expected to find things.
-#. **The official** ``1.5.0`` **when a library-wide consistency sweep is done.**
-   *Done.* The sweep checked prose against code, missing tests, unaligned
-   changes, packet formats against the specifications, and duplicated logic,
-   each finding reproduced before it was filed. Its whole point was to find what
-   one-at-a-time defect work does not, and its verified findings are closed:
-   :issue:`490`, :issue:`491`, :issue:`492`, :issue:`493`, :issue:`494`,
-   :issue:`495` and :issue:`496`, alongside the prose strand's own
-   :issue:`719`. A later round of defect fixes moved the prose strand's ground
-   again, so it ran a second time as :issue:`1103`; that is closed too. ``1.5.0``
-   shipped once this work was in.
-
-**The version string is the release button, so it is worth knowing exactly what
-each step does before editing it.** ``.github/workflows/create-release.yml`` is
-version-driven rather than tag-driven: its ``version_check`` job reads
-:data:`pcapkit.__version__` directly, derives ``PCAPKIT_PRERELEASE`` from
-``packaging.version.Version(...).is_prerelease``, and picks the Anaconda label
-from the same test.
-
-Worth spelling out how that workflow is *reached*, because reading its ``on:``
-block alone suggests it is not reachable from an ordinary commit at all — it
-lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain has an
-extra hop: a push to ``main`` triggers **Unit Tests**
-(``unit-tests.yml``), whose completion triggers **Vendor Update**
-(``cron-vendor.yml``) via ``workflow_run`` -- ``cron-vendor.yml`` carries no
-``push`` trigger of its own, deliberately, per the comment on its
-``workflow_run`` trigger -- and *that* completion triggers **Create Release**
-itself. :doc:`workflows` draws the chain among the repository's other workflows.
-
-Every publishing job — ``github``, ``tag``, ``pypi``, ``conda`` — is gated on
-``startsWith(github.ref_name, 'v')`` or on evidence that its own target still
-needs publishing. Only ``github`` gates on ``PCAPKIT_TAG_EXISTS``, because the
-tag that output answers for is the one ``github`` is about to create. ``tag``,
-``pypi`` and ``conda`` each gate on their own target instead -- whether the
-matching Conda tag exists, whether PyPI's file count for the version has
-reached the expected total, whether Anaconda's upload is complete. Each of
-those additionally requires ``version_check`` and the release test gate
-(``unit-tests``) to have succeeded, and ``github`` -- and, for ``conda``,
-``tag`` -- to have succeeded *or skipped*. ``github`` itself needs the gate
-directly, and the gate runs only when one of the publishing jobs would.
-Those conditions open with ``!cancelled()``, which suppresses the ``success()``
-Actions would otherwise prepend; accepting ``skipped`` is then what stops an
-upstream job's legitimate skip cascading into skipping a job whose own evidence
-says it still has work to do. Naming the two states rather than writing "not
-failed" is deliberate: a *cancelled* dependency then skips the job below it
-cleanly, instead of letting it run against an artefact that was never
-produced.
-
-That is why an ordinary commit does not publish: the version string has not
-moved, so each job's own check finds its target already there and every one of
-them skips, as does the full-suite release test gate ahead of them. Changing the
-version string is what flips every one of those checks, and the next push then
-tags and publishes. So:
+The two steps differed only in the version string, which
+:file:`.github/workflows/create-release.yml` reads:
 
 .. list-table::
    :header-rows: 1
@@ -1166,40 +1103,31 @@ tags and publishes. So:
      - ``main``
      - full release
 
-Both steps publish to PyPI — the ``pypi`` job carries no prerelease gate — but a
-beta is only installable with ``pip install --pre``, so it reaches people
-who ask for it and nobody else. The consequential change is at step 2, where the
-Anaconda label flips from ``dev`` to ``main``. Neither step needs any change to
-the workflow itself; editing the version string is the whole of it, which is
-precisely why it should be its own commit rather than a line folded into
-something else.
+Both publish to PyPI, where the ``pypi`` job carries no prerelease gate, but a
+beta installs only with ``pip install --pre``, so it reaches only those who ask
+for it.
 
 Remaining Work
 --------------
 
-The items above are ordered by subject, and each says what it leaves open. This
-section adds the open work that spans several of them, and says which items
-*depend* on something rather than merely waiting for someone to start them. Nothing here is claimed: if you want an item,
-say so in the `discussion thread
+Open work that spans the items above, and what each depends on. Nothing here is
+claimed: to take an item, say so in the `discussion thread
 <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__.
 
-**The remaining protocols** from the list under `More Protocols, More!!!`_ above,
-taken three or four at a time. QUIC, DSL, FDDI and ISDN come last: QUIC because it
-is really HTTP/3 over a new transport and wants that settled first, the rest
-because a capture in the wild is rare enough that the work buys little until the
-commoner protocols are in.
+**The remaining protocols** from `More Protocols, More!!!`_ above. QUIC, DSL, FDDI
+and ISDN come last: QUIC because it is really HTTP/3 over a new transport and
+wants that settled first, the rest because a capture in the wild is rare enough
+that the work buys little until the commoner protocols are in.
 
-**Per-entry coverage of the option and parameter registries.** The
-option, parameter, block and frame registries are *enumerated* but not
-*implemented* throughout: a code can be registered, and named, and still have no
-working per-entry read/make pair behind it. The goal of this item is to close
-that gap to zero for every code whose format is actually specified.
+**Per-entry coverage of the option and parameter registries.** The option,
+parameter, block and frame registries are *enumerated* but not *implemented*
+throughout: a code can be registered and named, and still have no per-entry
+read/make pair behind it. The goal is to close that gap for every code whose
+format is specified.
 
-Both halves of the gap are measurable — the registered codes against the
-families :file:`examples/generators/options.py` walks, and the shortfall
-against ``EXPECTED_FAILURES`` in
-:file:`tests/protocols/test_option_roundtrip_unit.py` — so the commands are
-written down instead of figures that will be stale by the next merge:
+Both halves of the gap are measurable, against the families
+:file:`examples/generators/options.py` walks and the ``EXPECTED_FAILURES`` of
+:file:`tests/protocols/test_option_roundtrip_unit.py`:
 
 .. code-block:: shell
 
@@ -1215,25 +1143,23 @@ written down instead of figures that will be stale by the next merge:
               spec.loader.exec_module(m); \
               print(collections.Counter(k.split('/')[0] for k in m.EXPECTED_FAILURES))"
 
-Things to be precise about before anyone starts. First, the round-trip half
-is closed: ``EXPECTED_FAILURES`` is empty, so every case the harness enumerates
-round-trips, and a new entry there would record a defect rather than a
-deferral. Second, **round-tripping is not the same as being implemented** — the
+Two things to be precise about. The round-trip half is closed:
+``EXPECTED_FAILURES`` is empty, so a new entry there records a defect rather than
+a deferral. And **round-tripping is not the same as being implemented**: the
 harness walks the codes each protocol registers a handler for, not every code
 its enumeration names, so what remains is the codes with no per-entry handler,
-such as the SCTP chunk types under `SCTP`_ above, which fall through to the
-generic handlers and parse as opaque.
+such as the SCTP chunk types under `SCTP`_ above, which parse as opaque.
 
 This is deliberately **not** the same request as the ``__proto__`` dispatch
-registries. Those name whole protocols, so closing a gap there means
-implementing a dissector, which is the protocol work above. The option and
-parameter registries are per-entry formats inside protocols that already exist,
-so the work is self-contained and does not wait on anything. Their enumerating harness already exists and already fails when a
-registered code has no case, which is how the shortfall is known at all; what is
-missing is the implementations behind the codes, not the accounting of them.
+registries. Those name whole protocols, so closing a gap there means writing a
+dissector, which is the protocol work above. The option and parameter
+registries are per-entry formats inside protocols that already exist, so the
+work is self-contained and waits on nothing. Their harness already fails when a
+registered code has no case; what is missing is the implementations behind the
+codes, not the accounting of them.
 :file:`tests/protocols/test_dispatch_registry_unit.py` gives the ``__proto__``
-family the same accounting for the separate question of whether a registered
-protocol's dispatch reaches it.
+family the same accounting for whether a registered protocol's dispatch reaches
+it.
 
 **Cryptographic integrity verification.** See `Checksum and Integrity
 Verification`_ above. HIP's ``HIP_MAC``/``RVS_HMAC``/``RELAY_HMAC`` and its
@@ -1253,10 +1179,9 @@ prerequisites are the protocols the multicast options embed: :rfc:`9777` MLD
 and :rfc:`3376` **IGMPv3** group records. ICMPv6 and IGMPv3 are implemented
 (:issue:`2448`); MLD is not (see `More Protocols, More!!!`_ above), so a registry
 landed first would have only :class:`~pcapkit.protocols.misc.raw.protocol.Raw` to
-register for it. The
-counter-argument to waiting is real though, and worth weighing rather than dismissing: changing the
-parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the
-disruptive half, since it changes what existing captures dump to, so there is a case for
-taking that churn early and registering dissectors later. The remaining format, the
+register for it. Against waiting: changing the parsed shape from :obj:`bytes`
+to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the disruptive half, since
+it changes what existing captures dump to, so there is a case for taking that
+churn early and registering dissectors later. The remaining format, the
 :rfc:`6088` traffic selectors of :rfc:`6089` and :rfc:`7222`, is a registry of
 its own, and nobody has claimed it.

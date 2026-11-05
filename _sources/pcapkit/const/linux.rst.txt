@@ -4,9 +4,8 @@ Linux-Specific Constant Enumerations
 
 .. module:: pcapkit.const.linux
 
-This module contains all constant enumerations of the Linux-specific
-encapsulations, e.g. :class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`.
-Available enumerations include:
+For Linux-specific encapsulations, such as
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`.
 
 .. list-table::
 
@@ -20,8 +19,7 @@ ARP Hardware Types
 
 .. module:: pcapkit.const.linux.arphrd
 
-This module contains the constant enumeration for **Linux ARP Hardware Types**,
-which is automatically generated from :class:`pcapkit.vendor.linux.arphrd.ARPHRD`.
+Generated from :class:`pcapkit.vendor.linux.arphrd.ARPHRD`.
 
 .. autoclass:: pcapkit.const.linux.arphrd.ARPHRD
    :members:

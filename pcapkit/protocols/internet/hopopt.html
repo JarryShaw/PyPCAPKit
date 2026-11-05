@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/hopopt.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.hopopt.protocol contains HOPOPT only, which implements the extractor for IPv6 Hop-by-Hop Options header (HOPOPT)*, whose structure is described as below:,,,, Octets, Bits..." />
-<meta name="description" content="pcapkit.protocols.internet.hopopt.protocol contains HOPOPT only, which implements the extractor for IPv6 Hop-by-Hop Options header (HOPOPT)*, whose structure is described as below:,,,, Octets, Bits..." />
+<meta property="og:description" content="pcapkit.protocols.internet.hopopt.protocol contains HOPOPT only, which implements the extractor for IPv6 Hop-by-Hop Options header (HOPOPT)*, whose structure is:,,,, Octets, Bits, Name, Description..." />
+<meta name="description" content="pcapkit.protocols.internet.hopopt.protocol contains HOPOPT only, which implements the extractor for IPv6 Hop-by-Hop Options header (HOPOPT)*, whose structure is:,,,, Octets, Bits, Name, Description..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPv6 Options - Shared Option Helpers" href="ipv6_option.html"><link rel="prev" title="IPv6-Route - Routing Header for IPv6" href="ipv6_route.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,8 +573,7 @@
 <p id="module-pcapkit.protocols.internet.hopopt.protocol"><a class="reference internal" href="#module-pcapkit.protocols.internet.hopopt.protocol" title="pcapkit.protocols.internet.hopopt.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hopopt.protocol</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.protocol.HOPOPT" title="pcapkit.protocols.internet.hopopt.protocol.HOPOPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOPOPT</span></code></a>
 only, which implements the extractor for IPv6 Hop-by-Hop
-Options header (HOPOPT) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
-described as below:</p>
+Options header (HOPOPT) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -779,7 +778,7 @@ value is a <code class="docutils literal notranslate"><span class="pre">(parser,
 class-name default, because
 <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> sits between
 this class and that default in the MRO and carries its own
-<code class="docutils literal notranslate"><span class="pre">'IPv6-Ext'</span></code> (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>). Inheriting it would rename
+<code class="docutils literal notranslate"><span class="pre">'IPv6-Ext'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>). Inheriting it would rename
 this header in every <a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>
 string and in <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>’s packet
 dict key.</p>

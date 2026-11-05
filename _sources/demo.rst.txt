@@ -6,7 +6,7 @@ Basic Samples
 
 :mod:`pcapkit` is built around the :func:`~pcapkit.interface.core.extract`,
 :func:`~pcapkit.interface.core.reassemble` and :func:`~pcapkit.interface.core.trace`
-verbs. Some common scenarios:
+functions. Some common scenarios:
 
 1. extract a PCAP file and dump the result to a specific file
    (with no reassembly)
@@ -40,8 +40,8 @@ verbs. Some common scenarios:
    .. code-block:: python
 
       from pcapkit import HTTP, extract
-      # reasm_strict is the default: it submits incompletely reassembled
-      # datagrams too, which is why the packet check below is needed
+      # under reasm_strict, the default, an incompletely reassembled
+      # datagram carries no packet, hence the check below
       extraction = extract(fin='in.pcap', store=False, nofile=True, reassembly=True, tcp=True, reasm_strict=True)
       # print extracted packet if HTTP in reassembled payloads
       for datagram in extraction.reassembly.tcp:
@@ -51,19 +51,13 @@ verbs. Some common scenarios:
 CLI Samples
 -----------
 
-:mod:`pcapkit`'s CLI (command line interface) can be reached in these ways.
+:mod:`pcapkit`'s command line interface runs as either:
 
-* through console scripts
+* ``pcapkit-cli [...]``, the console script the samples below use; or
+* ``python -m pcapkit [...]`` -- the module is ``pcapkit``, though the
+  distribution on PyPI is ``pypcapkit``.
 
-  Use command name ``pcapkit-cli [...]`` directly (as shown in samples).
-
-* through Python module
-
-  ``python -m pcapkit [...]`` works exactly the same as above. Note that the
-  module name is ``pcapkit``, even though the distribution on PyPI is named
-  ``pypcapkit``.
-
-Here are some usage samples:
+Samples:
 
 1. export to a macOS Property List
    (`Xcode`_ has special support for this format)
@@ -84,10 +78,9 @@ Here are some usage samples:
 
    .. note::
 
-      The output format is **not** presumed from the output file name, so
-      ``-f``/``--format`` (or the ``-j``/``--json`` switch) has to be given;
-      without it the default tree view is written into whatever file name was
-      supplied.
+      The output format is **not** inferred from the output file name, so
+      give ``-f``/``--format`` (or the ``-j``/``--json`` switch); without it the
+      default tree view is written to the file named.
 
    .. code-block:: shell
 

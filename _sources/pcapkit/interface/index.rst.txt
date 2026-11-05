@@ -3,9 +3,8 @@ User Interface
 
 .. module:: pcapkit.interface
 
-:mod:`pcapkit.interface` defines the user-oriented
-interfaces and constants. These interfaces are
-designed to help and simplify the usage of :mod:`pcapkit`.
+:mod:`pcapkit.interface` defines the user-facing functions and constants that
+simplify the use of :mod:`pcapkit`.
 
 .. toctree::
 
@@ -13,21 +12,16 @@ designed to help and simplify the usage of :mod:`pcapkit`.
    misc
    registry
 
-For wrapper interface functions and constants, please
-refer to the documentation of :mod:`pcapkit.interface.core`
-module, where the core interfaces are defined. And for the
-auxiliary interfaces, please refer to the documentation
-of :mod:`pcapkit.interface.misc` module.
-The helpers the registrars share live in the
-:mod:`pcapkit.interface.registry` module.
+:mod:`pcapkit.interface.core` defines the core functions and constants,
+:mod:`pcapkit.interface.misc` the auxiliary ones, and
+:mod:`pcapkit.interface.registry` the helpers the registrars share.
 
 .. note::
 
-   Should you wish to have additional interfaces defined,
-   please feel free to open an issue on GitHub, or even better,
-   submit a pull request. Your contribution is highly appreciated.
+   To ask for another interface, open an issue on GitHub, or submit a pull
+   request.
 
-Following is a table of all interfaces defined in this module:
+The public interfaces, by category:
 
 +------------------+---------------------+--------------------------------------------+
 | Category         | Interface                                                        |

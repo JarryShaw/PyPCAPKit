@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit is an independent open source library, using only DictDumper as its formatted output dumper. Unlike popular PCAP file extractors, such as Scapy, DPKT and PyShark, pcapkit tends to provide c..." />
-<meta name="description" content="pcapkit is an independent open source library, using only DictDumper as its formatted output dumper. Unlike popular PCAP file extractors, such as Scapy, DPKT and PyShark, pcapkit tends to provide c..." />
+<meta property="og:description" content="pcapkit is an independent open source library, using DictDumper as its formatted output dumper. Unlike Scapy, DPKT and PyShark, pcapkit aims to support each protocol in full, options and parameters..." />
+<meta name="description" content="pcapkit is an independent open source library, using DictDumper as its formatted output dumper. Unlike Scapy, DPKT and PyShark, pcapkit aims to support each protocol in full, options and parameters..." />
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="User Interface" href="interface/index.html"><link rel="prev" title="PyPCAPKit - Comprehensive Network Packet Analysis Library" href="../index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,14 +570,12 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit">
 <span id="module-documentation"></span><h1>Module Documentation<a class="headerlink" href="#module-pcapkit" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an independent open source library, using only
-<a class="reference external" href="https://dictdumper.jarryshaw.me">DictDumper</a> as its formatted output dumper.</p>
-<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> and
-<a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> tends to provide comprehensive
-support to all protocols, including but not limited to their
-parameters and/or options, etc. Therefore, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> contains
-enumeration registries used by protocols, independent protocol
-schema definitions as well as various customisable interfaces.</p>
+<p><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is an independent open source library, using <a class="reference external" href="https://dictdumper.jarryshaw.me">DictDumper</a> as its
+formatted output dumper.</p>
+<p>Unlike <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> aims to support each
+protocol in full, options and parameters included, so it carries the protocols’
+enumeration registries, independent schema definitions and customisable
+interfaces.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Subpackages</span></p>
 <ul>
@@ -600,18 +598,18 @@ schema definitions as well as various customisable interfaces.</p>
 <dd><p>version number</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../contributing/releasing.html"><span class="doc">Release Process</span></a> for how this value is bumped and
-consumed by the release pipeline.</p>
+<p><a class="reference internal" href="../contributing/releasing.html"><span class="doc">Release Process</span></a>, on how the release pipeline bumps and
+reads it.</p>
 </div>
 </dd></dl>
 
 </section>
 <section id="module-pcapkit.all">
 <span id="library-index"></span><h2>Library Index<a class="headerlink" href="#module-pcapkit.all" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has defined various and numerous functions
-and classes, which have different features and purposes.
-To make a simple index for this library, <a class="reference internal" href="#module-pcapkit.all" title="pcapkit.all"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.all</span></code></a>
-contains all things from <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.all" title="pcapkit.all"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.all</span></code></a> gathers the public names of the <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> subpackages in
+one namespace – <a class="reference internal" href="const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> as a module, and <a class="reference internal" href="vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> not
+at all – with the third-party engines’ <a class="reference internal" href="toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> helpers prefixed
+by engine, such as <code class="docutils literal notranslate"><span class="pre">scapy_packet2dict</span></code>.</p>
 </section>
 <section id="module-pcapkit.__main__">
 <span id="command-line-tool"></span><h2>Command Line Tool<a class="headerlink" href="#module-pcapkit.__main__" title="Link to this heading">¶</a></h2>
@@ -620,7 +618,7 @@ contains all things from <a class="reference internal" href="#module-pcapkit" ti
 <p>The <a class="reference external" href="https://carpedm20.github.io/emoji/docs/"><code class="docutils literal notranslate"><span class="pre">emoji</span></code></a> package (the <code class="docutils literal notranslate"><span class="pre">cli</span></code> extra) decorates the <code class="docutils literal notranslate"><span class="pre">-v</span></code> output.
 Without it, importing the module warns with
 <a class="reference internal" href="utilities/warnings.html#pcapkit.utilities.warnings.EmojiWarning" title="pcapkit.utilities.warnings.EmojiWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmojiWarning</span></code></a> and the CLI prints plain
-text instead.</p>
+text.</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.__main__" title="pcapkit.__main__"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.__main__</span></code></a> provides the CLI, merged in from the deprecated
 <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> project.</p>
@@ -697,8 +695,8 @@ options:
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_DEVMODE">
 <span class="sig-name descname"><span class="pre">PCAPKIT_DEVMODE</span></span><a class="headerlink" href="#envvar-PCAPKIT_DEVMODE" title="Link to this definition">¶</a></dt>
-<dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case), <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-will run in development mode.</p>
+<dd><p>Set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case) to run
+<a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> in development mode.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="utilities/logging.html#pcapkit.utilities.logging.DEVMODE" title="pcapkit.utilities.logging.DEVMODE"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.logging.DEVMODE</span></code></a></p>
@@ -708,8 +706,8 @@ will run in development mode.</p>
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_VERBOSE">
 <span class="sig-name descname"><span class="pre">PCAPKIT_VERBOSE</span></span><a class="headerlink" href="#envvar-PCAPKIT_VERBOSE" title="Link to this definition">¶</a></dt>
-<dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case), <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-will run with verbose output.</p>
+<dd><p>Set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case) for verbose
+output.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="utilities/logging.html#pcapkit.utilities.logging.VERBOSE" title="pcapkit.utilities.logging.VERBOSE"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.logging.VERBOSE</span></code></a></p>
@@ -719,21 +717,20 @@ will run with verbose output.</p>
 <dl class="std envvar">
 <dt class="sig sig-object std" id="envvar-PCAPKIT_SPHINX">
 <span class="sig-name descname"><span class="pre">PCAPKIT_SPHINX</span></span><a class="headerlink" href="#envvar-PCAPKIT_SPHINX" title="Link to this definition">¶</a></dt>
-<dd><p>If set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case), <a class="reference internal" href="#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-will run with Sphinx additional typing hints and docstrings support.</p>
+<dd><p>Set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (or <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, in any case) for the extra
+typing hints and docstrings the Sphinx build reads.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="utilities/logging.html#pcapkit.utilities.logging.SPHINX_TYPE_CHECKING" title="pcapkit.utilities.logging.SPHINX_TYPE_CHECKING"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.logging.SPHINX_TYPE_CHECKING</span></code></a></p>
 </div>
 </dd></dl>
 
-<p>The <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> tunable limits, such as
-<a class="reference internal" href="utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>, are read by
-<a class="reference internal" href="utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a>, which lists each
-with its default, its accepted range and its risks. The <a class="reference internal" href="vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>
-crawlers’ <span class="target" id="index-0"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>, <span class="target" id="index-1"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>,
-<span class="target" id="index-2"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and <span class="target" id="index-3"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a> are read by
-<a class="reference internal" href="vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>, and listed under <a class="reference internal" href="vendor/default.html#vendor-variables"><span class="std std-ref">Environment Variables</span></a>.</p>
+<p><a class="reference internal" href="utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> reads the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> tunable limits, such as
+<a class="reference internal" href="utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>, and lists each with its
+default, range and risks. <a class="reference internal" href="vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a> reads the crawlers’
+<span class="target" id="index-0"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>, <span class="target" id="index-1"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>,
+<span class="target" id="index-2"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and <span class="target" id="index-3"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a>, listed under
+<a class="reference internal" href="vendor/default.html#vendor-variables"><span class="std std-ref">Environment Variables</span></a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span><span class="target" id="index-4"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and <span class="target" id="index-5"></span><a class="reference internal" href="vendor/default.html#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a> are documented
 with <a class="reference internal" href="vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a> rather than here, and are still read on

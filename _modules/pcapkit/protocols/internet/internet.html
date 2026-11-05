@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -708,13 +708,9 @@
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_NoNxt</span><span class="p">:</span>      <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw.protocol'</span><span class="p">,</span>            <span class="s1">'Raw'</span><span class="p">),</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipv6_opts.protocol'</span><span class="p">,</span>  <span class="s1">'IPv6_Opts'</span><span class="p">),</span>
 
-            <span class="c1"># OSPF rides directly on IP, so IANA protocol number 89 is its only</span>
-            <span class="c1"># dispatch point. The dissector nonetheless lives under</span>
-            <span class="c1"># ``protocols.application`` and reports ``__layer__ = 'Application'``,</span>
-            <span class="c1"># because a routing protocol computes the forwarding table rather</span>
-            <span class="c1"># than forwarding packets -- the dispatch tier and the subpackage are</span>
-            <span class="c1"># deliberately decoupled, see</span>
-            <span class="c1"># :doc:`/contributing/conventions/protocol-layer-placement`.</span>
+            <span class="c1"># OSPF rides directly on IP (protocol 89) but lives under ``protocols.application``:</span>
+            <span class="c1"># a routing protocol computes the forwarding table rather than forwarding packets;</span>
+            <span class="c1"># see :doc:`/contributing/conventions/protocol-layer-placement`.</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">OSPFIGP</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ospf.protocol'</span><span class="p">,</span> <span class="s1">'OSPF'</span><span class="p">),</span>
 
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span><span class="p">:</span>       <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet.ipx.protocol'</span><span class="p">,</span>        <span class="s1">'IPX'</span><span class="p">),</span>
@@ -725,15 +721,14 @@
     <span class="p">)</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
+    <span class="c1">#: and whether a bare :class:`int` is a valid key too. Declared by the class</span>
+    <span class="c1">#: owning the registry and read by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`,</span>
+    <span class="c1">#: so a ``code=`` key is checked as</span>
     <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype` checks</span>
-    <span class="c1">#: its own -- a subclass sharing this registry is therefore checked as</span>
-    <span class="c1">#: :class:`Internet` is (:issue:`2268`), while</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps one of its own,</span>
-    <span class="c1">#: declares its own pairing (:issue:`2511`).</span>
+    <span class="c1">#: its own (:issue:`2268`).</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipx.protocol.IPX`, which keeps a registry</span>
+    <span class="c1">#: of its own, declares its own pairing (:issue:`2511`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_TransType</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1">#: int: How many IPv6 extension headers in a row the next layer follows:</span>
@@ -1517,7 +1512,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1543,7 +1538,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

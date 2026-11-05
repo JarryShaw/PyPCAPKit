@@ -4,8 +4,10 @@ Flow Tracing Base Class
 .. module:: pcapkit.foundation.traceflow.traceflow
 
 :mod:`pcapkit.foundation.traceflow.traceflow` contains
-:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` only,
-which is an abstract base class for all flow tracing classes.
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, the abstract base
+class of a custom flow tracing class, and
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`, which it and the
+built-in TCP flow tracing class derive from.
 
 .. autoclass:: pcapkit.foundation.traceflow.traceflow.TraceFlow
    :no-members:
@@ -13,8 +15,7 @@ which is an abstract base class for all flow tracing classes.
 
    .. seealso::
 
-      For more information on customisation and extension, please
-      refer to :doc:`../../../ext`.
+      For customisation and extension, see :doc:`../../../ext`.
 
    .. property:: name
       :type: str
@@ -23,8 +24,7 @@ which is an abstract base class for all flow tracing classes.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__protocol_name__` class attribute.
+         Also a class variable, set by :attr:`__protocol_name__`.
 
    .. property:: protocol
       :type: typing.Type[pcapkit.protocols.protocol.ProtocolBase]
@@ -33,8 +33,7 @@ which is an abstract base class for all flow tracing classes.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__protocol_type__` class attribute.
+         Also a class variable, set by :attr:`__protocol_type__`.
 
    .. property:: registry
       :type: dict[str, ModuleDescriptor[TraceFlowBase] | typing.Type[TraceFlowBase]]
@@ -43,12 +42,11 @@ which is an abstract base class for all flow tracing classes.
 
       .. note::
 
-         This property is only available as a class variable, since it is
-         defined on :class:`TraceFlowMeta`. It reads
-         :attr:`~pcapkit.foundation.extraction.Extractor.__traceflow__`, the
-         single table every flow tracing registration lands in, so it is not a
-         per-class mapping. It is *not* :attr:`__output__`, which is the
-         separate output-dumper table this class also owns.
+         A class variable only, defined on :class:`TraceFlowMeta`. It is not
+         per-class: it reads
+         :attr:`~pcapkit.foundation.extraction.Extractor.__traceflow__`, the one
+         table every flow tracing registration lands in. It is *not*
+         :attr:`__output__`, the separate output-dumper table this class owns.
 
    .. autoproperty:: index
 

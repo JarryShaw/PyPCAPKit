@@ -32,6 +32,54 @@ only, which is the base class for all vendor crawlers.
 
    .. automethod:: __init__
 
+Running a Crawler
+-----------------
+
+Instantiating a crawler fetches its registry and writes the constant module:
+
+.. mermaid::
+
+   flowchart TD
+       NEW["a crawler instantiated: Vendor.\_\_init\_\_"]
+       L{"LINK set?"}
+       G["GET LINK<br/>a non-OK or empty page retried,<br/>up to MAX\_RETRY"]
+       P{"get\_proxies() gives any?"}
+       GP["GET LINK through the proxies<br/>retried the same way"]
+       CI{"PCAPKIT\_CI\_MODE on?"}
+       TTY{"stdin interactive?"}
+       RAISE["the request error is raised"]
+       MAN["manual: LINK opened in a browser,<br/>wait for its saved page source"]
+       REQ["request(text): the registry's records"]
+       CNT["count(data)"]
+       CTX["context(data): process(), then the module template"]
+       DEST["\_dest\_path(): the matching module under pcapkit/const/"]
+       WR["the constant module written"]
+
+       NEW --> L
+       L -->|"no: request() with no text"| REQ
+       L -->|yes| G
+       G -->|ok| REQ
+       G -->|fails| P
+       P -->|yes| GP
+       P -->|no| CI
+       GP -->|ok| REQ
+       GP -->|fails| CI
+       CI -->|yes| RAISE
+       CI -->|no| TTY
+       TTY -->|no| RAISE
+       TTY -->|yes| MAN --> REQ
+       REQ --> CNT --> CTX --> DEST --> WR
+
+       click NEW "default.html#pcapkit.vendor.default.Vendor.__init__"
+       click REQ "default.html#pcapkit.vendor.default.Vendor.request"
+       click CNT "default.html#pcapkit.vendor.default.Vendor.count"
+       click CTX "default.html#pcapkit.vendor.default.Vendor.context"
+       click DEST "default.html#pcapkit.vendor.default.Vendor._dest_path"
+
+Each failed fetch warns with :class:`~pcapkit.utilities.warnings.VendorRequestWarning`;
+:envvar:`PCAPKIT_VENDOR_RETRY` sets :data:`~pcapkit.vendor.default.MAX_RETRY`, and
+:envvar:`PCAPKIT_CI_MODE` turns on the CI check.
+
 .. _vendor-variables:
 
 Environment Variables

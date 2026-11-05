@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -1004,19 +1004,14 @@
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="c1"># NOTE: A capture that ends at or inside the header has no payload</span>
-        <span class="c1"># octets, and parsing the next layer from none would default-fill a</span>
-        <span class="c1"># header that was never captured, which ``from_data`` then rebuilds</span>
-        <span class="c1"># (#1167). A zero length makes it a ``NoPayload`` instead.</span>
+        <span class="c1"># NOTE: A capture ending at or inside the header has no payload; a zero length</span>
+        <span class="c1"># makes it a ``NoPayload`` rather than a default-filled header (#1167).</span>
         <span class="c1">#</span>
-        <span class="c1"># A Total Length of 0 is what TCP segmentation offload leaves in a</span>
-        <span class="c1"># capture taken on the sending host: the payload is then the rest of</span>
-        <span class="c1"># the captured frame, with no trailer, as Wireshark ("presumed TSO") and</span>
-        <span class="c1"># dpkt read it. Any other Total Length shorter than the header is</span>
-        <span class="c1"># Wireshark's "Bogus IP length", which it dissects no further: no</span>
-        <span class="c1"># payload, and the octets after the header are the trailer, as they are</span>
-        <span class="c1"># for a Total Length equal to the header's. Either way the rebuild</span>
-        <span class="c1"># writes the Total Length back as it was (#1547).</span>
+        <span class="c1"># A Total Length of 0 is what TCP segmentation offload leaves on the sending</span>
+        <span class="c1"># host: the payload is the rest of the frame, with no trailer, as Wireshark</span>
+        <span class="c1"># ("presumed TSO") and dpkt read it. Any other Total Length shorter than the</span>
+        <span class="c1"># header is Wireshark's "Bogus IP length": no payload, and the rest is trailer.</span>
+        <span class="c1"># Either way the rebuild writes the Total Length back as it was (#1547).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_plen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
@@ -1025,15 +1020,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_plen</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="c1"># NOTE: A later fragment, one with a non-zero Fragment Offset, carries a</span>
-        <span class="c1"># slice of the datagram's data from that offset on, and that slice</span>
-        <span class="c1"># starts with no upper-layer header (:rfc:`791#section-3.2`), though</span>
-        <span class="c1"># ``protocol`` above still names the one the first fragment carries. No</span>
-        <span class="c1"># code is dispatched on, so the registry's fallback leaves the octets as</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.protocol.Raw` with no protocol to alias it</span>
-        <span class="c1"># as, and ``'UDP' in frame`` does not hold of a slice of UDP payload</span>
-        <span class="c1"># (#1553). Reassembly takes ``packet.payload``, the octets as</span>
-        <span class="c1"># captured, which this leaves as they were.</span>
+        <span class="c1"># NOTE: A later fragment (non-zero Fragment Offset) starts with no upper-layer</span>
+        <span class="c1"># header (:rfc:`791#section-3.2`), though ``protocol`` names the first fragment's.</span>
+        <span class="c1"># Nothing is dispatched on, so the octets stay Raw and ``'UDP' in frame`` does not</span>
+        <span class="c1"># hold (#1553); reassembly takes ``packet.payload`` as captured.</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span>
         <span class="c1"># NOTE: A Total Length of 0 declares none, so the frame's lengths are the</span>
         <span class="c1"># only record of a cut and the payload keeps them (#2689).</span>
@@ -3366,7 +3356,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -3392,7 +3382,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

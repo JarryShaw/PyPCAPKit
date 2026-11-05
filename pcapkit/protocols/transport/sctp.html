@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/transport/sctp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.transport.sctp.protocol contains SCTP only, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is described as below:,,,, Octets, Bit..." />
-<meta name="description" content="pcapkit.protocols.transport.sctp.protocol contains SCTP only, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is described as below:,,,, Octets, Bit..." />
+<meta property="og:description" content="pcapkit.protocols.transport.sctp.protocol contains SCTP, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is:,,,, Octets, Bits, Name, Description,,, ..." />
+<meta name="description" content="pcapkit.protocols.transport.sctp.protocol contains SCTP, which implements the extractor for Stream Control Transmission Protocol (SCTP)*, whose structure is:,,,, Octets, Bits, Name, Description,,, ..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="TCP - Transmission Control Protocol" href="tcp.html"><link rel="prev" title="DCCP - Datagram Congestion Control Protocol" href="dccp.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -576,10 +576,9 @@ module, and <a class="reference internal" href="#module-pcapkit.protocols.transp
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.protocols.transport.sctp.protocol" title="pcapkit.protocols.transport.sctp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> only,
+<a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>,
 which implements the extractor for Stream Control
-Transmission Protocol (SCTP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
-described as below:</p>
+Transmission Protocol (SCTP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -624,12 +623,10 @@ described as below:</p>
 <dd><p>Bases: <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.transport.sctp.data.SCTP" title="pcapkit.protocols.transport.sctp.data.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.transport.sctp.schema.SCTP" title="pcapkit.protocols.transport.sctp.schema.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a>]</p>
 <p>This class implements Stream Control Transmission Protocol.</p>
 <p>Unlike <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP" title="pcapkit.protocols.transport.tcp.protocol.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> and
-<a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>, SCTP does <strong>not</strong> dispatch
-the next layer on port numbers: user data travels inside DATA chunks, and
-each DATA chunk names its upper layer through its <em>payload protocol
-identifier</em> (PPID). The <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> registry is
-therefore keyed by PPID rather than by port number, and is populated through
-<a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.register" title="pcapkit.protocols.transport.sctp.protocol.SCTP.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP.register()</span></code></a>:</p>
+<a class="reference internal" href="udp.html#pcapkit.protocols.transport.udp.protocol.UDP" title="pcapkit.protocols.transport.udp.protocol.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>, SCTP dispatches the next
+layer on the <em>payload protocol identifier</em> (PPID) each DATA chunk carries, not
+on a port, so <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> is keyed by PPID and
+populated through <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.register" title="pcapkit.protocols.transport.sctp.protocol.SCTP.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SCTP.register()</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadProtocolIdentifier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">PayloadProtocolIdentifier</span><span class="o">.</span><span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span><span class="p">,</span> <span class="n">NGAP</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SCTP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">NGAP</span><span class="p">)</span>  <span class="c1"># equivalent, PPID given as a plain integer</span>
@@ -640,17 +637,12 @@ and 66 (<code class="docutils literal notranslate"><span class="pre">PayloadProt
 registered to
 <a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>, and every other PPID
 resolves to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
-<p>Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
-a DTLS record, and this registry maps it straight to
-<a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> rather than through
-<a class="reference internal" href="../application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>, so the bytes are not
-aligned PER and the parse always degrades to
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. It is registered so that the
-PPID is <em>named</em> in the protochain rather than reported as an unassigned
-number.</p>
-<p>This class supports parsing of the following SCTP chunks, which
-are directly mapped to the <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.chunk.Chunk</span></code></a>
-enumeration:</p>
+<p>Only PPID 60 decodes. A PPID 66 payload is an NGAP PDU in a DTLS record,
+mapped straight to <a class="reference internal" href="../application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>
+rather than through <a class="reference internal" href="../application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a>,
+so it always degrades to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>; it
+is registered so that the protochain names the PPID.</p>
+<p>The SCTP chunks it parses, by <a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.chunk.Chunk</span></code></a> type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -719,9 +711,8 @@ enumeration:</p>
 extension that <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> does not implement – falls through to
 <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_donone" title="pcapkit.protocols.transport.sctp.protocol.SCTP._read_chunk_donone"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_chunk_donone()</span></code></a>, which
 records the chunk’s raw flags and value verbatim rather than raising.</p>
-<p>This class supports parsing of the following chunk parameters,
-which are directly mapped to the
-<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.parameter.Parameter</span></code></a> enumeration:</p>
+<p>The chunk parameters it parses, by
+<a class="reference internal" href="../../const/sctp.html#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.sctp.parameter.Parameter</span></code></a> type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -824,13 +815,11 @@ by port number as in <a class="reference internal" href="tcp.html#pcapkit.protoc
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto_key__">
 <span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto_key__" title="Link to this definition">¶</a></dt>
 <dd><p>What <a class="reference internal" href="#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by – the enum a key must be a member of,
-and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
-class <em>owning</em> the registry, and read from it by
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
-<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a> checks its own
-– a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is accepted because the registry is keyed by
-payload protocol identifier, which is a number in its own right (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is valid too. Read by
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+to check a <code class="docutils literal notranslate"><span class="pre">code=</span></code> key as
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a> checks
+its own; a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a PPID (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">

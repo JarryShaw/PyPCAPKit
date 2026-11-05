@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,11 +558,10 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.sslv2.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.sslv2.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` only,</span>
-<span class="sd">which implements an extractor for Secure Sockets Layer</span>
-<span class="sd">version 2 (SSLv2) [*]_, as defined by the (long expired)</span>
-<span class="sd">Netscape draft that introduced it.</span>
+<span class="sd">:mod:`pcapkit.protocols.application.sslv2.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, the extractor for</span>
+<span class="sd">Secure Sockets Layer version 2 (SSLv2) [*]_, as the expired Netscape draft</span>
+<span class="sd">defines it.</span>
 
 <span class="sd">SSLv2 is wire-*incompatible* with SSLv3 and TLS: it carries no</span>
 <span class="sd">content-type byte and no ``0x03xx``-style record version, its record header</span>
@@ -571,8 +570,7 @@
 <span class="sd">field. See :func:`~pcapkit.protocols.application.sslv2.schema.sslv2_record_length`</span>
 <span class="sd">for the header's exact shape.</span>
 
-<span class="sd">SSLv1 has no module here, nor does it need one: it was never publicly</span>
-<span class="sd">released, so there is no wire format to dissect.</span>
+<span class="sd">SSLv1 was never publicly released, so it has no wire format to dissect.</span>
 
 <span class="sd">Decoding ``CLIENT-HELLO``/``SERVER-HELLO`` bodies assumes the record is</span>
 <span class="sd">genuinely cleartext. Per the draft's §5.4, most other message types are sent</span>
@@ -1484,7 +1482,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1510,7 +1508,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -685,15 +685,14 @@ see <a class="reference internal" href="#pcapkit.protocols.internet.internet.Int
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.__proto_key__">
 <span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.__proto_key__" title="Link to this definition">¶</a></dt>
 <dd><p>What <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by – the enum a key must be a member of,
-and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
-class <em>owning</em> the registry, and read from it by
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
-<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key too. Declared by the class
+owning the registry and read by
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>,
+so a <code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked as
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.internet.register_transtype" title="pcapkit.foundation.registry.protocols.internet.register_transtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_transtype()</span></code></a> checks
-its own – a subclass sharing this registry is therefore checked as
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> is (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>), while
-<a class="reference internal" href="ipx.html#pcapkit.protocols.internet.ipx.protocol.IPX" title="pcapkit.protocols.internet.ipx.protocol.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a>, which keeps one of its own,
-declares its own pairing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2511">#2511</a>).</p>
+its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).
+<a class="reference internal" href="ipx.html#pcapkit.protocols.internet.ipx.protocol.IPX" title="pcapkit.protocols.internet.ipx.protocol.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a>, which keeps a registry
+of its own, declares its own pairing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2511">#2511</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -982,19 +981,39 @@ it while parsing, see <a class="reference internal" href="../../utilities/config
 
 <section id="extension-header-chains">
 <h2>Extension Header Chains<a class="headerlink" href="#extension-header-chains" title="Link to this heading">¶</a></h2>
-<p>A chain of IPv6 extension headers is dissected to at most
-<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> headers in
-a row, whether it follows IPv6 or another layer such as IPv4. What follows is
-kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The
-<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> engine leaves the walk to its own parser, which does not stop there,
-so it may still find the upper layer past it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>). So may the
-<code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit, which reads the chain as <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes it. So does the
-<code class="docutils literal notranslate"><span class="pre">scapy</span></code> engine behind IPv6, where Scapy dissects each extension header itself;
-behind IPv4, its toolkit steps over them in the octets to find TCP, up to
-<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> of them in a row. The
-<code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkit walks no extension header chain, so it finds no upper
-layer behind one.</p>
+<p>A chain of IPv6 extension headers, behind IPv6 or another layer such as IPv4,
+is dissected to at most <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>
+headers in a row. What follows is kept as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The other
+engines and toolkits:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine or toolkit</p></th>
+<th class="head"><p>Behind a chain</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> engine</p></td>
+<td><p>Its own parser walks the chain without that limit, so it may still find
+the upper layer (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit</p></td>
+<td><p>Reads the chain as <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes it, so it may too.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code> engine</p></td>
+<td><p>Behind IPv6, Scapy dissects each extension header itself, so it may too.
+Behind IPv4, its toolkit steps over at most
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> of them in a row
+in the octets to find TCP.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkit</p></td>
+<td><p>Walks no chain, so it finds no upper layer behind one.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 </section>
 

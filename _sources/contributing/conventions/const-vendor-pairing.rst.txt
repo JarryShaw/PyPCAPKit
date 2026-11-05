@@ -26,20 +26,16 @@ Novell's and Xerox's own IPX socket/packet-type tables, went offline (:issue:`50
 :issue:`518`).
 
 :class:`~pcapkit.const.linux.arphrd.ARPHRD` follows this pattern: its source is the
-Linux kernel header ``<linux/if_arp.h>``, C source
-under the kernel's own versioning rather than an IANA page, so
-:mod:`pcapkit.vendor.linux.arphrd` reads a ``DATA`` dict of
-``{code: (name, description)}`` transcribed from the header instead of fetching a
-URL. The crawler's :meth:`~pcapkit.vendor.default.Vendor.process` renders that dict
-into the same enumeration members, the same ``FLAG`` bound and the same
-``_missing_`` body the committed :mod:`pcapkit.const.linux.arphrd` carries --
-running it is a no-op against the file in the tree, exactly as a web-scraped
-crawler's run is. The explanatory prose that once lived in the hand-maintained
-``const`` module -- which values are listed and why, the cross-reference to
-:class:`~pcapkit.const.arp.hardware.Hardware` -- now lives in the crawler's own
-module docstring and comments, alongside the ``DATA`` literal it documents; the
-generated ``const`` module carries only the plain, templated docstring every
-other generated module does.
+Linux kernel header ``<linux/if_arp.h>``, C source under the kernel's own versioning
+rather than an IANA page, so :mod:`pcapkit.vendor.linux.arphrd` reads a ``DATA`` dict
+of ``{code: (name, description)}`` transcribed from the header. The crawler's
+:meth:`~pcapkit.vendor.default.Vendor.process` renders that dict into the members, the
+``FLAG`` bound and the ``_missing_`` body the committed :mod:`pcapkit.const.linux.arphrd`
+carries, so running it is a no-op against the tree, as a web-scraped crawler's run is.
+The explanatory prose -- which values are listed and why, the cross-reference to
+:class:`~pcapkit.const.arp.hardware.Hardware` -- lives in the crawler's module
+docstring and comments, beside the ``DATA`` literal it documents; the generated
+``const`` module carries only the templated docstring every generated module does.
 
 Where the primary source is paywalled, a pinned secondary revision is an acceptable
 ``DATA`` source once its values are cross-checked against independent implementations,
@@ -51,46 +47,16 @@ Linux kernel's header and Wireshark.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`~pcapkit.const.tls.content_type.ContentType` and
-:class:`~pcapkit.const.tls.handshake_type.HandshakeType`, which came with the TLS
-record layer, have matching crawlers -- :mod:`pcapkit.vendor.tls.content_type` and
-:mod:`pcapkit.vendor.tls.handshake_type`, exported as ``TLS_ContentType`` and
-``TLS_HandshakeType`` -- closing the gap :issue:`2495` tracked. Both take the
-normal ``LINK``-and-scrape shape against IANA's ``tls-parameters-5.csv`` and
-``tls-parameters-7.csv``, as this doc said the eventual crawler would; unlike
-ARPHRD, TLS's source is a live, web-published table, so neither reads a
-``DATA`` literal.
-
-Running either crawler is a true no-op against the committed ``const``
-modules: regenerating both reproduces the tree byte-for-byte, the same
-guarantee ARPHRD and the ``sslv2`` restack carry. Getting there meant
-regenerating the ``const`` modules committed with the TLS record layer, which
-predated the crawler and had drifted from it in the ways cross-review of
-:pr:`2503` (:issue:`2495`) caught:
-
-* the committed ``ContentType`` resolved values 32-63 to ``Unassigned`` via a
-  flat ``_missing_`` fallback, while IANA's registry -- and the crawler --
-  call that band ``Reserved`` (:rfc:`9147`); the committed docstring already
-  said "Reserved", the code did not. Regenerating fixes the resolved name for
-  that band.
-* the committed ``ContentType`` carried an ``invalid = 0`` sentinel with no
-  IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
-  inside its 0-19 ``Unassigned`` band, unnamed); it is dropped, and value 0
-  now resolves to ``Unassigned`` like the rest of that band.
-  :class:`~pcapkit.protocols.application.ssl.protocol.SSL` never checked this member
-  by name -- its wire-type allowlist already excluded value 0 by construction
-  -- so the sentinel's removal is behaviourally a no-op there too.
-* the committed ``HandshakeType`` cited RFC 5246, 6066 and 4680 for several
-  members where IANA's registry now cites :rfc:`9846`, and left IANA's two
-  single-row ``Unassigned`` entries (values 7 and 255) to ``_missing_``
-  rather than naming them; the crawler renders both as explicit members
-  (``unassigned_7``, ``unassigned_255``), matching the registry.
-
-The protocol-specific prose the hand-curated modules carried -- the
+:class:`~pcapkit.const.tls.handshake_type.HandshakeType` have matching crawlers,
+:mod:`pcapkit.vendor.tls.content_type` and :mod:`pcapkit.vendor.tls.handshake_type`,
+exported as ``TLS_ContentType`` and ``TLS_HandshakeType`` (:issue:`2495`). Both take
+the normal ``LINK``-and-scrape shape against IANA's ``tls-parameters-5.csv`` and
+``tls-parameters-7.csv``: unlike ARPHRD's, TLS's source is a live, web-published
+table, so neither reads a ``DATA`` literal. Running either reproduces its committed
+``const`` module byte-for-byte. As for ARPHRD, the protocol-specific prose -- the
 record-layer header citations, the Unassigned/Reserved band rationale, the
-``_RESERVED``-suffix handling -- moved into the crawlers' own module
-docstrings and comments, the way :mod:`pcapkit.vendor.linux.arphrd` already
-does for ARPHRD; the generated ``const`` modules carry only the plain,
-templated docstring every other generated module does.
+``_RESERVED``-suffix handling -- lives in the crawlers' module docstrings and
+comments.
 
 Lazy Package Imports
 ~~~~~~~~~~~~~~~~~~~~

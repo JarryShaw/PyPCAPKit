@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit holds the core utilities pcapkit is built on: the Field family for data parsing, the checksum algorithms the protocols compute and verify, the ContextRegistry channel for caller-sup..." />
-<meta name="description" content="pcapkit.corekit holds the core utilities pcapkit is built on: the Field family for data parsing, the checksum algorithms the protocols compute and verify, the ContextRegistry channel for caller-sup..." />
+<meta property="og:description" content="pcapkit.corekit holds the core utilities pcapkit is built on:,, Module, Holds,,, fields, the Field family for data parsing,, checksum, the checksum algorithms the protocols compute and verify,, con..." />
+<meta name="description" content="pcapkit.corekit holds the core utilities pcapkit is built on:,, Module, Holds,,, fields, the Field family for data parsing,, checksum, the checksum algorithms the protocols compute and verify,, con..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Fields" href="fields/index.html"><link rel="prev" title="Abstract Classes" href="../utilities/inspect.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,25 +570,65 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit">
 <span id="core-utilities"></span><h1>Core Utilities<a class="headerlink" href="#module-pcapkit.corekit" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> holds the core utilities <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built on:
-the <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> family for data parsing, the
-<a class="reference internal" href="checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">checksum</span></code></a> algorithms the protocols compute and verify,
-the <a class="reference internal" href="context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> channel for caller-supplied
-information a protocol needs but the wire does not carry, the
-<a class="reference internal" href="decorators.html#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decorators</span></code></a> that protocols and schemas parse through,
-the <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>/
-<a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> bases every constant enumeration
-inherits from, the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>-like <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>,
-the <a class="reference internal" href="io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> and stream proxies of
-<a class="reference internal" href="io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a>, the
-<a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming a class by module, the
-<a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> family for multi-entry mappings,
-the <a class="reference internal" href="packet.html#pcapkit.corekit.packet.DeferredPacket" title="pcapkit.corekit.packet.DeferredPacket"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredPacket</span></code></a> mixin for a <code class="docutils literal notranslate"><span class="pre">packet</span></code>
-parsed on first read, the protocol collection
-<a class="reference internal" href="protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>, the
-<a class="reference internal" href="schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a> helpers shared across the schema layer, the shared
-<a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sentinels</span></code></a>, and the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>-like
-<a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">VersionInfo</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> holds the core utilities <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built on:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Module</p></th>
+<th class="head"><p>Holds</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fields</span></code></a></p></td>
+<td><p>the <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> family for data parsing</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="checksum/index.html#module-pcapkit.corekit.checksum" title="pcapkit.corekit.checksum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">checksum</span></code></a></p></td>
+<td><p>the checksum algorithms the protocols compute and verify</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">context</span></code></a></p></td>
+<td><p>the <a class="reference internal" href="context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> channel for
+caller-supplied information a protocol needs but the wire does not carry</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="decorators.html#module-pcapkit.corekit.decorators" title="pcapkit.corekit.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decorators</span></code></a></p></td>
+<td><p>the decorators that protocols and schemas parse through</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a></p></td>
+<td><p>the <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and
+<a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> bases of every constant
+enumeration</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="infoclass.html#module-pcapkit.corekit.infoclass" title="pcapkit.corekit.infoclass"><code class="xref py py-mod docutils literal notranslate"><span class="pre">infoclass</span></code></a></p></td>
+<td><p>the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>-like <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a></p></td>
+<td><p><a class="reference internal" href="io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> and the stream proxies</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">module</span></code></a></p></td>
+<td><p><a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, naming a class by module</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="multidict.html#module-pcapkit.corekit.multidict" title="pcapkit.corekit.multidict"><code class="xref py py-mod docutils literal notranslate"><span class="pre">multidict</span></code></a></p></td>
+<td><p>the <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> family for multi-entry
+mappings</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="packet.html#module-pcapkit.corekit.packet" title="pcapkit.corekit.packet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">packet</span></code></a></p></td>
+<td><p>the <a class="reference internal" href="packet.html#pcapkit.corekit.packet.DeferredPacket" title="pcapkit.corekit.packet.DeferredPacket"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredPacket</span></code></a> mixin, for a
+<code class="docutils literal notranslate"><span class="pre">packet</span></code> parsed on first read</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="protochain.html#module-pcapkit.corekit.protochain" title="pcapkit.corekit.protochain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">protochain</span></code></a></p></td>
+<td><p>the protocol collection <a class="reference internal" href="protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="schema/index.html#module-pcapkit.corekit.schema" title="pcapkit.corekit.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a></p></td>
+<td><p>helpers shared across the schema layer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sentinels</span></code></a></p></td>
+<td><p>the shared sentinels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="version.html#module-pcapkit.corekit.version" title="pcapkit.corekit.version"><code class="xref py py-mod docutils literal notranslate"><span class="pre">version</span></code></a></p></td>
+<td><p>the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>-like <a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">VersionInfo</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="fields/index.html">Protocol Fields</a><ul>

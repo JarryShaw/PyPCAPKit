@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.ipv6
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`IPv6_ExtensionHeader <pcapkit.vendor.ipv6.extension_header.ExtensionHeader>`
@@ -34,8 +30,7 @@ IPv6 Extension Header Types
 
 .. module:: pcapkit.vendor.ipv6.extension_header
 
-This module contains the vendor crawler for **IPv6 Extension Header Types**,
-which is automatically generating :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader`.
+Generates :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader`.
 
 .. autoclass:: pcapkit.vendor.ipv6.extension_header.ExtensionHeader
    :members: LINK
@@ -46,8 +41,7 @@ Option Actions
 
 .. module:: pcapkit.vendor.ipv6.option_action
 
-This module contains the vendor crawler for **Option Actions**,
-which is automatically generating :class:`pcapkit.const.ipv6.option_action.OptionAction`.
+Generates :class:`pcapkit.const.ipv6.option_action.OptionAction`.
 
 .. autoclass:: pcapkit.vendor.ipv6.option_action.OptionAction
    :members: FLAG
@@ -58,8 +52,7 @@ Destination Options and Hop-by-Hop Options
 
 .. module:: pcapkit.vendor.ipv6.option
 
-This module contains the vendor crawler for **Destination Options and Hop-by-Hop Options**,
-which is automatically generating :class:`pcapkit.const.ipv6.option.Option`.
+Generates :class:`pcapkit.const.ipv6.option.Option`.
 
 .. autoclass:: pcapkit.vendor.ipv6.option.Option
    :members: FLAG, LINK
@@ -70,8 +63,7 @@ QS Functions
 
 .. module:: pcapkit.vendor.ipv6.qs_function
 
-This module contains the vendor crawler for **QS Functions**,
-which is automatically generating :class:`pcapkit.const.ipv6.qs_function.QSFunction`.
+Generates :class:`pcapkit.const.ipv6.qs_function.QSFunction`.
 
 .. autoclass:: pcapkit.vendor.ipv6.qs_function.QSFunction
    :members: FLAG
@@ -82,8 +74,7 @@ IPv6 Router Alert Option Values
 
 .. module:: pcapkit.vendor.ipv6.router_alert
 
-This module contains the vendor crawler for **IPv6 Router Alert Option Values**,
-which is automatically generating :class:`pcapkit.const.ipv6.router_alert.RouterAlert`.
+Generates :class:`pcapkit.const.ipv6.router_alert.RouterAlert`.
 
 .. autoclass:: pcapkit.vendor.ipv6.router_alert.RouterAlert
    :members: FLAG, LINK
@@ -94,8 +85,7 @@ IPv6 Routing Types
 
 .. module:: pcapkit.vendor.ipv6.routing
 
-This module contains the vendor crawler for **IPv6 Routing Types**,
-which is automatically generating :class:`pcapkit.const.ipv6.routing.Routing`.
+Generates :class:`pcapkit.const.ipv6.routing.Routing`.
 
 .. autoclass:: pcapkit.vendor.ipv6.routing.Routing
    :members: FLAG, LINK
@@ -106,8 +96,7 @@ Seed-ID Types
 
 .. module:: pcapkit.vendor.ipv6.seed_id
 
-This module contains the vendor crawler for **Seed-ID Types**,
-which is automatically generating :class:`pcapkit.const.ipv6.seed_id.SeedID`.
+Generates :class:`pcapkit.const.ipv6.seed_id.SeedID`.
 
 .. autoclass:: pcapkit.vendor.ipv6.seed_id.SeedID
    :members: FLAG
@@ -118,8 +107,7 @@ Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options
 
 .. module:: pcapkit.vendor.ipv6.smf_dpd_mode
 
-This module contains the vendor crawler for **Simplified Multicast Forwarding Duplicate Packet Detection (SMF_DPD) Options**,
-which is automatically generating :class:`pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode`.
+Generates :class:`pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode`.
 
 .. autoclass:: pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode
    :members: FLAG
@@ -130,8 +118,7 @@ TaggerID Types
 
 .. module:: pcapkit.vendor.ipv6.tagger_id
 
-This module contains the vendor crawler for **TaggerID Types**,
-which is automatically generating :class:`pcapkit.const.ipv6.tagger_id.TaggerID`.
+Generates :class:`pcapkit.const.ipv6.tagger_id.TaggerID`.
 
 .. autoclass:: pcapkit.vendor.ipv6.tagger_id.TaggerID
    :members: FLAG, LINK

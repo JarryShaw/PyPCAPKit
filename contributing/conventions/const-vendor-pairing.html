@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -590,20 +590,16 @@ precedent: both read a hand-transcribed <code class="docutils literal notranslat
 Novell’s and Xerox’s own IPX socket/packet-type tables, went offline (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/507">#507</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/518">#518</a>).</p>
 <p><a class="reference internal" href="../../pcapkit/const/linux.html#pcapkit.const.linux.arphrd.ARPHRD" title="pcapkit.const.linux.arphrd.ARPHRD"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARPHRD</span></code></a> follows this pattern: its source is the
-Linux kernel header <code class="docutils literal notranslate"><span class="pre">&lt;linux/if_arp.h&gt;</span></code>, C source
-under the kernel’s own versioning rather than an IANA page, so
-<a class="reference internal" href="../../pcapkit/vendor/linux.html#module-pcapkit.vendor.linux.arphrd" title="pcapkit.vendor.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.linux.arphrd</span></code></a> reads a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> dict of
-<code class="docutils literal notranslate"><span class="pre">{code:</span> <span class="pre">(name,</span> <span class="pre">description)}</span></code> transcribed from the header instead of fetching a
-URL. The crawler’s <a class="reference internal" href="../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.process" title="pcapkit.vendor.default.Vendor.process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code></a> renders that dict
-into the same enumeration members, the same <code class="docutils literal notranslate"><span class="pre">FLAG</span></code> bound and the same
-<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body the committed <a class="reference internal" href="../../pcapkit/const/linux.html#module-pcapkit.const.linux.arphrd" title="pcapkit.const.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.linux.arphrd</span></code></a> carries –
-running it is a no-op against the file in the tree, exactly as a web-scraped
-crawler’s run is. The explanatory prose that once lived in the hand-maintained
-<code class="docutils literal notranslate"><span class="pre">const</span></code> module – which values are listed and why, the cross-reference to
-<a class="reference internal" href="../../pcapkit/const/arp.html#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hardware</span></code></a> – now lives in the crawler’s own
-module docstring and comments, alongside the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal it documents; the
-generated <code class="docutils literal notranslate"><span class="pre">const</span></code> module carries only the plain, templated docstring every
-other generated module does.</p>
+Linux kernel header <code class="docutils literal notranslate"><span class="pre">&lt;linux/if_arp.h&gt;</span></code>, C source under the kernel’s own versioning
+rather than an IANA page, so <a class="reference internal" href="../../pcapkit/vendor/linux.html#module-pcapkit.vendor.linux.arphrd" title="pcapkit.vendor.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.linux.arphrd</span></code></a> reads a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> dict
+of <code class="docutils literal notranslate"><span class="pre">{code:</span> <span class="pre">(name,</span> <span class="pre">description)}</span></code> transcribed from the header. The crawler’s
+<a class="reference internal" href="../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.process" title="pcapkit.vendor.default.Vendor.process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code></a> renders that dict into the members, the
+<code class="docutils literal notranslate"><span class="pre">FLAG</span></code> bound and the <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body the committed <a class="reference internal" href="../../pcapkit/const/linux.html#module-pcapkit.const.linux.arphrd" title="pcapkit.const.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.linux.arphrd</span></code></a>
+carries, so running it is a no-op against the tree, as a web-scraped crawler’s run is.
+The explanatory prose – which values are listed and why, the cross-reference to
+<a class="reference internal" href="../../pcapkit/const/arp.html#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hardware</span></code></a> – lives in the crawler’s module
+docstring and comments, beside the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal it documents; the generated
+<code class="docutils literal notranslate"><span class="pre">const</span></code> module carries only the templated docstring every generated module does.</p>
 <p>Where the primary source is paywalled, a pinned secondary revision is an acceptable
 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> source once its values are cross-checked against independent implementations,
 ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2607">#2607</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2575">#2575</a>). <a class="reference internal" href="../../pcapkit/vendor/ipx.html#module-pcapkit.vendor.ipx" title="pcapkit.vendor.ipx"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.ipx</span></code></a> is the earlier
@@ -613,45 +609,16 @@ Linux kernel’s header and Wireshark.</p>
 <section id="link-and-scrape-pairing-tls-content-types-and-handshaketype">
 <h2><code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-Scrape Pairing: TLS Content Types and HandshakeType<a class="headerlink" href="#link-and-scrape-pairing-tls-content-types-and-handshaketype" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.content_type.ContentType" title="pcapkit.const.tls.content_type.ContentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentType</span></code></a> and
-<a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">HandshakeType</span></code></a>, which came with the TLS
-record layer, have matching crawlers – <a class="reference internal" href="../../pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.content_type" title="pcapkit.vendor.tls.content_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.content_type</span></code></a> and
-<a class="reference internal" href="../../pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.handshake_type" title="pcapkit.vendor.tls.handshake_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.handshake_type</span></code></a>, exported as <code class="docutils literal notranslate"><span class="pre">TLS_ContentType</span></code> and
-<code class="docutils literal notranslate"><span class="pre">TLS_HandshakeType</span></code> – closing the gap <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2495">#2495</a> tracked. Both take the
-normal <code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-scrape shape against IANA’s <code class="docutils literal notranslate"><span class="pre">tls-parameters-5.csv</span></code> and
-<code class="docutils literal notranslate"><span class="pre">tls-parameters-7.csv</span></code>, as this doc said the eventual crawler would; unlike
-ARPHRD, TLS’s source is a live, web-published table, so neither reads a
-<code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal.</p>
-<p>Running either crawler is a true no-op against the committed <code class="docutils literal notranslate"><span class="pre">const</span></code>
-modules: regenerating both reproduces the tree byte-for-byte, the same
-guarantee ARPHRD and the <code class="docutils literal notranslate"><span class="pre">sslv2</span></code> restack carry. Getting there meant
-regenerating the <code class="docutils literal notranslate"><span class="pre">const</span></code> modules committed with the TLS record layer, which
-predated the crawler and had drifted from it in the ways cross-review of
-<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2503">#2503</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2495">#2495</a>) caught:</p>
-<ul class="simple">
-<li><p>the committed <code class="docutils literal notranslate"><span class="pre">ContentType</span></code> resolved values 32-63 to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> via a
-flat <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fallback, while IANA’s registry – and the crawler –
-call that band <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9147.html"><strong>RFC 9147</strong></a>); the committed docstring already
-said “Reserved”, the code did not. Regenerating fixes the resolved name for
-that band.</p></li>
-<li><p>the committed <code class="docutils literal notranslate"><span class="pre">ContentType</span></code> carried an <code class="docutils literal notranslate"><span class="pre">invalid</span> <span class="pre">=</span> <span class="pre">0</span></code> sentinel with no
-IANA counterpart and no reference anywhere in the codebase (IANA leaves 0
-inside its 0-19 <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> band, unnamed); it is dropped, and value 0
-now resolves to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> like the rest of that band.
-<a class="reference internal" href="../../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> never checked this member
-by name – its wire-type allowlist already excluded value 0 by construction
-– so the sentinel’s removal is behaviourally a no-op there too.</p></li>
-<li><p>the committed <code class="docutils literal notranslate"><span class="pre">HandshakeType</span></code> cited RFC 5246, 6066 and 4680 for several
-members where IANA’s registry now cites <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9846.html"><strong>RFC 9846</strong></a>, and left IANA’s two
-single-row <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> entries (values 7 and 255) to <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
-rather than naming them; the crawler renders both as explicit members
-(<code class="docutils literal notranslate"><span class="pre">unassigned_7</span></code>, <code class="docutils literal notranslate"><span class="pre">unassigned_255</span></code>), matching the registry.</p></li>
-</ul>
-<p>The protocol-specific prose the hand-curated modules carried – the
+<a class="reference internal" href="../../pcapkit/const/tls.html#pcapkit.const.tls.handshake_type.HandshakeType" title="pcapkit.const.tls.handshake_type.HandshakeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">HandshakeType</span></code></a> have matching crawlers,
+<a class="reference internal" href="../../pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.content_type" title="pcapkit.vendor.tls.content_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.content_type</span></code></a> and <a class="reference internal" href="../../pcapkit/vendor/tls.html#module-pcapkit.vendor.tls.handshake_type" title="pcapkit.vendor.tls.handshake_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.tls.handshake_type</span></code></a>,
+exported as <code class="docutils literal notranslate"><span class="pre">TLS_ContentType</span></code> and <code class="docutils literal notranslate"><span class="pre">TLS_HandshakeType</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2495">#2495</a>). Both take
+the normal <code class="docutils literal notranslate"><span class="pre">LINK</span></code>-and-scrape shape against IANA’s <code class="docutils literal notranslate"><span class="pre">tls-parameters-5.csv</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tls-parameters-7.csv</span></code>: unlike ARPHRD’s, TLS’s source is a live, web-published
+table, so neither reads a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal. Running either reproduces its committed
+<code class="docutils literal notranslate"><span class="pre">const</span></code> module byte-for-byte. As for ARPHRD, the protocol-specific prose – the
 record-layer header citations, the Unassigned/Reserved band rationale, the
-<code class="docutils literal notranslate"><span class="pre">_RESERVED</span></code>-suffix handling – moved into the crawlers’ own module
-docstrings and comments, the way <a class="reference internal" href="../../pcapkit/vendor/linux.html#module-pcapkit.vendor.linux.arphrd" title="pcapkit.vendor.linux.arphrd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.linux.arphrd</span></code></a> already
-does for ARPHRD; the generated <code class="docutils literal notranslate"><span class="pre">const</span></code> modules carry only the plain,
-templated docstring every other generated module does.</p>
+<code class="docutils literal notranslate"><span class="pre">_RESERVED</span></code>-suffix handling – lives in the crawlers’ module docstrings and
+comments.</p>
 </section>
 <section id="lazy-package-imports">
 <h2>Lazy Package Imports<a class="headerlink" href="#lazy-package-imports" title="Link to this heading">¶</a></h2>

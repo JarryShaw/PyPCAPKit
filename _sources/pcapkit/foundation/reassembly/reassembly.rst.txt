@@ -4,10 +4,11 @@ Reassembly Base Class
 .. module:: pcapkit.foundation.reassembly.reassembly
 
 :mod:`pcapkit.foundation.reassembly.reassembly` contains
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
-which is an abstract base class for all reassembly classes,
-based on algorithms described in :rfc:`791` and :rfc:`815`,
-that implement datagram reassembly of IP and TCP packets.
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`, the abstract base
+class of a custom reassembly class, and
+:class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`, which it and
+the built-in IP, TCP and DTLS reassembly classes derive from. The algorithms
+follow :rfc:`791` and :rfc:`815`.
 
 .. autoclass:: pcapkit.foundation.reassembly.reassembly.Reassembly
    :no-members:
@@ -15,8 +16,7 @@ that implement datagram reassembly of IP and TCP packets.
 
    .. seealso::
 
-      For more information on customisation and extension, please
-      refer to :doc:`../../../ext`.
+      For customisation and extension, see :doc:`../../../ext`.
 
    .. property:: name
       :type: str
@@ -25,8 +25,7 @@ that implement datagram reassembly of IP and TCP packets.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__protocol_name__` class attribute.
+         Also a class variable, set by :attr:`__protocol_name__`.
 
 
    .. property:: protocol
@@ -36,8 +35,7 @@ that implement datagram reassembly of IP and TCP packets.
 
       .. note::
 
-         This property is also available as a class variable. Its
-         value can be set by :attr:`__protocol_type__` class attribute.
+         Also a class variable, set by :attr:`__protocol_type__`.
 
    .. property:: registry
       :type: dict[str, ModuleDescriptor[ReassemblyBase] | typing.Type[ReassemblyBase]]
@@ -46,11 +44,10 @@ that implement datagram reassembly of IP and TCP packets.
 
       .. note::
 
-         This property is only available as a class variable, since it is
-         defined on :class:`ReassemblyMeta`. It reads
+         A class variable only, defined on :class:`ReassemblyMeta`. It is not
+         per-class: it reads
          :attr:`~pcapkit.foundation.extraction.Extractor.__reassembly__`, the
-         single table every reassembly registration lands in, so it is not a
-         per-class mapping.
+         one table every reassembly registration lands in.
 
    .. autoproperty:: count
    .. autoproperty:: datagram

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/packet.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.packet contains DeferredPacket, the mixin that lets an Info subclass hold its packet field as a placeholder and resolve it on first read. It is shared by the reassembled datagrams o..." />
-<meta name="description" content="pcapkit.corekit.packet contains DeferredPacket, the mixin that lets an Info subclass hold its packet field as a placeholder and resolve it on first read. It is shared by the reassembled datagrams o..." />
+<meta property="og:description" content="pcapkit.corekit.packet contains DeferredPacket, the mixin that lets an Info subclass hold its packet field as a placeholder and resolve it on first read. The reassembled datagrams of pcapkit.founda..." />
+<meta name="description" content="pcapkit.corekit.packet contains DeferredPacket, the mixin that lets an Info subclass hold its packet field as a placeholder and resolve it on first read. The reassembled datagrams of pcapkit.founda..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Chain" href="protochain.html"><link rel="prev" title="Multi-Mapping Dictionary" href="multidict.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,10 +573,10 @@
 <p><a class="reference internal" href="#module-pcapkit.corekit.packet" title="pcapkit.corekit.packet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.packet</span></code></a> contains
 <a class="reference internal" href="#pcapkit.corekit.packet.DeferredPacket" title="pcapkit.corekit.packet.DeferredPacket"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredPacket</span></code></a>, the mixin that lets an
 <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> subclass hold its <code class="docutils literal notranslate"><span class="pre">packet</span></code> field as
-a placeholder and resolve it on first read. It is shared by the reassembled
-datagrams of <a class="reference internal" href="../foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> and the traced flows of
-<a class="reference internal" href="../foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a>, whose <code class="docutils literal notranslate"><span class="pre">packet</span></code> is a second parse of the
-payload and a reassembly of the stream respectively.</p>
+a placeholder and resolve it on first read. The reassembled datagrams of
+<a class="reference internal" href="../foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> use it for a second parse of the payload,
+and the traced flows of <a class="reference internal" href="../foundation/traceflow/index.html#module-pcapkit.foundation.traceflow" title="pcapkit.foundation.traceflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow</span></code></a> for a reassembly of
+the stream.</p>
 <p>A subclass is declared <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">X(DeferredPacket,</span> <span class="pre">Info)</span></code>, lists <code class="docutils literal notranslate"><span class="pre">packet</span></code> in
 its <code class="docutils literal notranslate"><span class="pre">__additional__</span></code>, and names its placeholder class in
 <a class="reference internal" href="#pcapkit.corekit.packet.DeferredPacket.__deferred__" title="pcapkit.corekit.packet.DeferredPacket.__deferred__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__deferred__</span></code></a>;

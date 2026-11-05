@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -560,9 +560,9 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_ext.protocol` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`</span>
-<span class="sd">only, which is both (GitHub issue :issue:`917`) the shared **base class** of</span>
-<span class="sd">every IPv6 extension header in this package and a **generic** extractor for</span>
-<span class="sd">a header with no dedicated parser. The class docstring separates these roles.</span>
+<span class="sd">only, which is both the shared **base class** of every IPv6 extension header</span>
+<span class="sd">in this package and a **generic** extractor for a header with no dedicated</span>
+<span class="sd">parser (:issue:`917`); the class docstring separates the roles.</span>
 
 <span class="sd">Length Rules</span>
 <span class="sd">------------</span>
@@ -613,8 +613,8 @@
 
 <span class="sd">This table classifies by *wire format* alone, over every code</span>
 <span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates,</span>
-<span class="sd">which match IANA's *IPv6 Extension Header Types* registry exactly (GitHub</span>
-<span class="sd">issue :issue:`925`).</span>
+<span class="sd">which match IANA's *IPv6 Extension Header Types* registry exactly</span>
+<span class="sd">(:issue:`925`).</span>
 
 <span class="sd">``Shim6`` conforms to the generic rule (:rfc:`5533`) but has no dedicated parser class; see</span>
 <span class="sd">"Entry Paths" below for how it reaches this class by direct dispatch.</span>
@@ -649,7 +649,7 @@
 <span class="sd">would default it to plain :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, whose</span>
 <span class="sd">missing ``next`` field would end the walk in</span>
 <span class="sd">:meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer&gt;`</span>
-<span class="sd">there (GitHub issue :issue:`891`). This module registers this class for that</span>
+<span class="sd">there (:issue:`891`). This module registers this class for that</span>
 <span class="sd">code instead (see the bottom of the module), so dispatch reaches a working</span>
 <span class="sd">generic parser directly. The registration is global, shared by every</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.internet.Internet` subclass, so</span>
@@ -659,34 +659,27 @@
 <span class="sd">A header with a dedicated class whose parser raises does not reach this class.</span>
 <span class="sd">:func:`~pcapkit.corekit.decorators.beholder` makes it plain</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and the walk stops there, as</span>
-<span class="sd">:rfc:`8200#section-4` has a node discard such a packet (GitHub issue</span>
-<span class="sd">:issue:`2477`).</span>
+<span class="sd">:rfc:`8200#section-4` has a node discard such a packet (:issue:`2477`).</span>
 
 <span class="sd">The Overrun Guard</span>
 <span class="sd">-----------------</span>
 
 <span class="sd">The house convention for a declared length that does not fit what remains</span>
-<span class="sd">is warn-and-clip: emit a warning naming what was declared against what is</span>
-<span class="sd">left, then read only what is left. See</span>
+<span class="sd">is warn-and-clip: warn, naming what was declared against what is left, then</span>
+<span class="sd">read only what is left (see</span>
 <span class="sd">:func:`pcapkit.protocols.misc.pcapng.schema.bounded_area` and</span>
-<span class="sd">:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`.</span>
+<span class="sd">:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`).</span>
 
-<span class="sd">This class follows that convention's *warning* -- a</span>
+<span class="sd">This class keeps the warning -- a</span>
 <span class="sd">:class:`~pcapkit.utilities.warnings.SchemaWarning`, as</span>
-<span class="sd">:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area` emits -- and</span>
-<span class="sd">deliberately diverges on the *action*. Clipping is right when the declared</span>
-<span class="sd">length only governs how much of the current object to read, since there is</span>
-<span class="sd">always a well-defined "what is left" to fall back to. Here the declared length</span>
-<span class="sd">also decides *where the next header starts*; a clipped skip distance points at</span>
-<span class="sd">whatever bytes end the buffer, which are not a header. Continuing from there</span>
-<span class="sd">would fabricate a layer and record a false entry in</span>
-<span class="sd">:class:`~pcapkit.corekit.protochain.ProtoChain`, which reads as a parsed fact</span>
-<span class="sd">rather than a guess. So :meth:`read` warns in the same form as</span>
-<span class="sd">:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area`, then **stops the</span>
-<span class="sd">walk**: this instance absorbs every remaining octet and reports :data:`None`</span>
-<span class="sd">for ``next``, which the caller's loop already reads as "no more extension</span>
-<span class="sd">headers". The chain ends honestly at the bad header instead of inventing what</span>
-<span class="sd">follows it.</span>
+<span class="sd">:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area` emits -- but not the</span>
+<span class="sd">clip. Here the declared length also decides *where the next header starts*: a</span>
+<span class="sd">clipped skip distance points at the bytes that end the buffer, which are not a</span>
+<span class="sd">header, and continuing would record a fabricated layer in</span>
+<span class="sd">:class:`~pcapkit.corekit.protochain.ProtoChain`. So :meth:`read` warns, then</span>
+<span class="sd">**stops the walk**: this instance absorbs every remaining octet and reports</span>
+<span class="sd">:data:`None` for ``next``, which the caller's loop reads as "no more extension</span>
+<span class="sd">headers".</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
@@ -746,7 +739,7 @@
 
 <span class="sd">    .. rubric:: Base and Fallback Roles</span>
 
-<span class="sd">    One class plays both, on the owner's ruling for GitHub issue :issue:`917`:</span>
+<span class="sd">    One class plays both, as ruled on :issue:`917`:</span>
 
 <span class="sd">    1. **The concrete fallback parser** for an :rfc:`6564`-conforming header</span>
 <span class="sd">       with no dedicated class, which is Shim6. :meth:`read`,</span>
@@ -873,8 +866,8 @@
 <span class="sd">        In the *fallback* role (this instance parsed this module's own schema)</span>
 <span class="sd">        this is **not** the base</span>
 <span class="sd">        :attr:`Protocol.protocol &lt;pcapkit.protocols.protocol.Protocol.protocol&gt;`</span>
-<span class="sd">        meaning ("name of next layer protocol"). On the owner's ruling for</span>
-<span class="sd">        GitHub issue :issue:`891` it is deliberately repointed at this</span>
+<span class="sd">        meaning ("name of next layer protocol"). As ruled on :issue:`891`, it</span>
+<span class="sd">        is repointed at this</span>
 <span class="sd">        instance's *own* identity, i.e. which header's format it parsed, which</span>
 <span class="sd">        for this class is only :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.</span>
 <span class="sd">        The identity is resolved per instance from the numeric code handed to</span>
@@ -1671,7 +1664,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1697,7 +1690,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, H..." />
-<meta name="description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, H..." />
+<meta property="og:description" content=",, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, Hash Algorithms ‡,, PCAPNG_VerdictType, Verdict Types §,, PCAPNG_RecordType, Record Types ¶,, PCAPNG_Se..." />
+<meta name="description" content=",, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, Hash Algorithms ‡,, PCAPNG_VerdictType, Verdict Types §,, PCAPNG_RecordType, Record Types ¶,, PCAPNG_Se..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Engine Comparison" href="../../engines.html"><link rel="prev" title="SSL Vendor Crawlers" href="tls.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.pcapng">
 <span id="pcapng-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.pcapng" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> implementations. Available
-vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -608,17 +605,15 @@ vendor crawlers include:</p>
 <p>The crawlers that scrape a registry table –
 <a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType" title="pcapkit.vendor.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockType</span></code></a>,
 <a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType" title="pcapkit.vendor.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
-<a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="pcapkit.vendor.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a> – all read
+<a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="pcapkit.vendor.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a> – read
 revision <code class="docutils literal notranslate"><span class="pre">-03</span></code> of the draft, as each one’s <code class="docutils literal notranslate"><span class="pre">LINK</span></code> below shows. Revision
-<code class="docutils literal notranslate"><span class="pre">-02</span></code> renders its registries as ASCII art inside <code class="docutils literal notranslate"><span class="pre">&lt;pre&gt;</span></code> and carries no
-registry <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code> at all, so the <code class="docutils literal notranslate"><span class="pre">table-1</span></code> through <code class="docutils literal notranslate"><span class="pre">table-10</span></code> ids
-these crawlers select on exist only in <code class="docutils literal notranslate"><span class="pre">-03</span></code>, where the registries are real
-tables. The footnotes below point at <code class="docutils literal notranslate"><span class="pre">-03</span></code> for the same reason.</p>
+<code class="docutils literal notranslate"><span class="pre">-02</span></code> renders its registries as ASCII art inside <code class="docutils literal notranslate"><span class="pre">&lt;pre&gt;</span></code>, so the
+<code class="docutils literal notranslate"><span class="pre">table-1</span></code> through <code class="docutils literal notranslate"><span class="pre">table-10</span></code> ids these crawlers select exist only in
+<code class="docutils literal notranslate"><span class="pre">-03</span></code>. The footnotes below point at <code class="docutils literal notranslate"><span class="pre">-03</span></code> for the same reason.</p>
 </div>
 <section id="module-pcapkit.vendor.pcapng.block_type">
 <span id="block-types"></span><h2>Block Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.block_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Block Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.block_type.BlockType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.block_type.BlockType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.block_type.BlockType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.block_type.</span></span><span class="sig-name descname"><span class="pre">BlockType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/block_type.html#BlockType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.block_type.BlockType" title="Link to this definition">¶</a></dt>
@@ -641,8 +636,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </section>
 <section id="module-pcapkit.vendor.pcapng.hash_algorithm">
 <span id="hash-algorithms"></span><h2>Hash Algorithms<a class="headerlink" href="#module-pcapkit.vendor.pcapng.hash_algorithm" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Hash Algorithms</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.hash_algorithm.HashAlgorithm</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.hash_algorithm.HashAlgorithm</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.hash_algorithm.</span></span><span class="sig-name descname"><span class="pre">HashAlgorithm</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/hash_algorithm.html#HashAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm" title="Link to this definition">¶</a></dt>
@@ -659,8 +653,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </section>
 <section id="module-pcapkit.vendor.pcapng.option_type">
 <span id="option-types"></span><h2>Option Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.option_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Option Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.option_type.OptionType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.option_type.OptionType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.option_type.OptionType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.option_type.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/option_type.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType" title="Link to this definition">¶</a></dt>
@@ -684,8 +677,7 @@ is the <code class="docutils literal notranslate"><span class="pre">-03</span></
 </section>
 <section id="module-pcapkit.vendor.pcapng.record_type">
 <span id="record-types"></span><h2>Record Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.record_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Record Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.record_type.RecordType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.record_type.RecordType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.record_type.RecordType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.record_type.</span></span><span class="sig-name descname"><span class="pre">RecordType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/record_type.html#RecordType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="Link to this definition">¶</a></dt>
@@ -709,8 +701,7 @@ is the <code class="docutils literal notranslate"><span class="pre">-03</span></
 </section>
 <section id="module-pcapkit.vendor.pcapng.secrets_type">
 <span id="secrets-types"></span><h2>Secrets Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.secrets_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Secrets Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.secrets_type.SecretsType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.secrets_type.SecretsType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.secrets_type.SecretsType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.secrets_type.</span></span><span class="sig-name descname"><span class="pre">SecretsType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/secrets_type.html#SecretsType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType" title="Link to this definition">¶</a></dt>
@@ -727,8 +718,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </section>
 <section id="module-pcapkit.vendor.pcapng.verdict_type">
 <span id="verdict-types"></span><h2>Verdict Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.verdict_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Verdict Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.verdict_type.VerdictType" title="pcapkit.const.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.verdict_type.VerdictType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.verdict_type.VerdictType" title="pcapkit.const.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.verdict_type.VerdictType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.verdict_type.VerdictType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.verdict_type.</span></span><span class="sig-name descname"><span class="pre">VerdictType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/verdict_type.html#VerdictType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType" title="Link to this definition">¶</a></dt>
@@ -745,8 +735,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </section>
 <section id="module-pcapkit.vendor.pcapng.filter_type">
 <span id="filter-types"></span><h2>Filter Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.filter_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Filter Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.filter_type.FilterType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.filter_type.FilterType" title="pcapkit.const.pcapng.filter_type.FilterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.filter_type.FilterType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.filter_type.FilterType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.filter_type.</span></span><span class="sig-name descname"><span class="pre">FilterType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/filter_type.html#FilterType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.filter_type.FilterType" title="Link to this definition">¶</a></dt>
@@ -763,8 +752,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </section>
 <section id="module-pcapkit.vendor.pcapng.tls_key_label">
 <span id="tls-key-log-labels"></span><h2>TLS Key Log Labels<a class="headerlink" href="#module-pcapkit.vendor.pcapng.tls_key_label" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>TLS Key Log Labels</strong>,
-which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.tls_key_label.TLSKeyLabel</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.tls_key_label.TLSKeyLabel</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.tls_key_label.</span></span><span class="sig-name descname"><span class="pre">TLSKeyLabel</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/tls_key_label.html#TLSKeyLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel" title="Link to this definition">¶</a></dt>
@@ -810,7 +798,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 </aside>
 <aside class="footnote brackets" id="id16" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">♥</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv">https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv</a>, c.f., <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p>
+<p><a class="reference external" href="https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv">https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv</a>, cf. <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p>
 </aside>
 </aside>
 </section>

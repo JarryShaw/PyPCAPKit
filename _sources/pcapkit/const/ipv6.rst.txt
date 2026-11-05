@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.ipv6
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`IPv6_ExtensionHeader <pcapkit.const.ipv6.extension_header.ExtensionHeader>`
@@ -34,8 +30,7 @@ IPv6 Extension Header Types
 
 .. module:: pcapkit.const.ipv6.extension_header
 
-This module contains the constant enumeration for **IPv6 Extension Header Types**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.
+Generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.
 
 .. versionchanged:: 1.5.0
 
@@ -52,8 +47,7 @@ Option Actions
 
 .. module:: pcapkit.const.ipv6.option_action
 
-This module contains the constant enumeration for **Option Actions**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.option_action.OptionAction`.
+Generated from :class:`pcapkit.vendor.ipv6.option_action.OptionAction`.
 
 .. autoclass:: pcapkit.const.ipv6.option_action.OptionAction
    :members:
@@ -65,8 +59,7 @@ Destination Options and Hop-by-Hop Options
 
 .. module:: pcapkit.const.ipv6.option
 
-This module contains the constant enumeration for **Destination Options and Hop-by-Hop Options**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.option.Option`.
+Generated from :class:`pcapkit.vendor.ipv6.option.Option`.
 
 .. autoclass:: pcapkit.const.ipv6.option.Option
    :members:
@@ -78,8 +71,7 @@ QS Functions
 
 .. module:: pcapkit.const.ipv6.qs_function
 
-This module contains the constant enumeration for **QS Functions**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.qs_function.QSFunction`.
+Generated from :class:`pcapkit.vendor.ipv6.qs_function.QSFunction`.
 
 .. autoclass:: pcapkit.const.ipv6.qs_function.QSFunction
    :members:
@@ -91,8 +83,7 @@ IPv6 Router Alert Option Values
 
 .. module:: pcapkit.const.ipv6.router_alert
 
-This module contains the constant enumeration for **IPv6 Router Alert Option Values**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.router_alert.RouterAlert`.
+Generated from :class:`pcapkit.vendor.ipv6.router_alert.RouterAlert`.
 
 .. autoclass:: pcapkit.const.ipv6.router_alert.RouterAlert
    :members:
@@ -104,8 +95,7 @@ IPv6 Routing Types
 
 .. module:: pcapkit.const.ipv6.routing
 
-This module contains the constant enumeration for **IPv6 Routing Types**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.routing.Routing`.
+Generated from :class:`pcapkit.vendor.ipv6.routing.Routing`.
 
 .. autoclass:: pcapkit.const.ipv6.routing.Routing
    :members:
@@ -117,8 +107,7 @@ Seed-ID Types
 
 .. module:: pcapkit.const.ipv6.seed_id
 
-This module contains the constant enumeration for **Seed-ID Types**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.seed_id.SeedID`.
+Generated from :class:`pcapkit.vendor.ipv6.seed_id.SeedID`.
 
 .. autoclass:: pcapkit.const.ipv6.seed_id.SeedID
    :members:
@@ -130,8 +119,7 @@ Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options
 
 .. module:: pcapkit.const.ipv6.smf_dpd_mode
 
-This module contains the constant enumeration for **Simplified Multicast Forwarding Duplicate Packet Detection (SMF_DPD) Options**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode`.
+Generated from :class:`pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode`.
 
 .. autoclass:: pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode
    :members:
@@ -143,8 +131,7 @@ TaggerID Types
 
 .. module:: pcapkit.const.ipv6.tagger_id
 
-This module contains the constant enumeration for **TaggerID Types**,
-which is automatically generated from :class:`pcapkit.vendor.ipv6.tagger_id.TaggerID`.
+Generated from :class:`pcapkit.vendor.ipv6.tagger_id.TaggerID`.
 
 .. autoclass:: pcapkit.const.ipv6.tagger_id.TaggerID
    :members:

@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -1002,17 +1002,9 @@
 
 
 
-<span class="c1"># NOTE: RFC 9850 :rfc:`9850#section-4.2` makes the TLS key labels an IANA</span>
-<span class="c1"># registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a</span>
-<span class="c1"># closed, hand-picked set, so the TLS key label enumeration is the generated</span>
-<span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as</span>
-<span class="c1"># ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This</span>
-<span class="c1"># module does not re-export it under the unaliased name (#1744).</span>
-<span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set</span>
-<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7, Decryption Secrets Block, says</span>
-<span class="c1"># the label "is one of" four names), not a registry, so filing it under</span>
-<span class="c1"># :mod:`pcapkit.const` would misrepresent it as one. The ``Enum_*`` alias convention covers imports of const enums, so it does</span>
-<span class="c1"># not apply to a local definition.</span>
+<span class="c1"># NOTE: RFC 9850 section 4.2 makes the TLS key labels an IANA registry, generated</span>
+<span class="c1"># as ``Enum_TLSKeyLabel`` and not re-exported here (#1744). ``WireGuardKeyLabel``</span>
+<span class="c1"># stays hand-written: draft-ietf-opsawg-pcapng-06 section 4.7 closes it to four names.</span>
 
 
 <div class="viewcode-block" id="WireGuardKeyLabel">
@@ -1389,14 +1381,13 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` checks its own --</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame` keeps a registry of its own,</span>
-    <span class="c1">#: keyed by the same enum, and so declares the same pairing rather than</span>
-    <span class="c1">#: sharing this one (:issue:`2268`).</span>
+    <span class="c1">#: and whether a bare :class:`int` is a valid key too. Declared by the class</span>
+    <span class="c1">#: *owning* the registry, so</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`</span>
+    <span class="c1">#: checks a ``code=`` key as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng` does;</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose registry</span>
+    <span class="c1">#: is keyed by the same enum, declares its own (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1">#: Block type to method mapping. A :obj:`str` value names the</span>
@@ -1528,21 +1519,8 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
-    <span class="c1"># NOTE: A plain property, where the inherited one is a</span>
-    <span class="c1"># :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate: the</span>
-    <span class="c1"># inherited one caches because it *reads the stream*, and a second read would</span>
-    <span class="c1"># consume octets that are no longer there, whereas this one only walks buffers</span>
-    <span class="c1"># the schema layer has already filled, at the cost of a handful of dict</span>
-    <span class="c1"># lookups.</span>
-    <span class="c1">#</span>
-    <span class="c1"># Caching it would make a second ``unpack`` on the same instance return the</span>
-    <span class="c1"># *first* call's octets, because :meth:`self.unpack &lt;unpack&gt;` reports the</span>
-    <span class="c1"># payload through this property and ``get_payload`` would never be reached.</span>
-    <span class="c1"># Nothing in the tree calls ``unpack`` twice on one instance</span>
-    <span class="c1"># (``__post_init__`` is its only caller), so this keeps an invariant rather</span>
-    <span class="c1"># than fixing a bug. A data descriptor also wins over ``__dict__``, so a</span>
-    <span class="c1"># stale entry left by the inherited ``cached_property`` cannot shadow this</span>
-    <span class="c1"># one either.</span>
+    <span class="c1"># NOTE: Not cached, unlike the inherited one, which reads the stream: this only</span>
+    <span class="c1"># walks filled buffers, and a cache would hand a second ``unpack`` stale octets.</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Packet'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Header and payload octets of the current block.</span>
@@ -1575,13 +1553,9 @@
         <span class="k">if</span> <span class="n">payload_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Data_Packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
-        <span class="c1"># The octets ahead of the payload field, in wire order: the outer</span>
-        <span class="c1"># schema's fields up to the one holding the block -- its 4-octet Block</span>
-        <span class="c1"># Type -- and then the block's own fields up to the payload. The block is</span>
-        <span class="c1"># found by identity rather than by name so that renaming the field</span>
-        <span class="c1"># cannot silently fold the whole block body into the header; if it is not</span>
-        <span class="c1"># found at all, the header loses the Block Type and nothing else, and the</span>
-        <span class="c1"># payload stays exact either way.</span>
+        <span class="c1"># The octets ahead of the payload field, in wire order: the outer schema's fields</span>
+        <span class="c1"># up to the block (its Block Type), then the block's up to the payload. The block</span>
+        <span class="c1"># is found by identity, so a renamed field cannot fold the body into the header.</span>
         <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
         <span class="n">stop</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
                      <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">block</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
@@ -1883,9 +1857,9 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods, for when the current instance</span>
+<span class="sd">            does not have it.</span>
 
 <span class="sd">            As in :meth:`Protocol.pack &lt;pcapkit.protocols.protocol.Protocol.pack&gt;`,</span>
 <span class="sd">            the header is made on a copy outside construction, so the instance</span>
@@ -1925,9 +1899,9 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We used a special keyword argument ``__packet__`` to pass the</span>
-<span class="sd">            global packet data to underlying methods. This is useful when</span>
-<span class="sd">            the packet data is not available in the current instance.</span>
+<span class="sd">            The special keyword argument ``__packet__`` passes the global</span>
+<span class="sd">            packet data to underlying methods, for when the current instance</span>
+<span class="sd">            does not have it.</span>
 
 <span class="sd">            A block handed to :meth:`make` as raw :obj:`bytes` is written back</span>
 <span class="sd">            verbatim past the Block Type, so the schema :meth:`make` returns</span>
@@ -2065,19 +2039,9 @@
             <span class="n">bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Block Total Length is cross-checked against its own trailing</span>
-            <span class="c1"># copy and never against the file, so on a capture cut short it runs</span>
-            <span class="c1"># past the real end -- and seeking past the end is legal and silent.</span>
-            <span class="c1"># The *next* block read would then measure a negative remainder,</span>
-            <span class="c1"># since ``pcapkit.corekit.decorators.prepare`` derives it as the</span>
-            <span class="c1"># end of the stream less the current position, and a negative</span>
-            <span class="c1"># ``__length__`` is what ``pcapng_block_selector`` hands to</span>
-            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with</span>
-            <span class="c1"># a bare ``ValueError: read length must be non-negative or -1``. That</span>
-            <span class="c1"># would cost the whole extraction rather than the one truncated</span>
-            <span class="c1"># block, the opposite of the #431 accommodation for damaged input.</span>
-            <span class="c1"># ``_read_fileng`` stops at the end of the file, so the octets it</span>
-            <span class="c1"># returned are the authority on where the block really finishes.</span>
+            <span class="c1"># NOTE: Block Total Length is checked only against its trailing copy, so on a cut</span>
+            <span class="c1"># capture it runs past the end, and the next block would read a negative length,</span>
+            <span class="c1"># failing the whole extraction against #431; the octets read mark the block's end.</span>
             <span class="n">read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">read</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length '</span>
@@ -2138,22 +2102,9 @@
         <span class="n">type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Enum_BlockType</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'block type'</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">'PCAP-NG'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">type_val</span>
 
-        <span class="c1"># NOTE: An option or record handed over as raw octets has its type code</span>
-        <span class="c1"># read back out of them -- by ``_make_pcapng_options`` and</span>
-        <span class="c1"># ``_make_nrb_records`` -- in the byte order the block is written in. So</span>
-        <span class="c1"># the byte order has to be settled before the block maker runs, not only</span>
-        <span class="c1"># after it as ``pack`` settles it, and settled the way ``pack`` settles</span>
-        <span class="c1"># it, so that the code read matches the octets emitted. Settling it here</span>
-        <span class="c1"># covers every block maker: ``_make_block_shb`` and</span>
-        <span class="c1"># ``_make_block_systemd`` settle their own, and without this the rest</span>
-        <span class="c1"># read an attribute that is not there (#2353). A section header block</span>
-        <span class="c1"># overrides this from its own Byte-Order Magic, it being the block that</span>
-        <span class="c1"># starts the section read here.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``or {}`` rather than a ``get`` default because ``__packet__`` may be</span>
-        <span class="c1"># handed over explicitly as :data:`None`, which is what</span>
-        <span class="c1"># :meth:`Schema.pack &lt;pcapkit.protocols.schema.Schema.pack&gt;`</span>
-        <span class="c1"># takes for "no packet data" as well.</span>
+        <span class="c1"># NOTE: Settle the byte order before the block maker, which reads the type code of</span>
+        <span class="c1"># a raw option or record back in it (#2353); an SHB overrides it from its own magic.</span>
+        <span class="c1"># ``or {}``, as ``__packet__`` may be given as ``None``, which ``Schema.pack`` takes too.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5213,13 +5164,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">data</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Option'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="c1"># NOTE: Unlike every other block that carries options, a custom block</span>
-        <span class="c1"># has no ``OptionField`` to name an option registry:</span>
-        <span class="c1"># :class:`~pcapkit.protocols.misc.pcapng.schema.CustomBlock`</span>
-        <span class="c1"># spans the custom data, its padding and the options as one opaque blob,</span>
-        <span class="c1"># since only the owner of the private enterprise number knows where the</span>
-        <span class="c1"># custom data ends. Its options are therefore resolved in the generic</span>
-        <span class="c1"># ``opt_*`` space, which is the only one valid in every block.</span>
+        <span class="c1"># NOTE: A custom block spans its data, padding and options as one blob, with no</span>
+        <span class="c1"># ``OptionField``, so its options resolve in the generic ``opt_*`` space.</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7387,15 +7333,8 @@
 <span class="sd">            Timezone of the current block.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: UTC, not the host's timezone, is the default in both branches</span>
-        <span class="c1"># below. A capture carries no timezone of its own unless it says so, and</span>
-        <span class="c1"># draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,</span>
-        <span class="c1"># defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC</span>
-        <span class="c1"># with no timezone term at all, so substituting the *reading* machine's</span>
-        <span class="c1"># zone would make the same file parse to different instants on different</span>
-        <span class="c1"># hosts. ``_get_resolution``</span>
-        <span class="c1"># and ``_get_offset`` fall back to the format's own defaults in this</span>
-        <span class="c1"># situation; this is the matching one.</span>
+        <span class="c1"># NOTE: UTC, not the host's zone, by default in both branches: the EPB timestamp is</span>
+        <span class="c1"># an offset from the UTC epoch (draft-ietf-opsawg-pcapng-02 section 4.3).</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_timezone'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -7448,17 +7387,8 @@
 
         <span class="n">timestamp_raw</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp_high</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">timestamp_low</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
-            <span class="c1"># NOTE: This is the UTC epoch the docstring above promises, with no</span>
-            <span class="c1"># ``tzone.utcoffset(None)`` added. The block</span>
-            <span class="c1"># timestamp is an offset from the UNIX epoch, so it is</span>
-            <span class="c1"># timezone-independent by definition (draft-ietf-opsawg-pcapng-02</span>
-            <span class="c1"># section 4.3, Enhanced Packet Block, spells out the arithmetic and</span>
-            <span class="c1"># has no timezone term), and the same draft's section 4.2, Interface</span>
-            <span class="c1"># Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"</span>
-            <span class="c1"># and of ``if_tsoffset`` that it is "not intended to be used as an</span>
-            <span class="c1"># offset between local time and UTC". A shifted epoch would also</span>
-            <span class="c1"># contradict ``ts_datetime`` below, which is built from the</span>
-            <span class="c1"># unshifted value.</span>
+            <span class="c1"># NOTE: The UTC epoch, with no ``tzone.utcoffset`` added: the timestamp is</span>
+            <span class="c1"># zone-free (draft section 4.3), and section 4.2 says ``if_tzone`` SHOULD NOT be used.</span>
             <span class="n">timestamp_epoch</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp_raw</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_resolution</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span> <span class="o">+</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_offset</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span>
 
@@ -8438,7 +8368,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -8464,7 +8394,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

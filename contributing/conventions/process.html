@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/process.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull request..." />
-<meta name="description" content="The pages before this one are about writing library code. The rulings here are about running the repository – what an install carries, what a changelog entry is, and what the issue and pull request..." />
+<meta property="og:description" content="The rulings on running the repository – what an install carries, what a changelog entry is, and what the issue and pull request labels mean. None is derivable from a module or fits a code-conventio..." />
+<meta name="description" content="The rulings on running the repository – what an install carries, what a changelog entry is, and what the issue and pull request labels mean. None is derivable from a module or fits a code-conventio..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Writing the Documentation" href="documentation.html"><link rel="prev" title="Protocol Layer Placement" href="protocol-layer-placement.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,14 +570,12 @@
         <article role="main" id="furo-main-content">
           <section id="running-the-repository">
 <span id="process"></span><h1>Running the Repository<a class="headerlink" href="#running-the-repository" title="Link to this heading">¶</a></h1>
-<p>The pages before this one are about writing library code. The rulings here are
-about running the repository – what an install carries, what a changelog entry is,
-and what the issue and pull request labels mean. None of them is derivable from a
-module, and none fits a code-convention page, so the owner ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> that they get a page of
-their own rather than being left in their threads. Each ruling below is <strong>paraphrased
-rather than quoted</strong>, also on the owner’s standing instruction there; the issue named
-beside it is where the original wording is.</p>
+<p>The rulings on running the repository – what an install carries, what a
+changelog entry is, and what the issue and pull request labels mean. None is
+derivable from a module or fits a code-convention page, so the owner ruled on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a> that they get a page of their own. Each is <strong>paraphrased rather than
+quoted</strong>, on the owner’s standing instruction there; the issue named beside it
+holds the original wording.</p>
 <section id="the-all-extra">
 <h2>The <code class="docutils literal notranslate"><span class="pre">all</span></code> Extra<a class="headerlink" href="#the-all-extra" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">all</span></code> means <strong>core addons only</strong> – the things that let the library itself run at
@@ -597,9 +595,8 @@ the ones that qualify: the CLI addon, the crypto addon, and <code class="docutil
 </div>
 <p>So <code class="docutils literal notranslate"><span class="pre">all</span></code> is exactly the union of those extras, written out as literals rather
 than referenced.</p>
-<p>Two groups stay out, and the reasons are <strong>different</strong> rather than two versions of
-one reason. Keeping them apart is what stops the list drifting the way it already did
-once:</p>
+<p>Two groups stay out, for <strong>different</strong> reasons; keeping them apart stops the list
+drifting as it once did:</p>
 <ul class="simple">
 <li><p><strong>The third-party capture engines are excluded by kind.</strong> <code class="docutils literal notranslate"><span class="pre">DPKT</span></code>, <code class="docutils literal notranslate"><span class="pre">Scapy</span></code>,
 <code class="docutils literal notranslate"><span class="pre">PyShark</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAPFile</span></code>, <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> are not core addons, so
@@ -645,7 +642,7 @@ checks both against the code.</p>
 <p>An entry is <strong>not one line per commit</strong>. Group the changes by topic, and give concise
 detail of what actually changed in that version bump. Ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
-<p>Two different things get confused here, so they are named apart:</p>
+<p>Two things get confused here:</p>
 <ul class="simple">
 <li><p><strong>A pull request’s commits.</strong> The shared changelog for the 1.5.0 cycle was a
 long-lived pull request of its own, carrying roughly one commit per code pull
@@ -658,8 +655,7 @@ entries under a section per top-level module, with <code class="docutils literal
 once – the completed Mobility Header registry is one bullet, not two. That is a
 property of <em>the file</em>, and it is the axis the ruling governs.</p></li>
 </ul>
-<p>Both are measurable rather than matters of memory, which is the point of writing the
-commands down instead of a figure that will be stale by the next merge:</p>
+<p>Both are measurable:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># entries in the file, and the module sections they group under</span>
 grep<span class="w"> </span>-cE<span class="w"> </span><span class="s1">'^\* '</span><span class="w"> </span>docs/source/changelog/1.5.0.rst
 grep<span class="w"> </span>-B1<span class="w"> </span>-E<span class="w"> </span><span class="s1">'^-{3,}$'</span><span class="w"> </span>docs/source/changelog/1.5.0.rst<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-vE<span class="w"> </span><span class="s1">'^-{3,}$|^--$'</span>
@@ -710,8 +706,8 @@ makes sense against the scheme it sits in.</p>
 statement someone made rather than a value derived from the change. That matters most
 for the <code class="docutils literal notranslate"><span class="pre">review:</span></code> family below: such a label is not evidence of the state it names,
 it is a record that the owner asserted it.</p>
-<p>Some paths are automated, and each is worth knowing about because a label they set has
-had no human judgement behind it:</p>
+<p>Some paths are automated, and a label they set has had no human judgement behind
+it:</p>
 <ul class="simple">
 <li><p><strong>dependabot</strong> puts <code class="docutils literal notranslate"><span class="pre">dependencies</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> on its own
 pull requests, and only those: <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> configures the
@@ -736,8 +732,7 @@ has GitHub’s own defaults, of which <code class="docutils literal notranslate"
 <code class="docutils literal notranslate"><span class="pre">duplicate</span></code> are all in live use and <code class="docutils literal notranslate"><span class="pre">good</span> <span class="pre">first</span> <span class="pre">issue</span></code> is archived. GitHub cannot
 archive a label, so an archived one keeps its name and description and is recoloured
 grey (<code class="docutils literal notranslate"><span class="pre">cccccc</span></code>); it is kept rather than deleted so the name stays reserved.
-Those are documented by GitHub rather than here, and are counted rather than listed so
-this page does not go stale every time one is added:</p>
+GitHub documents those, and they are counted rather than listed here:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gh</span> <span class="n">label</span> <span class="nb">list</span> <span class="o">-</span><span class="n">R</span> <span class="n">JarryShaw</span><span class="o">/</span><span class="n">PyPCAPKit</span> <span class="o">--</span><span class="n">limit</span> <span class="mi">100</span> <span class="o">--</span><span class="n">json</span> <span class="n">name</span> <span class="o">-</span><span class="n">q</span> <span class="s1">'.[].name'</span> <span class="o">|</span> <span class="n">wc</span> <span class="o">-</span><span class="n">l</span>
 </pre></div>
 </div>
@@ -975,11 +970,11 @@ scopes, because <code class="docutils literal notranslate"><span class="pre">GIT
 secret every run skips with a notice</strong> rather than failing, and Status falls back to
 being set by hand.</p>
 <p>The board has these views: <em>All items</em>; <em>Board</em>, the open items in one column per
-Status; <em>Release 1.5</em>, the open milestone; <em>Needs decision</em> and <em>Blocked</em>, each the
-open items in that state; <em>Open pull requests</em>; and <em>History</em>, everything <em>Done</em>.
-Rename <em>Release 1.5</em> when the next milestone opens. Sorting and grouping are set in
-the web interface; names, layouts, filters and columns can also be set through the
-GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
+Status; <em>Needs decision</em> and <em>Blocked</em>, each the open items in that state; <em>Open
+pull requests</em>; <em>History</em>, everything <em>Done</em>; and a <em>Release X.Y</em> board for each
+milestone from <code class="docutils literal notranslate"><span class="pre">PyPCAPKit</span> <span class="pre">v1.5</span></code> on, filtered on it. Add one when a milestone
+opens. Sorting and grouping are set in the web interface; names, layouts, filters
+and columns can also be set through the GraphQL API (<code class="docutils literal notranslate"><span class="pre">updateProjectV2View</span></code>).</p>
 <p>Link neither from docstrings, code comments or Markdown files. Both are tracking
 metadata that changes as work moves, and a link to them goes stale the way a line
 number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are the durable trail.

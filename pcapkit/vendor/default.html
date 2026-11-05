@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/default.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.vendor.default exports Vendor only, which is the base class for all vendor crawlers. Environment Variables: The crawlers’ variables are read here, not by pcapkit.utilities.config(#1726). PC..." />
-<meta name="description" content="pcapkit.vendor.default exports Vendor only, which is the base class for all vendor crawlers. Environment Variables: The crawlers’ variables are read here, not by pcapkit.utilities.config(#1726). PC..." />
+<meta property="og:description" content="pcapkit.vendor.default exports Vendor only, which is the base class for all vendor crawlers. Running a Crawler: Instantiating a crawler fetches its registry and writes the constant module: Each fai..." />
+<meta name="description" content="pcapkit.vendor.default exports Vendor only, which is the base class for all vendor crawlers. Running a Crawler: Instantiating a crawler fetches its registry and writes the constant module: Each fai..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Type Registry Vendor Crawlers" href="reg.html"><link rel="prev" title="Vendor Crawlers" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -861,8 +861,7 @@ with no instance required to obtain it. That lets a caller resolve a
 crawler’s destination <em>without</em> instantiating it, and so without triggering
 <a class="reference internal" href="#pcapkit.vendor.default.Vendor.__init__" title="pcapkit.vendor.default.Vendor.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Vendor.__init__()</span></code></a>’s network fetch, render and write –
 the pre-run snapshot that <code class="docutils literal notranslate"><span class="pre">run()</span></code> in <a class="reference internal" href="index.html#module-pcapkit.vendor.__main__" title="pcapkit.vendor.__main__"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.__main__</span></code></a>
-takes (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/872">#872</a>) is exactly such a caller. Every crawler defined in this
-codebase inherits this implementation unchanged; none overrides
+takes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/872">#872</a>) is such a caller. No crawler overrides
 <code class="docutils literal notranslate"><span class="pre">_dest_path</span></code>, so the classmethod is authoritative for all of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -887,10 +886,54 @@ codebase inherits this implementation unchanged; none overrides
 
 </dd></dl>
 
+<section id="running-a-crawler">
+<h2>Running a Crawler<a class="headerlink" href="#running-a-crawler" title="Link to this heading">¶</a></h2>
+<p>Instantiating a crawler fetches its registry and writes the constant module:</p>
+<pre  class="mermaid">
+        flowchart TD
+    NEW[&quot;a crawler instantiated: Vendor.\_\_init\_\_&quot;]
+    L{&quot;LINK set?&quot;}
+    G[&quot;GET LINK&lt;br/&gt;a non-OK or empty page retried,&lt;br/&gt;up to MAX\_RETRY&quot;]
+    P{&quot;get\_proxies() gives any?&quot;}
+    GP[&quot;GET LINK through the proxies&lt;br/&gt;retried the same way&quot;]
+    CI{&quot;PCAPKIT\_CI\_MODE on?&quot;}
+    TTY{&quot;stdin interactive?&quot;}
+    RAISE[&quot;the request error is raised&quot;]
+    MAN[&quot;manual: LINK opened in a browser,&lt;br/&gt;wait for its saved page source&quot;]
+    REQ[&quot;request(text): the registry's records&quot;]
+    CNT[&quot;count(data)&quot;]
+    CTX[&quot;context(data): process(), then the module template&quot;]
+    DEST[&quot;\_dest\_path(): the matching module under pcapkit/const/&quot;]
+    WR[&quot;the constant module written&quot;]
+
+    NEW --&gt; L
+    L --&gt;|&quot;no: request() with no text&quot;| REQ
+    L --&gt;|yes| G
+    G --&gt;|ok| REQ
+    G --&gt;|fails| P
+    P --&gt;|yes| GP
+    P --&gt;|no| CI
+    GP --&gt;|ok| REQ
+    GP --&gt;|fails| CI
+    CI --&gt;|yes| RAISE
+    CI --&gt;|no| TTY
+    TTY --&gt;|no| RAISE
+    TTY --&gt;|yes| MAN --&gt; REQ
+    REQ --&gt; CNT --&gt; CTX --&gt; DEST --&gt; WR
+
+    click NEW &quot;default.html#pcapkit.vendor.default.Vendor.__init__&quot;
+    click REQ &quot;default.html#pcapkit.vendor.default.Vendor.request&quot;
+    click CNT &quot;default.html#pcapkit.vendor.default.Vendor.count&quot;
+    click CTX &quot;default.html#pcapkit.vendor.default.Vendor.context&quot;
+    click DEST &quot;default.html#pcapkit.vendor.default.Vendor._dest_path&quot;
+    </pre><p>Each failed fetch warns with <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.VendorRequestWarning" title="pcapkit.utilities.warnings.VendorRequestWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">VendorRequestWarning</span></code></a>;
+<span class="target" id="index-3"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a> sets <a class="reference internal" href="#pcapkit.vendor.default.MAX_RETRY" title="pcapkit.vendor.default.MAX_RETRY"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_RETRY</span></code></a>, and
+<span class="target" id="index-4"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a> turns on the CI check.</p>
+</section>
 <section id="environment-variables">
 <span id="vendor-variables"></span><h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h2>
 <p>The crawlers’ variables are read here, not by <a class="reference internal" href="../utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). <span class="target" id="index-3"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a> and <span class="target" id="index-4"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). <span class="target" id="index-5"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a> and <span class="target" id="index-6"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>
 are read once, when this module is imported, with
 <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.read_limit" title="pcapkit.utilities.config.read_limit"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_limit()</span></code></a> and
 <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.read_flag" title="pcapkit.utilities.config.read_flag"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_flag()</span></code></a>: a bad value warns with a
@@ -931,7 +974,7 @@ or <code class="docutils literal notranslate"><span class="pre">0</span></code>/
 <span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">MAX_RETRY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.vendor.default.MAX_RETRY" title="Link to this definition">¶</a></dt>
 <dd><p>How many times <a class="reference internal" href="#pcapkit.vendor.default.Vendor._request" title="pcapkit.vendor.default.Vendor._request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Vendor._request()</span></code></a> asks for a crawler’s page, both
 directly and then through the proxies of <a class="reference internal" href="#pcapkit.vendor.default.get_proxies" title="pcapkit.vendor.default.get_proxies"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_proxies()</span></code></a>, before giving
-up, <span class="target" id="index-5"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>.</p>
+up, <span class="target" id="index-7"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Read with <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.read_limit" title="pcapkit.utilities.config.read_limit"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_limit()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). A
 value that is not an integer of at least <code class="docutils literal notranslate"><span class="pre">1</span></code> warns with
@@ -950,7 +993,7 @@ as <code class="docutils literal notranslate"><span class="pre">1</span></code>.
 <dt class="sig sig-object py" id="pcapkit.vendor.default.CI_MODE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">CI_MODE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.vendor.default.CI_MODE" title="Link to this definition">¶</a></dt>
 <dd><p>Whether the crawlers run in CI, where a failed fetch fails the run
-instead of prompting, <span class="target" id="index-6"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>.</p>
+instead of prompting, <span class="target" id="index-8"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Read with <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.read_flag" title="pcapkit.utilities.config.read_flag"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_flag()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). A
 value it does not accept warns with
@@ -1039,8 +1082,8 @@ destination.</p>
 <dt class="sig sig-object py" id="pcapkit.vendor.default.get_proxies">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.default.</span></span><span class="sig-name descname"><span class="pre">get_proxies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#get_proxies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.get_proxies" title="Link to this definition">¶</a></dt>
 <dd><p>Get proxy for blocked sites.</p>
-<p>The function will read <span class="target" id="index-7"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and
-<span class="target" id="index-8"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a>, if any, on every call, for the proxy
+<p>The function will read <span class="target" id="index-9"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and
+<span class="target" id="index-10"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a>, if any, on every call, for the proxy
 settings of <a class="reference external" href="https://requests.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">requests</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1136,6 +1179,7 @@ manual-intervention path it could not have used anyway.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Base Crawler</a><ul>
+<li><a class="reference internal" href="#running-a-crawler">Running a Crawler</a></li>
 <li><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
@@ -1155,5 +1199,363 @@ manual-intervention path it could not have used anyway.</p>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: fit-content;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: fit-content;\n}\n\n.mermaid-container > pre > svg {\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     </body>
 </html>

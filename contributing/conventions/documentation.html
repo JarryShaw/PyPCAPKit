@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -580,6 +580,20 @@ reference renders from, since the owner named both when settling the first of th
 thread was the only place most of it lived. As on <a class="reference internal" href="process.html#process"><span class="std std-ref">Running the Repository</span></a>, every ruling here is
 <strong>paraphrased rather than quoted</strong>, on the owner’s standing instruction there; the
 issue named beside a rule is where the original wording is.</p>
+<section id="concision">
+<h2>Concision<a class="headerlink" href="#concision" title="Link to this heading">¶</a></h2>
+<p><strong>Every page, docstring and comment is as short as it can be while staying
+accurate.</strong> Cut restatement, hedging, narration, and any sentence that would survive
+deletion unnoticed; keep the specific fact, name and reference. Where the content is
+structure or a run of parallel items, a diagram (<a class="reference internal" href="#mermaid-for-flows">Mermaid for Flows</a>) or a table says
+it in less. This reaches the Markdown documents and every code comment, not only what
+Sphinx renders. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and reaffirmed by the owner in session, recorded
+on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>.</p>
+<p><strong>Cut timed context</strong> – when a thing changed and what it used to do – everywhere but
+version-bounded prose: changelog entries, breaking-change and deprecation notes, and the
+version directives. <strong>Keep a design decision</strong>: where a reader would otherwise undo a
+deliberate choice, its reason is tightened rather than removed. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p>
+</section>
 <section id="heading-case-and-shape">
 <h2>Heading Case and Shape<a class="headerlink" href="#heading-case-and-shape" title="Link to this heading">¶</a></h2>
 <p><strong>Title Case, and short.</strong> Sentence case belongs only to a heading that genuinely is a
@@ -649,10 +663,12 @@ singular heading plural cost <a class="reference internal" href="registry-protoc
 </section>
 <section id="mermaid-for-flows">
 <h2>Mermaid for Flows<a class="headerlink" href="#mermaid-for-flows" title="Link to this heading">¶</a></h2>
-<p>Where the subject is a flow, prefer a Mermaid graph to the paragraph or the ASCII
-diagram that would otherwise carry it – a graph is read faster than its own
-description. The owner ruled this on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, asking for it where it is necessary and
-helpful, which bounds it:</p>
+<p><strong>Draw the structure, and keep the prose beside it short.</strong> A pipeline, a hierarchy, a
+dispatch chain, a lifecycle or a decision procedure gets a Mermaid graph rather than an
+ASCII diagram, even where the paragraph describing it reads well, since a graph is read
+faster than its own description. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> asked for graphs where they are necessary
+and helpful; the owner widened that in session, recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>, which keeps
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>’s bounds and adds the last of these:</p>
 <ul class="simple">
 <li><p><strong>A short sequence does not earn a graph.</strong> Two steps read perfectly well as a
 sentence, and a diagram of them costs a reader a context switch for nothing.</p></li>
@@ -662,44 +678,67 @@ than compresses.</p></li>
 <li><p><strong>Do not redraw a graph another page already has.</strong> The owner’s condition when
 approving the navigation work on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> was that nothing duplicate information
 already shown, and a second copy of a flow is exactly that.</p></li>
+<li><p><strong>Every node and edge traces to the code or to the page.</strong> A graph makes claims as a
+sentence does, so <a class="reference internal" href="#accuracy">Accuracy</a> applies to each of them.</p></li>
 </ul>
-<p>The style model is the set already in the tree, every one of which builds. The sweep
-excludes this page, which names the directive in its own prose and would otherwise
-count itself:</p>
+<p><strong>Every diagram is vertical</strong>, because a horizontal one renders too small to read. Ruled
+by the owner in session and recorded on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2787">#2787</a>:</p>
+<ul class="simple">
+<li><p>A flowchart is <code class="docutils literal notranslate"><span class="pre">flowchart</span> <span class="pre">TD</span></code> or <code class="docutils literal notranslate"><span class="pre">flowchart</span> <span class="pre">TB</span></code>, and a subgraph inside one
+stacks too, so it sets no horizontal <code class="docutils literal notranslate"><span class="pre">direction</span></code> of its own.</p></li>
+<li><p>A state diagram is <code class="docutils literal notranslate"><span class="pre">stateDiagram-v2</span></code> with <code class="docutils literal notranslate"><span class="pre">direction</span> <span class="pre">TB</span></code>.</p></li>
+<li><p>A sequence diagram is allowed only while its participants are few, since they always
+lay out side by side; <code class="docutils literal notranslate"><span class="pre">wrap:</span> <span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">actorMargin</span></code> in its front
+matter wrap its messages between narrow participants.</p></li>
+</ul>
+<p>Vertical is judged on the render, which has to come out taller than wide. So a diagram
+is written <code class="docutils literal notranslate"><span class="pre">TD</span></code> or <code class="docutils literal notranslate"><span class="pre">TB</span></code> unless an <code class="docutils literal notranslate"><span class="pre">LR</span></code> layout measures both taller than wide and
+larger than every <code class="docutils literal notranslate"><span class="pre">TD</span></code> attempt, as the workflow trigger map and the field and protocol
+hierarchies do.</p>
+<p>Where a vertical layout runs wide or piles its labels on top of each other, stack
+siblings with an invisible link (<code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">~~~</span> <span class="pre">B</span></code>), group nodes in subgraphs, break a long
+label with <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code>, pull the graph in with a smaller <code class="docutils literal notranslate"><span class="pre">nodeSpacing</span></code> in its front
+matter, or split it – rather than turning it on its side.</p>
+<p>For the mechanics, the style model is the set in the tree, every one of which builds
+and is a bare <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> carrying no directive options. The sweep excludes this
+page, which names the directive in its own prose and would otherwise count itself:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># directives</span>
 grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># pages carrying one</span>
 </pre></div>
 </div>
-<p>Every one is a bare <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> carrying no directive options, and every one is a
-<code class="docutils literal notranslate"><span class="pre">flowchart</span></code>: <code class="docutils literal notranslate"><span class="pre">LR</span></code> for a type hierarchy, and for a graph whose <code class="docutils literal notranslate"><span class="pre">TD</span></code> layout would run
-wider than the page or pile its edge labels on top of each other – a decision with many
-outcomes, a trigger map – and <code class="docutils literal notranslate"><span class="pre">TD</span></code> for the other sequences and decisions. <strong>Quote a
-node label whose text Mermaid would otherwise try to parse</strong>, and leave a bare identifier
-bare. That is what the exemplars do with <em>node</em> labels, and it follows the subject rather
-than the direction: every node label in the sequence, decision and trigger graphs is
-quoted, since every one of them is prose; the type hierarchies quote only where the text
-forces it, which is <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">h2[&quot;HTTP/2&quot;]</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> and nowhere else. Everything else there
-uses the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>, <code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and
-<code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, and spends its quotes on <code class="docutils literal notranslate"><span class="pre">click</span></code> targets instead.
-<strong>Write a</strong> <code class="docutils literal notranslate"><span class="pre">click</span></code> <strong>target relative to the page it is on</strong> – <code class="docutils literal notranslate"><span class="pre">protocol.html#...</span></code>,
-<code class="docutils literal notranslate"><span class="pre">../../ext.html#...</span></code> – never from the site root: the published site is served under
-<code class="docutils literal notranslate"><span class="pre">/PyPCAPKit/</span></code>, so a target starting with <code class="docutils literal notranslate"><span class="pre">/</span></code> resolves outside it and 404s.
-<strong>Edge labels follow no rule at all.</strong> The exemplars quote some and leave others bare,
-including <code class="docutils literal notranslate"><span class="pre">|workflow_run:</span> <span class="pre">completed|</span></code> and <code class="docutils literal notranslate"><span class="pre">|02:00|</span></code>, which the reason above would
-have quoted and which Mermaid accepts anyway – so match the graph being edited rather
-than this paragraph. Inside a quoted label, <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> breaks the text across lines and a
-literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is written <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>. Mermaid also reads label text as
-Markdown, so an underscore that opens or closes a name is written <code class="docutils literal notranslate"><span class="pre">\_</span></code> –
-<code class="docutils literal notranslate"><span class="pre">\_missing\_</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.\_\_version\_\_</span></code> – or the name renders as emphasis. Its
-own <code class="docutils literal notranslate"><span class="pre">#95;</span></code> escape is no substitute: in a label that carries a <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> it is decoded
-before the Markdown pass, and the emphasis comes back. Where a steep edge runs under
-a neighbouring edge label, <code class="docutils literal notranslate"><span class="pre">curve:</span> <span class="pre">monotoneX</span></code> in the graph’s front matter keeps it
-clear, as the mint criterion’s decision graph does.
-<a class="reference internal" href="../releasing.html"><span class="doc">The release pipeline</span></a> is the <code class="docutils literal notranslate"><span class="pre">TD</span></code> example and
-<a class="reference internal" href="../../pcapkit/corekit/fields/index.html"><span class="doc">the field hierarchy</span></a> the <code class="docutils literal notranslate"><span class="pre">LR</span></code> one.</p>
+<ul class="simple">
+<li><p><strong>Quote a node label whose text Mermaid would otherwise try to parse</strong>, and leave a
+bare identifier bare. A graph whose node labels are prose quotes every one of them.
+A type hierarchy keeps the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and <code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, quotes only
+where the text forces it – <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> – and spends its quotes on
+<code class="docutils literal notranslate"><span class="pre">click</span></code> targets instead.</p></li>
+<li><p><strong>Write a</strong> <code class="docutils literal notranslate"><span class="pre">click</span></code> <strong>target relative to the page it is on</strong> – <code class="docutils literal notranslate"><span class="pre">protocol.html#...</span></code>,
+<code class="docutils literal notranslate"><span class="pre">../../ext.html#...</span></code> – never from the site root: the published site is served
+under <code class="docutils literal notranslate"><span class="pre">/PyPCAPKit/</span></code>, so a target starting with <code class="docutils literal notranslate"><span class="pre">/</span></code> resolves outside it and 404s.</p></li>
+<li><p><strong>Edge labels follow no rule at all.</strong> The exemplars quote some and leave others
+bare, including <code class="docutils literal notranslate"><span class="pre">|workflow_run:</span> <span class="pre">completed|</span></code> and <code class="docutils literal notranslate"><span class="pre">|02:00|</span></code>, which the reason above
+would have quoted and which Mermaid accepts anyway – so match the graph being edited
+rather than this list.</p></li>
+<li><p><strong>Inside a quoted label</strong>, <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> breaks the text across lines and a literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>
+or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is written <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>. Mermaid also reads label text as Markdown,
+so an underscore that opens or closes a name is written <code class="docutils literal notranslate"><span class="pre">\_</span></code> – <code class="docutils literal notranslate"><span class="pre">\_missing\_</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcapkit.\_\_version\_\_</span></code> – or the name renders as emphasis. Its own <code class="docutils literal notranslate"><span class="pre">#95;</span></code>
+escape is no substitute: in a label that carries a <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> it is decoded before the
+Markdown pass, and the emphasis comes back.</p></li>
+<li><p><strong>Where a steep edge runs under a neighbouring edge label</strong>, <code class="docutils literal notranslate"><span class="pre">curve:</span> <span class="pre">monotoneX</span></code> in
+the graph’s front matter keeps it clear, as the mint criterion’s decision graph does.</p></li>
+<li><p><strong>Leave the sizing to</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>. Its <code class="docutils literal notranslate"><span class="pre">mermaid_init_config</span></code>
+turns <code class="docutils literal notranslate"><span class="pre">useMaxWidth</span></code> off for flowchart, state and sequence diagrams alike, since
+each type reads its own copy, so a diagram renders at its own size; a type the pages
+have not used needs its own entry there.</p></li>
+</ul>
+<p><a class="reference internal" href="../releasing.html"><span class="doc">The release pipeline</span></a> is the example of a vertical
+pipeline, <a class="reference internal" href="../../pcapkit/foundation/engines/index.html"><span class="doc">the engine hierarchy</span></a> of a vertical
+type hierarchy, and <a class="reference internal" href="../maintenance.html"><span class="doc">Maintenance Workflow</span></a> of the state and sequence diagrams.</p>
 </section>
 <section id="toctree-captions">
 <h2>Toctree Captions<a class="headerlink" href="#toctree-captions" title="Link to this heading">¶</a></h2>
@@ -966,6 +1005,7 @@ rewrite destroys that in exchange for nothing a reader ever sees.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Writing the Documentation</a><ul>
+<li><a class="reference internal" href="#concision">Concision</a></li>
 <li><a class="reference internal" href="#heading-case-and-shape">Heading Case and Shape</a></li>
 <li><a class="reference internal" href="#renaming-a-heading">Renaming a Heading</a></li>
 <li><a class="reference internal" href="#mermaid-for-flows">Mermaid for Flows</a></li>

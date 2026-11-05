@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -1002,14 +1002,13 @@ module and class, or a <a class="reference internal" href="../protocol.html#pcap
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto_key__">
 <span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto_key__" title="Link to this definition">¶</a></dt>
 <dd><p>What <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by – the enum a key must be a member of,
-and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too. Declared by the
-class <em>owning</em> the registry, and read from it by
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a> so a
-<code class="docutils literal notranslate"><span class="pre">code=</span></code> key is checked exactly as
-<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng" title="pcapkit.foundation.registry.protocols.misc.register_pcapng"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_pcapng()</span></code></a> checks its own –
-<a class="reference internal" href="pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> keeps a registry of its own,
-keyed by the same enum, and so declares the same pairing rather than
-sharing this one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key too. Declared by the class
+<em>owning</em> the registry, so
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code></a>
+checks a <code class="docutils literal notranslate"><span class="pre">code=</span></code> key as
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.misc.register_pcapng" title="pcapkit.foundation.registry.protocols.misc.register_pcapng"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_pcapng()</span></code></a> does;
+<a class="reference internal" href="pcap.html#pcapkit.protocols.misc.pcap.frame.protocol.Frame" title="pcapkit.protocols.misc.pcap.frame.protocol.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, whose registry
+is keyed by the same enum, declares its own (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2268">#2268</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1337,9 +1336,9 @@ override can be undone (<a class="extlink-issue reference external" href="https:
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>We used a special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> to pass the
-global packet data to underlying methods. This is useful when
-the packet data is not available in the current instance.</p>
+<p>The special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> passes the global
+packet data to underlying methods, for when the current instance
+does not have it.</p>
 <p>As in <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.pack</span></code></a>,
 the header is made on a copy outside construction, so the instance
 keeps its own header, block type, byte order and option counts
@@ -1367,9 +1366,9 @@ keeps its own header, block type, byte order and option counts
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>We used a special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> to pass the
-global packet data to underlying methods. This is useful when
-the packet data is not available in the current instance.</p>
+<p>The special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> passes the global
+packet data to underlying methods, for when the current instance
+does not have it.</p>
 <p>A block handed to <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> as raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> is written back
 verbatim past the Block Type, so the schema <a class="reference internal" href="#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> returns
 holds the octets rather than the block’s fields. Those octets are

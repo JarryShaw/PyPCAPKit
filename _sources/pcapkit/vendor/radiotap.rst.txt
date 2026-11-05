@@ -4,9 +4,7 @@
 
 .. module:: pcapkit.vendor.radiotap
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` implementations, each scraping
-radiotap.org [*]_. Available vendor crawlers include:
+Each scrapes radiotap.org [*]_.
 
 .. list-table::
 
@@ -58,8 +56,7 @@ Field Types
 
 .. module:: pcapkit.vendor.radiotap.field_type
 
-This module contains the vendor crawler for **Radiotap Field Types**,
-which is automatically generating :class:`pcapkit.const.radiotap.field_type.FieldType`.
+Generates :class:`pcapkit.const.radiotap.field_type.FieldType`.
 
 The registry is radiotap.org's *Defined Fields* table, scraped from
 :attr:`~pcapkit.vendor.radiotap.field_type.FieldType.LINK`, and RTS retries and data
@@ -83,8 +80,7 @@ Flags
 
 .. module:: pcapkit.vendor.radiotap.flags
 
-This module contains the vendor crawler for **Radiotap Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.flags.Flags`.
+Generates :class:`pcapkit.const.radiotap.flags.Flags`.
 
 Each flag crawler scrapes the table on its field's page, and subclasses this one.
 A row whose mask sets one bit is a member; a row that sets more bits, or that
@@ -105,8 +101,7 @@ Channel Flags
 
 .. module:: pcapkit.vendor.radiotap.channel_flags
 
-This module contains the vendor crawler for **Radiotap Channel Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.channel_flags.ChannelFlags`.
+Generates :class:`pcapkit.const.radiotap.channel_flags.ChannelFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.channel_flags.ChannelFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -117,8 +112,7 @@ RX Flags
 
 .. module:: pcapkit.vendor.radiotap.rx_flags
 
-This module contains the vendor crawler for **Radiotap RX Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.rx_flags.RXFlags`.
+Generates :class:`pcapkit.const.radiotap.rx_flags.RXFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.rx_flags.RXFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -129,8 +123,7 @@ TX Flags
 
 .. module:: pcapkit.vendor.radiotap.tx_flags
 
-This module contains the vendor crawler for **Radiotap TX Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.tx_flags.TXFlags`.
+Generates :class:`pcapkit.const.radiotap.tx_flags.TXFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.tx_flags.TXFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -141,8 +134,7 @@ MCS Known Flags
 
 .. module:: pcapkit.vendor.radiotap.mcs_known
 
-This module contains the vendor crawler for **Radiotap MCS Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.mcs_known.MCSKnown`.
+Generates :class:`pcapkit.const.radiotap.mcs_known.MCSKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.mcs_known.MCSKnown
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -153,8 +145,7 @@ A-MPDU Status Flags
 
 .. module:: pcapkit.vendor.radiotap.ampdu_flags
 
-This module contains the vendor crawler for **Radiotap A-MPDU Status Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.ampdu_flags.AMPDUFlags`.
+Generates :class:`pcapkit.const.radiotap.ampdu_flags.AMPDUFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.ampdu_flags.AMPDUFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -165,8 +156,7 @@ VHT Known Flags
 
 .. module:: pcapkit.vendor.radiotap.vht_known
 
-This module contains the vendor crawler for **Radiotap VHT Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.vht_known.VHTKnown`.
+Generates :class:`pcapkit.const.radiotap.vht_known.VHTKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.vht_known.VHTKnown
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -177,8 +167,7 @@ VHT Flags
 
 .. module:: pcapkit.vendor.radiotap.vht_flags
 
-This module contains the vendor crawler for **Radiotap VHT Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.vht_flags.VHTFlags`.
+Generates :class:`pcapkit.const.radiotap.vht_flags.VHTFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.vht_flags.VHTFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -189,8 +178,7 @@ VHT Coding Flags
 
 .. module:: pcapkit.vendor.radiotap.vht_coding
 
-This module contains the vendor crawler for **Radiotap VHT Coding Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.vht_coding.VHTCoding`.
+Generates :class:`pcapkit.const.radiotap.vht_coding.VHTCoding`.
 
 .. autoclass:: pcapkit.vendor.radiotap.vht_coding.VHTCoding
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -201,8 +189,7 @@ Timestamp Flags
 
 .. module:: pcapkit.vendor.radiotap.timestamp_flags
 
-This module contains the vendor crawler for **Radiotap Timestamp Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.timestamp_flags.TimestampFlags`.
+Generates :class:`pcapkit.const.radiotap.timestamp_flags.TimestampFlags`.
 
 .. autoclass:: pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -213,8 +200,7 @@ HE Data1 Known Flags
 
 .. module:: pcapkit.vendor.radiotap.he_data1_known
 
-This module contains the vendor crawler for **Radiotap HE Data1 Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.he_data1_known.HEData1Known`.
+Generates :class:`pcapkit.const.radiotap.he_data1_known.HEData1Known`.
 
 .. autoclass:: pcapkit.vendor.radiotap.he_data1_known.HEData1Known
    :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
@@ -225,8 +211,7 @@ HE Data2 Known Flags
 
 .. module:: pcapkit.vendor.radiotap.he_data2_known
 
-This module contains the vendor crawler for **Radiotap HE Data2 Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.he_data2_known.HEData2Known`.
+Generates :class:`pcapkit.const.radiotap.he_data2_known.HEData2Known`.
 
 .. autoclass:: pcapkit.vendor.radiotap.he_data2_known.HEData2Known
    :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
@@ -237,8 +222,7 @@ HE-MU Flags1 Known Flags
 
 .. module:: pcapkit.vendor.radiotap.he_mu_flags1_known
 
-This module contains the vendor crawler for **Radiotap HE-MU Flags1 Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
+Generates :class:`pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known`.
 
 .. autoclass:: pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known
    :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
@@ -249,8 +233,7 @@ HE-MU Flags2 Known Flags
 
 .. module:: pcapkit.vendor.radiotap.he_mu_flags2_known
 
-This module contains the vendor crawler for **Radiotap HE-MU Flags2 Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
+Generates :class:`pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known`.
 
 .. autoclass:: pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known
    :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
@@ -261,8 +244,7 @@ HE-MU-other-user Known Flags
 
 .. module:: pcapkit.vendor.radiotap.he_mu_other_user_known
 
-This module contains the vendor crawler for **Radiotap HE-MU-other-user Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown`.
+Generates :class:`pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -273,8 +255,7 @@ L-SIG Data1 Flags
 
 .. module:: pcapkit.vendor.radiotap.lsig_data1
 
-This module contains the vendor crawler for **Radiotap L-SIG Data1 Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.lsig_data1.LSIGData1`.
+Generates :class:`pcapkit.const.radiotap.lsig_data1.LSIGData1`.
 
 .. autoclass:: pcapkit.vendor.radiotap.lsig_data1.LSIGData1
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -285,8 +266,7 @@ S1G Known Flags
 
 .. module:: pcapkit.vendor.radiotap.s1g_known
 
-This module contains the vendor crawler for **Radiotap S1G Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.s1g_known.S1GKnown`.
+Generates :class:`pcapkit.const.radiotap.s1g_known.S1GKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.s1g_known.S1GKnown
    :members: FLAG, LINK, SUBFIELD, NAMES
@@ -297,8 +277,7 @@ U-SIG Common Known Flags
 
 .. module:: pcapkit.vendor.radiotap.usig_common_known
 
-This module contains the vendor crawler for **Radiotap U-SIG Common Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.usig_common_known.USIGCommonKnown`.
+Generates :class:`pcapkit.const.radiotap.usig_common_known.USIGCommonKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown
    :members: FLAG, LINK, SUBFIELD, VALUES, NAMES
@@ -309,8 +288,7 @@ EHT Known Flags
 
 .. module:: pcapkit.vendor.radiotap.eht_known
 
-This module contains the vendor crawler for **Radiotap EHT Known Flags**,
-which is automatically generating :class:`pcapkit.const.radiotap.eht_known.EHTKnown`.
+Generates :class:`pcapkit.const.radiotap.eht_known.EHTKnown`.
 
 .. autoclass:: pcapkit.vendor.radiotap.eht_known.EHTKnown
    :members: FLAG, LINK, SUBFIELD, NAMES

@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -940,19 +940,10 @@
 
 
 
-<span class="c1"># NOTE: Import must not disturb configuration the application has already</span>
-<span class="c1"># made -- that is the whole point of the NullHandler convention -- so this only</span>
-<span class="c1"># guarantees the logger has *a* handler, and leaves level and propagation</span>
-<span class="c1"># alone. Calling reset() here instead would detach a host application's</span>
-<span class="c1"># handlers merely because it imported pcapkit after configuring logging.</span>
-<span class="c1">#</span>
-<span class="c1"># Re-execution has to be idempotent too, which the test suite relies on when it</span>
-<span class="c1"># exercises import-time behaviour. That rules out an identity test for the</span>
-<span class="c1"># devmode handler: ``handler`` is built when this module runs, so re-executing</span>
-<span class="c1"># it yields a *new* object every time and ``handler not in logger.handlers``</span>
-<span class="c1"># would be true on each pass, stacking one stderr handler per reload. The test</span>
-<span class="c1"># is therefore on what would actually duplicate -- a stream handler already</span>
-<span class="c1"># writing to the same stream.</span>
+<span class="c1"># NOTE: import only guarantees the logger *a* handler, leaving the application's</span>
+<span class="c1"># level, propagation and handlers alone, as ``reset()`` would not. Re-execution is</span>
+<span class="c1"># idempotent, so the devmode handler is tested by stream, not identity (each run</span>
+<span class="c1"># builds a new one).</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
 
@@ -1333,7 +1324,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1359,7 +1350,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

@@ -3,7 +3,7 @@ Text Fields
 
 .. module:: pcapkit.corekit.fields.strings
 
-Bytes-based Fields
+Bytes-Based Fields
 ------------------
 
 .. autoclass:: pcapkit.corekit.fields.strings.BytesField
@@ -14,7 +14,7 @@ Bytes-based Fields
    :members:
    :show-inheritance:
 
-String-based Fields
+String-Based Fields
 -------------------
 
 .. autoclass:: pcapkit.corekit.fields.strings.StringField

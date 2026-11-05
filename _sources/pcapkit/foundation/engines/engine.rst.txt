@@ -27,9 +27,7 @@ every extraction engine.
 
       .. note::
 
-         Also available as a class variable; set it with the
-         :attr:`__engine_name__` class attribute.
-
+         Also a class variable, set by :attr:`__engine_name__`.
 
    .. property:: module
       :type: str
@@ -38,8 +36,7 @@ every extraction engine.
 
       .. note::
 
-         Also available as a class variable; set it with the
-         :attr:`__engine_module__` class attribute.
+         Also a class variable, set by :attr:`__engine_module__`.
 
    .. property:: registry
       :type: dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
@@ -48,10 +45,10 @@ every extraction engine.
 
       .. note::
 
-         Only available as a class variable, since it is defined on
-         :class:`EngineMeta`. It is not a per-class mapping: it reads
-         :attr:`~pcapkit.foundation.extraction.Extractor.__engine__`, the
-         single table every engine registration lands in.
+         A class variable only, defined on :class:`EngineMeta`. It is not
+         per-class: it reads
+         :attr:`~pcapkit.foundation.extraction.Extractor.__engine__`, the one
+         table every engine registration lands in.
 
    .. autoproperty:: extractor
 

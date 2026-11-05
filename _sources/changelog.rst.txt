@@ -1,24 +1,16 @@
 .. The changelog's index. Every entry is its own document under
-   ``changelog/``, one per released version; this page is the title, the
-   preamble, a one- or two-line summary of each entry with a link to its own
-   page, and the table of contents behind them -- there is exactly one copy of
-   each entry and nothing to keep in step by hand.
+   ``changelog/``, one per version; this page holds the preamble, a one- or
+   two-line summary of each entry linking its page, and the toctree behind them.
 
-   The repository root carries ``CHANGELOG.md`` rather than a second copy of
-   this history. It holds only the version being released, in Markdown, because
-   its consumers are the ``Create Release`` workflow's release body and the
-   source distribution, and both of those read Markdown. It is generated from
+   ``CHANGELOG.md`` at the repository root holds only the version being
+   released, in Markdown, for the ``Create Release`` workflow's release body and
+   the source distribution. ``util/changelog_md.py`` generates it from
    ``changelog/<version>.rst``, so this tree stays the single source.
 
-   The toctree at the bottom carries ``:hidden:`` -- the summary list above it
-   is this page's real, readable table of contents, and a second, unannotated
-   list of the same links would only repeat them. ``util/changelog_md.py``
-   still reads that toctree to find the newest entry (see its own docstring),
-   so it has to keep existing, stay newest-first, and list exactly the pages
-   the summary list does.
-
-   The preamble below is the single-file changelog's, which this page replaces,
-   with its notes set as ``.. note::`` admonitions.
+   The toctree carries ``:hidden:`` because the summary list is this page's
+   readable table of contents. ``util/changelog_md.py`` reads the toctree to
+   find the newest entry (see its docstring), so it stays, newest-first, listing
+   exactly the pages the summary list does.
 
 =========
 Changelog
@@ -36,13 +28,12 @@ All notable changes to PyPCAPKit are recorded here.
 
    Post-releases (``X.Y.Z.postN``) are, from 1.0.1 onwards, automated
    publications of the weekly registry refresh: a bot regenerates the vendor
-   constant enumerations under ``pcapkit.const`` from the upstream IANA
-   registries and bumps the version. They carry no library changes, and are
-   collapsed into a single line per release below. Where a post-release did
-   carry something real, it is called out.
+   constant enumerations under ``pcapkit.const`` from their upstream registries
+   and bumps the version. They carry no library changes and are collapsed into
+   one line per release below; one that did carry something real is called out.
 
-Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
-carries only the version being released; this page is the whole recorded history.
+Releases are listed newest first. :file:`CHANGELOG.md` at the repository root
+carries only the version being released.
 
 * **1.6.0** (2026-11-05) -- Protocol pairs on a shared abstract base, dissectors
   for IGMP and DCCP, one package per protocol, and verified checksums.

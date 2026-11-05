@@ -27,19 +27,20 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
 
 .. mermaid::
 
-   flowchart LR
+   flowchart TD
        A{{EngineMeta}} -.->|metaclass| B(EngineBase)
 
        subgraph built-in [Built-in Engines]
-           direction LR
+           direction TB
 
            PCAP
            PCAPNG
+           PCAP ~~~ PCAPNG
        end
        B --> built-in
 
        subgraph third-party [3rd Party Engines]
-           direction LR
+           direction TB
 
            Scapy
            DPKT
@@ -47,6 +48,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
            PyPCAP
            PCAP_CT
            PyPCAPFile
+           Scapy ~~~ DPKT ~~~ PyShark ~~~ PyPCAP ~~~ PCAP_CT ~~~ PyPCAPFile
        end
        B --> third-party
 
@@ -172,7 +174,7 @@ parser -- but the extraction then does not use the engine requested.
 
 A constraint that an import cannot reveal is enforced by overriding
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
-:meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
+the :class:`~pcapkit.foundation.extraction.Extractor` constructor consults
 *before* the import test, so asking for an engine that cannot run here produces
 one warning naming the actual cause and a fall back to the built-in parser.
 :class:`~pcapkit.foundation.engines.pyshark.PyShark` checks its Python ceiling and for
@@ -184,6 +186,46 @@ a system ``libpcap`` is present (:issue:`2132`).
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` deliberately has no Python ceiling
 check, even though upstream cannot be installed on 3.12 or newer: what matters is which
 distribution is present, and a version check would refuse a working build.
+
+.. _engine-selection:
+
+The constructor settles the engine in this order, each fallback with its own warning:
+
+.. mermaid::
+
+   flowchart TD
+       REQ["engine= name, lowercased<br/>none given means default"]
+       K{"a name in<br/>Extractor.\_\_engine\_\_?"}
+       U{"unsupported\_reason()<br/>gives a reason?"}
+       W2["EngineWarning:<br/>not supported on this interpreter"]
+       I{"import\_test(module)<br/>imports it?"}
+       W3["EngineWarning: not installed"]
+       RUN["the requested engine runs"]
+       D{"default or pcapkit?"}
+       W1["EngineWarning:<br/>unsupported extraction engine"]
+       DEF["the default engine"]
+       M{"the input's magic number"}
+       PCAP["built-in PCAP engine"]
+       PCAPNG["built-in PCAP-NG engine"]
+       FE["FormatError: unknown file format"]
+
+       REQ --> K
+       K -->|yes| U
+       U -->|yes| W2 --> DEF
+       U -->|no| I
+       I -->|yes| RUN
+       I -->|no| W3 --> DEF
+       K -->|no| D
+       D -->|yes| DEF
+       D -->|no| W1 --> DEF
+       DEF --> M
+       M -->|PCAP| PCAP
+       M -->|PCAP-NG| PCAPNG
+       M -->|neither| FE
+
+       click RUN "../extraction.html#pcapkit.foundation.extraction.Extractor.run"
+       click DEF "../extraction.html#pcapkit.foundation.extraction.Extractor.run"
+       click I "../extraction.html#pcapkit.foundation.extraction.Extractor.import_test"
 
 .. seealso::
 

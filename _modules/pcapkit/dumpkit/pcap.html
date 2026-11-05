@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,9 +558,7 @@
 
 <span class="sd">.. module:: pcapkit.dumpkit.pcap</span>
 
-<span class="sd">:mod:`pcapkit.dumpkit.pcap` is the dumper for :mod:`pcapkit` implementation,</span>
-<span class="sd">specifically for PCAP format, like those described in</span>
-<span class="sd">:mod:`dictdumper`.</span>
+<span class="sd">:mod:`pcapkit.dumpkit.pcap` holds the PCAP file dumper, :class:`PCAPIO`.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -776,34 +774,24 @@
 <span class="sd">            name: name of current content block</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            A PCAP record is a 16-octet header followed by the packet octets, and</span>
-<span class="sd">            both are already in hand: the header fields are ``value.frame_info``,</span>
-<span class="sd">            with the fraction in this file's resolution (see</span>
-<span class="sd">            :meth:`self._make_timestamp &lt;_make_timestamp&gt;`), and the octets are</span>
-<span class="sd">            exactly ``value.packet``. So this writes them directly, rather than</span>
-<span class="sd">            handing them to</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose constructor</span>
-<span class="sd">            packs the record and then **dissects it again** through the whole</span>
-<span class="sd">            protocol stack to arrive at bytes it was given. That round trip</span>
-<span class="sd">            measured about 82% of the cost of a flow-traced extraction -- ``http.pcap``,</span>
-<span class="sd">            1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms</span>
-<span class="sd">            without, over a 1030 ms untraced baseline.</span>
+<span class="sd">            A PCAP record is a 16-octet header, from ``value.frame_info`` with</span>
+<span class="sd">            the fraction in this file's resolution (see</span>
+<span class="sd">            :meth:`self._make_timestamp &lt;_make_timestamp&gt;`), followed by</span>
+<span class="sd">            ``value.packet``. Both are written directly rather than through</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.protocol.Frame`, whose</span>
+<span class="sd">            constructor **dissects the record again** through the whole</span>
+<span class="sd">            protocol stack. That round trip measured about 82% of the cost of a</span>
+<span class="sd">            flow-traced extraction (``http.pcap``, 1117 frames, best of 7:</span>
+<span class="sd">            2319 ms with it, 1263 ms without, over a 1030 ms untraced</span>
+<span class="sd">            baseline), and re-emits every parse warning the frame raised, such</span>
+<span class="sd">            as ``SchemaWarning: packet length &lt; 0: -3`` for a 3-octet payload.</span>
 
-<span class="sd">            Skipping it is not only cheaper. The re-dissection would re-emit</span>
-<span class="sd">            every parse warning the frame had already produced once, and warn</span>
-<span class="sd">            about payloads it has no business parsing at all -- writing a</span>
-<span class="sd">            3-octet payload would raise ``SchemaWarning: packet length &lt; 0: -3``</span>
-<span class="sd">            from a dumper that only has to copy it.</span>
-
-<span class="sd">            ``incl_len`` is written as ``len(value.packet)``, the octets that</span>
-<span class="sd">            follow it, not as ``value.frame_info.incl_len``. The two are equal</span>
-<span class="sd">            for every record a file holds whole. A record whose captured length</span>
-<span class="sd">            runs past the end of its file, or a PCAP-NG block whose captured</span>
-<span class="sd">            length runs past the block (:issue:`1405`), is *kept as captured*</span>
-<span class="sd">            by its reader: the declared length stays in ``frame_info``, so the</span>
-<span class="sd">            source rebuilds byte-exactly, and ``packet`` is the octets present.</span>
-<span class="sd">            Copying that declared length would claim octets the trace does not</span>
-<span class="sd">            hold, and a reader would run off the end of the file (:issue:`1541`).</span>
+<span class="sd">            ``incl_len`` is written as ``len(value.packet)``, not as</span>
+<span class="sd">            ``value.frame_info.incl_len``. They differ only for a record kept</span>
+<span class="sd">            as captured whose declared length runs past the end of its file, or</span>
+<span class="sd">            past its PCAP-NG block (:issue:`1405`); copying that length would</span>
+<span class="sd">            claim octets the trace does not hold, and a reader would run off</span>
+<span class="sd">            the end of the file (:issue:`1541`).</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
@@ -1238,7 +1226,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1264,7 +1252,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

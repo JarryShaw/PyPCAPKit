@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -559,8 +559,8 @@
 
 <span class="sd">.. module:: pcapkit.corekit.decorators</span>
 
-<span class="sd">:mod:`pcapkit.corekit.decorators` contains several useful</span>
-<span class="sd">decorators, including :func:`~pcapkit.corekit.decorators.seekset`,</span>
+<span class="sd">:mod:`pcapkit.corekit.decorators` contains the decorators</span>
+<span class="sd">:func:`~pcapkit.corekit.decorators.seekset`,</span>
 <span class="sd">:func:`~pcapkit.corekit.decorators.beholder` and</span>
 <span class="sd">:func:`~pcapkit.corekit.decorators.prepare`.</span>
 
@@ -921,32 +921,23 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: ``Schema.unpack`` clears ``__updated__`` before returning, but</span>
-        <span class="c1"># ``post_process`` runs after it and assigns fields -- and every field</span>
-        <span class="c1"># assignment sets the flag again (``Schema.__setattr__``). The schema is</span>
-        <span class="c1"># then left marked as needing a re-pack even though its ``__buffer__``</span>
-        <span class="c1"># already holds the octets just read off the wire, so the next</span>
-        <span class="c1"># ``bytes(schema)`` or ``len(schema)`` silently re-packs it.</span>
+        <span class="c1"># NOTE: ``Schema.unpack`` clears ``__updated__``, but ``post_process``</span>
+        <span class="c1"># runs after it and every field assignment sets the flag again</span>
+        <span class="c1"># (``Schema.__setattr__``), so the next ``bytes(schema)`` or</span>
+        <span class="c1"># ``len(schema)`` silently re-packs a schema whose ``__buffer__`` already</span>
+        <span class="c1"># holds the octets read. That re-pack calls ``post_process`` again with a</span>
+        <span class="c1"># packet context rebuilt from the schema's own fields, overwriting what</span>
+        <span class="c1"># the first call derived from the enclosing layer -- such as the IPv6</span>
+        <span class="c1"># source address</span>
+        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``</span>
+        <span class="c1"># resolves, re-packed one option later by ``OptionField.unpack``'s</span>
+        <span class="c1"># ``len(data)``. So clear the flag after ``post_process``, as</span>
+        <span class="c1"># ``Schema.pack`` does.</span>
         <span class="c1">#</span>
-        <span class="c1"># That re-pack is not merely wasted work: ``Schema.pack`` calls</span>
-        <span class="c1"># ``post_process`` a *second* time, with a packet context rebuilt from</span>
-        <span class="c1"># the schema's own fields and therefore holding none of the enclosing</span>
-        <span class="c1"># layer's, so it overwrites exactly the values ``post_process`` derived</span>
-        <span class="c1"># from that context. It would discard, for one, the IPv6 source address</span>
-        <span class="c1"># that ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``</span>
-        <span class="c1"># has just resolved: ``OptionField.unpack`` measures each parsed option</span>
-        <span class="c1"># with ``len(data)``, which triggers the re-pack one option later.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``Schema.pack`` already orders the two the other way round -- clear the</span>
-        <span class="c1"># flag *after* ``post_process``, not before -- so match it here and the</span>
-        <span class="c1"># revision made while unpacking survives.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Guarded rather than assigned outright because ``post_process`` may hand</span>
-        <span class="c1"># back something other than a schema: an implementation is free to return</span>
-        <span class="c1"># a nested one instead of ``self``, as</span>
-        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, and the</span>
-        <span class="c1"># decorator is also applied to stand-ins in the test suite that return</span>
-        <span class="c1"># the packet mapping. Only a real schema carries the flag.</span>
+        <span class="c1"># Guarded because ``post_process`` may return something other than a</span>
+        <span class="c1"># schema: a nested one, as</span>
+        <span class="c1"># ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, or the</span>
+        <span class="c1"># packet mapping, as stand-ins in the test suite do.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">):</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1316,7 +1307,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1342,7 +1333,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

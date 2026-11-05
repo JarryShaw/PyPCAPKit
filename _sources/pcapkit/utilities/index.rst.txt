@@ -5,14 +5,17 @@ Module Utilities
 .. module:: pcapkit.utilities
 
 :mod:`pcapkit.utilities` holds the cross-cutting services :mod:`pcapkit` is
-built with: user-refined exceptions and warnings, logging, the tunable limits
-of :mod:`~pcapkit.utilities.config`, a compatibility layer, timestamp
-conversion, pickle reductions, the
-:mod:`context variables <pcapkit.utilities.contextvars>` its modules share,
-:mod:`lazy imports <pcapkit.utilities.importlib>` for a package's exports, an
-:mod:`abstract-class check <pcapkit.utilities.inspect>` that reads no interpreter
-flag, and wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
-outside itself; see :ref:`utilities-or-corekit`.
+built with, and imports nothing from :mod:`pcapkit` outside itself (see
+:ref:`utilities-or-corekit`):
+
+* user-refined exceptions and warnings, and logging;
+* the tunable limits of :mod:`~pcapkit.utilities.config`;
+* a compatibility layer, timestamp conversion and pickle reductions;
+* the :mod:`context variables <pcapkit.utilities.contextvars>` its modules
+  share, :mod:`lazy imports <pcapkit.utilities.importlib>` for a package's
+  exports, and an :mod:`abstract-class check <pcapkit.utilities.inspect>` that
+  reads no interpreter flag;
+* wrappers around third-party libraries.
 
 .. toctree::
    :maxdepth: 2
@@ -33,8 +36,8 @@ Version Compatibility
 
 .. module:: pcapkit.utilities.compat
 
-:mod:`pcapkit` further provides a compatibility layer for the
-following objects and functions:
+:mod:`pcapkit.utilities.compat` covers these objects on interpreters older than
+the version listed:
 
 .. list-table::
    :header-rows: 1
@@ -69,9 +72,9 @@ following objects and functions:
      - Python 3.10
 
 It also exports :mod:`pathlib`, :exc:`ModuleNotFoundError`,
-:class:`collections.abc.Collection` and :func:`functools.cached_property` as the
-standard library has them, with no fallback, since 1.5.0 requires Python 3.8 or
-later (:issue:`2051`).
+:class:`collections.abc.Collection` and :func:`functools.cached_property`
+straight from the standard library, since 1.5.0 requires Python 3.8 or later
+(:issue:`2051`).
 
 .. function:: final(f)
 

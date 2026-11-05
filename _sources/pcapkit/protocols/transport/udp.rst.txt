@@ -7,7 +7,7 @@ UDP - User Datagram Protocol
 :mod:`pcapkit.protocols.transport.udp.protocol` contains
 :class:`~pcapkit.protocols.transport.udp.protocol.UDP` only,
 which implements the extractor for User Datagram Protocol
-(UDP) [*]_, whose structure is described as below:
+(UDP) [*]_, whose structure is:
 
 ======= ========= ===================== ===============================
 Octets      Bits        Name                    Description

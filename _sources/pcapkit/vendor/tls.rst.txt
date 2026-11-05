@@ -4,12 +4,10 @@
 
 .. module:: pcapkit.vendor.tls
 
-This module contains the vendor crawlers of the constant enumerations shared by
-the record-layer implementations under the
-:class:`~pcapkit.protocols.application.ssl.protocol.SSL` umbrella --
+For the constant enumerations shared by the record-layer implementations under
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL`:
 :class:`~pcapkit.protocols.application.tls.protocol.TLS` (SSLv3 through TLS 1.3) and
-:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`. Available vendor crawlers
-include:
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`.
 
 .. list-table::
 
@@ -27,8 +25,7 @@ TLS/DTLS Content Types
 
 .. module:: pcapkit.vendor.tls.content_type
 
-This module contains the vendor crawler for **TLS/DTLS Content Types**,
-which is automatically generating :class:`pcapkit.const.tls.content_type.ContentType`.
+Generates :class:`pcapkit.const.tls.content_type.ContentType`.
 
 .. autoclass:: pcapkit.vendor.tls.content_type.ContentType
    :members: FLAG, LINK
@@ -39,8 +36,7 @@ TLS/DTLS HandshakeType
 
 .. module:: pcapkit.vendor.tls.handshake_type
 
-This module contains the vendor crawler for **TLS/DTLS HandshakeType**,
-which is automatically generating :class:`pcapkit.const.tls.handshake_type.HandshakeType`.
+Generates :class:`pcapkit.const.tls.handshake_type.HandshakeType`.
 
 .. autoclass:: pcapkit.vendor.tls.handshake_type.HandshakeType
    :members: FLAG, LINK
@@ -51,8 +47,7 @@ TLS/DTLS ExtensionType Values
 
 .. module:: pcapkit.vendor.tls.extension_type
 
-This module contains the vendor crawler for **TLS/DTLS ExtensionType Values**,
-which is automatically generating :class:`pcapkit.const.tls.extension_type.ExtensionType`.
+Generates :class:`pcapkit.const.tls.extension_type.ExtensionType`.
 
 .. autoclass:: pcapkit.vendor.tls.extension_type.ExtensionType
    :members: FLAG, LINK

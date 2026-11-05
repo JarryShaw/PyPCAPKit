@@ -16,7 +16,7 @@ that is usable as a standalone protocol in its own right inherits both
 :class:`~pcapkit.protocols.internet.ipsec.protocol.IPsec`), as
 :class:`~pcapkit.protocols.internet.esp.protocol.ESP` does.
 
-The family as it stands:
+The family:
 
 .. list-table::
    :header-rows: 1
@@ -51,8 +51,8 @@ standalone form is an IPsec one.
 The Shared-Registry Trap
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Stated before the criterion itself, because it is the part a future reader will get
-wrong.** The obvious way to decide whether a header is "usable as a standalone protocol"
+**This is the part most often got wrong**, so it comes before the criterion. The
+obvious way to decide whether a header is "usable as a standalone protocol"
 is to ask what the library's own dispatch already allows. That answer is useless, and
 measurably so:
 
@@ -161,8 +161,8 @@ on: ESP's own data model reports ``next`` as :obj:`None`, and
 ends the ordinary way one iteration later -- not because ESP lacks a parser, which
 it has, but because it cannot hand the walk a successor.
 
-The full reasoning, including how ESP's terminal case differs from 253/254's, is
-written where the code is and is deliberately not restated at length here: see
+The full reasoning, including how ESP's terminal case differs from 253/254's, lives
+with the code: see
 :meth:`IPv6._import_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer>`
 and the module docstring of :mod:`pcapkit.protocols.internet.ipv6_ext.protocol`.
 

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/reg.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of protocol type registry implementations. Available vendor crawlers include:,, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 Num..." />
-<meta name="description" content="This module contains all vendor crawlers of protocol type registry implementations. Available vendor crawlers include:,, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 Num..." />
+<meta property="og:description" content=",, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 Numbers †,, TRANSTYPE, Transport Layer Protocol Numbers ‡,, APPTYPE, Application Layer Protocol Numbers (Service Name and..." />
+<meta name="description" content=",, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 Numbers †,, TRANSTYPE, Transport Layer Protocol Numbers ‡,, APPTYPE, Application Layer Protocol Numbers (Service Name and..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="ARP Vendor Crawlers" href="arp.html"><link rel="prev" title="Base Crawler" href="default.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,8 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.reg">
 <span id="protocol-type-registry-vendor-crawlers"></span><h1>Protocol Type Registry Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.reg" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of protocol type registry
-implementations. Available vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -592,8 +590,7 @@ implementations. Available vendor crawlers include:</p>
 </div>
 <section id="module-pcapkit.vendor.reg.linktype">
 <span id="link-layer-header-type-values"></span><h2>Link-Layer Header Type Values<a class="headerlink" href="#module-pcapkit.vendor.reg.linktype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Link-Layer Header Type Values</strong>,
-which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.linktype.LinkType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.linktype.LinkType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.linktype.</span></span><span class="sig-name descname"><span class="pre">LinkType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType" title="Link to this definition">¶</a></dt>
@@ -616,8 +613,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.reg.ethertype">
 <span id="ethertype-ieee-802-numbers"></span><h2>Ethertype IEEE 802 Numbers<a class="headerlink" href="#module-pcapkit.vendor.reg.ethertype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Ethertype IEEE 802 Numbers</strong>,
-which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.ethertype.</span></span><span class="sig-name descname"><span class="pre">EtherType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType" title="Link to this definition">¶</a></dt>
@@ -664,8 +660,7 @@ order it was read.</p>
 </section>
 <section id="module-pcapkit.vendor.reg.transtype">
 <span id="transport-layer-protocol-numbers"></span><h2>Transport Layer Protocol Numbers<a class="headerlink" href="#module-pcapkit.vendor.reg.transtype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Transport Layer Protocol Numbers</strong>,
-which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.transtype.TransType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.transtype.TransType</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType" title="Link to this definition">¶</a></dt>
@@ -688,11 +683,9 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.reg.apptype">
 <span id="application-layer-protocol-numbers"></span><h2>Application Layer Protocol Numbers<a class="headerlink" href="#module-pcapkit.vendor.reg.apptype" title="Link to this heading">¶</a></h2>
-<p>This package contains the vendor crawlers for <strong>Application Layer Protocol
-Numbers</strong>, which are automatically generating <a class="reference internal" href="../const/reg.html#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>.
-IANA keys every assignment on a <code class="docutils literal notranslate"><span class="pre">(service,</span> <span class="pre">port,</span> <span class="pre">transport)</span></code> triple, so the
-registry is one crawler per transport protocol alongside the base they all
-render against.</p>
+<p>Generates <a class="reference internal" href="../const/reg.html#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>. IANA keys every assignment on a
+<code class="docutils literal notranslate"><span class="pre">(service,</span> <span class="pre">port,</span> <span class="pre">transport)</span></code> triple, so the registry is one crawler per transport
+protocol alongside the base they all render against.</p>
 <dl class="py class" id="module-pcapkit.vendor.reg.apptype.apptype">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.apptype.AppType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="Link to this definition">¶</a></dt>

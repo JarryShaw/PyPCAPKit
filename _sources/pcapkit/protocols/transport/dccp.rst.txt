@@ -5,10 +5,9 @@ DCCP - Datagram Congestion Control Protocol
 .. module:: pcapkit.protocols.transport.dccp.protocol
 
 :mod:`pcapkit.protocols.transport.dccp.protocol` contains
-:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` only,
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP`,
 which implements the extractor for Datagram Congestion
-Control Protocol (DCCP) [*]_, whose generic header is
-described as below:
+Control Protocol (DCCP) [*]_, whose generic header is:
 
 ======= ========= ========================= =======================================
 Octets      Bits        Name                    Description

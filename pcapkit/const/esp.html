@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/esp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of ESP implementations. Available enumerations include:,, ESP_Cipher, Encryption Algorithm Transform IDs*,, ESP_Integrity, Integrity Algorithm Transfo..." />
-<meta name="description" content="This module contains all constant enumerations of ESP implementations. Available enumerations include:,, ESP_Cipher, Encryption Algorithm Transform IDs*,, ESP_Integrity, Integrity Algorithm Transfo..." />
+<meta property="og:description" content=",, ESP_Cipher, Encryption Algorithm Transform IDs*,, ESP_Integrity, Integrity Algorithm Transform IDs †,,,, ESP has no algorithm registry of its own: IKEv2 negotiates an SA’s algorithms, so both en..." />
+<meta name="description" content=",, ESP_Cipher, Encryption Algorithm Transform IDs*,, ESP_Integrity, Integrity Algorithm Transform IDs †,,,, ESP has no algorithm registry of its own: IKEv2 negotiates an SA’s algorithms, so both en..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="HIP Constant Enumerations" href="hip.html"><link rel="prev" title="VLAN Constant Enumerations" href="vlan.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.const.esp">
 <span id="esp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.esp" title="Link to this heading">¶</a></h1>
-<p>This module contains all constant enumerations of
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> implementations. Available
-enumerations include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -585,16 +582,14 @@ enumerations include:</p>
 </tbody>
 </table>
 </div>
-<p>ESP has no algorithm registry of its own: an SA’s algorithms are negotiated by
-IKEv2, so both enumerations are the corresponding IKEv2 <em>transform ID</em>
-sub-registries. They live here rather than under an <code class="docutils literal notranslate"><span class="pre">ikev2</span></code> package because
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> is the only thing in
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> that consumes them.</p>
-<p>Both enumerate every transform <strong>IANA has registered</strong>, which is a much larger
-set than <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> can apply. Which of them ESP actually implements is a
-separate question, answered by
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and
-<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a>.</p>
+<p>ESP has no algorithm registry of its own: IKEv2 negotiates an SA’s algorithms, so
+both enumerations are IKEv2 <em>transform ID</em> sub-registries. They live here rather
+than under an <code class="docutils literal notranslate"><span class="pre">ikev2</span></code> package because
+<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> is their only consumer.</p>
+<p>Both list every transform <strong>IANA has registered</strong>, far more than <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> can
+apply; <a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and
+<a class="reference internal" href="../protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a> list those ESP
+implements.</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
@@ -607,8 +602,7 @@ separate question, answered by
 </aside>
 <section id="module-pcapkit.const.esp.cipher">
 <span id="esp-encryption-algorithm-transform-ids"></span><h2>ESP Encryption Algorithm Transform IDs<a class="headerlink" href="#module-pcapkit.const.esp.cipher" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>Transform Type 1 -
-Encryption Algorithm Transform IDs</strong>, which is automatically generated from
+<p>IANA’s <em>Transform Type 1 - Encryption Algorithm Transform IDs</em>, generated from
 <a class="reference internal" href="../vendor/esp.html#pcapkit.vendor.esp.cipher.Cipher" title="pcapkit.vendor.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.esp.cipher.Cipher</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.esp.cipher.Cipher">
@@ -1051,8 +1045,7 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 </section>
 <section id="module-pcapkit.const.esp.integrity">
 <span id="esp-integrity-algorithm-transform-ids"></span><h2>ESP Integrity Algorithm Transform IDs<a class="headerlink" href="#module-pcapkit.const.esp.integrity" title="Link to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>Transform Type 3 -
-Integrity Algorithm Transform IDs</strong>, which is automatically generated from
+<p>IANA’s <em>Transform Type 3 - Integrity Algorithm Transform IDs</em>, generated from
 <a class="reference internal" href="../vendor/esp.html#pcapkit.vendor.esp.integrity.Integrity" title="pcapkit.vendor.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.esp.integrity.Integrity</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.esp.integrity.Integrity">

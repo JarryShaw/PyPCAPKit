@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -576,10 +576,8 @@ only, which implements the extractor for the radiotap header <a class="footnote-
 tools prepend to an 802.11 frame, as seen on a
 <code class="docutils literal notranslate"><span class="pre">LINKTYPE_IEEE802_11_RADIOTAP</span></code> capture, or on a
 <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LINUX_SLL</span></code>/<code class="docutils literal notranslate"><span class="pre">LINKTYPE_LINUX_SLL2</span></code> capture whose <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code>
-is <code class="docutils literal notranslate"><span class="pre">ARPHRD_IEEE80211_RADIOTAP</span></code>. Radiotap is not part of the 802.11
-standard itself – it is a prefix written by the capturing tool, in front of
-the raw 802.11 MAC frame. Its fixed start, all little-endian, is described
-as below:</p>
+is <code class="docutils literal notranslate"><span class="pre">ARPHRD_IEEE80211_RADIOTAP</span></code>. Radiotap is not part of the 802.11 standard.
+Its fixed start, all little-endian, is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>

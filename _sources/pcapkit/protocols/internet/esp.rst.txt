@@ -287,6 +287,40 @@ Known Limitations
 Processing Status
 -----------------
 
+Where in :meth:`ESP.read <pcapkit.protocols.internet.esp.protocol.ESP.read>` each
+status is set:
+
+.. mermaid::
+
+   flowchart TD
+       R["ESP.read: SPI, sequence number,<br/>the rest as payload"] --> M
+       M{"an ESPContext SA matching<br/>the SPI and outer destination?"}
+       M -->|no| NOSA["NO\_SA: kept opaque, no warning"]
+       M -->|yes| T{"payload shorter than the SA's ICV?"}
+       T -->|yes| TR["TRUNCATED"]
+       T -->|no| SPLIT["split off the ICV"]
+       SPLIT --> U{"association.unavailable() gives a reason?<br/>e.g. cryptography not installed"}
+       U -->|yes| UN["UNSUPPORTED: the ICV still reported"]
+       U -->|no| I{"a separate integrity algorithm?"}
+       I -->|"yes, and compute\_icv differs from the ICV"| AF["AUTH\_FAILED"]
+       I -->|"no, or the ICV verifies"| D["association.decrypt"]
+       D -->|"InvalidTag: a combined-mode tag fails,<br/>most likely a wrong key"| AF
+       D -->|ProtocolError| DF["DECRYPT\_FAILED"]
+       D -->|plaintext| TRL{"\_read\_trailer: the trailer self-consistent?"}
+       TRL -->|no| DF
+       TRL -->|yes| OK["DECRYPTED"]
+       OK --> NXT["plaintext dispatched on Next Header"]
+
+       click R "esp.html#pcapkit.protocols.internet.esp.protocol.ESP.read"
+       click M "esp.html#pcapkit.protocols.internet.esp.protocol.ESPContext.match"
+       click U "esp.html#pcapkit.protocols.internet.esp.protocol.SecurityAssociation.unavailable"
+       click D "esp.html#pcapkit.protocols.internet.esp.protocol.SecurityAssociation.decrypt"
+       click TRL "esp.html#pcapkit.protocols.internet.esp.protocol.ESP._read_trailer"
+
+``TRUNCATED`` is checked before ``UNSUPPORTED`` since the ICV length comes from the
+SA, not from |cryptography|_, and every status but ``DECRYPTED`` is made by
+:meth:`~pcapkit.protocols.internet.esp.protocol.ESP._make_opaque`.
+
 .. autoclass:: pcapkit.protocols.internet.esp.protocol.ESPStatus
    :members:
    :show-inheritance:

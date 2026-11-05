@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,11 +558,9 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.httpv2.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.httpv2.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`</span>
-<span class="sd">only, which implements an extractor for Hypertext Transfer</span>
-<span class="sd">Protocol (HTTP/2) [*]_, whose structure is described as</span>
-<span class="sd">below:</span>
+<span class="sd">:mod:`pcapkit.protocols.application.httpv2.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`, the extractor for</span>
+<span class="sd">the Hypertext Transfer Protocol (HTTP/2) [*]_, whose frame is:</span>
 
 <span class="sd">======= ========= ===================== ==========================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -711,9 +709,7 @@
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HTTP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HTTP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Hypertext Transfer Protocol (HTTP/2).</span>
 
-<span class="sd">    This class supports parsing of the following HTTP/2 frames,</span>
-<span class="sd">    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    The HTTP/2 frames it parses, by :class:`pcapkit.const.http.frame.Frame` type:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -902,20 +898,15 @@
             <span class="n">length</span> <span class="o">=</span> <span class="n">remaining</span>
 
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ``0 &lt; ... &lt; 9`` rather than ``... &lt; 9``: an exhausted stream</span>
-            <span class="c1"># (``len(self) == 0``) is left alone, so ``length`` reaches</span>
-            <span class="c1"># :meth:`Protocol.unpack &lt;pcapkit.protocols.protocol.Protocol.unpack&gt;`</span>
-            <span class="c1"># still ``None`` and its ``prepare`` decorator raises</span>
-            <span class="c1"># :exc:`StreamEOFError` as documented above; only a *non-empty*</span>
-            <span class="c1"># short stream is rejected as malformed here.</span>
+            <span class="c1"># ``0 &lt;``: an exhausted stream is left for ``Protocol.unpack``'s</span>
+            <span class="c1"># ``prepare`` decorator to raise ``StreamEOFError``, as documented</span>
+            <span class="c1"># above; only a non-empty short stream is malformed.</span>
             <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
                                     <span class="sa">f</span><span class="s1">'shorter than the 9-octet frame header'</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="c1"># An *explicit* length, zero included, is a caller assertion about</span>
-            <span class="c1"># how much data this frame has -- not the "figure it out"</span>
-            <span class="c1"># ``None`` above -- so every value under nine is rejected the same</span>
-            <span class="c1"># way, with no exhaustion signal to preserve.</span>
+            <span class="c1"># An explicit length, zero included, asserts how much data the</span>
+            <span class="c1"># frame has, so every value under nine is malformed.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
                                 <span class="sa">f</span><span class="s1">'shorter than the 9-octet frame header'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -955,16 +946,8 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preface_length</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="c1"># NOTE: ``schema.length`` is the *declared* length off the wire -- the</span>
-        <span class="c1"># 24-bit field a hostile or truncated capture controls outright -- so</span>
-        <span class="c1"># checking only it would let a frame whose buffer holds far fewer octets</span>
-        <span class="c1"># than it claims report a length nothing backs (e.g. a nine-octet buffer</span>
-        <span class="c1"># declaring 16777215). ``length`` is the number of octets actually</span>
-        <span class="c1"># available for this frame (``Protocol.__len__`` returns</span>
-        <span class="c1"># ``len(self._data)``, and an explicit ``length`` means the same), so it</span>
-        <span class="c1"># has to clear the 9-octet header *and* back the declared value. The</span>
-        <span class="c1"># declared value counts the frame payload only, the header excluded</span>
-        <span class="c1"># (:rfc:`9113#section-4.1`), so ``length`` must hold both.</span>
+        <span class="c1"># NOTE: ``schema.length`` counts the payload alone (RFC 9113, section 4.1), so</span>
+        <span class="c1"># ``length`` must cover the 9-octet header and the declared payload as well.</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -1041,10 +1024,9 @@
         <span class="n">type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># A frame type whose payload is of fixed or minimum size cannot be</span>
-            <span class="c1"># built from empty octets, so an omitted frame dispatches to that</span>
-            <span class="c1"># type's own constructor, as ``{}`` does (#2274). An explicit</span>
-            <span class="c1"># ``b''`` stays raw.</span>
+            <span class="c1"># An omitted frame dispatches to the type's own constructor, as</span>
+            <span class="c1"># ``{}`` does, since a fixed-size payload cannot be empty octets</span>
+            <span class="c1"># (#2274). An explicit ``b''`` stays raw.</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -1526,9 +1508,8 @@
         <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">ACK</span> <span class="ow">and</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: every pair rather than a mapping: an identifier may repeat, and</span>
-        <span class="c1"># the values apply in order (:rfc:`9113#section-6.5.3`). ``Settings``</span>
-        <span class="c1"># keeps every entry, and answers an index with the last value.</span>
+        <span class="c1"># NOTE: Every pair, not a mapping: an identifier may repeat and applies in order</span>
+        <span class="c1"># (:rfc:`9113#section-6.5.3`); ``Settings`` answers an index with the last value.</span>
         <span class="n">sets</span> <span class="o">=</span> <span class="n">Data_Settings</span><span class="p">([(</span><span class="n">setting</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">setting</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">settings</span><span class="p">])</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SettingsFrame</span><span class="p">(</span>
@@ -2747,7 +2728,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2773,7 +2754,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

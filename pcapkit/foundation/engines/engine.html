@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -700,8 +700,7 @@ reaches this method at all.</p>
 <dd><p>Engine name.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Also available as a class variable; set it with the
-<a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="pcapkit.foundation.engines.engine.EngineBase.__engine_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_name__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="pcapkit.foundation.engines.engine.EngineBase.__engine_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_name__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -711,8 +710,7 @@ reaches this method at all.</p>
 <dd><p>Engine module name.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Also available as a class variable; set it with the
-<a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="pcapkit.foundation.engines.engine.EngineBase.__engine_module__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_module__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="pcapkit.foundation.engines.engine.EngineBase.__engine_module__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_module__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -722,10 +720,10 @@ reaches this method at all.</p>
 <dd><p>Mapping of engine names to engine classes.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Only available as a class variable, since it is defined on
-<a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineMeta" title="pcapkit.foundation.engines.engine.EngineMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineMeta</span></code></a>. It is not a per-class mapping: it reads
-<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__engine__" title="pcapkit.foundation.extraction.Extractor.__engine__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine__</span></code></a>, the
-single table every engine registration lands in.</p>
+<p>A class variable only, defined on <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineMeta" title="pcapkit.foundation.engines.engine.EngineMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineMeta</span></code></a>. It is not
+per-class: it reads
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__engine__" title="pcapkit.foundation.extraction.Extractor.__engine__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine__</span></code></a>, the one
+table every engine registration lands in.</p>
 </div>
 </dd></dl>
 
@@ -831,9 +829,9 @@ extraction process.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">EngineMeta</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_T</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
 <p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> class. It can be useful to reduce unnecessary
-registry calls and simplify the customisation process.</p>
+<p>It provides <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.name" title="pcapkit.foundation.engines.engine.EngineBase.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EngineBase.name</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.module" title="pcapkit.foundation.engines.engine.EngineBase.module"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EngineBase.module</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase.registry" title="pcapkit.foundation.engines.engine.EngineBase.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EngineBase.registry</span></code></a> as class properties, the first two read from
+<code class="docutils literal notranslate"><span class="pre">__engine_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__engine_module__</span></code> where a subclass sets them.</p>
 </dd></dl>
 
 </section>

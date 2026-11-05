@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.icmp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.icmpv4.protocol.ICMPv4` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`ICMP_Type <pcapkit.const.icmp.type.Type>`
@@ -26,8 +22,7 @@ ICMP Type Numbers
 
 .. module:: pcapkit.const.icmp.type
 
-This module contains the constant enumeration for **ICMP Type Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.icmp.type.Type`.
+Generated from :class:`pcapkit.vendor.icmp.type.Type`.
 
 .. autoclass:: pcapkit.const.icmp.type.Type
    :members:
@@ -39,9 +34,7 @@ ICMP Destination Unreachable Codes
 
 .. module:: pcapkit.const.icmp.destination_unreachable_code
 
-This module contains the constant enumeration for **ICMP Destination
-Unreachable Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmp.destination_unreachable_code.DestinationUnreachableCode`.
+Generated from :class:`pcapkit.vendor.icmp.destination_unreachable_code.DestinationUnreachableCode`.
 
 .. autoclass:: pcapkit.const.icmp.destination_unreachable_code.DestinationUnreachableCode
    :members:
@@ -53,9 +46,7 @@ ICMP Time Exceeded Codes
 
 .. module:: pcapkit.const.icmp.time_exceeded_code
 
-This module contains the constant enumeration for **ICMP Time Exceeded
-Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmp.time_exceeded_code.TimeExceededCode`.
+Generated from :class:`pcapkit.vendor.icmp.time_exceeded_code.TimeExceededCode`.
 
 .. autoclass:: pcapkit.const.icmp.time_exceeded_code.TimeExceededCode
    :members:
@@ -67,9 +58,7 @@ ICMP Parameter Problem Codes
 
 .. module:: pcapkit.const.icmp.parameter_problem_code
 
-This module contains the constant enumeration for **ICMP Parameter Problem
-Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmp.parameter_problem_code.ParameterProblemCode`.
+Generated from :class:`pcapkit.vendor.icmp.parameter_problem_code.ParameterProblemCode`.
 
 .. autoclass:: pcapkit.const.icmp.parameter_problem_code.ParameterProblemCode
    :members:

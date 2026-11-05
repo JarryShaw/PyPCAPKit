@@ -7,33 +7,29 @@ Scapy Support
 
 .. module:: pcapkit.foundation.engines.scapy
 
-This module contains the implementation for `Scapy`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `Scapy`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
-   Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s
-   layer registries -- ``conf.l2types`` and the ``bind_layers`` payload table,
-   both of which exist only as import side effects of the layer modules.
-   Importing a narrower submodule leaves them empty, and
-   :class:`~scapy.utils.PcapReader` then returns every frame as one opaque
-   :class:`~scapy.packet.Raw` layer without raising, so the engine would dissect
-   nothing and say so only on :data:`sys.stderr`. Naming the layer modules
-   individually is not a cheaper route: it repairs the link layer but leaves the
-   payload table short, so :file:`dhcp.pcapng` still comes back as
-   ``Ethernet / IP / UDP / Raw``, and such a list would go stale silently as
-   `Scapy`_ gains layer types.
+   Constructing this engine imports ``scapy.all``, whose layer modules fill
+   `Scapy`_'s layer registries -- ``conf.l2types`` and the ``bind_layers``
+   payload table -- as an import side effect. A narrower import leaves them
+   empty, and :class:`~scapy.utils.PcapReader` then returns every frame as one
+   opaque :class:`~scapy.packet.Raw` layer without raising, saying so only on
+   :data:`sys.stderr`. Importing the layer modules by name repairs the link
+   layer but leaves the payload table short, so :file:`dhcp.pcapng` still reads
+   as ``Ethernet / IP / UDP / Raw``, and such a list goes stale as `Scapy`_ gains
+   layer types.
 
-   One side effect: ``scapy.all`` loads :mod:`scapy.layers.dcerpc`, which
-   reaches `Scapy`_'s TLS layer and there triggers a
-   ``CryptographyDeprecationWarning`` from |cryptography|_ about
-   finite-field Diffie-Hellman. It concerns a key-exchange code path
-   :mod:`pcapkit` never executes, but it subclasses :exc:`UserWarning` rather
+   ``scapy.all`` also loads :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s
+   TLS layer and there triggers a ``CryptographyDeprecationWarning`` from
+   |cryptography|_ about finite-field Diffie-Hellman. :mod:`pcapkit` never runs
+   that key-exchange path, but the warning subclasses :exc:`UserWarning` rather
    than :exc:`DeprecationWarning`, so Python's default filters show it.
 
-   :mod:`pcapkit` deliberately does not filter it away -- it is `Scapy`_'s to
-   emit and the consumer's to silence, on the same footing as every other
-   category (see :mod:`pcapkit.utilities.warnings`)::
+   :mod:`pcapkit` leaves it unfiltered on purpose: it is `Scapy`_'s to emit and
+   the consumer's to silence, like every other category (see
+   :mod:`pcapkit.utilities.warnings`)::
 
       import warnings
 
@@ -60,8 +56,7 @@ DPKT Support
 
 .. module:: pcapkit.foundation.engines.dpkt
 
-This module contains the implementation for `DPKT`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `DPKT`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
@@ -99,14 +94,12 @@ PyShark Support
 
 .. module:: pcapkit.foundation.engines.pyshark
 
-This module contains the implementation for `PyShark`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `PyShark`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
-   `PyShark`_ has requirements beyond installing it, and none is
-   visible to an import -- the package imports cleanly and then fails when used,
-   which is why
+   `PyShark`_ imports cleanly with its Python ceiling or :program:`tshark`
+   unmet, and fails only when used, so
    :meth:`~pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason` checks
    both up front.
 
@@ -114,17 +107,16 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    ``asyncio.get_event_loop_policy().get_event_loop()``. With no running loop,
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
-   ``RuntimeError: There is no current event loop in thread 'MainThread'``. Python
-   3.13 was not measured; it is expected to work, being on the
+   ``RuntimeError: There is no current event loop in thread 'MainThread'``. 3.13
+   was not measured, and is expected to work, being on the
    deprecated-but-functional side of that change.
 
    **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
    parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults
    ``tshark_path`` in its :file:`config.ini` first, then :envvar:`PATH` on POSIX,
    both Program Files directories on Windows, and
-   :file:`/Applications/Wireshark.app` on macOS. The check delegates to
-   |pyshark|_'s own resolver for exactly that reason, so a correctly configured
-   install off :envvar:`PATH` is not refused.
+   :file:`/Applications/Wireshark.app` on macOS. The check uses |pyshark|_'s own
+   resolver, so a configured install off :envvar:`PATH` is not refused.
 
    **Read access under AppArmor.** From Ubuntu 25.04, :program:`tshark` runs
    confined by an enforcing AppArmor profile, :file:`/etc/apparmor.d/tshark`,
@@ -161,15 +153,14 @@ PyPCAP Support
 
 .. module:: pcapkit.foundation.engines.pypcap
 
-This module contains the implementation for `PyPCAP`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `PyPCAP`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
-   `PyPCAP`_ publishes no wheels, so installing it compiles a C extension and
-   needs both the :manpage:`libpcap(3)` headers and its shared library on the
-   system -- a header alone is not enough. It is therefore **not** part of the
-   ``all`` extra, and is installed on its own once libpcap is available:
+   `PyPCAP`_ publishes no wheels, so installing it compiles a C extension, which
+   needs both the :manpage:`libpcap(3)` headers and its shared library. It is
+   therefore **not** in the ``all`` extra; install it on its own once libpcap is
+   present:
 
    .. code-block:: shell
 
@@ -204,9 +195,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    engine therefore checks which of the two it got and raises
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when it is `pcap-ct`_,
    naming ``engine='pcap_ct'`` in the message. Running `pcap-ct`_ under the
-   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would report an engine that is
-   not the one in use, and the two have different install requirements and different
-   version coverage to report.
+   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would misreport the
+   engine in use, whose install requirements and version coverage differ.
 
    A |pcap|_ module that is installed but cannot load -- its import raises
    :exc:`OSError`, say, because no :manpage:`libpcap(3)` can be found -- is reported
@@ -260,8 +250,7 @@ pcap-ct Support
 
 .. module:: pcapkit.foundation.engines.pcap_ct
 
-This module contains the implementation for `pcap-ct`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `pcap-ct`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. _libpcap: https://pypi.org/project/libpcap/
 
@@ -273,37 +262,36 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`: select it with
    ``engine='pcap_ct'``.
 
-   Its reason for existing is coverage. Upstream `PyPCAP`_ stops at Python 3.11
-   (see the note under `PyPCAP Support`_ above); `pcap-ct`_ and `libpcap`_ both
-   publish ``py3-none-any`` wheels, so **installing** this engine needs no
-   compiler and no ``pcap.h``:
+   It exists for coverage. Upstream `PyPCAP`_ stops at Python 3.11 (see
+   `PyPCAP Support`_ above), while `pcap-ct`_ and `libpcap`_ both publish
+   ``py3-none-any`` wheels, so **installing** this engine needs no compiler and
+   no ``pcap.h``:
 
    .. code-block:: shell
 
       pip install pypcapkit[PCAP_CT]
 
-   Together these engines cover every interpreter the project supports, and
-   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` covers all of it on its own:
+   The two extras' markers split the supported interpreters between them:
 
    =========================================================================  ==================
    Engine                                                                     Python
    =========================================================================  ==================
-   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` (``pypcap``)             3.10, 3.11
+   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` (``pypcap``)             below 3.12
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` (``pcap-ct``)          3.10 and newer
    =========================================================================  ==================
 
 .. warning::
 
-   **A system** :manpage:`libpcap(3)` **is still required at run time**, and this
-   is the easiest thing to get wrong about `pcap-ct`_. `libpcap`_ ships a vendored
+   **A system** :manpage:`libpcap(3)` **is still required at run time.**
+   `libpcap`_ ships a vendored
    :file:`libpcap.so` under ``_platform/{linux,macos,windows}/`` but does **not**
    use it by default: its :file:`libpcap.cfg` reads ``LIBPCAP = None`` as
    published, which sends the loader to :func:`ctypes.util.find_library`, so what
    gets mapped is the host's ``libpcap.so.1``.
 
-   Which system library gets mapped therefore depends on the interpreter's
-   loader search path, so the same wheel can load different ``libpcap`` versions
-   under different interpreters. Setting ``LIBPCAP = tcpdump`` in
+   The library mapped therefore follows the interpreter's loader search path, so
+   the same wheel can load different ``libpcap`` versions under different
+   interpreters. Setting ``LIBPCAP = tcpdump`` in
    :file:`libpcap.cfg` selects the vendored copy instead.
 
    With no system :manpage:`libpcap(3)` at all, ``import pcap`` raises
@@ -350,12 +338,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
-   PCAP-NG is rejected with a
-   :exc:`~pcapkit.utilities.exceptions.FormatError`, for both engines, and the
-   reason is that accepting it would be *unpredictable* rather than merely
-   limited. :manpage:`libpcap(3)` can read a PCAP-NG savefile, but how well
-   depends on the version the host provides -- which, per the warning above, the
-   `libpcap`_ wheel does not pin. Reading :file:`examples/captures/dhcp.pcapng`:
+   Both engines reject PCAP-NG with a
+   :exc:`~pcapkit.utilities.exceptions.FormatError`, because accepting it would
+   be *unpredictable* rather than merely limited. :manpage:`libpcap(3)` can read
+   a PCAP-NG savefile, but how well depends on the version the host provides --
+   which, per the warning above, the `libpcap`_ wheel does not pin. Reading
+   :file:`examples/captures/dhcp.pcapng`:
 
    ================  ===========================================================
    System libpcap    Result
@@ -405,8 +393,7 @@ PyPCAPFile Support
 
 .. module:: pcapkit.foundation.engines.pypcapfile
 
-This module contains the implementation for `PyPCAPFile`_ engine
-support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+The `PyPCAPFile`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
@@ -456,18 +443,14 @@ Backend Detection
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Unrelated PyPI distributions install a top-level module named |pcap|_ --
-`PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
-a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
-and ``import pcap`` resolves to whichever the import system finds first.
+`PyPCAP`_, a Cython extension module, and `pcap-ct`_, a :mod:`ctypes` package,
+both install a top-level |pcap|_ module, so ``import pcap`` resolves to whichever
+the import system finds first. This module tells
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
-:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` each have to know which one
-they actually got rather than assume, and this module is the one place that
-answers it -- deliberately shared, since the engines must agree and a copy of
-the detection in each would be a chance to disagree. It is *only* detection,
-and it imports nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`,
-which imports nothing from :mod:`pcapkit.foundation`, so it cannot introduce an
-import cycle.
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which one they got, shared
+so the two engines cannot disagree. It only detects, and imports nothing from
+:mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`, which imports nothing from
+:mod:`pcapkit.foundation`, so it cannot introduce an import cycle.
 
 .. autodata:: pcapkit.foundation.engines._pcap_backend.PYPCAP
 

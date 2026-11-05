@@ -4,11 +4,10 @@
 
 .. module:: pcapkit.const.tls
 
-This module contains the constant enumerations shared by the record-layer
-implementations under the :class:`~pcapkit.protocols.application.ssl.protocol.SSL`
-umbrella -- :class:`~pcapkit.protocols.application.tls.protocol.TLS` (SSLv3 through
-TLS 1.3) and :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`. Available
-enumerations include:
+Shared by the record-layer implementations under
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL`:
+:class:`~pcapkit.protocols.application.tls.protocol.TLS` (SSLv3 through TLS 1.3) and
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`.
 
 .. list-table::
 
@@ -26,8 +25,7 @@ TLS/DTLS Content Types
 
 .. module:: pcapkit.const.tls.content_type
 
-This module contains the constant enumeration for **TLS/DTLS Content Types**,
-which is automatically generated from :class:`pcapkit.vendor.tls.content_type.ContentType`.
+Generated from :class:`pcapkit.vendor.tls.content_type.ContentType`.
 
 .. autoclass:: pcapkit.const.tls.content_type.ContentType
    :members:
@@ -39,10 +37,8 @@ TLS/DTLS HandshakeType
 
 .. module:: pcapkit.const.tls.handshake_type
 
-This module contains the constant enumeration for **TLS/DTLS HandshakeType**,
-which is automatically generated from
-:class:`pcapkit.vendor.tls.handshake_type.HandshakeType`. It includes the
-DTLS-only messages :rfc:`9147#section-5.2` adds to the registry.
+Generated from :class:`pcapkit.vendor.tls.handshake_type.HandshakeType`, including
+the DTLS-only messages :rfc:`9147#section-5.2` adds to the registry.
 
 .. autoclass:: pcapkit.const.tls.handshake_type.HandshakeType
    :members:
@@ -54,8 +50,7 @@ TLS/DTLS ExtensionType Values
 
 .. module:: pcapkit.const.tls.extension_type
 
-This module contains the constant enumeration for **TLS/DTLS ExtensionType Values**,
-which is automatically generated from :class:`pcapkit.vendor.tls.extension_type.ExtensionType`.
+Generated from :class:`pcapkit.vendor.tls.extension_type.ExtensionType`.
 
 .. autoclass:: pcapkit.const.tls.extension_type.ExtensionType
    :members:

@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,35 +573,29 @@
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>This page is the maintained copy of the project’s enhancement proposals, kept
-in step with the code. The <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> holds them as they
-were first raised; here an implemented proposal is described as implemented,
-and only genuinely open work is asked for. Please leave notes in the thread
-rather than against this page.</p>
+in step with the code. The <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> holds them as first
+raised; here an implemented proposal is described as implemented, and only open
+work is asked for. Leave notes in the thread rather than against this page.</p>
 </div>
 <p>Pull requests for anything still open, and new ideas of your own, are very
 welcome. For questions, leave a note in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> or under the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a">Q&amp;A
 category</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This page tracks <strong>feature requests</strong> – what is not implemented yet, and
-what a contributor could pick up. It is not an issue tracker. Where work on
-something listed here turns up a <strong>defect</strong> in code that already exists, the
-defect belongs in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> and is linked from here,
-not written up as prose on this page. A design question that needs a decision
-before anyone can implement it – as against something simply being broken –
-is a request and does belong here.</p>
+<p>This page tracks <strong>feature requests</strong>, not defects. A defect that work on an
+item turns up goes in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a> and is linked from here. A
+design question that needs a decision before anyone can implement it is a
+request, and belongs here.</p>
 </div>
 <p>Wish you enjoy <strong>PyPCAPKit</strong>!!!</p>
 <section id="more-protocols-more">
 <h2>More Protocols, More!!!<a class="headerlink" href="#more-protocols-more" title="Link to this heading">¶</a></h2>
-<p>Plenty of protocols are not decoded yet, and every one of them is wanted.
-Adding one is about the most self-contained contribution there is: a schema
-class, a data class and a protocol class, as sketched in
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/251">discussion #251</a>.
-The reply in that thread is the closest thing the project has to a
-step-by-step guide for adding a protocol, and is worth reading before starting
-one. Grouped by each TCP/IP layer and ordered by protocol name alphabetically,
-the ones outstanding are,</p>
+<p>Every protocol not decoded is wanted. Adding one is self-contained: a package
+holding a protocol, a schema and a data class (<a class="reference internal" href="conventions/protocol-family-grouping.html#protocol-family-grouping"><span class="std std-ref">Protocol Family Grouping</span></a>),
+as sketched in
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/251">discussion #251</a>,
+whose reply is the closest thing to a step-by-step guide. Outstanding, by TCP/IP
+layer and alphabetically:</p>
 <ul class="simple">
 <li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, NDP, PPP</p></li>
 <li><p>Internet Layer: ECN, Shim6</p></li>
@@ -645,18 +639,17 @@ record and ignore the folder.</p>
 transport layer protocol implemented per <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a>: the common header, every
 chunk type, chunk parameter and error cause the RFC defines, and CRC32c checksum
 verification.</p>
-<p>One note on how it differs from its siblings. The next layer is dispatched
-on the DATA chunk’s <em>payload protocol identifier</em> through
+<p>Unlike its siblings, it dispatches the next layer on the DATA chunk’s <em>payload
+protocol identifier</em> through
 <a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>, not on port
 numbers, so <a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_apptype" title="pcapkit.foundation.registry.protocols.transport.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a>
 deliberately does not fan out to it.</p>
-<p>What is still wanted is the registered-but-unimplemented type codes. IANA
-registers considerably more than <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a> defines, and the surplus falls
-through to the generic handlers rather than failing the extraction – so a
-capture using one parses, but yields an opaque chunk instead of its fields.
-That is true of many of the registered chunk types, chunk parameters and error
-causes; <a class="reference internal" href="../pcapkit/const/sctp.html"><span class="doc">SCTP Constant Enumerations</span></a> lists them all.</p>
-<p>The other thing wanted for SCTP is reassembly, which
+<p>Still wanted are the registered-but-unimplemented type codes. IANA registers
+more chunk types, chunk parameters and error causes than <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html"><strong>RFC 9260</strong></a> defines
+(<a class="reference internal" href="../pcapkit/const/sctp.html"><span class="doc">SCTP Constant Enumerations</span></a> lists them), and the surplus falls through to the
+generic handlers: a capture using one parses, but yields an opaque chunk
+instead of its fields.</p>
+<p>SCTP also wants reassembly, which
 <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> has only for IP, TCP and DTLS handshake
 messages – see <a class="reference internal" href="#reassembly-beyond-ip-and-tcp">Reassembly Beyond IP and TCP</a> below, since it needs work in
 <a class="reference internal" href="../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> rather than in the protocol.</p>
@@ -666,7 +659,7 @@ messages – see <a class="reference internal" href="#reassembly-beyond-ip-and-t
 <p><strong>Done.</strong> <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> parses without keys, and
 decrypts when a Security Association is supplied through the protocol keyed
 <a class="reference internal" href="../pcapkit/corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a> channel.</p>
-<p>What is still wanted there is wider algorithm coverage. The enumerations
+<p>Still wanted is wider algorithm coverage. The enumerations
 under <a class="reference internal" href="../pcapkit/const/esp.html"><span class="doc">ESP Constant Enumerations</span></a> –
 <a class="reference internal" href="../pcapkit/const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
 <a class="reference internal" href="../pcapkit/const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> – carry every transform IANA has
@@ -717,8 +710,9 @@ the wire, so registering it reached the whole
 handoff indicators, access network identifier sub-options, flow identification
 and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
 traffic selector formats and QoS attributes are all generated in full under
-<a class="reference internal" href="../pcapkit/const/mh.html"><span class="doc">MH Constant Enumerations</span></a>. Value sets that IANA does not register live in <code class="docutils literal notranslate"><span class="pre">mh.py</span></code> itself rather than
-in <a class="reference internal" href="../pcapkit/const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>: the localized routing acknowledgment status codes of
+<a class="reference internal" href="../pcapkit/const/mh.html"><span class="doc">MH Constant Enumerations</span></a>. Value sets that IANA does not register live in
+<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh.protocol" title="pcapkit.protocols.internet.mh.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh.protocol</span></code></a> rather than in <a class="reference internal" href="../pcapkit/const/mh.html#module-pcapkit.const.mh" title="pcapkit.const.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.mh</span></code></a>:
+the localized routing acknowledgment status codes of
 <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a>
 (<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus" title="pcapkit.protocols.internet.mh.protocol.LocalizedRoutingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code></a>) and the local
 mobility anchor address option codes of <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a>
@@ -838,9 +832,9 @@ needs a decision on what an undecrypted DTLS-wrapped NGAP PDU reports.</p>
 </section>
 <section id="registered-but-not-dissected">
 <h3>Registered, but Not Dissected<a class="headerlink" href="#registered-but-not-dissected" title="Link to this heading">¶</a></h3>
-<p>A different shape of gap from the empty stubs, and easy to miss because nothing
-announces it. The <a class="reference internal" href="../pcapkit/const/reg.html"><span class="doc">Protocol Type Registry Constant Enumerations</span></a> enumerations are complete, but only a
-small part of each is bound to a dissector; everything else resolves to
+<p>A gap easy to miss, because nothing announces it. The
+<a class="reference internal" href="../pcapkit/const/reg.html"><span class="doc">Protocol Type Registry Constant Enumerations</span></a> enumerations are complete, but only a small part of
+each is bound to a dissector; everything else resolves to
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, so the capture parses without
 complaint and yields nothing useful.</p>
 <ul class="simple">
@@ -877,8 +871,7 @@ and keeps the frame body <a class="reference internal" href="../pcapkit/protocol
 payload is <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> until something calls
 <a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_sctp" title="pcapkit.foundation.registry.protocols.transport.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>.</p></li>
 </ul>
-<p>How much of each registry is bound is measurable, so measure it rather than
-trust a figure written down here:</p>
+<p>How much of each registry is bound is measurable:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from pcapkit.protocols.internet.internet import Internet; \</span>
 <span class="s2">           from pcapkit.const.reg.transtype import TransType; \</span>
 <span class="s2">           print(len(Internet.__proto__), len(list(TransType)))"</span>
@@ -977,8 +970,7 @@ them again: <a class="reference internal" href="../pcapkit/corekit/infoclass.htm
 suspect – is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 <code class="docutils literal notranslate"><span class="pre">%s</span></code>. The IO-batching idea the thread proposed was never the bottleneck.</p>
-<p>The larger costs this section listed all lie outside the parse path, and each is
-addressed in full or in part:</p>
+<p>The larger costs lie outside the parse path:</p>
 <ul class="simple">
 <li><p><strong>The flow dumper reopens its output file once per frame</strong>, in
 <a class="reference internal" href="../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO" title="pcapkit.dumpkit.pcap.PCAPIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPIO</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">__call__</span></code>. It does not
@@ -1165,7 +1157,7 @@ each engine has a matching module.</p>
 in CI against Python 3.11 through 3.15, per
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>, and against the end-of-life 3.8 through 3.10
 on legs whose failures block nothing.
-The module count is measurable rather than worth writing down:</p>
+The module count is measurable:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>tests<span class="w"> </span>-name<span class="w"> </span><span class="s1">'test_*.py'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
 </pre></div>
 </div>
@@ -1380,18 +1372,16 @@ cleanly as an intact one.</p>
 <p><strong>These are different problems and they want separating</strong>, because only one
 of them is cryptographic and the distinction decides what is actually hard.</p>
 <p><strong>The one’s-complement Internet checksum</strong>, which covers IPv4’s header, TCP, UDP,
-DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography at all — it is sixteen-bit addition
-with end-around carry, and implementing it is an afternoon. What blocks it is the
-<strong>IP pseudo-header</strong>: the TCP, UDP, DCCP and ICMPv6 checksums are computed over source
-and destination addresses, the protocol number and the payload length, all of
-which live in the <em>enclosing</em> layer. So verification needs a parsed protocol to
-reach back to its parent, which is a structural question about
+DCCP, ICMP/ICMPv6, IGMP, GRE and OSPF, needs no cryptography: it is sixteen-bit
+addition with end-around carry. The hard part is the <strong>IP pseudo-header</strong>: the
+TCP, UDP, DCCP and ICMPv6 checksums cover source and destination addresses, the
+protocol number and the payload length, all of which live in the <em>enclosing</em>
+layer, so verification is a structural question about
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> rather than an arithmetic one.
-That is precisely why SCTP came first and is not evidence the rest are easy:
-<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the common header and chunks with
-the checksum field zeroed and <strong>no pseudo-header</strong>, so it can be verified from
-the SCTP packet alone. Note also that SCTP’s CRC32c is a hand-rolled lookup table
-in <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#module-pcapkit.protocols.transport.sctp.protocol" title="pcapkit.protocols.transport.sctp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.protocol</span></code></a>, not a library call, so it is not
+SCTP has no such dependency: <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the
+common header and chunks with the checksum field zeroed and <strong>no pseudo-header</strong>,
+so the SCTP packet alone verifies it. Its CRC32c is a hand-rolled lookup table in
+<a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#module-pcapkit.protocols.transport.sctp.protocol" title="pcapkit.protocols.transport.sctp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.protocol</span></code></a>, not a library call, so it is no
 precedent for a dependency either.</p>
 <p><strong>The cryptographic integrity checks</strong> are where the <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a>
 dependency — introduced for ESP — genuinely buys something new, and half of that
@@ -1430,12 +1420,11 @@ a back-reference only helps verification, while a pseudo-header class is also
 what the construction side needs in order to <em>emit</em> a correct checksum, and
 the two paths then share one definition instead of agreeing by coincidence.</p></li>
 </ul>
-<p>One case was left to implementation time, since it is about wording rather
-than design: <strong>checksum offload</strong>. A capture taken on the sending
-host routinely contains checksums the NIC had not computed yet, so the field is
-zero or garbage on the wire and “invalid” is the wrong word for it. The status
-has to say <em>not computed</em> distinctly from <em>wrong</em>, or it cries wolf on the
-commonest capture there is; it is settled below as <code class="docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code>, spelled after
+<p><strong>Checksum offload</strong> was left to implementation, being about wording rather than
+design. A capture taken on the sending host routinely holds checksums the NIC
+had not computed, zero or garbage on the wire, so the status has to say <em>not
+computed</em> distinctly from <em>wrong</em>, or it cries wolf on the commonest capture
+there is. It is <code class="docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code> below, spelled after
 <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESPStatus" title="pcapkit.protocols.internet.esp.protocol.ESPStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESPStatus</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code>.</p>
 <p><strong>The one’s-complement half is done</strong> for every protocol named above
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2472">#2472</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2475">#2475</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2618">#2618</a>), on
@@ -1507,10 +1496,9 @@ than offloading it. Settled at implementation (<a class="extlink-issue reference
 </section>
 <section id="deterministic-construction-arguments">
 <h2>Deterministic Construction Arguments<a class="headerlink" href="#deterministic-construction-arguments" title="Link to this heading">¶</a></h2>
-<p>This opens a broader run of proposals for the construction (<code class="docutils literal notranslate"><span class="pre">make()</span></code>)
-workflow in general – more go under this heading as they get scoped – and
-its first item, making a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call’s own argument list deterministic, is
-<strong>done for 1.6.0</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>).</p>
+<p><strong>Done</strong> in 1.6.0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>): a <code class="docutils literal notranslate"><span class="pre">make()</span></code> call’s argument list is
+deterministic. Further proposals for the construction workflow go under this
+heading.</p>
 <p>Inferring a namespace from the caller’s frame, for a conventional
 four-argument group – <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and
 <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> – leaves a call’s contract invisible from its signature:
@@ -1550,18 +1538,16 @@ static method every protocol inherits, beside
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.unquote" title="pcapkit.protocols.protocol.Protocol.unquote"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unquote()</span></code></a>, rather than a module of
 its own, since it serves <code class="docutils literal notranslate"><span class="pre">make()</span></code> alone.</p></li>
 </ul>
-<p>The trade-off: a bare string for these fields is a pattern the docs and the
-examples relied on, so the change breaks every <code class="docutils literal notranslate"><span class="pre">make()</span></code> call site that
-relies on the inference. That is why it is one change across
-<code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code> rather than folded into the next defect fix on this
-family, and it removes the root cause of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a>/<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a>
-family rather than leaving its next instance to be found and patched the same
-way.</p>
+<p>The trade-off: the docs and the examples relied on a bare string for these
+fields, so the change breaks every <code class="docutils literal notranslate"><span class="pre">make()</span></code> call site that relies on the
+inference. That is why it is one change across <code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/</span></code>: it
+removes the root cause of the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2356">#2356</a>/<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2394">#2394</a> family rather than
+leaving its next instance to be found and patched.</p>
 </section>
 <section id="release-plan">
 <h2>Release Plan<a class="headerlink" href="#release-plan" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is the current version, and editing it is what starts
-a release.</p>
+<p>Editing <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is what starts a release; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
+covers the workflow it drives.</p>
 <section id="in-one-step">
 <h3>1.6.0, in One Step<a class="headerlink" href="#in-one-step" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">1.6.0</span></code> is released in one step, with no beta. Its version edit rides in
@@ -1572,62 +1558,18 @@ release, as step 2 of <a class="reference internal" href="#in-two-steps">1.5.0, 
 </section>
 <section id="in-two-steps">
 <h3>1.5.0, in Two Steps<a class="headerlink" href="#in-two-steps" title="Link to this heading">¶</a></h3>
-<p>The 1.5.0 release came in two deliberate steps:</p>
 <ol class="arabic simple">
-<li><p><strong>A beta —</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> <strong>— when the remaining defects are closed.</strong>
-<em>Done.</em> The feature work had landed already; what remained was the
-defect tail in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a>, and closing it earned a
-beta rather than a final release, because the consistency sweep of step 2 had
-not run yet and was expected to find things.</p></li>
-<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>when a library-wide consistency sweep is done.</strong>
-<em>Done.</em> The sweep checked prose against code, missing tests, unaligned
-changes, packet formats against the specifications, and duplicated logic,
-each finding reproduced before it was filed. Its whole point was to find what
-one-at-a-time defect work does not, and its verified findings are closed:
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/490">#490</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/492">#492</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/493">#493</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/494">#494</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/495">#495</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>, alongside the prose strand’s own
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>. A later round of defect fixes moved the prose strand’s ground
-again, so it ran a second time as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; that is closed too. <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code>
-shipped once this work was in.</p></li>
+<li><p><strong>A beta,</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code>, <strong>once the remaining defects were closed.</strong> A beta
+rather than a final release, because the consistency sweep of step 2 had not
+run and was expected to find things.</p></li>
+<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>once a library-wide consistency sweep was done.</strong>
+The sweep checked prose against code, missing tests, unaligned changes, packet
+formats against the specifications, and duplicated logic, reproducing each
+finding before filing it: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/490">#490</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>, and the prose strand,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a> and its second pass <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>.</p></li>
 </ol>
-<p><strong>The version string is the release button, so it is worth knowing exactly what
-each step does before editing it.</strong> <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> is
-version-driven rather than tag-driven: its <code class="docutils literal notranslate"><span class="pre">version_check</span></code> job reads
-<a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> directly, derives <code class="docutils literal notranslate"><span class="pre">PCAPKIT_PRERELEASE</span></code> from
-<code class="docutils literal notranslate"><span class="pre">packaging.version.Version(...).is_prerelease</span></code>, and picks the Anaconda label
-from the same test.</p>
-<p>Worth spelling out how that workflow is <em>reached</em>, because reading its <code class="docutils literal notranslate"><span class="pre">on:</span></code>
-block alone suggests it is not reachable from an ordinary commit at all — it
-lists only <code class="docutils literal notranslate"><span class="pre">push</span></code> on <code class="docutils literal notranslate"><span class="pre">v*</span></code> tags and a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>. The chain has an
-extra hop: a push to <code class="docutils literal notranslate"><span class="pre">main</span></code> triggers <strong>Unit Tests</strong>
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>), whose completion triggers <strong>Vendor Update</strong>
-(<code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>) via <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> – <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> carries no
-<code class="docutils literal notranslate"><span class="pre">push</span></code> trigger of its own, deliberately, per the comment on its
-<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger – and <em>that</em> completion triggers <strong>Create Release</strong>
-itself. <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a> draws the chain among the repository’s other workflows.</p>
-<p>Every publishing job — <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda</span></code> — is gated on
-<code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> or on evidence that its own target still
-needs publishing. Only <code class="docutils literal notranslate"><span class="pre">github</span></code> gates on <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS</span></code>, because the
-tag that output answers for is the one <code class="docutils literal notranslate"><span class="pre">github</span></code> is about to create. <code class="docutils literal notranslate"><span class="pre">tag</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> each gate on their own target instead – whether the
-matching Conda tag exists, whether PyPI’s file count for the version has
-reached the expected total, whether Anaconda’s upload is complete. Each of
-those additionally requires <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and the release test gate
-(<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code>) to have succeeded, and <code class="docutils literal notranslate"><span class="pre">github</span></code> – and, for <code class="docutils literal notranslate"><span class="pre">conda</span></code>,
-<code class="docutils literal notranslate"><span class="pre">tag</span></code> – to have succeeded <em>or skipped</em>. <code class="docutils literal notranslate"><span class="pre">github</span></code> itself needs the gate
-directly, and the gate runs only when one of the publishing jobs would.
-Those conditions open with <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, which suppresses the <code class="docutils literal notranslate"><span class="pre">success()</span></code>
-Actions would otherwise prepend; accepting <code class="docutils literal notranslate"><span class="pre">skipped</span></code> is then what stops an
-upstream job’s legitimate skip cascading into skipping a job whose own evidence
-says it still has work to do. Naming the two states rather than writing “not
-failed” is deliberate: a <em>cancelled</em> dependency then skips the job below it
-cleanly, instead of letting it run against an artefact that was never
-produced.</p>
-<p>That is why an ordinary commit does not publish: the version string has not
-moved, so each job’s own check finds its target already there and every one of
-them skips, as does the full-suite release test gate ahead of them. Changing the
-version string is what flips every one of those checks, and the next push then
-tags and publishes. So:</p>
+<p>The two steps differed only in the version string, which
+<code class="file docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> reads:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -1657,36 +1599,27 @@ tags and publishes. So:</p>
 </tbody>
 </table>
 </div>
-<p>Both steps publish to PyPI — the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job carries no prerelease gate — but a
-beta is only installable with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--pre</span></code>, so it reaches people
-who ask for it and nobody else. The consequential change is at step 2, where the
-Anaconda label flips from <code class="docutils literal notranslate"><span class="pre">dev</span></code> to <code class="docutils literal notranslate"><span class="pre">main</span></code>. Neither step needs any change to
-the workflow itself; editing the version string is the whole of it, which is
-precisely why it should be its own commit rather than a line folded into
-something else.</p>
+<p>Both publish to PyPI, where the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job carries no prerelease gate, but a
+beta installs only with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--pre</span></code>, so it reaches only those who ask
+for it.</p>
 </section>
 </section>
 <section id="remaining-work">
 <h2>Remaining Work<a class="headerlink" href="#remaining-work" title="Link to this heading">¶</a></h2>
-<p>The items above are ordered by subject, and each says what it leaves open. This
-section adds the open work that spans several of them, and says which items
-<em>depend</em> on something rather than merely waiting for someone to start them. Nothing here is claimed: if you want an item,
-say so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a>.</p>
-<p><strong>The remaining protocols</strong> from the list under <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above,
-taken three or four at a time. QUIC, DSL, FDDI and ISDN come last: QUIC because it
-is really HTTP/3 over a new transport and wants that settled first, the rest
-because a capture in the wild is rare enough that the work buys little until the
-commoner protocols are in.</p>
-<p><strong>Per-entry coverage of the option and parameter registries.</strong> The
-option, parameter, block and frame registries are <em>enumerated</em> but not
-<em>implemented</em> throughout: a code can be registered, and named, and still have no
-working per-entry read/make pair behind it. The goal of this item is to close
-that gap to zero for every code whose format is actually specified.</p>
-<p>Both halves of the gap are measurable — the registered codes against the
-families <code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> walks, and the shortfall
-against <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code> — so the commands are
-written down instead of figures that will be stale by the next merge:</p>
+<p>Open work that spans the items above, and what each depends on. Nothing here is
+claimed: to take an item, say so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a>.</p>
+<p><strong>The remaining protocols</strong> from <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above. QUIC, DSL, FDDI
+and ISDN come last: QUIC because it is really HTTP/3 over a new transport and
+wants that settled first, the rest because a capture in the wild is rare enough
+that the work buys little until the commoner protocols are in.</p>
+<p><strong>Per-entry coverage of the option and parameter registries.</strong> The option,
+parameter, block and frame registries are <em>enumerated</em> but not <em>implemented</em>
+throughout: a code can be registered and named, and still have no per-entry
+read/make pair behind it. The goal is to close that gap for every code whose
+format is specified.</p>
+<p>Both halves of the gap are measurable, against the families
+<code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> walks and the <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> of
+<code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code>:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># registered codes, and the families they are drawn from</span>
 python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import sys; sys.path.insert(0, 'examples/generators'); import options; \</span>
 <span class="s2">           print(len(options.cases()), len(options.FAMILIES))"</span>
@@ -1700,24 +1633,22 @@ python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import
 <span class="s2">           print(collections.Counter(k.split('/')[0] for k in m.EXPECTED_FAILURES))"</span>
 </pre></div>
 </div>
-<p>Things to be precise about before anyone starts. First, the round-trip half
-is closed: <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> is empty, so every case the harness enumerates
-round-trips, and a new entry there would record a defect rather than a
-deferral. Second, <strong>round-tripping is not the same as being implemented</strong> — the
+<p>Two things to be precise about. The round-trip half is closed:
+<code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> is empty, so a new entry there records a defect rather than
+a deferral. And <strong>round-tripping is not the same as being implemented</strong>: the
 harness walks the codes each protocol registers a handler for, not every code
 its enumeration names, so what remains is the codes with no per-entry handler,
-such as the SCTP chunk types under <a class="reference internal" href="#sctp">SCTP</a> above, which fall through to the
-generic handlers and parse as opaque.</p>
+such as the SCTP chunk types under <a class="reference internal" href="#sctp">SCTP</a> above, which parse as opaque.</p>
 <p>This is deliberately <strong>not</strong> the same request as the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch
-registries. Those name whole protocols, so closing a gap there means
-implementing a dissector, which is the protocol work above. The option and
-parameter registries are per-entry formats inside protocols that already exist,
-so the work is self-contained and does not wait on anything. Their enumerating harness already exists and already fails when a
-registered code has no case, which is how the shortfall is known at all; what is
-missing is the implementations behind the codes, not the accounting of them.
+registries. Those name whole protocols, so closing a gap there means writing a
+dissector, which is the protocol work above. The option and parameter
+registries are per-entry formats inside protocols that already exist, so the
+work is self-contained and waits on nothing. Their harness already fails when a
+registered code has no case; what is missing is the implementations behind the
+codes, not the accounting of them.
 <code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_registry_unit.py</span></code> gives the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>
-family the same accounting for the separate question of whether a registered
-protocol’s dispatch reaches it.</p>
+family the same accounting for whether a registered protocol’s dispatch reaches
+it.</p>
 <p><strong>Cryptographic integrity verification.</strong> See <a class="reference internal" href="#checksum-and-integrity-verification">Checksum and Integrity
 Verification</a> above. HIP’s <code class="docutils literal notranslate"><span class="pre">HIP_MAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RVS_HMAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RELAY_HMAC</span></code> and its
 signature parameters can be taken up at any point, since
@@ -1735,11 +1666,10 @@ prerequisites are the protocols the multicast options embed: <span class="target
 and <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMPv3</strong> group records. ICMPv6 and IGMPv3 are implemented
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>); MLD is not (see <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above), so a registry
 landed first would have only <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> to
-register for it. The
-counter-argument to waiting is real though, and worth weighing rather than dismissing: changing the
-parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is the
-disruptive half, since it changes what existing captures dump to, so there is a case for
-taking that churn early and registering dissectors later. The remaining format, the
+register for it. Against waiting: changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>
+to <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is the disruptive half, since
+it changes what existing captures dump to, so there is a case for taking that
+churn early and registering dissectors later. The remaining format, the
 <span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, is a registry of
 its own, and nobody has claimed it.</p>
 </section>

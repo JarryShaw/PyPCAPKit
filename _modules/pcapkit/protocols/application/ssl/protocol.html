@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,13 +558,13 @@
 
 <span class="sd">.. module:: pcapkit.protocols.application.ssl.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.application.ssl.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.application.ssl.protocol.SSL` only,</span>
-<span class="sd">which is the umbrella base class for the Secure Sockets Layer protocol</span>
-<span class="sd">family [*]_ -- the SSL versions, Transport Layer Security</span>
-<span class="sd">(:class:`~pcapkit.protocols.application.tls.protocol.TLS`, which also covers SSLv3</span>
-<span class="sd">through :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`) and Datagram TLS</span>
-<span class="sd">(:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`).</span>
+<span class="sd">:mod:`pcapkit.protocols.application.ssl.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.application.ssl.protocol.SSL`, the base class of the</span>
+<span class="sd">Secure Sockets Layer family [*]_:</span>
+<span class="sd">:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, Transport Layer</span>
+<span class="sd">Security (:class:`~pcapkit.protocols.application.tls.protocol.TLS`, which also</span>
+<span class="sd">covers SSLv3 through :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`)</span>
+<span class="sd">and Datagram TLS (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`).</span>
 
 <span class="sd">The TLS record header (:rfc:`9846#section-5.1`) is a</span>
 <span class="sd">:class:`~pcapkit.const.tls.content_type.ContentType`, a legacy record version</span>
@@ -1498,9 +1498,8 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a</span>
         <span class="c1"># parse yields, so resolve it through the registry to cover both.</span>
-        <span class="c1"># NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: an</span>
-        <span class="c1"># unassigned or reserved value still resolves to a named member via</span>
-        <span class="c1"># ``_missing_``, yet is never a record's genuine content type.</span>
+        <span class="c1"># NOTE: Checked against ``_WIRE_CONTENT_TYPES``, not by name: ``_missing_`` names</span>
+        <span class="c1"># even an unassigned or reserved value, which is never a genuine content type.</span>
         <span class="n">content_type</span> <span class="o">=</span> <span class="n">Enum_ContentType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">content_type</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">content_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_WIRE_CONTENT_TYPES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
@@ -2537,7 +2536,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2563,7 +2562,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

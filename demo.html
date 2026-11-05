@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/demo.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Basic Samples: pcapkit is built around the extract(), reassemble() and trace() verbs. Some common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), extract..." />
-<meta name="description" content="Basic Samples: pcapkit is built around the extract(), reassemble() and trace() verbs. Some common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), extract..." />
+<meta property="og:description" content="Basic Samples: pcapkit is built around the extract(), reassemble() and trace() functions. Some common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), ext..." />
+<meta name="description" content="Basic Samples: pcapkit is built around the extract(), reassemble() and trace() functions. Some common scenarios: extract a PCAP file and dump the result to a specific file (with no reassembly), ext..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Glossary" href="glossary.html"><link rel="prev" title="Customisation &amp; Extensions" href="ext.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -574,7 +574,7 @@
 <h2>Basic Samples<a class="headerlink" href="#basic-samples" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is built around the <a class="reference internal" href="pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a>,
 <a class="reference internal" href="pcapkit/interface/core.html#pcapkit.interface.core.reassemble" title="pcapkit.interface.core.reassemble"><code class="xref py py-func docutils literal notranslate"><span class="pre">reassemble()</span></code></a> and <a class="reference internal" href="pcapkit/interface/core.html#pcapkit.interface.core.trace" title="pcapkit.interface.core.trace"><code class="xref py py-func docutils literal notranslate"><span class="pre">trace()</span></code></a>
-verbs. Some common scenarios:</p>
+functions. Some common scenarios:</p>
 <ol class="arabic">
 <li><p>extract a PCAP file and dump the result to a specific file
 (with no reassembly)</p>
@@ -603,8 +603,8 @@ verbs. Some common scenarios:</p>
 <li><p>extract a PCAP file and reassemble TCP payload
 (with no output file nor frame storage)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="c1"># reasm_strict is the default: it submits incompletely reassembled</span>
-<span class="c1"># datagrams too, which is why the packet check below is needed</span>
+<span class="c1"># under reasm_strict, the default, an incompletely reassembled</span>
+<span class="c1"># datagram carries no packet, hence the check below</span>
 <span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">'in.pcap'</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reassembly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
 <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
@@ -617,18 +617,13 @@ verbs. Some common scenarios:</p>
 </section>
 <section id="cli-samples">
 <h2>CLI Samples<a class="headerlink" href="#cli-samples" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s CLI (command line interface) can be reached in these ways.</p>
-<ul>
-<li><p>through console scripts</p>
-<p>Use command name <code class="docutils literal notranslate"><span class="pre">pcapkit-cli</span> <span class="pre">[...]</span></code> directly (as shown in samples).</p>
-</li>
-<li><p>through Python module</p>
-<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pcapkit</span> <span class="pre">[...]</span></code> works exactly the same as above. Note that the
-module name is <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, even though the distribution on PyPI is named
-<code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code>.</p>
-</li>
+<p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s command line interface runs as either:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pcapkit-cli</span> <span class="pre">[...]</span></code>, the console script the samples below use; or</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pcapkit</span> <span class="pre">[...]</span></code> – the module is <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, though the
+distribution on PyPI is <code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code>.</p></li>
 </ul>
-<p>Here are some usage samples:</p>
+<p>Samples:</p>
 <ol class="arabic">
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
@@ -647,10 +642,9 @@ Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>
 <li><p>export to a JSON file</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The output format is <strong>not</strong> presumed from the output file name, so
-<code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--format</span></code> (or the <code class="docutils literal notranslate"><span class="pre">-j</span></code>/<code class="docutils literal notranslate"><span class="pre">--json</span></code> switch) has to be given;
-without it the default tree view is written into whatever file name was
-supplied.</p>
+<p>The output format is <strong>not</strong> inferred from the output file name, so
+give <code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--format</span></code> (or the <code class="docutils literal notranslate"><span class="pre">-j</span></code>/<code class="docutils literal notranslate"><span class="pre">--json</span></code> switch); without it the
+default tree view is written to the file named.</p>
 </div>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--auto-extension<span class="w"> </span>--output<span class="w"> </span>out.json<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>--verbose
 🚨<span class="w"> </span>Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">'in.pcap'</span>

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/transport/dccp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.transport.dccp.protocol contains DCCP only, which implements the extractor for Datagram Congestion Control Protocol (DCCP)*, whose generic header is described as below:,,,, Octets..." />
-<meta name="description" content="pcapkit.protocols.transport.dccp.protocol contains DCCP only, which implements the extractor for Datagram Congestion Control Protocol (DCCP)*, whose generic header is described as below:,,,, Octets..." />
+<meta property="og:description" content="pcapkit.protocols.transport.dccp.protocol contains DCCP, which implements the extractor for Datagram Congestion Control Protocol (DCCP)*, whose generic header is:,,,, Octets, Bits, Name, Descriptio..." />
+<meta name="description" content="pcapkit.protocols.transport.dccp.protocol contains DCCP, which implements the extractor for Datagram Congestion Control Protocol (DCCP)*, whose generic header is:,,,, Octets, Bits, Name, Descriptio..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="SCTP - Stream Control Transmission Protocol" href="sctp.html"><link rel="prev" title="Transport Layer Base Protocol" href="transport.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -571,10 +571,9 @@
           <section id="module-pcapkit.protocols.transport.dccp">
 <span id="dccp-datagram-congestion-control-protocol"></span><h1>DCCP - Datagram Congestion Control Protocol<a class="headerlink" href="#module-pcapkit.protocols.transport.dccp" title="Link to this heading">¶</a></h1>
 <p id="module-pcapkit.protocols.transport.dccp.protocol"><a class="reference internal" href="#module-pcapkit.protocols.transport.dccp.protocol" title="pcapkit.protocols.transport.dccp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.dccp.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.transport.dccp.protocol.DCCP" title="pcapkit.protocols.transport.dccp.protocol.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a> only,
+<a class="reference internal" href="#pcapkit.protocols.transport.dccp.protocol.DCCP" title="pcapkit.protocols.transport.dccp.protocol.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>,
 which implements the extractor for Datagram Congestion
-Control Protocol (DCCP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose generic header is
-described as below:</p>
+Control Protocol (DCCP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose generic header is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -655,9 +654,8 @@ header 12 octets long. The fields of the packet type, then the options, follow.<
 <p>This class implements Datagram Congestion Control Protocol.</p>
 <p>No application protocol is registered in <a class="reference internal" href="#pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__" title="pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>, so the application data
 area is <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> unless one is.</p>
-<p>This class supports parsing of the following DCCP options, which are
-directly mapped to the <a class="reference internal" href="../../const/dccp.html#pcapkit.const.dccp.option.Option" title="pcapkit.const.dccp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.dccp.option.Option</span></code></a>
-enumeration:</p>
+<p>The DCCP options it parses, by <a class="reference internal" href="../../const/dccp.html#pcapkit.const.dccp.option.Option" title="pcapkit.const.dccp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.dccp.option.Option</span></code></a>
+type:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -753,7 +751,7 @@ port number, and empty until a protocol is registered.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.dccp.protocol.DCCP.__proto_key__">
 <span class="sig-name descname"><span class="pre">__proto_key__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.15)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><span class="pre">EnumRegistry</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.dccp.protocol.DCCP.__proto_key__" title="Link to this definition">¶</a></dt>
 <dd><p>What <a class="reference internal" href="#pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__" title="pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a> is keyed by – the enum a key must be a member of,
-and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is a valid key there too, as for
+and whether a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is valid too, as for
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.__proto_key__" title="pcapkit.protocols.transport.tcp.protocol.TCP.__proto_key__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto_key__</span></code></a>.</p>
 </dd></dl>
 

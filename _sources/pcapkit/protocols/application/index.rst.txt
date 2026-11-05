@@ -3,9 +3,8 @@ Application Layer
 
 .. module:: pcapkit.protocols.application
 
-:mod:`pcapkit.protocols.application` is the collection of all protocols in
-application layer, with detailed implementation and methods. Layer is decided by
-function rather than encapsulation, see
+:mod:`pcapkit.protocols.application` holds the application layer protocols. A
+protocol's layer is decided by function rather than encapsulation; see
 :doc:`/contributing/conventions/protocol-layer-placement`.
 
 .. toctree::

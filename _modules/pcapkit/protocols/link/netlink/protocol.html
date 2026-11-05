@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -588,9 +588,7 @@
 <span class="sd">-----</span>
 
 <span class="sd">Only the fixed 16-octet ``nlmsghdr`` framing is dissected -- ``nlmsg_len``,</span>
-<span class="sd">``nlmsg_type``, ``nlmsg_flags``, ``nlmsg_seq`` and ``nlmsg_pid``. Two things a</span>
-<span class="sd">complete Netlink dissector would eventually need are deliberately left out of</span>
-<span class="sd">this first cut:</span>
+<span class="sd">``nlmsg_type``, ``nlmsg_flags``, ``nlmsg_seq`` and ``nlmsg_pid``. Left out:</span>
 
 <span class="sd">* **Per-family message payloads.** What a given ``nlmsg_type`` means, and how</span>
 <span class="sd">  its payload is laid out, is defined independently by each Netlink family</span>
@@ -598,17 +596,13 @@
 <span class="sd">  own -- routing table entries, link attributes (``rtattr``/``nlattr`` TLV</span>
 <span class="sd">  chains), and so on. The payload is kept as</span>
 <span class="sd">  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless its ``nlmsg_type`` is registered.</span>
-<span class="sd">* **Multiple messages packed into one read.** The kernel's own netlink(7)</span>
-<span class="sd">  page documents that a single read from a netlink socket, and so a single</span>
-<span class="sd">  captured frame, commonly carries more than one ``nlmsghdr`` message back to</span>
-<span class="sd">  back (:rfc:`3549#section-2.3.2` numbers the header fields; it does not</span>
-<span class="sd">  itself restate the "one read, several messages" framing convention, which</span>
-<span class="sd">  is :manpage:`netlink(7)`'s). This class dissects only the *first* message's</span>
-<span class="sd">  header; everything after it -- that message's own payload, and any sibling</span>
-<span class="sd">  messages the frame may carry -- is kept together as the undissected</span>
-<span class="sd">  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload, exactly as if it were one</span>
-<span class="sd">  larger opaque blob. Splitting the frame on every ``nlmsg_len`` boundary is</span>
-<span class="sd">  future work, tracked on :issue:`2460`.</span>
+<span class="sd">* **Multiple messages packed into one read.** Per :manpage:`netlink(7)`, a</span>
+<span class="sd">  single read from a netlink socket, and so a single captured frame, commonly</span>
+<span class="sd">  carries several ``nlmsghdr`` messages back to back. This class dissects only</span>
+<span class="sd">  the *first* message's header; that message's payload and any sibling</span>
+<span class="sd">  messages are kept together as the</span>
+<span class="sd">  :class:`~pcapkit.protocols.misc.raw.protocol.Raw` payload. Splitting the frame on</span>
+<span class="sd">  every ``nlmsg_len`` boundary is not implemented.</span>
 
 <span class="sd">Byte Order</span>
 <span class="sd">----------</span>
@@ -1338,7 +1332,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1364,7 +1358,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

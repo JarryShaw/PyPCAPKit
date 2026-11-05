@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/ieee802_11.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of IEEE802_11 implementations. Available vendor crawlers include:,, IEEE802_11_Type, Frame Types,, IEEE802_11_ManagementSubtype, Management Frame Subtypes,,..." />
-<meta name="description" content="This module contains all vendor crawlers of IEEE802_11 implementations. Available vendor crawlers include:,, IEEE802_11_Type, Frame Types,, IEEE802_11_ManagementSubtype, Management Frame Subtypes,,..." />
+<meta property="og:description" content=",, IEEE802_11_Type, Frame Types,, IEEE802_11_ManagementSubtype, Management Frame Subtypes,, IEEE802_11_ControlSubtype, Control Frame Subtypes,, IEEE802_11_DataSubtype, Data Frame Subtypes,, IEEE802..." />
+<meta name="description" content=",, IEEE802_11_Type, Frame Types,, IEEE802_11_ManagementSubtype, Management Frame Subtypes,, IEEE802_11_ControlSubtype, Control Frame Subtypes,, IEEE802_11_DataSubtype, Data Frame Subtypes,, IEEE802..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="L2TP Vendor Crawlers" href="l2tp.html"><link rel="prev" title="ARP Vendor Crawlers" href="arp.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.ieee802_11">
 <span id="ieee802-11-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a> implementations.
-Available vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -597,20 +594,18 @@ Available vendor crawlers include:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>These crawlers do not crawl. IEEE Std 802.11-2020 assigns the frame type
-and subtype values in Table 9-1 of the standard’s text, and neither IEEE
-nor IANA publishes them as a machine-readable registry, so each crawler
-reads a <code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal and defines no <code class="docutils literal notranslate"><span class="pre">LINK</span></code>
-(<a class="reference internal" href="../../contributing/conventions/const-vendor-pairing.html#const-vendor-pairing"><span class="std std-ref">Const-Vendor Pairing</span></a>). Each <code class="docutils literal notranslate"><span class="pre">DATA</span></code> is transcribed from the table
-on Wikipedia’s <em>802.11 frame types</em> page <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, which reproduces Table 9-1
-with the Trigger frame of IEEE Std 802.11ax-2021.</p>
+and subtype values in Table 9-1 of its text, and neither IEEE nor IANA
+publishes them as a machine-readable registry, so each crawler reads a
+<code class="docutils literal notranslate"><span class="pre">DATA</span></code> literal and defines no <code class="docutils literal notranslate"><span class="pre">LINK</span></code> (<a class="reference internal" href="../../contributing/conventions/const-vendor-pairing.html#const-vendor-pairing"><span class="std std-ref">Const-Vendor Pairing</span></a>).
+Each <code class="docutils literal notranslate"><span class="pre">DATA</span></code> is transcribed from Wikipedia’s <em>802.11 frame types</em> page <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
+which reproduces Table 9-1 with the Trigger frame of IEEE Std 802.11ax-2021.</p>
 </div>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
 </div>
 <section id="module-pcapkit.vendor.ieee802_11.type">
 <span id="frame-types"></span><h2>Frame Types<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11.type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>IEEE 802.11 Frame Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type" title="pcapkit.const.ieee802_11.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.type.Type</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.type.Type" title="pcapkit.const.ieee802_11.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.type.Type</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ieee802_11.type.Type">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ieee802_11.type.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ieee802_11/type.html#Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ieee802_11.type.Type" title="Link to this definition">¶</a></dt>
@@ -627,8 +622,7 @@ which is automatically generating <a class="reference internal" href="../const/i
 </section>
 <section id="module-pcapkit.vendor.ieee802_11.management_subtype">
 <span id="management-frame-subtypes"></span><h2>Management Frame Subtypes<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11.management_subtype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>IEEE 802.11 Management Frame Subtypes</strong>,
-which is automatically generating <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.management_subtype.ManagementSubtype</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.management_subtype.ManagementSubtype" title="pcapkit.const.ieee802_11.management_subtype.ManagementSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.management_subtype.ManagementSubtype</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ieee802_11.management_subtype.ManagementSubtype">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ieee802_11.management_subtype.</span></span><span class="sig-name descname"><span class="pre">ManagementSubtype</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ieee802_11/management_subtype.html#ManagementSubtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ieee802_11.management_subtype.ManagementSubtype" title="Link to this definition">¶</a></dt>
@@ -645,8 +639,7 @@ which is automatically generating <a class="reference internal" href="../const/i
 </section>
 <section id="module-pcapkit.vendor.ieee802_11.control_subtype">
 <span id="control-frame-subtypes"></span><h2>Control Frame Subtypes<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11.control_subtype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>IEEE 802.11 Control Frame Subtypes</strong>,
-which is automatically generating <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.control_subtype.ControlSubtype" title="pcapkit.const.ieee802_11.control_subtype.ControlSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.control_subtype.ControlSubtype</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.control_subtype.ControlSubtype" title="pcapkit.const.ieee802_11.control_subtype.ControlSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.control_subtype.ControlSubtype</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ieee802_11.control_subtype.ControlSubtype">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ieee802_11.control_subtype.</span></span><span class="sig-name descname"><span class="pre">ControlSubtype</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ieee802_11/control_subtype.html#ControlSubtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ieee802_11.control_subtype.ControlSubtype" title="Link to this definition">¶</a></dt>
@@ -663,8 +656,7 @@ which is automatically generating <a class="reference internal" href="../const/i
 </section>
 <section id="module-pcapkit.vendor.ieee802_11.data_subtype">
 <span id="data-frame-subtypes"></span><h2>Data Frame Subtypes<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11.data_subtype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>IEEE 802.11 Data Frame Subtypes</strong>,
-which is automatically generating <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.data_subtype.DataSubtype" title="pcapkit.const.ieee802_11.data_subtype.DataSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.data_subtype.DataSubtype</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.data_subtype.DataSubtype" title="pcapkit.const.ieee802_11.data_subtype.DataSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.data_subtype.DataSubtype</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ieee802_11.data_subtype.DataSubtype">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ieee802_11.data_subtype.</span></span><span class="sig-name descname"><span class="pre">DataSubtype</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ieee802_11/data_subtype.html#DataSubtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ieee802_11.data_subtype.DataSubtype" title="Link to this definition">¶</a></dt>
@@ -681,8 +673,7 @@ which is automatically generating <a class="reference internal" href="../const/i
 </section>
 <section id="module-pcapkit.vendor.ieee802_11.extension_subtype">
 <span id="extension-frame-subtypes"></span><h2>Extension Frame Subtypes<a class="headerlink" href="#module-pcapkit.vendor.ieee802_11.extension_subtype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>IEEE 802.11 Extension Frame Subtypes</strong>,
-which is automatically generating <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype" title="pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ieee802_11.html#pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype" title="pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ieee802_11.extension_subtype.</span></span><span class="sig-name descname"><span class="pre">ExtensionSubtype</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ieee802_11/extension_subtype.html#ExtensionSubtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ieee802_11.extension_subtype.ExtensionSubtype" title="Link to this definition">¶</a></dt>

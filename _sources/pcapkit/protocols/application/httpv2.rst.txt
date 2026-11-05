@@ -7,8 +7,7 @@ HTTP/2 - Hypertext Transfer Protocol
 :mod:`pcapkit.protocols.application.httpv2.protocol` contains
 :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`
 only, which implements an extractor for Hypertext Transfer
-Protocol (HTTP/2) [*]_, whose structure is described as
-below:
+Protocol (HTTP/2) [*]_, whose structure is:
 
 ======= ========= ===================== ==========================
 Octets      Bits        Name                    Description

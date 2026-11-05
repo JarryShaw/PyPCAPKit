@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.mh
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.mh.protocol.MH` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`MH_Packet <pcapkit.const.mh.packet.Packet>`
@@ -100,8 +96,7 @@ Access Technology Type Option Type Values
 
 .. module:: pcapkit.const.mh.access_type
 
-This module contains the constant enumeration for **Access Technology Type Option Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.access_type.AccessType`.
+Generated from :class:`pcapkit.vendor.mh.access_type.AccessType`.
 
 .. autoclass:: pcapkit.const.mh.access_type.AccessType
    :members:
@@ -113,8 +108,7 @@ Pseudo Home Address Acknowledgement Status Codes
 
 .. module:: pcapkit.const.mh.ack_status_code
 
-This module contains the constant enumeration for **Pseudo Home Address Acknowledgement Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.ack_status_code.ACKStatusCode`.
+Generated from :class:`pcapkit.vendor.mh.ack_status_code.ACKStatusCode`.
 
 .. autoclass:: pcapkit.const.mh.ack_status_code.ACKStatusCode
    :members:
@@ -126,8 +120,7 @@ Access Network Information (ANI) Sub-Option Type Values
 
 .. module:: pcapkit.const.mh.ani_suboption
 
-This module contains the constant enumeration for **Access Network Information (ANI) Sub-Option Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.ani_suboption.ANISuboption`.
+Generated from :class:`pcapkit.vendor.mh.ani_suboption.ANISuboption`.
 
 .. autoclass:: pcapkit.const.mh.ani_suboption.ANISuboption
    :members:
@@ -139,8 +132,7 @@ Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options
 
 .. module:: pcapkit.const.mh.auth_subtype
 
-This module contains the constant enumeration for **Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options**,
-which is automatically generated from :class:`pcapkit.vendor.mh.auth_subtype.AuthSubtype`.
+Generated from :class:`pcapkit.vendor.mh.auth_subtype.AuthSubtype`.
 
 .. autoclass:: pcapkit.const.mh.auth_subtype.AuthSubtype
    :members:
@@ -152,8 +144,7 @@ Binding Acknowledgment Flags
 
 .. module:: pcapkit.const.mh.binding_ack_flag
 
-This module contains the constant enumeration for **Binding Acknowledgment Flags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag`.
+Generated from :class:`pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag`.
 
 .. autoclass:: pcapkit.const.mh.binding_ack_flag.BindingACKFlag
    :members:
@@ -165,8 +156,7 @@ Binding Revocation Type
 
 .. module:: pcapkit.const.mh.binding_revocation
 
-This module contains the constant enumeration for **Binding Revocation Type**,
-which is automatically generated from :class:`pcapkit.vendor.mh.binding_revocation.BindingRevocation`.
+Generated from :class:`pcapkit.vendor.mh.binding_revocation.BindingRevocation`.
 
 .. autoclass:: pcapkit.const.mh.binding_revocation.BindingRevocation
    :members:
@@ -178,8 +168,7 @@ Binding Update Flags
 
 .. module:: pcapkit.const.mh.binding_update_flag
 
-This module contains the constant enumeration for **Binding Update Flags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag`.
+Generated from :class:`pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag`.
 
 .. autoclass:: pcapkit.const.mh.binding_update_flag.BindingUpdateFlag
    :members:
@@ -191,8 +180,7 @@ IPv4 DHCP Support Mode Flags
 
 .. module:: pcapkit.const.mh.dhcp_support_mode
 
-This module contains the constant enumeration for **IPv4 DHCP Support Mode Flags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.dhcp_support_mode.DHCPSupportMode`.
+Generated from :class:`pcapkit.vendor.mh.dhcp_support_mode.DHCPSupportMode`.
 
 .. autoclass:: pcapkit.const.mh.dhcp_support_mode.DHCPSupportMode
    :members:
@@ -204,8 +192,7 @@ Status Codes (DNS Update Mobility Option)
 
 .. module:: pcapkit.const.mh.dns_status_code
 
-This module contains the constant enumeration for **Status Codes (DNS Update Mobility Option)**,
-which is automatically generated from :class:`pcapkit.vendor.mh.dns_status_code.DNSStatusCode`.
+Generated from :class:`pcapkit.vendor.mh.dns_status_code.DNSStatusCode`.
 
 .. autoclass:: pcapkit.const.mh.dns_status_code.DNSStatusCode
    :members:
@@ -217,8 +204,7 @@ DSMIP6-TLS Packet Types Registry
 
 .. module:: pcapkit.const.mh.dsmip6_tls_packet
 
-This module contains the constant enumeration for **DSMIP6-TLS Packet Types Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
+Generated from :class:`pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
 
 .. autoclass:: pcapkit.const.mh.dsmip6_tls_packet.DSMIP6TLSPacket
    :members:
@@ -230,8 +216,7 @@ Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes
 
 .. module:: pcapkit.const.mh.dsmipv6_home_address
 
-This module contains the constant enumeration for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
+Generated from :class:`pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 
 .. autoclass:: pcapkit.const.mh.dsmipv6_home_address.DSMIPv6HomeAddress
    :members:
@@ -243,8 +228,7 @@ Enumerating Algorithms
 
 .. module:: pcapkit.const.mh.enumerating_algorithm
 
-This module contains the constant enumeration for **Enumerating Algorithms**,
-which is automatically generated from :class:`pcapkit.vendor.mh.enumerating_algorithm.EnumeratingAlgorithm`.
+Generated from :class:`pcapkit.vendor.mh.enumerating_algorithm.EnumeratingAlgorithm`.
 
 .. autoclass:: pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm
    :members:
@@ -256,8 +240,7 @@ Flow Binding Acknowledgement Status Codes
 
 .. module:: pcapkit.const.mh.fb_ack_status
 
-This module contains the constant enumeration for **Flow Binding Acknowledgement Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus`.
+Generated from :class:`pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus`.
 
 .. autoclass:: pcapkit.const.mh.fb_ack_status.FlowBindingACKStatus
    :members:
@@ -269,8 +252,7 @@ Flow Binding Action Values
 
 .. module:: pcapkit.const.mh.fb_action
 
-This module contains the constant enumeration for **Flow Binding Action Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.fb_action.FlowBindingAction`.
+Generated from :class:`pcapkit.vendor.mh.fb_action.FlowBindingAction`.
 
 .. autoclass:: pcapkit.const.mh.fb_action.FlowBindingAction
    :members:
@@ -282,8 +264,7 @@ Flow Binding Indication Triggers
 
 .. module:: pcapkit.const.mh.fb_indication_trigger
 
-This module contains the constant enumeration for **Flow Binding Indication Triggers**,
-which is automatically generated from :class:`pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
+Generated from :class:`pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
 
 .. autoclass:: pcapkit.const.mh.fb_indication_trigger.FlowBindingIndicationTrigger
    :members:
@@ -295,8 +276,7 @@ Flow Binding Type
 
 .. module:: pcapkit.const.mh.fb_type
 
-This module contains the constant enumeration for **Flow Binding Type**,
-which is automatically generated from :class:`pcapkit.vendor.mh.fb_type.FlowBindingType`.
+Generated from :class:`pcapkit.vendor.mh.fb_type.FlowBindingType`.
 
 .. autoclass:: pcapkit.const.mh.fb_type.FlowBindingType
    :members:
@@ -308,8 +288,7 @@ Flow Identification Mobility Option Status Codes
 
 .. module:: pcapkit.const.mh.flow_id_status
 
-This module contains the constant enumeration for **Flow Identification Mobility Option Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_status.FlowIDStatus`.
+Generated from :class:`pcapkit.vendor.mh.flow_id_status.FlowIDStatus`.
 
 .. autoclass:: pcapkit.const.mh.flow_id_status.FlowIDStatus
    :members:
@@ -321,8 +300,7 @@ Flow Identification Sub-Options
 
 .. module:: pcapkit.const.mh.flow_id_suboption
 
-This module contains the constant enumeration for **Flow Identification Sub-Options**,
-which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption`.
+Generated from :class:`pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption`.
 
 .. autoclass:: pcapkit.const.mh.flow_id_suboption.FlowIDSuboption
    :members:
@@ -334,8 +312,7 @@ Handoff Indicator Option Type Values
 
 .. module:: pcapkit.const.mh.handoff_type
 
-This module contains the constant enumeration for **Handoff Indicator Option Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.handoff_type.HandoffType`.
+Generated from :class:`pcapkit.vendor.mh.handoff_type.HandoffType`.
 
 .. autoclass:: pcapkit.const.mh.handoff_type.HandoffType
    :members:
@@ -347,8 +324,7 @@ Handover Acknowledge Flags
 
 .. module:: pcapkit.const.mh.handover_ack_flag
 
-This module contains the constant enumeration for **Handover Acknowledge Flags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag`.
+Generated from :class:`pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag`.
 
 .. autoclass:: pcapkit.const.mh.handover_ack_flag.HandoverACKFlag
    :members:
@@ -360,8 +336,7 @@ Handover Acknowledge Status Codes
 
 .. module:: pcapkit.const.mh.handover_ack_status
 
-This module contains the constant enumeration for **Handover Acknowledge Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus`.
+Generated from :class:`pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus`.
 
 .. autoclass:: pcapkit.const.mh.handover_ack_status.HandoverACKStatus
    :members:
@@ -373,8 +348,7 @@ Handover Initiate Flags
 
 .. module:: pcapkit.const.mh.handover_initiate_flag
 
-This module contains the constant enumeration for **Handover Initiate Flags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag`.
+Generated from :class:`pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag`.
 
 .. autoclass:: pcapkit.const.mh.handover_initiate_flag.HandoverInitiateFlag
    :members:
@@ -386,8 +360,7 @@ Handover Initiate Status Codes
 
 .. module:: pcapkit.const.mh.handover_initiate_status
 
-This module contains the constant enumeration for **Handover Initiate Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiate_status.HandoverInitiateStatus`.
+Generated from :class:`pcapkit.vendor.mh.handover_initiate_status.HandoverInitiateStatus`.
 
 .. autoclass:: pcapkit.const.mh.handover_initiate_status.HandoverInitiateStatus
    :members:
@@ -399,8 +372,7 @@ IPv4 Home Address Reply Status Codes
 
 .. module:: pcapkit.const.mh.home_address_reply
 
-This module contains the constant enumeration for **IPv4 Home Address Reply Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.home_address_reply.HomeAddressReply`.
+Generated from :class:`pcapkit.vendor.mh.home_address_reply.HomeAddressReply`.
 
 .. autoclass:: pcapkit.const.mh.home_address_reply.HomeAddressReply
    :members:
@@ -412,8 +384,7 @@ LMA-Controlled MAG Parameters Sub-Option Type Values
 
 .. module:: pcapkit.const.mh.lma_mag_suboption
 
-This module contains the constant enumeration for **LMA-Controlled MAG Parameters Sub-Option Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption`.
+Generated from :class:`pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption`.
 
 .. autoclass:: pcapkit.const.mh.lma_mag_suboption.LMAControlledMAGSuboption
    :members:
@@ -425,8 +396,7 @@ Mobile Node Group Identifier Type Registry
 
 .. module:: pcapkit.const.mh.mn_group_id
 
-This module contains the constant enumeration for **Mobile Node Group Identifier Type Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.mn_group_id.MNGroupID`.
+Generated from :class:`pcapkit.vendor.mh.mn_group_id.MNGroupID`.
 
 .. autoclass:: pcapkit.const.mh.mn_group_id.MNGroupID
    :members:
@@ -438,8 +408,7 @@ Mobile Node Identifier Option Subtypes
 
 .. module:: pcapkit.const.mh.mn_id_subtype
 
-This module contains the constant enumeration for **Mobile Node Identifier Option Subtypes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.mn_id_subtype.MNIDSubtype`.
+Generated from :class:`pcapkit.vendor.mh.mn_id_subtype.MNIDSubtype`.
 
 .. autoclass:: pcapkit.const.mh.mn_id_subtype.MNIDSubtype
    :members:
@@ -451,8 +420,7 @@ Operator-Identifier Type Registry
 
 .. module:: pcapkit.const.mh.operator_id
 
-This module contains the constant enumeration for **Operator-Identifier Type Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.operator_id.OperatorID`.
+Generated from :class:`pcapkit.vendor.mh.operator_id.OperatorID`.
 
 .. autoclass:: pcapkit.const.mh.operator_id.OperatorID
    :members:
@@ -464,8 +432,7 @@ Mobility Options
 
 .. module:: pcapkit.const.mh.option
 
-This module contains the constant enumeration for **Mobility Options**,
-which is automatically generated from :class:`pcapkit.vendor.mh.option.Option`.
+Generated from :class:`pcapkit.vendor.mh.option.Option`.
 
 .. autoclass:: pcapkit.const.mh.option.Option
    :members:
@@ -477,8 +444,7 @@ Mobility Header Types - for the MH Type Field in the Mobility Header
 
 .. module:: pcapkit.const.mh.packet
 
-This module contains the constant enumeration for **Mobility Header Types - for the MH Type field in the Mobility Header**,
-which is automatically generated from :class:`pcapkit.vendor.mh.packet.Packet`.
+Generated from :class:`pcapkit.vendor.mh.packet.Packet`.
 
 .. autoclass:: pcapkit.const.mh.packet.Packet
    :members:
@@ -490,8 +456,7 @@ Quality-of-Service Attribute Registry
 
 .. module:: pcapkit.const.mh.qos_attribute
 
-This module contains the constant enumeration for **Quality-of-Service Attribute Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.qos_attribute.QoSAttribute`.
+Generated from :class:`pcapkit.vendor.mh.qos_attribute.QoSAttribute`.
 
 .. autoclass:: pcapkit.const.mh.qos_attribute.QoSAttribute
    :members:
@@ -503,8 +468,7 @@ Binding Revocation Acknowledgement Status Codes
 
 .. module:: pcapkit.const.mh.revocation_status_code
 
-This module contains the constant enumeration for **Binding Revocation Acknowledgement Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.revocation_status_code.RevocationStatusCode`.
+Generated from :class:`pcapkit.vendor.mh.revocation_status_code.RevocationStatusCode`.
 
 .. autoclass:: pcapkit.const.mh.revocation_status_code.RevocationStatusCode
    :members:
@@ -516,8 +480,7 @@ Revocation Trigger Values
 
 .. module:: pcapkit.const.mh.revocation_trigger
 
-This module contains the constant enumeration for **Revocation Trigger Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.revocation_trigger.RevocationTrigger`.
+Generated from :class:`pcapkit.vendor.mh.revocation_trigger.RevocationTrigger`.
 
 .. autoclass:: pcapkit.const.mh.revocation_trigger.RevocationTrigger
    :members:
@@ -529,8 +492,7 @@ Status Codes
 
 .. module:: pcapkit.const.mh.status_code
 
-This module contains the constant enumeration for **Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.status_code.StatusCode`.
+Generated from :class:`pcapkit.vendor.mh.status_code.StatusCode`.
 
 .. autoclass:: pcapkit.const.mh.status_code.StatusCode
    :members:
@@ -542,8 +504,7 @@ Traffic Selector Format
 
 .. module:: pcapkit.const.mh.traffic_selector
 
-This module contains the constant enumeration for **Traffic Selector Format**,
-which is automatically generated from :class:`pcapkit.vendor.mh.traffic_selector.TrafficSelector`.
+Generated from :class:`pcapkit.vendor.mh.traffic_selector.TrafficSelector`.
 
 .. autoclass:: pcapkit.const.mh.traffic_selector.TrafficSelector
    :members:
@@ -555,8 +516,7 @@ Update Notification Acknowledgement Status Registry
 
 .. module:: pcapkit.const.mh.upa_status
 
-This module contains the constant enumeration for **Update Notification Acknowledgement Status Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.upa_status.UpdateNotificationACKStatus`.
+Generated from :class:`pcapkit.vendor.mh.upa_status.UpdateNotificationACKStatus`.
 
 .. autoclass:: pcapkit.const.mh.upa_status.UpdateNotificationACKStatus
    :members:
@@ -568,8 +528,7 @@ Update Notification Reasons Registry
 
 .. module:: pcapkit.const.mh.upn_reason
 
-This module contains the constant enumeration for **Update Notification Reasons Registry**,
-which is automatically generated from :class:`pcapkit.vendor.mh.upn_reason.UpdateNotificationReason`.
+Generated from :class:`pcapkit.vendor.mh.upn_reason.UpdateNotificationReason`.
 
 .. autoclass:: pcapkit.const.mh.upn_reason.UpdateNotificationReason
    :members:
@@ -581,8 +540,7 @@ Link-Layer Address (LLA) Option Code
 
 .. module:: pcapkit.const.mh.lla_code
 
-This module contains the constant enumeration for **Link-Layer Address (LLA) Option Code**,
-which is automatically generated from :class:`pcapkit.vendor.mh.lla_code.LLACode`.
+Generated from :class:`pcapkit.vendor.mh.lla_code.LLACode`.
 
 .. versionchanged:: 1.5.0
 
@@ -600,8 +558,7 @@ CGA Extension Type Tags
 
 .. module:: pcapkit.const.mh.cga_type
 
-This module contains the constant enumeration for **CGA Extension Type Tags**,
-which is automatically generated from :class:`pcapkit.vendor.mh.cga_type.CGAType`.
+Generated from :class:`pcapkit.vendor.mh.cga_type.CGAType`.
 
 .. autoclass:: pcapkit.const.mh.cga_type.CGAType
    :members:
@@ -613,8 +570,7 @@ CGA Extension Type Values
 
 .. module:: pcapkit.const.mh.cga_extension
 
-This module contains the constant enumeration for **CGA Extension Type Values**,
-which is automatically generated from :class:`pcapkit.vendor.mh.cga_extension.CGAExtension`.
+Generated from :class:`pcapkit.vendor.mh.cga_extension.CGAExtension`.
 
 .. autoclass:: pcapkit.const.mh.cga_extension.CGAExtension
    :members:
@@ -626,8 +582,7 @@ CGA SEC
 
 .. module:: pcapkit.const.mh.cga_sec
 
-This module contains the constant enumeration for **CGA SEC**,
-which is automatically generated from :class:`pcapkit.vendor.mh.cga_sec.CGASec`.
+Generated from :class:`pcapkit.vendor.mh.cga_sec.CGASec`.
 
 .. autoclass:: pcapkit.const.mh.cga_sec.CGASec
    :members:
@@ -639,8 +594,7 @@ Binding Error Status Code
 
 .. module:: pcapkit.const.mh.binding_error
 
-This module contains the constant enumeration for **Binding Error Status Code**,
-which is automatically generated from :class:`pcapkit.vendor.mh.binding_error.BindingError`.
+Generated from :class:`pcapkit.vendor.mh.binding_error.BindingError`.
 
 .. autoclass:: pcapkit.const.mh.binding_error.BindingError
    :members:

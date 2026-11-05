@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -558,22 +558,13 @@
 
 <span class="sd">.. module:: pcapkit.corekit.sentinels</span>
 
-<span class="sd">:mod:`pcapkit.corekit.sentinels` is the single, shared home for every</span>
-<span class="sd">module-level singleton sentinel this package defines for itself -- a value</span>
-<span class="sd">whose only job is to be recognised by identity (``value is SENTINEL``), so</span>
-<span class="sd">that it can never be confused with a value a caller might legitimately pass.</span>
-<span class="sd">See the "Naming a Sentinel" section of</span>
-<span class="sd">:file:`docs/source/contributing/conventions/sentinel-convention.rst` for the</span>
-<span class="sd">house rule the sentinels below follow.</span>
+<span class="sd">:mod:`pcapkit.corekit.sentinels` is the one home of every module-level</span>
+<span class="sd">singleton sentinel this package defines: a value recognised by identity</span>
+<span class="sd">(``value is SENTINEL``), so it is never confused with one a caller passes. The</span>
+<span class="sd">sentinels follow :ref:`sentinel-convention`.</span>
 
-<span class="sd">The owner's ruling on GitHub issue :issue:`911` chose one shared module over</span>
-<span class="sd">one module per sentinel, and this module is the only import path for each</span>
-<span class="sd">of them: the module of the class that uses each one does not re-export it</span>
-<span class="sd">(:issue:`1744`), per the ruling recorded on :issue:`1103` that a moved name keeps no</span>
-<span class="sd">re-export at its old path. :mod:`pcapkit.corekit.module`,</span>
-<span class="sd">:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and</span>
-<span class="sd">:mod:`pcapkit.protocols.protocol` import the object they use from here, but</span>
-<span class="sd">none lists it in ``__all__`` or documents it, and none binds the type.</span>
+<span class="sd">It is the only import path for each (:issue:`911`): a module that uses one</span>
+<span class="sd">imports it from here and does not list it in ``__all__`` (:issue:`1744`).</span>
 
 <span class="sd">Every sentinel type derives from :class:`Sentinel`, which with its</span>
 <span class="sd">metaclass :class:`SentinelMeta` makes it behave like the type of a built-in</span>
@@ -1562,7 +1553,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1588,7 +1579,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

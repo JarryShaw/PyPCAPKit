@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation is a collection of foundations for pcapkit, including PCAP file extraction tool Extractor and the engines it reads through, TCP/IP and DTLS reassembly implementations and the ana..." />
-<meta name="description" content="pcapkit.foundation is a collection of foundations for pcapkit, including PCAP file extraction tool Extractor and the engines it reads through, TCP/IP and DTLS reassembly implementations and the ana..." />
+<meta property="og:description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of what it reassembles;, t..." />
+<meta name="description" content="pcapkit.foundation holds the machinery of pcapkit: the PCAP file extractor Extractor, and the engines it reads through;, the IP, TCP and DTLS reassembly, and the analysis of what it reassembles;, t..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="File Extractor" href="extraction.html"><link rel="prev" title="Registry Helpers" href="../interface/registry.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,14 +570,15 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.foundation">
 <span id="library-foundation"></span><h1>Library Foundation<a class="headerlink" href="#module-pcapkit.foundation" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> is a collection of foundations for
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including PCAP file extraction tool
-<a class="reference internal" href="extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and the
-<a class="reference internal" href="engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">engines</span></code></a> it reads through, TCP/IP and DTLS
-reassembly implementations and the <a class="reference internal" href="analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a> of what
-they reassemble, TCP flow tracer
-<a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>, and registry
-management APIs for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
+<p><a class="reference internal" href="#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> holds the machinery of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>:</p>
+<ul class="simple">
+<li><p>the PCAP file extractor <a class="reference internal" href="extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>,
+and the <a class="reference internal" href="engines/index.html#module-pcapkit.foundation.engines" title="pcapkit.foundation.engines"><code class="xref py py-mod docutils literal notranslate"><span class="pre">engines</span></code></a> it reads through;</p></li>
+<li><p>the IP, TCP and DTLS <a class="reference internal" href="reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">reassembly</span></code></a>, and the
+<a class="reference internal" href="analysis/index.html#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a> of what it reassembles;</p></li>
+<li><p>the TCP flow tracer <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>;</p></li>
+<li><p>the <a class="reference internal" href="registry.html#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">registry</span></code></a> management APIs.</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="extraction.html">File Extractor</a><ul>

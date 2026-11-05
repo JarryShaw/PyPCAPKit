@@ -3,8 +3,7 @@ Link Layer
 
 .. module:: pcapkit.protocols.link
 
-:mod:`pcapkit.protocols.link` is the collection of all protocols in
-link layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.link` holds the link layer protocols.
 
 .. versionremoved:: 1.5.0
 

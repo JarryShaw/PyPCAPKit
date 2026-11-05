@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -591,8 +591,8 @@ packages of their own:</p>
 </tbody>
 </table>
 </div>
-<p>The tag structure is described as below, keyed as for a customer tag; a service
-tag’s keys start <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> instead:</p>
+<p>The tag structure, keyed as for a customer tag (a service tag’s keys start
+<code class="docutils literal notranslate"><span class="pre">s_tag</span></code>), is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -631,15 +631,13 @@ tag’s keys start <code class="docutils literal notranslate"><span class="pre">
 </tbody>
 </table>
 </div>
-<p>The two tags carry an identical tag control information layout and differ only
-in the tag protocol identifier (TPID) that selected them – <code class="docutils literal notranslate"><span class="pre">0x8100</span></code> for the
-customer tag, <code class="docutils literal notranslate"><span class="pre">0x88A8</span></code> for the service tag. The TPID is not part of either tag:
-it is the EtherType field of whatever encapsulates the tag. Both classes read the
-same four octets and share all parsing and construction code, which this base
-holds.</p>
-<p>They are still distinct classes rather than one class bound at two EtherTypes,
-because 802.1ad <em>stacks</em> them. In a Q-in-Q frame the service tag’s own
-next-EtherType is <code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, which selects a customer tag in turn:</p>
+<p>The two tags differ only in the tag protocol identifier (TPID) that selects
+them, which is not part of either tag but the EtherType field of whatever
+encapsulates it. Both read the same four octets with the parsing and
+construction code this base holds.</p>
+<p>They are distinct classes, not one class bound at two EtherTypes, because
+802.1ad <em>stacks</em> them: in a Q-in-Q frame the service tag’s next EtherType,
+<code class="docutils literal notranslate"><span class="pre">0x8100</span></code>, selects a customer tag:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ethernet.type                = 0x88A8
 ethernet.s_tag.tci.vid       = 100     &lt;- service tag,  802.1ad
 ethernet.s_tag.type          = 0x8100
@@ -648,10 +646,9 @@ ethernet.s_tag.c_tag.type    = 0x0800
 </pre></div>
 </div>
 <p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info_name" title="pcapkit.protocols.protocol.Protocol.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a> – <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> against
-<code class="docutils literal notranslate"><span class="pre">c_tag</span></code> – is what keeps the two apart in the parsed
-<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>. One class bound at both EtherTypes
-would nest a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code>, leaving nothing to say which was the
-service tag.</p>
+<code class="docutils literal notranslate"><span class="pre">c_tag</span></code> – keeps the two apart in the parsed
+<a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>; one class would nest a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside
+a <code class="docutils literal notranslate"><span class="pre">c_tag</span></code>, leaving nothing to say which was the service tag.</p>
 <p>Each tag has a package of its own because a package holds one protocol class,
 named after it, with only the framework bases in <a class="reference internal" href="../protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>
 exempt (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2529">#2529</a>). This base is abstract, nothing dispatches to it, and it

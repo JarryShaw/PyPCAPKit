@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/link/loopback.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.link.loopback.protocol contains Loopback only, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described ..." />
-<meta name="description" content="pcapkit.protocols.link.loopback.protocol contains Loopback only, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described ..." />
+<meta property="og:description" content="pcapkit.protocols.link.loopback.protocol contains Loopback, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is:,,,, Octets, Bi..." />
+<meta name="description" content="pcapkit.protocols.link.loopback.protocol contains Loopback, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is:,,,, Octets, Bi..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Netlink - Linux Netlink Socket Framing" href="netlink.html"><link rel="prev" title="Linux “Cooked” Capture Encapsulation v2" href="linux_sll2.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -576,10 +576,10 @@ module, and <a class="reference internal" href="#module-pcapkit.protocols.link.l
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>).</p>
 </div>
 <p><a class="reference internal" href="#module-pcapkit.protocols.link.loopback.protocol" title="pcapkit.protocols.link.loopback.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback.protocol</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>
-only, which implements the extractor for the BSD loopback
+<a class="reference internal" href="#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>,
+which implements the extractor for the BSD loopback
 encapsulation <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> of <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code>,
-whose structure is described as below:</p>
+whose structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>

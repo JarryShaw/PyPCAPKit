@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -600,11 +600,11 @@ needed by the test suite.</p>
 </section>
 <section id="the-option-round-trip-generator">
 <h2>The Option Round-Trip Generator<a class="headerlink" href="#the-option-round-trip-generator" title="Link to this heading">¶</a></h2>
-<p>One generator works differently from the rest.
-<code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> does not describe packets it wants; it asks
-the library which option, chunk, parameter, message, frame and block codes it
-registers, and then constructs one of each through the public construction API,
-parses it back, and constructs it again from what was parsed. The
+<p><code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> differs from the other generators: rather
+than describing the packets it wants, it asks the library which option, chunk,
+parameter, message, frame and block codes it registers, constructs one of each
+through the public construction API, parses it back, and constructs it again from
+what was parsed. The
 <code class="file docutils literal notranslate"><span class="pre">options-*.pcap</span></code> captures are the cases that survive that round trip, so
 they record what this version of <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> builds rather than what a
 third-party tool builds.</p>

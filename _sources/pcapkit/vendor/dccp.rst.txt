@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.dccp
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`DCCP_PacketType <pcapkit.vendor.dccp.packet_type.PacketType>`
@@ -30,8 +26,7 @@ DCCP Packet Types
 
 .. module:: pcapkit.vendor.dccp.packet_type
 
-This module contains the vendor crawler for **DCCP Packet Types**,
-which is automatically generating :class:`pcapkit.const.dccp.packet_type.PacketType`.
+Generates :class:`pcapkit.const.dccp.packet_type.PacketType`.
 
 .. autoclass:: pcapkit.vendor.dccp.packet_type.PacketType
    :members: FLAG, LINK
@@ -42,8 +37,7 @@ DCCP Reset Codes
 
 .. module:: pcapkit.vendor.dccp.reset_code
 
-This module contains the vendor crawler for **DCCP Reset Codes**,
-which is automatically generating :class:`pcapkit.const.dccp.reset_code.ResetCode`.
+Generates :class:`pcapkit.const.dccp.reset_code.ResetCode`.
 
 .. autoclass:: pcapkit.vendor.dccp.reset_code.ResetCode
    :members: FLAG, LINK
@@ -54,8 +48,7 @@ DCCP Option Types
 
 .. module:: pcapkit.vendor.dccp.option
 
-This module contains the vendor crawler for **DCCP Option Types**,
-which is automatically generating :class:`pcapkit.const.dccp.option.Option`.
+Generates :class:`pcapkit.const.dccp.option.Option`.
 
 .. autoclass:: pcapkit.vendor.dccp.option.Option
    :members: FLAG, LINK
@@ -66,8 +59,7 @@ DCCP Feature Numbers
 
 .. module:: pcapkit.vendor.dccp.feature
 
-This module contains the vendor crawler for **DCCP Feature Numbers**,
-which is automatically generating :class:`pcapkit.const.dccp.feature.Feature`.
+Generates :class:`pcapkit.const.dccp.feature.Feature`.
 
 .. autoclass:: pcapkit.vendor.dccp.feature.Feature
    :members: FLAG, LINK
@@ -78,8 +70,7 @@ DCCP Ack Vector States
 
 .. module:: pcapkit.vendor.dccp.ack_vector_state
 
-This module contains the vendor crawler for **DCCP Ack Vector States**,
-which is automatically generating :class:`pcapkit.const.dccp.ack_vector_state.AckVectorState`.
+Generates :class:`pcapkit.const.dccp.ack_vector_state.AckVectorState`.
 
 .. autoclass:: pcapkit.vendor.dccp.ack_vector_state.AckVectorState
    :members: FLAG, LINK
@@ -90,8 +81,7 @@ DCCP Drop Codes
 
 .. module:: pcapkit.vendor.dccp.drop_code
 
-This module contains the vendor crawler for **DCCP Drop Codes**,
-which is automatically generating :class:`pcapkit.const.dccp.drop_code.DropCode`.
+Generates :class:`pcapkit.const.dccp.drop_code.DropCode`.
 
 .. autoclass:: pcapkit.vendor.dccp.drop_code.DropCode
    :members: FLAG, LINK

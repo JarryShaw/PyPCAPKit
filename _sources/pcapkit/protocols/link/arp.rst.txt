@@ -14,8 +14,7 @@ ARP - Address Resolution Protocol
 :mod:`pcapkit.protocols.link.arp.protocol` contains
 :class:`~pcapkit.protocols.link.arp.protocol.ARP` only,
 which implements an extractor for Address Resolution
-Protocol (ARP) [*]_, whose structure is described as
-below:
+Protocol (ARP) [*]_, whose structure is:
 
 .. table::
 

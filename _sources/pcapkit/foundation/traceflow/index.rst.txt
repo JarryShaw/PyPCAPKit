@@ -30,7 +30,7 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.traceflow`:
 
 .. mermaid::
 
-   flowchart LR
+   flowchart TD
        A{{TraceFlowMeta}} -.->|metaclass| B(TraceFlowBase)
 
        B --> TCP

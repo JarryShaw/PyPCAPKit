@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -563,24 +563,21 @@
 
 <span class="sd">.. note::</span>
 
-<span class="sd">   Constructing this engine imports ``scapy.all``, which is what populates</span>
-<span class="sd">   `Scapy`_'s layer registries -- see :meth:`Scapy.__init__` for why anything</span>
-<span class="sd">   narrower silently returns undissected frames.</span>
+<span class="sd">   Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s</span>
+<span class="sd">   layer registries -- see :meth:`Scapy.__init__` for why anything narrower</span>
+<span class="sd">   silently returns undissected frames.</span>
 
-<span class="sd">   One side effect is worth knowing about in advance: ``scapy.all`` loads</span>
-<span class="sd">   :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there</span>
-<span class="sd">   triggers a ``CryptographyDeprecationWarning`` from |cryptography|_ about</span>
-<span class="sd">   finite-field Diffie-Hellman. It is emitted by any complete registry load, not</span>
-<span class="sd">   by ``scapy.all`` in particular, and it concerns a key-exchange code path</span>
-<span class="sd">   :mod:`pcapkit` never executes -- but it subclasses :exc:`UserWarning`, not</span>
-<span class="sd">   :exc:`DeprecationWarning`, so Python's default filters show it.</span>
+<span class="sd">   That load reaches `Scapy`_'s TLS layer through :mod:`scapy.layers.dcerpc`,</span>
+<span class="sd">   which triggers a ``CryptographyDeprecationWarning`` from |cryptography|_</span>
+<span class="sd">   about finite-field Diffie-Hellman, a code path :mod:`pcapkit` never</span>
+<span class="sd">   executes. It subclasses :exc:`UserWarning`, not :exc:`DeprecationWarning`,</span>
+<span class="sd">   so Python's default filters show it.</span>
 
-<span class="sd">   :mod:`pcapkit` deliberately does not filter it away. The warning is `Scapy`_'s</span>
-<span class="sd">   to emit and the consumer's to silence, on the same footing as every other</span>
-<span class="sd">   category (see :mod:`pcapkit.utilities.warnings`); hiding a third-party</span>
-<span class="sd">   deprecation notice from inside a constructor would suppress the only advance</span>
-<span class="sd">   warning that a future |cryptography|_ release breaks `Scapy`_'s TLS layer.</span>
-<span class="sd">   To silence it, filter it as usual::</span>
+<span class="sd">   :mod:`pcapkit` leaves it unfiltered: it is `Scapy`_'s to emit and the</span>
+<span class="sd">   consumer's to silence, as for every other category (see</span>
+<span class="sd">   :mod:`pcapkit.utilities.warnings`), and hiding it would suppress the only</span>
+<span class="sd">   advance notice that a future |cryptography|_ release breaks `Scapy`_'s TLS</span>
+<span class="sd">   layer. To silence it::</span>
 
 <span class="sd">       import warnings</span>
 
@@ -872,34 +869,23 @@
 <span class="sd">            extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`, and the difference is</span>
-        <span class="c1"># load-bearing rather than cosmetic. Scapy dispatches on two registries that</span>
-        <span class="c1"># exist only as *import side effects* of its layer modules: ``conf.l2types``,</span>
-        <span class="c1"># mapping a capture's link type onto a link-layer class, and the</span>
-        <span class="c1"># ``bind_layers`` payload table. ``scapy/__init__.py`` fills in neither, so</span>
-        <span class="c1"># importing just the sniffing submodule leaves both empty --</span>
-        <span class="c1"># :class:`~scapy.utils.PcapReader` then cannot map even link type 1 (plain</span>
-        <span class="c1"># Ethernet), writes ``unknown LL type [1]/[0x1]`` to stderr and returns every</span>
-        <span class="c1"># frame as one opaque :class:`~scapy.packet.Raw` layer. Nothing raises, so the</span>
-        <span class="c1"># engine would deliver no dissection whatsoever and announce it only on</span>
-        <span class="c1"># stderr (#406).</span>
+        <span class="c1"># NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`. Scapy dispatches on two</span>
+        <span class="c1"># registries filled only as import side effects of its layer modules:</span>
+        <span class="c1"># ``conf.l2types``, mapping a link type onto a link-layer class, and the</span>
+        <span class="c1"># ``bind_layers`` payload table. With just the sniffing submodule both are</span>
+        <span class="c1"># empty, so :class:`~scapy.utils.PcapReader` cannot map even link type 1,</span>
+        <span class="c1"># writes ``unknown LL type [1]/[0x1]`` to stderr and returns every frame as</span>
+        <span class="c1"># one :class:`~scapy.packet.Raw` layer, raising nothing (#406).</span>
         <span class="c1">#</span>
-        <span class="c1"># Naming the layer modules individually is not a cheaper way to the same</span>
-        <span class="c1"># place: it repairs the link layer and leaves the payload table short, so</span>
-        <span class="c1"># ``dhcp.pcapng`` still comes back as ``Ethernet / IP / UDP / Raw`` rather</span>
-        <span class="c1"># than ``... / UDP / BOOTP / DHCP options``. Enumerating them here would also</span>
-        <span class="c1"># go stale silently -- a link or payload type added by a later scapy would</span>
-        <span class="c1"># regress to ``Raw`` with no error -- whereas ``scapy.all`` defers to</span>
-        <span class="c1"># ``conf.load_layers``, which scapy itself keeps current. The cost is the</span>
-        <span class="c1"># layer loading, not the façade: importing ``scapy.layers.all`` alone</span>
-        <span class="c1"># measures the same, so there is no complete-but-cheaper option to prefer.</span>
+        <span class="c1"># Importing the layer modules by name repairs the link layer but leaves the</span>
+        <span class="c1"># payload table short (``dhcp.pcapng`` stops at ``Ethernet / IP / UDP /</span>
+        <span class="c1"># Raw``), and goes stale silently as scapy adds types; ``scapy.all`` defers</span>
+        <span class="c1"># to ``conf.load_layers``, which scapy keeps current. The cost is the layer</span>
+        <span class="c1"># loading, not the façade: ``scapy.layers.all`` alone measures the same.</span>
         <span class="c1">#</span>
-        <span class="c1"># This stays inside ``__init__`` rather than moving to module scope so that</span>
-        <span class="c1"># ``import pcapkit`` does not pay for it; only callers who actually select</span>
-        <span class="c1"># this engine do. And it is bound to :attr:`_expkg`, the attribute</span>
-        <span class="c1"># :meth:`run` calls ``sniff`` on, rather than left as a bare side-effecting</span>
-        <span class="c1"># import -- an import whose value is used cannot be dropped later as unused,</span>
-        <span class="c1"># which is how this class of bug comes back.</span>
+        <span class="c1"># It stays in ``__init__`` so ``import pcapkit`` does not pay for it, and is</span>
+        <span class="c1"># bound to :attr:`_expkg`, which :meth:`run` calls ``sniff`` on, so it</span>
+        <span class="c1"># cannot later be dropped as an unused import.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scapy</span><span class="w"> </span><span class="kn">import</span> <span class="nb">all</span> <span class="k">as</span> <span class="n">scapy</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">scapy</span>
@@ -1412,7 +1398,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1438,7 +1424,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

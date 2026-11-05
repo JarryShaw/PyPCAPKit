@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.icmpv6
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`ICMPv6_Type <pcapkit.const.icmpv6.type.Type>`
@@ -26,8 +22,7 @@ ICMPv6 Type Numbers
 
 .. module:: pcapkit.const.icmpv6.type
 
-This module contains the constant enumeration for **ICMPv6 Type Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.icmpv6.type.Type`.
+Generated from :class:`pcapkit.vendor.icmpv6.type.Type`.
 
 .. autoclass:: pcapkit.const.icmpv6.type.Type
    :members:
@@ -39,9 +34,7 @@ ICMPv6 Destination Unreachable Codes
 
 .. module:: pcapkit.const.icmpv6.destination_unreachable_code
 
-This module contains the constant enumeration for **ICMPv6 Destination
-Unreachable Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmpv6.destination_unreachable_code.DestinationUnreachableCode`.
+Generated from :class:`pcapkit.vendor.icmpv6.destination_unreachable_code.DestinationUnreachableCode`.
 
 .. autoclass:: pcapkit.const.icmpv6.destination_unreachable_code.DestinationUnreachableCode
    :members:
@@ -53,9 +46,7 @@ ICMPv6 Time Exceeded Codes
 
 .. module:: pcapkit.const.icmpv6.time_exceeded_code
 
-This module contains the constant enumeration for **ICMPv6 Time Exceeded
-Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmpv6.time_exceeded_code.TimeExceededCode`.
+Generated from :class:`pcapkit.vendor.icmpv6.time_exceeded_code.TimeExceededCode`.
 
 .. autoclass:: pcapkit.const.icmpv6.time_exceeded_code.TimeExceededCode
    :members:
@@ -67,9 +58,7 @@ ICMPv6 Parameter Problem Codes
 
 .. module:: pcapkit.const.icmpv6.parameter_problem_code
 
-This module contains the constant enumeration for **ICMPv6 Parameter
-Problem Codes**, which is automatically generated from
-:class:`pcapkit.vendor.icmpv6.parameter_problem_code.ParameterProblemCode`.
+Generated from :class:`pcapkit.vendor.icmpv6.parameter_problem_code.ParameterProblemCode`.
 
 .. autoclass:: pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode
    :members:

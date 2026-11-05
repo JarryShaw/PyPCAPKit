@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/ipv6_route.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.ipv6_route.protocol contains IPv6_Route only, which implements the extractor for Routing Header for IPv6 (IPv6-Route)*, whose structure is described as below:,,,, Octets,..." />
-<meta name="description" content="pcapkit.protocols.internet.ipv6_route.protocol contains IPv6_Route only, which implements the extractor for Routing Header for IPv6 (IPv6-Route)*, whose structure is described as below:,,,, Octets,..." />
+<meta property="og:description" content="pcapkit.protocols.internet.ipv6_route.protocol contains IPv6_Route only, which implements the extractor for Routing Header for IPv6 (IPv6-Route)*, whose structure is:,,,, Octets, Bits, Name, Descri..." />
+<meta name="description" content="pcapkit.protocols.internet.ipv6_route.protocol contains IPv6_Route only, which implements the extractor for Routing Header for IPv6 (IPv6-Route)*, whose structure is:,,,, Octets, Bits, Name, Descri..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="HOPOPT - IPv6 Hop-by-Hop Options" href="hopopt.html"><link rel="prev" title="IPv6-Opts - Destination Options for IPv6" href="ipv6_opts.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,7 +573,7 @@
 <p id="module-pcapkit.protocols.internet.ipv6_route.protocol"><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route.protocol" title="pcapkit.protocols.internet.ipv6_route.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route.protocol</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>
 only, which implements the extractor for Routing Header for IPv6
-(IPv6-Route) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
+(IPv6-Route) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -898,7 +898,7 @@ override can be undone (<a class="extlink-issue reference external" href="https:
 stub above, which types them as optional keyword parameters. The
 runtime accepts them through <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> without defaulting them.
 The discrepancy with the implementation signature is deliberate
-(GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/505">#505</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/505">#505</a>).</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1373,15 +1373,10 @@ here (<a class="extlink-issue reference external" href="https://github.com/Jarry
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.schema.RPL.cmpr">
 <span class="sig-name descname"><span class="pre">cmpr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.CmprInfo" title="pcapkit.protocols.internet.ipv6_route.schema.CmprInfo"><span class="pre">CmprInfo</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">cmpr&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.schema.RPL.cmpr" title="Link to this definition">¶</a></dt>
 <dd><p>CmprI and CmprE – two 4-bit counts sharing one octet.</p>
-<p>NOTE: <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> gives <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> as <em>“4-bit
-unsigned integer”</em>, i.e. the high and low nibble of a single octet, so
-they cannot be two <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field" title="pcapkit.corekit.fields.numbers.UInt8Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt8Field</span></code></a>
-(one octet each). Together with <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.RPL.pad" title="pcapkit.protocols.internet.ipv6_route.schema.RPL.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pad</span></code></a> below – <code class="docutils literal notranslate"><span class="pre">Pad</span></code>
-(4 bits) plus <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (20 bits) – this is the one 32-bit word the
-diagram in <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> draws, and the same word
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route._read_data_type_rpl"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Route._read_data_type_rpl</span></code></a>’s
-own docstring draws. The split between the two fields falls on the octet
-boundary between <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> and <code class="docutils literal notranslate"><span class="pre">Pad</span></code>, so neither straddles an octet.</p>
+<p>NOTE: <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a> gives each as a <em>“4-bit unsigned integer”</em>,
+the high and low nibble of one octet. With <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.schema.RPL.pad" title="pcapkit.protocols.internet.ipv6_route.schema.RPL.pad"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pad</span></code></a> – <code class="docutils literal notranslate"><span class="pre">Pad</span></code> (4 bits)
+and <code class="docutils literal notranslate"><span class="pre">Reserved</span></code> (20 bits) – they form the 32-bit word that section
+draws; the split falls on the octet boundary between <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> and <code class="docutils literal notranslate"><span class="pre">Pad</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1480,7 +1475,7 @@ instance based on <a class="reference internal" href="#pcapkit.protocols.interne
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.schema.</span></span><span class="sig-name descname"><span class="pre">ipv6_route_data_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdr_ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route/schema.html#ipv6_route_data_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.schema.ipv6_route_data_length" title="Link to this definition">¶</a></dt>
 <dd><p>Length, in octets, of the IPv6-Route type-specific data for a given <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code>.</p>
-<p>Per <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
+<p>Per <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
 Routing header in 8-octet units, not including the first 8 octets”</em> –
 i.e. the total on-the-wire header is <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> octets. Of
 that, the 4 octets of <code class="docutils literal notranslate"><span class="pre">next</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code>/<code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">seg_left</span></code> are not

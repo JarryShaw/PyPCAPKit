@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -559,11 +559,9 @@
 
 <span class="sd">.. module:: pcapkit.protocols.transport.tcp.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.transport.tcp.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` only,</span>
-<span class="sd">which implements the extractor for Transmission Control</span>
-<span class="sd">Protocol (TCP) [*]_, whose structure is described as</span>
-<span class="sd">below:</span>
+<span class="sd">:mod:`pcapkit.protocols.transport.tcp.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`, the extractor for the</span>
+<span class="sd">Transmission Control Protocol (TCP) [*]_, whose header is:</span>
 
 <span class="sd">======= ========= ========================= =======================================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -736,9 +734,8 @@
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_TCP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_TCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Transmission Control Protocol.</span>
 
-<span class="sd">    This class supports parsing of the following protocols, which are</span>
-<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto__&gt;`</span>
-<span class="sd">    attribute:</span>
+<span class="sd">    The :attr:`self.__proto__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto__&gt;`</span>
+<span class="sd">    registry binds these ports:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -751,12 +748,13 @@
 <span class="sd">         - :class:`pcapkit.protocols.application.ftp.protocol.FTP`</span>
 <span class="sd">       * - 80</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.http.protocol.HTTP`</span>
+<span class="sd">       * - 443</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.tls.protocol.TLS`</span>
 <span class="sd">       * - 8080</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.http.protocol.HTTP`</span>
 
-<span class="sd">    This class supports parsing of the following TCP options,</span>
-<span class="sd">    which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    The TCP options it parses, by</span>
+<span class="sd">    :class:`pcapkit.const.tcp.option.Option` code:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -831,9 +829,8 @@
 <span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_fastopen`</span>
 <span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_fastopen`</span>
 
-<span class="sd">    This class supports parsing of the following Multipath TCP options,</span>
-<span class="sd">    which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    The Multipath TCP options it parses, by</span>
+<span class="sd">    :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption` subtype:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -893,6 +890,9 @@
 
 <span class="sd">    .. versionchanged:: 1.6.0</span>
 
+<span class="sd">       * Port 443 binds</span>
+<span class="sd">         :class:`~pcapkit.protocols.application.tls.protocol.TLS`</span>
+<span class="sd">         (:issue:`2437`).</span>
 <span class="sd">       * The checksum is computed when :meth:`make` is given none, over the</span>
 <span class="sd">         ``pseudo`` it is given or by the enclosing IP layer, and verified by</span>
 <span class="sd">         that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`</span>
@@ -968,19 +968,13 @@
             <span class="c1">#   443   https      http protocol over TLS/SSL</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
-            <span class="c1"># 8443 is deliberately absent: IANA registers it as ``pcsync-https``</span>
-            <span class="c1"># rather than as an HTTP alternate or a TLS one, so nothing here</span>
-            <span class="c1"># names it.</span>
+            <span class="c1"># 8443 is deliberately absent: IANA registers it as ``pcsync-https``,</span>
+            <span class="c1"># not as an HTTP or TLS alternate.</span>
             <span class="c1">#</span>
-            <span class="c1"># The HTTP ports bind the version-dispatching</span>
-            <span class="c1"># :class:`pcapkit.protocols.application.http.protocol.HTTP` rather than</span>
-            <span class="c1"># ``httpv1.HTTPv1``, because HTTP/1 and HTTP/2 share these ports on the</span>
-            <span class="c1"># wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on</span>
-            <span class="c1"># 80 -- so the port cannot decide the version and the payload has to.</span>
-            <span class="c1"># ``HTTP._dispatch_version`` identifies the payload (the RFC 9113 §3.4</span>
-            <span class="c1"># connection preface, an HTTP/1 start line, then a plausible HTTP/2</span>
-            <span class="c1"># frame header) and the layer is ``HTTPv1`` or ``HTTPv2`` (#2524).</span>
-            <span class="c1"># UDP's table binds the same class for the same ports.</span>
+            <span class="c1"># The HTTP ports bind the version-dispatching HTTP base, since</span>
+            <span class="c1"># HTTP/1 and cleartext HTTP/2 share them (RFC 9113): the payload,</span>
+            <span class="c1"># not the port, decides the version, through</span>
+            <span class="c1"># ``HTTP._dispatch_version`` (#2524). UDP's table does the same.</span>
             <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp_data.protocol'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
             <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp.protocol'</span><span class="p">,</span> <span class="s1">'FTP'</span><span class="p">),</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http.protocol'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
@@ -990,14 +984,13 @@
     <span class="p">)</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too. Declared by the</span>
-    <span class="c1">#: class *owning* the registry, and read from it by</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a</span>
-    <span class="c1">#: ``code=`` key is checked exactly as</span>
-    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` checks its own</span>
-    <span class="c1">#: -- a bare :class:`int` is accepted because the registry is keyed by</span>
-    <span class="c1">#: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
-    <span class="c1">#: member carries one (:issue:`2268`).</span>
+    <span class="c1">#: and whether a bare :class:`int` is valid too. Read by</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`</span>
+    <span class="c1">#: to check a ``code=`` key as</span>
+    <span class="c1">#: :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` checks</span>
+    <span class="c1">#: its own; a bare :class:`int` is a port number, which an</span>
+    <span class="c1">#: :class:`~pcapkit.const.reg.apptype.apptype.AppType` member carries</span>
+    <span class="c1">#: (:issue:`2268`).</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_AppType</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1">#: Option code to method mapping, see :meth:`_read_tcp_options` and</span>
@@ -1159,15 +1152,8 @@
 
         <span class="c1"># connection control flags</span>
         <span class="c1">#</span>
-        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a</span>
-        <span class="c1"># runtime no-op, so the accumulator would stay the plain :class:`int` ``0`` for a</span>
-        <span class="c1"># segment whose flags octet is all zero: the ``|=`` below is the only promotion and</span>
-        <span class="c1"># never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:</span>
-        <span class="c1"># argument of type 'int' is not a container or iterable``. A segment with any flag</span>
-        <span class="c1"># set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` whose</span>
-        <span class="c1"># ``_missing_`` accepts any value in the 12-bit flags field, ``0`` to ``0xFFF``,</span>
-        <span class="c1"># so ``Enum_Flags(0)`` is a valid flagless member that compares equal to ``0`` and</span>
-        <span class="c1"># ORs as usual. This is the type :attr:`connection` advertises.</span>
+        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``: a flagless</span>
+        <span class="c1"># segment would keep a plain ``int``, and ``in`` on it raises TypeError.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1178,20 +1164,16 @@
             <span class="s1">'connection'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="c1"># NOTE: A Data Offset declaring more header than was captured leaves the</span>
-        <span class="c1"># missing octets to read as zeros, which ``from_data`` then rebuilds;</span>
-        <span class="c1"># rejecting it keeps the octets as captured inside the parent (#1404).</span>
+        <span class="c1"># NOTE: Rejected rather than read as zeros, which ``from_data`` would</span>
+        <span class="c1"># rebuild, so the parent keeps the octets as captured (#1404).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">TCP_MIN_HEADER_LEN</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
-            <span class="c1"># NOTE: the octets after an End of Option List option are kept as</span>
-            <span class="c1"># read, so that :meth:`make` rebuilds the option area -- and the</span>
-            <span class="c1"># Data Offset computed from it -- at its original length. They are</span>
-            <span class="c1"># sliced from the octets, as IPv4 does, since a schema :meth:`make`</span>
-            <span class="c1"># built holds them in ``options`` and no ``padding`` (#2769).</span>
+            <span class="c1"># NOTE: Post-EOOL octets are kept so ``make`` rebuilds the parsed Data Offset;</span>
+            <span class="c1"># sliced as IPv4 does, since a built schema keeps them in ``options`` (#2769).</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
             <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
@@ -1272,18 +1254,8 @@
 <span class="sd">           :exc:`ValueError` rather than being accepted (:issue:`758`).</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: the connection control flags are resolved *before* the options are</span>
-        <span class="c1"># built, because option makers reached from ``_make_tcp_options`` read</span>
-        <span class="c1"># :attr:`self._flags` -- ``_make_mptcp_join`` branches on it to pick between</span>
-        <span class="c1"># the three MP_JOIN layouts of :rfc:`8684` section 3.2 (figure 5 for SYN,</span>
-        <span class="c1"># figure 6 for SYN/ACK, figure 7 for ACK). Resolving them afterwards would</span>
-        <span class="c1"># raise ``AttributeError: 'TCP' object has no attribute '_flags'`` on a fresh</span>
-        <span class="c1"># instance, and on an instance that had already parsed a segment would build</span>
-        <span class="c1"># the option from *that* segment's flags: packing an MP_JOIN-ACK segment from</span>
-        <span class="c1"># a parsed MP_JOIN-SYN instance would emit the 12-octet SYN option and drop</span>
-        <span class="c1"># the caller's 20-octet HMAC. Initialising ``_flags`` to zero would not fix</span>
-        <span class="c1"># that: it leaves the stale read and turns the fresh case into a spurious</span>
-        <span class="c1"># ``invalid flags combination``.</span>
+        <span class="c1"># NOTE: Flags come first: ``_make_mptcp_join`` picks the MP_JOIN layout from</span>
+        <span class="c1"># ``self._flags``, which a fresh instance lacks and a parsed one holds stale.</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">'cwr'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">cwr</span><span class="p">),</span>
             <span class="s1">'ece'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ece</span><span class="p">),</span>
@@ -1295,17 +1267,8 @@
             <span class="s1">'fin'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fin</span><span class="p">),</span>
         <span class="p">}</span>  <span class="c1"># type: Schema_Flags</span>
 
-        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``.</span>
-        <span class="c1"># :func:`typing.cast` is a runtime no-op, so the accumulator would stay the</span>
-        <span class="c1"># plain :class:`int` ``0`` whenever no flag is set, and ``Enum_Flags.SYN in</span>
-        <span class="c1"># self._flags`` would raise ``TypeError: argument of type 'int' is not a</span>
-        <span class="c1"># container or iterable`` instead of reaching ``_make_mptcp_join``'s own</span>
-        <span class="c1"># ``ProtocolError: ... invalid flags combination``. :class:`Enum_Flags` is an</span>
-        <span class="c1"># ``aenum.IntFlag``, so ``Enum_Flags(0)`` is a valid flagless member that</span>
-        <span class="c1"># compares equal to ``0`` and ORs as usual. :meth:`read` seeds itself the same</span>
-        <span class="c1"># way, rather than relying on ``mptcp_data_selector`` rejecting a flagless</span>
-        <span class="c1"># MP_JOIN before ``_read_mptcp_join`` runs, which would leave the ``TypeError``</span>
-        <span class="c1"># avoided only by a guard in another file.</span>
+        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``: with no flag</span>
+        <span class="c1"># set a plain ``int`` stays, and ``in`` on it raises TypeError.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1556,9 +1519,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid option: </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> holds no kind octet'</span><span class="p">)</span>
-                    <span class="c1"># NOTE: Resolved as the kind of a ``(code, arguments)`` pair</span>
-                    <span class="c1"># is, so a kind no ``Option`` member holds, such as 255,</span>
-                    <span class="c1"># comes back as its code rather than raising (#2708).</span>
+                    <span class="c1"># NOTE: Resolved like a ``(code, arguments)`` pair's kind, so a kind</span>
+                    <span class="c1"># no ``Option`` member holds, such as 255, stays its code (#2708).</span>
                     <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Enum_Option</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'option kind'</span><span class="p">)</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_Option | bytes</span>
                     <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1599,9 +1561,8 @@
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
 
-        <span class="c1"># NOTE: ``padding`` belongs after an End of Option List option; with</span>
-        <span class="c1"># that gone -- e.g. options edited after parsing -- it is dropped, and</span>
-        <span class="c1"># the Data Offset is computed from the options alone.</span>
+        <span class="c1"># NOTE: ``padding`` belongs after EOOL; with that gone, e.g. options edited after</span>
+        <span class="c1"># parsing, it is dropped and the Data Offset counts the options alone.</span>
         <span class="k">if</span> <span class="n">padding</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span>
             <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
             <span class="n">total_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
@@ -3521,10 +3482,8 @@
         <span class="k">if</span> <span class="n">seconds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'TCP: invalid [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] timeout: </span><span class="si">{</span><span class="n">timeout</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: a parsed (or requested) unit that the value no longer fits in --</span>
-        <span class="c1"># e.g. a parsed seconds option edited past 15 bits, or a minutes option</span>
-        <span class="c1"># edited to a value that is not a whole number of minutes -- falls back</span>
-        <span class="c1"># to the size-based choice, as when no unit is given at all.</span>
+        <span class="c1"># NOTE: A parsed or requested unit the value does not fit (seconds past 15 bits, or</span>
+        <span class="c1"># minutes not whole) falls back to the size-based choice, as with no unit given.</span>
         <span class="n">fits_seconds</span> <span class="o">=</span> <span class="n">seconds</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">15</span>
         <span class="k">if</span> <span class="n">granularity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">granularity</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fits_seconds</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">granularity</span> <span class="ow">and</span> <span class="n">seconds</span> <span class="o">%</span> <span class="mi">60</span><span class="p">):</span>
             <span class="n">granularity</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">fits_seconds</span>
@@ -3616,14 +3575,8 @@
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">schema</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="c1"># NOTE: ``Schema_MPTCP.subtype`` is not a packable field (see the</span>
-        <span class="c1"># comment on :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`), so</span>
-        <span class="c1"># the makers above only put ``subtype`` into ``test``, the bitfield they</span>
-        <span class="c1"># actually pack. Unpacking sets it from</span>
-        <span class="c1"># :meth:`~pcapkit.protocols.transport.tcp.schema._MPTCP.post_process`;</span>
-        <span class="c1"># this is the same assignment for the construction path, so a schema</span>
-        <span class="c1"># built via ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])`` has</span>
-        <span class="c1"># ``.subtype`` set just like one built by parsing bytes.</span>
+        <span class="c1"># NOTE: ``Schema_MPTCP.subtype`` is no field (see the NOTE on ``MPTCP``), so it is</span>
+        <span class="c1"># set here, as ``_MPTCP.post_process`` sets it on unpacking.</span>
         <span class="n">schema</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">subtype_val</span>
         <span class="k">return</span> <span class="n">schema</span></div>
 
@@ -3653,18 +3606,8 @@
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="c1"># NOTE: The length is sized from what the schema actually writes, not</span>
-        <span class="c1"># from ``data``'s own width (#2272). ``Schema_MPTCPUnknown`` always packs</span>
-        <span class="c1"># three octets of header -- ``kind``, ``length`` and the subtype/flags</span>
-        <span class="c1"># octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as</span>
-        <span class="c1"># its body, so the option is never shorter than 3 octets -- the smallest</span>
-        <span class="c1"># Multipath TCP option :rfc:`8684` section 3 permits. A plain</span>
-        <span class="c1"># ``2 + len(data)`` would declare 2 for ``data=b''`` while those three</span>
-        <span class="c1"># octets are packed anyway, and the segment could not be read back:</span>
-        <span class="c1"># ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which would</span>
-        <span class="c1"># go negative and raise ``ProtocolError: Field data resolved to a</span>
-        <span class="c1"># negative length``. For every non-empty ``data`` the two expressions</span>
-        <span class="c1"># agree, so only the empty case tells them apart.</span>
+        <span class="c1"># NOTE: Sized from what the schema writes (#2272): three octets, the third taking</span>
+        <span class="c1"># ``data[0]``, then ``data[1:]``; ``2 + len(data)`` would not read back for ``b''``.</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPUnknown</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>
@@ -3868,14 +3811,8 @@
 
         <span class="k">return</span> <span class="n">Schema_MPTCPDSS</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9:</span>
-            <span class="c1"># 4 for ``Kind``/``Length``/subtype/flags, then the Data ACK (4, or</span>
-            <span class="c1"># 8 with ``a``) when ``A`` is set, and the mapping when ``M`` is set</span>
-            <span class="c1"># -- the DSN (4, or 8 with ``m``), the 4-octet Subflow Sequence</span>
-            <span class="c1"># Number, the 2-octet Data-Level Length and, only if checksums were</span>
-            <span class="c1"># negotiated, the 2-octet Checksum. ``a`` and ``m`` widen a field</span>
-            <span class="c1"># only when it is present, so a stray flag on the wire still packs</span>
-            <span class="c1"># back without changing the length.</span>
+            <span class="c1"># NOTE: RFC 8684, section 3.3, figure 9. ``a`` and ``m`` widen only a present</span>
+            <span class="c1"># field (the Data ACK if ``A``, the DSN if ``M``), so a stray flag packs back.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="p">((</span><span class="mi">8</span> <span class="k">if</span> <span class="n">flag_a</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag_A</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
             <span class="o">+</span> <span class="p">((</span><span class="mi">8</span> <span class="k">if</span> <span class="n">flag_m</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag_M</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
@@ -3948,12 +3885,8 @@
             <span class="n">port</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">port</span>
             <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: Through ``parse_ip_address`` because the option length below</span>
-            <span class="c1"># is derived from the family here, ahead of the schema, so a bare</span>
-            <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` into an</span>
-            <span class="c1"># ``IPv4Address`` that the schema's own guard can no longer tell from</span>
-            <span class="c1"># a real address: ``addr=True`` would reach</span>
-            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with an IPv4 length.</span>
+            <span class="c1"># NOTE: ``parse_ip_address`` refuses a ``bool``; ``ipaddress.ip_address`` would</span>
+            <span class="c1"># make it ``0.0.0.1`` before the schema's own guard sees it.</span>
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>
@@ -4016,12 +3949,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s1"> addr_id'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPRemoveAddress</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: :rfc:`8684` section 3.4.2 figure 13 gives ``Length = 3 + n``,</span>
-            <span class="c1"># where the 3 is ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved</span>
-            <span class="c1"># (1) and each of the *n* Address IDs is one further octet. A constant</span>
-            <span class="c1"># length would be right for only one list length. This is the field</span>
-            <span class="c1"># ``MPTCPRemoveAddress.addr_id`` sizes itself from, as</span>
-            <span class="c1"># ``pkt['length'] - 3``, so it governs the parse as well as the pack.</span>
+            <span class="c1"># NOTE: RFC 8684, section 3.4.2, figure 13: ``Length = 3 + n``, one octet per</span>
+            <span class="c1"># Address ID, which ``MPTCPRemoveAddress.addr_id`` also sizes itself from.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr_id_list</span><span class="p">),</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -4057,9 +3986,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``backup`` must be carried over, or reconstructing a parsed</span>
-            <span class="c1"># MP_PRIO would always write ``B=0``; the ``B`` flag is the entire</span>
-            <span class="c1"># payload of this option.</span>
+            <span class="c1"># NOTE: ``backup`` is carried over, or rebuilding a parsed MP_PRIO would write</span>
+            <span class="c1"># ``B=0``; the ``B`` flag is this option's entire payload.</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
@@ -4067,17 +3995,8 @@
         <span class="n">where</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'[OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPPriority</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: :rfc:`8684` section 3.3.8 figure 11 gives MP_PRIO as **3**</span>
-            <span class="c1"># octets -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B`` (1)</span>
-            <span class="c1"># -- with no Address ID at all: section 5 records that this document</span>
-            <span class="c1"># "specifies the removal of the AddrID field [RFC6824] in the MP_PRIO</span>
-            <span class="c1"># option". The 4-octet form is :rfc:`6824`'s, which this schema and</span>
-            <span class="c1"># ``_read_mptcp_prio`` both still accept, so the length has to follow</span>
-            <span class="c1"># whether an Address ID was actually given rather than being a</span>
-            <span class="c1"># constant. ``MPTCPPriority.addr_id`` is conditional on</span>
-            <span class="c1"># ``pkt['length'] == 4``, so a constant ``4`` would satisfy its own</span>
-            <span class="c1"># predicate and pack a phantom all-zero Address ID octet when</span>
-            <span class="c1"># ``addr_id=None``.</span>
+            <span class="c1"># NOTE: MP_PRIO is 3 octets (RFC 8684, section 3.3.8, figure 11); RFC 6824's</span>
+            <span class="c1"># 4 with an Address ID is still accepted, so ``addr_id`` decides the length.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">3</span> <span class="k">if</span> <span class="n">addr_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -4451,20 +4370,16 @@
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">backup</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">backup</span>
             <span class="n">addr_id</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr_id</span>
-            <span class="c1"># NOTE: ``hmac`` must be carried over here, or reconstructing a</span>
-            <span class="c1"># parsed MP_JOIN-SYN/ACK would substitute the ``bytes(8)`` default</span>
-            <span class="c1"># for the truncated HMAC that was on the wire.</span>
+            <span class="c1"># NOTE: ``hmac`` is carried over, or rebuilding a parsed MP_JOIN-SYN/ACK would</span>
+            <span class="c1"># substitute the ``bytes(8)`` default for the truncated HMAC on the wire.</span>
             <span class="n">hmac</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">hmac</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
         <span class="n">where</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'[OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinSYNACK</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the</span>
-            <span class="c1"># SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +</span>
-            <span class="c1"># ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random</span>
-            <span class="c1"># number (32 bits, 4). The SYN form of figure 5 is 12, since it</span>
-            <span class="c1"># carries a 4-octet token where this one carries an 8-octet HMAC.</span>
+            <span class="c1"># NOTE: RFC 8684, section 3.2, figure 6: 4 octets, the truncated</span>
+            <span class="c1"># HMAC (8) and the random number (4).</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -4507,10 +4422,8 @@
         <span class="n">where</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'[OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">subtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
         <span class="k">return</span> <span class="n">Schema_MPTCPJoinACK</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">),</span>
-            <span class="c1"># NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the</span>
-            <span class="c1"># ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,</span>
-            <span class="c1"># being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,</span>
-            <span class="c1"># 20). ``_read_join_ack``'s guard requires the same 24.</span>
+            <span class="c1"># NOTE: :rfc:`8684` section 3.2 figure 7: 4 octets, then the full 20-octet HMAC;</span>
+            <span class="c1"># ``_read_join_ack``'s guard requires the same 24.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
             <span class="n">test</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'subtype'</span><span class="p">:</span> <span class="n">subtype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -4883,7 +4796,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -4909,7 +4822,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

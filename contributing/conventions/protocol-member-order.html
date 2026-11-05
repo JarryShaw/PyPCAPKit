@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -582,9 +582,10 @@
 <code class="docutils literal notranslate"><span class="pre">register_xxx()</span></code>.</p></li>
 <li><p><strong>Data models.</strong> Every dunder name: <code class="docutils literal notranslate"><span class="pre">__index__</span></code>, <code class="docutils literal notranslate"><span class="pre">__length_hint__</span></code>,
 <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__new__</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and any other.</p></li>
-<li><p><strong>Utilities.</strong> Everything else, mostly private methods, in the subgroups below. Every private helper, including <code class="docutils literal notranslate"><span class="pre">_check_*</span></code>, sits here, never before <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code>.</p>
+<li><p><strong>Utilities.</strong> Everything else, mostly private methods, in the subgroups below.
+Every private helper, including <code class="docutils literal notranslate"><span class="pre">_check_*</span></code>, sits here, after <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code>.</p>
 <ol class="loweralpha simple">
-<li><p><strong>Data.</strong> <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code> comes first in the group, before everything else.</p></li>
+<li><p><strong>Data.</strong> <code class="docutils literal notranslate"><span class="pre">_make_data()</span></code> comes first.</p></li>
 <li><p><strong>Helpers.</strong> The helpers that <code class="docutils literal notranslate"><span class="pre">read()</span></code> or <code class="docutils literal notranslate"><span class="pre">make()</span></code> call, one helper at a
 time, in the order <code class="docutils literal notranslate"><span class="pre">read()</span></code> or <code class="docutils literal notranslate"><span class="pre">make()</span></code> first uses them. “Uses” means a
 direct reference in the body of <code class="docutils literal notranslate"><span class="pre">read()</span></code> or <code class="docutils literal notranslate"><span class="pre">make()</span></code>. Helpers reached only

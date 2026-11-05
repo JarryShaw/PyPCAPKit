@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -573,15 +573,12 @@
 <span class="sd">     - :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`</span>
 <span class="sd">     - :rfc:`2661`</span>
 
-<span class="sd">Only L2TPv2 is implemented. What the family is expected to grow is set out below,</span>
-<span class="sd">so that the base's shape is not guessed at later.</span>
+<span class="sd">Only L2TPv2 is implemented; the missing members are set out below.</span>
 
-<span class="sd">The base deliberately carries **no header parsing at all**, in the way</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ip.protocol.IP` carries none for its family. That is</span>
-<span class="sd">not tidiness: the versions genuinely do not share a header. All that is common</span>
-<span class="sd">across them is the *first 16-bit word carrying a version nibble at bits 12-15*;</span>
-<span class="sd">everything after it differs, so a base that parsed further would be assuming one</span>
-<span class="sd">version's layout for all of them.</span>
+<span class="sd">The base carries **no header parsing**, as</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ip.protocol.IP` carries none for its family: the</span>
+<span class="sd">versions share only a version nibble at bits 12-15 of the first 16-bit word, so a</span>
+<span class="sd">base that parsed further would impose one version's layout on all of them.</span>
 
 <span class="sd">Unimplemented Members</span>
 <span class="sd">---------------------</span>
@@ -589,15 +586,13 @@
 <span class="sd">**L2TPv3** [:rfc:`3931`] has a different session header and a different control</span>
 <span class="sd">message header from v2, and is reachable two ways -- over UDP port 1701 like v2</span>
 <span class="sd">(§4.1.2), and directly over IP as **protocol number 115** (§4.1.1: *"L2TPv3 over</span>
-<span class="sd">IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second</span>
-<span class="sd">route is why</span>
+<span class="sd">IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). So</span>
 <span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
-<span class="sd">leaves 115 unbound: the binding waits on an ``L2TPv3`` class, not on a</span>
-<span class="sd">different framing decision. It also means 115 names v3 alone: v2's</span>
+<span class="sd">leaves 115 unbound until an ``L2TPv3`` class exists; v2's</span>
 <span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol.__index__` is its UDP port.</span>
 
-<span class="sd">Binding :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` at 115 instead does not</span>
-<span class="sd">work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3</span>
+<span class="sd">Binding :class:`~pcapkit.protocols.link.l2tpv2.protocol.L2TPv2` at 115 does not</span>
+<span class="sd">work (:issue:`548`). Over IP the v3</span>
 <span class="sd">session header is, in :rfc:`3931` §4.1.1.1's own words, *"free of any restrictions</span>
 <span class="sd">imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw</span>
 <span class="sd">32-bit Session ID and carries **no version nibble at all**, so there is nothing a</span>
@@ -607,9 +602,7 @@
 <span class="sd">for a v3-over-IP datagram: a complete header assembled out of a Session ID and</span>
 <span class="sd">the first two octets of the PPP frame behind it. The check refuses that datagram</span>
 <span class="sd">only because its Session ID does not put ``2`` in the nibble; one that does</span>
-<span class="sd">parses as v2. 115 is a missing</span>
-<span class="sd">*class*, not a missing registration, and until that class exists an undissected</span>
-<span class="sd">payload is the honest answer.</span>
+<span class="sd">parses as v2.</span>
 
 <span class="sd">**L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*</span>
 <span class="sd">an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves</span>
@@ -633,19 +626,17 @@
 <span class="sd">:meth:`L2TP.from_data &lt;pcapkit.protocols.link.l2tp.protocol.L2TP.from_data&gt;` is handed.</span>
 <span class="sd">:meth:`L2TPv2.read &lt;pcapkit.protocols.link.l2tpv2.protocol.L2TPv2.read&gt;` **checks** the</span>
 <span class="sd">nibble as well and refuses anything other than ``2``. That keeps v3 traffic on</span>
-<span class="sd">port 1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture</span>
-<span class="sd">traffic rather than a corner case) from being reported as v2 with a tunnel and</span>
-<span class="sd">session ID read out of v3's Control Connection ID.</span>
+<span class="sd">port 1701, which :rfc:`3931` §4.7.2 shares, from being reported as v2 with a</span>
+<span class="sd">tunnel and session ID read out of v3's Control Connection ID.</span>
 
 <span class="sd">UDP port 1701 binds L2TPv2 itself, the only member.</span>
 <span class="sd">:meth:`~pcapkit.protocols.link.l2tp.protocol.L2TP._member_of_version` is where a further</span>
 <span class="sd">member goes, and binding the port to this base through a hook making the same</span>
 <span class="sd">switch, as :meth:`IGMP._dispatch &lt;pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch&gt;`</span>
-<span class="sd">does for IP protocol 2, needs no new registry. L2TP is the easier case beside</span>
+<span class="sd">does for IP protocol 2, needs no new registry: unlike</span>
 <span class="sd">:class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose</span>
 <span class="sd">:meth:`~pcapkit.protocols.application.http.protocol.HTTP._guess_version` has to *infer*</span>
-<span class="sd">the version because HTTP's wire format carries no version field, whereas L2TP</span>
-<span class="sd">states its version explicitly in those four bits. The switch belongs on the</span>
+<span class="sd">the version, L2TP states it in those four bits. The switch belongs on the</span>
 <span class="sd">**UDP** path only: over IP protocol 115 there is no nibble to switch on, per the</span>
 <span class="sd">§4.1.1.1 note above.</span>
 
@@ -1227,7 +1218,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1253,7 +1244,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

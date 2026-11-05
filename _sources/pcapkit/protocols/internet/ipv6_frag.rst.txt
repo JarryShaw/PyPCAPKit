@@ -7,8 +7,7 @@ IPv6-Frag - Fragment Header for IPv6
 :mod:`pcapkit.protocols.internet.ipv6_frag.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag`
 only, which implements the extractor for Fragment Header for
-IPv6 (IPv6-Frag) [*]_, whose structure is described as
-below:
+IPv6 (IPv6-Frag) [*]_, whose structure is:
 
 ======= ========= ========================= =======================
 Octets      Bits        Name                    Description

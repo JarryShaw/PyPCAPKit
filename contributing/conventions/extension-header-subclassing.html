@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -582,7 +582,7 @@ that is usable as a standalone protocol in its own right inherits both
 <a class="reference internal" href="../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> (or
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec" title="pcapkit.protocols.internet.ipsec.protocol.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>), as
 <a class="reference internal" href="../../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> does.</p>
-<p>The family as it stands:</p>
+<p>The family:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -626,8 +626,8 @@ naming it satisfies the convention, and it is the right second base for a header
 standalone form is an IPsec one.</p>
 <section id="the-shared-registry-trap">
 <h2>The Shared-Registry Trap<a class="headerlink" href="#the-shared-registry-trap" title="Link to this heading">¶</a></h2>
-<p><strong>Stated before the criterion itself, because it is the part a future reader will get
-wrong.</strong> The obvious way to decide whether a header is “usable as a standalone protocol”
+<p><strong>This is the part most often got wrong</strong>, so it comes before the criterion. The
+obvious way to decide whether a header is “usable as a standalone protocol”
 is to ask what the library’s own dispatch already allows. That answer is useless, and
 measurably so:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
@@ -724,8 +724,8 @@ on: ESP’s own data model reports <code class="docutils literal notranslate"><s
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>
 ends the ordinary way one iteration later – not because ESP lacks a parser, which
 it has, but because it cannot hand the walk a successor.</p>
-<p>The full reasoning, including how ESP’s terminal case differs from 253/254’s, is
-written where the code is and is deliberately not restated at length here: see
+<p>The full reasoning, including how ESP’s terminal case differs from 253/254’s, lives
+with the code: see
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer" title="pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._import_next_layer</span></code></a>
 and the module docstring of <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#module-pcapkit.protocols.internet.ipv6_ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.protocol</span></code></a>.</p>
 <div class="admonition caution">

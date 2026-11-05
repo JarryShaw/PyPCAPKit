@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, timestamp conversion, p..." />
-<meta name="description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, timestamp conversion, p..." />
+<meta property="og:description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with, and imports nothing from pcapkit outside itself (see Choosing Between utilities and corekit): user-refined exceptions and w..." />
+<meta name="description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with, and imports nothing from pcapkit outside itself (see Choosing Between utilities and corekit): user-refined exceptions and w..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Exceptions" href="exceptions.html"><link rel="prev" title="Checksums" href="../protocols/misc/checksum.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -571,14 +571,18 @@
           <section id="module-pcapkit.utilities">
 <span id="module-utilities"></span><h1>Module Utilities<a class="headerlink" href="#module-pcapkit.utilities" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> holds the cross-cutting services <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is
-built with: user-refined exceptions and warnings, logging, the tunable limits
-of <a class="reference internal" href="config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a>, a compatibility layer, timestamp
-conversion, pickle reductions, the
-<a class="reference internal" href="contextvars.html#module-pcapkit.utilities.contextvars" title="pcapkit.utilities.contextvars"><code class="xref py py-mod docutils literal notranslate"><span class="pre">context</span> <span class="pre">variables</span></code></a> its modules share,
-<a class="reference internal" href="importlib.html#module-pcapkit.utilities.importlib" title="pcapkit.utilities.importlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lazy</span> <span class="pre">imports</span></code></a> for a package’s exports, an
-<a class="reference internal" href="inspect.html#module-pcapkit.utilities.inspect" title="pcapkit.utilities.inspect"><code class="xref py py-mod docutils literal notranslate"><span class="pre">abstract-class</span> <span class="pre">check</span></code></a> that reads no interpreter
-flag, and wrappers around third-party libraries. It imports nothing from <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
-outside itself; see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
+built with, and imports nothing from <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> outside itself (see
+<a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>):</p>
+<ul class="simple">
+<li><p>user-refined exceptions and warnings, and logging;</p></li>
+<li><p>the tunable limits of <a class="reference internal" href="config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a>;</p></li>
+<li><p>a compatibility layer, timestamp conversion and pickle reductions;</p></li>
+<li><p>the <a class="reference internal" href="contextvars.html#module-pcapkit.utilities.contextvars" title="pcapkit.utilities.contextvars"><code class="xref py py-mod docutils literal notranslate"><span class="pre">context</span> <span class="pre">variables</span></code></a> its modules
+share, <a class="reference internal" href="importlib.html#module-pcapkit.utilities.importlib" title="pcapkit.utilities.importlib"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lazy</span> <span class="pre">imports</span></code></a> for a package’s
+exports, and an <a class="reference internal" href="inspect.html#module-pcapkit.utilities.inspect" title="pcapkit.utilities.inspect"><code class="xref py py-mod docutils literal notranslate"><span class="pre">abstract-class</span> <span class="pre">check</span></code></a> that
+reads no interpreter flag;</p></li>
+<li><p>wrappers around third-party libraries.</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a><ul>
@@ -632,8 +636,8 @@ outside itself; see <a class="reference internal" href="../../contributing/conve
 </div>
 <section id="module-pcapkit.utilities.compat">
 <span id="version-compatibility"></span><h2>Version Compatibility<a class="headerlink" href="#module-pcapkit.utilities.compat" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> further provides a compatibility layer for the
-following objects and functions:</p>
+<p><a class="reference internal" href="#module-pcapkit.utilities.compat" title="pcapkit.utilities.compat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code></a> covers these objects on interpreters older than
+the version listed:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -685,9 +689,9 @@ following objects and functions:</p>
 </table>
 </div>
 <p>It also exports <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>,
-<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> as the
-standard library has them, with no fallback, since 1.5.0 requires Python 3.8 or
-later (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
+<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a>
+straight from the standard library, since 1.5.0 requires Python 3.8 or later
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.compat.final">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">final</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/typing.html#final"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.final" title="Link to this definition">¶</a></dt>

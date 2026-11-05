@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/reassembly.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly only, which is an abstract base class for all reassembly classes, based on algorithms described in RFC 791 and RFC 815, that implement d..." />
-<meta name="description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly only, which is an abstract base class for all reassembly classes, based on algorithms described in RFC 791 and RFC 815, that implement d..." />
+<meta property="og:description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly, the abstract base class of a custom reassembly class, and ReassemblyBase, which it and the built-in IP, TCP and DTLS reassembly classes..." />
+<meta name="description" content="pcapkit.foundation.reassembly.reassembly contains Reassembly, the abstract base class of a custom reassembly class, and ReassemblyBase, which it and the built-in IP, TCP and DTLS reassembly classes..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IP Datagram Reassembly" href="ip/index.html"><link rel="prev" title="Packets Reassembly" href="index.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -571,10 +571,11 @@
           <section id="module-pcapkit.foundation.reassembly.reassembly">
 <span id="reassembly-base-class"></span><h1>Reassembly Base Class<a class="headerlink" href="#module-pcapkit.foundation.reassembly.reassembly" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.reassembly</span></code></a> contains
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> only,
-which is an abstract base class for all reassembly classes,
-based on algorithms described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> and <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>,
-that implement datagram reassembly of IP and TCP packets.</p>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>, the abstract base
+class of a custom reassembly class, and
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>, which it and
+the built-in IP, TCP and DTLS reassembly classes derive from. The algorithms
+follow <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> and <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_DT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_IT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_BT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">Info</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="Link to this definition">¶</a></dt>
@@ -630,8 +631,7 @@ older than it on the capture’s clock is abandoned.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For more information on customisation and extension, please
-refer to <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
+<p>For customisation and extension, see <a class="reference internal" href="../../../ext.html"><span class="doc">Customisation &amp; Extensions</span></a>.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.name">
@@ -639,8 +639,7 @@ refer to <a class="reference internal" href="../../../ext.html"><span class="doc
 <dd><p>Protocol name of current reassembly class.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is also available as a class variable. Its
-value can be set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -650,8 +649,7 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.reas
 <dd><p>Protocol of current reassembly class.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is also available as a class variable. Its
-value can be set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a> class attribute.</p>
+<p>Also a class variable, set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -661,11 +659,10 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.reas
 <dd><p>Mapping of protocol names to reassembly classes.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This property is only available as a class variable, since it is
-defined on <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a>. It reads
+<p>A class variable only, defined on <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a>. It is not
+per-class: it reads
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__reassembly__" title="pcapkit.foundation.extraction.Extractor.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>, the
-single table every reassembly registration lands in, so it is not a
-per-class mapping.</p>
+one table every reassembly registration lands in.</p>
 </div>
 </dd></dl>
 
@@ -1042,9 +1039,9 @@ default</p></li>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">ReassemblyMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#ReassemblyMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
 <p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>.</p>
-<p>This meta class is used to generate necessary attributes for the
-<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> class. It can be useful to reduce unnecessary
-registry calls and simplify the customisation process.</p>
+<p>It provides <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.name" title="pcapkit.foundation.reassembly.reassembly.Reassembly.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Reassembly.name</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Reassembly.protocol</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.registry" title="pcapkit.foundation.reassembly.reassembly.Reassembly.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Reassembly.registry</span></code></a> as class properties, the first two read from
+<code class="docutils literal notranslate"><span class="pre">__protocol_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__protocol_type__</span></code> where a subclass sets them.</p>
 </dd></dl>
 
 </section>

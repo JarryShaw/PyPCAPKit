@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -604,14 +604,13 @@ see
 in <strong>aligned PER</strong> (ALIGNED PACKED ENCODING RULES, <abbr>APER</abbr>). There is no
 header to read and no framing to resolve: the whole payload is the encoding,
 and none of its structure is visible until an ASN.1 decoder has run over it.</p>
-<p>Decoding therefore needs the optional <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> dependency
-(<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[NGAP]</span></code>). <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> imports and works without
-it; an NGAP payload simply degrades to the opaque payload path, exactly as an
-unregistered PPID would, because
+<p>Decoding needs the optional <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> dependency
+(<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[NGAP]</span></code>). Without it <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> still works, and an
+NGAP payload falls back to <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> as an
+unregistered PPID’s does:
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>, which
 <a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP" title="pcapkit.protocols.transport.sctp.protocol.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> inherits, is wrapped in
-<a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and falls back to
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
+<a class="reference internal" href="../../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.protocol.NGAP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.protocol.</span></span><span class="sig-name descname"><span class="pre">NGAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/ngap/protocol.html#NGAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.protocol.NGAP" title="Link to this definition">¶</a></dt>
@@ -660,7 +659,9 @@ four-octet prefix common to every PDU rather than this PDU’s size.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> is not installed, if the payload is
     not a well formed aligned PER <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>, or if octets follow
-    the <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>.</p>
+    the <code class="docutils literal notranslate"><span class="pre">NGAP-PDU</span></code>. A whole octet left over is not part of it: an
+    SCTP DATA chunk holds one whole message (RFC 9260 §1.3, §3.3.1),
+    and APER pads to the octet (X.691 (02/2021) §11.1.4-5).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -803,13 +804,11 @@ objects <strong>structurally</strong>, by ASN.1 shape rather than by procedure:<
 </tbody>
 </table>
 </div>
-<p>That is a deliberate trade. Every elementary procedure and protocol IE
-works on the day it is decoded, and a new 3GPP release needs no
-code change here; what is given up is per-IE typing, so an IE’s value is
-reported in the specification’s own shape rather than as a
-<a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>-specific model. The fields worth reading at a glance – the PDU
-kind, procedure code, criticality, message type name and the IE list – are
-surfaced as first-class fields on
+<p>That is a deliberate trade: every elementary procedure and protocol IE the
+decoder knows is converted, and a new 3GPP release needs no code change here;
+what is given up is per-IE typing, so an IE’s value keeps the specification’s
+own shape rather than a <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>-specific model. The PDU kind, procedure
+code, criticality, message type name and IE list are first-class fields on
 <a class="reference internal" href="#pcapkit.protocols.application.ngap.data.NGAP" title="pcapkit.protocols.application.ngap.data.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> regardless.</p>
 </section>
 <section id="known-limitations">

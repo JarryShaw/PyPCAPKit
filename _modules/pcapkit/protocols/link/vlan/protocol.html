@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -576,27 +576,21 @@
 <span class="sd">  2          16   ``c_tag.type``            Protocol (Internet Layer)</span>
 <span class="sd">======= ========= ====================== =============================</span>
 
-<span class="sd">The two tags carry an **identical** tag control information layout -- the same</span>
-<span class="sd">3-bit PCP, 1-bit DEI and 12-bit VID -- and are told apart solely by the tag</span>
-<span class="sd">protocol identifier (TPID) that selected them, ``0x8100`` for the customer tag</span>
-<span class="sd">against ``0x88A8`` for the service tag. That TPID is not part of either tag: it</span>
-<span class="sd">is the EtherType field of whatever encapsulates the tag, so both classes read the</span>
-<span class="sd">same four octets and share every byte of parsing and construction code.</span>
+<span class="sd">Both tags have the same tag control information layout -- 3-bit PCP, 1-bit</span>
+<span class="sd">DEI, 12-bit VID -- and differ only in the tag protocol identifier (TPID) that</span>
+<span class="sd">selected them. The TPID is the EtherType field of the encapsulating header, not</span>
+<span class="sd">part of the tag, so both classes share all parsing and construction code.</span>
 
-<span class="sd">They are nonetheless distinct classes rather than one class bound at two</span>
-<span class="sd">EtherTypes, because 802.1ad *stacks* them: a Q-in-Q frame carries a service tag</span>
-<span class="sd">whose next EtherType is ``0x8100``, selecting a customer tag in turn. Both tags</span>
-<span class="sd">therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.Protocol.info_name`</span>
-<span class="sd">-- ``s_tag`` against ``c_tag`` -- is what keeps them apart in the parsed</span>
-<span class="sd">:class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes</span>
-<span class="sd">would nest one ``c_tag`` inside another, leaving nothing in the output to say</span>
-<span class="sd">which of the two was the service tag.</span>
+<span class="sd">They are still distinct classes because 802.1ad *stacks* them: a Q-in-Q frame</span>
+<span class="sd">carries a service tag whose next EtherType, ``0x8100``, selects a customer tag.</span>
+<span class="sd">:attr:`~pcapkit.protocols.protocol.Protocol.info_name` -- ``s_tag`` against</span>
+<span class="sd">``c_tag`` -- keeps the two apart in the parsed</span>
+<span class="sd">:class:`~pcapkit.corekit.infoclass.Info`; one class bound at both EtherTypes</span>
+<span class="sd">would nest one ``c_tag`` inside another.</span>
 
-<span class="sd">Each tag has a package of its own because a package holds one protocol class,</span>
-<span class="sd">named after it, with only the framework bases in :mod:`pcapkit.protocols.protocol`</span>
-<span class="sd">exempt (:issue:`2529`). This base declares no</span>
-<span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own -- it is</span>
-<span class="sd">abstract and nothing dispatches to it -- so its ``__index__`` raises.</span>
+<span class="sd">Each tag has a package of its own, since a package holds one protocol class,</span>
+<span class="sd">named after it (:issue:`2529`). This base is abstract and nothing dispatches to</span>
+<span class="sd">it, so its :meth:`~pcapkit.protocols.protocol.Protocol.__index__` raises.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q</span>
 
@@ -1208,7 +1202,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1234,7 +1228,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

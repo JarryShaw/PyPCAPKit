@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.sctp
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`SCTP_Chunk <pcapkit.vendor.sctp.chunk.Chunk>`
@@ -24,8 +20,7 @@ SCTP Chunk Types
 
 .. module:: pcapkit.vendor.sctp.chunk
 
-This module contains the vendor crawler for **SCTP Chunk Types**,
-which is automatically generating :class:`pcapkit.const.sctp.chunk.Chunk`.
+Generates :class:`pcapkit.const.sctp.chunk.Chunk`.
 
 .. autoclass:: pcapkit.vendor.sctp.chunk.Chunk
    :members: FLAG, LINK
@@ -36,8 +31,7 @@ SCTP Chunk Parameter Types
 
 .. module:: pcapkit.vendor.sctp.parameter
 
-This module contains the vendor crawler for **SCTP Chunk Parameter Types**,
-which is automatically generating :class:`pcapkit.const.sctp.parameter.Parameter`.
+Generates :class:`pcapkit.const.sctp.parameter.Parameter`.
 
 .. autoclass:: pcapkit.vendor.sctp.parameter.Parameter
    :members: FLAG, LINK
@@ -48,8 +42,7 @@ SCTP Error Cause Codes
 
 .. module:: pcapkit.vendor.sctp.cause_code
 
-This module contains the vendor crawler for **SCTP Error Cause Codes**,
-which is automatically generating :class:`pcapkit.const.sctp.cause_code.CauseCode`.
+Generates :class:`pcapkit.const.sctp.cause_code.CauseCode`.
 
 .. autoclass:: pcapkit.vendor.sctp.cause_code.CauseCode
    :members: FLAG, LINK
@@ -60,8 +53,7 @@ SCTP Payload Protocol Identifiers
 
 .. module:: pcapkit.vendor.sctp.payload_protocol_identifier
 
-This module contains the vendor crawler for **SCTP Payload Protocol Identifiers**,
-which is automatically generating :class:`pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
+Generates :class:`pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`.
 
 .. autoclass:: pcapkit.vendor.sctp.payload_protocol_identifier.PayloadProtocolIdentifier
    :members: FLAG, LINK

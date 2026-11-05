@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.ftp
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ftp.protocol.FTP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`FTP_Command <pcapkit.const.ftp.command.Command>`
@@ -20,20 +16,16 @@ FTP Command
 
 .. module:: pcapkit.const.ftp.command
 
-This module contains the constant enumeration for **FTP Command**, which is
-automatically generated from :class:`pcapkit.vendor.ftp.command.Command`, plus the
-companion :class:`~pcapkit.const.ftp.command.FEATCode` enumeration it also declares --
-the ``FEAT`` response keywords the ``FEAT code`` column of the same IANA registry
-names, c.f., :rfc:`5797#section-3`.
+Generated from :class:`pcapkit.vendor.ftp.command.Command`, with the companion
+:class:`~pcapkit.const.ftp.command.FEATCode`: the ``FEAT`` response keywords that
+the same IANA registry's ``FEAT code`` column names (:rfc:`5797#section-3`).
 
 .. versionchanged:: 1.5.0
 
    Neither :meth:`Command._missing_ <pcapkit.const.ftp.command.Command._missing_>` nor
    :meth:`Command.get() <pcapkit.const.ftp.command.Command.get>` mints a member
-   (:issue:`860`): only IANA-registered values are members, and a new one is created
-   through :meth:`~pcapkit.const.ftp.command.Command.register`, which can supply the
-   ``feat``, ``desc``, ``type`` and ``conf`` a bare wire command word carries none of. A
-   minted member had each of them at its default.
+   (:issue:`860`): only IANA-registered values are members, and
+   :meth:`~pcapkit.const.ftp.command.Command.register` adds a new one.
 
    :meth:`Command.get() <pcapkit.const.ftp.command.Command.get>` refuses a
    non-:class:`str` ``key`` with :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with
@@ -67,8 +59,7 @@ FTP Server Return Code
 
 .. module:: pcapkit.const.ftp.return_code
 
-This module contains the constant enumeration for **FTP Server Return Code**,
-which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.ReturnCode`.
+Generated from :class:`pcapkit.vendor.ftp.return_code.ReturnCode`.
 
 .. autoclass:: pcapkit.const.ftp.return_code.ReturnCode
    :members:

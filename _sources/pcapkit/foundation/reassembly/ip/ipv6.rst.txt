@@ -4,9 +4,8 @@ IPv6 Datagram Reassembly
 .. module:: pcapkit.foundation.reassembly.ipv6
 
 :mod:`pcapkit.foundation.reassembly.ipv6` contains
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6`
-only, which reconstructs fragmented IPv6 packets back to
-origin. Please refer to :doc:`ip` for more information.
+:class:`~pcapkit.foundation.reassembly.ipv6.IPv6` only, which reconstructs
+fragmented IPv6 packets back to origin; see :doc:`ip`.
 
 .. autoclass:: pcapkit.foundation.reassembly.ipv6.IPv6
    :no-members:

@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.sslv2
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`SSLv2_HandshakeType <pcapkit.vendor.sslv2.handshake_type.HandshakeType>`
@@ -22,8 +18,7 @@ SSLv2 Handshake Message Type
 
 .. module:: pcapkit.vendor.sslv2.handshake_type
 
-This module contains the vendor crawler for **SSLv2 Handshake Message Type**,
-which is automatically generating :class:`pcapkit.const.sslv2.handshake_type.HandshakeType`.
+Generates :class:`pcapkit.const.sslv2.handshake_type.HandshakeType`.
 
 .. note::
 
@@ -41,8 +36,7 @@ SSLv2 Protocol Version
 
 .. module:: pcapkit.vendor.sslv2.version
 
-This module contains the vendor crawler for **SSLv2 Protocol Version**,
-which is automatically generating :class:`pcapkit.const.sslv2.version.Version`.
+Generates :class:`pcapkit.const.sslv2.version.Version`.
 
 .. note::
 

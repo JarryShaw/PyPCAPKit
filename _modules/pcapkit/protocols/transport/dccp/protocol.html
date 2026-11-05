@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -559,11 +559,9 @@
 
 <span class="sd">.. module:: pcapkit.protocols.transport.dccp.protocol</span>
 
-<span class="sd">:mod:`pcapkit.protocols.transport.dccp.protocol` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` only,</span>
-<span class="sd">which implements the extractor for Datagram Congestion</span>
-<span class="sd">Control Protocol (DCCP) [*]_, whose generic header is</span>
-<span class="sd">described as below:</span>
+<span class="sd">:mod:`pcapkit.protocols.transport.dccp.protocol` holds</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP`, the extractor for the</span>
+<span class="sd">Datagram Congestion Control Protocol (DCCP) [*]_, whose generic header is:</span>
 
 <span class="sd">======= ========= ========================= =======================================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
@@ -687,9 +685,8 @@
 <span class="sd">    &lt;pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__&gt;`, so the application data</span>
 <span class="sd">    area is :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless one is.</span>
 
-<span class="sd">    This class supports parsing of the following DCCP options, which are</span>
-<span class="sd">    directly mapped to the :class:`pcapkit.const.dccp.option.Option`</span>
-<span class="sd">    enumeration:</span>
+<span class="sd">    The DCCP options it parses, by :class:`pcapkit.const.dccp.option.Option`</span>
+<span class="sd">    type:</span>
 
 <span class="sd">    .. list-table::</span>
 <span class="sd">       :header-rows: 1</span>
@@ -771,7 +768,7 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,</span>
-    <span class="c1">#: and whether a bare :class:`int` is a valid key there too, as for</span>
+    <span class="c1">#: and whether a bare :class:`int` is valid too, as for</span>
     <span class="c1">#: :attr:`TCP.__proto_key__ &lt;pcapkit.protocols.transport.tcp.protocol.TCP.__proto_key__&gt;`.</span>
     <span class="n">__proto_key__</span><span class="p">:</span> <span class="s1">'ClassVar[tuple[Type[EnumRegistry], bool]]'</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_AppType</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -2554,7 +2551,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -2580,7 +2577,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

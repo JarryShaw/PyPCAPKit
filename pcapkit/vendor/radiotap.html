@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/radiotap.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of Radiotap implementations, each scraping radiotap.org*. Available vendor crawlers include:,, Radiotap_FieldType, Field Types,, Radiotap_Flags, Flags,, Rad..." />
-<meta name="description" content="This module contains all vendor crawlers of Radiotap implementations, each scraping radiotap.org*. Available vendor crawlers include:,, Radiotap_FieldType, Field Types,, Radiotap_Flags, Flags,, Rad..." />
+<meta property="og:description" content="Each scrapes radiotap.org*.,, Radiotap_FieldType, Field Types,, Radiotap_Flags, Flags,, Radiotap_ChannelFlags, Channel Flags,, Radiotap_RXFlags, RX Flags,, Radiotap_TXFlags, TX Flags,, Radiotap_MCS..." />
+<meta name="description" content="Each scrapes radiotap.org*.,, Radiotap_FieldType, Field Types,, Radiotap_Flags, Flags,, Radiotap_ChannelFlags, Channel Flags,, Radiotap_RXFlags, RX Flags,, Radiotap_TXFlags, TX Flags,, Radiotap_MCS..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="VLAN Vendor Crawlers" href="vlan.html"><link rel="prev" title="Linux-Specific Vendor Crawlers" href="linux.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,7 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.radiotap">
 <span id="radiotap-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap" title="pcapkit.protocols.link.radiotap.protocol.Radiotap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.radiotap" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap" title="pcapkit.protocols.link.radiotap.protocol.Radiotap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code></a> implementations, each scraping
-radiotap.org <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>. Available vendor crawlers include:</p>
+<p>Each scrapes radiotap.org <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -644,8 +642,7 @@ radiotap.org <a class="footnote-reference brackets" href="#id2" id="id1" role="d
 </div>
 <section id="module-pcapkit.vendor.radiotap.field_type">
 <span id="field-types"></span><h2>Field Types<a class="headerlink" href="#module-pcapkit.vendor.radiotap.field_type" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap Field Types</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.field_type.FieldType" title="pcapkit.const.radiotap.field_type.FieldType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.field_type.FieldType</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.field_type.FieldType" title="pcapkit.const.radiotap.field_type.FieldType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.field_type.FieldType</span></code></a>.</p>
 <p>The registry is radiotap.org’s <em>Defined Fields</em> table, scraped from
 <a class="reference internal" href="#pcapkit.vendor.radiotap.field_type.FieldType.LINK" title="pcapkit.vendor.radiotap.field_type.FieldType.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>, and RTS retries and data
 retries from its <em>Unofficially Used Fields</em> table, scraped from
@@ -689,8 +686,7 @@ the field, the systems that generate it and those that parse it.</p>
 </section>
 <section id="module-pcapkit.vendor.radiotap.flags">
 <span id="flags"></span><h2>Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.flags.Flags" title="pcapkit.const.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.flags.Flags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.flags.Flags" title="pcapkit.const.radiotap.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.flags.Flags</span></code></a>.</p>
 <p>Each flag crawler scrapes the table on its field’s page, and subclasses this one.
 A row whose mask sets one bit is a member; a row that sets more bits, or that
 radiotap.org marks reserved or unused, is not, and its bits stay undefined; nor
@@ -737,8 +733,7 @@ which Linux leaves unnamed.</p>
 </section>
 <section id="module-pcapkit.vendor.radiotap.channel_flags">
 <span id="channel-flags"></span><h2>Channel Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.channel_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap Channel Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.channel_flags.ChannelFlags" title="pcapkit.const.radiotap.channel_flags.ChannelFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.channel_flags.ChannelFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.channel_flags.ChannelFlags" title="pcapkit.const.radiotap.channel_flags.ChannelFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.channel_flags.ChannelFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.channel_flags.ChannelFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.channel_flags.</span></span><span class="sig-name descname"><span class="pre">ChannelFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/channel_flags.html#ChannelFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.channel_flags.ChannelFlags" title="Link to this definition">¶</a></dt>
@@ -775,8 +770,7 @@ Wireshark’s <code class="docutils literal notranslate"><span class="pre">packe
 </section>
 <section id="module-pcapkit.vendor.radiotap.rx_flags">
 <span id="rx-flags"></span><h2>RX Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.rx_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap RX Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.rx_flags.RXFlags" title="pcapkit.const.radiotap.rx_flags.RXFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.rx_flags.RXFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.rx_flags.RXFlags" title="pcapkit.const.radiotap.rx_flags.RXFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.rx_flags.RXFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.rx_flags.RXFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.rx_flags.</span></span><span class="sig-name descname"><span class="pre">RXFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/rx_flags.html#RXFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.rx_flags.RXFlags" title="Link to this definition">¶</a></dt>
@@ -811,8 +805,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.tx_flags">
 <span id="tx-flags"></span><h2>TX Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.tx_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap TX Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.tx_flags.TXFlags" title="pcapkit.const.radiotap.tx_flags.TXFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.tx_flags.TXFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.tx_flags.TXFlags" title="pcapkit.const.radiotap.tx_flags.TXFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.tx_flags.TXFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.tx_flags.TXFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.tx_flags.</span></span><span class="sig-name descname"><span class="pre">TXFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/tx_flags.html#TXFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.tx_flags.TXFlags" title="Link to this definition">¶</a></dt>
@@ -847,8 +840,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.mcs_known">
 <span id="mcs-known-flags"></span><h2>MCS Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.mcs_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap MCS Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.mcs_known.MCSKnown" title="pcapkit.const.radiotap.mcs_known.MCSKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.mcs_known.MCSKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.mcs_known.MCSKnown" title="pcapkit.const.radiotap.mcs_known.MCSKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.mcs_known.MCSKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.mcs_known.MCSKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.mcs_known.</span></span><span class="sig-name descname"><span class="pre">MCSKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/mcs_known.html#MCSKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.mcs_known.MCSKnown" title="Link to this definition">¶</a></dt>
@@ -885,8 +877,7 @@ Wireshark’s <code class="docutils literal notranslate"><span class="pre">packe
 </section>
 <section id="module-pcapkit.vendor.radiotap.ampdu_flags">
 <span id="a-mpdu-status-flags"></span><h2>A-MPDU Status Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.ampdu_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap A-MPDU Status Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.ampdu_flags.AMPDUFlags" title="pcapkit.const.radiotap.ampdu_flags.AMPDUFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.ampdu_flags.AMPDUFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.ampdu_flags.AMPDUFlags" title="pcapkit.const.radiotap.ampdu_flags.AMPDUFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.ampdu_flags.AMPDUFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.ampdu_flags.AMPDUFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.ampdu_flags.</span></span><span class="sig-name descname"><span class="pre">AMPDUFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/ampdu_flags.html#AMPDUFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.ampdu_flags.AMPDUFlags" title="Link to this definition">¶</a></dt>
@@ -921,8 +912,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.vht_known">
 <span id="vht-known-flags"></span><h2>VHT Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.vht_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap VHT Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_known.VHTKnown" title="pcapkit.const.radiotap.vht_known.VHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_known.VHTKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_known.VHTKnown" title="pcapkit.const.radiotap.vht_known.VHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_known.VHTKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.vht_known.VHTKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.vht_known.</span></span><span class="sig-name descname"><span class="pre">VHTKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/vht_known.html#VHTKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.vht_known.VHTKnown" title="Link to this definition">¶</a></dt>
@@ -957,8 +947,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.vht_flags">
 <span id="vht-flags"></span><h2>VHT Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.vht_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap VHT Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_flags.VHTFlags" title="pcapkit.const.radiotap.vht_flags.VHTFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_flags.VHTFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_flags.VHTFlags" title="pcapkit.const.radiotap.vht_flags.VHTFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_flags.VHTFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.vht_flags.VHTFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.vht_flags.</span></span><span class="sig-name descname"><span class="pre">VHTFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/vht_flags.html#VHTFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.vht_flags.VHTFlags" title="Link to this definition">¶</a></dt>
@@ -993,8 +982,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.vht_coding">
 <span id="vht-coding-flags"></span><h2>VHT Coding Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.vht_coding" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap VHT Coding Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_coding.VHTCoding" title="pcapkit.const.radiotap.vht_coding.VHTCoding"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_coding.VHTCoding</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.vht_coding.VHTCoding" title="pcapkit.const.radiotap.vht_coding.VHTCoding"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.vht_coding.VHTCoding</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.vht_coding.VHTCoding">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.vht_coding.</span></span><span class="sig-name descname"><span class="pre">VHTCoding</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/vht_coding.html#VHTCoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.vht_coding.VHTCoding" title="Link to this definition">¶</a></dt>
@@ -1029,8 +1017,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.timestamp_flags">
 <span id="timestamp-flags"></span><h2>Timestamp Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.timestamp_flags" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap Timestamp Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.timestamp_flags.TimestampFlags" title="pcapkit.const.radiotap.timestamp_flags.TimestampFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.timestamp_flags.TimestampFlags</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.timestamp_flags.TimestampFlags" title="pcapkit.const.radiotap.timestamp_flags.TimestampFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.timestamp_flags.TimestampFlags</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.timestamp_flags.</span></span><span class="sig-name descname"><span class="pre">TimestampFlags</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/timestamp_flags.html#TimestampFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.timestamp_flags.TimestampFlags" title="Link to this definition">¶</a></dt>
@@ -1065,8 +1052,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.he_data1_known">
 <span id="he-data1-known-flags"></span><h2>HE Data1 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_data1_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap HE Data1 Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data1_known.HEData1Known" title="pcapkit.const.radiotap.he_data1_known.HEData1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data1_known.HEData1Known</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data1_known.HEData1Known" title="pcapkit.const.radiotap.he_data1_known.HEData1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data1_known.HEData1Known</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data1_known.HEData1Known">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_data1_known.</span></span><span class="sig-name descname"><span class="pre">HEData1Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_data1_known.html#HEData1Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data1_known.HEData1Known" title="Link to this definition">¶</a></dt>
@@ -1107,8 +1093,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.he_data2_known">
 <span id="he-data2-known-flags"></span><h2>HE Data2 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_data2_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap HE Data2 Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data2_known.HEData2Known" title="pcapkit.const.radiotap.he_data2_known.HEData2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data2_known.HEData2Known</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_data2_known.HEData2Known" title="pcapkit.const.radiotap.he_data2_known.HEData2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_data2_known.HEData2Known</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_data2_known.HEData2Known">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_data2_known.</span></span><span class="sig-name descname"><span class="pre">HEData2Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_data2_known.html#HEData2Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_data2_known.HEData2Known" title="Link to this definition">¶</a></dt>
@@ -1149,8 +1134,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.he_mu_flags1_known">
 <span id="he-mu-flags1-known-flags"></span><h2>HE-MU Flags1 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_flags1_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap HE-MU Flags1 Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags1_known.HEMUFlags1Known</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_mu_flags1_known.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags1Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_mu_flags1_known.html#HEMUFlags1Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags1_known.HEMUFlags1Known" title="Link to this definition">¶</a></dt>
@@ -1191,8 +1175,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.he_mu_flags2_known">
 <span id="he-mu-flags2-known-flags"></span><h2>HE-MU Flags2 Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_flags2_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap HE-MU Flags2 Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_flags2_known.HEMUFlags2Known</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_mu_flags2_known.</span></span><span class="sig-name descname"><span class="pre">HEMUFlags2Known</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_mu_flags2_known.html#HEMUFlags2Known"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_flags2_known.HEMUFlags2Known" title="Link to this definition">¶</a></dt>
@@ -1233,8 +1216,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.he_mu_other_user_known">
 <span id="he-mu-other-user-known-flags"></span><h2>HE-MU-other-user Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.he_mu_other_user_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap HE-MU-other-user Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown" title="pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown" title="pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.he_mu_other_user_known.HEMUOtherUserKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.he_mu_other_user_known.</span></span><span class="sig-name descname"><span class="pre">HEMUOtherUserKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/he_mu_other_user_known.html#HEMUOtherUserKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.he_mu_other_user_known.HEMUOtherUserKnown" title="Link to this definition">¶</a></dt>
@@ -1270,8 +1252,7 @@ bits, so each member takes radiotap.org’s wording.</p>
 </section>
 <section id="module-pcapkit.vendor.radiotap.lsig_data1">
 <span id="l-sig-data1-flags"></span><h2>L-SIG Data1 Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.lsig_data1" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap L-SIG Data1 Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.lsig_data1.LSIGData1" title="pcapkit.const.radiotap.lsig_data1.LSIGData1"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.lsig_data1.LSIGData1</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.lsig_data1.LSIGData1" title="pcapkit.const.radiotap.lsig_data1.LSIGData1"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.lsig_data1.LSIGData1</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.lsig_data1.LSIGData1">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.lsig_data1.</span></span><span class="sig-name descname"><span class="pre">LSIGData1</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/lsig_data1.html#LSIGData1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.lsig_data1.LSIGData1" title="Link to this definition">¶</a></dt>
@@ -1306,8 +1287,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.s1g_known">
 <span id="s1g-known-flags"></span><h2>S1G Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.s1g_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap S1G Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.s1g_known.S1GKnown" title="pcapkit.const.radiotap.s1g_known.S1GKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.s1g_known.S1GKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.s1g_known.S1GKnown" title="pcapkit.const.radiotap.s1g_known.S1GKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.s1g_known.S1GKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.s1g_known.S1GKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.s1g_known.</span></span><span class="sig-name descname"><span class="pre">S1GKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/s1g_known.html#S1GKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.s1g_known.S1GKnown" title="Link to this definition">¶</a></dt>
@@ -1342,8 +1322,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.usig_common_known">
 <span id="u-sig-common-known-flags"></span><h2>U-SIG Common Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.usig_common_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap U-SIG Common Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.usig_common_known.USIGCommonKnown" title="pcapkit.const.radiotap.usig_common_known.USIGCommonKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.usig_common_known.USIGCommonKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.usig_common_known.USIGCommonKnown" title="pcapkit.const.radiotap.usig_common_known.USIGCommonKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.usig_common_known.USIGCommonKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.usig_common_known.</span></span><span class="sig-name descname"><span class="pre">USIGCommonKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/usig_common_known.html#USIGCommonKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.usig_common_known.USIGCommonKnown" title="Link to this definition">¶</a></dt>
@@ -1384,8 +1363,7 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.radiotap.eht_known">
 <span id="eht-known-flags"></span><h2>EHT Known Flags<a class="headerlink" href="#module-pcapkit.vendor.radiotap.eht_known" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Radiotap EHT Known Flags</strong>,
-which is automatically generating <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.eht_known.EHTKnown" title="pcapkit.const.radiotap.eht_known.EHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.eht_known.EHTKnown</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/radiotap.html#pcapkit.const.radiotap.eht_known.EHTKnown" title="pcapkit.const.radiotap.eht_known.EHTKnown"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.radiotap.eht_known.EHTKnown</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.radiotap.eht_known.EHTKnown">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.radiotap.eht_known.</span></span><span class="sig-name descname"><span class="pre">EHTKnown</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/radiotap/eht_known.html#EHTKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.radiotap.eht_known.EHTKnown" title="Link to this definition">¶</a></dt>

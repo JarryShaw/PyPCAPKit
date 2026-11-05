@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -583,7 +583,14 @@ links to them rather than restating them.</p>
 <section id="actors-and-roles">
 <h2>Actors and Roles<a class="headerlink" href="#actors-and-roles" title="Link to this heading">¶</a></h2>
 <pre  class="mermaid">
-        flowchart LR
+        ---
+config:
+  flowchart:
+    curve: monotoneX
+    nodeSpacing: 10
+    wrappingWidth: 150
+---
+flowchart TD
     OWNER[&quot;Owner&lt;br/&gt;rules and merges&quot;]
     GH[&quot;GitHub&lt;br/&gt;issues, pull requests, labels&quot;]
     COORD[&quot;Coordinator&lt;br/&gt;main thread&quot;]
@@ -602,6 +609,8 @@ links to them rather than restating them.</p>
     GH --&gt;|&quot;push and pull request events&quot;| CI
     CI --&gt;|&quot;check runs, reports&quot;| GH
     COORD --&gt;|&quot;checkpoint&quot;| NOTES
+    CI ~~~ COORD
+    WORKER ~~~ NOTES
     </pre><div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -704,7 +713,14 @@ runs, pruned worktrees</p></td>
 </table>
 </div>
 <pre  class="mermaid">
-        sequenceDiagram
+        ---
+config:
+  sequence:
+    wrap: true
+    width: 110
+    actorMargin: 15
+---
+sequenceDiagram
     participant S as Scheduler
     participant C as Coordinator
     participant G as GitHub
@@ -814,7 +830,7 @@ heading just written before anything is retried.</p>
 are the moves the loops make.</p>
 <pre  class="mermaid">
         stateDiagram-v2
-    direction LR
+    direction TB
     state &quot;pending&quot; as P
     state &quot;wip&quot; as W
     state &quot;blocked&quot; as B
@@ -838,7 +854,7 @@ and closed by hand where the keyword did not.</p>
 reporting the pull request as ready.</p>
 <pre  class="mermaid">
         stateDiagram-v2
-    direction LR
+    direction TB
     state &quot;review: pending&quot; as RP
     state &quot;review: running&quot; as RR
     state &quot;review: good-to-go&quot; as RG
@@ -861,7 +877,7 @@ reporting the pull request as ready.</p>
     D --&gt; W[&quot;Worker: one commit in its own worktree,&lt;br/&gt;new tests, a report&quot;]
     W --&gt; V{&quot;Coordinator verifies the diff and the tests;&lt;br/&gt;do the new tests fail with pcapkit/ reverted?&quot;}
     V --&gt;|no| W
-    V --&gt;|yes| K{&quot;Pure tests or docs,&lt;br/&gt;no call for the owner's eyes?&quot;}
+    V --&gt;|yes| K{&quot;Only docs or tests,&lt;br/&gt;no change to code or behaviour?&quot;}
     K --&gt;|yes| MAIN[&quot;Push straight to main,&lt;br/&gt;close the issue&quot;]
     K --&gt;|no| Q{&quot;Actions queue under 20?&quot;}
     Q --&gt;|no| H[&quot;Hold, and say so on the issue&quot;] --&gt; Q
@@ -896,6 +912,11 @@ it covers, the one thing most worth knowing – with the review’s detail as an
 appendix. A verdict superseded by a new head is said to be, so a stale one never
 reads as current. A reviewer’s correction of an earlier number is itself a claim,
 re-derived before it is relayed.</p></li>
+<li><p><strong>The verdict and its label go up</strong> once the review is in and Project tests, Lint
+and deploy-pages are green, never held for a slow non-blocking leg. Once that leg
+finishes its failing test ids are re-read, since an experimental or KTLO leg ends
+green whatever its tests did. A merge wave supersedes every GraalPy run on
+<code class="docutils literal notranslate"><span class="pre">main</span></code>, so a pull request’s GraalPy leg may be the only full run there is.</p></li>
 <li><p><strong>A green, conflict-free pull request can still break</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>: after a merge
 wave, merge it into the current <code class="docutils literal notranslate"><span class="pre">main</span></code> in a scratch tree and run the affected
 tests before calling it ready.</p></li>
@@ -910,7 +931,14 @@ pull request already merged or a concern genuinely apart from it.</p></li>
 request it concerns – never asked in the session – and the work that does not depend
 on it carries on.</p>
 <pre  class="mermaid">
-        sequenceDiagram
+        ---
+config:
+  sequence:
+    wrap: true
+    width: 110
+    actorMargin: 15
+---
+sequenceDiagram
     participant C as Coordinator
     participant G as Issue or pull request
     participant O as Owner
@@ -994,11 +1022,18 @@ supersede its run, which it skips or stops rather than cancels (<a class="refere
 job already failed. A non-blocking leg’s red check is a defect as well: such a leg may
 only warn and end green, so a step that can lose its runner is contained – capped,
 bounded, timed out – rather than excused.</p>
-<p><strong>What may go straight to</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>. A fix for a red <code class="docutils literal notranslate"><span class="pre">main</span></code>, whatever it touches. A
-change that is purely tests or docs, unless it needs the owner’s eyes – a
-conventions-page rule, the changelog, or a page that codifies process, like this one,
-goes through a pull request. Code always gets a pull request. Before a direct push,
-check that no open pull request edits the same hunk.</p>
+<p><strong>What may go straight to</strong> <code class="docutils literal notranslate"><span class="pre">main</span></code>. A change that only touches docs – pages,
+docstrings and comments, under <code class="file docutils literal notranslate"><span class="pre">pcapkit/</span></code> as anywhere else, conventions and
+process pages included – or only tests needs no issue and no pull request, and is
+pushed straight to <code class="docutils literal notranslate"><span class="pre">main</span></code>. A pull request is for a change to code or behaviour. A fix
+for a red <code class="docutils literal notranslate"><span class="pre">main</span></code> goes direct, whatever it touches. Every direct push waits out the
+release freeze below, and first checks that no open pull request edits the same hunk.</p>
+<p><strong>The release freeze.</strong> Once the push that moves <code class="docutils literal notranslate"><span class="pre">__version__</span></code> lands, nothing else
+does until Create Release’s <code class="docutils literal notranslate"><span class="pre">github</span></code> job is waiting on approval (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>),
+and that commit’s own Unit Tests run is never cancelled. A push mid-chain makes
+<code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skip, since its verdict no longer covers the checkout, and the
+release silently never starts. A squash merge whose body was cleared can be amended
+only before the chain reaches Vendor Update: after the tag, an amend orphans the tag.</p>
 </section>
 <section id="throttles-and-guards">
 <h2>Throttles and Guards<a class="headerlink" href="#throttles-and-guards" title="Link to this heading">¶</a></h2>
@@ -1108,6 +1143,11 @@ instruction to falsify rather than bless; the pull request’s own diff as the t
 under review, not <code class="docutils literal notranslate"><span class="pre">main</span></code>; the time budget; and a report that opens and closes with
 <code class="docutils literal notranslate"><span class="pre">GOOD</span> <span class="pre">TO</span> <span class="pre">GO</span></code> or <code class="docutils literal notranslate"><span class="pre">NEEDS</span> <span class="pre">CHANGES</span></code> at the sha, with each claim marked confirmed,
 refuted or <code class="docutils literal notranslate"><span class="pre">UNVERIFIED</span></code>.</p>
+<p><strong>Everything the automation writes is as short as it can be while staying accurate</strong>
+– docs, docstrings, comments, pull request and issue bodies, verdicts and Discussion
+posts alike, under the rules on <a class="reference internal" href="conventions/documentation.html#documentation"><span class="std std-ref">Writing the Documentation</span></a>. A flow in the docs is drawn as a
+vertical diagram in preference to prose, as that page’s <em>Mermaid for Flows</em> section
+sets out, and <a class="reference internal" href="pep.html"><span class="doc">Help Wanted</span></a> lists the work that remains without grouping it into waves.</p>
 <p><strong>Treat an agent’s report of an action as a finding.</strong> Workers have posted, filed
 issues and spawned agents despite their briefs; what such a worker did is verified and
 owned by the coordinator, and the next brief repeats the rule.</p>
@@ -1256,37 +1296,47 @@ of every tick is an empty issue board with every open pull request at
 <tr class="row-odd"><td><p>A KTLO leg read green over new failures</p></td>
 <td><p>failing-id diff (<a class="reference internal" href="#board-sweep">Board Sweep</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A bare label <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> removed every label</p></td>
+<tr class="row-even"><td><p>A slow GraalPy leg hid a <code class="docutils literal notranslate"><span class="pre">main</span></code> defect</p></td>
+<td><p>failing ids re-read once it finishes (<a class="reference internal" href="#the-pull-request-lifecycle">The Pull Request Lifecycle</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>A bare label <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> removed every label</p></td>
 <td><p>removal by name (<a class="reference internal" href="#board-sweep">Board Sweep</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Closes</span> <span class="pre">#a,</span> <span class="pre">#b</span></code> closed one issue</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Closes</span> <span class="pre">#a,</span> <span class="pre">#b</span></code> closed one issue</p></td>
 <td><p>one keyword per issue (<a class="reference internal" href="#label-state-machines">Label State Machines</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A green pull request failed against the current <code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<tr class="row-odd"><td><p>A green pull request failed against the current <code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
 <td><p>scratch merge (<a class="reference internal" href="#the-pull-request-lifecycle">The Pull Request Lifecycle</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>Cancelled board-sync runs left the board stale</p></td>
+<tr class="row-even"><td><p>Cancelled board-sync runs left the board stale</p></td>
 <td><p>never-cancelled list (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A test filled the disk</p></td>
+<tr class="row-odd"><td><p>A push during the release chain stops the release</p></td>
+<td><p>release freeze (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and the Main-CI Watch</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>A squash merge landed with its body cleared</p></td>
+<td><p>amended before Vendor Update, never after the tag (<a class="reference internal" href="#the-post-merge-routine-and-the-main-ci-watch">The Post-Merge Routine and
+the Main-CI Watch</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>A test filled the disk</p></td>
 <td><p>file-size cap (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>Bulk issue filing flooded the Actions queue</p></td>
+<tr class="row-even"><td><p>Bulk issue filing flooded the Actions queue</p></td>
 <td><p>queue thresholds (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A held dispatch was dropped</p></td>
+<tr class="row-odd"><td><p>A held dispatch was dropped</p></td>
 <td><p>commented holds (<a class="reference internal" href="#throttles-and-guards">Throttles and Guards</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A prune selected live agents’ trees</p></td>
+<tr class="row-even"><td><p>A prune selected live agents’ trees</p></td>
 <td><p>keep rules (<a class="reference internal" href="#worktree-cleanup">Worktree Cleanup</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A measurement read the shared checkout</p></td>
+<tr class="row-odd"><td><p>A measurement read the shared checkout</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pcapkit.__file__</span></code> assert (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p>A cross-review likely ran on the author’s model</p></td>
+<tr class="row-even"><td><p>A cross-review likely ran on the author’s model</p></td>
 <td><p>another model (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p>A worker posted and spawned on its own</p></td>
+<tr class="row-odd"><td><p>A worker posted and spawned on its own</p></td>
 <td><p>the worker rules (<a class="reference internal" href="#briefs">Briefs</a>)</p></td>
 </tr>
 </tbody>
@@ -1719,7 +1769,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1745,7 +1795,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

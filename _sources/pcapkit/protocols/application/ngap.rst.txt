@@ -42,14 +42,13 @@ in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). There is no
 header to read and no framing to resolve: the whole payload is the encoding,
 and none of its structure is visible until an ASN.1 decoder has run over it.
 
-Decoding therefore needs the optional |pycrate|_ dependency
-(``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without
-it; an NGAP payload simply degrades to the opaque payload path, exactly as an
-unregistered PPID would, because
+Decoding needs the optional |pycrate|_ dependency
+(``pip install pypcapkit[NGAP]``). Without it :mod:`pcapkit` still works, and an
+NGAP payload falls back to :class:`~pcapkit.protocols.misc.raw.protocol.Raw` as an
+unregistered PPID's does:
 :meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which
 :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` inherits, is wrapped in
-:func:`~pcapkit.corekit.decorators.beholder` and falls back to
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+:func:`~pcapkit.corekit.decorators.beholder`.
 
 .. autoclass:: pcapkit.protocols.application.ngap.protocol.NGAP
    :no-members:
@@ -92,13 +91,11 @@ ASN.1 / |pycrate|_ shape                                    :mod:`pcapkit` model
 ``INTEGER``, ``OCTET STRING``, ``ENUMERATED``, ``BOOLEAN``  kept as :obj:`int`, :obj:`bytes`, :obj:`str`, :obj:`bool`
 ==========================================================  ==========================================================
 
-That is a deliberate trade. Every elementary procedure and protocol IE
-works on the day it is decoded, and a new 3GPP release needs no
-code change here; what is given up is per-IE typing, so an IE's value is
-reported in the specification's own shape rather than as a
-:mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU
-kind, procedure code, criticality, message type name and the IE list -- are
-surfaced as first-class fields on
+That is a deliberate trade: every elementary procedure and protocol IE the
+decoder knows is converted, and a new 3GPP release needs no code change here;
+what is given up is per-IE typing, so an IE's value keeps the specification's
+own shape rather than a :mod:`pcapkit`-specific model. The PDU kind, procedure
+code, criticality, message type name and IE list are first-class fields on
 :class:`~pcapkit.protocols.application.ngap.data.NGAP` regardless.
 
 Known Limitations

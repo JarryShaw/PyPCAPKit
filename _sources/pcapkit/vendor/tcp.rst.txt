@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.tcp
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`TCP_Checksum <pcapkit.vendor.tcp.checksum.Checksum>`
@@ -24,8 +20,7 @@ TCP Checksum
 
 .. module:: pcapkit.vendor.tcp.checksum
 
-This module contains the vendor crawler for **TCP Checksum**,
-which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
+Generates :class:`pcapkit.const.tcp.checksum.Checksum`.
 
 .. autoclass:: pcapkit.vendor.tcp.checksum.Checksum
    :members: FLAG
@@ -36,8 +31,7 @@ Multipath TCP Options
 
 .. module:: pcapkit.vendor.tcp.mp_tcp_option
 
-This module contains the vendor crawler for **Multipath TCP options**,
-which is automatically generating :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
+Generates :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
 
 .. autoclass:: pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption
    :members: FLAG, LINK
@@ -48,8 +42,7 @@ TCP Option Kind Numbers
 
 .. module:: pcapkit.vendor.tcp.option
 
-This module contains the vendor crawler for **TCP Option Kind Numbers**,
-which is automatically generating :class:`pcapkit.const.tcp.option.Option`.
+Generates :class:`pcapkit.const.tcp.option.Option`.
 
 .. autoclass:: pcapkit.vendor.tcp.option.Option
    :members: FLAG, LINK
@@ -60,8 +53,7 @@ TCP Header Flags
 
 .. module:: pcapkit.vendor.tcp.flags
 
-This module contains the vendor crawler for **TCP Header Flags**,
-which is automatically generating :class:`pcapkit.const.tcp.flags.Flags`.
+Generates :class:`pcapkit.const.tcp.flags.Flags`.
 
 .. autoclass:: pcapkit.vendor.tcp.flags.Flags
    :members: FLAG, LINK

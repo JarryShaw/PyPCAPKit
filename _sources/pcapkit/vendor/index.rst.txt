@@ -4,22 +4,18 @@ Vendor Crawlers
 
 .. module:: pcapkit.vendor
 
-This module contains all web crawlers of :mod:`pcapkit`, which
-automatically generate the :mod:`pcapkit.const` module's constant
-enumerations.
-
-The crawlers need the ``vendor`` extra, ``pip install "pypcapkit[vendor]"``.
+The crawlers that generate :mod:`pcapkit.const`. They need the ``vendor`` extra,
+``pip install "pypcapkit[vendor]"``.
 
 .. versionchanged:: 1.5.0
 
-   Without ``requests`` or ``beautifulsoup4``, which the crawlers import at
-   module scope, importing this package succeeds and imports no crawler.
-   Reading any name in its ``__all__``, or
-   :class:`~pcapkit.vendor.default.Vendor`, then raises
-   :exc:`ModuleNotFoundError` naming the missing packages and the extra to
-   install (:issue:`1850`). Importing a crawler module directly, such as
+   Without ``requests`` or ``beautifulsoup4``, importing this package succeeds
+   but imports no crawler, where it used to raise. Reading a name in its
+   ``__all__``, or :class:`~pcapkit.vendor.default.Vendor`, raises
+   :exc:`ModuleNotFoundError` naming the missing packages and the extra
+   (:issue:`1850`). Importing a crawler module directly, such as
    :mod:`pcapkit.vendor.reg`, still raises the missing package's own
-   :exc:`ModuleNotFoundError`. Before, importing this package raised it.
+   :exc:`ModuleNotFoundError`.
 
 Crawler Implementations
 =======================
@@ -102,8 +98,7 @@ Command Line Tool
 
 .. module:: pcapkit.vendor.__main__
 
-:mod:`pcapkit.vendor.__main__` is a command line tool for updating
-constant enumerations.
+:program:`pcapkit-vendor` regenerates the constant enumerations.
 
 .. code-block::
 

@@ -2,10 +2,14 @@
 3rd-Party Support
 =================
 
-The adapters below are best effort (:issue:`1687`): they need not match the
-:doc:`builtin` adapters one to one, since protocol rules belong in the default
-engine only, so the same capture can reassemble or trace differently from one
-engine to the next. :doc:`../foundation/engines/index` tabulates the gaps.
+The adapters below are best effort (:issue:`1687`): protocol rules belong in the
+default engine only, so they need not match the :doc:`builtin` adapters one to
+one, and the same capture can reassemble or trace differently from one engine to
+the next. :doc:`../foundation/engines/index` tabulates the gaps.
+
+Each reassembly or flow tracing adapter returns the data its
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` for a frame it
+cannot use, except where a note below says it raises.
 
 Scapy Tools
 ===========
@@ -13,9 +17,6 @@ Scapy Tools
 .. module:: pcapkit.toolkit.scapy
 
 :mod:`pcapkit.toolkit.scapy` contains the adapters for the `Scapy`_ engine.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
 
 .. warning::
 
@@ -62,9 +63,6 @@ DPKT Tools
 .. module:: pcapkit.toolkit.dpkt
 
 :mod:`pcapkit.toolkit.dpkt` contains the adapters for the `DPKT`_ engine.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
 
 .. autofunction:: pcapkit.toolkit.dpkt.ipv4_reassembly
 
@@ -116,14 +114,11 @@ PyShark Tools
 .. module:: pcapkit.toolkit.pyshark
 
 :mod:`pcapkit.toolkit.pyshark` contains the adapters for the `PyShark`_ engine.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
 
 .. note::
 
-   Some :mod:`pcapkit` functions may not be available with the `PyShark`_ engine,
-   for lack of the corresponding `PyShark`_ functionality.
+   The `PyShark`_ engine supports no reassembly, so this module has a flow
+   tracing adapter only.
 
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
@@ -154,8 +149,7 @@ PyPCAP Tools
 .. note::
 
    `PyPCAP`_ performs no protocol dissection, so the reassembly and flow tracing
-   adapters below cannot be implemented. They are defined anyway, so that
-   calling one fails with an explanatory
+   adapters below exist only to raise an explanatory
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
    :exc:`ImportError`.
 
@@ -184,13 +178,11 @@ pcap-ct Tools
 .. note::
 
    `pcap-ct`_ is an independent reimplementation of the `PyPCAP`_ interface, so
-   this module is deliberately a sibling of :mod:`pcapkit.toolkit.pypcap` rather
-   than an alias of it: each engine names its own adapter, so a change made for
-   one cannot quietly alter the other.
+   this module is a sibling of :mod:`pcapkit.toolkit.pypcap` rather than an
+   alias of it: a change made for one engine cannot quietly alter the other.
 
    Like `PyPCAP`_ it performs no protocol dissection, so the reassembly and flow
-   tracing adapters below cannot be implemented. They are defined anyway, so
-   that calling one fails with an explanatory
+   tracing adapters below exist only to raise an explanatory
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than an
    :exc:`ImportError`.
 
@@ -215,9 +207,6 @@ PyPCAPFile Tools
 .. module:: pcapkit.toolkit.pypcapfile
 
 :mod:`pcapkit.toolkit.pypcapfile` contains the adapters for the `PyPCAPFile`_ engine.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
 
 .. note::
 

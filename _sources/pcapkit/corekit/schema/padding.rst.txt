@@ -5,10 +5,7 @@ Padding Arithmetic
 
 :mod:`pcapkit.corekit.schema.padding` counts the octets of padding that take a
 length to a boundary, for the padding fields, the schemas' ``length`` callbacks, the
-protocols' makers and the capture engines alike. It is one of the
-:mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not part of
-the header schema framework in :mod:`pcapkit.protocols.schema`; see
-:ref:`utilities-or-corekit`.
+protocols' makers and the capture engines alike.
 
 .. versionadded:: 1.6.0
 

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/ngap.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of NGAP implementations. Available vendor crawlers include:,, NGAP_ProcedureCode, NGAP Elementary Procedure Codes*,, NGAP_ProtocolIE, NGAP Protocol IE Ident..." />
-<meta name="description" content="This module contains all vendor crawlers of NGAP implementations. Available vendor crawlers include:,, NGAP_ProcedureCode, NGAP Elementary Procedure Codes*,, NGAP_ProtocolIE, NGAP Protocol IE Ident..." />
+<meta property="og:description" content=",, NGAP_ProcedureCode, NGAP Elementary Procedure Codes*,, NGAP_ProtocolIE, NGAP Protocol IE Identifiers †,,,, Each reads the assignment from pycrate ’s installed, compiled NGAP specification rather..." />
+<meta name="description" content=",, NGAP_ProcedureCode, NGAP Elementary Procedure Codes*,, NGAP_ProtocolIE, NGAP Protocol IE Identifiers †,,,, Each reads the assignment from pycrate ’s installed, compiled NGAP specification rather..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="OSPF Vendor Crawlers" href="ospf.html"><link rel="prev" title="HTTP Vendor Crawler" href="http.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -570,9 +570,6 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.vendor.ngap">
 <span id="ngap-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ngap" title="Link to this heading">¶</a></h1>
-<p>This module contains all vendor crawlers of
-<a class="reference internal" href="../protocols/application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> implementations. Available
-vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -585,14 +582,12 @@ vendor crawlers include:</p>
 </tbody>
 </table>
 </div>
-<p>Each sources the assignment from <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a>’s already-installed, compiled NGAP
-specification rather than fetching a network registry: 3GPP publishes TS 38.413
-as a PDF, with no registry kept in step with it that a crawler could fetch
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>).</p>
+<p>Each reads the assignment from <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a>’s installed, compiled NGAP specification
+rather than fetching a registry: 3GPP publishes TS 38.413 as a PDF, with no
+registry kept in step with it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>).</p>
 <section id="module-pcapkit.vendor.ngap.procedure_code">
 <span id="ngap-elementary-procedure-codes"></span><h2>NGAP Elementary Procedure Codes<a class="headerlink" href="#module-pcapkit.vendor.ngap.procedure_code" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>NGAP Elementary Procedure Codes</strong>,
-which is automatically generating <a class="reference internal" href="../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.procedure_code.ProcedureCode</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.procedure_code.ProcedureCode</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ngap.procedure_code.ProcedureCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ngap.procedure_code.</span></span><span class="sig-name descname"><span class="pre">ProcedureCode</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ngap/procedure_code.html#ProcedureCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ngap.procedure_code.ProcedureCode" title="Link to this definition">¶</a></dt>
@@ -646,8 +641,7 @@ order – already ascending by value, measured against pycrate
 </section>
 <section id="module-pcapkit.vendor.ngap.protocol_ie">
 <span id="ngap-protocol-ie-identifiers"></span><h2>NGAP Protocol IE Identifiers<a class="headerlink" href="#module-pcapkit.vendor.ngap.protocol_ie" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>NGAP Protocol IE Identifiers</strong>,
-which is automatically generating <a class="reference internal" href="../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.protocol_ie.ProtocolIE</span></code></a>.</p>
+<p>Generates <a class="reference internal" href="../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.protocol_ie.ProtocolIE</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ngap.protocol_ie.ProtocolIE">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ngap.protocol_ie.</span></span><span class="sig-name descname"><span class="pre">ProtocolIE</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ngap/protocol_ie.html#ProtocolIE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ngap.protocol_ie.ProtocolIE" title="Link to this definition">¶</a></dt>

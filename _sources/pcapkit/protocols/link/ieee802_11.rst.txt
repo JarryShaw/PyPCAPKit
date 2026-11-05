@@ -5,7 +5,7 @@ IEEE 802.11 - Wireless LAN MAC Header
 .. module:: pcapkit.protocols.link.ieee802_11.protocol
 
 :mod:`pcapkit.protocols.link.ieee802_11.protocol` contains
-:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` only, which implements
+:class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`, which implements
 the extractor for the IEEE 802.11 MAC header [*]_ of a protocol version 0
 frame, as a ``LINKTYPE_IEEE802_11`` capture carries it or
 :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` hands it on. Its fields, in

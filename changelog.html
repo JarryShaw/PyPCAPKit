@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/changelog.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. The repository root’s CHANGELOG.md carries only the version being released; this page is the whole recorded his..." />
-<meta name="description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. The repository root’s CHANGELOG.md carries only the version being released; this page is the whole recorded his..." />
+<meta property="og:description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.6.0(2026-11-05) – Protocol pairs..." />
+<meta name="description" content="All notable changes to PyPCAPKit are recorded here. Releases are listed newest first. CHANGELOG.md at the repository root carries only the version being released. 1.6.0(2026-11-05) – Protocol pairs..." />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="1.6.0 – 2026-11-05" href="changelog/1.6.0.html"><link rel="prev" title="Glossary" href="glossary.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -581,13 +581,12 @@ starts at 0.13.0 (2018-12-08); the earlier 0.x releases are not covered.</p>
 <p class="admonition-title">Note</p>
 <p>Post-releases (<code class="docutils literal notranslate"><span class="pre">X.Y.Z.postN</span></code>) are, from 1.0.1 onwards, automated
 publications of the weekly registry refresh: a bot regenerates the vendor
-constant enumerations under <code class="docutils literal notranslate"><span class="pre">pcapkit.const</span></code> from the upstream IANA
-registries and bumps the version. They carry no library changes, and are
-collapsed into a single line per release below. Where a post-release did
-carry something real, it is called out.</p>
+constant enumerations under <code class="docutils literal notranslate"><span class="pre">pcapkit.const</span></code> from their upstream registries
+and bumps the version. They carry no library changes and are collapsed into
+one line per release below; one that did carry something real is called out.</p>
 </div>
-<p>Releases are listed newest first. The repository root’s <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>
-carries only the version being released; this page is the whole recorded history.</p>
+<p>Releases are listed newest first. <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> at the repository root
+carries only the version being released.</p>
 <ul class="simple">
 <li><p><strong>1.6.0</strong> (2026-11-05) – Protocol pairs on a shared abstract base, dissectors
 for IGMP and DCCP, one package per protocol, and verified checksums.

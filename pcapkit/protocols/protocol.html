@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -671,17 +671,15 @@ on as <code class="docutils literal notranslate"><span class="pre">basis</span><
 <dd><p>Packet data of the protocol.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The split relies on <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.length</span></code></a> being the length of
-the octets <em>preceding</em> the payload, and on the payload running from
-there to the end of the buffer. Both hold for a protocol laid out as
-a header followed by its payload, which is nearly all of them.</p>
-<p>A protocol laid out otherwise has to override this: one whose
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> counts something else, or one carrying a <em>trailer</em>
-after the payload, gets a header that eats the payload and a payload
-of <code class="docutils literal notranslate"><span class="pre">b''</span></code>. <a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> is the
-example – its <a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>
-is the wire’s Block Total Length and the captured octets sit ahead of
-the option list and the trailing length field. The payload matters
+<p>The split takes <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.length</span></code></a> as the length of the
+octets <em>preceding</em> the payload, and the payload as running to the
+end of the buffer: a header followed by its payload.</p>
+<p>A protocol laid out otherwise overrides this, or its header eats the
+payload and the payload is <code class="docutils literal notranslate"><span class="pre">b''</span></code>.
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> does: its
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length" title="pcapkit.protocols.misc.pcapng.protocol.PCAPNG.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> is the
+wire’s Block Total Length, and the captured octets sit ahead of the
+option list and the trailing length field. The payload matters
 because <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__()</span></code></a> injects it into every parsed
 <code class="docutils literal notranslate"><span class="pre">_info</span></code>, which the dumpers write out.</p>
 </div>
@@ -746,27 +744,20 @@ should be <code class="docutils literal notranslate"><span class="pre">{protocol
     class, or not a <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is already
-registered, naming the displaced entry and its replacement so a
-caller can tell <em>what</em> was lost rather than only that something
-was. Fires only when the incumbent differs from the
-replacement; an unresolved
-<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> incumbent
-counts as different from the class it names.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> holds a
+different entry, naming the displaced one and its replacement.
+An unresolved <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
+incumbent counts as different from the class it names.</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The guard matches <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>’s: it
-fires only when the incumbent differs from the replacement, so
-handing back the entry already stored under <code class="docutils literal notranslate"><span class="pre">code</span></code> – the same
-class object, or a <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
-equal to the stored one – is a silent no-op rather than a warning
-about nothing displaced, and the stored entry is kept as it is
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>). The comparison runs before <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is
-resolved and resolves nothing, so a stored descriptor stays
-deferred, and an incumbent left as an unresolved descriptor still
-reports as different from the class it names.</p>
+<p>As for <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol" title="pcapkit.foundation.registry.protocols.protocol.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>,
+handing back the entry stored under <code class="docutils literal notranslate"><span class="pre">code</span></code> – the same class
+object, or an equal
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> – is a silent
+no-op that keeps the stored entry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1364">#1364</a>). The comparison
+resolves nothing, so a stored descriptor stays deferred.</p>
 <p>A descriptor equal to the one <code class="docutils literal notranslate"><span class="pre">code</span></code> shipped with restores that
 shipped object, unresolved, so undoing an override leaves the entry
 as shipped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>); see <code class="docutils literal notranslate"><span class="pre">_next_layer_entry()</span></code>, which
@@ -821,20 +812,18 @@ instance.</p>
 metadata the rebuild reads: <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code> and <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>,
 which the payload is dispatched on, <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and
 <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code>, and, for
-<a class="reference internal" href="internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, the extension header
-chain under <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code>. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> must carry them
-too, or no payload (nor IPv6 extension header) is rebuilt and no short
-read is cut back, see <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a>; nothing is guessed from
-its other keys (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
+<a class="reference internal" href="internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, the extension
+header chain under <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code>. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> without
+them rebuilds no payload (nor IPv6 extension header) and cuts no short
+read back; nothing is guessed from its other keys (see
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 <p>A header the capture cut short, as <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> records, is cut
-back before it is read, and read at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code>
-records, the one its parse read it at, so the rebuild parses and
-verifies the octets captured as the capture did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>),
-holding the values its parse read from them, not those <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>
-fills in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>), and the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer a
-parse reading the header short of its width leaves it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>).
-Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, which gives only its
-octets, the header made is read instead.</p>
+back and read at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records, so the rebuild
+parses the octets captured as the capture did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>): it holds
+the values its parse read, not those <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> fills in past the cut
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>), and the <code class="docutils literal notranslate"><span class="pre">Raw</span></code> next layer that parse left
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2717">#2717</a>). Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, which
+gives only its octets, the header made is read instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -897,28 +886,23 @@ precedence over the keywords <a class="reference internal" href="#pcapkit.protoc
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> here absorbs the keywords that
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands to the
-parse as well as to the construction, so an implementation is not
-expected to declare every keyword it is called with. It is <em>not</em> a
-place for a caller to put a keyword no signature declares: building a
-protocol <em>through its constructor</em> with such a keyword raises
+<p>The <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> absorbs the keywords <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands to the
+parse as well as the construction, so an implementation need not
+declare every keyword it is called with. A caller’s keyword that no
+signature declares still raises
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> from
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>).</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>Calling this method directly is not checked</strong>, and still discards an
-undeclared keyword in silence. The check lives in
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>, so it covers
-<code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> it leads to, but not
-<code class="docutils literal notranslate"><span class="pre">SomeProtocol.make(...)</span></code> on an instance obtained some other way –
-<code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(**kwargs)</span></code> is the idiom, used by this
-package’s own tests and by <a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its versioned
-implementation. Covering it would mean interposing on every <code class="docutils literal notranslate"><span class="pre">make</span></code>
-in the tree rather than on the one place their keywords converge, so
-it is deliberately not done. Construct through the constructor to get
-the check.</p>
+<p><strong>Calling this method directly is not checked</strong>, and discards an
+undeclared keyword silently. The check lives in
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>, the one place the
+keywords converge, so it covers <code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and its
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a>, but not <code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(**kwargs)</span></code>, as
+<a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a>
+calls its versioned implementation. Construct through the
+constructor to get the check.</p>
 </div>
 </dd></dl>
 
@@ -943,21 +927,19 @@ the check.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>The special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> passes the global
-packet data to underlying methods. This is useful when the packet
-data is not available in the current instance.</p>
-<p>When <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a> is already set,
-by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema" title="pcapkit.protocols.protocol.Protocol.from_schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_schema()</span></code></a> or by the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> call that
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> makes to construct the instance, that schema
-is kept, unless it still holds raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> where parsing its
-packed octets yields a schema – e.g. a raw option given to
-<code class="docutils literal notranslate"><span class="pre">make()</span></code>, directly or inside a data model – which <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>
-cannot consume. The header is then replaced by the parsed one
+packet data to underlying methods, for when the current instance
+does not have it.</p>
+<p>A <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a> already set, by
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema" title="pcapkit.protocols.protocol.Protocol.from_schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_schema()</span></code></a> or by the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> call of
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a>, is kept, unless it holds raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>
+where parsing its packed octets yields a schema – e.g. a raw
+option given to <code class="docutils literal notranslate"><span class="pre">make()</span></code>, directly or inside a data model – which
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> cannot consume; it is then replaced by the parsed one
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1312">#1312</a>).</p>
 <p>A header <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds from a short read is parsed
-from the octets captured instead, as quietly as the header made
-was read, and given the <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> of its data model before
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> reads it, as the record of a cut those octets may not
-show (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
+from the octets captured, its warnings discarded, and given its
+data model’s <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> before <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> runs, as the
+record of a cut those octets may not show (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -992,27 +974,27 @@ reaching <a class="reference internal" href="#pcapkit.protocols.protocol.Protoco
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>The special keyword argument <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> passes the global
-packet data to underlying methods. This is useful when the packet
-data is not available in the current instance.</p>
+packet data to underlying methods, for when the current instance
+does not have it.</p>
 <p>The octets are built from <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> alone, through <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>;
-the instance’s own parsed or constructed state is not read. A bare
-<code class="docutils literal notranslate"><span class="pre">SomeProtocol(...).pack()</span></code> therefore returns the octets of a
-default header, not the instance’s: <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.data" title="pcapkit.protocols.protocol.Protocol.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> holds those.</p>
-<p>Nor is that state written. Once the instance has been parsed or
-constructed, the header is made on a shallow copy of it (see
+the instance’s state is not read, so a bare
+<code class="docutils literal notranslate"><span class="pre">SomeProtocol(...).pack()</span></code> returns a default header, not the
+instance’s octets, which <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.data" title="pcapkit.protocols.protocol.Protocol.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> holds.</p>
+<p>Nor is that state written. Once the instance is parsed or
+constructed, the header is made on a shallow copy (see
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._packing_target" title="pcapkit.protocols.protocol.Protocol._packing_target"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_packing_target()</span></code></a>), so <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.schema" title="pcapkit.protocols.protocol.Protocol.schema"><code class="xref py py-attr docutils literal notranslate"><span class="pre">schema</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a> and
-anything <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> sets along the way, such as
+anything <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> sets, such as
 <a class="reference internal" href="transport/tcp.html#pcapkit.protocols.transport.tcp.protocol.TCP.connection" title="pcapkit.protocols.transport.tcp.protocol.TCP.connection"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.connection</span></code></a>,
-still describe that packet. Only the call that
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> makes to construct the instance keeps the
-header made here, as the one <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> reads back.</p>
-<p>That call, when <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds a header the capture cut
-short, cuts the header back to the octets captured, through its own
-<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and <a class="reference internal" href="index.html#pcapkit.protocols.schema.Schema._cut_short_read" title="pcapkit.protocols.schema.Schema._cut_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._cut_short_read</span></code></a>, and
-returns only those (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> then
-drops that header, so that <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parses the octets back
-and the rebuild holds the values its parse read, not those
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> filled in past the cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
+still describe that packet. Only the call <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a>
+makes to construct the instance keeps the header, for
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> to read back.</p>
+<p>When <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds a header the capture cut short,
+that call cuts it back to the octets captured, through
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and <a class="reference internal" href="index.html#pcapkit.protocols.schema.Schema._cut_short_read" title="pcapkit.protocols.schema.Schema._cut_short_read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._cut_short_read</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>). <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> then drops that header, so
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parses the octets back and the rebuild holds the
+values its parse read, not those <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> filled in past the
+cut (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>).</p>
 </div>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Calling it no longer replaces the instance’s
@@ -1177,34 +1159,19 @@ module and class, or a <a class="reference internal" href="#pcapkit.protocols.pr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__keywords__">
 <span class="sig-name descname"><span class="pre">__keywords__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(in Python v3.15)"><span class="pre">frozenset</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="Link to this definition">¶</a></dt>
-<dd><p>Construction keywords this protocol consumes out of <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> instead
-of declaring as a parameter, e.g. with <code class="docutils literal notranslate"><span class="pre">kwargs.get('spam')</span></code> in
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> – as <a class="reference internal" href="internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP.read" title="pcapkit.protocols.internet.esp.protocol.ESP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ESP.read</span></code></a>
-does with <code class="docutils literal notranslate"><span class="pre">packet</span></code>.
-<a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> finds keywords by
-reading signatures, which cannot see such a name, so a protocol that
-consumes one names it here and the construction check of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a>
-accepts it. The union over the MRO is used, so a subclass need not repeat
-its parents’ entries.</p>
-<p>Declaring the parameter is preferable where possible, since that also
-documents the keyword to the caller and to <a class="reference external" href="https://docs.python.org/3/library/inspect.html#module-inspect" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">inspect</span></code></a>. This is for the
-cases where it is not – a keyword handled uniformly for a whole family of
-names, say. It is opt-in per class, so it can only exempt a name whose
-author wrote it down (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>).</p>
-<p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> means the keywords cannot be enumerated and the check is
-skipped for this protocol. That is for a <em>dispatcher</em>, whose real signature
-belongs to a class chosen at call time:
-<a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> declares
-only <code class="docutils literal notranslate"><span class="pre">version</span></code> and forwards everything else to
-<a class="reference internal" href="application/httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1.make" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTPv1.make</span></code></a> or
-<a class="reference internal" href="application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2.make" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTPv2.make</span></code></a>
-depending on that value, so no set of names is right for it. Use it only
-for that shape, since a protocol that skips the check silently discards an
-unknown keyword. Unlike a set, the <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is <strong>not</strong> inherited: a
-subclass of a dispatcher is checked normally unless it dispatches too and
-says so, because <code class="docutils literal notranslate"><span class="pre">HTTPv1</span></code> and <code class="docutils literal notranslate"><span class="pre">HTTPv2</span></code> declare their keywords in full
-and exempting them along with their base would forgo the check on the very
-classes that can have it.</p>
+<dd><p>Construction keywords this protocol takes out of <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> by name
+rather than declaring as a parameter, as <a class="reference internal" href="internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Ext.read</span></code></a> does with
+<code class="docutils literal notranslate"><span class="pre">alias</span></code>. <a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> reads signatures, which miss such a
+name, so the construction check of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> accepts only those
+listed here, unioned over the MRO. Prefer a declared parameter, which also
+documents the keyword (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/617">#617</a>).</p>
+<p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> skips the check, for a <em>dispatcher</em> whose real signature is
+chosen at call time: <a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.protocol.HTTP.make" title="pcapkit.protocols.application.http.protocol.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> declares only
+<code class="docutils literal notranslate"><span class="pre">version</span></code> and forwards the rest to <a class="reference internal" href="application/httpv1.html#pcapkit.protocols.application.httpv1.protocol.HTTPv1.make" title="pcapkit.protocols.application.httpv1.protocol.HTTPv1.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTPv1.make</span></code></a> or
+<a class="reference internal" href="application/httpv2.html#pcapkit.protocols.application.httpv2.protocol.HTTPv2.make" title="pcapkit.protocols.application.httpv2.protocol.HTTPv2.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTPv2.make</span></code></a>.
+A protocol that skips the check discards an unknown keyword silently.
+Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is <strong>not</strong> inherited, so <code class="docutils literal notranslate"><span class="pre">HTTPv1</span></code> and
+<code class="docutils literal notranslate"><span class="pre">HTTPv2</span></code>, which declare their keywords in full, stay checked.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1212,14 +1179,12 @@ classes that can have it.</p>
 <span class="sig-name descname"><span class="pre">__own_make_keywords__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="Link to this definition">¶</a></dt>
 <dd><p>Whether the parameters of this class’s own <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> are accepted only
 while that <code class="docutils literal notranslate"><span class="pre">make</span></code> is the one in use. By default
-<a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> takes every <code class="docutils literal notranslate"><span class="pre">make</span></code> in the MRO, so a subclass
-that overrides <code class="docutils literal notranslate"><span class="pre">make</span></code> and forwards the rest to its parent keeps the
-parent’s keywords. A base whose subclasses override <code class="docutils literal notranslate"><span class="pre">make</span></code> <em>without</em>
-forwarding sets this, so that its keywords are refused for them rather than
-accepted and dropped – <a class="reference internal" href="internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>
-does, for <code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>). Read from the defining
-class alone, so it is not inherited, and it leaves <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a>
-and the other construction methods unaffected.</p>
+<a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> takes every <code class="docutils literal notranslate"><span class="pre">make</span></code> in the MRO. A base whose
+subclasses override <code class="docutils literal notranslate"><span class="pre">make</span></code> <em>without</em> forwarding sets this, so its
+keywords are refused for them rather than accepted and dropped, as
+<a class="reference internal" href="internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> does for
+<code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>). Not inherited, and
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code></a> and the other construction methods are unaffected.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1355,26 +1320,23 @@ method’s frame (<a class="extlink-issue reference external" href="https://gith
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._make_payload">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="Link to this definition">¶</a></dt>
 <dd><p>Create payload from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
-<p>This method uses <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code> and <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code> to
-determine the payload type and name. If either of them is missing or
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, or <code class="docutils literal notranslate"><span class="pre">data</span></code> holds nothing under <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code>, a
-<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> instance will be
-returned, exactly as for a protocol with no next layer. Otherwise, the
-payload will be constructed by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>.</p>
+<p>The payload’s type and name are <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code> and
+<code class="docutils literal notranslate"><span class="pre">__next_name__</span></code>. If either is missing or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, or <code class="docutils literal notranslate"><span class="pre">data</span></code>
+holds nothing under <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code>, the payload is a
+<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, as for
+a protocol with no next layer; otherwise <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> builds it.</p>
 <p><a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> carries
 both keys, so <code class="docutils literal notranslate"><span class="pre">data</span></code> rebuilt from such a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> dispatches as
 the info did. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> must carry them too, as it
 must <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> and, for IPv6, <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code>: the payload is
 never guessed from the other keys of <code class="docutils literal notranslate"><span class="pre">data</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
-<p>The payload is built one layer further into the frame than this
-protocol, as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a> counts it, since each layer built
-parses its own octets again. So rebuilding a frame stops at
-<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> where parsing it did, rather than that many
-layers below each layer of it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>). Nor does the payload’s
-parse report anything, the limit included: this protocol’s own parse
-goes over the same octets, so the rebuilt frame reports each warning,
-and each error a next-layer fallback absorbs, once, as the parsed one
-did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
+<p>The payload is built one layer further into the frame, as
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a> counts it, so a rebuild stops at
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> where the parse did
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>). The payload’s parse reports nothing, the limit
+included: this protocol’s own parse goes over the same octets, so the
+rebuilt frame reports each warning, and each error a next-layer fallback
+absorbs, once, as the parsed one did (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a></span>) – protocol data</p>
@@ -1955,17 +1917,14 @@ declares when <code class="docutils literal notranslate"><span class="pre">code<
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Every one of these registries is a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
-held on a <em>class</em> attribute, shared by every instance of the class in
-the process. So <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> inserts each code it misses, and
-parsing one packet carrying an unrecognised code grows the registry
-permanently.</p>
-<p>The inserted value is what the default factory would have produced
-anyway, so the entry buys nothing. It costs a spurious “already
-registered” warning from the next genuine <code class="docutils literal notranslate"><span class="pre">register</span></code> call for that
-code, and makes “is this code registered?” depend on what has been
-parsed. The fallback is therefore read from the default factory
-directly rather than through a lookup that records it.</p>
+<p>Each of these registries is a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> on a
+<em>class</em> attribute, shared process-wide, so <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> would
+insert every code it misses: one packet with an unrecognised code
+would grow the registry permanently. The entry buys nothing, costs a
+spurious “already registered” warning on the next genuine
+<code class="docutils literal notranslate"><span class="pre">register</span></code> of that code, and makes “is this code registered?”
+depend on what has been parsed, so the fallback is read from the
+default factory directly.</p>
 </div>
 </dd></dl>
 
@@ -1993,23 +1952,19 @@ declares – normally <a class="reference internal" href="misc/raw.html#pcapkit.
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The lookup itself is <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a>, so a miss
-does not grow the shared registry. What this adds is the
-next-layer-specific resolution step: the entry found –
-registered, or the fallback – may be a
-<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> rather than a
-class, and it is resolved to the class it names.</p>
-<p>Nothing is written back, on a hit or a miss. A miss has no key to
-write under, and recording one would be exactly the insertion
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a> exists
-to avoid. A hit memoised under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would retain a class that
-<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale, and would make parsing
-mutate a registry shared by the whole process (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>). The
-same holds for a memo in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s default factory or in a cache
-beside the registry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>).</p>
-<p>So every lookup resolves its descriptor again, and what keeps that
-affordable is <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> instead of re-entering
+<p>The lookup is <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._lookup_registry" title="pcapkit.protocols.protocol.Protocol._lookup_registry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code></a>, so a miss
+does not grow the shared registry. The entry found, registered or
+the fallback, may be a
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>, resolved to the
+class it names.</p>
+<p>Nothing is written back. A hit memoised under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would keep
+a class <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> makes stale, and make parsing
+mutate a registry the whole process shares (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>); so
+would a memo in the default factory or in a cache beside the
+registry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>). Each lookup
+resolves its descriptor again, kept cheap by
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> rather than re-entering
 <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/574">#574</a>).</p>
 </div>
 </dd></dl>
@@ -2143,23 +2098,26 @@ in them anyway: for a variable-length header such as
 <a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> the hint is the longest
 form rather than the shortest. A next layer that reports no hint is
 kept as parsed.</p>
-<p>The warnings of a parse that may be replaced are held until it is
-known whether it is. They are dropped when it is, since they describe
-a header the result does not have – <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> twice for
-an Ethernet frame of 10 octets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>) – and reported as the
-parse ends when it is kept, still inside the guard that catches them
-under an <code class="docutils literal notranslate"><span class="pre">error</span></code> filter. A layer kept with its header cut short
-still warns. The held warnings of a parse that raises are dropped
-too when <a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, which wraps
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>, replaces the layer, since the
-replacement’s <code class="docutils literal notranslate"><span class="pre">error</span></code> reports the failure (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>); outside
-<code class="docutils literal notranslate"><span class="pre">beholder</span></code>, they are reported as the error leaves. Under
-<code class="docutils literal notranslate"><span class="pre">beholder</span></code>, a layer is held however much was captured, since one
-that raises is replaced at any length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2516">#2516</a>), so a kept
-layer’s warnings follow those of the layers it carries. Outside
-<code class="docutils literal notranslate"><span class="pre">beholder</span></code>, a layer captured at least as long as its hint cannot
-be replaced, and is parsed holding nothing, even inside one that
-holds.</p>
+<p>The warnings of a parse that may be replaced are held until that is
+known, then:</p>
+<ul class="simple">
+<li><p><strong>replaced as short</strong> – dropped, since they describe a header the
+result does not have: <code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> twice for an Ethernet
+frame of 10 octets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>);</p></li>
+<li><p><strong>kept</strong> – reported as the parse ends, inside the guard that
+catches them under an <code class="docutils literal notranslate"><span class="pre">error</span></code> filter; a layer kept with its
+header cut short still warns;</p></li>
+<li><p><strong>raised</strong> – dropped when
+<a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, which wraps
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>, replaces the layer, whose <code class="docutils literal notranslate"><span class="pre">error</span></code>
+reports the failure (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2308">#2308</a>); otherwise reported as the
+error leaves.</p></li>
+</ul>
+<p>Under <code class="docutils literal notranslate"><span class="pre">beholder</span></code> a layer is held however much was captured, since
+one that raises is replaced at any length (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2516">#2516</a>), so a kept
+layer’s warnings follow those of the layers it carries. Outside it,
+a layer captured at least as long as its hint cannot be replaced,
+and is parsed holding nothing, even inside one that holds.</p>
 <p>A layer past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> in its frame is not parsed:
 it and the rest of the frame are kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, marked
@@ -2255,35 +2213,31 @@ none.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__reconstructing__">
 <span class="sig-name descname"><span class="pre">__reconstructing__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__reconstructing__" title="Link to this definition">¶</a></dt>
-<dd><p>Whether this instance is being rebuilt by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> from a parsed
-data model, as against constructed from keywords somebody wrote. It governs
-only whether the construction keyword check of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> raises or
-warns, and is set for the duration of that call alone; the class-level
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a> is what every other code path sees, including an instance
-built without <code class="docutils literal notranslate"><span class="pre">__init__</span></code>.</p>
+<dd><p>Whether <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> is rebuilding this instance from a parsed data
+model, rather than from keywords somebody wrote. It decides only whether
+the construction keyword check of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> raises or warns, and
+is set for that call alone; every other code path sees <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__short_read__">
 <span class="sig-name descname"><span class="pre">__short_read__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__short_read__" title="Link to this definition">¶</a></dt>
-<dd><p>The <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> record of the data model <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> rebuilds
-this instance from. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> cuts the header it makes back to the
-octets captured, and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> has <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parse them
-back at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records beside it, the one their
-parse read them at, so the rebuild is parsed and verified as its capture
-was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Set for the duration of that call
-alone, like <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__reconstructing__" title="pcapkit.protocols.protocol.Protocol.__reconstructing__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reconstructing__</span></code></a>; the class-level <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is
-what every other code path sees.</p>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> record of the data model <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
+rebuilds this instance from. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> cuts the header it makes back
+to the octets captured, and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> has <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>
+parse them at the width <code class="docutils literal notranslate"><span class="pre">__short_width__</span></code> records, so the rebuild is
+parsed as its capture was (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2703">#2703</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>). Set for that
+call alone, like <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__reconstructing__" title="pcapkit.protocols.protocol.Protocol.__reconstructing__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reconstructing__</span></code></a>; otherwise <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._past_layer_limit">
 <span class="sig-name descname"><span class="pre">_past_layer_limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._past_layer_limit" title="Link to this definition">¶</a></dt>
-<dd><p>Whether this layer is past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>, and so was kept as
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a>
-without being parsed. Such a layer carries an <code class="docutils literal notranslate"><span class="pre">error</span></code> as one that
-failed to parse does, so this is what tells the two apart: what follows
-the limit is not to be read on (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
+<dd><p>Whether <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a> kept this layer as
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> unparsed, being past
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>. Such a layer carries
+an <code class="docutils literal notranslate"><span class="pre">error</span></code> as a failed parse does; this tells the two apart, for what
+follows the limit is not to be read on (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2351,14 +2305,11 @@ propagated to nested layers by
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">_layer</span></code>, <code class="docutils literal notranslate"><span class="pre">_protocol</span></code> and <code class="docutils literal notranslate"><span class="pre">__context__</span></code> keywords are
-<em>out-of-band</em>: they configure the parse rather than describing the
-packet, and every one of them is consumed here, at the one point
-each of a protocol’s producers passes through. That is deliberate,
-and the normalisation below relies on it: fixing a spelling here
-fixes it for the engines, for every
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer</span></code></a>
-implementation, and for any third party protocol that copied their
-shape, rather than one call site at a time.</p>
+<em>out-of-band</em>: they configure the parse rather than describe the
+packet, and are consumed here, the one point every producer passes
+through, so a spelling normalised here is normalised for the
+engines, every <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer</span></code></a> and any
+third-party protocol alike.</p>
 <p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is read but not consumed: it stays in the keywords
 forwarded to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a>, and while parsing a copy is
 republished beside it as <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>.</p>
@@ -2391,10 +2342,10 @@ republished beside it as <code class="docutils literal notranslate"><span class=
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, the warnings of the
-parse are dropped, as the layer the payload is rebuilt for parses
-the same octets again and reports them there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). Those
-of a parse that raises are reported as the error leaves, unless
+<p>Inside a payload <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload" title="pcapkit.protocols.protocol.Protocol._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_payload()</span></code></a> rebuilds, the parse’s
+warnings are dropped, since the enclosing layer parses the same
+octets again and reports them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>). A parse that raises
+reports its warnings, unless
 <a class="reference internal" href="../corekit/decorators.html#pcapkit.corekit.decorators.beholder" title="pcapkit.corekit.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> replaces the layer.</p>
 </div>
 </dd></dl>
@@ -2420,36 +2371,21 @@ shapes and the enum-type inference rule.</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
-<p>This method is called when a subclass of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> is defined.
-It is used to set the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
+<p>Sets <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
 and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__data__" title="pcapkit.protocols.protocol.Protocol.__data__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__data__</span></code></a>
-attributes of the subclass.</p>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">schema</span></code> and/or <code class="docutils literal notranslate"><span class="pre">data</span></code> is not specified, the method looks
-for the class of the subclass’s own name in the <code class="docutils literal notranslate"><span class="pre">schema</span></code> and
-<code class="docutils literal notranslate"><span class="pre">data</span></code> modules beside the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> module that defines it, as
-<a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> finds
-<a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tp.schema.L2TP" title="pcapkit.protocols.link.l2tp.schema.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>). If there is none, the default
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> and
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.
-An explicit <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> keyword is used as given.</p>
-</div>
-<p>This method also names a concrete subclass in the by-name registry,
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>,
-under its upper-cased class name, once
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__()</span></code></a> has accepted its <code class="docutils literal notranslate"><span class="pre">code</span></code>,
-whereas <code class="docutils literal notranslate"><span class="pre">code</span></code>’s next-layer dispatch registration is opt-in. An
-abstract subclass, as <a class="reference internal" href="../utilities/inspect.html#pcapkit.utilities.inspect.isabstract" title="pcapkit.utilities.inspect.isabstract"><code class="xref py py-func docutils literal notranslate"><span class="pre">isabstract()</span></code></a>
-reports it, is not named, and nor is a class deriving
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> without this class, as every built-in protocol
-does. A name already holding another entry keeps it, and the clash is
-reported as a <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
-<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a> replaces an
-entry. A class meeting the <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a>
-that names its own module and name is no clash, and the descriptor
-stays.</p>
+on the subclass through <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__()</span></code></a>, which
+also finds an omitted one.</p>
+<p>Once that has accepted <code class="docutils literal notranslate"><span class="pre">code</span></code>, a concrete subclass is also named in
+the by-name registry, <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.__registry__" title="pcapkit.protocols.protocol.ProtocolBase.__registry__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__registry__</span></code></a>, under its
+upper-cased class name; unlike <code class="docutils literal notranslate"><span class="pre">code</span></code>’s dispatch registration, this
+is not opt-in. An abstract subclass, as
+<a class="reference internal" href="../utilities/inspect.html#pcapkit.utilities.inspect.isabstract" title="pcapkit.utilities.inspect.isabstract"><code class="xref py py-func docutils literal notranslate"><span class="pre">isabstract()</span></code></a> reports it, is not named,
+nor is a class deriving <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> alone, as every built-in
+protocol does. A name holding another entry keeps it, with a
+<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>; only
+<a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register_protocol" title="pcapkit.protocols.protocol.ProtocolBase.register_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register_protocol</span></code></a> replaces
+one. The <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> naming the
+class’s own module and name is no clash, and stays.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more information on the registry, please refer to
@@ -2593,14 +2529,89 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._exctx">
 <span class="sig-name descname"><span class="pre">_exctx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><span class="pre">ContextRegistry</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._exctx" title="Link to this definition">¶</a></dt>
 <dd><p>Caller supplied parsing context; see <a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>.
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__init__</span></code></a> replaces this with a real
-<a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a>; the class-level
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is what an instance built without <code class="docutils literal notranslate"><span class="pre">__init__</span></code> (e.g.
-<code class="docutils literal notranslate"><span class="pre">object.__new__(SomeProtocol)</span></code>) sees, so reading it is always safe.</p>
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__init__</span></code></a> sets a
+<a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a>; an instance built
+without <code class="docutils literal notranslate"><span class="pre">__init__</span></code> reads the class-level <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
 
+<section id="parsing-and-construction">
+<h2>Parsing and Construction<a class="headerlink" href="#parsing-and-construction" title="Link to this heading">¶</a></h2>
+<p>Parsing, construction, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema" title="pcapkit.protocols.protocol.Protocol.from_schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_schema()</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
+all run through one path:</p>
+<pre  class="mermaid">
+        flowchart TD
+    FS[&quot;from\_schema(schema)&quot;] --&gt;|&quot;\_\_header\_\_ = schema,&lt;br/&gt;then its octets&quot;| P
+    FD[&quot;from\_data(data)&quot;] --&gt;|&quot;\_make\_data(data) gives the fields,&lt;br/&gt;\_\_reconstructing\_\_ set&quot;| C
+    P[&quot;Proto(file, length, ...)&lt;br/&gt;parse&quot;] --&gt; INIT
+    C[&quot;Proto(field=value, ...)&lt;br/&gt;construct&quot;] --&gt; INIT
+    INIT[&quot;\_\_init\_\_&lt;br/&gt;consumes \_layer, \_protocol and \_\_context\_\_&quot;]
+    INIT --&gt;|construct| CHK[&quot;\_check\_construction\_keywords&lt;br/&gt;an undeclared keyword: UnsupportedCall,&lt;br/&gt;or a warning when reconstructing&quot;]
+    CHK --&gt; PACK[&quot;\_\_post\_init\_\_: pack(...)&lt;br/&gt;make() gives the schema, kept as \_\_header\_\_,&lt;br/&gt;and its octets&quot;]
+    INIT --&gt;|parse| OCT[&quot;\_\_post\_init\_\_: the octets given,&lt;br/&gt;or file.read(length)&quot;]
+    PACK --&gt; DATA[&quot;\_data, and \_file over it&quot;]
+    OCT --&gt; DATA
+    DATA --&gt; UNP{&quot;unpack: \_\_header\_\_ set?&quot;}
+    UNP --&gt;|no| SCH[&quot;\_\_schema\_\_.unpack(\_file, length, packet)&quot;]
+    UNP --&gt;|yes| KEPT[&quot;kept, or replaced by the parse of its octets&lt;br/&gt;where it holds raw items&quot;]
+    SCH --&gt; READ
+    KEPT --&gt; READ
+    READ[&quot;read(): the data model,&lt;br/&gt;calling \_decode\_next\_layer&quot;] --&gt; INFO[&quot;\_\_init\_\_: \_info updated with packet&quot;]
+
+    click FS &quot;protocol.html#pcapkit.protocols.protocol.Protocol.from_schema&quot;
+    click FD &quot;protocol.html#pcapkit.protocols.protocol.Protocol.from_data&quot;
+    click INIT &quot;protocol.html#pcapkit.protocols.protocol.Protocol.__init__&quot;
+    click PACK &quot;protocol.html#pcapkit.protocols.protocol.Protocol.pack&quot;
+    click UNP &quot;protocol.html#pcapkit.protocols.protocol.Protocol.unpack&quot;
+    click READ &quot;protocol.html#protocol-next-layer-dispatch&quot;
+    </pre><p>A rebuild of a header the capture cut short drops the header <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a>
+made, so <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> parses its octets back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2761">#2761</a>), and inside a
+payload being rebuilt the parse’s warnings are held and dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p>
+</section>
+<section id="next-layer-dispatch">
+<span id="protocol-next-layer-dispatch"></span><h2>Next-Layer Dispatch<a class="headerlink" href="#next-layer-dispatch" title="Link to this heading">¶</a></h2>
+<p>How a layer picks and builds the layer it carries, and where it keeps
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> or
+<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> instead:</p>
+<pre  class="mermaid">
+        flowchart TD
+    DEC[&quot;\_decode\_next\_layer(dict\_, proto, length)&lt;br/&gt;called from read()&quot;] --&gt; IMP[&quot;\_import\_next\_layer, wrapped by beholder&quot;]
+    IMP --&gt; EMP{&quot;\_empty\_next\_layer&quot;}
+    EMP --&gt;|&quot;octets and a non-zero length&quot;| TERM{&quot;layer= or protocol= reached?&quot;}
+    EMP --&gt;|&quot;no octets, length &amp;lt; 0&quot;| KRAW[&quot;Raw&quot;]
+    EMP --&gt;|&quot;otherwise: no octets,&lt;br/&gt;or a length of 0&quot;| KNOP[&quot;NoPayload&quot;]
+    TERM --&gt;|yes| KRAW
+    TERM --&gt;|no| LOOK[&quot;\_lookup\_next\_layer(\_\_proto\_\_, proto)&lt;br/&gt;the registered class, or the registry's fallback,&lt;br/&gt;normally Raw&quot;]
+    KRAW --&gt; LIM
+    KNOP --&gt; LIM
+    LOOK --&gt; LIM
+    LIM{&quot;\_parse\_next\_layer:&lt;br/&gt;past FRAME\_LAYER\_LIMIT,&lt;br/&gt;and not already Raw or NoPayload?&quot;}
+    LIM --&gt;|yes| RAWL[&quot;Raw, marked \_past\_layer\_limit&lt;br/&gt;one ProtocolWarning&quot;]
+    LIM --&gt;|no| NEW[&quot;klass(file\_, length, ...)&quot;]
+    NEW --&gt;|raises| BEH[&quot;beholder: NoPayload for an end-of-file StructError,&lt;br/&gt;else Raw carrying the error&quot;]
+    NEW --&gt;|parsed| SHORT{&quot;captured fewer octets than both&lt;br/&gt;\_\_length\_hint\_\_() and its length?&quot;}
+    SHORT --&gt;|yes| RAWS[&quot;Raw, its held warnings dropped&quot;]
+    SHORT --&gt;|no| KEEP[&quot;the parsed layer&quot;]
+    RAWL --&gt; WRITE
+    BEH --&gt; WRITE
+    RAWS --&gt; WRITE
+    KEEP --&gt; WRITE
+    WRITE[&quot;dict\_ gets its info, \_\_next\_type\_\_ and \_\_next\_name\_\_&lt;br/&gt;self.\_next and self.\_protos set&quot;]
+
+    click DEC &quot;protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer&quot;
+    click IMP &quot;protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer&quot;
+    click EMP &quot;protocol.html#pcapkit.protocols.protocol.Protocol._empty_next_layer&quot;
+    click LOOK &quot;protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer&quot;
+    click LIM &quot;protocol.html#pcapkit.protocols.protocol.Protocol._parse_next_layer&quot;
+    click BEH &quot;../corekit/decorators.html#pcapkit.corekit.decorators.beholder&quot;
+    </pre><p>Some layers add steps of their own:
+<a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> the
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> bound and IGMP’s dispatch,
+<a class="reference internal" href="transport/transport.html#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> a family base’s dispatch, and
+<a class="reference internal" href="internet/ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6" title="pcapkit.protocols.internet.ipv6.protocol.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> the walk drawn under
+<a class="reference internal" href="internet/ipv6_ext.html#ipv6-ext-walk"><span class="std std-ref">The Extension Header Walk</span></a>.</p>
+</section>
 <section id="layers-per-frame">
 <h2>Layers per Frame<a class="headerlink" href="#layers-per-frame" title="Link to this heading">¶</a></h2>
 <p>A frame is dissected to at most
@@ -2805,35 +2816,32 @@ default) skips registration entirely – see below.</p></li>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
-<p>This method is called when a subclass of <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> is defined.
-It is used to set the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
+<p>Sets <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__" title="pcapkit.protocols.protocol.Protocol.__schema__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__schema__</span></code></a>
 and <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__data__" title="pcapkit.protocols.protocol.Protocol.__data__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__data__</span></code></a>
-attributes of the subclass, and, if <code class="docutils literal notranslate"><span class="pre">code</span></code> is given, to register the
-subclass into the next-layer dispatch <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> (or registries) that
-<code class="docutils literal notranslate"><span class="pre">code</span></code> names – e.g. <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
+on the subclass and, if <code class="docutils literal notranslate"><span class="pre">code</span></code> is given, registers it into the
+next-layer dispatch <a class="reference internal" href="../../glossary.html#term-registry"><span class="xref std std-term">registry</span></a> (or registries) <code class="docutils literal notranslate"><span class="pre">code</span></code> names,
+e.g. <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">schema</span></code> and/or <code class="docutils literal notranslate"><span class="pre">data</span></code> is not specified, the method looks
-for the class of the subclass’s own name in the <code class="docutils literal notranslate"><span class="pre">schema</span></code> and
-<code class="docutils literal notranslate"><span class="pre">data</span></code> modules beside the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> module that defines it, as
+<p>An omitted <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> is the class of the subclass’s
+own name in the <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> module beside the
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> module defining it, as
 <a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> finds
 <a class="reference internal" href="link/l2tpv2.html#pcapkit.protocols.link.l2tp.schema.L2TP" title="pcapkit.protocols.link.l2tp.schema.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>). If there is none, the default
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> and
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.
-An explicit <code class="docutils literal notranslate"><span class="pre">schema</span></code> or <code class="docutils literal notranslate"><span class="pre">data</span></code> keyword is used as given.</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2534">#2534</a>), else
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.schema.Raw" title="pcapkit.protocols.misc.raw.schema.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> or
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.data.Raw" title="pcapkit.protocols.misc.raw.data.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 </div>
 <p>Dispatch registration is <strong>opt-in</strong>, like the <code class="docutils literal notranslate"><span class="pre">engine=</span></code>/<code class="docutils literal notranslate"><span class="pre">protocol=</span></code>/
 <code class="docutils literal notranslate"><span class="pre">fmt=</span></code> keywords of <a class="reference internal" href="../foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>,
 <a class="reference internal" href="../foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>,
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> and
-<a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>. Omitting <code class="docutils literal notranslate"><span class="pre">code</span></code> is a
-deliberate way to decline registration, and what every built-in
-protocol class does: the built-in dispatch tables (e.g.
-<a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>) are populated by
-literal assignment in each layer module, not by this hook. A subclass that declines can
-still be registered later via the owning class’s <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> classmethod or the
-matching <code class="docutils literal notranslate"><span class="pre">register_*</span></code> helper in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>.</p>
+<a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>. Every built-in protocol omits
+<code class="docutils literal notranslate"><span class="pre">code</span></code>: the built-in dispatch tables (e.g. <a class="reference internal" href="link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>) are literal assignments
+in each layer module. A class defined without <code class="docutils literal notranslate"><span class="pre">code</span></code> can be
+registered later through the owning class’s <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.register" title="pcapkit.protocols.protocol.ProtocolBase.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> or the
+matching <code class="docutils literal notranslate"><span class="pre">register_*</span></code> helper in
+<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">code</span></code> accepts:</p>
 <ul class="simple">
 <li><p>a single enum member, whose <em>type</em> determines the destination
@@ -2854,12 +2862,9 @@ into several registries from a single declaration – e.g. a
 <a class="reference internal" href="link/l2tp.html#pcapkit.protocols.link.l2tp.protocol.L2TP" title="pcapkit.protocols.link.l2tp.protocol.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> subclass reachable both
 by its IP protocol number and by a UDP port.</p></li>
 </ul>
-<p>The explicit mapping form is accepted even for a key whose type could
-be inferred: being more explicit than required is never an error.</p>
-<p>Inference refuses rather than guesses: an enum member whose type
-names no known destination raises
-<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> rather than doing
-nothing or picking an arbitrary registry.</p>
+<p>The mapping form is accepted even where the key’s type could be
+inferred. An enum member whose type names no known destination raises
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryError</span></code></a> rather than guessing.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.protocol.register_protocol_code" title="pcapkit.foundation.registry.protocols.protocol.register_protocol_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.protocol.register_protocol_code()</span></code></a>
@@ -3099,10 +3104,9 @@ naming it, so reading the view imports nothing. Look a class up with
 <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase.get_protocol" title="pcapkit.protocols.protocol.ProtocolBase.get_protocol"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.get_protocol()</span></code></a>, which resolves a descriptor.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>It is one map, not a per-class one, so every protocol class reads
-the same entries, and the view shows each later registration. It
-is defined on this metaclass, so it is a class attribute and
-<strong>not</strong> an instance one.</p>
+<p>Every protocol class reads the same map, later registrations
+included. Defined on the metaclass, it is a class attribute, <strong>not</strong>
+an instance one.</p>
 </div>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.6.0.</span></p>
@@ -3114,32 +3118,28 @@ is defined on this metaclass, so it is a class attribute and
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">OUT_OF_BAND_KEYWORDS</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS" title="Link to this definition">¶</a></dt>
-<dd><p>Keywords that configure the construction rather than naming a field, and are
-therefore consumed by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a> or by the schema layer
-instead of by a <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make</span></code></a>. No
-signature declares them, so <a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> cannot find them and
-they are listed here.</p>
-<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is here because the library puts it there itself:
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a>
-injects <code class="docutils literal notranslate"><span class="pre">packet=self.packet.payload</span></code> into every parsed <code class="docutils literal notranslate"><span class="pre">_info</span></code>, so the
-default <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_data" title="pcapkit.protocols.protocol.Protocol._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._make_data</span></code></a> (<code class="docutils literal notranslate"><span class="pre">data.to_dict()</span></code>)
-carries it into the keywords that <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> reconstructs from.
-Refusing it would make <code class="docutils literal notranslate"><span class="pre">from_data</span></code> fail on any protocol whose <code class="docutils literal notranslate"><span class="pre">make</span></code> does
-not declare a <code class="docutils literal notranslate"><span class="pre">packet</span></code>, starting with
-<a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>, the innermost layer of every
-packet. It is also a real field name for some protocols –
-<a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.make" title="pcapkit.protocols.internet.hip.protocol.HIP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.make</span></code></a> takes the HIP
-packet <em>type</em> under it – and listing it here does not change how it binds,
-only that it is never refused.</p>
+<dd><p>Construction keywords that name no field.
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a> or the
+schema layer consumes them, not <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make</span></code></a>.
+No signature declares them, so <a class="reference internal" href="#pcapkit.protocols.protocol._declared_keywords" title="pcapkit.protocols.protocol._declared_keywords"><code class="xref py py-func docutils literal notranslate"><span class="pre">_declared_keywords()</span></code></a> takes them from here.</p>
+<p><code class="docutils literal notranslate"><span class="pre">packet</span></code> is injected by the library: <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__init__</span></code></a> puts
+<code class="docutils literal notranslate"><span class="pre">packet=self.packet.payload</span></code> into every parsed <code class="docutils literal notranslate"><span class="pre">_info</span></code>, which the default
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_data" title="pcapkit.protocols.protocol.Protocol._make_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._make_data</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">data.to_dict()</span></code>) carries into the keywords <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data" title="pcapkit.protocols.protocol.Protocol.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a> rebuilds from. Refusing it
+would break <code class="docutils literal notranslate"><span class="pre">from_data</span></code> for every protocol whose <code class="docutils literal notranslate"><span class="pre">make</span></code> lacks it, starting
+with <a class="reference internal" href="misc/no_payload.html#pcapkit.protocols.misc.no_payload.protocol.NoPayload" title="pcapkit.protocols.misc.no_payload.protocol.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a>. Where it
+is a real field, as the packet <em>type</em> of <a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.make" title="pcapkit.protocols.internet.hip.protocol.HIP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.make</span></code></a>, listing it here only
+stops it being refused.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol._KEYWORD_CONSUMERS">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">_KEYWORD_CONSUMERS</span></span><a class="headerlink" href="#pcapkit.protocols.protocol._KEYWORD_CONSUMERS" title="Link to this definition">¶</a></dt>
-<dd><p>Methods a construction keyword may be destined for. The keywords handed to
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> reach all of them: <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> passes the same
-<code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack</span></code></a> (and
-through it to <code class="docutils literal notranslate"><span class="pre">make</span></code>) <em>and</em> to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack</span></code></a> (and through it to <code class="docutils literal notranslate"><span class="pre">read</span></code>).</p>
+<dd><p>Methods a construction keyword may be for.
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a>
+passes the same <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack</span></code></a>
+(and so <code class="docutils literal notranslate"><span class="pre">make</span></code>) <em>and</em> <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack</span></code></a>
+(and so <code class="docutils literal notranslate"><span class="pre">read</span></code>).</p>
 </dd></dl>
 
 <dl class="py function">
@@ -3163,21 +3163,14 @@ and are not to be checked – inherited <a class="reference external" href="http
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__keywords__" title="pcapkit.protocols.protocol.Protocol.__keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__keywords__</span></code></a> explains.</p>
 </dd>
 </dl>
-<p>The union is deliberately wider than the signature of <code class="docutils literal notranslate"><span class="pre">cls.make</span></code>, because
-a keyword reaching <code class="docutils literal notranslate"><span class="pre">make</span></code> is not necessarily <em>for</em> <code class="docutils literal notranslate"><span class="pre">make</span></code>:
-<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands one
-<code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> to both the construction and the parse of the packet it has just
-constructed, so a keyword declared by <code class="docutils literal notranslate"><span class="pre">read</span></code> travels through <code class="docutils literal notranslate"><span class="pre">make</span></code> too.
-<a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP" title="pcapkit.protocols.internet.hip.protocol.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a> is the live example:
-<a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.read" title="pcapkit.protocols.internet.hip.protocol.HIP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.read</span></code></a> declares
-<code class="docutils literal notranslate"><span class="pre">extension</span></code>, <a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.make" title="pcapkit.protocols.internet.hip.protocol.HIP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.make</span></code></a>
-does not, and <a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.__post_init__" title="pcapkit.protocols.internet.hip.protocol.HIP.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.__post_init__</span></code></a> forwards it to both.</p>
-<p>The walk covers the whole MRO rather than the most derived override of each
-method, so that a subclass declaring its own keyword and forwarding the rest
-to its parent does not make the parent’s keywords unreachable. The one
-exception is a class that sets <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="pcapkit.protocols.protocol.Protocol.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__own_make_keywords__</span></code></a>: its
-<code class="docutils literal notranslate"><span class="pre">make</span></code> counts only while it is the <code class="docutils literal notranslate"><span class="pre">make</span></code> of <code class="docutils literal notranslate"><span class="pre">cls</span></code>, not once a
-subclass overrides it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>).</p>
+<p>The union is wider than the signature of <code class="docutils literal notranslate"><span class="pre">cls.make</span></code>:
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.__post_init__</span></code></a> hands one <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>
+to both the construction and the parse, so a keyword <code class="docutils literal notranslate"><span class="pre">read</span></code> declares
+travels through <code class="docutils literal notranslate"><span class="pre">make</span></code> too, as <code class="docutils literal notranslate"><span class="pre">extension</span></code> of <a class="reference internal" href="internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP.read" title="pcapkit.protocols.internet.hip.protocol.HIP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP.read</span></code></a> does.</p>
+<p>The walk covers the whole MRO, not the most derived override of each method,
+so a subclass forwarding to its parent keeps the parent’s keywords. The
+exception is a class that sets <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__own_make_keywords__" title="pcapkit.protocols.protocol.Protocol.__own_make_keywords__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Protocol.__own_make_keywords__</span></code></a>: its <code class="docutils literal notranslate"><span class="pre">make</span></code>
+counts only while no subclass overrides it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2286">#2286</a>).</p>
 </dd></dl>
 
 </section>
@@ -3252,6 +3245,8 @@ subclass overrides it (<a class="extlink-issue reference external" href="https:/
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Root Protocol</a><ul>
+<li><a class="reference internal" href="#parsing-and-construction">Parsing and Construction</a></li>
+<li><a class="reference internal" href="#next-layer-dispatch">Next-Layer Dispatch</a></li>
 <li><a class="reference internal" href="#layers-per-frame">Layers per Frame</a></li>
 <li><a class="reference internal" href="#value-helpers">Value Helpers</a></li>
 <li><a class="reference internal" href="#data-models">Data Models</a></li>
@@ -3274,5 +3269,363 @@ subclass overrides it (<a class="extlink-issue reference external" href="https:/
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: fit-content;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: fit-content;\n}\n\n.mermaid-container > pre > svg {\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     </body>
 </html>

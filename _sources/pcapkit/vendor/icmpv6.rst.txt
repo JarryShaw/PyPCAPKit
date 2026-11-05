@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.vendor.icmpv6
 
-This module contains all vendor crawlers of
-:class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` implementations. Available
-vendor crawlers include:
-
 .. list-table::
 
    * - :class:`ICMPv6_Type <pcapkit.vendor.icmpv6.type.Type>`
@@ -26,8 +22,7 @@ ICMPv6 Type Numbers
 
 .. module:: pcapkit.vendor.icmpv6.type
 
-This module contains the vendor crawler for **ICMPv6 Type Numbers**,
-which is automatically generating :class:`pcapkit.const.icmpv6.type.Type`.
+Generates :class:`pcapkit.const.icmpv6.type.Type`.
 
 .. autoclass:: pcapkit.vendor.icmpv6.type.Type
    :members: FLAG
@@ -38,9 +33,7 @@ ICMPv6 Destination Unreachable Codes
 
 .. module:: pcapkit.vendor.icmpv6.destination_unreachable_code
 
-This module contains the vendor crawler for **ICMPv6 Destination
-Unreachable Codes**, which is automatically generating
-:class:`pcapkit.const.icmpv6.destination_unreachable_code.DestinationUnreachableCode`.
+Generates :class:`pcapkit.const.icmpv6.destination_unreachable_code.DestinationUnreachableCode`.
 
 .. autoclass:: pcapkit.vendor.icmpv6.destination_unreachable_code.DestinationUnreachableCode
    :members: FLAG
@@ -51,9 +44,7 @@ ICMPv6 Time Exceeded Codes
 
 .. module:: pcapkit.vendor.icmpv6.time_exceeded_code
 
-This module contains the vendor crawler for **ICMPv6 Time Exceeded
-Codes**, which is automatically generating
-:class:`pcapkit.const.icmpv6.time_exceeded_code.TimeExceededCode`.
+Generates :class:`pcapkit.const.icmpv6.time_exceeded_code.TimeExceededCode`.
 
 .. autoclass:: pcapkit.vendor.icmpv6.time_exceeded_code.TimeExceededCode
    :members: FLAG
@@ -64,9 +55,7 @@ ICMPv6 Parameter Problem Codes
 
 .. module:: pcapkit.vendor.icmpv6.parameter_problem_code
 
-This module contains the vendor crawler for **ICMPv6 Parameter Problem
-Codes**, which is automatically generating
-:class:`pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode`.
+Generates :class:`pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode`.
 
 .. autoclass:: pcapkit.vendor.icmpv6.parameter_problem_code.ParameterProblemCode
    :members: FLAG

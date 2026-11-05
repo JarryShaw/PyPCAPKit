@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/strings.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Bytes-based Fields: String-based Fields: Internal Definitions: Type Variables:" />
-<meta name="description" content="Bytes-based Fields: String-based Fields: Internal Definitions: Type Variables:" />
+<meta property="og:description" content="Bytes-Based Fields: String-Based Fields: Internal Definitions: Type Variables:" />
+<meta name="description" content="Bytes-Based Fields: String-Based Fields: Internal Definitions: Type Variables:" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IP Address Fields" href="ipaddress.html"><link rel="prev" title="Numerical Fields" href="numbers.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -571,7 +571,7 @@
           <section id="module-pcapkit.corekit.fields.strings">
 <span id="text-fields"></span><h1>Text Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.strings" title="Link to this heading">¶</a></h1>
 <section id="bytes-based-fields">
-<h2>Bytes-based Fields<a class="headerlink" href="#bytes-based-fields" title="Link to this heading">¶</a></h2>
+<h2>Bytes-Based Fields<a class="headerlink" href="#bytes-based-fields" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.strings.BytesField">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.strings.</span></span><span class="sig-name descname"><span class="pre">BytesField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">lambda</span> <span class="pre">*_:</span> <span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/strings.html#BytesField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.strings.BytesField" title="Link to this definition">¶</a></dt>
@@ -677,7 +677,7 @@ empty.</p>
 
 </section>
 <section id="string-based-fields">
-<h2>String-based Fields<a class="headerlink" href="#string-based-fields" title="Link to this heading">¶</a></h2>
+<h2>String-Based Fields<a class="headerlink" href="#string-based-fields" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.strings.StringField">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.strings.</span></span><span class="sig-name descname"><span class="pre">StringField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unquote</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">lambda</span> <span class="pre">*_:</span> <span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/strings.html#StringField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.strings.StringField" title="Link to this definition">¶</a></dt>
@@ -993,8 +993,8 @@ updating the current instance.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Text Fields</a><ul>
-<li><a class="reference internal" href="#bytes-based-fields">Bytes-based Fields</a></li>
-<li><a class="reference internal" href="#string-based-fields">String-based Fields</a></li>
+<li><a class="reference internal" href="#bytes-based-fields">Bytes-Based Fields</a></li>
+<li><a class="reference internal" href="#string-based-fields">String-Based Fields</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>
 </ul>

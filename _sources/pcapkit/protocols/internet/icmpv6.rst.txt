@@ -6,9 +6,9 @@ ICMPv6 - Internet Control Message Protocol for IPv6
 
 :mod:`pcapkit.protocols.internet.icmpv6.protocol` contains
 :class:`~pcapkit.protocols.internet.icmpv6.protocol.ICMPv6` only,
-which implements extractor for Internet Control
+which implements the extractor for Internet Control
 Message Protocol for IPv6 (ICMPv6) [*]_, whose structure
-is described as below:
+is:
 
 ======= ========= ======================= ===================================
 Octets      Bits        Name                    Description

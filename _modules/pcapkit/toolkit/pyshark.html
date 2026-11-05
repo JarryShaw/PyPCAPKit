@@ -435,7 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -563,9 +563,9 @@
 
 <span class="sd">.. note::</span>
 
-<span class="sd">   Due to the lack of functionality of `PyShark`_, some</span>
-<span class="sd">   functions of :mod:`pcapkit` may not be available with</span>
-<span class="sd">   the `PyShark`_ engine.</span>
+<span class="sd">   `PyShark`_ reports dissected fields, not octets, so this module has no</span>
+<span class="sd">   reassembly adapter, and :func:`tcp_traceflow` reports an empty header and</span>
+<span class="sd">   payload.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -1145,35 +1145,14 @@
     <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_has_fixed_header</span><span class="p">(</span><span class="n">tcp</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_has_addresses</span><span class="p">(</span><span class="n">ip</span><span class="p">):</span>
 
-        <span class="c1"># NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's</span>
-        <span class="c1"># internal ``WTAP_ENCAP_*`` number -- through</span>
-        <span class="c1"># ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the</span>
-        <span class="c1"># PDML root layer's *filter* name when the frame layer has no such</span>
-        <span class="c1"># field. That name cannot do the job on its own: one filter name</span>
-        <span class="c1"># serves several DLTs, so keying on it would answer ``RAW`` (101) for a</span>
-        <span class="c1"># ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid</span>
-        <span class="c1"># DLTs, wrong ones, and silent (#843). ``frame.encap_type``</span>
-        <span class="c1"># distinguishes them; see that table's comment for the measurements.</span>
+        <span class="c1"># NOTE: the link type is keyed on ``frame.encap_type`` (``WTAP_ENCAP_*``)</span>
+        <span class="c1"># through ``ENCAP_TYPE_TO_LINKTYPE``, and on the root layer's filter name</span>
+        <span class="c1"># only when that field is absent: one filter name serves several DLTs, so</span>
+        <span class="c1"># it alone gives ``RAW`` for ``rawip6`` and ``NULL`` for ``DLT_LOOP`` (#843).</span>
         <span class="c1">#</span>
-        <span class="c1"># PyShark reports every field as ``LayerFieldsContainer``, a ``str``</span>
-        <span class="c1"># subclass, so the number arrives as text and needs ``int()``; and a</span>
-        <span class="c1"># field the frame layer does not carry raises ``AttributeError`` out</span>
-        <span class="c1"># of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is</span>
-        <span class="c1"># what the ``getattr`` default absorbs here.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Neither path substitutes a DLT on a miss. A lookup raises on an</span>
-        <span class="c1"># unresolvable key rather than minting one (#775), and</span>
-        <span class="c1"># NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,</span>
-        <span class="c1"># respectively -- each meant to go with its own handler protocol</span>
-        <span class="c1"># class, so neither is an honest stand-in for "unknown link type".</span>
-        <span class="c1"># The bare ``KeyError``/``ValueError`` is re-raised as</span>
-        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
-        <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
-        <span class="c1"># letting it escape this public function.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The frame layer is found by name, not taken as ``frame_info``, which</span>
-        <span class="c1"># is ``pkt_comment`` on a commented packet; the root layer is then the</span>
-        <span class="c1"># first layer that is not the frame layer.</span>
+        <span class="c1"># A miss raises ``MissingKeyError`` rather than substituting a DLT (#775),</span>
+        <span class="c1"># since ``NULL`` and ``RAW`` are real DLTs. The frame layer is found by</span>
+        <span class="c1"># name, as ``frame_info`` is ``pkt_comment`` on a commented packet.</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">_ENGINE</span><span class="si">}</span><span class="s1">: packet </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s1"> has no frame layer'</span><span class="p">)</span>
@@ -1212,11 +1191,8 @@
             <span class="n">timestamp</span><span class="o">=</span><span class="n">_parse_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">),</span>                                       <span class="c1"># timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'seq'</span><span class="p">),</span>                                           <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'ack'</span><span class="p">),</span>                                           <span class="c1"># TCP acknowledgement number</span>
-            <span class="c1"># NOTE: PyShark reports dissected *fields*, not the octets behind</span>
-            <span class="c1"># them, so there is no header or payload to hand over -- which is</span>
-            <span class="c1"># the same reason this module carries no ``tcp_reassembly`` at all.</span>
-            <span class="c1"># ``Extractor`` refuses ``trace_analyse=True`` on this engine, so</span>
-            <span class="c1"># nothing reads them.</span>
+            <span class="c1"># NOTE: PyShark reports fields, not octets, so both are empty;</span>
+            <span class="c1"># ``Extractor`` refuses ``trace_analyse=True`` on this engine.</span>
             <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">,</span>                                                          <span class="c1"># unavailable</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(),</span>                                                 <span class="c1"># unavailable</span>
         <span class="p">)</span>
@@ -1586,7 +1562,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1612,7 +1588,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}, "state": {"useMaxWidth": false}, "sequence": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

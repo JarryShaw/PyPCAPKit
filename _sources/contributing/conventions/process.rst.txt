@@ -3,14 +3,12 @@
 Running the Repository
 ----------------------
 
-The pages before this one are about writing library code. The rulings here are
-about running the repository -- what an install carries, what a changelog entry is,
-and what the issue and pull request labels mean. None of them is derivable from a
-module, and none fits a code-convention page, so the owner ruled on
-:issue:`918` that they get a page of
-their own rather than being left in their threads. Each ruling below is **paraphrased
-rather than quoted**, also on the owner's standing instruction there; the issue named
-beside it is where the original wording is.
+The rulings on running the repository -- what an install carries, what a
+changelog entry is, and what the issue and pull request labels mean. None is
+derivable from a module or fits a code-convention page, so the owner ruled on
+:issue:`918` that they get a page of their own. Each is **paraphrased rather than
+quoted**, on the owner's standing instruction there; the issue named beside it
+holds the original wording.
 
 The ``all`` Extra
 ~~~~~~~~~~~~~~~~~
@@ -36,9 +34,8 @@ On the tree, in :file:`pyproject.toml`:
 So ``all`` is exactly the union of those extras, written out as literals rather
 than referenced.
 
-Two groups stay out, and the reasons are **different** rather than two versions of
-one reason. Keeping them apart is what stops the list drifting the way it already did
-once:
+Two groups stay out, for **different** reasons; keeping them apart stops the list
+drifting as it once did:
 
 *  **The third-party capture engines are excluded by kind.** ``DPKT``, ``Scapy``,
    ``PyShark``, ``PyPCAPFile``, ``PyPCAP`` and ``PCAP_CT`` are not core addons, so
@@ -86,7 +83,7 @@ An entry is **not one line per commit**. Group the changes by topic, and give co
 detail of what actually changed in that version bump. Ruled on
 :issue:`918`.
 
-Two different things get confused here, so they are named apart:
+Two things get confused here:
 
 *  **A pull request's commits.** The shared changelog for the 1.5.0 cycle was a
    long-lived pull request of its own, carrying roughly one commit per code pull
@@ -99,8 +96,7 @@ Two different things get confused here, so they are named apart:
    once -- the completed Mobility Header registry is one bullet, not two. That is a
    property of *the file*, and it is the axis the ruling governs.
 
-Both are measurable rather than matters of memory, which is the point of writing the
-commands down instead of a figure that will be stale by the next merge:
+Both are measurable:
 
 .. code-block:: shell
 
@@ -158,8 +154,8 @@ statement someone made rather than a value derived from the change. That matters
 for the ``review:`` family below: such a label is not evidence of the state it names,
 it is a record that the owner asserted it.
 
-Some paths are automated, and each is worth knowing about because a label they set has
-had no human judgement behind it:
+Some paths are automated, and a label they set has had no human judgement behind
+it:
 
 *  **dependabot** puts ``dependencies``, ``python`` and ``github_actions`` on its own
    pull requests, and only those: :file:`.github/dependabot.yml` configures the
@@ -185,8 +181,7 @@ has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` an
 ``duplicate`` are all in live use and ``good first issue`` is archived. GitHub cannot
 archive a label, so an archived one keeps its name and description and is recoloured
 grey (``cccccc``); it is kept rather than deleted so the name stays reserved.
-Those are documented by GitHub rather than here, and are counted rather than listed so
-this page does not go stale every time one is added::
+GitHub documents those, and they are counted rather than listed here::
 
    gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
 
@@ -406,11 +401,11 @@ secret every run skips with a notice** rather than failing, and Status falls bac
 being set by hand.
 
 The board has these views: *All items*; *Board*, the open items in one column per
-Status; *Release 1.5*, the open milestone; *Needs decision* and *Blocked*, each the
-open items in that state; *Open pull requests*; and *History*, everything *Done*.
-Rename *Release 1.5* when the next milestone opens. Sorting and grouping are set in
-the web interface; names, layouts, filters and columns can also be set through the
-GraphQL API (``updateProjectV2View``).
+Status; *Needs decision* and *Blocked*, each the open items in that state; *Open
+pull requests*; *History*, everything *Done*; and a *Release X.Y* board for each
+milestone from ``PyPCAPKit v1.5`` on, filtered on it. Add one when a milestone
+opens. Sorting and grouping are set in the web interface; names, layouts, filters
+and columns can also be set through the GraphQL API (``updateProjectV2View``).
 
 Link neither from docstrings, code comments or Markdown files. Both are tracking
 metadata that changes as work moves, and a link to them goes stale the way a line

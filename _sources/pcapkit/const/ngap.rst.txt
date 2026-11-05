@@ -4,10 +4,6 @@
 
 .. module:: pcapkit.const.ngap
 
-This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ngap.protocol.NGAP` implementations. Available
-enumerations include:
-
 .. list-table::
 
    * - :class:`NGAP_ProcedureCode <pcapkit.const.ngap.procedure_code.ProcedureCode>`
@@ -15,17 +11,15 @@ enumerations include:
    * - :class:`NGAP_ProtocolIE <pcapkit.const.ngap.protocol_ie.ProtocolIE>`
      - NGAP Protocol IE Identifiers [*]_
 
-Each is automatically generated from |pycrate|_'s compiled NGAP
-specification rather than an IANA-style registry -- see
-:mod:`pcapkit.vendor.ngap.procedure_code`'s module docstring for why.
+Each is generated from |pycrate|_'s compiled NGAP specification rather than an
+IANA-style registry; :mod:`pcapkit.vendor.ngap` says why.
 
 NGAP Elementary Procedure Codes
 ===============================
 
 .. module:: pcapkit.const.ngap.procedure_code
 
-This module contains the constant enumeration for **NGAP Elementary Procedure Codes**,
-which is automatically generated from :class:`pcapkit.vendor.ngap.procedure_code.ProcedureCode`.
+Generated from :class:`pcapkit.vendor.ngap.procedure_code.ProcedureCode`.
 
 .. autoclass:: pcapkit.const.ngap.procedure_code.ProcedureCode
    :members:
@@ -37,8 +31,7 @@ NGAP Protocol IE Identifiers
 
 .. module:: pcapkit.const.ngap.protocol_ie
 
-This module contains the constant enumeration for **NGAP Protocol IE Identifiers**,
-which is automatically generated from :class:`pcapkit.vendor.ngap.protocol_ie.ProtocolIE`.
+Generated from :class:`pcapkit.vendor.ngap.protocol_ie.ProtocolIE`.
 
 .. autoclass:: pcapkit.const.ngap.protocol_ie.ProtocolIE
    :members:

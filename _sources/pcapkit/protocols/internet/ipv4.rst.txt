@@ -7,8 +7,7 @@ IPv4 - Internet Protocol Version 4
 :mod:`pcapkit.protocols.internet.ipv4.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` only,
 which implements the extractor for Internet Protocol
-version 4 (IPv4) [*]_, whose structure is described
-as below:
+version 4 (IPv4) [*]_, whose structure is:
 
 ======= ========= ======================= ============================================
 Octets      Bits        Name                    Description

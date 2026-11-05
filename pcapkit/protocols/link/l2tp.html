@@ -442,7 +442,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/dccp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/sctp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
@@ -590,12 +590,10 @@ of their own:</p>
 </tbody>
 </table>
 </div>
-<p>Only L2TPv2 is implemented.</p>
-<p>The base deliberately parses no header, as
-<a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> does for its family, because the
-versions do not share one. Only the first 16-bit word, with a version nibble at
-bits 12-15, is common to all of them; a base that parsed further would assume one
-version’s layout for every version.</p>
+<p>The base parses no header, as <a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>
+does for its family: only the first 16-bit word, with the version nibble at bits
+12-15, is common to every version, so parsing further would impose one version’s
+layout on all.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.protocol.L2TP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.protocol.</span></span><span class="sig-name descname"><span class="pre">L2TP</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.data.Data" title="pcapkit.protocols.data.Data"><span class="pre">Data</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ST</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.Schema" title="pcapkit.protocols.schema.Schema"><span class="pre">Schema</span></a></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp/protocol.html#L2TP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.protocol.L2TP" title="Link to this definition">¶</a></dt>
@@ -776,14 +774,13 @@ are refused, since no field picks a member (<a class="extlink-issue reference ex
 <a class="reference internal" href="l2tpv2.html#pcapkit.protocols.link.l2tpv2.protocol.L2TPv2" title="pcapkit.protocols.link.l2tpv2.protocol.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a> and refuses any other version, for
 that field, for the nibble and for the data
 <a class="reference internal" href="#pcapkit.protocols.link.l2tp.protocol.L2TP.from_data" title="pcapkit.protocols.link.l2tp.protocol.L2TP.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a> is handed. UDP port 1701 binds
-L2TPv2 itself, the only member. The switch is where a further member goes, and
-binding the port to the base through a hook making the same switch, as
+L2TPv2 itself. A further member goes in that switch, and binding the port to the
+base through a hook making the same switch, as
 <a class="reference internal" href="../internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch" title="pcapkit.protocols.internet.igmp.protocol.IGMP._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IGMP._dispatch</span></code></a> does for
-IP protocol 2, needs no new registry. L2TP is the easier case beside
+IP protocol 2, needs no new registry. Unlike
 <a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.protocol.HTTP" title="pcapkit.protocols.application.http.protocol.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>, whose
 <a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.protocol.HTTP._guess_version" title="pcapkit.protocols.application.http.protocol.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_guess_version()</span></code></a> has to <em>infer</em>
-the version, because HTTP’s wire format carries no version field, whereas L2TP
-states its version explicitly in those four bits.</p>
+the version, L2TP states it in the version nibble.</p>
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
