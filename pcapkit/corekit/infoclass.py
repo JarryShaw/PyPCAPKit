@@ -253,24 +253,14 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
 class InfoMeta(abc.ABCMeta):
     """Meta class to add dynamic support to :class:`Info`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`Info` class. It can be useful to reduce runtime generation
-    cost as well as caching already generated attributes.
-
     * :attr:`Info.__additional__`, :attr:`Info.__excluded__` and
-      :attr:`Info.__included__` are lists of additional, excluded and included
-      field names, which are used to determine certain names to be treated as
-      built-in names, left out of ``repr`` and the dumps, or carried as
-      metadata by :meth:`Info.to_dict`. They will be automatically populated
-      from the class attributes of the :class:`Info` class and its base
-      classes.
+      :attr:`Info.__included__` list the field names treated as built-in
+      names, left out of ``repr`` and the dumps, and carried as metadata by
+      :meth:`Info.to_dict`, respectively.
 
       .. note::
 
-         This is implemented thru the :meth:`__new__` method, which will
-         inherit the additional, excluded and included field names from the
-         base classes, as well as populating the additional, excluded and
-         included fields from the subclass attributes.
+         :meth:`__new__` appends each base's names to the subclass's own:
 
          .. code-block:: python
 
@@ -462,35 +452,27 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
                 ``__dict__`` without :attr:`FinalisedState.FINAL`.
 
         """
-        # NOTE: ``final`` is applied *after* the class object exists, so
-        # :meth:`__init_subclass__` has already run and returned by the time a
-        # bare ``@final`` lands -- it cannot see the mistake, and no other
-        # class-creation hook fires later. First instantiation is the next event
-        # in the class's life this library controls, and it is also where the
-        # damage surfaces: an unfinalised class has no generated ``__init__``, so
-        # construction would fall through to :meth:`__update__` and fail with
-        # ``TypeError: 'int' object is not iterable``, naming neither the class
-        # nor the mistake.
+        # NOTE: ``final`` lands after the class exists, so no class-creation
+        # hook sees a bare ``@final``. First instantiation is the next event this
+        # library controls, and where the damage surfaces: with no generated
+        # ``__init__``, construction falls through to :meth:`__update__` and
+        # fails with ``TypeError: 'int' object is not iterable``, naming neither
+        # the class nor the mistake.
         #
-        # It is nested inside the NONE branch rather than run ahead of it, so a
-        # finalised class never evaluates it: the outer test is false for it and
-        # jumps straight to ``super().__new__``. The raise also leaves
-        # ``__finalised__`` unset, so a second attempt re-enters and fails again
-        # rather than the error firing once.
+        # The check sits inside the NONE branch, so a finalised class never
+        # evaluates it, and the raise leaves ``__finalised__`` unset, so a
+        # second attempt fails again.
         #
-        # Both lookups read ``cls.__dict__`` rather than ``getattr``, because
-        # both markers are ordinary, inherited class attributes. The outer one:
-        # ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it
-        # finalises, and a subclass reading that state through inheritance was
-        # never finalised itself -- it would keep the ``__excluded__`` it copied
-        # at declaration, without the names ``info_final`` adds, which would
-        # leak ``__map__``, ``__map_reverse__`` and ``__multi__`` from
-        # ``to_dict()`` (GitHub issue #1490). The inner one: an ancestor hand-marked bare
-        # ``@final`` passes its marker to every subclass declared before it
-        # landed, and ``getattr`` would blame such a subclass for a mismarking
-        # that is its ancestor's. ``OwnDictRuleTests.test_a_subclass_that_
+        # Both lookups read ``cls.__dict__``, not ``getattr``, as both markers
+        # are inherited. A subclass inheriting ``BASE`` or ``FINAL`` was never
+        # finalised itself, so it lacks the ``__excluded__`` names
+        # ``info_final`` adds and would leak ``__map__``, ``__map_reverse__``
+        # and ``__multi__`` from ``to_dict()`` (#1490). A subclass declared
+        # before an ancestor's bare ``@final`` landed inherits that marker, and
+        # ``getattr`` would blame it for the ancestor's mistake, as
+        # ``OwnDictRuleTests.test_a_subclass_that_
         # predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it``
-        # pins that shape.
+        # pins.
         if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise InfoError(f'{cls.__name__}: marked final but never finalised, so it has no generated '

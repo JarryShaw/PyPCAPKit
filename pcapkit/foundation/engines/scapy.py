@@ -9,24 +9,21 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
-   Constructing this engine imports ``scapy.all``, which is what populates
-   `Scapy`_'s layer registries -- see :meth:`Scapy.__init__` for why anything
-   narrower silently returns undissected frames.
+   Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s
+   layer registries -- see :meth:`Scapy.__init__` for why anything narrower
+   silently returns undissected frames.
 
-   One side effect is worth knowing about in advance: ``scapy.all`` loads
-   :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there
-   triggers a ``CryptographyDeprecationWarning`` from |cryptography|_ about
-   finite-field Diffie-Hellman. It is emitted by any complete registry load, not
-   by ``scapy.all`` in particular, and it concerns a key-exchange code path
-   :mod:`pcapkit` never executes -- but it subclasses :exc:`UserWarning`, not
-   :exc:`DeprecationWarning`, so Python's default filters show it.
+   That load reaches `Scapy`_'s TLS layer through :mod:`scapy.layers.dcerpc`,
+   which triggers a ``CryptographyDeprecationWarning`` from |cryptography|_
+   about finite-field Diffie-Hellman, a code path :mod:`pcapkit` never
+   executes. It subclasses :exc:`UserWarning`, not :exc:`DeprecationWarning`,
+   so Python's default filters show it.
 
-   :mod:`pcapkit` deliberately does not filter it away. The warning is `Scapy`_'s
-   to emit and the consumer's to silence, on the same footing as every other
-   category (see :mod:`pcapkit.utilities.warnings`); hiding a third-party
-   deprecation notice from inside a constructor would suppress the only advance
-   warning that a future |cryptography|_ release breaks `Scapy`_'s TLS layer.
-   To silence it, filter it as usual::
+   :mod:`pcapkit` leaves it unfiltered: it is `Scapy`_'s to emit and the
+   consumer's to silence, as for every other category (see
+   :mod:`pcapkit.utilities.warnings`), and hiding it would suppress the only
+   advance notice that a future |cryptography|_ release breaks `Scapy`_'s TLS
+   layer. To silence it::
 
        import warnings
 
@@ -314,34 +311,23 @@ class Scapy(EngineBase['ScapyPacket']):
             extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
         """
-        # NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`, and the difference is
-        # load-bearing rather than cosmetic. Scapy dispatches on two registries that
-        # exist only as *import side effects* of its layer modules: ``conf.l2types``,
-        # mapping a capture's link type onto a link-layer class, and the
-        # ``bind_layers`` payload table. ``scapy/__init__.py`` fills in neither, so
-        # importing just the sniffing submodule leaves both empty --
-        # :class:`~scapy.utils.PcapReader` then cannot map even link type 1 (plain
-        # Ethernet), writes ``unknown LL type [1]/[0x1]`` to stderr and returns every
-        # frame as one opaque :class:`~scapy.packet.Raw` layer. Nothing raises, so the
-        # engine would deliver no dissection whatsoever and announce it only on
-        # stderr (#406).
+        # NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`. Scapy dispatches on two
+        # registries filled only as import side effects of its layer modules:
+        # ``conf.l2types``, mapping a link type onto a link-layer class, and the
+        # ``bind_layers`` payload table. With just the sniffing submodule both are
+        # empty, so :class:`~scapy.utils.PcapReader` cannot map even link type 1,
+        # writes ``unknown LL type [1]/[0x1]`` to stderr and returns every frame as
+        # one :class:`~scapy.packet.Raw` layer, raising nothing (#406).
         #
-        # Naming the layer modules individually is not a cheaper way to the same
-        # place: it repairs the link layer and leaves the payload table short, so
-        # ``dhcp.pcapng`` still comes back as ``Ethernet / IP / UDP / Raw`` rather
-        # than ``... / UDP / BOOTP / DHCP options``. Enumerating them here would also
-        # go stale silently -- a link or payload type added by a later scapy would
-        # regress to ``Raw`` with no error -- whereas ``scapy.all`` defers to
-        # ``conf.load_layers``, which scapy itself keeps current. The cost is the
-        # layer loading, not the façade: importing ``scapy.layers.all`` alone
-        # measures the same, so there is no complete-but-cheaper option to prefer.
+        # Importing the layer modules by name repairs the link layer but leaves the
+        # payload table short (``dhcp.pcapng`` stops at ``Ethernet / IP / UDP /
+        # Raw``), and goes stale silently as scapy adds types; ``scapy.all`` defers
+        # to ``conf.load_layers``, which scapy keeps current. The cost is the layer
+        # loading, not the façade: ``scapy.layers.all`` alone measures the same.
         #
-        # This stays inside ``__init__`` rather than moving to module scope so that
-        # ``import pcapkit`` does not pay for it; only callers who actually select
-        # this engine do. And it is bound to :attr:`_expkg`, the attribute
-        # :meth:`run` calls ``sniff`` on, rather than left as a bare side-effecting
-        # import -- an import whose value is used cannot be dropped later as unused,
-        # which is how this class of bug comes back.
+        # It stays in ``__init__`` so ``import pcapkit`` does not pay for it, and is
+        # bound to :attr:`_expkg`, which :meth:`run` calls ``sniff`` on, so it
+        # cannot later be dropped as an unused import.
         from scapy import all as scapy  # isort:skip
 
         self._expkg = scapy

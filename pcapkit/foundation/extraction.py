@@ -7,10 +7,9 @@
 .. module:: pcapkit.foundation.extraction
 
 :mod:`pcapkit.foundation.extraction` contains
-:class:`~pcapkit.foundation.extraction.Extractor` only,
-which synthesises file I/O and protocol analysis,
-coordinates information exchange in all network layers,
-and extracts parameters from a PCAP file.
+:class:`~pcapkit.foundation.extraction.Extractor`, which reads the frames of a
+capture file through an engine, and optionally reassembles, traces and dumps
+them.
 
 """
 import collections

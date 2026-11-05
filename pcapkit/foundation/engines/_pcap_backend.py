@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Which distribution owns the |pcap|_ module?
-=================================================
+"""|pcap|_ Distribution Detection
+====================================
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
@@ -12,20 +12,18 @@ Unrelated PyPI distributions install a top-level module named |pcap|_:
   interface, shipped as a *package* (:file:`pcap/__init__.py`), installable on
   3.10 and newer.
 
-They therefore **collide**: nothing stops more than one from being installed, and
-``import pcap`` then silently resolves to whichever the import system finds
-first. Measured on Python 3.10 with both present, the ``pcap/`` package wins and
-upstream's extension module is shadowed and unreachable -- so ``pcap-ct`` always
-takes precedence, and no amount of ordering by the caller changes it.
+They **collide**: nothing stops both being installed, and ``import pcap`` then
+silently resolves to whichever the import system finds first. Measured on
+Python 3.10 with both present, the ``pcap/`` package wins and shadows
+upstream's extension module, whatever order the caller imposes.
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
-:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` are separate engines, so each
-has to know which distribution it actually got rather than assume. This module is
-the one place that answers that, deliberately shared: the engines must agree on
-the answer, and a copy of the detection in each would be a chance to disagree.
-It is *only* detection -- nothing here is engine behaviour -- and it imports
-nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`, which imports
-nothing from :mod:`pcapkit.foundation`, so it cannot introduce an import cycle.
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` are separate engines, so
+each has to know which distribution it got. This module is their one shared
+detection, so the two cannot disagree. It holds no engine behaviour, and
+imports nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`, which
+imports nothing from :mod:`pcapkit.foundation`, so it cannot introduce an
+import cycle.
 
 """
 import contextvars

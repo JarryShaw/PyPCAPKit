@@ -47,6 +47,8 @@ class ReassemblyManager(Info):
     #: TCP reassembly.
     tcp: 'TCP_Reassembly'
     #: DTLS handshake-message reassembly.
+    #:
+    #: .. versionadded:: 1.6.0
     dtls: 'DTLS_Reassembly'
 
     if TYPE_CHECKING:

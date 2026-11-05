@@ -4,22 +4,13 @@
 
 .. module:: pcapkit.corekit.sentinels
 
-:mod:`pcapkit.corekit.sentinels` is the single, shared home for every
-module-level singleton sentinel this package defines for itself -- a value
-whose only job is to be recognised by identity (``value is SENTINEL``), so
-that it can never be confused with a value a caller might legitimately pass.
-See the "Naming a Sentinel" section of
-:file:`docs/source/contributing/conventions/sentinel-convention.rst` for the
-house rule the sentinels below follow.
+:mod:`pcapkit.corekit.sentinels` is the one home of every module-level
+singleton sentinel this package defines: a value recognised by identity
+(``value is SENTINEL``), so it is never confused with one a caller passes. The
+sentinels follow :ref:`sentinel-convention`.
 
-The owner's ruling on GitHub issue :issue:`911` chose one shared module over
-one module per sentinel, and this module is the only import path for each
-of them: the module of the class that uses each one does not re-export it
-(:issue:`1744`), per the ruling recorded on :issue:`1103` that a moved name keeps no
-re-export at its old path. :mod:`pcapkit.corekit.module`,
-:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
-:mod:`pcapkit.protocols.protocol` import the object they use from here, but
-none lists it in ``__all__`` or documents it, and none binds the type.
+It is the only import path for each (:issue:`911`): a module that uses one
+imports it from here and does not list it in ``__all__`` (:issue:`1744`).
 
 Every sentinel type derives from :class:`Sentinel`, which with its
 metaclass :class:`SentinelMeta` makes it behave like the type of a built-in

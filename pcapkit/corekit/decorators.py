@@ -5,8 +5,8 @@
 
 .. module:: pcapkit.corekit.decorators
 
-:mod:`pcapkit.corekit.decorators` contains several useful
-decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
+:mod:`pcapkit.corekit.decorators` contains the decorators
+:func:`~pcapkit.corekit.decorators.seekset`,
 :func:`~pcapkit.corekit.decorators.beholder` and
 :func:`~pcapkit.corekit.decorators.prepare`.
 
@@ -359,32 +359,23 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         schema = func(cls, data, length, packet)
         ret = schema.post_process(packet)
 
-        # NOTE: ``Schema.unpack`` clears ``__updated__`` before returning, but
-        # ``post_process`` runs after it and assigns fields -- and every field
-        # assignment sets the flag again (``Schema.__setattr__``). The schema is
-        # then left marked as needing a re-pack even though its ``__buffer__``
-        # already holds the octets just read off the wire, so the next
-        # ``bytes(schema)`` or ``len(schema)`` silently re-packs it.
+        # NOTE: ``Schema.unpack`` clears ``__updated__``, but ``post_process``
+        # runs after it and every field assignment sets the flag again
+        # (``Schema.__setattr__``), so the next ``bytes(schema)`` or
+        # ``len(schema)`` silently re-packs a schema whose ``__buffer__`` already
+        # holds the octets read. That re-pack calls ``post_process`` again with a
+        # packet context rebuilt from the schema's own fields, overwriting what
+        # the first call derived from the enclosing layer -- such as the IPv6
+        # source address
+        # ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``
+        # resolves, re-packed one option later by ``OptionField.unpack``'s
+        # ``len(data)``. So clear the flag after ``post_process``, as
+        # ``Schema.pack`` does.
         #
-        # That re-pack is not merely wasted work: ``Schema.pack`` calls
-        # ``post_process`` a *second* time, with a packet context rebuilt from
-        # the schema's own fields and therefore holding none of the enclosing
-        # layer's, so it overwrites exactly the values ``post_process`` derived
-        # from that context. It would discard, for one, the IPv6 source address
-        # that ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``
-        # has just resolved: ``OptionField.unpack`` measures each parsed option
-        # with ``len(data)``, which triggers the re-pack one option later.
-        #
-        # ``Schema.pack`` already orders the two the other way round -- clear the
-        # flag *after* ``post_process``, not before -- so match it here and the
-        # revision made while unpacking survives.
-        #
-        # Guarded rather than assigned outright because ``post_process`` may hand
-        # back something other than a schema: an implementation is free to return
-        # a nested one instead of ``self``, as
-        # ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, and the
-        # decorator is also applied to stand-ins in the test suite that return
-        # the packet mapping. Only a real schema carries the flag.
+        # Guarded because ``post_process`` may return something other than a
+        # schema: a nested one, as
+        # ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, or the
+        # packet mapping, as stand-ins in the test suite do.
         if hasattr(ret, '__updated__'):
             ret.__updated__ = False
 

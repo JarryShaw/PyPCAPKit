@@ -5,88 +5,53 @@
 .. module:: pcapkit.corekit.enum
 
 :mod:`pcapkit.corekit.enum` contains the bases every enumeration in this
-library is meant to inherit from, split by whether the enumeration may *grow*:
+library inherits from, split by whether the enumeration may *grow*:
 
-* :class:`EnumLookup` -- the bare **lookup** half: :meth:`~EnumLookup.get`,
+* :class:`EnumLookup` -- the **lookup** half: :meth:`~EnumLookup.get`,
   :meth:`~EnumLookup.get_all` and the overridable
-  :meth:`~EnumLookup._validate_value` guard. Nothing here mutates the
-  enumeration, so it is what a *closed* set can inherit without being handed a
-  contract it must refuse.
-* :class:`EnumRegistry`, a subclass of the above -- adds the **mutating** half:
+  :meth:`~EnumLookup._validate_value` guard. It mutates nothing, so a *closed*
+  set inherits it without a contract it must refuse.
+* :class:`EnumRegistry`, its subclass -- adds the **mutating** half:
   :meth:`~EnumRegistry.register`, :meth:`~EnumRegistry.register_alias`,
   :meth:`~EnumRegistry.register_aliases`, :meth:`~EnumRegistry._extend` and
   :meth:`~EnumRegistry._unregistered_member`. Every generated registry under
-  :mod:`pcapkit.const` inherits from here.
+  :mod:`pcapkit.const` inherits from it.
 
-That split follows the rules laid down in GitHub issue :issue:`877`: a helper
-enumeration is immutable by default, unless RFC or IANA documents its value space as
-open. Such closed sets subclass a bare base enumeration in this module, and
-:class:`EnumRegistry` subclasses that base for the mutable ones.
+A helper enumeration is closed unless RFC or IANA documents its value space as
+open (:issue:`877`). Every mutating method stays on :class:`EnumRegistry`: a
+base carrying ``register`` has no principled reason to withhold
+``register_alias``, and one holding both would leave :class:`EnumRegistry` too
+thin to justify a second class. The base carries range validation instead,
+:meth:`EnumLookup._validate_value`: legality is every enumeration's concern,
+mutation only the open registries'.
 
-Which methods land on which tier was settled in the same thread. The deciding
-consideration was that a base carrying ``register`` has no principled reason to
-withhold ``register_alias``, so drawing the line between them risked setting a
-bad precedent. Following that through,
-a base holding both would leave :class:`EnumRegistry` with only
-``register_aliases``, ``_extend`` and ``_unregistered_member`` -- too thin to
-justify a second class, collapsing the two tiers into one. So every mutating
-method stays put, and what the base carries instead is the other requirement
-from that thread: some range-validation logic that inheriting classes can hook
-into, which is :meth:`EnumLookup._validate_value`. Legality is
-every enumeration's concern; mutation is only the open registries'.
+The registry contracts are :issue:`842`'s: ``get`` is a shortcut for ``[]``
+and returns the canonical member; ``get_all`` returns every matching member;
+``register`` mints a member at runtime under the name the caller gives; and
+``register_alias`` (and ``register_aliases``) adds alias names to a member.
+Defining them here rather than as generated text in
+:data:`pcapkit.vendor.default.LINE` means adding a method edits one class, not
+every crawler template that replaces it (:issue:`775`).
 
-Supporting measurement, taken when :issue:`877` split the tiers: **none** of
-the non-registry enumerations defines ``register``, ``register_alias``,
-``register_aliases`` or ``_unregistered_member``, and **no**
-:class:`EnumRegistry` subclass exists outside :mod:`pcapkit.const`. The mutating half
-therefore had no users to serve among the classes being re-parented.
+The registry tiers, with :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+layered on top (:issue:`860`):
 
-The registry tier's own shape is the earlier design settled in GitHub issue
-:issue:`842`: ``get``, ``get_all``, ``register`` and ``register_alias`` are to
-exist on every const registry, so the abstraction is finished by moving them to
-the base class. The closed sets split off by :issue:`877` are outside that
-contract. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base class carries the overrides and dispatching
-logic it needs, and :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s subclasses override again
-where their contracts differ.
-
-That is a tiered hierarchy, of which this module is **tier one**:
-
-1. :class:`EnumRegistry` -- ``get``, ``get_all``, ``register`` and
-   ``register_alias``, in the form that suits a registry mapping one key to one
-   member. ``register`` and ``register_alias`` are its own; ``get`` and
-   ``get_all`` are declared one level up on :class:`EnumLookup` and reach it by
-   inheritance. So a registry under :mod:`pcapkit.const` gets all of them from
-   this module, apart from the
-   overrides below and a few hand-written ``get`` overrides.
-2. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base -- overrides each of them, routing the lookups
-   through its ``_dispatch``, because a port lookup needs a transport protocol
-   to be answerable at all. Defined not in this module but in
-   :class:`pcapkit.const.reg.apptype.apptype.AppType` itself (GitHub issue
-   :issue:`860`), which mixes in :class:`EnumRegistry` directly. ``register`` and
-   ``register_alias`` are overridden without that dispatch, staying on the
-   registry they are called on, so that a write never leaks onto a transport
-   IANA never assigned the service to -- a minted member for the first, an
-   alias for the second. Plus ``_unregistered_member``, for its own extra
-   attributes (``svc``, ``port``, ``proto``) that the generic one below does
-   not know to set.
-3. The :class:`~pcapkit.const.reg.apptype.apptype.AppType` transport subclasses --
-   :class:`~pcapkit.const.reg.apptype.tcp.TCP`, :class:`~pcapkit.const.reg.apptype.udp.UDP`,
-   :class:`~pcapkit.const.reg.apptype.sctp.SCTP`, :class:`~pcapkit.const.reg.apptype.dccp.DCCP` --
-   need no override of their own at all: ``_dispatch`` already returns ``cls`` unchanged the moment
-   ``cls.__registry__`` is not :obj:`None`, which is true for exactly these subclasses, so tier 2's
-   lookups already answer correctly on each of them without a further layer.
-
-Defining these methods here, rather than as generated *text* written out
-longhand in :data:`pcapkit.vendor.default.LINE` and copied into each crawler
-that replaces that template wholesale, is what :issue:`775` asks for: as text,
-adding one method means editing every bespoke template by hand.
-
-The contracts are those set out on GitHub issue :issue:`842`: ``get`` is a
-shortcut for the ``[]`` operation and returns the canonical enumeration member;
-``get_all`` returns every matching member; ``register`` mints a new member on
-the class at runtime under the name the caller specifies, so nothing has to be
-guessed; ``register_alias`` (and ``register_aliases``) adds further alias names
-to a given member's mapping.
+1. :class:`EnumRegistry` -- the form for a registry mapping one key to one
+   member, which a registry under :mod:`pcapkit.const` uses as is unless it
+   carries a hand-written ``get`` override.
+2. :class:`~pcapkit.const.reg.apptype.apptype.AppType`, mixing in
+   :class:`EnumRegistry` directly -- routes ``get`` and ``get_all`` through its
+   ``_dispatch``, since a port lookup needs a transport protocol. Its
+   ``register`` and ``register_alias`` skip that dispatch and stay on the
+   registry they are called on, so a write never leaks onto a transport IANA
+   never assigned the service to. Its ``_unregistered_member`` also sets
+   ``svc``, ``port`` and ``proto``.
+3. Its transport subclasses -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+   :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+   :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
+   :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- override nothing:
+   ``_dispatch`` returns ``cls`` unchanged once ``cls.__registry__`` is not
+   :obj:`None`, which holds for exactly these.
 
 .. versionadded:: 1.5.0
 

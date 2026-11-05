@@ -55,9 +55,9 @@ logger = get_logger(__name__)
 class ReassemblyMeta(abc.ABCMeta):
     """Meta class to add dynamic support to :class:`Reassembly`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`Reassembly` class. It can be useful to reduce unnecessary
-    registry calls and simplify the customisation process.
+    It provides :attr:`Reassembly.name`, :attr:`Reassembly.protocol` and
+    :attr:`Reassembly.registry` as class properties, the first two read from
+    ``__protocol_name__`` and ``__protocol_type__`` where a subclass sets them.
 
     """
     if TYPE_CHECKING:

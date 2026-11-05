@@ -27,9 +27,9 @@ _T = TypeVar('_T')
 class EngineMeta(abc.ABCMeta, Generic[_T]):
     """Meta class to add dynamic support to :class:`EngineBase`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`EngineBase` class. It can be useful to reduce unnecessary
-    registry calls and simplify the customisation process.
+    It provides :attr:`EngineBase.name`, :attr:`EngineBase.module` and
+    :attr:`EngineBase.registry` as class properties, the first two read from
+    ``__engine_name__`` and ``__engine_module__`` where a subclass sets them.
 
     """
     if TYPE_CHECKING:
