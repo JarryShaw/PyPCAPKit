@@ -5,11 +5,9 @@
 
 .. module:: pcapkit.protocols.transport.tcp.protocol
 
-:mod:`pcapkit.protocols.transport.tcp.protocol` contains
-:class:`~pcapkit.protocols.transport.tcp.protocol.TCP` only,
-which implements the extractor for Transmission Control
-Protocol (TCP) [*]_, whose structure is described as
-below:
+:mod:`pcapkit.protocols.transport.tcp.protocol` holds
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`, the extractor for the
+Transmission Control Protocol (TCP) [*]_, whose header is:
 
 ======= ========= ========================= =======================================
 Octets      Bits        Name                    Description
@@ -180,9 +178,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
           schema=Schema_TCP, data=Data_TCP):
     """This class implements Transmission Control Protocol.
 
-    This class supports parsing of the following protocols, which are
-    registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`
-    attribute:
+    The :attr:`self.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`
+    registry binds these ports:
 
     .. list-table::
        :header-rows: 1
@@ -195,12 +192,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          - :class:`pcapkit.protocols.application.ftp.protocol.FTP`
        * - 80
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
+       * - 443
+         - :class:`pcapkit.protocols.application.tls.protocol.TLS`
        * - 8080
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
 
-    This class supports parsing of the following TCP options,
-    which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`
-    enumeration:
+    The TCP options it parses, by
+    :class:`pcapkit.const.tcp.option.Option` code:
 
     .. list-table::
        :header-rows: 1
@@ -275,9 +273,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          - :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_fastopen`
          - :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_fastopen`
 
-    This class supports parsing of the following Multipath TCP options,
-    which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
-    enumeration:
+    The Multipath TCP options it parses, by
+    :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption` subtype:
 
     .. list-table::
        :header-rows: 1
@@ -337,6 +334,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
     .. versionchanged:: 1.6.0
 
+       * Port 443 binds
+         :class:`~pcapkit.protocols.application.tls.protocol.TLS`
+         (:issue:`2437`).
        * The checksum is computed when :meth:`make` is given none, over the
          ``pseudo`` it is given or by the enclosing IP layer, and verified by
          that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
@@ -412,19 +412,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             #   443   https      http protocol over TLS/SSL
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
-            # 8443 is deliberately absent: IANA registers it as ``pcsync-https``
-            # rather than as an HTTP alternate or a TLS one, so nothing here
-            # names it.
+            # 8443 is deliberately absent: IANA registers it as ``pcsync-https``,
+            # not as an HTTP or TLS alternate.
             #
-            # The HTTP ports bind the version-dispatching
-            # :class:`pcapkit.protocols.application.http.protocol.HTTP` rather than
-            # ``httpv1.HTTPv1``, because HTTP/1 and HTTP/2 share these ports on the
-            # wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on
-            # 80 -- so the port cannot decide the version and the payload has to.
-            # ``HTTP._dispatch_version`` identifies the payload (the RFC 9113 §3.4
-            # connection preface, an HTTP/1 start line, then a plausible HTTP/2
-            # frame header) and the layer is ``HTTPv1`` or ``HTTPv2`` (#2524).
-            # UDP's table binds the same class for the same ports.
+            # The HTTP ports bind the version-dispatching HTTP base, since
+            # HTTP/1 and cleartext HTTP/2 share them (RFC 9113): the payload,
+            # not the port, decides the version, through
+            # ``HTTP._dispatch_version`` (#2524). UDP's table does the same.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp_data.protocol', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp.protocol', 'FTP'),
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
@@ -433,15 +427,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         },
     )
 
-    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` checks its own
-    #: -- a bare :class:`int` is accepted because the registry is keyed by
-    #: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
-    #: member carries one (:issue:`2268`).
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is valid too. Read by
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
+    #: to check a ``code=`` key as
+    #: :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp` checks
+    #: its own; a bare :class:`int` is a port number, which an
+    #: :class:`~pcapkit.const.reg.apptype.apptype.AppType` member carries
+    #: (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 
     #: Option code to method mapping, see :meth:`_read_tcp_options` and
@@ -601,15 +594,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         # connection control flags
         #
-        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a
-        # runtime no-op, so the accumulator would stay the plain :class:`int` ``0`` for a
-        # segment whose flags octet is all zero: the ``|=`` below is the only promotion and
-        # never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:
-        # argument of type 'int' is not a container or iterable``. A segment with any flag
-        # set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` whose
-        # ``_missing_`` accepts any value in the 12-bit flags field, ``0`` to ``0xFFF``,
-        # so ``Enum_Flags(0)`` is a valid flagless member that compares equal to ``0`` and
-        # ORs as usual. This is the type :attr:`connection` advertises.
+        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``: a flagless
+        # segment would keep a plain ``int``, and ``in`` on it raises TypeError.
         _flag = Enum_Flags(0)
         for key, val in schema.flags.items():
             if val == 1:
@@ -620,20 +606,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'connection': self._flags,
         })
 
-        # NOTE: A Data Offset declaring more header than was captured leaves the
-        # missing octets to read as zeros, which ``from_data`` then rebuilds;
-        # rejecting it keeps the octets as captured inside the parent (#1404).
+        # NOTE: Rejected rather than read as zeros, which ``from_data`` would
+        # rebuild, so the parent keeps the octets as captured (#1404).
         if len(self) < tcp.hdr_len:
             raise ProtocolError(f'{self.alias}: header length {tcp.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')
 
         _optl = tcp.hdr_len - TCP_MIN_HEADER_LEN
         if _optl:
-            # NOTE: the octets after an End of Option List option are kept as
-            # read, so that :meth:`make` rebuilds the option area -- and the
-            # Data Offset computed from it -- at its original length. They are
-            # sliced from the octets, as IPv4 does, since a schema :meth:`make`
-            # built holds them in ``options`` and no ``padding`` (#2769).
+            # NOTE: Post-EOOL octets are kept so ``make`` rebuilds the parsed Data Offset;
+            # sliced as IPv4 does, since a built schema keeps them in ``options`` (#2769).
             options = self._read_tcp_options(_optl)
             _used = sum(opt.length for _, opt in options.items(multi=True))
             tcp.__update__({
@@ -711,18 +693,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
            :exc:`ValueError` rather than being accepted (:issue:`758`).
 
         """
-        # NOTE: the connection control flags are resolved *before* the options are
-        # built, because option makers reached from ``_make_tcp_options`` read
-        # :attr:`self._flags` -- ``_make_mptcp_join`` branches on it to pick between
-        # the three MP_JOIN layouts of :rfc:`8684` section 3.2 (figure 5 for SYN,
-        # figure 6 for SYN/ACK, figure 7 for ACK). Resolving them afterwards would
-        # raise ``AttributeError: 'TCP' object has no attribute '_flags'`` on a fresh
-        # instance, and on an instance that had already parsed a segment would build
-        # the option from *that* segment's flags: packing an MP_JOIN-ACK segment from
-        # a parsed MP_JOIN-SYN instance would emit the 12-octet SYN option and drop
-        # the caller's 20-octet HMAC. Initialising ``_flags`` to zero would not fix
-        # that: it leaves the stale read and turns the fresh case into a spurious
-        # ``invalid flags combination``.
+        # NOTE: Flags come first: ``_make_mptcp_join`` picks the MP_JOIN layout from
+        # ``self._flags``, which a fresh instance lacks and a parsed one holds stale.
         flags = {
             'cwr': int(cwr),
             'ece': int(ece),
@@ -734,17 +706,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'fin': int(fin),
         }  # type: Schema_Flags
 
-        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``.
-        # :func:`typing.cast` is a runtime no-op, so the accumulator would stay the
-        # plain :class:`int` ``0`` whenever no flag is set, and ``Enum_Flags.SYN in
-        # self._flags`` would raise ``TypeError: argument of type 'int' is not a
-        # container or iterable`` instead of reaching ``_make_mptcp_join``'s own
-        # ``ProtocolError: ... invalid flags combination``. :class:`Enum_Flags` is an
-        # ``aenum.IntFlag``, so ``Enum_Flags(0)`` is a valid flagless member that
-        # compares equal to ``0`` and ORs as usual. :meth:`read` seeds itself the same
-        # way, rather than relying on ``mptcp_data_selector`` rejecting a flagless
-        # MP_JOIN before ``_read_mptcp_join`` runs, which would leave the ``TypeError``
-        # avoided only by a guard in another file.
+        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``: with no flag
+        # set a plain ``int`` stays, and ``in`` on it raises TypeError.
         _flag = Enum_Flags(0)
         for key, val in flags.items():
             if val == 1:
@@ -977,9 +940,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 if isinstance(schema, bytes):
                     if not schema:
                         raise ProtocolError(f'{self.alias}: invalid option: {schema!r} holds no kind octet')
-                    # NOTE: Resolved as the kind of a ``(code, arguments)`` pair
-                    # is, so a kind no ``Option`` member holds, such as 255,
-                    # comes back as its code rather than raising (#2708).
+                    # NOTE: Resolved like a ``(code, arguments)`` pair's kind, so a kind
+                    # no ``Option`` member holds, such as 255, stays its code (#2708).
                     code = self._make_index(schema[0], Enum_Option, bits=8, name='option kind')
                     data = schema  # type: Schema_Option | bytes
                     data_len = len(data)
@@ -1020,9 +982,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 options_list.append(data)
                 total_length += data_len
 
-        # NOTE: ``padding`` belongs after an End of Option List option; with
-        # that gone -- e.g. options edited after parsing -- it is dropped, and
-        # the Data Offset is computed from the options alone.
+        # NOTE: ``padding`` belongs after EOOL; with that gone, e.g. options edited after
+        # parsing, it is dropped and the Data Offset counts the options alone.
         if padding and code == Enum_Option.End_of_Option_List:
             options_list.append(padding)
             total_length += len(padding)
@@ -2786,10 +2747,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if seconds is None or seconds < 0:
             raise ProtocolError(f'TCP: invalid [OptNo {code}] timeout: {timeout!r}')
 
-        # NOTE: a parsed (or requested) unit that the value no longer fits in --
-        # e.g. a parsed seconds option edited past 15 bits, or a minutes option
-        # edited to a value that is not a whole number of minutes -- falls back
-        # to the size-based choice, as when no unit is given at all.
+        # NOTE: A parsed or requested unit the value does not fit (seconds past 15 bits, or
+        # minutes not whole) falls back to the size-based choice, as with no unit given.
         fits_seconds = seconds.bit_length() <= 15
         if granularity is None or (not granularity and not fits_seconds) or (granularity and seconds % 60):
             granularity = not fits_seconds
@@ -2875,14 +2834,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             meth = name[1]
 
         schema = meth(subtype_val, opt, **kwargs)
-        # NOTE: ``Schema_MPTCP.subtype`` is not a packable field (see the
-        # comment on :class:`~pcapkit.protocols.transport.tcp.schema.MPTCP`), so
-        # the makers above only put ``subtype`` into ``test``, the bitfield they
-        # actually pack. Unpacking sets it from
-        # :meth:`~pcapkit.protocols.transport.tcp.schema._MPTCP.post_process`;
-        # this is the same assignment for the construction path, so a schema
-        # built via ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])`` has
-        # ``.subtype`` set just like one built by parsing bytes.
+        # NOTE: ``Schema_MPTCP.subtype`` is no field (see the NOTE on ``MPTCP``), so it is
+        # set here, as ``_MPTCP.post_process`` sets it on unpacking.
         schema.subtype = subtype_val
         return schema
 
@@ -2909,18 +2862,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             data = opt.data
 
-        # NOTE: The length is sized from what the schema actually writes, not
-        # from ``data``'s own width (#2272). ``Schema_MPTCPUnknown`` always packs
-        # three octets of header -- ``kind``, ``length`` and the subtype/flags
-        # octet whose low nibble takes ``data[0]`` -- and then ``data[1:]`` as
-        # its body, so the option is never shorter than 3 octets -- the smallest
-        # Multipath TCP option :rfc:`8684` section 3 permits. A plain
-        # ``2 + len(data)`` would declare 2 for ``data=b''`` while those three
-        # octets are packed anyway, and the segment could not be read back:
-        # ``MPTCPUnknown.data`` sizes itself ``pkt['length'] - 3``, which would
-        # go negative and raise ``ProtocolError: Field data resolved to a
-        # negative length``. For every non-empty ``data`` the two expressions
-        # agree, so only the empty case tells them apart.
+        # NOTE: Sized from what the schema writes (#2272): three octets, the third taking
+        # ``data[0]``, then ``data[1:]``; ``2 + len(data)`` would not read back for ``b''``.
         return Schema_MPTCPUnknown(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
             length=3 + len(data[1:]),
@@ -3115,14 +3058,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_MPTCPDSS(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: this arithmetic follows :rfc:`8684` section 3.3 figure 9:
-            # 4 for ``Kind``/``Length``/subtype/flags, then the Data ACK (4, or
-            # 8 with ``a``) when ``A`` is set, and the mapping when ``M`` is set
-            # -- the DSN (4, or 8 with ``m``), the 4-octet Subflow Sequence
-            # Number, the 2-octet Data-Level Length and, only if checksums were
-            # negotiated, the 2-octet Checksum. ``a`` and ``m`` widen a field
-            # only when it is present, so a stray flag on the wire still packs
-            # back without changing the length.
+            # NOTE: RFC 8684, section 3.3, figure 9. ``a`` and ``m`` widen only a present
+            # field (the Data ACK if ``A``, the DSN if ``M``), so a stray flag packs back.
             length=4 + ((8 if flag_a else 4) if flag_A else 0)
             + ((8 if flag_m else 4) + 6 + (2 if checksum is not None else 0) if flag_M else 0),
             test={
@@ -3192,12 +3129,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             port = opt.port
             hmac = opt.hmac
         else:
-            # NOTE: Through ``parse_ip_address`` because the option length below
-            # is derived from the family here, ahead of the schema, so a bare
-            # ``ipaddress.ip_address`` would launder a ``bool`` into an
-            # ``IPv4Address`` that the schema's own guard can no longer tell from
-            # a real address: ``addr=True`` would reach
-            # ``mptcp_add_address_selector`` as ``0.0.0.1`` with an IPv4 length.
+            # NOTE: ``parse_ip_address`` refuses a ``bool``; ``ipaddress.ip_address`` would
+            # make it ``0.0.0.1`` before the schema's own guard sees it.
             addr_val = parse_ip_address(
                 addr, f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid address')
         version = addr_val.version
@@ -3257,12 +3190,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             self._make_uint(item, bits=8, name=f'{where} addr_id')
         return Schema_MPTCPRemoveAddress(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.4.2 figure 13 gives ``Length = 3 + n``,
-            # where the 3 is ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved
-            # (1) and each of the *n* Address IDs is one further octet. A constant
-            # length would be right for only one list length. This is the field
-            # ``MPTCPRemoveAddress.addr_id`` sizes itself from, as
-            # ``pkt['length'] - 3``, so it governs the parse as well as the pack.
+            # NOTE: RFC 8684, section 3.4.2, figure 13: ``Length = 3 + n``, one octet per
+            # Address ID, which ``MPTCPRemoveAddress.addr_id`` also sizes itself from.
             length=3 + len(addr_id_list),
             test={
                 'subtype': subtype.value,
@@ -3295,9 +3224,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
-            # NOTE: ``backup`` must be carried over, or reconstructing a parsed
-            # MP_PRIO would always write ``B=0``; the ``B`` flag is the entire
-            # payload of this option.
+            # NOTE: ``backup`` is carried over, or rebuilding a parsed MP_PRIO would write
+            # ``B=0``; the ``B`` flag is this option's entire payload.
             reserved = opt.reserved
             backup = opt.backup
             addr_id = opt.addr_id
@@ -3305,17 +3233,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPPriority(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.3.8 figure 11 gives MP_PRIO as **3**
-            # octets -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B`` (1)
-            # -- with no Address ID at all: section 5 records that this document
-            # "specifies the removal of the AddrID field [RFC6824] in the MP_PRIO
-            # option". The 4-octet form is :rfc:`6824`'s, which this schema and
-            # ``_read_mptcp_prio`` both still accept, so the length has to follow
-            # whether an Address ID was actually given rather than being a
-            # constant. ``MPTCPPriority.addr_id`` is conditional on
-            # ``pkt['length'] == 4``, so a constant ``4`` would satisfy its own
-            # predicate and pack a phantom all-zero Address ID octet when
-            # ``addr_id=None``.
+            # NOTE: MP_PRIO is 3 octets (RFC 8684, section 3.3.8, figure 11); RFC 6824's
+            # 4 with an Address ID is still accepted, so ``addr_id`` decides the length.
             length=3 if addr_id is None else 4,
             test={
                 'subtype': subtype.value,
@@ -3662,20 +3581,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             reserved = opt.reserved
             backup = opt.backup
             addr_id = opt.addr_id
-            # NOTE: ``hmac`` must be carried over here, or reconstructing a
-            # parsed MP_JOIN-SYN/ACK would substitute the ``bytes(8)`` default
-            # for the truncated HMAC that was on the wire.
+            # NOTE: ``hmac`` is carried over, or rebuilding a parsed MP_JOIN-SYN/ACK would
+            # substitute the ``bytes(8)`` default for the truncated HMAC on the wire.
             hmac = opt.hmac
             nonce = opt.nonce
 
         where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPJoinSYNACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the
-            # SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +
-            # ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random
-            # number (32 bits, 4). The SYN form of figure 5 is 12, since it
-            # carries a 4-octet token where this one carries an 8-octet HMAC.
+            # NOTE: RFC 8684, section 3.2, figure 6: 4 octets, the truncated
+            # HMAC (8) and the random number (4).
             length=16,
             test={
                 'subtype': subtype.value,
@@ -3715,10 +3630,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         where = f'[OptNo {Enum_Option.Multipath_TCP}] {subtype.name}'
         return Schema_MPTCPJoinACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            # NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the
-            # ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,
-            # being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,
-            # 20). ``_read_join_ack``'s guard requires the same 24.
+            # NOTE: :rfc:`8684` section 3.2 figure 7: 4 octets, then the full 20-octet HMAC;
+            # ``_read_join_ack``'s guard requires the same 24.
             length=24,
             test={
                 'subtype': subtype.value,

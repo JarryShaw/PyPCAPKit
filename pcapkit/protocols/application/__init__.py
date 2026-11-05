@@ -5,22 +5,22 @@
 
 .. module:: pcapkit.protocols.application
 
-:mod:`pcapkit.protocols.application` is a collection of all protocols in
-application layer.
+:mod:`pcapkit.protocols.application` holds the application layer protocols.
 
-Each protocol class, and the base class
-:class:`~pcapkit.protocols.application.application.Application`, is imported the
-first time it is reached rather than with this package, through
-:func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+.. versionchanged:: 1.6.0
+
+   Each protocol class, and the base class
+   :class:`~pcapkit.protocols.application.application.Application`, is imported on
+   first access through :func:`~pcapkit.utilities.importlib.lazy_exports`, not with
+   this package (:issue:`2730`).
 
 """
 # TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
 #       SSH, TELNET, XMPP.
 #
-# NB: NGAP's decoder below is an optional
-#     dependency; see pcapkit.protocols.application.ngap.protocol. Importing the module
-#     is free -- ``pycrate`` is imported inside the parse path, not here.
+# NB: NGAP's decoder, ``pycrate``, is an optional dependency imported only
+#     when parsing; see pcapkit.protocols.application.ngap.protocol.
 
 from typing import TYPE_CHECKING
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     # Base Class for Application Layer
     from pcapkit.protocols.application.application import Application
 
-    # Utility Classes for Protocols
+    # Application Layer Protocols
     from pcapkit.protocols.application.ftp import FTP
     from pcapkit.protocols.application.ftp_data import FTP_DATA
     from pcapkit.protocols.application.httpv1 import HTTPv1

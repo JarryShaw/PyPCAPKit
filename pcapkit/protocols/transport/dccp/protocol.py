@@ -5,11 +5,9 @@
 
 .. module:: pcapkit.protocols.transport.dccp.protocol
 
-:mod:`pcapkit.protocols.transport.dccp.protocol` contains
-:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP` only,
-which implements the extractor for Datagram Congestion
-Control Protocol (DCCP) [*]_, whose generic header is
-described as below:
+:mod:`pcapkit.protocols.transport.dccp.protocol` holds
+:class:`~pcapkit.protocols.transport.dccp.protocol.DCCP`, the extractor for the
+Datagram Congestion Control Protocol (DCCP) [*]_, whose generic header is:
 
 ======= ========= ========================= =======================================
 Octets      Bits        Name                    Description
@@ -131,9 +129,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
     <pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__>`, so the application data
     area is :class:`~pcapkit.protocols.misc.raw.protocol.Raw` unless one is.
 
-    This class supports parsing of the following DCCP options, which are
-    directly mapped to the :class:`pcapkit.const.dccp.option.Option`
-    enumeration:
+    The DCCP options it parses, by :class:`pcapkit.const.dccp.option.Option`
+    type:
 
     .. list-table::
        :header-rows: 1
@@ -214,8 +211,8 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too, as for
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is valid too, as for
     #: :attr:`TCP.__proto_key__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto_key__>`.
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 

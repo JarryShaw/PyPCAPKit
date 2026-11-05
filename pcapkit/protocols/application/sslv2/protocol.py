@@ -4,11 +4,10 @@
 
 .. module:: pcapkit.protocols.application.sslv2.protocol
 
-:mod:`pcapkit.protocols.application.sslv2.protocol` contains
-:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` only,
-which implements an extractor for Secure Sockets Layer
-version 2 (SSLv2) [*]_, as defined by the (long expired)
-Netscape draft that introduced it.
+:mod:`pcapkit.protocols.application.sslv2.protocol` holds
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, the extractor for
+Secure Sockets Layer version 2 (SSLv2) [*]_, as the expired Netscape draft
+defines it.
 
 SSLv2 is wire-*incompatible* with SSLv3 and TLS: it carries no
 content-type byte and no ``0x03xx``-style record version, its record header
@@ -17,8 +16,7 @@ the first octet of the record's data rather than a separate record-layer
 field. See :func:`~pcapkit.protocols.application.sslv2.schema.sslv2_record_length`
 for the header's exact shape.
 
-SSLv1 has no module here, nor does it need one: it was never publicly
-released, so there is no wire format to dissect.
+SSLv1 was never publicly released, so it has no wire format to dissect.
 
 Decoding ``CLIENT-HELLO``/``SERVER-HELLO`` bodies assumes the record is
 genuinely cleartext. Per the draft's §5.4, most other message types are sent

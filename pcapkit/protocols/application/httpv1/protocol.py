@@ -4,12 +4,11 @@ r"""HTTP/1.* - Hypertext Transfer Protocol
 
 .. module:: pcapkit.protocols.application.httpv1.protocol
 
-:mod:`pcapkit.protocols.application.httpv1.protocol` contains
-:class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`,
-which implements an extractor for Hypertext Transfer
-Protocol (HTTP/1.*) [*]_, and its
-:class:`~pcapkit.protocols.application.httpv1.protocol.Type` enumeration. The
-structure of an HTTP/1.* message is described as below:
+:mod:`pcapkit.protocols.application.httpv1.protocol` holds
+:class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1`, the extractor for
+the Hypertext Transfer Protocol (HTTP/1.*) [*]_, and its
+:class:`~pcapkit.protocols.application.httpv1.protocol.Type` enumeration. An
+HTTP/1.* message is:
 
 .. code-block:: text
 
@@ -68,10 +67,8 @@ if TYPE_CHECKING:
 
 __all__ = ['HTTPv1']
 
-# NOTE: The start-line patterns ``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS``,
-# and ``_HTTP2_PREFACE_HEADER``, are imported from ``http.py``, where
-# :func:`~pcapkit.protocols.application.http.protocol.test_start_line` classifies with
-# them; one copy keeps that predicate and this parser in agreement.
+# NOTE: The start-line patterns and ``_HTTP2_PREFACE_HEADER`` come from
+# ``http.py``, so ``test_start_line`` there and this parser agree.
 
 
 class Type(EnumLookup, StrEnum):
@@ -168,15 +165,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
 
         packet = schema.data
 
-        # NOTE: A payload carrying no header/body separator at all unpacks short
-        # here. It must surface as ``ProtocolError``, not a bare ``ValueError``:
-        # ``HTTP._guess_version`` falls through to its HTTP/2 arm on
-        # ``ProtocolError`` alone, so any other exception from an HTTP/1 attempt
-        # on HTTP/2 wire bytes would abort the guess instead of failing it.
-        # ``ProtocolError`` is also what the ``Raises:`` section above promises,
-        # and the same conversion the explicit ``version=`` path of
-        # ``HTTP.read`` performs; chained, so the unpacking error stays
-        # reachable as ``__cause__``.
+        # NOTE: Unpacking short with no header/body separator raises ``ProtocolError``,
+        # the only error ``HTTP._guess_version`` falls through to its HTTP/2 arm on.
         try:
             header, body = packet.split(b'\r\n\r\n', maxsplit=1)
         except ValueError as error:
@@ -269,9 +259,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
                     self._check_raw(raw_line, text, fold=False)
                     header_line = raw_line + b'\r\n'
 
-        # NOTE: Field lines are matched to the header fields by content, in
-        # order, rather than by position, so that adding or removing a field
-        # leaves the field lines around it as they were received.
+        # NOTE: Field lines are matched to the header fields by content, in order, not by
+        # position, so adding or removing a field leaves the lines around it as received.
         received_fields = []  # type: list[Optional[tuple[str, str]]]
         for raw_field in raw_header:
             try:
@@ -329,9 +318,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             Key-value pairs for protocol construction.
 
         """
-        # NOTE: ``read`` records an empty body as :obj:`None`, which is the
-        # public ``info.body`` value; ``make`` takes ``bytes`` and concatenates
-        # it, so the read-side ``None`` is translated back here (#1050).
+        # NOTE: ``read`` records an empty body as :obj:`None`, the public ``info.body``;
+        # ``make`` concatenates ``bytes``, so ``None`` is translated back here (#1050).
         return {
             'http_version': data.receipt.version,  # type: ignore[attr-defined]
             'method': getattr(data.receipt, 'method', None),
@@ -367,13 +355,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        # NOTE: A header with no CRLF is a start line with zero field lines,
-        # which :rfc:`9112#section-2.1` allows (``*( field-line CRLF )``). The
-        # one such header refused by name is the HTTP/2 connection preface's:
-        # ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`` splits in ``read`` to exactly
-        # ``PRI * HTTP/2.0``, which ``_RE_METHOD`` and ``_RE_VERSION`` would
-        # otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER`` in
-        # ``http.py``).
+        # NOTE: A header with no CRLF is a bare start line (RFC 9112, section 2.1), so the
+        # HTTP/2 preface's ``PRI * HTTP/2.0`` is refused by name, or it parses as a request.
         if header == _HTTP2_PREFACE_HEADER:
             raise ProtocolError('HTTP: invalid format')
         startline, _, headerfield = header.partition(b'\r\n')
@@ -414,15 +397,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
                 continuation.
 
         """
-        # NOTE: A field line beginning with SP or HTAB is an ``obs-fold``
-        # continuation of the line before it (:rfc:`9112#section-5.2`), so it is
-        # kept with that line rather than treated as a field line of its own,
-        # and unfolded by ``_read_field_line``. Deprecated, but present in real
-        # captures. Treating a continuation as a field line of its own goes wrong
-        # twice: one carrying no colon fails the colon check, so a valid message
-        # is refused; one that happens to contain a colon parses silently into a
-        # spurious extra field (``X-Long: a`` plus ``b: c``, for a folded
-        # ``X-Long: a b``).
+        # NOTE: A line led by SP or HTAB continues the one before (``obs-fold``, RFC 9112,
+        # section 5.2); alone it would refuse a valid message or parse as a spurious field.
         raw_fields = []  # type: list[bytes]
         for line in headerfield.split(b'\r\n') if headerfield else ():
             if line.startswith((b' ', b'\t')):
@@ -449,10 +425,8 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
                 line.
 
         """
-        # NOTE: Short for a start line of fewer than three whitespace-separated
-        # tokens. Raised as ``ProtocolError`` for the reason ``read`` gives,
-        # with the same message this method uses below for a start line it
-        # cannot recognise.
+        # NOTE: Short for fewer than three tokens; ``ProtocolError`` for the
+        # reason ``read`` gives.
         try:
             para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
         except ValueError as error:
@@ -593,22 +567,16 @@ class HTTPv1(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the line is not a field line.
 
         """
-        # NOTE: The accumulator is right-stripped as well as the continuation,
-        # because the production is ``obs-fold = OWS CRLF RWS`` and it is the
-        # *whole* obs-fold that is replaced by a single space -- the RFC's own
-        # remedy (:rfc:`9112#section-5.2`). The OWS before the CRLF belongs to
-        # the fold, not to the value, so ``X: a \t\r\n\tb`` unfolds to ``'a b'``.
+        # NOTE: The whole ``obs-fold = OWS CRLF RWS`` becomes one space (RFC
+        # 9112, section 5.2), so the OWS before the CRLF is stripped too.
         field, *continuations = line.split(b'\r\n')
         for continuation in continuations:
             if not continuation.startswith((b' ', b'\t')):
                 raise ProtocolError('HTTP: invalid format')
             field = field.rstrip() + b' ' + continuation.strip()
 
-        # NOTE: Checked rather than left to ``item[1]``, and refused rather than
-        # skipped: a field line with no colon is not a header field, and dropping
-        # it would hand back a message whose fields are quietly not the ones on
-        # the wire. ``ProtocolError`` for the reason ``read`` gives, and to the
-        # same message.
+        # NOTE: A field line with no colon is refused, not skipped, so the
+        # fields stay the ones on the wire; ``ProtocolError`` as in ``read``.
         item = re.split(rb'\s*:\s*', field, maxsplit=1)
         if len(item) != 2:
             raise ProtocolError('HTTP: invalid format')

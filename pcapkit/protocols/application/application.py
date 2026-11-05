@@ -4,19 +4,17 @@
 
 .. module:: pcapkit.protocols.application.application
 
-:mod:`pcapkit.protocols.application.application` contains only
-:class:`~pcapkit.protocols.application.application.Application`,
-which is a base class for application layer protocols, e.g.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.protocol.HTTPv1>` and
-:class:`HTTP/2 <pcapkit.protocols.application.httpv2.protocol.HTTPv2>`.
+:mod:`pcapkit.protocols.application.application` holds
+:class:`~pcapkit.protocols.application.application.Application`, the base class
+of the application layer protocols.
 
 .. versionchanged:: 1.5.0
 
    :meth:`~pcapkit.protocols.application.application.Application._decode_next_layer`
    and
    :meth:`~pcapkit.protocols.application.application.Application._import_next_layer`
-   accept the ``-1`` sentinel, so an application layer protocol can carry the
-   rest of its packet undissected as its payload; every call raised
+   accept the ``-1`` sentinel, which carries the rest of the packet undissected
+   as the payload, where every call raised
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (:issue:`719`).
 
 """
@@ -39,17 +37,17 @@ __all__ = ['Application']
 class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for application layer protocol family.
 
-    An application layer protocol has no further *protocol* layer above it, so
-    :meth:`_decode_next_layer` and :meth:`_import_next_layer` refuse to dispatch
-    on a protocol number. What they do permit is the ``-1`` sentinel, which asks
-    for the rest of the packet undissected and resolves to
-    :class:`~pcapkit.protocols.misc.raw.protocol.Raw` -- trailing bytes are not a further
-    protocol layer, unless the subclass dissects them, as
+    An application layer protocol has no protocol layer above it, so
+    :meth:`_decode_next_layer` and :meth:`_import_next_layer` refuse a protocol
+    number. They accept only the ``-1`` sentinel, which resolves the rest of the
+    packet to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, or to
+    :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` when nothing
+    remains. A subclass may dissect the rest instead, as
     :class:`~pcapkit.protocols.application.tls.protocol.TLS`,
     :class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2` and
-    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` do for a further record and
-    :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` for a further frame --
-    or to :class:`~pcapkit.protocols.misc.no_payload.protocol.NoPayload` when nothing remains.
+    :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` do for a further
+    record and :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` for a
+    further frame.
 
     """
 
@@ -109,8 +107,8 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction arguments, please refer to
-            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
+            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` for the
+            construction arguments.
 
         """
         # call super post-init
@@ -120,9 +118,8 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # that :meth:`from_data` rebuilds only what was captured (#1458).
         keep_short_read(self, length)
 
-        # ``read`` may have dispatched the undissected remainder through
-        # ``_decode_next_layer``, which already set the payload and the chain
-        # (basis included); only a protocol that did not gets the empty default
+        # ``read`` may already have set the payload and chain through
+        # ``_decode_next_layer``; otherwise default to an empty payload
         if getattr(self, '_next', None) is None:
             #: pcapkit.protocols.misc.no_payload.protocol.NoPayload: Payload of current instance.
             self._next = NoPayload()

@@ -4,11 +4,9 @@
 
 .. module:: pcapkit.protocols.application.ospf.protocol
 
-:mod:`pcapkit.protocols.application.ospf.protocol` contains
-:class:`~pcapkit.protocols.application.ospf.protocol.OSPF` only,
-which implements an extractor for Open Shortest Path
-First (OSPF) [*]_, whose structure is described
-as below:
+:mod:`pcapkit.protocols.application.ospf.protocol` holds
+:class:`~pcapkit.protocols.application.ospf.protocol.OSPF`, the extractor for
+Open Shortest Path First (OSPF) [*]_, whose header is:
 
 .. table::
 
@@ -235,10 +233,8 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 ('auth', cast('bytes', schema.auth_data)),
             ])
 
-        # NOTE: Octets captured past the Packet Length belong to this layer,
-        # since its own length field is what leaves them out of the payload --
-        # the message digest of cryptographic authentication among them -- and
-        # the rebuild keeps them as captured (#1455).
+        # NOTE: Octets past the Packet Length (a cryptographic digest among them) belong to
+        # this layer, as its length leaves them out, and are rebuilt as captured (#1455).
         if schema.trailer:
             ospf.__update__([
                 ('trailer', schema.trailer),

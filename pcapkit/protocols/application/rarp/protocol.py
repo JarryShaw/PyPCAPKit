@@ -4,11 +4,9 @@
 
 .. module:: pcapkit.protocols.application.rarp.protocol
 
-:mod:`pcapkit.protocols.application.rarp.protocol` contains
-:class:`~pcapkit.protocols.application.rarp.protocol.RARP` only,
-which implements an extractor for Reverse Address
-Resolution Protocol (RARP) [*]_, whose structure is
-described as below:
+:mod:`pcapkit.protocols.application.rarp.protocol` holds
+:class:`~pcapkit.protocols.application.rarp.protocol.RARP`, the extractor for the
+Reverse Address Resolution Protocol (RARP) [*]_, whose frame is:
 
 ====== ========= ========================= =========================
 Octets      Bits        Name                    Description

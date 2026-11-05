@@ -730,16 +730,8 @@ class _MPTCP(Schema):
         """
         ret = self.data
 
-        # NOTE: Only attributes that the construction path sets too are assigned
-        # here, so that a schema parsed off the wire carries exactly the same
-        # attributes as one built in memory by ``TCP._make_mode_mp`` (#2293). An
-        # earlier revision also set ``ret.option = Enum_Option.Multipath_TCP``,
-        # which no maker mirrored and nothing ever read: ``MPTCP`` declares no
-        # ``option`` field, and its real ``kind`` field already carries
-        # ``Multipath_TCP``. ``subtype`` is the one attribute that genuinely has
-        # to be assigned on both paths -- see the NOTE on :class:`MPTCP` for why
-        # it cannot be a field -- and ``TCP._make_mode_mp`` makes the matching
-        # assignment for construction.
+        # NOTE: Only what ``TCP._make_mode_mp`` sets is assigned, so a parsed schema
+        # matches a built one (#2293); ``subtype`` is no field, per the NOTE on ``MPTCP``.
         ret.length = self.test['length']
         ret.subtype = Enum_MPTCPOption.get(packet['test']['subtype'])
 
@@ -761,49 +753,24 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
        which registers :class:`~pcapkit.protocols.transport.tcp.schema._MPTCP`
        under ``Multipath_TCP`` instead.
 
+    Each subtype schema is handed the whole option from its first octet, through
+    ``mptcp_data_selector``, so a subclass's ``test`` field starts at the third
+    octet, after ``kind`` and ``length``, and its conditions can read
+    ``pkt['length']``.
+
     """
 
     __enum__: 'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]' = collections.defaultdict(lambda: MPTCPUnknown)
 
-    # NOTE: ``_MPTCP.data`` (a :class:`~pcapkit.corekit.fields.misc.SwitchField`,
-    # via :func:`mptcp_data_selector`) hands each subtype schema below the
-    # *whole* option -- ``kind``, ``length`` and all -- starting at the same
-    # first octet ``_MPTCP.test`` peeked and rewound past, rather than the
-    # bytes left over after some outer field already consumed a header. So
-    # unlike :class:`MPTCP`'s siblings that inherit :class:`Option`, which
-    # declares ``kind``/``length`` for exactly this reason, this base class
-    # has to declare its own -- unconditionally, since every Multipath TCP
-    # subtype carries an explicit length octet (no EOOL/NOP-style exception
-    # applies here). Every subclass's own leading field starts at the third
-    # octet as a result, which is where its ``test`` (subtype/flags) field
-    # expects to read from.
-    #
-    # Without them, packing would reject ``kind=``/``length=`` from the
-    # ``_make_mptcp_*`` makers with ``UnknownFieldWarning`` and then
-    # ``KeyError: 'length'`` the moment a sibling field's condition (e.g.
-    # ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read ``pkt['length']``;
-    # unpacking would misread the ``kind`` octet as the subtype/flags octet,
-    # since nothing had consumed it first.
+    # NOTE: ``kind`` and ``length`` are declared on the base, as on ``Option``, since every
+    # subtype is handed the whole option and carries a length octet.
     #: Option kind.
     kind: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
     #: MPTCP length.
     length: 'int' = UInt8Field()
 
-    # NOTE: ``subtype`` stays an annotation rather than becoming a real field
-    # alongside ``kind``/``length`` above -- deliberately, and the difference
-    # from those fields is why. ``kind`` and ``length`` are each the
-    # *sole* source of their own octet: nothing else in the schema packs them,
-    # so declaring them as real fields was the only way to get them onto the
-    # wire at all. ``subtype`` is not like that: every concrete subclass
-    # already encodes it as 4 bits of its own ``test`` :class:`BitField` (e.g.
-    # ``MPTCPCapable.test['subtype']``), which is what actually gets packed.
-    # A real ``Field`` for ``subtype`` on top of that would either pack the
-    # same 4 bits twice under two names, or need a "derive, don't pack" kind
-    # of field that this library's :mod:`~pcapkit.corekit.fields` does not
-    # have. So this attribute is populated by the *construction* path instead
-    # -- :meth:`~pcapkit.protocols.transport.tcp.protocol.TCP._make_mode_mp` sets it
-    # right after building the subtype-specific schema, mirroring exactly what
-    # :meth:`_MPTCP.post_process` already does for real unpacking.
+    # NOTE: ``subtype`` is no field, as each subclass's ``test`` bit field packs it and a
+    # field would pack it twice; ``TCP._make_mode_mp`` and ``_MPTCP.post_process`` set it.
     if TYPE_CHECKING:
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
@@ -842,10 +809,8 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
         'reserved': (3, 4),
         'hsa': (7, 1),
     })
-    # NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE five lengths --
-    # 4 (SYN, header only), 12 (sender's key), 20 (both keys), 22 (both keys
-    # and Data-Level Length) and 24 (that plus the Checksum) -- so each field
-    # below is present from the length that first carries it.
+    # NOTE: :rfc:`8684` section 3.1 figure 4 gives MP_CAPABLE the lengths 4, 12, 20, 22 and
+    # 24, so each field below is present from the length that first carries it.
     #: Option sender's key (if option length > 4).
     skey: 'int' = ConditionalField(
         UInt64Field(),

@@ -4,13 +4,13 @@
 
 .. module:: pcapkit.protocols.application.ssl.protocol
 
-:mod:`pcapkit.protocols.application.ssl.protocol` contains
-:class:`~pcapkit.protocols.application.ssl.protocol.SSL` only,
-which is the umbrella base class for the Secure Sockets Layer protocol
-family [*]_ -- the SSL versions, Transport Layer Security
-(:class:`~pcapkit.protocols.application.tls.protocol.TLS`, which also covers SSLv3
-through :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`) and Datagram TLS
-(:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`).
+:mod:`pcapkit.protocols.application.ssl.protocol` holds
+:class:`~pcapkit.protocols.application.ssl.protocol.SSL`, the base class of the
+Secure Sockets Layer family [*]_:
+:class:`~pcapkit.protocols.application.sslv2.protocol.SSLv2`, Transport Layer
+Security (:class:`~pcapkit.protocols.application.tls.protocol.TLS`, which also
+covers SSLv3 through :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`)
+and Datagram TLS (:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`).
 
 The TLS record header (:rfc:`9846#section-5.1`) is a
 :class:`~pcapkit.const.tls.content_type.ContentType`, a legacy record version
@@ -886,9 +886,8 @@ class SSL(Application[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract
         """
         # NOTE: ``make()`` leaves ``content_type`` a bare :obj:`int`, not the enum member a
         # parse yields, so resolve it through the registry to cover both.
-        # NOTE: checked against ``_WIRE_CONTENT_TYPES``, not by name: an
-        # unassigned or reserved value still resolves to a named member via
-        # ``_missing_``, yet is never a record's genuine content type.
+        # NOTE: Checked against ``_WIRE_CONTENT_TYPES``, not by name: ``_missing_`` names
+        # even an unassigned or reserved value, which is never a genuine content type.
         content_type = Enum_ContentType.get(int(schema.content_type))
         if content_type not in _WIRE_CONTENT_TYPES:
             raise ProtocolError(

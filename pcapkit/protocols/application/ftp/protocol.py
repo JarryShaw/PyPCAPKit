@@ -4,12 +4,10 @@
 
 .. module:: pcapkit.protocols.application.ftp.protocol
 
-:mod:`pcapkit.protocols.application.ftp.protocol` contains
-:class:`~pcapkit.protocols.application.ftp.protocol.FTP`,
-which implements an extractor for File Transfer Protocol
-(FTP) [*]_, the control channel; the data channel is
-:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`, in
-:mod:`pcapkit.protocols.application.ftp_data.protocol`.
+:mod:`pcapkit.protocols.application.ftp.protocol` holds
+:class:`~pcapkit.protocols.application.ftp.protocol.FTP`, the extractor for the
+control channel of the File Transfer Protocol (FTP) [*]_; the data channel is
+:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`.
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 
@@ -60,13 +58,10 @@ __all__ = ['FTP']
 #: :data:`~pcapkit.utilities.importlib.import_lock` (:issue:`2771`).
 _TCP: 'ModuleDescriptor[AppType_TCP]' = ModuleDescriptor('pcapkit.const.reg.apptype.tcp', 'TCP')
 
-# regex for FTP, per :rfc:`959#section-4` (replies) and :rfc:`959#section-5`
-# (commands): a command is ``<command> [<SP> <argument>] <CRLF>``, a reply line is
-# ``<code> [<SP> <text>] <CRLF>``, and the first line of a multi-line reply is
-# ``<code>-<text> <CRLF>`` with the text following the hyphen immediately. Only
-# the one separating SP is syntax; anything after it is the argument verbatim, so
-# that ``make`` writes back exactly the line that was read. ``\Z`` rather than
-# ``$``, which would also match before a trailing ``\n`` left outside the match.
+# FTP lines (RFC 959, sections 4 and 5): a command is ``<command> [<SP>
+# <argument>] <CRLF>``, a reply ``<code> [<SP> <text>] <CRLF>``, and a multi-line
+# reply opens ``<code>-<text> <CRLF>``. Only the one SP is syntax, so ``make``
+# writes back the line as read. ``\Z``, as ``$`` also matches before a ``\n``.
 FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})(?: (?P<args>.*))?\r\n\Z', re.I)
 FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})'
                           rb'(?:(?P<more>-)(?P<text>.*)|(?: (?P<args>.*))?)\r\n\Z', re.I)
@@ -133,10 +128,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
         schema = self.__header__
 
         data = schema.data
-        # NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive whole in one
-        # segment. Its first line is parsed as any reply line, and the lines
-        # after it are kept as received in ``lines``. A segment holding anything
-        # else -- no closing line, or more after it -- is refused.
+        # NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive in one segment; its
+        # first line is parsed, the rest kept in ``lines``, and anything else refused.
         line, lines = data, ()  # type: bytes, tuple[bytes, ...]
         if FTP_RESPONSE.match(data) is None and data.endswith(b'\r\n'):
             first, _, rest = data.partition(b'\r\n')
@@ -256,9 +249,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
         if lines and not (mf and self._test_lines(prefix, lines)):
             raise ProtocolError('FTP: lines must close a multi-line reply')
 
-        # NOTE: bytes and a bytearray are written verbatim and only a ``str`` is
-        # encoded; anything else is the wrong type, as it is for ``cmmd`` above
-        # (#2410).
+        # NOTE: bytes and a bytearray are written verbatim and only a ``str`` is encoded;
+        # anything else is the wrong type, as it is for ``cmmd`` above (#2410).
         if args is None:
             suffix = b''
         elif isinstance(args, (bytes, bytearray)):
@@ -400,10 +392,8 @@ class FTP(Application[Data_FTP, Schema_FTP],
                 included, or does not fit in three digits.
 
         """
-        # NOTE: ``ReturnCode`` is an ``IntEnum``, so a member takes the ``int``
-        # branch. ``bool`` is an ``int`` subclass, so without the explicit check
-        # ``True`` would write code 001, and ``int()`` alone would raise a bare
-        # ValueError or TypeError rather than a ProtocolError (#2416).
+        # NOTE: ``bool`` is refused first, or ``True`` would write 001; a bare ``int()``
+        # would raise ValueError or TypeError rather than ProtocolError (#2416).
         value = None  # type: Optional[int]
         if isinstance(code, bool):
             pass

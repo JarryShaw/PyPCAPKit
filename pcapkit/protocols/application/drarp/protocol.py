@@ -4,11 +4,10 @@
 
 .. module:: pcapkit.protocols.application.drarp.protocol
 
-:mod:`pcapkit.protocols.application.drarp.protocol` contains
-:class:`~pcapkit.protocols.application.drarp.protocol.DRARP` only,
-which implements an extractor for Dynamic Reverse Address
-Resolution Protocol (DRARP) [*]_, whose frame is the one
-:mod:`pcapkit.protocols.application.rarp.protocol` describes.
+:mod:`pcapkit.protocols.application.drarp.protocol` holds
+:class:`~pcapkit.protocols.application.drarp.protocol.DRARP`, the extractor for
+the Dynamic Reverse Address Resolution Protocol (DRARP) [*]_, whose frame is the
+one :mod:`pcapkit.protocols.application.rarp.protocol` describes.
 
 Nothing dispatches to :class:`~pcapkit.protocols.application.drarp.protocol.DRARP`:
 under EtherType ``0x8035``, a DRARP operation parses as

@@ -4,11 +4,9 @@
 
 .. module:: pcapkit.protocols.application.httpv2.protocol
 
-:mod:`pcapkit.protocols.application.httpv2.protocol` contains
-:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`
-only, which implements an extractor for Hypertext Transfer
-Protocol (HTTP/2) [*]_, whose structure is described as
-below:
+:mod:`pcapkit.protocols.application.httpv2.protocol` holds
+:class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2`, the extractor for
+the Hypertext Transfer Protocol (HTTP/2) [*]_, whose frame is:
 
 ======= ========= ===================== ==========================
 Octets      Bits        Name                    Description
@@ -155,9 +153,7 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
            schema=Schema_HTTP, data=Data_HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
-    This class supports parsing of the following HTTP/2 frames,
-    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`
-    enumeration:
+    The HTTP/2 frames it parses, by :class:`pcapkit.const.http.frame.Frame` type:
 
     .. list-table::
        :header-rows: 1
@@ -344,20 +340,15 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             length = remaining
 
         if length is None:
-            # ``0 < ... < 9`` rather than ``... < 9``: an exhausted stream
-            # (``len(self) == 0``) is left alone, so ``length`` reaches
-            # :meth:`Protocol.unpack <pcapkit.protocols.protocol.Protocol.unpack>`
-            # still ``None`` and its ``prepare`` decorator raises
-            # :exc:`StreamEOFError` as documented above; only a *non-empty*
-            # short stream is rejected as malformed here.
+            # ``0 <``: an exhausted stream is left for ``Protocol.unpack``'s
+            # ``prepare`` decorator to raise ``StreamEOFError``, as documented
+            # above; only a non-empty short stream is malformed.
             if 0 < len(self) < 9:
                 raise ProtocolError(f'HTTP/2: invalid format, packet ({len(self)} octet(s)) '
                                     f'shorter than the 9-octet frame header')
         elif length < 9:
-            # An *explicit* length, zero included, is a caller assertion about
-            # how much data this frame has -- not the "figure it out"
-            # ``None`` above -- so every value under nine is rejected the same
-            # way, with no exhaustion signal to preserve.
+            # An explicit length, zero included, asserts how much data the
+            # frame has, so every value under nine is malformed.
             raise ProtocolError(f'HTTP/2: invalid format, packet ({length} octet(s)) '
                                 f'shorter than the 9-octet frame header')
         return super().unpack(length, **kwargs)
@@ -394,16 +385,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
             length = len(self) - self._preface_length
         schema = self.__header__
 
-        # NOTE: ``schema.length`` is the *declared* length off the wire -- the
-        # 24-bit field a hostile or truncated capture controls outright -- so
-        # checking only it would let a frame whose buffer holds far fewer octets
-        # than it claims report a length nothing backs (e.g. a nine-octet buffer
-        # declaring 16777215). ``length`` is the number of octets actually
-        # available for this frame (``Protocol.__len__`` returns
-        # ``len(self._data)``, and an explicit ``length`` means the same), so it
-        # has to clear the 9-octet header *and* back the declared value. The
-        # declared value counts the frame payload only, the header excluded
-        # (:rfc:`9113#section-4.1`), so ``length`` must hold both.
+        # NOTE: ``schema.length`` counts the payload alone (RFC 9113, section 4.1), so
+        # ``length`` must cover the 9-octet header and the declared payload as well.
         if length < 9 or schema.length + 9 > length:
             raise ProtocolError(f'HTTP/2: [Type {schema.type}] invalid format')
         if schema.type in (Enum_Frame.SETTINGS, Enum_Frame.PING) and schema.stream['sid'] != 0:
@@ -477,10 +460,9 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         type_val = self._make_index(type, Enum_Frame, bits=8, name='type')
 
         if frame is None:
-            # A frame type whose payload is of fixed or minimum size cannot be
-            # built from empty octets, so an omitted frame dispatches to that
-            # type's own constructor, as ``{}`` does (#2274). An explicit
-            # ``b''`` stays raw.
+            # An omitted frame dispatches to the type's own constructor, as
+            # ``{}`` does, since a fixed-size payload cannot be empty octets
+            # (#2274). An explicit ``b''`` stays raw.
             frame = {}
 
         if isinstance(frame, bytes):
@@ -935,9 +917,8 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
         if flag.ACK and header.length != 0:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
-        # NOTE: every pair rather than a mapping: an identifier may repeat, and
-        # the values apply in order (:rfc:`9113#section-6.5.3`). ``Settings``
-        # keeps every entry, and answers an index with the last value.
+        # NOTE: Every pair, not a mapping: an identifier may repeat and applies in order
+        # (:rfc:`9113#section-6.5.3`); ``Settings`` answers an index with the last value.
         sets = Data_Settings([(setting.id, setting.value) for setting in schema.settings])
 
         data = Data_SettingsFrame(

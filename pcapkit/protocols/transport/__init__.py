@@ -5,13 +5,14 @@
 
 .. module:: pcapkit.protocols.transport
 
-:mod:`pcapkit.protocols.transport` is a collection of all protocols in
-the transport layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.transport` holds the transport layer protocols.
 
-Each protocol class, and the base class
-:class:`~pcapkit.protocols.transport.transport.Transport`, is imported the first
-time it is reached rather than with this package, through
-:func:`~pcapkit.utilities.importlib.lazy_exports` (:issue:`2730`).
+.. versionchanged:: 1.6.0
+
+   Each protocol class, and the base class
+   :class:`~pcapkit.protocols.transport.transport.Transport`, is imported on first
+   access through :func:`~pcapkit.utilities.importlib.lazy_exports`, not with this
+   package (:issue:`2730`).
 
 """
 # TODO: Implement RSVP.

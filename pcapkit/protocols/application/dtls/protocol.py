@@ -4,9 +4,9 @@
 
 .. module:: pcapkit.protocols.application.dtls.protocol
 
-:mod:`pcapkit.protocols.application.dtls.protocol` contains
-:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`, which implements an
-extractor for the DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
+:mod:`pcapkit.protocols.application.dtls.protocol` holds
+:class:`~pcapkit.protocols.application.dtls.protocol.DTLS`, the extractor for the
+DTLS record-layer family -- DTLS 1.0 (:rfc:`4347`), DTLS
 1.2 (:rfc:`6347`) and its connection-ID records (:rfc:`9146`), and DTLS 1.3's
 legacy-format and unified-header records (:rfc:`9147`) -- and
 :class:`~pcapkit.protocols.application.dtls.protocol.DTLSContext`, which holds the

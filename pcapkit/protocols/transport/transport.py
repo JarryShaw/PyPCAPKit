@@ -4,12 +4,9 @@
 
 .. module:: pcapkit.protocols.transport.transport
 
-:mod:`pcapkit.protocols.transport.transport` contains
-:class:`~pcapkit.protocols.transport.transport.Transport`,
-which is a base class for transport layer protocols, e.g.
-:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
-:class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
-:class:`~pcapkit.protocols.transport.sctp.protocol.SCTP`.
+:mod:`pcapkit.protocols.transport.transport` holds
+:class:`~pcapkit.protocols.transport.transport.Transport`, the base class of the
+transport layer protocols.
 
 """
 import io
@@ -82,9 +79,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Important:
-            This method must be called from a non-abstract class, as the
-            protocol map should be associated directly with specific
-            transport layer protocol type.
+            Call it on a concrete transport protocol, whose own ``__proto__``
+            it updates.
 
         Raises:
             pcapkit.utilities.exceptions.UnsupportedCall: If called on
@@ -97,19 +93,15 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 registered and the incumbent differs from the replacement; the
                 message names both. An unresolved
                 :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as
-                different from the class it names. See
+                different from the class it names. The guard is the one
                 :meth:`Protocol.register
-                <pcapkit.protocols.protocol.Protocol.register>` for the
-                guard this shares with ``register_protocol``, and for the
-                shipped descriptor that a restore puts back (:issue:`1504`).
+                <pcapkit.protocols.protocol.Protocol.register>` describes
+                (:issue:`1504`).
 
         Note:
-            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` and
-            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` each define their own
-            ``__proto__`` rather than sharing one on :class:`Transport`.
-            ``register_apptype`` reaches this method once per transport
-            protocol, each time on that protocol's own registry, so it cannot
-            warn spuriously.
+            Each transport protocol defines its own ``__proto__``, so
+            ``register_apptype``, which calls this once per transport protocol,
+            never warns spuriously.
 
         .. versionchanged:: 1.3.0
 
@@ -149,53 +141,37 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             instance.
 
         Important:
-            The annotation names the **base** registry rather than one
-            transport's own, because this is the single method
-            :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`,
-            :class:`~pcapkit.protocols.transport.udp.protocol.UDP` and
-            :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` share, and each
-            resolves its ports in a different one --
-            :class:`~pcapkit.const.reg.apptype.tcp.TCP` for the first, and so
-            on. A caller that knows which transport it has gets the narrower
-            type from whatever handed it the pair, e.g.
-            :meth:`TCP._make_ports
+            The annotation names the **base** registry because every transport
+            protocol shares this method while resolving its ports in a registry
+            of its own, such as :class:`~pcapkit.const.reg.apptype.tcp.TCP`. A
+            caller that knows its transport gets the narrower type from
+            whatever handed it the pair, e.g. :meth:`TCP._make_ports
             <pcapkit.foundation.reassembly.tcp.TCP._make_ports>`.
 
-            A bare :obj:`int` port still resolves, so the tightened annotation
-            is a declaration of what callers should pass rather than a new
-            rejection -- the method predates 1.5.0, and a member and the port it
-            carries are the same key of an :obj:`int`-keyed mapping anyway:
-            :meth:`AppType.__hash__
-            <pcapkit.const.reg.apptype.apptype.AppType.__hash__>` is its port's
-            and :meth:`AppType.__eq__
-            <pcapkit.const.reg.apptype.apptype.AppType.__eq__>` compares against
-            it. So the port chosen below is tested against :attr:`__proto__`
-            exactly as it arrived, and the chosen one is unwrapped to the
-            :obj:`int` key the registry declares only when it is a member --
-            through :meth:`AppType.__int__
-            <pcapkit.const.reg.apptype.apptype.AppType.__int__>`, i.e.
-            :attr:`AppType.port
-            <pcapkit.const.reg.apptype.apptype.AppType.port>`. Reading
-            ``.port`` unconditionally would have made the :obj:`int` case an
-            :exc:`AttributeError`, and unwrapping unconditionally would have
-            changed what anything *else* does here: :func:`int` of :obj:`None`
-            raises where the lookup falls back to
-            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and :func:`int` of
-            ``'80'`` would dispatch a :class:`str` nobody registered.
+            A bare :obj:`int` port still resolves: a member hashes as its port
+            (:meth:`AppType.__hash__
+            <pcapkit.const.reg.apptype.apptype.AppType.__hash__>`) and compares
+            equal to it (:meth:`AppType.__eq__
+            <pcapkit.const.reg.apptype.apptype.AppType.__eq__>`). So each port
+            is tested against :attr:`__proto__` as it arrived, and the chosen
+            one is unwrapped through :meth:`AppType.__int__
+            <pcapkit.const.reg.apptype.apptype.AppType.__int__>` only when it
+            is a member; unwrapping anything else would make :obj:`None` raise
+            rather than fall back to
+            :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, and ``'80'``
+            dispatch as a port.
 
-            Nothing is written back on a miss either way, so a payload on an
-            unregistered port does not grow a process-wide registry -- see
-            :meth:`Protocol._lookup_registry
+            A miss writes nothing back, so an unregistered port does not grow
+            the process-wide registry -- see :meth:`Protocol._lookup_registry
             <pcapkit.protocols.protocol.Protocol._lookup_registry>`.
 
         .. versionchanged:: 1.5.0
 
            ``ports`` is a pair of
            :class:`~pcapkit.const.reg.apptype.apptype.AppType` members rather
-           than of bare :obj:`int` port numbers, so that the one caller that
-           reaches this method -- :meth:`TCP.submit
+           than of bare :obj:`int` port numbers, so :meth:`TCP.submit
            <pcapkit.foundation.reassembly.tcp.TCP.submit>`, through
-           :class:`~pcapkit.foundation.reassembly.data.data.Deferred` -- hands
+           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`, hands
            over the same named ports a parsed header carries (:issue:`2417`).
 
         """
@@ -329,15 +305,11 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :class:`~pcapkit.const.reg.apptype.apptype.AppType`.
 
         Important:
-            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` accepts
-            a bare :obj:`int` for a port, but the schema field converts it only
-            on the way *out* (in
-            :meth:`PortEnumField.pre_process
-            <pcapkit.corekit.fields.numbers.PortEnumField.pre_process>`),
-            so the schema attribute keeps whatever it was handed. Normalising
-            here makes a constructed packet carry the same
-            :class:`~pcapkit.const.reg.apptype.apptype.AppType` as a parsed one, so
-            reading ``.port`` off it works on both paths.
+            The schema field converts a bare :obj:`int` port only on the way
+            *out* (:meth:`PortEnumField.pre_process
+            <pcapkit.corekit.fields.numbers.PortEnumField.pre_process>`), so
+            normalising here gives a constructed packet the same
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` as a parsed one.
 
         .. versionchanged:: 1.6.0
 
@@ -381,10 +353,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
             it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.protocol.Raw`
             records it as :attr:`Data_Raw.protocol
-            <pcapkit.protocols.misc.raw.data.Raw.protocol>`. Dropping it would
-            make a payload on a port we do not decode indistinguishable from
-            one on port 22. The lower port is the one carried, for the same
-            reason it is the primary lookup key.
+            <pcapkit.protocols.misc.raw.data.Raw.protocol>`, which tells
+            payloads on different undecoded ports apart. The port carried is the
+            one looked up.
             :meth:`SCTP._decode_next_layer
             <pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer>` and
             :meth:`Internet._import_next_layer

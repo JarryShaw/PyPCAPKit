@@ -4,10 +4,10 @@
 
 .. module:: pcapkit.protocols.application.ftp_data.protocol
 
-:mod:`pcapkit.protocols.application.ftp_data.protocol` contains
-:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA` only,
-which implements an extractor for the data channel of File
-Transfer Protocol (FTP) [*]_, whose octets it keeps undissected.
+:mod:`pcapkit.protocols.application.ftp_data.protocol` holds
+:class:`~pcapkit.protocols.application.ftp_data.protocol.FTP_DATA`, the extractor
+for the data channel of the File Transfer Protocol (FTP) [*]_, whose octets it
+keeps undissected.
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 

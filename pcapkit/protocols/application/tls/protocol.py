@@ -4,9 +4,9 @@
 
 .. module:: pcapkit.protocols.application.tls.protocol
 
-:mod:`pcapkit.protocols.application.tls.protocol` contains
-:class:`~pcapkit.protocols.application.tls.protocol.TLS` only,
-which implements an extractor for the TLS/SSLv3+ record-layer family --
+:mod:`pcapkit.protocols.application.tls.protocol` holds
+:class:`~pcapkit.protocols.application.tls.protocol.TLS`, the extractor for the
+TLS/SSLv3+ record-layer family --
 SSLv3, TLS 1.0, TLS 1.1, TLS 1.2 (:rfc:`5246`) and TLS 1.3 (:rfc:`9846`,
 which obsoletes :rfc:`5077`, :rfc:`5246`, :rfc:`6961`, :rfc:`7627`,
 :rfc:`8422` and :rfc:`8446`). :attr:`TCP.__proto__

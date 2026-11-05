@@ -94,11 +94,8 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Frame', pkt['type'])
     schema = FrameType.registry[type]
-    # The frame payload is bounded by the declared Length, so anything after
-    # it -- typically the next frame -- is left for :attr:`HTTPv2.payload`. It is
-    # bounded by the buffer as well, so that a Length the buffer cannot back
-    # reaches :meth:`HTTPv2.read <pcapkit.protocols.application.httpv2.protocol.HTTPv2.read>`,
-    # which rejects it with :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+    # Bounded by the declared Length, leaving the next frame for the payload,
+    # and by the buffer, so ``HTTPv2.read`` rejects a Length nothing backs.
     return SchemaField(length=min(pkt['length'], pkt['__length__']), schema=schema)
 
 
@@ -169,24 +166,11 @@ class FrameType(EnumSchema[Enum_Frame]):
             Revised schema.
 
         """
-        # Seed the accumulator with the frame's own ``Flags`` rather than a bare
-        # ``0``, so that a frame with no bit set still reports ``__flags__`` as
-        # the ``Flags`` both this schema and :class:`~pcapkit.protocols.data.\
-        # application.httpv2.Flags` declare it to be. ``|=`` promotes a plain
-        # ``0`` only as a side effect, so without this a flags octet of ``0x00``
-        # -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and
-        # a membership test against it raises :exc:`TypeError` rather than
-        # answering. This mirrors the construct path, which seeds
-        # ``Flags(0)`` at every site that builds one.
-        #
-        # ``FrameType.Flags`` itself declares no members, and from Python 3.11
-        # the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse
-        # ``Flags(0)`` outright with a ``TypeError`` that it has no members
-        # (3.10 and earlier hand back a pseudo-member instead), so
-        # the frame schemas that inherit it unchanged -- ``UnassignedFrame``,
-        # ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and
-        # ``WindowUpdateFrame`` -- keep the plain ``int``, which is what their
-        # data objects' bare ``Flags`` carries as ``__value__``.
+        # Seeded with ``Flags(0)``, as the construct path is, so a frame with no
+        # flag set, routine in HTTP/2, still reports ``__flags__`` as ``Flags``:
+        # an ``in`` test on a plain ``int`` raises TypeError. The memberless
+        # ``FrameType.Flags``, which Python 3.11+ refuses to call, keeps the
+        # plain ``int`` for the frame schemas that inherit it unchanged.
         flags = self.Flags(0) if self.Flags.__members__ else 0
         for key, val in filter(lambda kv: kv[0].startswith('BIT_'),
                                self.Flags.__members__.items()):
@@ -194,9 +178,8 @@ class FrameType(EnumSchema[Enum_Frame]):
             if packet['flags'][name]:
                 flags |= val
 
-        # Bits the frame type leaves undefined are kept as well: a receiver
-        # ignores them (:rfc:`9113#section-4.1`), but a rebuild must not erase
-        # them. ``Flags`` keeps such bits as pseudo-members.
+        # Undefined bits are kept as pseudo-members: a receiver ignores them
+        # (RFC 9113, section 4.1), but a rebuild must not erase them.
         raw = sum(packet['flags'][f'bit_{bit}'] << bit for bit in range(8))
         self.__flags__ = flags | (raw & ~int(flags))
         return self
@@ -228,19 +211,8 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
         UInt8Field(),
         lambda pkt: pkt['flags']['bit_3'],  # PADDED
     )
-    # NOTE: the conditional subtracts the padding length, it does not *replace*
-    # the whole expression. A conditional expression binds looser than ``-``, so
-    # writing ``pkt['__length__'] - pkt['pad_len'] if <test> else 0`` groups as
-    # ``(pkt['__length__'] - pkt['pad_len']) if <test> else 0`` and hands back ``0``
-    # -- "read no payload at all" -- for every frame without the ``PADDED``
-    # flag. ``__length__`` is the *remaining* declared length at this field, so
-    # the unpadded arm wants ``__length__`` itself, which is what subtracting a
-    # zero padding length gives. Padding is rare in HTTP/2, so that arm would be
-    # the common one: an unpadded ``DATA`` frame would parse with ``data`` as
-    # ``b''`` and nothing would raise or warn. The parentheses also keep
-    # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
-    # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
-    # it as :data:`~pcapkit.corekit.sentinels.NO_VALUE`.
+    # NOTE: Parenthesised, or ``a - b if t else 0`` reads as ``(a - b) if t else 0`` and an
+    # unpadded frame reads no data; the guard leaves ``pad_len`` (``NO_VALUE``) unread.
     #: Data.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
@@ -285,10 +257,7 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
         UInt8Field(),
         lambda pkt: pkt['flags']['bit_5'],  # PRIORITY
     )
-    # NOTE: the conditional subtracts the padding length rather than replacing
-    # the whole expression -- see :attr:`DataFrame.data` for why the outer
-    # parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame
-    # would read its header block fragment as ``b''``.
+    # NOTE: Parenthesised as in ``DataFrame.data``.
     #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
@@ -382,10 +351,7 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
         'reserved': (0, 1),
         'sid': (1, 31),
     })
-    # NOTE: the conditional subtracts the padding length rather than replacing
-    # the whole expression -- see :attr:`DataFrame.data` for why the outer
-    # parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``
-    # frame would read its header block fragment as ``b''``.
+    # NOTE: Parenthesised as in ``DataFrame.data``.
     #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0

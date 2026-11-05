@@ -4,10 +4,9 @@
 
 .. module:: pcapkit.protocols.application.sslv3.protocol
 
-:mod:`pcapkit.protocols.application.sslv3.protocol` contains
-:class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3` only,
-which implements an extractor for Secure Sockets Layer
-version 3 (SSLv3) [*]_, whose record is the one
+:mod:`pcapkit.protocols.application.sslv3.protocol` holds
+:class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`, the extractor for
+Secure Sockets Layer version 3 (SSLv3) [*]_, whose record is the one
 :mod:`pcapkit.protocols.application.tls.protocol` describes.
 
 Nothing dispatches to :class:`~pcapkit.protocols.application.sslv3.protocol.SSLv3`:

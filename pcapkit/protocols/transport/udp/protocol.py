@@ -5,10 +5,9 @@
 
 .. module:: pcapkit.protocols.transport.udp.protocol
 
-:mod:`pcapkit.protocols.transport.udp.protocol` contains
-:class:`~pcapkit.protocols.transport.udp.protocol.UDP` only,
-which implements the extractor for User Datagram Protocol
-(UDP) [*]_, whose structure is described as below:
+:mod:`pcapkit.protocols.transport.udp.protocol` holds
+:class:`~pcapkit.protocols.transport.udp.protocol.UDP`, the extractor for the
+User Datagram Protocol (UDP) [*]_, whose header is:
 
 ======= ========= ===================== ===============================
 Octets      Bits        Name                    Description
@@ -57,9 +56,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
           schema=Schema_UDP, data=Data_UDP):
     """This class implements User Datagram Protocol.
 
-    This class supports parsing of the following protocols, which are
-    registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>`
-    attribute:
+    The :attr:`self.__proto__ <pcapkit.protocols.transport.udp.protocol.UDP.__proto__>`
+    registry binds these ports:
 
     .. list-table::
        :header-rows: 1
@@ -70,17 +68,18 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
        * - 1701
          - :class:`pcapkit.protocols.link.l2tpv2.protocol.L2TPv2`
+       * - 5684
+         - :class:`pcapkit.protocols.application.dtls.protocol.DTLS`
        * - 8080
          - :class:`pcapkit.protocols.application.http.protocol.HTTP`
 
     Note:
-        The HTTP ports resolve to
-        :class:`pcapkit.protocols.application.http.protocol.HTTP`, whose
-        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version` picks
-        :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or
-        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the payload.
-        :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`
-        binds the same class for its HTTP ports.
+        :class:`~pcapkit.protocols.application.http.protocol.HTTP`, bound as in
+        :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto__>`,
+        picks :class:`~pcapkit.protocols.application.httpv1.protocol.HTTPv1` or
+        :class:`~pcapkit.protocols.application.httpv2.protocol.HTTPv2` from the
+        payload through
+        :meth:`~pcapkit.protocols.application.http.protocol.HTTP._dispatch_version`.
 
     .. versionchanged:: 1.5.0
 
@@ -92,6 +91,9 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
     .. versionchanged:: 1.6.0
 
+       * Port 5684 binds
+         :class:`~pcapkit.protocols.application.dtls.protocol.DTLS`
+         (:issue:`2437`).
        * The checksum is computed when :meth:`make` is given none, over the
          ``pseudo`` it is given or by the enclosing IP layer, and verified by
          that layer under :data:`~pcapkit.utilities.config.CHECKSUM_VERIFY`
@@ -123,25 +125,19 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #   5684  coaps      CoAP over DTLS
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
-            # The HTTP entries bind the version-dispatching
-            # :class:`pcapkit.protocols.application.http.protocol.HTTP`, as TCP's table
-            # does. See the note in the class docstring.
+            # The HTTP entries bind the version-dispatching HTTP base, as TCP's
+            # table does.
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
 
-            # L2TPv2 (RFC 2661) is UDP-borne, and v2 is the only version
-            # implemented, so the concrete class is bound rather than the
-            # abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)
-            # stays unbound because that version has no class; once it has,
-            # it takes 115 and this entry becomes a version switch on the Ver
-            # nibble. See pcapkit.protocols.link.l2tp.protocol.
+            # L2TPv2 (RFC 2661) is the only L2TP version implemented, so the
+            # concrete class is bound rather than the abstract L2TP base.
+            # L2TPv3 (RFC 3931, IANA protocol number 115) has no class. See
+            # pcapkit.protocols.link.l2tp.protocol.
             1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
 
-            # CoAP over DTLS (RFC 7252) is bound here, but it is not the only
-            # fixed port a DTLS-borne protocol is registered at -- IANA also
-            # registers DTLS at 853 (domain-s), 4740 (ipfixs), 5349
-            # (stuns/turns), 6514 (syslog-tls) and 10161/10162 (snmpdtls),
-            # among others -- and plenty of deployments negotiate DTLS on a
-            # dynamic port no registry can name. See
+            # CoAP over DTLS (RFC 7252). IANA registers DTLS-borne protocols at
+            # other ports too, such as 853 (domain-s) and 6514 (syslog-tls),
+            # and DTLS often runs on a dynamic port. See
             # pcapkit.protocols.application.dtls.protocol.
             5684: ModuleDescriptor('pcapkit.protocols.application.dtls.protocol', 'DTLS'),
 
@@ -149,15 +145,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         },
     )
 
-    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
-    #: and whether a bare :class:`int` is a valid key there too. Declared by the
-    #: class *owning* the registry, and read from it by
-    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` so a
-    #: ``code=`` key is checked exactly as
-    #: :func:`~pcapkit.foundation.registry.protocols.transport.register_udp` checks its own
-    #: -- a bare :class:`int` is accepted because the registry is keyed by
-    #: port number, and an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
-    #: member carries one (:issue:`2268`).
+    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: and whether a bare :class:`int` is valid too. Read by
+    #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
+    #: to check a ``code=`` key as
+    #: :func:`~pcapkit.foundation.registry.protocols.transport.register_udp` checks
+    #: its own; a bare :class:`int` is a port number, which an
+    #: :class:`~pcapkit.const.reg.apptype.apptype.AppType` member carries
+    #: (:issue:`2268`).
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)
 
     #: Whether :meth:`make` left the checksum for the enclosing IP layer to
@@ -231,8 +226,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         )
 
         # NOTE: Octets captured past the Length field belong to this layer,
-        # since its own length field is what leaves them out of the payload,
-        # and the rebuild keeps them as captured (#1461).
+        # which leaves them out of the payload; rebuilt as captured (#1461).
         if schema.trailer:
             udp.__update__([
                 ('trailer', schema.trailer),
@@ -285,11 +279,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
            instead.
 
         """
-        # NOTE: An explicit ``total_length`` is written as given, so that a
-        # ``from_data`` rebuild of a capture truncated by snaplen keeps the
-        # length the sender declared instead of the one that was recorded
-        # (#1155). Computed from the octets at hand otherwise, which is
-        # what a plain ``UDP(payload=...)`` wants.
+        # NOTE: An explicit ``total_length`` is written as given, so a
+        # snaplen-truncated capture rebuilds with its declared length (#1155).
         if total_length is None:
             total_length = 8 + len(payload)
         total_length = self._make_uint(total_length, bits=16, name='length')
@@ -358,9 +349,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             'srcport': data.srcport,
             'dstport': data.dstport,
             'checksum': data.checksum,
-            # NOTE: The parsed length is passed through rather than left to
-            # ``make`` to recompute, so that a truncated capture rebuilds with
-            # the length that was on the wire (#1155).
+            # NOTE: Passed through so a truncated capture rebuilds with the
+            # length on the wire (#1155).
             'total_length': data.len,
             'payload': cls._make_payload(data),
             # NOTE: And the octets captured past the Length field (#1461).
