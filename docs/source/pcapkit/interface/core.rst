@@ -3,9 +3,8 @@ Core Interface
 
 .. module:: pcapkit.interface.core
 
-:mod:`pcapkit.interface.core` defines core user-oriented
-interfaces and variables, which wrap around the
-foundation classes from :mod:`pcapkit.foundation`.
+:mod:`pcapkit.interface.core` defines the core user-facing functions and
+constants, which wrap the classes in :mod:`pcapkit.foundation`.
 
 .. autofunction:: pcapkit.interface.core.extract
 
@@ -75,12 +74,12 @@ Extraction Engines
 
 .. note::
 
-   Every engine :mod:`pcapkit` ships has a constant here. Each constant *is* its
-   ``engine=`` string -- ``'pypcap'``, ``'pcap_ct'`` and ``'pypcapfile'`` for the
-   `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_ ones -- so the two spellings are
-   interchangeable. An engine registered at runtime with
+   Every ``engine=`` string :mod:`pcapkit` ships has a constant here, and the
+   constant *is* the string, so :data:`PyPCAP` and ``'pypcap'`` are
+   interchangeable; :data:`PCAPKit` selects the built-in PCAP or PCAP-NG engine
+   by the file's magic number. An engine registered at runtime with
    :func:`~pcapkit.foundation.registry.foundation.register_extractor_engine` has
-   no constant and is addressed by the name it was registered under.
+   no constant, and is named by the string it was registered under.
 
    .. seealso::
 

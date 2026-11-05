@@ -2,15 +2,17 @@
 Built-in Support
 ================
 
+Each reassembly or flow tracing adapter below returns the data its
+:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` for a frame it
+cannot use.
+
 PCAP Tools
 ==========
 
 .. module:: pcapkit.toolkit.pcap
 
-:mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it. The TCP adapters here and in
+:mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format. The TCP
+adapters here and in
 :mod:`pcapkit.toolkit.pcapng` read the segment with
 :func:`~pcapkit.toolkit.pcap.tcp_segment`, and the DTLS ones the record with
 :func:`~pcapkit.toolkit.pcap._dtls_fragments`.
@@ -44,9 +46,6 @@ PCAP-NG Tools
 .. module:: pcapkit.toolkit.pcapng
 
 :mod:`pcapkit.toolkit.pcapng` contains the adapters for the PCAP-NG format.
-The reassembly and flow tracing adapters return the data their
-:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
 
 .. autofunction:: pcapkit.toolkit.pcapng.ipv4_reassembly
 

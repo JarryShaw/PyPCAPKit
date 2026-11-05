@@ -4,15 +4,13 @@ Module Documentation
 
 .. module:: pcapkit
 
-:mod:`pcapkit` is an independent open source library, using only
-`DictDumper`_ as its formatted output dumper.
+:mod:`pcapkit` is an independent open source library, using `DictDumper`_ as its
+formatted output dumper.
 
-Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_ and
-`PyShark`_, :mod:`pcapkit` tends to provide comprehensive
-support to all protocols, including but not limited to their
-parameters and/or options, etc. Therefore, :mod:`pcapkit` contains
-enumeration registries used by protocols, independent protocol
-schema definitions as well as various customisable interfaces.
+Unlike `Scapy`_, `DPKT`_ and `PyShark`_, :mod:`pcapkit` aims to support each
+protocol in full, options and parameters included, so it carries the protocols'
+enumeration registries, independent schema definitions and customisable
+interfaces.
 
 .. toctree::
    :maxdepth: 1
@@ -35,18 +33,18 @@ Package Metadata
 
    .. seealso::
 
-      :doc:`../contributing/releasing` for how this value is bumped and
-      consumed by the release pipeline.
+      :doc:`../contributing/releasing`, on how the release pipeline bumps and
+      reads it.
 
 Library Index
 =============
 
 .. module:: pcapkit.all
 
-:mod:`pcapkit` has defined various and numerous functions
-and classes, which have different features and purposes.
-To make a simple index for this library, :mod:`pcapkit.all`
-contains all things from :mod:`pcapkit`.
+:mod:`pcapkit.all` gathers the public names of the :mod:`pcapkit` subpackages in
+one namespace -- :mod:`pcapkit.const` as a module, and :mod:`pcapkit.vendor` not
+at all -- with the third-party engines' :mod:`pcapkit.toolkit` helpers prefixed
+by engine, such as ``scapy_packet2dict``.
 
 Command Line Tool
 =================
@@ -58,7 +56,7 @@ Command Line Tool
    The |emoji|_ package (the ``cli`` extra) decorates the ``-v`` output.
    Without it, importing the module warns with
    :class:`~pcapkit.utilities.warnings.EmojiWarning` and the CLI prints plain
-   text instead.
+   text.
 
 :mod:`pcapkit.__main__` provides the CLI, merged in from the deprecated
 |jspcapy|_ project.
@@ -137,8 +135,8 @@ Environment Variables
 
 .. envvar:: PCAPKIT_DEVMODE
 
-   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
-   will run in development mode.
+   Set to ``1`` (or ``yes``, ``true`` or ``on``, in any case) to run
+   :mod:`pcapkit` in development mode.
 
    .. seealso::
 
@@ -146,8 +144,8 @@ Environment Variables
 
 .. envvar:: PCAPKIT_VERBOSE
 
-   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
-   will run with verbose output.
+   Set to ``1`` (or ``yes``, ``true`` or ``on``, in any case) for verbose
+   output.
 
    .. seealso::
 
@@ -155,20 +153,19 @@ Environment Variables
 
 .. envvar:: PCAPKIT_SPHINX
 
-   If set to ``1`` (or ``yes``, ``true`` or ``on``, in any case), :mod:`pcapkit`
-   will run with Sphinx additional typing hints and docstrings support.
+   Set to ``1`` (or ``yes``, ``true`` or ``on``, in any case) for the extra
+   typing hints and docstrings the Sphinx build reads.
 
    .. seealso::
 
       :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`
 
-The ``PCAPKIT_*`` tunable limits, such as
-:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, are read by
-:mod:`pcapkit.utilities.config`, which lists each
-with its default, its accepted range and its risks. The :mod:`pcapkit.vendor`
-crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
-:envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY` are read by
-:mod:`pcapkit.vendor.default`, and listed under :ref:`vendor-variables`.
+:mod:`pcapkit.utilities.config` reads the ``PCAPKIT_*`` tunable limits, such as
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and lists each with its
+default, range and risks. :mod:`pcapkit.vendor.default` reads the crawlers'
+:envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
+:envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY`, listed under
+:ref:`vendor-variables`.
 
 .. versionchanged:: 1.5.0
 

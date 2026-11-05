@@ -4,11 +4,10 @@ Character Set Detection
 .. module:: pcapkit.utilities.chardet
 
 :mod:`pcapkit.utilities.chardet` wraps `chardet`_ with a bounded cache, for
-turning the bytes of a text field into a :obj:`str`. It is shared by
-:meth:`StringField.post_process
-<pcapkit.corekit.fields.strings.StringField.post_process>` and
-:meth:`Protocol.decode <pcapkit.protocols.protocol.Protocol.decode>`,
-which is why it lives here rather than beside either of them.
+turning the bytes of a text field into a :obj:`str`. :meth:`StringField.post_process
+<pcapkit.corekit.fields.strings.StringField.post_process>`,
+:meth:`Protocol.decode <pcapkit.protocols.protocol.Protocol.decode>` and the FTP
+and HTTP/1.* dissectors share it, so it lives beside none of them.
 
 .. autofunction:: pcapkit.utilities.chardet.detect
 

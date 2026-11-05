@@ -6,10 +6,10 @@ Deferred Packet
 :mod:`pcapkit.corekit.packet` contains
 :class:`~pcapkit.corekit.packet.DeferredPacket`, the mixin that lets an
 :class:`~pcapkit.corekit.infoclass.Info` subclass hold its ``packet`` field as
-a placeholder and resolve it on first read. It is shared by the reassembled
-datagrams of :mod:`pcapkit.foundation.reassembly` and the traced flows of
-:mod:`pcapkit.foundation.traceflow`, whose ``packet`` is a second parse of the
-payload and a reassembly of the stream respectively.
+a placeholder and resolve it on first read. The reassembled datagrams of
+:mod:`pcapkit.foundation.reassembly` use it for a second parse of the payload,
+and the traced flows of :mod:`pcapkit.foundation.traceflow` for a reassembly of
+the stream.
 
 A subclass is declared ``class X(DeferredPacket, Info)``, lists ``packet`` in
 its ``__additional__``, and names its placeholder class in

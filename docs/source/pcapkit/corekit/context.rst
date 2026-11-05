@@ -8,22 +8,21 @@ caller-supplied information that a protocol needs to parse a packet but that
 is **not** carried on the wire.
 
 Most protocols are self-describing: every length, offset and type needed to
-walk a packet is in the packet. A few are not, and
-:class:`~pcapkit.protocols.internet.esp.protocol.ESP` is the motivating example:
-:rfc:`4303` deliberately leaves the payload length, the position of the
+walk a packet is in the packet. A few are not, such as
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP`:
+:rfc:`4303` leaves the payload length, the position of the
 ``Pad Length`` / ``Next Header`` trailer and the length of the ``Integrity
 Check Value`` to the Security Association (SA), which is negotiated out of band
 and known only to the caller.
 
-Rather than adding protocol-specific keyword arguments to
+Rather than as protocol-specific keyword arguments to
 :class:`~pcapkit.foundation.extraction.Extractor`, such information is passed
 as a :class:`~pcapkit.corekit.context.ContextRegistry` -- a mapping of protocol
 index ID (cf. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`) to
-a :class:`~pcapkit.corekit.context.ProtocolContext` instance. It is handed to
-:class:`~pcapkit.foundation.extraction.Extractor` once and propagated down the
-protocol stack by
-:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`,
-so that a protocol nested arbitrarily deep can reach it through
+a :class:`~pcapkit.corekit.context.ProtocolContext` instance. The extractor
+takes it once, and
+:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`
+passes it down the stack, so a protocol at any depth reaches it through
 :meth:`Protocol._get_context <pcapkit.protocols.protocol.Protocol._get_context>`.
 
 Decoding an ESP tunnel end to end:
@@ -42,13 +41,12 @@ Decoding an ESP tunnel end to end:
 
 .. important::
 
-   A context often holds secrets, such as ESP encryption and integrity keys.
-   Contexts are therefore plain instance attributes on the protocol object and
-   are **never** written into its data model, which is the only thing that
-   reaches :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` and,
-   from there, the output dumpers.
-   :class:`~pcapkit.corekit.context.ProtocolContext` implementations are
-   expected to keep secrets out of their :meth:`~object.__repr__` as well.
+   A context often holds secrets, such as ESP encryption and integrity keys, so
+   it is a plain instance attribute on the protocol object and is **never**
+   written into its data model, the only thing that reaches
+   :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` and the output
+   dumpers. A :class:`~pcapkit.corekit.context.ProtocolContext` implementation
+   should keep secrets out of its :meth:`~object.__repr__` too.
 
 .. autoclass:: pcapkit.corekit.context.ProtocolContext
    :no-members:

@@ -4,9 +4,8 @@ IPv4 Datagram Reassembly
 .. module:: pcapkit.foundation.reassembly.ipv4
 
 :mod:`pcapkit.foundation.reassembly.ipv4` contains
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`
-only, which reconstructs fragmented IPv4 packets back to
-origin. Please refer to :doc:`ip` for more information.
+:class:`~pcapkit.foundation.reassembly.ipv4.IPv4` only, which reconstructs
+fragmented IPv4 packets back to origin; see :doc:`ip`.
 
 .. autoclass:: pcapkit.foundation.reassembly.ipv4.IPv4
    :no-members:

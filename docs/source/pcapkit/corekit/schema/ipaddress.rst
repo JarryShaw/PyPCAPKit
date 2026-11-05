@@ -6,10 +6,7 @@ IP Address Conversion
 :mod:`pcapkit.corekit.schema.ipaddress` converts a caller-supplied IP address to an
 :mod:`ipaddress` object, refusing a :obj:`bool` before :mod:`ipaddress` reads it as
 an :class:`int` (:issue:`491`), for the IP address fields
-(:mod:`pcapkit.corekit.fields.ipaddress`) and the protocols' makers alike. It is one
-of the :mod:`pcapkit.corekit.schema` helpers shared across the schema layer, not
-part of the header schema framework in :mod:`pcapkit.protocols.schema`; see
-:ref:`utilities-or-corekit`.
+(:mod:`pcapkit.corekit.fields.ipaddress`) and the protocols' makers alike.
 
 .. versionadded:: 1.6.0
 

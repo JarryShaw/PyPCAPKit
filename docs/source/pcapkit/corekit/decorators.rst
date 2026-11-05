@@ -3,8 +3,8 @@ Decorator Functions
 
 .. module:: pcapkit.corekit.decorators
 
-:mod:`pcapkit.corekit.decorators` contains several useful
-decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
+:mod:`pcapkit.corekit.decorators` contains the decorators
+:func:`~pcapkit.corekit.decorators.seekset`,
 :func:`~pcapkit.corekit.decorators.beholder` and
 :func:`~pcapkit.corekit.decorators.prepare`.
 
@@ -24,11 +24,9 @@ decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
 
 .. important::
 
-   The decorators above are designed for decorating *methods*: an instance
-   method of a protocol for :func:`seekset` and :func:`beholder`, and a
-   classmethod of a schema for :func:`prepare`.
-   For more information, please refer to the documentation of each
-   decorator function.
+   The decorators above decorate *methods*: an instance method of a protocol
+   for :func:`seekset` and :func:`beholder`, and a classmethod of a schema for
+   :func:`prepare`.
 
 Type Variables
 --------------

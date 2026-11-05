@@ -28,11 +28,10 @@ channel**:
    exactly as they govern any other library's (with one wrinkle in naming a
    category on the command line, noted below).
 
-The counts are the same in development mode as outside it:
-:envvar:`PCAPKIT_DEVMODE` changes where the log records go, and
-:envvar:`PCAPKIT_VERBOSE` how much detail they carry, never how many records
-there are. Constructing a warning class is not an act of reporting one -- it
-emits nothing and has no side effects.
+Neither flag changes how many records there are: :envvar:`PCAPKIT_DEVMODE`
+changes where the log records go, and :envvar:`PCAPKIT_VERBOSE` how much detail
+they carry. Constructing a warning class reports nothing and has no side
+effects.
 
 A next layer is parsed on trial, and replaced with
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw` when its header was not captured or its
@@ -50,8 +49,8 @@ layer's are reported as above when the trial ends (:issue:`1580`, :issue:`2308`,
 Silencing pcapkit Warnings
 --------------------------
 
-Filter them like any other library's, at the level of granularity you want --
-:class:`~pcapkit.utilities.warnings.BaseWarning` for all of them, or a single
+Filter them like any other library's, by
+:class:`~pcapkit.utilities.warnings.BaseWarning` for all of them, or by a single
 category::
 
    import warnings
@@ -74,14 +73,13 @@ select a family::
    :option:`-W` and :envvar:`PYTHONWARNINGS` cannot name a :mod:`pcapkit`
    category directly: ``-W ignore::pcapkit.utilities.warnings.BaseWarning`` is
    rejected with ``Invalid -W option ignored: invalid module name``. CPython
-   imports the category while parsing the option, and that happens before
-   :mod:`site` has added ``site-packages`` to :data:`sys.path`, so no installed
-   package's own category can be named there -- this is not specific to
-   :mod:`pcapkit`. Use a standard category on the command line, or install a
-   precise filter in code as above.
+   imports the category while parsing the option, before :mod:`site` has added
+   ``site-packages`` to :data:`sys.path`, so no installed package's category can
+   be named there. Use a standard category on the command line, or a filter in
+   code as above.
 
-All of that governs the :mod:`warnings` channel. The ``pcapkit`` logger is
-configured separately, through the :mod:`logging` module::
+That governs the :mod:`warnings` channel. The ``pcapkit`` logger is configured
+through :mod:`logging`::
 
    import logging
 

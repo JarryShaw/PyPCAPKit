@@ -3,9 +3,8 @@ Auxiliary Interface
 
 .. module:: pcapkit.interface.misc
 
-:mod:`pcapkit.interface.misc` contains miscellaneous
-user interface functions, classes, etc., which are
-generally provided per user's requests.
+:mod:`pcapkit.interface.misc` contains auxiliary user interfaces, mostly added
+on users' requests.
 
 .. autofunction:: pcapkit.interface.misc.follow_tcp_stream
 
