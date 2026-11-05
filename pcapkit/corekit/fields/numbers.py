@@ -208,13 +208,8 @@ class NumberField(Field[int], Generic[_T]):
         else:
             self._bit_length, self._bit_mask = -1, -1
 
-        # NOTE: ``__signed__`` fixes the sign for a subclass such as
-        # :class:`UInt32Field`; discarding a contradicting ``signed`` would make
-        # ``UInt32Field(signed=True)`` return an unsigned field and
-        # ``Int8Field(signed=False)`` a signed one, both without a word.
-        # ``None`` is what "not given" looks like, which is what
-        # lets a contradicting value be told apart from the default and rejected
-        # while leaving an agreeing one alone. See #545.
+        # NOTE: ``__signed__`` fixes a subclass's sign, so a contradicting ``signed`` is rejected rather
+        # than discarded; ``None`` means not given, which tells it apart from the default (#545).
         if self.__signed__ is None:
             self._signed = False if signed is None else bool(signed)
         elif signed is None or bool(signed) == self.__signed__:
@@ -232,10 +227,8 @@ class NumberField(Field[int], Generic[_T]):
         if self.__template__ is not None:
             struct_fmt = self.__template__
         else:
-            # NOTE: ``self._signed``, not the ``signed`` argument. A subclass
-            # that fixes ``__signed__`` without also fixing ``__template__``
-            # would otherwise build its template from the argument and parse
-            # with the opposite sign to the one it declared.
+            # NOTE: ``self._signed``, not the argument, so a subclass fixing ``__signed__`` but not
+            # ``__template__`` parses with the sign it declared.
             struct_fmt = self.build_template(self._length, self._signed)
         self._template = f'{endian}{struct_fmt}'
 
@@ -791,17 +784,15 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             try:
                 member = self._namespace(value)
             except ValueError as error:
-                # NOTE: An in-library rejection is pcapkit's own decision about
-                # the value, rather than the enumeration library reporting that
-                # no member carries it, so it is not this layer's to absorb.
+                # NOTE: an in-library rejection is pcapkit's own verdict on the
+                # value, not a missing member, so it is not this layer's to absorb.
                 if isinstance(error, BaseError):
                     raise
             else:
                 if record is None:
                     return member
-                # NOTE: A registry member is shared, so the captured bits
-                # outside ``bit_length`` go on an unregistered copy of it
-                # rather than on the member itself (#1488).
+                # NOTE: a registry member is shared, so the bits outside
+                # ``bit_length`` go on an unregistered copy of it (#1488).
                 attrs = {key: val for key, val in vars(member).items()
                          if key not in ('_name_', '_value_', '__reduce_ex__')}
                 attrs[_OUTSIDE_BITS] = record
@@ -890,10 +881,8 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             ``Enum.__reduce_ex__``, which returns ``(cls, (value,))`` -- the
             one lookup this member is deliberately absent from. A minted
             member is registered and so round-trips; left alone, this one
-            would not. Measured on CPython 3.14.7, resolving port 53406
-            through the TCP schema's :class:`PortEnumField`
-            with nothing in place of the override,
-            ``pickle.loads(pickle.dumps(member))`` raised
+            would not: without the override, an unknown TCP port's member
+            made ``pickle.loads(pickle.dumps(member))`` raise
             ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP`` -- while
             ``pickle.dumps`` still succeeded, so the failure surfaced only on
             read-back rather than where it was caused.
@@ -956,18 +945,14 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             raise TypeError(
                 f'{namespace!r} derives from neither str nor int; '
                 '_unregistered_member does not know how to build one of its members')
-        # NOTE: setting the enum protocol's own name/value attributes
-        # directly, rather than through namespace's own __new__, is what
-        # skips the registration that __new__ would otherwise have done.
+        # NOTE: setting name/value directly rather than through the namespace's
+        # __new__ is what skips the registration __new__ would do.
         obj._name_ = name  # pylint: disable=protected-access
         obj._value_ = value  # pylint: disable=protected-access
         for attr_name, attr_value in attrs.items():
             setattr(obj, attr_name, attr_value)
-        # NOTE: ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``,
-        # i.e. to the one lookup this member is deliberately absent from, so
-        # pickle and copy would both raise on it without this. Overriding it
-        # per instance, which pickle and copy both honour, rebuilds an
-        # equivalent unregistered member instead.
+        # NOTE: ``Enum.__reduce_ex__`` would reduce to the value lookup this member is absent from, so a
+        # per-instance override lets pickle and copy rebuild an equivalent unregistered member.
         return reduce_to(obj, _rebuild_unregistered_member, namespace, value, name, attrs)
 
 
@@ -1067,9 +1052,8 @@ class PortEnumField(EnumField):
             one :meth:`post_process` tests. See GitHub issue :issue:`2314`.
 
         """
-        # NOTE: imported here rather than at module level, as
-        # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
-        # against AppType rather than ``self._namespace`` (#1516).
+        # NOTE: imported here since :mod:`pcapkit.const` imports
+        # :mod:`pcapkit.corekit`; tested against AppType, not ``self._namespace`` (#1516).
         from pcapkit.const.reg.apptype import AppType  # pylint: disable=import-outside-toplevel
 
         if isinstance(value, AppType):
@@ -1139,39 +1123,22 @@ class PortEnumField(EnumField):
         value = super(EnumField, self).post_process(value, packet)
         proto = self._proto
         if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
-            # NOTE: lets AppType.get() -- unmodified -- raise its rejection
-            # for a port this field's own width cannot represent, rather than
-            # risking it being absorbed below as a foreign miss.
+            # NOTE: lets AppType.get() raise its own rejection for a port this
+            # field's width cannot hold, rather than absorbing it below as a miss.
             return self._namespace.get(value, proto=proto)
         owner = self._namespace._dispatch(value, proto)  # pylint: disable=protected-access
         if not owner.__registry__.getlist(value):  # type: ignore[union-attr]
             try:
                 declared = owner._missing_(value)  # pylint: disable=protected-access
             except ValueError as error:
-                # NOTE: value is already known to be in-width here, so this
-                # ValueError is never the out-of-range rejection, which never
-                # reaches this branch; it could only be a foreign "no member has
-                # this value", absorbed as a miss. AppType._missing_ raises
-                # neither for an in-width port: it answers a miss with None. A
-                # pcapkit.utilities.exceptions error is still a deliberate
-                # registry decision and propagates unchanged.
+                # NOTE: ``value`` is in width here, so a ValueError is a foreign "no such member" miss; a
+                # ``pcapkit.utilities.exceptions`` error is a deliberate registry decision and propagates.
                 if isinstance(error, BaseError):
                     raise
                 declared = None
             if declared is None:
-                # NOTE: an unregistered member of ``owner`` itself, per the
-                # ruling in EnumField._unregistered_member, rather than a foreign
-                # pseudo-enum. ``.port``, ``.svc`` and ``.proto`` are what a real
-                # AppType member carries -- read unconditionally by e.g.
-                # Transport._decode_next_layer's ``srcport.port`` -- and
-                # ``svc='unknown'`` marks a port with no declared service. They
-                # are passed in the order AppType.__new__ sets them, because
-                # DictDumper.object_hook renders a member's addon keys straight
-                # out of its ``__dict__`` in insertion order -- so any other
-                # order here would make an unassigned port dump ``port`` before
-                # ``svc`` while every declared one dumps ``svc`` first. The
-                # transport is ``owner.__transport__``, as AppType.get uses,
-                # since ``proto`` may be a bare int with no ``.name`` (#1774).
+                # NOTE: An unregistered ``owner`` member, attributes set in ``AppType.__new__``'s order, which
+                # dumps follow; ``owner.__transport__`` is used as ``proto`` may be a bare int (#1774).
                 transport = owner.__transport__
                 return self._unregistered_member(
                     owner, f'unknown [{value:d} - {transport.name}]',

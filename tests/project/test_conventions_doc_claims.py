@@ -1,76 +1,68 @@
 # -*- coding: utf-8 -*-
 """Claims the split *House Conventions* pages make that the tree can be asked about.
 
-The *House Conventions* pages, under :file:`docs/source/contributing/conventions/`,
-record the settled design rulings, and most of what they record is reasoning --
-which no test can check. Some of it is not: a per-class classification, a forbidden
-role, an exception type. Those are the parts that rot silently, because Sphinx
-builds without ``-W`` and without ``nitpicky``, so a page whose every factual claim
-has gone stale still renders and CI still passes.
+The pages under :file:`docs/source/contributing/conventions/` record settled
+rulings, mostly as reasoning no test can check. The checkable parts -- a per-class
+classification, a forbidden role, an exception type -- rot silently, because Sphinx
+builds without ``-W`` or ``nitpicky``, so a page whose every factual claim is stale
+still renders and CI still passes.
 
-GitHub issue #918 part 1 harvested the settled rulings onto a single page; part 2
-split it into :file:`docs/source/contributing/conventions/`, one file per
-``.. _label:`` anchor plus the :file:`index.rst` that carries the ``.. important::``
-preamble and the toctree. This file pins the checkable claims, plus the split's own
-structure:
+GitHub issue #918 part 1 harvested the rulings onto one page; part 2 split it into
+:file:`docs/source/contributing/conventions/`, one file per ``.. _label:`` anchor
+plus an :file:`index.rst` carrying the ``.. important::`` preamble and the toctree.
+This file pins the checkable claims and the split's structure:
 
-* :class:`ConventionAnchorTests` -- every ``.. _label:`` anchor, one per file:
-  every anchor exists, lives in exactly its own file, is listed in the index's
-  toctree, and the top-level :file:`docs/source/index.rst` points at the index
-  page rather than a bare ``contributing/conventions`` document path. A reader
-  that slices one page *between* two anchors cannot work on this layout -- GitHub
-  issue #930 named that slice the split's concrete blocker -- so each reader takes
-  an anchor's file whole.
+* :class:`ConventionAnchorTests` -- every anchor exists, lives in exactly its own
+  file and is in the index's toctree, and :file:`docs/source/index.rst` points at
+  the index page rather than a bare ``contributing/conventions`` path. A reader
+  slicing one page *between* two anchors cannot work on this layout -- GitHub issue
+  #930 named that slice the split's blocker -- so each reader takes an anchor's
+  file whole.
 * :class:`PhaseTwoRemainderTests` -- what the page says about
   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2 and the
-  population its audit covers, measured rather than remembered: unchecked, a claim
-  such as the phase *"has not happened yet"* outlives the work that falsifies it
-  (#921), because nothing contradicts it. The page states no counts (#1103's ruling,
-  #1811), so what is checked is each claim about the whole population.
+  population its audit covers, measured: unchecked, a claim such as the phase *"has
+  not happened yet"* outlives the work that falsifies it (#921). The page states no
+  counts (#1103's ruling, #1811), so each claim is checked over the whole
+  population.
 * :class:`ExtensionHeaderClassificationTests` -- the page's bases-per-header table
-  against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
-  pins the *code* to the ruling; this pins the *page* to the code, which is the half
-  that goes stale when a new header lands.
-* :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
-  miss, which names :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, not the
-  true but unspecific :exc:`KeyError` (#918).
+  against the declarations. ``tests/protocols/internet/test_ipv6_ext_unit.py`` pins
+  the *code* to the ruling; this pins the *page* to the code, the half that goes
+  stale when a new header lands.
+* :class:`FailedLookupExceptionTests` -- the page's name-miss example names
+  :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, not the true but unspecific
+  :exc:`KeyError` (#918).
 * :class:`GetOverrideContractTests` -- what a ``get`` override owes the base:
-  ``@classmethod`` for delegation, which Python forces rather than anyone ruling
-  (#913's precedent, followed by #908), plus the rulings part 1 harvested --
-  ``quiet=True`` on the raise (#933), no suppression standing in for an honoured
-  signature (#935), and deletion rather than repair when the override only
-  reimplements the base (#940). Includes a guard against an audit row claiming
-  overrides that do not exist, as the one #940 falsified did while rendering fine
-  and failing nothing.
+  ``@classmethod`` for delegation, which Python forces (#913's precedent, followed
+  by #908), plus the rulings part 1 harvested -- ``quiet=True`` on the raise
+  (#933), no suppression standing in for an honoured signature (#935), and deletion
+  rather than repair when the override only reimplements the base (#940). Also
+  guards against an audit row claiming overrides that do not exist, as the one #940
+  falsified did while rendering fine.
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
-  ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
-  ``objects.inv`` carries no ``py:`` objects), converted to plain literals rather
-  than roles. A forbidden role needs a test or it comes back. Pins the other
-  half of the same fix alongside it: the sentinel references #934 part B
-  qualified stay qualified, since none of ``AbsentType``, ``NoValueType`` or
-  ``ABSENT`` resolves unqualified outside
-  :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module context. Both
-  checks scan every split page rather than one file, since either could in
-  principle land on any of them.
-
+  ``aenum`` cannot be cross-referenced (``conf.py`` excludes it: its
+  ``objects.inv`` carries no ``py:`` objects), so it is a plain literal, not a role;
+  a forbidden role needs a test or it comes back. Also pins that the sentinel
+  references #934 part B qualified stay qualified, since none of ``AbsentType``,
+  ``NoValueType`` or ``ABSENT`` resolves unqualified outside
+  :file:`docs/source/pcapkit/corekit/sentinels.rst`'s module context. Both scan
+  every split page, since either could land on any of them.
 * :class:`ProcessConventionTests` -- the *process* rulings #918 harvested onto
-  :file:`process.rst`: what the ``all`` extra carries (#910), what a
-  changelog entry is, and what the issue and pull request labels mean. Grounded in
+  :file:`process.rst`: what the ``all`` extra carries (#910), what a changelog entry
+  is, and what the issue and pull request labels mean. Grounded in
   :file:`pyproject.toml`, :file:`docs/source/changelog/1.5.0.rst` and
-  :file:`.github/PULL_REQUEST_TEMPLATE.md` rather than in the owner's phrasing, which
-  that page is required to paraphrase rather than quote.
-
+  :file:`.github/PULL_REQUEST_TEMPLATE.md` rather than in the owner's phrasing,
+  which that page paraphrases.
 * :class:`PackageInitLayoutTests` -- the ``__init__`` layout
-  :file:`protocol-family-grouping.rst` shows: the protocol class's import, then
-  the ``schema`` aliases under their heading, then the ``data`` aliases under
-  theirs, each block in :program:`isort`'s own order, which :program:`isort` then
-  skips. Every protocol package's ``__init__`` is read against the page's example,
-  and the example against the package it is taken from (#2534).
+  :file:`protocol-family-grouping.rst` shows: the protocol class's import, then the
+  ``schema`` aliases under their heading, then the ``data`` aliases under theirs,
+  each block in :program:`isort`'s own order, which :program:`isort` then skips.
+  Every protocol package's ``__init__`` is read against the page's example, and the
+  example against its source package (#2534).
 
-Deliberately **not** checked here: whether the page's cross-references resolve. That is
-a property of the built inventory rather than of the source, for the reason
-:file:`tests/project/test_documentation_claims.py` gives at length, and the honest check
-is the rendered HTML.
+Deliberately **not** checked: whether the pages' cross-references resolve. That is a
+property of the built inventory, not the source, for the reason
+:file:`tests/project/test_documentation_claims.py` gives, and the honest check is the
+rendered HTML.
 
 """
 
@@ -97,29 +89,21 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The directory GitHub issue #918 part 2 split the single-page
-#: :file:`conventions.rst` into. Hard-coded rather than discovered, because the path
-#: is *also* what ``pcapkit/corekit/sentinels.py`` and
-#: ``tests/corekit/test_sentinel_exports_unit.py`` hard-code -- so if the layout
-#: moves again, every one of them has to be updated together, and a test that found
-#: it either way would hide that.
+#: :file:`conventions.rst` into. Hard-coded, not discovered:
+#: ``pcapkit/corekit/sentinels.py`` and ``tests/corekit/test_sentinel_exports_unit.py``
+#: hard-code it too, so a move must update them together, which a discovering test
+#: would hide.
 CONVENTIONS_DIR = ROOT / 'docs' / 'source' / 'contributing' / 'conventions'
 
 #: The index page that carries the toctree and the ``.. important::`` preamble.
 INDEX = CONVENTIONS_DIR / 'index.rst'
 
-#: Every ``.. _label:`` anchor, in the order the index's toctree lists the files in.
-#: ``process`` holds, on the owner's ruling, the settled *process* rulings -- the
-#: ``all`` extra, what a changelog entry is, and what the labels mean -- on a page of
-#: their own rather than wedged onto a code-convention page. ``documentation`` carries
-#: the rulings GitHub issue #719 settled about the prose itself -- heading case, when
-#: a Mermaid graph beats a paragraph, and what a sentence on these pages may claim.
-#: ``protocol-layer-placement`` carries the other ruling that thread settled -- which
-#: subpackage a dissector belongs in, decided by designed function rather than by
-#: encapsulation -- and sits beside the other class-hierarchy page. ``test-coverage``
-#: carries GitHub issue #1203's rules for what the test suite has to prove, and
-#: ``utilities-or-corekit`` GitHub issue #1712's rule for which of those two packages
-#: a module belongs in. Every anchor is the bare file stem, which is what
-#: :data:`PAGES` below depends on.
+#: Every ``.. _label:`` anchor, in the index's toctree order. Each is the bare file
+#: stem, which :data:`PAGES` depends on. ``process`` holds the settled *process*
+#: rulings on a page of their own, on the owner's ruling, rather than on a
+#: code-convention page; ``protocol-layer-placement`` sits beside the other
+#: class-hierarchy page. GitHub issues #719, #1203 and #1712 settled the rulings on
+#: ``documentation``, ``test-coverage`` and ``utilities-or-corekit`` respectively.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',

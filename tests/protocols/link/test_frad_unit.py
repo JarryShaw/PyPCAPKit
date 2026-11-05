@@ -2,9 +2,8 @@
 """GitHub issue #2460: Frame Relay Access Device (FRAD) frames.
 
 :class:`~pcapkit.protocols.link.frad.protocol.FRAD` dissects the ``arphrd_type``
-``ARPHRD_FRAD`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+``ARPHRD_FRAD`` payload of
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` (see
 :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 Q.922 address field, the direct-NLPID and SNAP-encapsulated forms per
 :rfc:`2427`, and byte-exact round trips. The FRAD-dispatch side of
@@ -189,9 +188,8 @@ class TestFRAD(unittest.TestCase):
                 FRAD(dlci=dlci)
 
     def test_make_rejects_an_invalid_flag_bit(self) -> None:
-        # NOTE: True/False are not cases here -- bool is an int subclass and
-        # True == 1, so a bit flag (unlike dlci, a numeric identifier) treats
-        # it as a legitimate spelling of 1 rather than rejecting it.
+        # NOTE: no bool cases: ``True == 1``, so a bit flag, unlike the numeric
+        # ``dlci``, takes it as a spelling of 1.
         from pcapkit.protocols.link.frad.protocol import FRAD
         from pcapkit.utilities.exceptions import ProtocolError
 

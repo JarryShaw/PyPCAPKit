@@ -166,12 +166,8 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
     def test_both_ranges_still_render_with_their_own_body(self) -> None:
         # Reordering must not lose either range or swap their bodies.
         #
-        # NOTE: the second assertion checks for the ``_unregistered_member``
-        # form, not ``extend_enum``: every range branch on this crawler
-        # resolves through ``_unregistered_member`` (#775) -- see
-        # tests/const/test_const_enum_no_mint.py's own docstring. The
-        # hex-suffixed name is kept, because PR #878 scopes that conversion
-        # as not registering rather than renaming.
+        # NOTE: range branches resolve through ``_unregistered_member``, not ``extend_enum``
+        # (#775); the hex-suffixed name stays, as PR #878 stopped registering, not naming.
         _enum, miss = self._process_fixture()
         text = '\n'.join(miss)
 

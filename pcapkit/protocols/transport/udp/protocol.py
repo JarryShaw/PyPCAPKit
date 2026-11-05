@@ -130,8 +130,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             80: ModuleDescriptor('pcapkit.protocols.application.http.protocol', 'HTTP'),
 
             # L2TPv2 (RFC 2661) is the only L2TP version implemented, so the
-            # concrete class is bound rather than the abstract L2TP base.
-            # L2TPv3 (RFC 3931, IANA protocol number 115) has no class. See
+            # concrete class is bound rather than the abstract L2TP base. See
             # pcapkit.protocols.link.l2tp.protocol.
             1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2.protocol', 'L2TPv2'),
 

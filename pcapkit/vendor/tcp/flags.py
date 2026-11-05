@@ -148,9 +148,8 @@ class Flags(Vendor):
             name = DATA.get(int(code), dscp.split(' (')[0]).replace('Reserved for future use', 'Reserved')
             renm = self.rename(name or 'Unassigned', code, original=dscp)
 
-            # NOTE: IANA numbers the bits from the most significant end of the
-            # 16-bit Data Offset/flags word, so the wire mask of offset ``n`` is
-            # ``1 << (15 - n)`` -- FIN, at offset 15, is the low bit (#2310).
+            # NOTE: IANA numbers the 16-bit Data Offset/flags word from its top bit,
+            # so offset ``n`` masks ``1 << (15 - n)`` (#2310).
             pres = f"{renm} = 1 << {15 - int(code)}"
             sufs = f'#: {desc}'
 

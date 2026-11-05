@@ -1,214 +1,162 @@
 # -*- coding: utf-8 -*-
 """Tests that nothing in the workflows that publish does so ungated or unpublished.
 
-Over :file:`.github/workflows/create-release.yml`, which everything up to
-:class:`TestYAMLAgreesWithTheScanner` is about, and
-:file:`.github/workflows/cron-conda.yml`, whose conda build bumps #1632 found
-neither tagged nor uploaded. They share the scanner, the expression evaluator
-and the cascade model below; nothing else.
+Covers :file:`.github/workflows/create-release.yml` (everything up to
+:class:`TestYAMLAgreesWithTheScanner`) and :file:`.github/workflows/cron-conda.yml`,
+whose conda build bumps #1632 found neither tagged nor uploaded. The two share only
+the scanner, the expression evaluator and the cascade model below.
 
-#641: guards against a publishing job with no ``environment:`` -- a ``pypi``
-job whose ``environment: release`` is commented out while the ``id-token: write``
-from the same upstream snippet sits live below it, or a ``conda`` job with no
-``environment:`` at all. A scheduled vendor crawl that bumps the version is enough
-to enter that workflow, so both package indexes are then reachable with no human
-in the path.
+#641: a publishing job with no ``environment:`` -- a ``pypi`` job whose
+``environment: release`` is commented out while the same snippet's ``id-token:
+write`` stays live, or a ``conda`` job with none at all. A scheduled vendor crawl
+that bumps the version enters that workflow, so both package indexes are then
+reachable with no human in the path. A missing ``environment:`` fails, warns and
+shows nothing in a run, and a line missing from a commented block reads as disabled
+on purpose, so only an assertion over the file can notice it.
 
-What makes that worth a test rather than just a fix is how quietly it arises.
-Nothing about a missing ``environment:`` line fails, warns, or shows up in a run's
-output -- the job simply runs -- and a line missing from inside a commented block
-reads as though it had been disabled deliberately and as a unit. So the
-regression is invisible by construction, and the only thing that can notice it is
-an assertion over the file.
+The rule is not a copy of the file: **every job in that workflow that runs a
+publishing action or pushes to git must declare an** ``environment:``, which also
+catches a new, renamed or reordered job. It generalises over job *identity*, not
+publishing *mechanism*: :data:`PUBLISHING_MARKERS` is a hand-maintained list of
+substrings, so a route it does not name -- ``twine upload``, a renamed fork of a
+pinned action, a ``curl`` at an index -- passes while ungated.
+:class:`TestMarkersStillMatch` keeps the existing markers from going blind but
+cannot add one; a new publishing route needs its marker added here.
 
-The rule asserted here is not a copy of the current file: **any job in that
-workflow which runs a publishing action or pushes to git must declare an
-``environment:``.** Stated that way it also catches a *new* publishing job added
-later without a gate, and a job renamed or reordered.
+Deliberately untested, because a unit-tier test cannot:
 
-Be clear about how far that generalises, though, because it is easy to overstate.
-:data:`PUBLISHING_MARKERS` is what decides "publishing", and it is a finite,
-hand-maintained list of substrings. So the rule generalises across job
-*identity* and not across publishing *mechanism*: a job uploading by some route
-none of those names -- ``twine upload``, a fork of a pinned action under
-another name, a ``curl`` straight at an index -- matches no marker, and would
-pass this test while genuinely ungated.
-:class:`TestMarkersStillMatch` only keeps the existing markers from going blind;
-it cannot invent another. Adding a publishing route to this workflow therefore means
-adding its marker here, and that is a maintenance obligation rather than something
-the test enforces.
+* **Whether the environments exist and have required reviewers.** That is
+  repository settings: an ``environment:`` naming a missing environment is created
+  implicitly with no protection rules, so passing here is necessary, not
+  sufficient. Checking needs an authenticated ``GET
+  /repos/{owner}/{repo}/environments``, and the unit tier runs on a fresh clone with
+  no network and no token, so the workflow's own comment and #641 record it.
+* **Whether GitHub requests one approval per environment or per matrix leg.** That
+  is runner behaviour, observable only in a real run, and moot while ``pypi`` and
+  ``conda``, both matrix jobs, have no required reviewers (#887). It matters only if
+  a matrix job is gated by its own environment.
 
-Two things this deliberately does **not** test, because it cannot:
+:mod:`yaml` comes only with the ``test`` extra, so the scanner is hand-rolled and
+:class:`TestYAMLAgreesWithTheScanner` checks it against :func:`yaml.safe_load`,
+skipping without that extra -- the split
+``test_the_rewritten_date_is_a_string_and_not_a_yaml_date`` in
+:file:`tests/project/test_bump_version.py` makes.
 
-* **Whether the environments exist, and whether they have required reviewers.**
-  That is repository settings, not repository content, and an ``environment:``
-  naming an environment that does not exist is created implicitly with no
-  protection rules -- so the workflow half passing here is necessary and not
-  sufficient. The check needs an authenticated ``GET
-  /repos/{owner}/{repo}/environments``, which a unit-tier test may not make: the
-  tier runs on a fresh clone with no network and no token. It is written down in
-  the workflow's own comment and in #641 instead.
-* **Whether GitHub requests one approval per environment or one per matrix leg.**
-  ``pypi`` and ``conda`` are both matrix jobs. That is a property of the
-  Actions runner, observable only from a real run -- and moot for both,
-  which have no required reviewers (#887). The question would resurface
-  only if a matrix job were gated by its own environment.
+#888: one guard for every job past ``version_check`` -- "the ``v*`` tag exists" as
+a proxy for "this version was published" -- diverges when a release half-completes,
+and every downstream job then skips while the run reports green.
+:class:`TestEvidenceBasedGating` checks that ``tag``, ``pypi`` and ``conda`` each read
+their own evidence, and that their ``if:`` conditions bypass the default status
+check with ``!cancelled()``: otherwise a job whose ``needs:`` includes a
+legitimately skipped predecessor is skipped before its ``if:`` is evaluated.
+:func:`declared_if` reads an ``if:``, folded-scalar form included, the same textual
+way the rest of this module reads ``environment:`` and ``needs:``.
 
-:mod:`yaml` comes only with the ``test`` extra, so the scanner in this module is
-hand-rolled and dependency-free, and :class:`TestYAMLAgreesWithTheScanner` checks
-it against :func:`yaml.safe_load`, skipping on an install without that extra. The
-same split as ``test_the_rewritten_date_is_a_string_and_not_a_yaml_date`` in
-:file:`tests/project/test_bump_version.py`: the assertion that must run everywhere
-does not need the dependency, and the one that needs it guards the substitute.
+#905's cross-review of #888 found two defects no string assertion can catch,
+because neither shows until the workflow runs:
 
-#888: one guard shared by every job past ``version_check`` -- "the ``v*`` tag
-exists" -- as a proxy for "this version was already published" diverges exactly
-when a release half-completes, and makes every downstream job skip silently
-while the run reports green. :class:`TestEvidenceBasedGating` below guards
-against that: ``tag``, ``pypi`` and ``conda`` each read their own evidence
-instead of a shared tag, and -- the part that is easy to get
-subtly wrong -- their ``if:`` conditions bypass GitHub's default status check
-explicitly (``!cancelled()``) rather than relying on evidence alone, because a
-job whose ``needs:`` includes a legitimately-skipped predecessor is skipped
-before its own ``if:`` is even evaluated otherwise. :func:`declared_if` is
-what makes an ``if:`` condition -- including the multi-line, folded-scalar
-form these conditions take -- checkable the same coarse, textual way the rest of
-this module already checks ``environment:`` and ``needs:``.
+* **``release_status`` demanding uniformity across the release jobs** reads a
+  self-heal -- ``github``/``tag`` skipping because their artefacts exist,
+  ``pypi``/``conda`` succeeding because theirs did not -- as #888's stranded
+  partial, and errors on the run that fixes it.
+  :class:`TestReleaseStatusScriptExecutesCorrectly` runs the step's script over the
+  shapes a real run can take; the uniformity bug fails the self-heal row.
+* **``python3`` source indented by its YAML block scalar** compiles only on Python
+  3.14; 3.9 through 3.13 each raise ``IndentationError: unexpected indent``,
+  measured. A snippet that runs before ``actions/setup-python`` gets the runner
+  image's ``python3`` -- 3.12 on ``ubuntu-latest`` when #905 measured it.
+  :class:`TestPythonSnippetsSurviveOlderInterpreters` runs each snippet under an
+  interpreter older than 3.14 found on ``PATH``, skipping otherwise, since compiling
+  under a 3.14 test runner proves nothing.
 
-#905's cross-review of #888 found two defects no string assertion over the
-YAML can catch, because neither shows until something the workflow executes
-runs:
+#962: the same argument holds one layer up, for the ``if:`` expressions. On #961
+each strengthened text assertion was defeated by a mutation it had not anticipated,
+because vocabulary is not structure and structure is not meaning.
+:class:`TestGateExpressionsEvaluateCorrectly` **evaluates** each gate over the
+scenarios a real run can be in, so a mutation that changes the truth table is
+caught however it is spelled: reversed operands, ``contains(fromJSON(...))``, a
+``!=`` negation, a ``true ||`` prefix, a one-character ``&&``-to-``||`` slip.
 
-* **``release_status`` branch logic demanding uniformity across the release
-  jobs** reads a self-heal -- ``github``/``tag`` legitimately skipping because
-  their artefacts already exist, ``pypi``/``conda`` running and succeeding
-  because theirs did not -- as the stranded-partial shape #888 is about, and
-  errors on the very run that fixes it.
-  :class:`TestReleaseStatusScriptExecutesCorrectly` actually runs the step's
-  script, over a table of the shapes a real run can take, and checks which
-  branch each one takes -- the uniformity bug fails exactly the self-heal row.
-* **``python3`` source indented by the surrounding YAML block scalar** only
-  ``compile()``s on Python 3.14 -- every interpreter from 3.9 through 3.13
-  raises ``IndentationError: unexpected indent`` on that leading whitespace,
-  measured directly against each one. A snippet that runs before
-  ``actions/setup-python`` installs a chosen version gets whatever ``python3``
-  the runner image ships by default -- 3.12 on ``ubuntu-latest`` when #905
-  measured it, never 3.14. :class:`TestPythonSnippetsSurviveOlderInterpreters`
-  runs each snippet under an interpreter older than 3.14 when one can be found
-  on ``PATH``, skipping otherwise -- ``compile()`` under whatever interpreter
-  happens to be running this test suite proves nothing when that interpreter is
-  3.14 itself.
+The text assertions **stay**, settled on #962: they cost nothing, their failure
+names the clause rather than a scenario row, and without them an evaluator bug would
+leave the gates unpinned -- #962's failure one layer down. The layers catch
+different things, and :class:`TestGateMutationsChangeTheTruthTable` records which
+rejects which: a ``true ||`` prefix is invisible to the text layer and obvious to
+the evaluator, while reversed operands leave the truth table unchanged, so only the
+text layer sees them.
 
-#962: the same argument, one layer up, applies to the ``if:`` expressions
-themselves. Review rounds on #961 produced mutation after mutation of a single
-clause, and each strengthening of the text assertions was defeated by one the
-previous round had not anticipated -- because vocabulary is not structure and
-structure is not meaning. :class:`TestGateExpressionsEvaluateCorrectly`
-**evaluates** each gate instead, over a table of the scenarios a real run can
-be in, so a mutation is caught when it changes the gate's truth table however
-it is spelled: reversed operands, ``contains(fromJSON(...))``, a ``!=``
-negation, a ``true ||`` prefix and a one-character ``&&``-to-``||`` slip all
-land in the same place.
+#967: rows holding every evidence output at ``'true'`` or ``'false'`` cannot tell
+``<evidence> == 'false'`` from ``<evidence> != 'true'``, and the text layer never
+checks which comparison is made, so that edit is invisible to both layers. The two
+diverge only on an output that is neither, in the dangerous direction: ``!=
+'true'`` publishes where ``== 'false'`` skips. :func:`gate_rows` therefore carries,
+per gated job, a row with that job's evidence at ``null`` -- the only row that
+mutation fails.
 
-The text assertions **stay** rather than being replaced, settled on #962
-itself. They cost nothing, they fail with a message naming the clause rather
-than naming a scenario row, and an evaluator bug would otherwise leave the
-gates unpinned entirely -- which is #962's own failure mode reintroduced one
-layer down. The two layers also catch genuinely different things, and
-:class:`TestGateMutationsChangeTheTruthTable` records which layer rejects
-which mutation instead of leaving that to be assumed: a ``true ||`` prefix is
-invisible to the text layer and obvious to the evaluator, while reversed
-operands are the exact opposite -- they do not change the truth table at all,
-so only the text layer has anything to say about them.
+:func:`evaluate_condition` implements only the subset this workflow uses: ``!``,
+``&&``, ``||``, parentheses, ``==``/``!=`` against single-quoted literals, integer
+literals, ``startsWith``, ``contains``, ``fromJSON``, the status-check functions,
+and ``needs.<job>.result`` / ``needs.<job>.outputs.<NAME>`` / ``github.*`` lookups.
+``contains``, ``fromJSON`` and ``always()`` appear in no gate; they exist so the
+mutation table is *evaluated* rather than rejected, since a parse error would look
+like a caught mutation. Anything else raises :exc:`UnsupportedExpression`, and
+``test_every_declared_if_is_evaluable`` makes the file outgrowing the subset a loud
+failure.
 
-#967: a truth table is only as discriminating as its rows, and rows holding
-every evidence output at a literal ``'true'`` or ``'false'`` cannot tell
-``<evidence> == 'false'`` from ``<evidence> != 'true'``: the two spellings agree
-there, and the text layer never looks at *which* comparison is made against an
-output at all -- so the edit is invisible to both layers at once. They diverge
-only on an output that is neither, and for a publishing job that is the
-dangerous direction: ``!= 'true'`` runs where ``== 'false'`` skips, so evidence
-nothing established becomes a publish attempt. :func:`gate_rows` therefore
-carries one row per gated job holding that job's own evidence at ``null``, which
-is the only row in the table that mutation fails.
-
-:func:`evaluate_condition` implements the subset this workflow uses and
-nothing more: ``!``, ``&&``, ``||``, parentheses, ``==``/``!=`` against
-single-quoted literals, integer literals, ``startsWith``, ``contains``,
-``fromJSON``, the status-check functions, and ``needs.<job>.result`` /
-``needs.<job>.outputs.<NAME>`` / ``github.*`` lookups. ``contains``,
-``fromJSON`` and ``always()`` appear in no gate on the tree -- they are
-implemented because the mutation table needs them *evaluated* rather than
-rejected, since a parse error would otherwise look like a caught mutation
-while proving nothing about the truth table. Anything outside the subset
-raises :exc:`UnsupportedExpression`, and
-``test_every_declared_if_is_evaluable`` is what makes the file growing past
-that subset a loud failure rather than a silent gap.
-
-Two things :func:`evaluate_condition` deliberately does **not** model, both of
-them runner behaviour rather than expression semantics. Neither is folded into
-the evaluator; both are modelled *beside* it, by :func:`cascade_skipped_by` and
-:func:`job_runs`, for the jobs whose correctness turns on them (#1632):
+Two pieces of runner behaviour stay out of the evaluator and are modelled beside
+it, by :func:`cascade_skipped_by` and :func:`job_runs`, for the jobs that turn on
+them (#1632):
 
 * **The implicit ``success()``** Actions prepends to an ``if:`` that calls no
-  status-check function itself. It applies to ``github``, which is why
-  ``test_github_runs_when_its_own_v_tag_is_missing`` evaluates the *declared*
-  condition and says so; it does not apply to ``tag``/``pypi``/``conda``,
-  which all open with ``!cancelled()``, so for those three the declared
-  condition is the whole gate.
-* **The cascade-skip** that skips such a job before its own ``if:`` is
-  evaluated at all, once a ``needs:`` ancestor skipped or failed. Escaping it
-  is what ``!cancelled()`` is *for*, and
-  ``test_evidence_gated_jobs_survive_a_legitimately_skipped_predecessor``
-  pins it textually above.
+  status-check function. It applies to ``github``, which is why
+  ``test_github_runs_when_its_own_v_tag_is_missing`` says it evaluates the
+  *declared* condition; ``tag``/``pypi``/``conda`` all open with ``!cancelled()``,
+  so for them the declared condition is the whole gate.
+* **The cascade-skip** of such a job, before its ``if:`` is evaluated, once a
+  ``needs:`` ancestor skipped or failed. ``!cancelled()`` exists to escape it, and
+  ``test_evidence_gated_jobs_survive_a_legitimately_skipped_predecessor`` pins that
+  textually.
 
-#1632 is what happens when a job does not escape it, so for
-:file:`cron-conda.yml` the cascade is evaluated rather than only asserted
-about. That workflow runs on ``workflow_run`` (#731) and skips its own
-``unit-tests`` gate on that event; ``conda-update`` escapes the skipped
-ancestor with ``!cancelled()`` and commits a build bump, and a ``conda-tag``
-or ``conda-dist`` calling no status-check function at all is skipped behind it
-by Actions' implicit ``success()`` -- which is how the five bumps #1632 lists
-were committed and then neither tagged nor uploaded. Measured on run 38325136710:
-``Update requirements.txt`` succeeded with its Bump, Commit and Push steps
-all green (pushing ``f4f94bcad``), and both downstream jobs reported
-``skipped``.
+#1632 is a job that does not escape it, so for :file:`cron-conda.yml` the cascade is
+evaluated, not only asserted. That workflow runs on ``workflow_run`` (#731) and
+skips its own ``unit-tests`` gate on that event; ``conda-update`` escapes with
+``!cancelled()`` and commits a build bump, and a ``conda-tag`` or ``conda-dist``
+calling no status-check function is skipped behind it by the implicit
+``success()`` -- how the bumps #1632 lists were committed but neither tagged nor
+uploaded. Measured on run 38325136710: ``Update requirements.txt`` succeeded with
+its Bump, Commit and Push steps green (pushing ``f4f94bcad``), and both downstream
+jobs reported ``skipped``.
 
-That defect sits one layer *below* an ``if:`` -- both conditions evaluated
-**true** on that run -- so no amount of evaluating them can see it, which is
-the same shape of argument #962 made one layer up.
-:class:`TestCondaBumpIsTaggedAndUploaded` therefore goes through
-:func:`job_runs`, which composes the declared condition with
-:func:`cascade_skipped_by`'s model of the implicit check;
-:class:`TestTheCascadeModel` pins that model on fixtures, including the
-condition text #1632 found, with no status-check call, so the model itself
-cannot drift into agreeing with whatever the file happens to say.
+Both conditions evaluated **true** on that run, so the defect sits below an
+``if:``, where no evaluation of one can see it -- #962's argument one layer down.
+:class:`TestCondaBumpIsTaggedAndUploaded` therefore goes through :func:`job_runs`,
+which composes the declared condition with :func:`cascade_skipped_by`'s model of
+the implicit check, and :class:`TestTheCascadeModel` pins that model on fixtures,
+#1632's condition text included, so it cannot drift into agreeing with the file.
 
-Past the cascade lies a second hazard: two runs can compute the same bump from
-one checkout, and the second reports the bump the first already pushed, so a
-``conda-tag`` reading that report re-creates an existing tag and fails. Run
-38325153882 was one: raised by ``Unit Tests`` 38323026585 for 01151b13f, 12 s
-after 38325136710 was raised by 38323045571 for 9083163f5, both on ``main``'s tip
-2e941bbb7 -- two runs in a merge wave, not one run's ``workflow_run`` firing
-twice. ``conda-update``'s ``CONDA_CHANGED`` therefore reads its Push Changes
-step's verdict on what actually landed, so the rows carry *step* outputs and
-:func:`resolve_outputs` maps them through the job's declared ``outputs:`` -- and
-:class:`TestCondaPushReportsWhatLanded` runs that step's script against a local
-origin to show the verdict is the right one.
+A second hazard: two runs can compute the same bump from one checkout, and the
+second reports the bump the first already pushed, so a ``conda-tag`` reading that
+report re-creates an existing tag and fails. Run 38325153882 was one: raised by
+``Unit Tests`` 38323026585 for 01151b13f, 12 s after 38325136710 was raised by
+38323045571 for 9083163f5, both on ``main``'s tip 2e941bbb7 -- two runs in a merge
+wave, not one ``workflow_run`` firing twice. ``conda-update``'s ``CONDA_CHANGED``
+therefore reads its Push Changes step's verdict on what landed, so the rows carry
+*step* outputs that :func:`resolve_outputs` maps through the job's declared
+``outputs:``, and :class:`TestCondaPushReportsWhatLanded` runs that step's script
+against a local origin.
 
-A reachable chain has a third hazard (#1643's review): a Push Changes that
-rebases onto whatever ``main`` holds by then, and a Conda Tag that tags
-``main``'s tip after a ``git pull``, let a commit landing during the run be
-tagged and uploaded with no ``Unit Tests`` verdict of its own. So Push Changes
-pushes only when what its rebase brings in is covered by
+A third hazard (#1643's review): a Push Changes that rebases onto whatever ``main``
+then holds, and a Conda Tag that tags ``main``'s tip after a ``git pull``, let a
+commit landing mid-run be tagged and uploaded with no ``Unit Tests`` verdict of its
+own. So Push Changes pushes only when what its rebase brings in is covered by
 :file:`util/verdict_covers_checkout.py`'s rule, and Conda Tag tags the
-``CONDA_COMMIT`` it pushed; :class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
+``CONDA_COMMIT`` it pushed; :class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's
+own steps after it.
 
-The ``unit-tests`` gate and the ``verdict`` job are the jobs of
-:file:`cron-head.yml` (#1967), which ``cron-conda.yml`` calls as its ``head``
-job. The rows say whether each of those jobs runs, and :data:`HEAD_JOBS`
-are decided against that file; the jobs of ``cron-conda.yml`` read ``head``'s
-result and its ``verified`` output.
+The ``unit-tests`` gate and the ``verdict`` job belong to :file:`cron-head.yml`
+(#1967), which ``cron-conda.yml`` calls as its ``head`` job. The rows say whether
+each runs, :data:`HEAD_JOBS` are decided against that file, and the jobs of
+``cron-conda.yml`` read ``head``'s result and its ``verified`` output.
 
 """
 

@@ -243,12 +243,8 @@ class Deferred(ReduceAsProtocol2, Generic[_KT]):
 
     def __init__(self, analyze: 'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]',
                  proto: '_KT', payload: 'bytes') -> 'None':
-        # NOTE: the two type-parameterized attributes are annotated on their
-        # assignment, as ``_omd_bucket`` in :mod:`pcapkit.corekit.multidict`
-        # does. A slotted class declares no class-level attributes, so mypy
-        # infers each one from this assignment, and it cannot infer a *class*
-        # attribute's type from a type variable -- it asks for an annotation
-        # instead. ``payload`` needs none: :obj:`bytes` is inferred.
+        # NOTE: annotated on assignment, as in :mod:`pcapkit.corekit.multidict`: mypy cannot infer
+        # a slotted attribute's type from a type variable.
         self.analyze: 'Callable[[_KT, bytes], ProtocolBase | DTLSHandshake]' = analyze
         self.proto: '_KT' = proto
         self.payload = payload

@@ -279,26 +279,12 @@ class PayloadField(FieldBase[_TP]):
             from pcapkit.protocols.protocol import \
                 ProtocolBase  # pylint: disable=import-outside-toplevel
 
-            # NOTE: The registry is keyed on the upper-cased class name, and the
-            # getter upper-cases the name it is given, so a name in any other
-            # case still resolves -- where a miss leaves ``_protocol`` as
-            # :obj:`None`, which the property above resolves to
-            # :class:`~pcapkit.protocols.misc.raw.protocol.Raw`. So
-            # ``PayloadField(protocol='http')`` would yield a raw payload instead
-            # of HTTP, with nothing to say so (#787).
+            # NOTE: The getter upper-cases the name, so any case resolves rather than missing into None, which
+            # reads as ``Raw`` and would turn ``protocol='http'`` silently raw (#787).
             resolved = ProtocolBase.get_protocol(protocol)
 
-            # NOTE: Warned rather than left silent, and warned rather than
-            # raised. Unlike the registry lookups that dispatch on a code read
-            # off the wire -- where a miss is ordinary traffic and
-            # :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is the right answer --
-            # this branch is reached only from a caller that named a protocol in
-            # source, so a miss is a mistake in that name rather than a property
-            # of the captured packet, and it is otherwise indistinguishable from
-            # an unparsed payload. It stays a warning because the :obj:`None`
-            # fallback is itself legitimate (a ``PayloadField`` with no protocol
-            # at all is the common case), so refusing the assignment outright
-            # would reject a lenient spelling the field has always accepted.
+            # NOTE: A miss here is a mistake in source, not traffic, so it warns; it does not raise, since
+            # the None fallback is legitimate and the field has always accepted the lenient spelling.
             if resolved is None:
                 warn(f'unregistered payload protocol: {protocol!r}', RegistryWarning)
 
@@ -314,18 +300,8 @@ class PayloadField(FieldBase[_TP]):
 
         self._default = default  # type: ignore[assignment]
 
-        # NOTE: Through the property rather than straight to ``_protocol``, so a
-        # name given here is resolved exactly as one assigned later is. Writing
-        # the attribute directly would store the :obj:`str` verbatim and the
-        # getter would hand that same string back, so
-        # ``PayloadField(protocol='http')`` -- or ``protocol='HTTP'`` -- would
-        # yield neither the protocol nor
-        # :class:`~pcapkit.protocols.misc.raw.protocol.Raw` but the string itself (#787).
-        # The lookup the setter performs stays inside
-        # its ``isinstance(protocol, str)`` branch, so a field declared in a
-        # schema class body -- every in-library use, none of which names a
-        # protocol -- still does not import :mod:`pcapkit.protocols` while that
-        # package may itself be mid-import.
+        # NOTE: Through the property, so a name given here resolves as one assigned later does (#787); the
+        # lookup stays in its ``str`` branch, so a schema class body never imports a mid-import package.
         self.protocol = protocol  # type: ignore[assignment]
 
         self._callback = callback
@@ -722,10 +698,8 @@ class SchemaField(FieldBase[_TS]):
         if isinstance(value, bytes):
             return value
 
-        # NOTE: :meth:`Schema.to_dict <pcapkit.protocols.schema.Schema.to_dict>`
-        # flattens a nested schema into a plain mapping, so a schema rebuilt
-        # through ``from_dict`` hands that mapping back here; turn it into the
-        # declared schema before packing it.
+        # NOTE: ``Schema.to_dict`` flattens a nested schema to a mapping, so one rebuilt through
+        # ``from_dict`` hands it back here to become the declared schema before packing.
         from pcapkit.protocols.schema import Schema  # pylint: disable=import-outside-toplevel
         if isinstance(value, Mapping) and not isinstance(value, Schema):
             value = self._schema.from_dict(value)
@@ -755,14 +729,8 @@ class SchemaField(FieldBase[_TS]):
         else:
             file = buffer
 
-        # NOTE: a negative length means the field was declared without one, so
-        # the nested schema is sized by whatever remains in ``file`` instead.
-        # Passing ``-1`` on would seed its ``__length__`` negative, and every
-        # sub-field read would then warn ``packet length < 0``. The remainder is
-        # measured here rather than left to ``prepare`` (by passing
-        # :data:`None`), because there a remainder of zero raises the quiet
-        # end-of-stream signal that ends a whole extraction, whereas here it
-        # only means the item is truncated.
+        # NOTE: A negative length sizes the nested schema by what remains in ``file``; it is measured here, as
+        # ``prepare`` would read a zero remainder as end of stream rather than a truncated item.
         length = self.length
         if length < 0:
             current = file.tell()

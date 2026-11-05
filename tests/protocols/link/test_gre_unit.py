@@ -2,9 +2,8 @@
 """GitHub issue #2501: Generic Routing Encapsulation (GRE) frames.
 
 :class:`~pcapkit.protocols.link.gre.protocol.GRE` dissects the ``arphrd_type``
-``ARPHRD_IPGRE``/``ARPHRD_IP6GRE`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+``ARPHRD_IPGRE``/``ARPHRD_IP6GRE`` payload of
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` (see
 :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 base header [:rfc:`2784`], the optional Key and Sequence Number extensions
 [:rfc:`2890`], the EtherType-keyed dispatch through

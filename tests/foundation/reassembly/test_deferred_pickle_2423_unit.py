@@ -1,63 +1,27 @@
 # -*- coding: utf-8 -*-
-""":class:`Deferred` could not be pickled under protocol 0 or 1.
+""":class:`Deferred` pickles under every protocol, protocol 0 and 1 included.
 
-GitHub issues :issue:`2423` and :issue:`2425`.
+GitHub issues #2423 and #2425.
 
 :class:`~pcapkit.foundation.reassembly.data.data.Deferred` declares
-``__slots__`` and defined neither ``__getstate__`` nor ``__setstate__``. A
-slotted class has no ``__dict__`` for the default pickle reduction to read,
-and :mod:`copyreg` refuses outright under protocol 0 or 1 whenever
-``type(self).__getstate__`` is still the inherited default, so
-:func:`pickle.dumps` raised :exc:`TypeError` -- *"a class that defines
-__slots__ without defining __getstate__ cannot be pickled"* -- for *any*
-``Deferred`` instance under either protocol, independent of what ``analyze``
-and ``proto`` held (:issue:`2423`).
+``__slots__``, and :mod:`copyreg` refuses a slotted class with no
+``__getstate__`` of its own under protocol 0 or 1, so :func:`pickle.dumps`
+raised :exc:`TypeError` for any instance (#2423). The review of that fix found
+defects in the state itself (#2425), all covered here:
 
-The cross-review on that fix raised further defects before it merged, all
-covered here as well, every one of them at the ``__getstate__``/
-``__setstate__`` pair (:issue:`2425`):
+* it has to be the ``(dict_or_None, slots)`` pair Python's default reduction
+  builds, which every released build pickled under protocol 2 and above;
+  :meth:`__setstate__` also accepts the flat ``{slot: value}`` dict of an
+  unreleased first fix;
+* it has to carry every base class's slots, named as :func:`copyreg._slotnames`
+  names them: a bare-string ``__slots__ = 'extra'`` is one slot, and a mangled
+  ``__slots__ = ('__secret',)`` is ``_<ClassName>__secret``.
 
-* the first revision's ``__getstate__`` returned a flat ``{slot: value}``
-  dict -- a *different* shape from the ``(dict_or_None, slots)`` pair every
-  released, pre-:issue:`2423` build already produced for protocol 2 and
-  above (neither defined a custom ``__getstate__``, so Python's own default
-  slotted-class reduction built it). Restoring either shape with the other's
-  :meth:`__setstate__` raised :exc:`AttributeError`. The fix mirrors that
-  native shape instead of inventing one, so a ``Deferred`` pickled by any
-  released version still unpickles, and :meth:`__setstate__` additionally
-  still accepts the first revision's own flat shape.
-* the second revision's ``__getstate__`` walked ``type(self).__mro__`` and
-  read each class's ``__slots__`` directly, fixing the dropped-base-class-slots
-  case above but still getting two slot *spellings* wrong: a bare-string
-  ``__slots__ = 'extra'`` (valid Python for one slot named by the whole
-  string) was iterated character by character, and a private, name-mangled
-  ``__slots__ = ('__secret',)`` was read back under its unmangled name, which
-  :func:`hasattr` never finds (the instance attribute is really
-  ``_<ClassName>__secret``). The fix replaces the hand-rolled walk with
-  :func:`copyreg._slotnames`, the standard library's own helper for this,
-  which already gets both right.
-
-The analyser passed to ``Deferred`` has to be a module-level function here --
-a :keyword:`lambda` is not picklable by :mod:`pickle` under *any* protocol
-(its qualified name resolves to nothing importable), which is a separate,
-unrelated limitation that would mask what this test is pinning. A *bound
-method* is not the same problem -- its instance and its class are each
-looked up by name and pickle just fine -- a module-level function is simply
-the plainest picklable callable available here.
-
-:class:`_BareStringSlotSub` and :class:`_MangledSlotSub` below are module-level
-for the same reason ``Deferred`` itself is imported at module scope in this
-file alone, breaking with the rest of this directory's per-test
-``from pcapkit... import`` convention (see
-:func:`~tests._support.reimport_once_per_class`): a class :mod:`pickle` can
-locate by its qualified name has to be defined somewhere importable, not
-nested inside a test method, for the round trips below to go through *real*
-:func:`pickle.dumps`/:func:`pickle.loads` rather than a direct call to
-``__getstate__``/``__setstate__``. The module-level import does not leak into
-the rest of this file's tests: each ``Deferred`` instance built with a
-freshly re-imported class, as every other test here does, is still ``isinstance``-
-distinct from these two subclasses' own class object, but none of this file's
-assertions mix the two.
+The analyser is a module-level function, since a :keyword:`lambda` pickles under
+no protocol. :class:`_BareStringSlotSub` and :class:`_MangledSlotSub` are
+module-level, and ``Deferred`` is imported at module scope unlike the rest of
+this directory, so that :mod:`pickle` can locate them by qualified name for real
+round trips; no assertion mixes them with the per-class re-imported ``Deferred``.
 
 """
 
@@ -69,11 +33,7 @@ from pcapkit.foundation.reassembly.data.data import Deferred as _Deferred
 from tests._support import reimport_once_per_class
 
 #: Test tier (#1958): pickling and copying behaviour belongs on ``ALL``, per
-#: ``tests/_tiers.py``'s own list of what qualifies -- it is exactly the kind
-#: of thing that can (and, within this file's own history, did) differ
-#: between interpreters, most sharply the :issue:`2425` round that needed
-#: ``__reduce_ex__`` rather than ``object.__getstate__`` (3.11+ only) to build
-#: a version-independent comparison shape.
+#: ``tests/_tiers.py``, since it can differ between interpreters.
 __tier__ = 'ALL'
 
 
@@ -97,10 +57,8 @@ def _state(obj: 'object') -> 'object':
 class _BareStringSlotSub(_Deferred):
     """A subclass declaring its own slot as a bare string, not a tuple.
 
-    ``__slots__ = 'extra'`` is valid Python -- one slot named by the whole
-    string -- and is exactly what a ``for name in cls.__slots__`` walk gets
-    wrong: it iterates the string's *characters* instead of treating it as a
-    single name (:issue:`2425`).
+    ``__slots__ = 'extra'`` is one slot named by the whole string, which a
+    ``for name in cls.__slots__`` walk splits into characters (#2425).
 
     """
 
@@ -115,11 +73,8 @@ class _BareStringSlotSub(_Deferred):
 class _MangledSlotSub(_Deferred):
     """A subclass declaring a private, name-mangled slot.
 
-    ``__slots__ = ('__secret',)`` inside a class body is stored, at the
-    instance level, under the mangled name ``_MangledSlotSub__secret`` -- the
-    same mangling ``self.__secret`` gets for an ordinary attribute. Reading
-    the unmangled spelling back, as ``hasattr(self, '__secret')`` does, never
-    finds it (:issue:`2425`).
+    ``__slots__ = ('__secret',)`` is stored under ``_MangledSlotSub__secret``, so
+    ``hasattr(self, '__secret')`` never finds it (#2425).
 
     """
 
@@ -173,13 +128,7 @@ class DeferredPickleTests(unittest.TestCase):
         self.assertEqual(restored.payload, b'payload')
 
     def test_getstate_shape_is_dict_state_and_slots_state(self) -> None:
-        """The state is the native ``(dict_or_None, slots)`` pair.
-
-        Not a flat :obj:`dict` -- that was the first revision's shape, and
-        :issue:`2425` finding 1 is exactly that it disagreed with the shape
-        every released pickle already used.
-
-        """
+        """The state is the native ``(dict_or_None, slots)`` pair, not a flat dict (#2425)."""
         from pcapkit.foundation.reassembly.data.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
@@ -195,15 +144,12 @@ class DeferredPickleTests(unittest.TestCase):
 
 
 class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
-    """:issue:`2425` finding 1: the state shape must match every released build's.
+    """#2425 finding 1: the state shape must match every released build's.
 
-    A ``Deferred`` pickled under protocol 2 or above by any version before
-    :issue:`2423`'s fix -- every one of them, since none defined a custom
-    ``__getstate__`` -- used Python's own default slotted-class reduction: a
-    2-tuple of an instance-``__dict__`` state (:data:`None` here, since
-    ``Deferred`` has no bare ``__dict__``) and a slots-state :obj:`dict`.
-    That pickle has to keep unpickling against the current, fixed class, and
-    the reverse.
+    A released ``Deferred`` pickled under protocol 2 and above through Python's
+    default slotted-class reduction: a pair of the instance ``__dict__`` state
+    (:data:`None`, as ``Deferred`` has none) and a slots-state :obj:`dict`. That
+    pickle has to unpickle against the current class, and the reverse.
 
     """
 
@@ -213,20 +159,13 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
     @staticmethod
     def _native_default_state(analyze: 'object', proto: 'object',
                                payload: 'bytes') -> 'tuple[object, dict[str, object]]':
-        """The exact state a pre-:issue:`2423` ``Deferred`` pickle carried.
+        """The exact state a released ``Deferred`` pickle carried.
 
-        Built from an unrelated class sharing ``Deferred``'s three slots and
-        defining no ``__getstate__`` of its own, so Python's own default
-        slotted-class reduction produces this -- not a hand-written stand-in
-        for it.
+        Built from an unrelated class sharing ``Deferred``'s slots with no
+        ``__getstate__`` of its own, so Python's default reduction produces it.
 
-        Read through ``__reduce_ex__(2)[2]`` rather than a direct call to
-        ``stand_in.__getstate__()``: the latter is ``object.__getstate__``,
-        added only in Python 3.11, so it raises :exc:`AttributeError` on
-        3.8-3.10. ``__reduce_ex__`` is the protocol-2 reduction every
-        interpreter this project supports has always had, and its third
-        element is the identical state -- confirmed equal to
-        ``__getstate__()``'s own result on an interpreter that has one.
+        Read through ``__reduce_ex__(2)[2]``, which every supported interpreter has and
+        which equals ``__getstate__()``; ``object.__getstate__`` arrived in Python 3.11.
 
         """
         class _PreFixShape:
@@ -254,11 +193,9 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
         self.assertIs(restored.analyze, _analyze)
 
     def test_setstate_still_accepts_the_first_revisions_flat_shape(self) -> None:
-        """The flat ``{slot: value}`` shape the very first fix returned.
+        """The flat ``{slot: value}`` shape of the unreleased first #2423 fix.
 
-        Never released, but already pushed in an earlier revision of
-        :issue:`2423`'s fix -- accepting it costs nothing and protects anyone
-        who pickled against that revision.
+        Accepting it costs nothing and protects anyone who pickled against it.
 
         """
         from pcapkit.foundation.reassembly.data.data import Deferred
@@ -273,10 +210,9 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
     def test_a_pickle_made_before_the_2423_fix_still_unpickles(self) -> None:
         """End-to-end: real pickle bytes, built the way a released version would.
 
-        ``Deferred`` defines no ``__getstate__`` (#2714), so a protocol-2 dump
-        goes through Python's default slotted-class reduction, as any
-        pre-:issue:`2423` release's did; only the restore goes through
-        ``__setstate__``.
+        ``Deferred`` defines no ``__getstate__`` (#2714), so a protocol-2 dump goes
+        through Python's default slotted-class reduction, as a release's did; only the
+        restore goes through ``__setstate__``.
 
         """
         from pcapkit.foundation.reassembly.data.data import Deferred
@@ -293,24 +229,14 @@ class DeferredPickleBackwardCompatibilityTests(unittest.TestCase):
 
 
 class DeferredPickleSubclassTests(unittest.TestCase):
-    """:issue:`2425` finding 2: ``__getstate__`` must not read ``self.__slots__``.
+    """#2425 finding 2: the state must not read ``self.__slots__``.
 
-    ``self.__slots__`` resolves through the MRO like any other attribute, so
-    a subclass declaring its own ``__slots__`` shadows ``Deferred``'s. The
-    first revision read ``self.__slots__`` directly and so silently dropped
-    every slot ``Deferred`` itself declares for such a subclass, rather than
-    raising -- the loss is silent on ``__getstate__`` and only surfaces as a
-    missing attribute later, on whatever first reads it back.
+    ``self.__slots__`` resolves through the MRO, so a subclass's own ``__slots__``
+    shadows ``Deferred``'s, and reading it silently drops every slot ``Deferred``
+    declares until something reads one back.
 
-    Exercised directly through the state :mod:`pickle` carries and
-    ``__setstate__`` rather than a full :func:`pickle.dumps`/:func:`pickle.loads`
-    round trip: the subclass
-    has to be defined inside the test for the same reason the module
-    docstring gives for not using a lambda as the analyser -- a class local to
-    a function is not importable by its qualified name, so :mod:`pickle`
-    cannot locate it to build a real pickle. The state and ``__setstate__`` are
-    exactly the mechanism :issue:`2425` finding 2 is about, so reading them
-    directly still exercises the regression.
+    The subclass is local to the test, so :mod:`pickle` cannot locate it; these read
+    the state and call ``__setstate__`` directly, which is the mechanism at fault.
 
     """
 
@@ -357,11 +283,9 @@ class DeferredPickleSubclassTests(unittest.TestCase):
 class DeferredGetstateEdgeCaseTests(unittest.TestCase):
     """The edge cases of the state, which ``Deferred`` takes from Python's own default.
 
-    Each of these mirrors a branch of the native default state construction
-    (see the module docstring's worked example in
-    :class:`DeferredPickleBackwardCompatibilityTests`): an unset slot, the
-    ``__weakref__`` bookkeeping slot, and a subclass that picks up a bare
-    ``__dict__`` by declaring no ``__slots__`` of its own.
+    Each mirrors a branch of the default state construction: an unset slot, the
+    ``__weakref__`` bookkeeping slot, and a subclass with no ``__slots__`` of its
+    own, which gets a ``__dict__``.
 
     """
 
@@ -416,15 +340,11 @@ class DeferredGetstateEdgeCaseTests(unittest.TestCase):
 
 
 class DeferredPickleSlotSpellingTests(unittest.TestCase):
-    """:issue:`2425` round 2: two slot *spellings* the MRO-walk fix still missed.
+    """#2425: the two slot *spellings* a hand-rolled MRO walk gets wrong.
 
-    Unlike the other subclass tests in this file, these go through *real*
-    :func:`pickle.dumps`/:func:`pickle.loads`, because the defect was in how
-    slot *names* are collected -- :func:`copyreg._slotnames` versus a
-    hand-rolled walk -- and a direct call to ``__getstate__``/``__setstate__``
-    would not have caught the hand-rolled walk reading the wrong name in the
-    first place. ``_BareStringSlotSub`` and ``_MangledSlotSub`` are therefore
-    module-level (see the module docstring for why that is safe here).
+    Real :func:`pickle.dumps`/:func:`pickle.loads` round trips, since the defect is
+    in how slot *names* are collected, which a direct ``__setstate__`` call would
+    not reach; hence the module-level subclasses.
 
     """
 

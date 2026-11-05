@@ -31,9 +31,8 @@ if TYPE_CHECKING:
 __all__ = ['C_Tag']
 
 
-# NOTE: ``schema`` and ``data`` are restated, not inherited: ProtocolBase.__init_subclass__
-# looks an omitted pair up by class name in the ``schema`` and ``data`` modules beside
-# this one, and this package has neither, so it would bind Raw's. RARP does the same.
+# NOTE: ``schema`` and ``data`` are restated: with no such modules in this package,
+# ProtocolBase.__init_subclass__ would bind Raw's. RARP does the same.
 class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1Q Customer VLAN Tag Type.
 

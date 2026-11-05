@@ -129,10 +129,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         reserved: int
 
 
-# NOTE: The option helpers are shared with IPv6-Opts and live in
-# :mod:`pcapkit.protocols.internet.ipv6_ext.schema`. The functions below bind
-# what differs between the two headers: the ``HOPOPT`` error prefix, and the
-# option schemas of this module.
+# NOTE: The option helpers shared with IPv6-Opts live in ``ipv6_ext.schema``; these bind the
+# ``HOPOPT`` error prefix and this module's option schemas.
 
 
 def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':

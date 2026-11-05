@@ -75,13 +75,8 @@ from tests._tiers import ROOT
 #: Test tier (#1958): branches on the running interpreter's version or implementation.
 __tier__ = 'ALL'
 
-# NOTE: :mod:`aenum` is deliberately *not* imported at module scope, however
-# convenient that would be for the assertions below. A module-level import would
-# warm the cache issue #687 is about as a side effect of this file being
-# collected, which is the fix -- so it would also make the fix impossible to
-# switch off and the regression test impossible to fail. The warming is done by
-# :data:`WARM_BEFORE_FAKING` alone, where it is visible and named, and the
-# assertions reach :mod:`aenum` through :data:`sys.modules` instead.
+# NOTE: no module-scope :mod:`aenum` import, which would warm #687's cache (the fix)
+# on collection; WARM_BEFORE_FAKING warms it, and asserts reach it via sys.modules.
 
 #: Modules to import before :data:`sys.version_info` is faked, so that whatever
 #: they memoise about the interpreter at import time is the *real* answer.

@@ -4,7 +4,7 @@ Base Crawler
 .. module:: pcapkit.vendor.default
 
 :mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`
-only, which is the base class for all vendor crawlers.
+only, the base class of every vendor crawler.
 
 .. autoclass:: pcapkit.vendor.default.Vendor
    :no-members:
@@ -76,9 +76,7 @@ Instantiating a crawler fetches its registry and writes the constant module:
        click CTX "default.html#pcapkit.vendor.default.Vendor.context"
        click DEST "default.html#pcapkit.vendor.default.Vendor._dest_path"
 
-Each failed fetch warns with :class:`~pcapkit.utilities.warnings.VendorRequestWarning`;
-:envvar:`PCAPKIT_VENDOR_RETRY` sets :data:`~pcapkit.vendor.default.MAX_RETRY`, and
-:envvar:`PCAPKIT_CI_MODE` turns on the CI check.
+Each failed fetch warns with :class:`~pcapkit.utilities.warnings.VendorRequestWarning`.
 
 .. _vendor-variables:
 
@@ -107,13 +105,11 @@ the import is still honoured.
 
 .. envvar:: PCAPKIT_HTTP_PROXY
 
-   The HTTP proxy address for the crawlers, read by
-   :func:`~pcapkit.vendor.default.get_proxies` on every call. Unset by default.
+   The crawlers' HTTP proxy address; unset by default.
 
 .. envvar:: PCAPKIT_HTTPS_PROXY
 
-   The HTTPS proxy address for the crawlers, read by
-   :func:`~pcapkit.vendor.default.get_proxies` on every call. Unset by default.
+   The crawlers' HTTPS proxy address; unset by default.
 
 .. autodata:: pcapkit.vendor.default.MAX_RETRY
 .. autodata:: pcapkit.vendor.default.CI_MODE

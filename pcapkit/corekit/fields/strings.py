@@ -177,10 +177,8 @@ class StringField(_TextField[str]):
         # since re-encoding its text is exactly what would not reproduce them.
         buffer = value.raw if isinstance(value, DecodedString) else self._encode(value)
 
-        # NOTE: A negative length is resolved from the *encoded* octets, not from
-        # the character count -- the ``Ns`` template counts octets, so counting
-        # characters would truncate any text that does not encode one octet per
-        # character.
+        # NOTE: A negative length resolves from the encoded octets, not the character count, since the
+        # ``Ns`` template counts octets.
         if self._length < 0:
             self._length = len(buffer)
             self._template = f'{self._length}s'
@@ -208,19 +206,15 @@ class StringField(_TextField[str]):
             try:
                 ret = value.decode(charset, self._errors)
             except UnicodeError:
-                # NOTE: A codec may raise under ``'replace'`` too -- ``idna``
-                # supports ``'strict'`` alone, and ``punycode`` before Python 3.13
-                # decodes some non-ASCII octets strictly whatever the handler -- so
-                # the last resort is the fallback encoding, UTF-8, which cannot.
-                # The check below keeps the octets, as for any lossy decoding.
+                # NOTE: A codec may raise under ``'replace'`` (``idna``, older ``punycode``), so UTF-8, which
+                # cannot, is the last resort; the check below keeps the octets, as for any lossy decoding.
                 try:
                     ret = value.decode(charset, 'replace')
                 except UnicodeError:
                     ret = value.decode('utf-8', 'replace')
 
-        # NOTE: Encoding may itself fail -- ``errors='strict'`` over text that
-        # decoded under a lone-surrogate scheme, for one -- which is as much a
-        # failure to reproduce the octets as a mismatch is.
+        # NOTE: encoding may itself fail, e.g. ``errors='strict'`` over text decoded
+        # under a lone-surrogate scheme; that fails to reproduce the octets too.
         try:
             lossless = self._encode(ret) == value
         except UnicodeError:
@@ -294,11 +288,8 @@ class BitField(_TextField[Dict[str, Any]]):
 
         self._namespace = namespace or {}
 
-        # NOTE: A subfield reaching past the end of the field is a mistake in the
-        # schema that declares it, not something a packet can cause, so it is
-        # rejected here rather than at packing time -- where it would instead grow
-        # the buffer, and surface much later as an opaque ``OverflowError`` from
-        # :meth:`int.to_bytes`.
+        # NOTE: A subfield past the field's end is a schema mistake, so it is rejected here rather than
+        # growing the buffer at pack time into an opaque ``OverflowError``.
         width = self.length * 8
         for name, (start, size) in self._namespace.items():
             if start < 0 or size < 1 or start + size > width:
@@ -328,14 +319,8 @@ class BitField(_TextField[Dict[str, Any]]):
                 integer.
 
         """
-        # NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with
-        # ``b'0'`` rather than with NUL bytes -- a zero bit written by the loop below
-        # is the *character* ``b'0'``, which is itself non-zero, so a truthiness test
-        # over the buffer cannot tell a cleared bit from a set one and would report
-        # every named bit as set.
-        #
-        # The unnamed bits seed it, so that they come back as captured; masking
-        # them keeps a stray named bit in the record from overriding a subfield.
+        # NOTE: One ASCII digit per bit, seeded from the unnamed bits so they come back as captured;
+        # masking them keeps a stray named bit in the record from overriding a subfield.
         unnamed = value.get(self.UNNAMED, 0)
         if isinstance(unnamed, bool) or not isinstance(unnamed, int):
             raise FieldValueError(

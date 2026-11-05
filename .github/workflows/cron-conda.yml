@@ -901,12 +901,8 @@ jobs:
             else
               status="${UPDATE_STATUS:-success}"
             fi
-            # #2458: both used to skip only when nothing was pushed, so a
-            # pushed build always carried Tag/Upload lines too. Now a pushed
-            # dev-release build (`DEV_RELEASE` = 'true') also leaves both
-            # skipped, on purpose, so that case gets its own explanatory line
-            # below rather than silently dropping Tag/Upload with no reason
-            # given.
+            # a pushed dev-release build (`DEV_RELEASE` = 'true') skips Tag and
+            # Upload on purpose, so it gets its own line below (#2458)
             if [ "$TAG_RESULT" != skipped ] && [ -f report/conda-report.md ]; then
               {
                 echo "- Tag: $TAG_RESULT"

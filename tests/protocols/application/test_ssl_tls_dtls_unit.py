@@ -504,11 +504,10 @@ class EncryptedAlertRecordTests(unittest.TestCase):
     """The same bug class as ``EncryptedHandshakeRecordTests`` above, for
     content type 21 (``alert``).
 
-    An encrypted alert is not an edge case: it is any TLS 1.2 alert sent
-    after ``ChangeCipherSpec``, including the ``close_notify`` that ends
-    nearly every TLS 1.2 connection. Before this fix, any alert fragment
-    that was not exactly 2 octets raised and dropped the whole record --
-    cleartext header included -- to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
+    An encrypted alert is any TLS 1.2 alert sent after ``ChangeCipherSpec``,
+    including the ``close_notify`` that ends nearly every TLS 1.2 connection, so
+    a fragment other than 2 octets must not drop the whole record, cleartext
+    header included, to :class:`~pcapkit.protocols.misc.raw.protocol.Raw`.
 
     """
 
@@ -642,7 +641,7 @@ def _dtls_client_hello_wire(*, supported_versions: 'bytes | None' = None,
 
 
 class VersionDispatchTests(unittest.TestCase):
-    """:meth:`TLS.read`/:meth:`DTLS.read` (:issue:`2437`): identifying the
+    """:meth:`TLS.read`/:meth:`DTLS.read` (#2437): identifying the
     concrete tier and setting
     :attr:`~pcapkit.protocols.application.tls.protocol.TLS.alias` dynamically,
     mirroring :class:`~pcapkit.protocols.link.arp.protocol.ARP`'s own dynamic dispatch

@@ -5,7 +5,7 @@ The captures under ``examples/captures/`` are not tracked in git, apart from the
 inputs ``in.pcap`` and ``dhcp.pcapng`` (see ``.gitignore``), yet the runtime,
 regression and integration tests read them and pin their contents, as do the
 demonstration scripts in ``examples/legacy_smoke/``. This script rebuilds the
-generated captures, so a fresh clone can run ``pytest`` without any ignore flags:
+generated ones, so a fresh clone can run ``pytest`` without any ignore flags:
 
 .. code-block:: shell
 
@@ -44,11 +44,10 @@ if TYPE_CHECKING:
 #: Repository root, i.e. the grandparent of the directory holding this script.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-# Run as a script, sys.path[0] is this directory, not the tree root, so pcapkit
-# would resolve to whatever is installed -- an editable install pins one
-# checkout -- rather than to this tree (#1343). PathFinder precedes the
-# editable finder in sys.meta_path, so putting the root first wins. Every
-# sibling that imports pcapkit repeats this, since each may run on its own.
+# Run as a script, sys.path[0] is this directory, so pcapkit would resolve to
+# whatever is installed rather than this tree (#1343); the root goes first, as
+# PathFinder precedes the editable finder. Every sibling importing pcapkit repeats
+# this, since each may run on its own.
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -56,11 +55,9 @@ if str(ROOT) not in sys.path:
 HERE = pathlib.Path(__file__).resolve().parent
 #: Destination directory for every generated capture.
 DEST = ROOT / 'examples' / 'captures'
-#: Generator modules, in the order they are run. :file:`options.py` runs last
-#: because it is the only one that builds its captures out of :mod:`pcapkit`'s
-#: own construction output, so a failure in it is a statement about the library
-#: rather than about the fixture -- and reading it after the others have already
-#: printed keeps that distinction visible in the log.
+#: Generator modules, in run order. :file:`options.py` runs last, since only it
+#: builds its captures with :mod:`pcapkit` itself, so its failure is the library's
+#: rather than a fixture's, and printing it after the others keeps that visible.
 GENERATORS = ('pcap', 'endian', 'pcapng', 'legacy', 'options')
 
 

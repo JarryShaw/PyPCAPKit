@@ -5,17 +5,16 @@ Root Protocol
 .. currentmodule:: pcapkit.protocols.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
-:class:`~pcapkit.protocols.protocol.Protocol`, an abstract base class with
-pre-defined utility arguments and methods. Inherit it directly only to create a
-new protocol stack; a new protocol in an existing layer subclasses that layer's
-base class -- :class:`~pcapkit.protocols.link.link.Link`,
+:class:`~pcapkit.protocols.protocol.Protocol`, the abstract base for a new
+protocol stack. A protocol in an existing layer subclasses that layer's base
+instead -- :class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
 :class:`~pcapkit.protocols.transport.transport.Transport` or
-:class:`~pcapkit.protocols.application.application.Application` -- instead; see
-:doc:`/ext`. The built-in protocol families, those layer classes included,
-derive from :class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass
-is :class:`~pcapkit.protocols.protocol.ProtocolMeta`; both are listed under
-Internal Definitions below.
+:class:`~pcapkit.protocols.application.application.Application` (:doc:`/ext`).
+The built-in families, those bases included, derive from
+:class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass is
+:class:`~pcapkit.protocols.protocol.ProtocolMeta`, both under
+`Internal Definitions`_.
 
 .. versionchanged:: 1.5.0
 
@@ -143,7 +142,7 @@ Parsing and Construction
 ------------------------
 
 Parsing, construction, :meth:`~Protocol.from_schema` and :meth:`~Protocol.from_data`
-all run through one path:
+share one path:
 
 .. mermaid::
 
@@ -229,43 +228,47 @@ Layers per Frame
 ----------------
 
 A frame is dissected to at most
-:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers of its protocol
-chain, counted from the first layer the frame record carries, through tunnels,
-VLAN tags and IPv6 extension headers alike. What follows is kept as
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers, counted from the
+first layer its frame record carries, through tunnels, VLAN tags and IPv6
+extension headers alike; a protocol constructed from its own octets is not
+counted, so its count starts at the first layer it dissects. The rest is kept as
 :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, with one
-:exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and is
-marked :attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
+:exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and marked
+:attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
 :term:`default engine`'s TCP reassembly and flow tracing do not read a TCP segment
-there back out, as they do one the TCP parser rejected (:issue:`1518`). A
-protocol constructed from its own octets is not counted itself, so the count
-starts at the first layer it dissects. One chain of extension headers is also bounded on
-its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
+back out of it, as they do one the TCP parser rejected (:issue:`1518`). One chain
+of extension headers is bounded separately, by
+:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
+
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
-parsers, which do not apply the frame's layer bound (:issue:`1609`). The
-``dpkt`` toolkit reads what |dpkt|_ decodes, which applies neither bound.
+parsers, which do not apply the frame's bound (:issue:`1609`); the ``dpkt``
+toolkit reads what |dpkt|_ decodes, which applies neither bound.
 
 Value Helpers
 -------------
 
-A protocol reads and makes its field values through the helpers
-:class:`~pcapkit.protocols.protocol.Protocol` carries, rather than through
-copies of its own (:issue:`2614`). A maker checks a caller's values through them
-before packing, and raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for
-one its field cannot carry rather than masking it (:issue:`2617`):
+A protocol reads and makes field values through the helpers on
+:class:`~pcapkit.protocols.protocol.Protocol`, not copies of its own
+(:issue:`2614`). A maker checks a caller's values through them before packing,
+and raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for a value its
+field cannot carry rather than masking it (:issue:`2617`):
 
-* an unsigned integer through :meth:`~Protocol._make_uint`, which takes a
-  :obj:`bool` for a one-bit field only;
-* a two's-complement integer through :meth:`~Protocol._make_sint`, the inverse of
-  :meth:`~Protocol._read_sint`;
-* the octets of a fixed-size field through :meth:`~Protocol._make_octets`, which
-  refuses any other width rather than padding or cutting it (:issue:`2676`). A
-  value taken from a model of a cut capture goes through
-  :meth:`~Protocol._fill_short_read` first, which zero-fills just the octets the
-  cut left out, for the rebuild to cut back.
-
-:meth:`~Protocol._uint_size` counts the octets a variable-width integer needs,
-and :func:`~pcapkit.corekit.schema.padding.pad_length` the padding that takes a
-length to an alignment boundary.
+=================================================== ===========================================================
+Helper                                              Does
+=================================================== ===========================================================
+:meth:`~Protocol._make_uint`                        checks an unsigned integer; a :obj:`bool` passes for a
+                                                    one-bit field only
+:meth:`~Protocol._make_sint`                        checks a two's-complement integer, the inverse of
+                                                    :meth:`~Protocol._read_sint`
+:meth:`~Protocol._make_octets`                      checks a fixed-size field's octets, refusing any other
+                                                    width rather than padding or cutting it (:issue:`2676`)
+:meth:`~Protocol._fill_short_read`                  zero-fills the octets a cut capture left out of a value
+                                                    taken from its model, before :meth:`~Protocol._make_octets`,
+                                                    for the rebuild to cut back
+:meth:`~Protocol._uint_size`                        counts the octets a variable-width integer needs
+:func:`~pcapkit.corekit.schema.padding.pad_length`  counts the padding that takes a length to an alignment
+                                                    boundary
+=================================================== ===========================================================
 
 Data Models
 -----------

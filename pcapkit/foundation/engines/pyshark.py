@@ -133,13 +133,13 @@ class PyShark(EngineBase['PySharkPacket']):
     def unsupported_reason(cls) -> 'Optional[str]':
         """Why this engine cannot run here, or :data:`None` when it can.
 
-        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, because none of the things that stop this engine is
-        visible to an import. `PyShark`_ imports perfectly well and then fails
-        when it is used, which without this hook escapes from :meth:`run` as a hard
-        error rather than degrading to the default engine with a warning.
+        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
+        its engine, *before* the import test, because nothing that stops this
+        engine is visible to an import. `PyShark`_ imports fine and fails when
+        used, which without this hook escapes from :meth:`run` as a hard error
+        rather than degrading to the default engine with a warning.
 
-        **The interpreter.** |pyshark|_ 0.6 does
+        **The interpreter.** |pyshark|_ 0.6 calls
         ``asyncio.get_event_loop_policy().get_event_loop()`` in
         ``Capture._setup_eventloop``, in a fresh interpreter with no
         running loop. Measured: 3.10 and 3.11 return a loop
@@ -148,31 +148,19 @@ class PyShark(EngineBase['PySharkPacket']):
         'MainThread'``; on 3.13 |pyshark|_ extracted a capture. Hence
         :attr:`PYTHON_CEILING` is ``(3, 14)``.
 
-        **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around
-        Wireshark's command-line tool and does no parsing itself, so it is useless
-        without it. The check delegates to |pyshark|_'s own
-        ``get_process_path()`` rather than calling :func:`shutil.which`, because
-        the two are not equivalent and ``which`` would refuse setups that work:
-        |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` *first*, and
-        then at :envvar:`PATH` on POSIX, at both Program Files directories on
-        Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking
-        |pyshark|_ gets all of that for free and cannot disagree with what
-        |pyshark|_ will do a moment later.
+        **The** :program:`tshark` **binary.** |pyshark|_ wraps Wireshark's
+        command-line tool and parses nothing itself. The check asks |pyshark|_'s
+        own ``get_process_path()`` rather than :func:`shutil.which`, which would
+        refuse setups that work: |pyshark|_ reads ``tshark_path`` from its
+        :file:`config.ini` first, then :envvar:`PATH` on POSIX, both Program Files
+        directories on Windows, and :file:`/Applications/Wireshark.app` on macOS.
 
         Note:
-            Deliberately **not cached**, and the cost was measured rather than
-            assumed: the failing path -- which is the expensive one, since it
-            exhausts every candidate -- takes about 290 microseconds with 39
-            :envvar:`PATH` entries, against about 120 for a bare
-            :func:`shutil.which`. This runs once per
-            :class:`~pcapkit.foundation.extraction.Extractor`, not once per frame,
-            so it is far below the cost of opening the capture. Caching would trade
-            that for an answer about the *environment* that cannot change within
-            the process -- so installing Wireshark, or fixing
-            :envvar:`PATH`, would not take effect until restart. The Windows path
-            does more work than the POSIX one (two Program Files directories, and
-            :func:`shutil.which` there would multiply by ``PATHEXT``), but it is
-            still a bounded handful of :func:`os.stat` calls.
+            Deliberately **not cached**: it runs per
+            :class:`~pcapkit.foundation.extraction.Extractor` rather than per
+            frame, far below the cost of opening the capture, and caching would
+            keep a stale answer after Wireshark is installed or :envvar:`PATH` is
+            fixed.
 
         Returns:
             A short phrase naming the limitation, or :data:`None`.

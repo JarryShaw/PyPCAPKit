@@ -210,49 +210,16 @@ def beholder(
                     logger.error('The following error occurred while parsing the packet:')
                     traceback.print_exc()
 
-            # NOTE: ``self._get_payload()`` rather than
-            # ``self.__header__.get_payload()``, which it wraps. The two agree
-            # for every protocol whose payload is a schema field, and differ for
-            # the protocols that override it: SCTP carries user data inside a DATA
-            # chunk and PCAP-NG inside a block, so neither header schema has a
-            # ``payload`` field at all. Going through the schema there raises
-            # ProtocolUnbound('unknown field: payload') *from the recovery path*,
-            # turning a next-layer parse failure that should have degraded to
-            # Raw into a crash. Reachable once something is registered on an
-            # SCTP payload protocol identifier, which NGAP is.
-            #
-            # A ``payload`` passed to the decorated method is the octets that
-            # method was asked to parse, and wins: IPv6 hands its upper layer
-            # the payload *past* the extension headers, so falling back to the
-            # whole IPv6 payload would hold those headers twice, once in the
-            # extension header chain and once more in this ``Raw``
-            # (#1471).
+            # NOTE: A ``payload`` passed in wins, as IPv6 hands its upper layer the octets
+            # past the extension headers, which would otherwise be held twice (#1471).
             file_ = cast('Optional[bytes]', kwargs.get('payload'))
             if file_ is None:
+                # NOTE: Not ``self.__header__.get_payload()``, as SCTP and PCAP-NG schemas
+                # have no ``payload`` field and the recovery path would crash on them.
                 file_ = self._get_payload()
 
-            # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
-            # a payload that failed to parse still reports the code it arrived
-            # with, which is what ``Data_Raw.protocol`` means. A plain integer has
-            # no ``name`` and still renders as ``Raw`` in the protochain, cf.
-            # ``Raw.__post_init__``, so this only adds a name where the registry
-            # key is an enumeration.
-            #
-            # Measured, because the layers differ and it is easy to state this too
-            # broadly: SCTP's unregistered path keeps its enumeration -- an unknown
-            # PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so
-            # without this line, *registering* NGAP on PPID 60 would make a
-            # failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less
-            # than the same bytes gave while unregistered. TCP's unregistered
-            # path keeps its code too, but as a plain integer: an unknown port
-            # yields ``TCP:Raw`` with ``protocol=49998``, because
-            # ``Transport._decode_next_layer`` resolves ports through
-            # ``__proto__`` and never reaches here, and forwards the port
-            # whether or not it is registered. So both *unknown* paths preserve
-            # the code that arrived; what differs is only that SCTP's is an
-            # enumeration the protochain can name, while TCP's is an ``int`` and
-            # renders as ``Raw`` (#418). This line is about the *failure* path,
-            # which it makes uniform.
+            # NOTE: ``alias=proto`` matches ``_import_next_layer``, so a failed parse still
+            # reports the code it arrived with as ``Data_Raw.protocol`` (#418).
             next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold
@@ -307,15 +274,8 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         length = cast('Optional[int]', args[2] if len(args) > 2 else kwargs.pop('length', None))
         packet = cast('Optional[dict[str, Any]]', args[3] if len(args) > 3 else kwargs.pop('packet', None))
 
-        # NOTE: The decorated function's real signature is exactly the
-        # parameters above -- see #454. Anything left over here is therefore
-        # unwanted rather than something to forward: an extra positional
-        # argument, or a keyword that ``kwargs.pop`` above never touched
-        # because ``length``/``packet`` arrived positionally instead. The
-        # latter is also what catches ``length`` (or ``packet``) supplied
-        # *both* positionally and by keyword -- the positional value wins
-        # above and the keyword is left in ``kwargs`` unconsumed, so it
-        # surfaces here rather than silently losing the keyword's value.
+        # NOTE: The real signature is exactly the parameters above (#454), so anything left is
+        # unwanted, including ``length``/``packet`` given both positionally and by keyword.
         extra_args = args[4:]
         if extra_args or kwargs:
             culprits = ', '.join([repr(arg) for arg in extra_args]
@@ -359,23 +319,8 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         schema = func(cls, data, length, packet)
         ret = schema.post_process(packet)
 
-        # NOTE: ``Schema.unpack`` clears ``__updated__``, but ``post_process``
-        # runs after it and every field assignment sets the flag again
-        # (``Schema.__setattr__``), so the next ``bytes(schema)`` or
-        # ``len(schema)`` silently re-packs a schema whose ``__buffer__`` already
-        # holds the octets read. That re-pack calls ``post_process`` again with a
-        # packet context rebuilt from the schema's own fields, overwriting what
-        # the first call derived from the enclosing layer -- such as the IPv6
-        # source address
-        # ``pcapkit.protocols.internet.hopopt.schema.MPLOption.post_process``
-        # resolves, re-packed one option later by ``OptionField.unpack``'s
-        # ``len(data)``. So clear the flag after ``post_process``, as
-        # ``Schema.pack`` does.
-        #
-        # Guarded because ``post_process`` may return something other than a
-        # schema: a nested one, as
-        # ``pcapkit.protocols.internet.hopopt.schema._SMFDPDOption`` does, or the
-        # packet mapping, as stand-ins in the test suite do.
+        # NOTE: ``post_process`` sets ``__updated__`` again, so a later re-pack would rerun it
+        # without the enclosing layer's context; clear it as ``Schema.pack`` does, if present.
         if hasattr(ret, '__updated__'):
             ret.__updated__ = False
 

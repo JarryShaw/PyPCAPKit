@@ -155,9 +155,8 @@ class SeekableReader(io.BufferedReader):
         self._buffer_discard = None
         if buffer_save:
             if buffer_path is None:
-                # NOTE: the buffer is read back by name, which Windows refuses for
-                # a ``NamedTemporaryFile`` while it is open (#2098). A ``mkstemp``
-                # file it allows; this removes it on close, or at collection.
+                # NOTE: Read back by name, which Windows refuses for an open ``NamedTemporaryFile``
+                # (#2098); this removes the ``mkstemp`` file on close, or at collection.
                 fd, self._buffer_path = tempfile.mkstemp()
                 try:
                     self._buffer_file = open(fd, 'wb', buffering=0)
@@ -187,9 +186,8 @@ class SeekableReader(io.BufferedReader):
 
         if self._buffer_cur > self._buffer_size:
             if buf_len >= self._buffer_size:
-                # NOTE: the last ``_buffer_size`` octets, counted from the front rather
-                # than as ``buf[-self._buffer_size:]``, which for a buffer of no size at
-                # all is ``buf[-0:]`` -- the whole of ``buf``, not none of it.
+                # NOTE: Counted from the front, as ``buf[-self._buffer_size:]`` for a buffer
+                # of no size is ``buf[-0:]``, the whole of ``buf``.
                 self._buffer_view[:] = buf[buf_len - self._buffer_size:]
             else:
                 self._buffer_view[:-buf_len] = self._buffer_view[old_ptr - (self._buffer_size - buf_len):old_ptr]
@@ -236,9 +234,8 @@ class SeekableReader(io.BufferedReader):
         minimum = size if minimum is None else minimum
         read = getattr(self._stream, 'read1', self._stream.read)
 
-        # NOTE: ``-1`` sets no limit of its own, but one read still goes no further
-        # than :data:`sys.maxsize`, whatever the setting, past which it raises
-        # :exc:`OverflowError` rather than coming back short (#1975).
+        # NOTE: ``-1`` sets no limit of its own, but one read stops at :data:`sys.maxsize`, past
+        # which it raises :exc:`OverflowError` rather than coming back short (#1975).
         limit = sys.maxsize if config.READ_CHUNK == -1 else min(config.READ_CHUNK, sys.maxsize)
         chunks = []  # type: list[bytes]
         count = 0
@@ -419,26 +416,15 @@ class SeekableReader(io.BufferedReader):
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.readline(size)
             elif not size:
-                # NOTE: a request for no octets is answered without consulting the window,
-                # which has nothing to say about it. Asking anyway refuses a zero-length
-                # read from a position :meth:`_truncate_buffer` has left behind the window -- a
-                # refusal over data that was never wanted.
-                #
-                # Truthiness rather than ``size == 0`` on purpose. It is the same test for
-                # every value this method can be reached with -- ``size`` is an ``int`` by
-                # the time control arrives, and ``False`` is ``0`` -- but :meth:`peek` does
-                # not normalise a ``None`` its signature does not permit, and there the two
-                # spellings diverge: ``size == 0`` would send ``None`` on to the window and
-                # report a type error as a position error. Keeping it falsy keeps that call
-                # failing as a :exc:`TypeError`.
+                # NOTE: No octets wanted, so no window check. Falsy rather than ``size == 0``, so
+                # a ``None`` from :meth:`peek` still fails as a :exc:`TypeError`.
                 buf = b''
             else:
                 buf_rem = self._seek_buffer()
                 buf = self._take_buffer(buf_rem if size < 0 else min(size, buf_rem), line=True)
 
-            # NOTE: an unbounded ``readline`` has to keep going until the line ends, and
-            # capping it at the buffer's content -- which the line need not end inside --
-            # is what makes the continuation necessary rather than optional here.
+            # NOTE: An unbounded ``readline`` runs to the line's end, which need not lie inside
+            # the buffer's content, so the continuation is necessary here.
             size_rem = -1
             if not buf.endswith(b'\n') and (size < 0 or (size_rem := size - len(buf)) > 0):
                 buf_tmp = self._stream.readline(size_rem)
@@ -535,9 +521,8 @@ class SeekableReader(io.BufferedReader):
 
         if target < 0:
             raise SeekError(f'negative seek value {target}')
-        # NOTE: both refusals read the target rather than ``_tell``, which is what lets them
-        # run before the position is committed. This one is the window's, so a saved buffer
-        # -- which can still supply the octets from file -- is exempt from it.
+        # NOTE: Both refusals read the target, not ``_tell``, to run before the position is
+        # committed; this one is the window's, so a saved buffer, which can serve it, is exempt.
         if target < self._buffer_set and self._buffer_file is None:
             raise SeekError(f'cannot seek before the beginning of the buffer: {target} < {self._buffer_set}')
 
@@ -545,34 +530,23 @@ class SeekableReader(io.BufferedReader):
         if self._tell >= self._buffer_set:
             ended = False
             if self._tell > (tmp_end := self._buffer_set + self._buffer_cur):
-                # NOTE: if we do need to seek beyond the existing contents,
-                # then we'll do a quick read to make up the contents; the
-                # size of the read is set to be 1/4 size of the buffer or
-                # the size of the content to be read, whichever is larger.
-                # However, the length to fill must not be larger than the
-                # buffer size itself.
-                #
-                # The gap is waited for and the rest is not, and the position is
-                # the target, or the end of the stream if that comes first -- not
-                # wherever an over-asking read happened to stop (#1586).
+                # NOTE: Seeking past the contents reads to fill the gap, capped at the buffer
+                # size; the position is the target, or the stream's end if sooner (#1586).
                 tmp_gap = min(self._tell - tmp_end, self._buffer_size)
                 tmp_len = min(max(tmp_gap, self._buffer_size // 4), self._buffer_size)
 
                 tmp_buf = self._fill(tmp_len, tmp_gap)
                 ended = len(tmp_buf) < tmp_gap
                 self._tell = min(self._tell, tmp_end + len(tmp_buf))
-            # NOTE: past a stream that ended inside the buffer, this is the silent seek past
-            # the end of a file, which a frame reader makes over a record the capture cut
-            # short. A seek that went past the buffer's edge, or stopped short of a target
-            # beyond it, is still warned of.
+            # NOTE: Past a stream that ended inside the buffer, this is a silent seek past the
+            # end, as over a record the capture cut short; any other overshoot is warned of.
             if target > buf_end and not (ended and self._tell <= buf_end):
                 warn(f'seek beyond the end of the buffer: {target} > {buf_end}',
                      SeekWarning, stacklevel=stacklevel())
             self._buffer.seek(self._tell - self._buffer_set, io.SEEK_SET)
         else:
-            # NOTE: only a saved buffer reaches here -- the refusal above has already
-            # turned away a position before the window when there is no file to serve it
-            # from.
+            # NOTE: Only a saved buffer reaches here, as the refusal above turned away a
+            # position before the window with no file to serve it from.
             self._buffer.seek(0, io.SEEK_SET)
         return self._tell
 
@@ -641,17 +615,14 @@ class SeekableReader(io.BufferedReader):
 
         """
         if size is None:
-            # NOTE: an unspecified size means the current position, following the
-            # :meth:`io.IOBase.truncate` convention. The buffer
-            # is indexed relative to ``_buffer_set``, and the position may sit before it
-            # once a saved buffer has been rewound, in which case nothing is kept.
+            # NOTE: No size means the current position, as in :meth:`io.IOBase.truncate`,
+            # relative to ``_buffer_set``; a rewound saved buffer may sit before it, keeping none.
             size = max(self._tell - self._buffer_set, 0)
         if size < 0:
             raise TruncateError(f'negative size value {size}')
 
-        # NOTE: the position isn't changed by a truncation, but rebuilding the buffer
-        # resets it, so it is read here and put back below -- moved down by whatever
-        # the window's base moved up, so that it still denotes the same octet.
+        # NOTE: Rebuilding the buffer resets its position, so it is put back below, moved down
+        # by whatever the window's base moved up, to denote the same octet.
         buffer_pos = self._buffer.tell()
         self._buffer_view.release()
 
@@ -665,9 +636,8 @@ class SeekableReader(io.BufferedReader):
         self._buffer.seek(max(buffer_pos - dropped, 0), io.SEEK_SET)
 
         self._buffer_size = size
-        # NOTE: ``_buffer_set + _buffer_cur`` is unchanged by construction -- the base
-        # gains exactly what the content pointer loses -- so the stream's consumption
-        # point still reads correctly out of the pair.
+        # NOTE: ``_buffer_set + _buffer_cur`` is unchanged, as the base gains what the content
+        # pointer loses, so the stream's consumption point still reads correctly.
         self._buffer_set += dropped
         self._buffer_cur = len(temp) - dropped
         return self._buffer_size
@@ -701,9 +671,8 @@ class SeekableReader(io.BufferedReader):
         if size is None or size < 0:
             size = -1
 
-        # NOTE: both reads from the stream go through :meth:`_fill`, which keeps reading
-        # past a short answer, as :meth:`io.BufferedIOBase.read` is specified to: a short
-        # result here means the end of the stream, and the frame readers take it so.
+        # NOTE: Both stream reads go through :meth:`_fill`, which reads past a short answer, so
+        # a short result here means the end of the stream, and the frame readers take it so.
         if self._tell >= self._buffer_set + self._buffer_cur:
             buf = self._fill(size)
         else:
@@ -837,17 +806,12 @@ class SeekableReader(io.BufferedReader):
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.peek(size)
             elif not size:
-                # NOTE: as in :meth:`readline` -- no octets wanted, so no window check. Only
-                # the buffered branch is short-circuited: the branch above hands a bare
-                # ``peek()`` to the raw stream, whose own ``peek(0)`` may legitimately
-                # return a whole buffer's worth, and that is left as it was.
+                # NOTE: As in :meth:`readline`, no octets wanted, so no window check; the bare
+                # ``peek()`` the branch above hands to the raw stream is left as it was.
                 buf = b''
             else:
-                # NOTE: read through the view rather than through ``self._buffer``, whose
-                # cursor an ordinary read would advance. A preview must leave the position
-                # alone, and the buffer's cursor is part of the position: advancing it here
-                # while leaving ``_tell`` untouched would make the *next* buffered read
-                # start from the wrong octet, with ``tell()`` reporting the right one.
+                # NOTE: Through the view, not ``self._buffer``, whose cursor is part of the
+                # position; advancing it would start the next buffered read at the wrong octet.
                 buf_rem = self._seek_buffer()
                 buf_off = self._buffer.tell()
                 buf = bytes(self._buffer_view[
@@ -969,13 +933,8 @@ class PeekableStream:
             self._stream.seek(pos, io.SEEK_SET)
 
     def __getattr__(self, name: 'str') -> 'Any':
-        # NOTE: reached only for a name the proxy lacks, and some names are refused
-        # rather than forwarded. ``_stream`` is the proxy's own: :mod:`copy` and
-        # :mod:`pickle` build an instance without :meth:`__init__`, so it is not set
-        # yet, and forwarding would look it up through here again until the
-        # recursion limit (#1524). A dunder names a protocol of the proxy's, not of
-        # the stream's: forwarded, the stream's ``__setstate__`` or ``__deepcopy__``
-        # would be applied to the proxy.
+        # NOTE: ``_stream`` is refused, as :mod:`copy` and :mod:`pickle` skip :meth:`__init__` and
+        # forwarding would recurse (#1524); a dunder is the proxy's protocol, not the stream's.
         if name == '_stream' or (name.startswith('__') and name.endswith('__')):
             raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}')
         return getattr(self._stream, name)

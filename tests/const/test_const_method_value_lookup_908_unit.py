@@ -287,20 +287,14 @@ class NonStrKeyTests(unittest.TestCase):
         from pcapkit.const.http.method import Method
         from pcapkit.vendor.http.method import LINE
 
-        # NOTE: ``inspect.getsource(Method.get)`` rather than
-        # ``Method.get.__func__``, which a ``staticmethod`` does not carry --
-        # so against a ``staticmethod`` ``get`` (#908) this would die with
-        # :exc:`AttributeError` before reaching a single assertion, and would
-        # be pinning ``classmethod``-ness (already pinned by
-        # :class:`DefaultSignatureTests`) rather than the docstring it is
-        # named for. ``getsource`` works on both descriptor kinds.
+        # NOTE: ``getsource(Method.get)`` works on both descriptor kinds, unlike
+        # ``Method.get.__func__``; DefaultSignatureTests pins classmethod-ness.
         source = inspect.getsource(Method.get)
         rendered = LINE('Method', 'HTTP Method', '<ENUM>', 'pcapkit.vendor.http.method')
 
         self.assertIn('Raises:', source)
-        # NOTE: a distinctive sentence rather than the bare word
-        # ``ValueError``, which occurs incidentally elsewhere in 4kB of
-        # docstring and would make this assertion near-vacuous.
+        # NOTE: a distinctive sentence, since the bare word ``ValueError`` occurs
+        # elsewhere in the docstring and would make this assertion near-vacuous.
         self.assertIn('has a :class:`bytes` name or value', source)
         self.assertIn('has a :class:`bytes` name or value', rendered)
 

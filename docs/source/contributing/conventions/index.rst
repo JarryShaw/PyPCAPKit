@@ -10,8 +10,7 @@ House Conventions
 
    What each page governs:
 
-   * :ref:`mint-criterion` -- :mod:`pcapkit.const`, which is where the settled
-     questions have mostly arisen;
+   * :ref:`mint-criterion` -- :mod:`pcapkit.const`;
    * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
    * :ref:`registry-protocol` -- :mod:`pcapkit.const` again, the registration
      wrappers of :mod:`pcapkit.foundation.registry`, how a ``make()`` field holding

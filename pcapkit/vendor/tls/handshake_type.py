@@ -123,11 +123,8 @@ class HandshakeType(Vendor):
                         temp.append(f'[:rfc:`{temp_split[0]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            # NOTE: the comment text, unlike the identifier, keeps the
-            # registry's original case -- only the ``_RESERVED`` suffix
-            # :data:`RESERVED_SUFFIX` describes is dropped, since it is a
-            # statement about the registry rather than part of the message
-            # name (see the module docstring).
+            # NOTE: the comment keeps the registry's case, dropping only the
+            # :data:`RESERVED_SUFFIX`, which is no part of the message name.
             display = name.split(' (', maxsplit=1)[0]
             if display.upper().endswith(RESERVED_SUFFIX.upper()):
                 display = display[:-len(RESERVED_SUFFIX)]

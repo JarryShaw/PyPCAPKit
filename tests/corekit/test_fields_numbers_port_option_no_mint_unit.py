@@ -137,9 +137,8 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
                 self.assertEqual(resolved.svc, 'unknown')
                 self.assertEqual(resolved.proto, proto)
                 self.assertEqual(resolved.name, '<unassigned>')
-                # NOTE: a real member of a registered value would be the same
-                # object every time (aenum caches by value); two distinct
-                # objects here is what proves this one was never registered.
+                # NOTE: aenum caches a registered value's member, so two distinct
+                # objects prove this one was never registered.
                 self.assertIsNot(resolved, resolved_again)
 
     def test_two_unregistered_members_for_the_same_port_compare_equal(self) -> None:

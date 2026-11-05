@@ -136,22 +136,19 @@ class PyPCAP(EngineBase['RawFrame']):
     def unsupported_reason(cls) -> 'Optional[str]':
         """Why this engine cannot run here, or :data:`None` when it can.
 
-        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, because the import test cannot answer this question:
+        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
+        its engine, *before* the import test, which cannot answer this:
         ``import pcap`` succeeds when `pcap-ct`_ is installed and upstream
-        `PyPCAP`_ is not, so the guard is satisfied and this engine would run on a
-        distribution it does not drive -- reporting :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` for work that
-        ``pcap-ct`` did.
+        `PyPCAP`_ is not, so this engine would run on a distribution it does not
+        drive and take credit for work ``pcap-ct`` did.
 
         The condition is deliberately *not* a Python version ceiling, even though
         upstream cannot be installed on 3.12 or newer. What matters is which
-        distribution is actually present: a version check would refuse a
-        hypothetical upstream build that someone got working on a newer
-        interpreter, and would say nothing useful on 3.10 and 3.11, where both
-        distributions install happily and either could be the one in place.
+        distribution is present: a version check would refuse an upstream build
+        someone got working on a newer interpreter, and would say nothing on 3.10
+        and 3.11, where either distribution could be the one in place.
 
-        It also reports a |pcap|_ that is installed but cannot load -- one whose
-        import raises something other than :exc:`ImportError`, such as the
+        It also reports a |pcap|_ that is installed but cannot load, such as the
         :exc:`OSError` a loader raises when it cannot find :manpage:`libpcap(3)`.
         :meth:`Extractor.import_test
         <pcapkit.foundation.extraction.Extractor.import_test>` lets that through,
@@ -216,10 +213,8 @@ class PyPCAP(EngineBase['RawFrame']):
                 backstop rather than the usual path.
 
         """
-        # NOTE: the probe comes *before* ``import pcap`` so that this engine and
-        # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way
-        # here. Either import can raise ``OSError`` rather than ``ImportError``
-        # (#2132), which the probe turns into a reason instead of a crash.
+        # NOTE: probe before ``import pcap``, as ``PCAP_CT`` does: either import can raise
+        # ``OSError`` (#2132), which the probe reports as a reason rather than a crash.
         self._backend = _pcap_backend.probe()
 
         collision = _pcap_backend.collision_reason(self._backend)
@@ -316,10 +311,8 @@ class PyPCAP(EngineBase['RawFrame']):
             warn("'Extractor(engine=pypcap)' object does not support flow tracing; "
                  f"so 'tcp={ext._tcp}' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
-        # NOTE: ``promisc=False`` is defensive only -- the offline branch of
-        # ``pcap.pcap`` ignores it, but should ``pcap_open_offline`` ever fail the
-        # constructor falls through to opening the name as a live device, and we
-        # do not want that attempt to request promiscuous mode.
+        # NOTE: ``promisc=False`` is defensive: should ``pcap_open_offline`` fail, the constructor
+        # falls back to a live device, which must not request promiscuous mode.
         handle = self._expkg.pcap(name=ext._ifnm, promisc=False)
         self._dlink = Enum_LinkType.get(handle.datalink())
 

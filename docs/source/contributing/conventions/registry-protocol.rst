@@ -6,9 +6,8 @@ The Registry Protocol
 :meth:`~pcapkit.corekit.enum.EnumLookup.get`,
 :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`,
 :meth:`~pcapkit.corekit.enum.EnumRegistry.register` and
-:meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias` are expected to exist on
-**every** registry, per the ruling on
-:issue:`842`. They come from
+:meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias` exist on **every**
+registry, per the ruling on :issue:`842`. They come from
 :class:`~pcapkit.corekit.enum.EnumRegistry`, mixed in ahead of the enum base so that
 ``_member_type_`` still resolves to :class:`int` or :class:`str`:
 
@@ -23,16 +22,15 @@ share the generated template: :class:`~pcapkit.const.ftp.command.Command`,
 :class:`~pcapkit.const.http.method.Method`,
 :class:`~pcapkit.const.http.status_code.StatusCode`,
 :class:`~pcapkit.const.pcapng.option_type.OptionType` and
-:class:`~pcapkit.const.reg.apptype.apptype.AppType`. They are on the base regardless --
-:issue:`860` finished that -- so a
-bespoke ``__new__`` exempts a registry from the template, not from the protocol.
+:class:`~pcapkit.const.reg.apptype.apptype.AppType`. They are on the base too
+(:issue:`860`): a bespoke ``__new__`` exempts a registry from the template, not from
+the protocol.
 
 The Two-Tier Hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~
 
-:class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base: per phase 1 of
-:issue:`877` it has a parent, and the line between them is whether the enumeration
-may *grow*:
+Per phase 1 of :issue:`877`, :class:`~pcapkit.corekit.enum.EnumRegistry` has a
+parent, and the line between them is whether the enumeration may *grow*:
 
 =================================================== ==============================================================
 :class:`~pcapkit.corekit.enum.EnumLookup`           ``get``, ``get_all``, ``_validate_value``
@@ -41,31 +39,28 @@ may *grow*:
 =================================================== ==============================================================
 
 The owner ruled on :issue:`877` that a registry may subclass a bare base enum out of
-:mod:`pcapkit.corekit.enum`, with :class:`~pcapkit.corekit.enum.EnumRegistry`
-subclassing that base in turn for use by the mutable ones. So a **closed** set
-inherits :class:`~pcapkit.corekit.enum.EnumLookup`
-directly and is never handed a ``register`` it would have to refuse; an **open**
-registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry`.
+:mod:`pcapkit.corekit.enum`, which :class:`~pcapkit.corekit.enum.EnumRegistry`
+subclasses in turn for the mutable ones. So a **closed** set inherits
+:class:`~pcapkit.corekit.enum.EnumLookup` directly and is never handed a ``register``
+it would have to refuse; an **open** registry inherits
+:class:`~pcapkit.corekit.enum.EnumRegistry`.
 
-What settled the split is the owner's own second thought about carrying ``register``
-on the base: if the base carries ``register``, there is no principled reason for it
-not to carry ``register_alias`` as well, and the ruling would be the worse for it.
-Following that through leaves :class:`~pcapkit.corekit.enum.EnumRegistry` holding only
-a few methods, too thin to justify a second class -- so the two tiers collapse into one,
-which is the opposite of what was ruled.
+The owner's own second thought settled the split: a base carrying ``register`` has no
+principled reason not to carry ``register_alias`` too, which leaves
+:class:`~pcapkit.corekit.enum.EnumRegistry` too thin to justify a second class and
+collapses the two tiers into one -- the opposite of what was ruled.
 
 **Both tiers are plain classes, and that is load-bearing.** The parent above
 :class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type with the enum
 base -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
-``_member_type_`` still comes from the enum base. Had either tier subclassed
-``aenum.Enum`` in order to "be an enum", it would have become the member type
-itself and broken ``int``, ``str`` and flag registries at once.
+``_member_type_`` still comes from the enum base. A tier subclassing ``aenum.Enum``
+to "be an enum" would become the member type itself and break ``int``, ``str`` and
+flag registries at once.
 
-:meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` is what the base carries
-*instead* of ``register``, and it answers the owner's other requirement: the base has
-to offer range-validation logic for its inheriting classes to hook into. The
-base implementation accepts everything; an override states a range, in the shape the
-generated registries spell by hand in ``_missing_``:
+The base carries :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` *instead*
+of ``register``, meeting the owner's other requirement: range-validation logic for
+inheriting classes to hook into. The base accepts everything; an override states a
+range, in the shape the generated registries spell by hand in ``_missing_``:
 
 .. code-block:: python
 
@@ -74,11 +69,11 @@ generated registries spell by hand in ``_missing_``:
        if not (isinstance(value, int) and 0 <= value <= 0xFF):
            raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
 
-**Every registry has it overridden**, so that ``register`` refuses what ``get`` refuses
-(:issue:`1816`). Each vendor generator emits the override from the check it already
-writes at the top of ``_missing_``, with the same message. That is the ``FLAG`` of most
-crawlers, but a bespoke template's own range where its ``_missing_`` checks something
-else: ``0``-``999`` for :class:`~pcapkit.const.http.status_code.StatusCode` and
+**Every registry overrides it**, so that ``register`` refuses what ``get`` refuses
+(:issue:`1816`). Each vendor generator emits the override from the check at the top of
+its ``_missing_``, with the same message: the ``FLAG`` of most crawlers, or a bespoke
+template's own range where its ``_missing_`` checks something else:
+``0``-``999`` for :class:`~pcapkit.const.http.status_code.StatusCode` and
 :class:`~pcapkit.const.ftp.return_code.ReturnCode`, and :class:`str` for
 :class:`~pcapkit.const.ftp.command.Command`,
 :class:`~pcapkit.const.ftp.command.FEATCode` and
@@ -98,11 +93,11 @@ The check is the *range*, not everything ``_missing_`` decides. A value inside t
 that matches neither a member nor an unassigned range -- ``CauseCode(0)``, say -- still
 fails to resolve through ``get``, and ``register`` may mint it.
 
-What is easy to get wrong about it:
+Easy to get wrong:
 
-* **It guards, it does not convert.** The return type is :obj:`None` deliberately, so
-  that an override cannot normalise a value on its way through and silently change
-  what a lookup resolves to.
+* **It guards, it does not convert.** It returns :obj:`None` deliberately, so an
+  override cannot normalise a value on its way through and silently change what a
+  lookup resolves to.
 * **Raise from** :mod:`pcapkit.utilities.exceptions`.
   :exc:`~pcapkit.utilities.exceptions.EnumValueError` is the fitting one, and because
   it subclasses :exc:`ValueError` a rejection is caught by ``get``'s own ``except`` and
@@ -113,10 +108,8 @@ What is easy to get wrong about it:
   ``get`` re-raises a :exc:`ValueError` that is already a
   :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
   and converts only |aenum|_'s and :mod:`enum`'s own "no member carries this
-  value". The consequence is the point of the discrimination rather than a side
-  effect: the override's **own message** survives to the caller instead of being
-  replaced by the base's. So an override should say in its message what it rejected
-  and why; that message is what the caller sees.
+  value". That is the point: the override's **own message** reaches the caller in
+  place of the base's, so it should say what it rejected and why.
 * **A** ``str`` **key never reaches it.** That path never calls ``cls(key)``, so it
   resolves only against already-populated lookup tables, where every value present is
   legal by construction. ``register`` does call it, after its duplicate check.
@@ -132,9 +125,8 @@ What is easy to get wrong about it:
 Failed-Lookup Exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two rules govern which exception a failed lookup raises, and they pull in opposite
-directions on purpose. The owner ruled on
-:issue:`923` that the choice between
+Two rules govern which exception a failed lookup raises, pulling in opposite
+directions on purpose. The owner ruled on :issue:`923` that the choice between
 :exc:`ValueError` and :exc:`KeyError` follows whichever stdlib's :class:`~enum.Enum`
 would raise in the same circumstance, and that whichever it is comes from
 :mod:`pcapkit.utilities.exceptions` rather than from builtins.
@@ -169,19 +161,17 @@ Which branch a key takes, and what each miss ends in:
        VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>quiet, derives ValueError"]
        KEYERR ~~~ VALUE
 
-Do not "improve" on the shape by making both misses report identically. Converting
-one into the other is exactly what :issue:`923` retired, and it was retired in several
-places at once:
+Do not "improve" on the shape by making both misses report identically: :issue:`923`
+retired exactly that, where
 :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>`
-and ``Criticality.get`` had each turned the base's :exc:`KeyError` into a
-:exc:`ValueError`, and ``FastBindingAcknowledgmentStatus.get`` raised
-:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two ways
-of getting it wrong reported identically.
+and ``Criticality.get`` turned the base's :exc:`KeyError` into a :exc:`ValueError` and
+``FastBindingAcknowledgmentStatus.get`` raised
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss.
 
-One more thing is not visible from the exception class, and it is deliberate:
-whether a miss is **reported**. **Every miss** ``get`` **reports is quiet** -- by name
-or by value, whether ``default`` answers it or it is raised -- while ``register``
-refusing the same value is loud. Quiet means what
+The exception class does not show, deliberately, whether a miss is **reported**.
+**Every miss** ``get`` **reports is quiet** -- by name or by value, whether
+``default`` answers it or it is raised -- while ``register`` refusing the same value
+is loud. Quiet means what
 :class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True`` means: nothing is
 logged and no exception hook is installed. A raised miss is still an ordinary
 exception that reaches the caller; left uncaught, it is printed by whichever hook is

@@ -300,10 +300,8 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         if math.isinf(self._timeout) or not self._buffer:
             return []
 
-        # NOTE: The deadline is compared against the buffer's own origin rather
-        # than an elapsed count decremented per packet, so the answer depends
-        # only on the timestamps in the capture file and not on how the frames
-        # were handed over. That is what keeps a replay deterministic.
+        # NOTE: compared against the buffer's own origin, not a per-packet countdown, so a
+        # replay depends only on the capture's timestamps and stays deterministic.
         deadline = timestamp - self._timeout
         expired = [
             bufid for (bufid, buffer) in self._buffer.items()
@@ -314,11 +312,8 @@ class ReassemblyBase(ReduceAsProtocol2, Generic[_PT, _DT, _IT, _BT], metaclass=R
         for bufid in expired:
             buffer = self._buffer.pop(bufid)
 
-            # NOTE: :rfc:`8200#section-4.5` and :rfc:`1122#section-3.3.2` both
-            # ask for an ICMP Time Exceeded here, gated on the offset-zero
-            # fragment having been received. An offline parser sends nothing, so
-            # the condition is reported instead: the header buffer is non-empty
-            # exactly when that fragment arrived.
+            # NOTE: :rfc:`8200#section-4.5` and :rfc:`1122#section-3.3.2` owe an ICMP Time Exceeded
+            # once the offset-zero fragment arrived; offline, it is reported instead.
             owed_icmp = bool(getattr(buffer, 'header', None) or getattr(buffer, 'hdr', None))
             logger.debug('%s: abandoning buffer %s after %.6fs > %.6fs timeout '
                          '(ICMP Time Exceeded owed: %s)', self.name, bufid,
@@ -595,12 +590,8 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
             :meth:`pcapkit.foundation.extraction.Extractor.register_reassembly`.
 
         """
-        # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
-        # idea ``engine`` -- so guessing the other base's keyword, or ``name=``,
-        # is the expected mistake, not a careless one. Left in ``**kwargs`` it
-        # would be dropped by the bare ``super().__init_subclass__()`` below,
-        # leaving the class silently unregistered: no exception, no warning.
-        # See the sibling note in ``Engine.__init_subclass__``.
+        # NOTE: ``engine=`` or ``name=`` here is the expected mistake, and left in ``**kwargs``
+        # it would silently skip registration; see ``Engine.__init_subclass__``.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
             raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')

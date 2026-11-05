@@ -182,10 +182,8 @@ class PCAP(EngineBase[Frame]):
         # write output
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
-            # NOTE: every writer takes the frame's info: a PCAP writer for its
-            # octets and record header, the others for its fields, which only
-            # the info itself tells apart from the option lists it holds
-            # (GitHub issue #1484).
+            # NOTE: every writer takes the frame's info, since only the info itself tells its
+            # fields apart from the option lists it holds (#1484).
             info = frame.info
             if ext._flag_f:
                 ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
@@ -256,7 +254,6 @@ class PCAP(EngineBase[Frame]):
         size = RECORD_HEADER_LEN
         if len(head) == RECORD_HEADER_LEN:
             size += int.from_bytes(head[8:12], self._gbhdr.byteorder)
-        # NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a record
-        # longer than that is read ahead only so far; the reader moves past the
-        # rest itself (#1975).
+        # NOTE: no buffer holds more than :data:`sys.maxsize` octets; the reader
+        # moves past the rest of a longer record itself (#1975).
         ifile._read_ahead_size = min(size, sys.maxsize)

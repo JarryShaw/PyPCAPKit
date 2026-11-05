@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for DTLS 1.3's unified-header ciphertext records (:issue:`2467`).
+"""Unit tests for DTLS 1.3's unified-header ciphertext records (#2467).
 
 RFC 9147 section 4.1 gives an encrypted record a unified header, first octet
 ``001CSLEE``: ``C`` names a connection ID, ``S`` an 8- or 16-bit sequence

@@ -173,10 +173,8 @@ class ContextRegistry(Mapping[str, 'ProtocolContext']):
         if value is None:
             return self
 
-        # NOTE: Copied rather than aliased, so that a caller handed a registry
-        # by the public ``ProtocolBase.context`` property cannot reach into the
-        # protocol's own. The per-layer hot path in ``ProtocolBase.__init__``
-        # skips this call instead of making the copy cheaper.
+        # NOTE: Copied, not aliased, so a caller of the public ``ProtocolBase.context`` cannot
+        # reach the protocol's own; ``ProtocolBase.__init__``'s hot path skips this call instead.
         if isinstance(value, ContextRegistry):
             self.__data__.update(value.__data__)
             return self

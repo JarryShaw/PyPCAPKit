@@ -331,9 +331,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # move backward to the beginning of the packet
             self._file.seek(0, io.SEEK_SET)
         else:
-            # NOTE: Copied, to keep the original frame data intact. ``unpack`` has consumed
-            # the whole record, packet data included, so seek to the start ``__post_init__``
-            # recorded, as ``PCAPNG.read`` does, not back over ``self.length``.
+            # NOTE: A copy, to keep the frame data intact. ``unpack`` consumed the whole record, so
+            # seek to the start ``__post_init__`` recorded, as ``PCAPNG.read`` does, not back over it.
             seek_cur = _seek_set + self.length + _ilen
 
             # move backward to the beginning of the frame
@@ -368,11 +367,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             #: io.BytesIO: Source data stream.
             self._file = io.BytesIO(self._data)
 
-        # NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` a snapshot cut
-        # exceeds; ``test_truncated_ipv4_header_is_raw_with_its_error`` pins it (#2236).
-        #
-        # NOTE: A layer that states no length cannot see the cut, so the layers
-        # below are told both lengths (#2653).
+        # NOTE: The octets *present*, ``cap_len``, never the on-wire ``len`` (#2236); a layer stating
+        # no length cannot see the cut, so the layers below are told both lengths (#2653).
         token = frame_length.set((_ilen, _olen))
         try:
             return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
@@ -413,9 +409,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             incl_len = min(len(packet), snaplen) if snaplen else len(packet)
         if orig_len is None:
             orig_len = len(packet)
-        # NOTE: The record holds exactly ``incl_len`` octets of packet data, so a
-        # packet longer than that -- e.g. than the snaplen -- is cut to it rather
-        # than written out whole behind a clipped length.
+        # NOTE: The record holds exactly ``incl_len`` octets of packet data, so a longer
+        # packet is cut to it rather than written out whole behind a clipped length.
         if len(packet) > incl_len:
             packet = bytes(packet)[:incl_len]
 
@@ -473,9 +468,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             _read = True
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(file) if isinstance(file, bytes) else file
-        # NOTE: Taken *before* the unpack, which advances the stream past the
-        # whole record; :meth:`self.read <read>` needs the record's own start and
-        # cannot work it out afterwards. See the note there.
+        # NOTE: Taken *before* the unpack moves the stream past the whole record, as
+        # :meth:`self.read <read>` needs the record's own start.
         _seek_set = self._file.tell()
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
@@ -549,14 +543,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             Current protocol with packet extracted.
 
         Notes:
-            We added a new key ``__next_type__`` to ``dict_`` to store the
-            next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. :meth:`Info.to_dict
-            <pcapkit.corekit.infoclass.Info.to_dict>` carries both, and the
-            dumpers leave them out.
-
-            We also added a new key ``protocols`` to ``dict_`` to store the
-            protocol chain of the current packet (frame).
+            ``dict_`` gains ``__next_type__`` and ``__next_name__``, the next
+            layer's protocol type and name, which :meth:`Info.to_dict
+            <pcapkit.corekit.infoclass.Info.to_dict>` carries and the dumpers
+            leave out, and ``protocols``, the protocol chain of the current
+            packet (frame).
 
             ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so
             ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).

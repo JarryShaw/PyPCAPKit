@@ -95,7 +95,7 @@ class HTTPv2GeneratedFrameTests(unittest.TestCase):
                           for outcome in options.outcomes((family,))}
 
     def test_every_frame_type_is_generated(self) -> None:
-        """The ten :rfc:`9113` frame types are the ten cases, all capturable."""
+        """Every :rfc:`9113` frame type is a case, and each is capturable."""
         self.assertEqual(sorted(self.frames), sorted(EXPECTED_STREAM))
         for code, outcome in self.frames.items():
             with self.subTest(type=code):

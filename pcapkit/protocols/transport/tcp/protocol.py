@@ -2033,15 +2033,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ProtocolError: If the length is neither **3** nor **4**.
 
         Note:
-            The figure above is :rfc:`6824`'s, deliberately, because it is the one
-            with an Address ID in it and this method accepts both forms.
-            :rfc:`8684` section 3.3.8 figure 11 draws MP_PRIO as **3** octets and
-            nothing more -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B``
-            (1) -- since section 5 of that document "specifies the removal of the
-            AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical
-            attack in which a subflow could be forced into backup mode. The
-            4-octet :rfc:`6824` form is therefore legacy, and the guard stays
-            permissive so that traffic carrying it still parses.
+            The figure above is :rfc:`6824`'s, the one with an Address ID, as this
+            method accepts both forms. :rfc:`8684` section 3.3.8 figure 11 draws
+            MP_PRIO as **3** octets -- ``Kind`` (1) + ``Length`` (1) +
+            subtype/reserved/``B`` (1) -- since its section 5 "specifies the
+            removal of the AddrID field [RFC6824] in the MP_PRIO option", closing
+            an attack that could force a subflow into backup mode. The 4-octet
+            form is legacy, and the guard stays permissive so that traffic
+            carrying it still parses.
 
             On the construction side,
             :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPPriority`'s

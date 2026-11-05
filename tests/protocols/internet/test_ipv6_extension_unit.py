@@ -679,11 +679,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 self.assertEqual(proto.read(length=8), 'decoded')
         decode.assert_called_once()
 
-        # NOTE: "No options" is not the same as "no options area". The header is at
-        # least (0 + 1) * 8 = 8 octets and 2 of those are the fixed part, so the
-        # remaining 6 have to be padding options -- an empty options list is not a
-        # thing that can go on the wire; asserting for one here passes only if
-        # ``make`` emits a 2-octet header while declaring 8.
+        # NOTE: "No options" still means an options area: the 8-octet minimum
+        # header leaves 6 octets of padding after the 2-octet fixed part.
         made_empty = proto.make(next=TransType.TCP)
         self.assertEqual(made_empty.next, TransType.TCP)
         self.assertEqual(made_empty.len, 0)
@@ -1054,12 +1051,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             seq=3,
         ).flags['dup'])
 
-        # NOTE: The lengths below are the length of the *options area*, and the two
-        # octets of the fixed header precede it, so a well-formed options area is 6
-        # octets short of a multiple of 8 -- never a multiple of 8 itself. Each
-        # assertion is followed by the octet count that justifies it, since a
-        # number 6 too large (or one accounting padding emitted two octets longer
-        # than it is counted as) is the easy mistake here.
+        # NOTE: These lengths are of the *options area*, after the 2-octet fixed
+        # header, so a well-formed one is 6 short of a multiple of 8.
 
         options, total_length = make_options([
             b'\x00',
@@ -1078,10 +1071,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(schema_length, 14)
         self.assertEqual(type(schema_options[0]).__name__, 'UnassignedOption')
 
-        # NOTE: A shortfall of exactly 2 octets, i.e. ``2 + opt_len`` 6 past a
-        # multiple of 8, is one ``PadN`` of ``Opt Data Len`` 0 rather than two
-        # ``Pad1`` (#1793). That is a 4-octet option, not a 6-octet one --
-        # 2 + 6 is already aligned and needs no padding.
+        # NOTE: A 2-octet shortfall is one ``PadN`` of ``Opt Data Len`` 0, not two
+        # ``Pad1`` (#1793).
         pad2_options, pad2_length = make_options([
             bytes([Option.CALIPSO]) + b'123',
         ])
@@ -1322,10 +1313,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Option.Router_Alert, len=1,
             alert=RouterAlert.Datagram_contains_RSVP_message,
         ))
-        # NOTE: A CALIPSO option too short for its compartment bitmap is
-        # rejected while it is unpacked, by ``calipso_pad_len``, so the reader
-        # keeps no length guard of its own (#2318); see
-        # tests/protocols/test_dead_branches_2318_unit.py.
+        # NOTE: ``calipso_pad_len`` rejects a too-short CALIPSO option while unpacking,
+        # so the reader has no guard (#2318, test_dead_branches_2318_unit).
         bad_smf = schema.SMFHashBasedDPDOption(type=Option.SMF_DPD, len=3, hav=b'\x81\x02\x03')
         object.__setattr__(bad_smf, 'mode', 2)
         assert_bad(proto._read_opt_smf_dpd, bad_smf)
@@ -1620,25 +1609,14 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         draws the routing-data fixed area as a single 32-bit word --
         ``CmprI`` and ``CmprE`` are each a *"4-bit unsigned integer"*, ``Pad``
         likewise, and ``Reserved`` takes the remaining 20 bits -- so it is
-        **4** octets. The schema declared it as two ``UInt8Field`` plus a
-        3-octet ``BitField``, which is **5**, and so built a header one octet
-        narrower than the ``Hdr Ext Len`` computed from that inflated data
-        area declared. Measured without the fix, for the two addresses the
-        round-trip table uses::
+        **4** octets, not the **5** of two ``UInt8Field`` plus a 3-octet
+        ``BitField``, which builds a header one octet narrower than its
+        ``Hdr Ext Len``. RFC 6554 numbers no figures, so the citation is to
+        Section 3.
 
-            len(bytes(made))  == 41      # 4 + (5 + 32)
-            made.length       == 5       # ceil((37 - 4) / 8)
-            8 + 8 * 5         == 48      # what that Hdr Ext Len declares
-
-        Note RFC 6554 carries no numbered figure captions at all, so the
-        citation is to Section 3 and never to a "Figure N".
-
-        The assertions below are deliberately split. The ``make`` ones go
-        through the public entry point and are blind to how the schema spells
-        its fields, so without the fix they fail with those exact numbers
-        rather than with a constructor error; the schema-level one pins the
-        nibble placement, which is the thing a reader of the RFC diagram would
-        check.
+        The ``make`` assertions go through the public entry point, blind to how
+        the schema spells its fields; the schema-level one pins the nibble
+        placement.
 
         """
         from pcapkit.const.ipv6.routing import Routing

@@ -819,40 +819,23 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_quick_start_option_is_eight_octets_wide_on_the_wire(self) -> None:
         """Both Quick-Start suboptions survive the round trip whole. C.f. #552.
 
+        :rfc:`4782#section-3.1` gives the option as eight octets for both
+        functions (figures 3 and 4), and
+        :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._read_opt_qs`
+        rejects any other ``length``. Guards against
         :func:`~pcapkit.protocols.internet.ipv4.schema.quick_start_data_selector`
-        sized the nested suboption schema with a hardcoded
-        ``SchemaField(length=5)``, which is the width of a Quick-Start Request's
-        ``ttl`` and ``nonce`` alone -- the ``type``, ``length`` and ``flags``
-        octets in front of them, which the suboption schema re-declares, were
-        unaccounted for. :rfc:`4782#section-3.1` gives the option as eight octets
-        for both functions -- *"the second byte contains the length field,
-        indicating an option length of eight bytes"*, with figure 3 for a Request
-        and figure 4 for a Report -- and
-        :meth:`~pcapkit.protocols.internet.ipv4.protocol.IPv4._read_opt_qs` rejects any
-        other ``length`` outright.
+        sizing the suboption at five octets, ``ttl`` and ``nonce`` alone, which
+        mis-decodes the nonce and reads the leftover octets as a fabricated
+        option.
 
-        So the reader consumed five, warned ``SchemaWarning: packet length < 0:
-        -3``, resynchronised on the second octet of the nonce and decoded it as
-        **55** rather than 933982136 -- silent corruption -- and then read the
-        three octets it had not consumed as a further, fabricated option, which
-        made the whole datagram fail with ``ProtocolError: IPv4: invalid format``.
+        A Report's fourth octet is *"not used"*, and *"bytes 5-8 contain a
+        30-bit QS Nonce"* in both functions, so ``QuickStartReportOption`` must
+        carry that octet too or decode its nonce one early. Both functions are
+        asserted, since fixing only the selector leaves the Report failing.
 
-        ``QuickStartReportOption`` was one octet short as well, missing the ``Not
-        Used`` octet that :rfc:`4782#section-3.1` puts where a Request has ``QS
-        TTL`` -- *"for a Report of Approved Rate, the fourth byte of the
-        Quick-Start Option is not used"*, and *"bytes 5-8 contain a 30-bit QS
-        Nonce and a 2-bit Reserved field"*, so the nonce starts at the fifth
-        octet either way. It therefore packed seven octets against the
-        ``length=8`` that ``_make_opt_qs`` writes into it, and a spec-correct
-        Report read off the wire decoded its nonce one octet early. Both
-        functions are asserted here for that reason, since fixing only the
-        selector leaves the Report failing on a bare ``struct.error`` -- measured
-        on ``19088100deadbee0`` in exactly that state.
-
-        This starts from wire octets, like
-        :meth:`test_ipv4_sid_option_is_four_octets_wide_on_the_wire` and for the
-        same reason: the selector's length is only consulted while *parsing*, so a
-        construct-then-reconstruct comparison would have agreed with itself.
+        It starts from wire octets, like
+        :meth:`test_ipv4_sid_option_is_four_octets_wide_on_the_wire`: the
+        selector's length is only consulted while *parsing*.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -918,22 +901,12 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_timestamp_option_is_buildable_through_make(self) -> None:
         """``make`` keeps the timestamps it is given. C.f. #552.
 
-        ``_make_opt_ts`` passed ``data=`` to
-        :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`, whose field is
-        ``ts_data`` -- ``data`` is the attribute its ``post_process`` *derives*.
-        :meth:`Schema.__update__
-        <pcapkit.protocols.schema.Schema.__update__>` answers a name it does
-        not know with an
-        :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` and carries on, so
-        every timestamp was dropped in silence and ``ts_data`` stayed bound to its
-        class-level ``ListField``, which ``post_process`` then tried to iterate:
-        ``TypeError: 'ListField' object is not iterable``. Without the fix the
-        IPv4 Timestamp option cannot be built through ``make`` at all.
-
-        The absence of the warning is asserted as well as the presence of the
-        timestamps, because the warning is the whole reason the defect was silent:
-        a future rename that reintroduces it would otherwise only show up as a
-        value that happens to be missing.
+        :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`'s field is
+        ``ts_data``; ``data`` is what its ``post_process`` *derives*. A ``data=``
+        keyword is answered by :meth:`Schema.__update__
+        <pcapkit.protocols.schema.Schema.__update__>` with an
+        :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` and dropped, so
+        the absence of that warning is asserted as well as the timestamps.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber

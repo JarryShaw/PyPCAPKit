@@ -21,14 +21,8 @@ if TYPE_CHECKING:
 __all__ = ['HandshakeType']
 
 ###############################################################################
-# NOTE: this crawler does not crawl. Its source is the expired Netscape SSLv2
-# draft, draft-hickman-netscape-ssl-00, which is not an IANA (or any other)
-# live registry a crawler could re-fetch -- there is nothing upstream of this
-# module to go stale against. Per the const-vendor-pairing convention, a
-# hand-maintained registry still gets a crawler, reading
-# :data:`~pcapkit.vendor.sslv2.handshake_type.DATA` instead of fetching a URL
-# -- the same shape as :mod:`pcapkit.vendor.linux.arphrd`,
-# :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.
+# NOTE: this crawler does not crawl: draft-hickman-netscape-ssl-00 is no live registry,
+# so it reads the hand-maintained :data:`~pcapkit.vendor.sslv2.handshake_type.DATA`.
 ###############################################################################
 
 #: SSLv2 handshake message type registry, transcribed from

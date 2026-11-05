@@ -311,23 +311,8 @@ class Scapy(EngineBase['ScapyPacket']):
             extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
         """
-        # NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`. Scapy dispatches on two
-        # registries filled only as import side effects of its layer modules:
-        # ``conf.l2types``, mapping a link type onto a link-layer class, and the
-        # ``bind_layers`` payload table. With just the sniffing submodule both are
-        # empty, so :class:`~scapy.utils.PcapReader` cannot map even link type 1,
-        # writes ``unknown LL type [1]/[0x1]`` to stderr and returns every frame as
-        # one :class:`~scapy.packet.Raw` layer, raising nothing (#406).
-        #
-        # Importing the layer modules by name repairs the link layer but leaves the
-        # payload table short (``dhcp.pcapng`` stops at ``Ethernet / IP / UDP /
-        # Raw``), and goes stale silently as scapy adds types; ``scapy.all`` defers
-        # to ``conf.load_layers``, which scapy keeps current. The cost is the layer
-        # loading, not the façade: ``scapy.layers.all`` alone measures the same.
-        #
-        # It stays in ``__init__`` so ``import pcapkit`` does not pay for it, and is
-        # bound to :attr:`_expkg`, which :meth:`run` calls ``sniff`` on, so it
-        # cannot later be dropped as an unused import.
+        # NOTE: ``scapy.all`` fills the layer registries scapy dispatches on, which the sniffing
+        # submodule alone leaves empty (#406); imported here to keep ``import pcapkit`` cheap.
         from scapy import all as scapy  # isort:skip
 
         self._expkg = scapy
@@ -394,13 +379,8 @@ class Scapy(EngineBase['ScapyPacket']):
 
         # extract & analyse file
         logger.debug('scapy: sniffing %s', ext._ifnm)
-        # NOTE: the reader is opened here rather than by ``sniff(offline=...)`` so
-        # that every packet carries its capture's timestamp resolution, which
-        # Scapy's own readers discard (#1507). Labelled with the file name, as
-        # ``offline=`` labels it, so ``Packet.sniffed_on`` is unchanged. ``sniff``
-        # closes it at the end of the file, as it closes the reader ``offline=``
-        # opens; it is closed here as well in case ``sniff`` raised first, which
-        # the reader takes as a no-op once closed.
+        # NOTE: opened here rather than by ``sniff(offline=...)`` so packets keep the capture's
+        # timestamp resolution (#1507); closed here too in case ``sniff`` raised first.
         reader = _reader_type()(ext._ifnm)
         try:
             self._extmp = iter(self._expkg.sniff(opened_socket={reader: ext._ifnm}))

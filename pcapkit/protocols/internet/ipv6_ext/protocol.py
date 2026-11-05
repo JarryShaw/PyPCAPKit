@@ -713,16 +713,6 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         }
 
 
-# NOTE: Registered by direct assignment into ``Internet.__proto__``, as
-# ``pcapkit.protocols.internet.internet`` does for every other entry, rather
-# than via the ``code=`` keyword of ``ProtocolBase.__init_subclass__``. The two
-# are equivalent in effect, but ``code=`` resolves through
-# ``register_protocol_code``, which imports
-# ``pcapkit.foundation.registry.protocols`` *at class-definition time*, while
-# ``pcapkit.protocols.internet`` (which imports this module) is still being
-# built. From here that completes a cycle back into the unfinished
-# ``pcapkit.protocols.internet`` through ``pcapkit.foundation.extraction``:
-# ``ImportError: cannot import name 'Extractor' from partially initialized
-# module 'pcapkit.foundation.extraction'`` on a bare ``import pcapkit``. Plain
-# dict assignment carries no import of its own.
+# NOTE: Assigned directly rather than via ``code=``, whose registry import at class definition
+# closes an import cycle through the half-built ``pcapkit.protocols.internet``.
 Internet.__proto__[Enum_TransType.Shim6] = IPv6_Ext

@@ -2162,11 +2162,8 @@ class PCAPNGUnitTests(unittest.TestCase):
                              __packet__={'byteorder': 'little'})
         self.assertEqual(len(packed), 20)
 
-        # NOTE: ``unpack`` injects the captured octets by reading ``self.packet``
-        # rather than by extracting them a second time of its own (#646), so these
-        # stubs have to present the schema surface that property reads: the outer
-        # schema's ``__fields__``/``__buffer__`` up to the field holding the block,
-        # and the block's own up to its payload field.
+        # NOTE: ``unpack`` reads the captured octets through ``self.packet`` (#646), so the stubs
+        # carry the ``__fields__``/``__buffer__`` that property reads, outer schema and block alike.
         unpacker = object.__new__(PCAPNG)
         unpacker.__header__ = None
         payload_block = types.SimpleNamespace(

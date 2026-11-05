@@ -333,11 +333,8 @@ def _pcap_reader() -> 'Type[PCAPReader]':
                      'PCAP record gives its captured length instead', DPKTWarning,
                      stacklevel=stacklevel())
 
-        # NOTE: the loop is ``dpkt.pcap.Reader.__iter__``'s, over the stream
-        # and the record header type that method reads them through. A generator,
-        # so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before
-        # :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a
-        # nanosecond file, from upstream's loop and from this one alike.
+        # NOTE: ``dpkt.pcap.Reader.__iter__``'s loop, as a generator so ``Reader.__init__`` runs
+        # none of it before :attr:`_upstream` is set; nanosecond files yield ``Decimal`` timestamps.
         def __iter__(self) -> 'Iterator[tuple[float | decimal.Decimal, bytes]]':
             if self._upstream:
                 yield from super().__iter__()
@@ -561,14 +558,8 @@ class DPKT(EngineBase['DPKTPacket']):
         try:
             packet = protocol(pkt)  # type: DPKTPacket
         except Exception as exc:  # pylint: disable=broad-except
-            # NOTE: Caught broadly, as :meth:`Protocol.analyze
-            # <pcapkit.protocols.protocol.Protocol.analyze>` does: dpkt raises
-            # more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads
-            # ``frag_off`` from whatever header follows an IPv6 Fragment header,
-            # so a Fragment header followed by ESP or Destination Options raises
-            # :exc:`AttributeError` (#1351). The frame is kept as a raw
-            # packet, so one undecodable frame neither ends the extraction nor
-            # shifts the numbering of the frames after it.
+            # NOTE: caught broadly, as :meth:`Protocol.analyze` does, since dpkt raises more than
+            # ``UnpackError`` (#1351); the frame is kept raw so later frames keep their numbering.
             warn(f'Frame {ext._frnum + 1}: dpkt cannot parse the frame '
                  f'({type(exc).__name__}: {exc}); kept as raw data',
                  DPKTWarning, stacklevel=stacklevel())

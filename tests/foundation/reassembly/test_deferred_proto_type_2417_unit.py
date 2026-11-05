@@ -1,77 +1,43 @@
 # -*- coding: utf-8 -*-
 """:class:`Deferred`'s ``proto`` annotation admits what both reassemblers pass.
 
-GitHub issue :issue:`2417`.
-:class:`~pcapkit.foundation.reassembly.data.data.Deferred` typed its ``proto``
-parameter :class:`~pcapkit.const.reg.transtype.TransType` and documented it as
-the payload protocol type. That is what
-:meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>` passes, but
+GitHub issue #2417. :meth:`IP.submit <pcapkit.foundation.reassembly.ip.IP.submit>`
+passes a :class:`~pcapkit.const.reg.transtype.TransType`, but
 :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` passes a
-``(source, destination)`` port pair, because
-:meth:`Transport.analyze
-<pcapkit.protocols.transport.transport.Transport.analyze>` overrides that
-parameter to one. mypy 2.3.1 said so:
+``(source, destination)`` port pair, as :meth:`Transport.analyze
+<pcapkit.protocols.transport.transport.Transport.analyze>` takes; mypy reported
+a ``TransType``-only annotation as ``[arg-type]`` at ``TCP.submit``.
 
-.. code-block:: text
+:class:`~pcapkit.foundation.reassembly.data.data.Deferred` is **generic** over
+that value's type rather than a union, so each instance's ``proto`` and the
+parameter its ``analyze`` expects are one type: ``proto`` is annotated with the
+type variable, and what it admits is that variable's constraints. mypy rejects a
+port pair against an analyser declared over ``TransType`` but not the reverse,
+since ``aenum`` ships no stubs and ``TransType``'s base resolves to ``Any``; so
+these tests read the declaration at runtime.
 
-   pcapkit/foundation/reassembly/tcp.py:754:64: error: Argument 2 to "Deferred" has incompatible type "tuple[Any, Any]"; expected "TransType"  [arg-type]
+The constraints are named registry values: ``TCP.submit`` resolves each port
+through :meth:`Transport._make_port
+<pcapkit.protocols.transport.transport.Transport._make_port>` to a member of the
+``AppType_TCP`` registry :attr:`TCP.src
+<pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads from -- the same member
+for a registered port, an equal one for an unassigned port. An
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` is a :class:`~enum.StrEnum`,
+not an :obj:`int`, which :class:`ResolvedPortTests` pins.
 
-The class is now **generic** over that value's type rather than declaring a
-union of the two, so each instance's ``proto`` and the parameter its ``analyze``
-expects are the same type. ``proto`` is therefore annotated with the type
-variable, and what the declaration admits is that variable's *constraints*.
+What fails on anything but the generic over named values:
 
-That rejects the pairing above -- a port pair against an analyser declared over
-``TransType`` -- which is the direction a real mismatch takes. The reverse
-pairing is not rejected by mypy alone: ``aenum`` ships no type stubs, so under
-``ignore_missing_imports`` the ``aenum.IntEnum`` base of
-:class:`~pcapkit.const.reg.transtype.TransType` resolves to ``Any``, and a
-``Deferred[TransType]`` built over the port-pair analyser type-checks clean.
-That is a gap in the dependency's type coverage rather than in the type
-parameter. It is also why these tests read the declaration at runtime instead
-of resting on mypy.
+* :meth:`DeclaredProtoTypeTests.test_declared_type_admits_what_each_reassembler_passes`
+  -- each value admitted by exactly one constraint, and the two by different
+  ones, which a union cannot tell apart, nor a pin on the annotation's text;
+* :meth:`DeclaredProtoTypeTests.test_the_analyser_takes_the_same_type_variable_as_proto`
+  -- the analyser takes the variable ``proto`` names;
+* :meth:`ResolvedPortTests.test_submit_hands_over_resolved_application_types`
+  -- the ports are members, not bare integers.
 
-The port pair itself then moved: both constraints are *named registry values*,
-so ``TCP.submit`` resolves each port through :meth:`Transport._make_port
-<pcapkit.protocols.transport.transport.Transport._make_port>` and the constraint
-is ``tuple[AppType_TCP, AppType_TCP]`` -- the *per-transport* registry, which
-is what the resolution really answers with -- rather than ``tuple[int, int]``.
-A deferred analysis now dispatches on a member of the registry
-:attr:`TCP.src <pcapkit.protocols.transport.tcp.protocol.TCP.src>` reads from: the very
-same member for a registered port, an equal one reached by a different route
-for an unassigned one (see :meth:`ResolvedPortTests.test_an_unassigned_port_is_equal_to_the_parse_paths_own`),
-and :meth:`Transport.analyze
-<pcapkit.protocols.transport.transport.Transport.analyze>` declares that pair.
-Unlike the generic itself, this half *is* a runtime change --
-:class:`~pcapkit.const.reg.apptype.apptype.AppType` is a
-:class:`~enum.StrEnum`, so it is no :obj:`int` at all and
-``isinstance(port, int)`` is now :data:`False` -- which is what
-:class:`ResolvedPortTests` pins.
-
-Three cases fail on anything but the generic over named values:
-:meth:`DeclaredProtoTypeTests.test_declared_type_admits_what_each_reassembler_passes`
-requires each value to be admitted by *exactly one* constraint and the two by
-different ones,
-:meth:`DeclaredProtoTypeTests.test_the_analyser_takes_the_same_type_variable_as_proto`
-requires the analyser to take the variable ``proto`` names, and
-:meth:`ResolvedPortTests.test_submit_hands_over_resolved_application_types`
-requires the values themselves to be members. Against the regression's single
-class, and against the union that first widened it, the first two report that
-``proto`` is annotated with a type rather than a type parameter; against the
-bare port pair, the first fails because ``tuple[AppType_TCP, AppType_TCP]``
-does not admit it and the third because an :obj:`int` is not a member.
-
-The "different ones" half is what the parameter buys over a union: a union
-admits a port pair and a protocol type on *either* call, so it cannot tell a
-``Deferred[TransType]`` from a ``Deferred[tuple[AppType_TCP, AppType_TCP]]`` and leaves
-each analyser's first parameter unconstrained. Pinning the annotation's text
-instead would pass for a union that happened to name the right classes while
-still excluding one of them.
-
-Every case builds its packets in memory and reads no capture. Those in
-:class:`DeclaredProtoTypeTests` never *call* the held analyser either -- only
-:attr:`Deferred.proto` is read, so nothing there depends on a parser. Classes
-are imported inside each test, after
+Every case builds its packets in memory and reads no capture, and
+:class:`DeclaredProtoTypeTests` reads only :attr:`Deferred.proto`, never calling
+the analyser. Classes are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
 
 """
@@ -372,10 +338,9 @@ class DeclaredProtoTypeTests(unittest.TestCase):
 class ResolvedPortTests(unittest.TestCase):
     """The ports themselves, not the declaration: members rather than numbers.
 
-    This is the half of :issue:`2417` that runs. The declaration above would be
-    satisfied by a ``tuple[AppType_TCP, AppType_TCP]`` constraint over a ``submit`` that
-    still passed bare numbers -- :func:`admits` would simply report that nothing
-    admits the pair -- so what pins the resolution is reading the values.
+    The declaration alone cannot catch a ``submit`` passing bare numbers, since
+    :func:`admits` would only report that nothing admits them; so this reads the
+    values (#2417).
 
     """
 
@@ -476,10 +441,8 @@ class ResolvedPortTests(unittest.TestCase):
 
         :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`
         answers a port in no IANA span with an unregistered ``unknown`` member
-        and mints nothing into the registry (:issue:`860`), so resolving in
-        ``submit`` cannot fail on a capture of traffic on an ephemeral port --
-        which is most captures, and would otherwise have made this change a new
-        way for reassembly to raise.
+        and mints nothing into the registry (#860), so resolving in ``submit``
+        cannot fail on traffic on an ephemeral port.
 
         """
         from pcapkit.const.reg.apptype import AppType

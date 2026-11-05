@@ -1,122 +1,68 @@
 # -*- coding: utf-8 -*-
 """HTTP/2 payload lengths, asserted against the octets that went onto the wire.
 
-GitHub issue #668. Guards against the payload length callbacks of the frame
-types that take a ``PADDED`` flag in
-:mod:`pcapkit.protocols.application.httpv2.schema` putting the conditional
-expression in the wrong place, under which an **unpadded** ``DATA``,
-``HEADERS`` or ``PUSH_PROMISE`` frame parses with its whole payload silently
-discarded.
+GitHub issue #668. Guards the payload length callbacks of the ``PADDED``-flag frame types in
+:mod:`pcapkit.protocols.application.httpv2.schema` against a misplaced conditional, under
+which an **unpadded** ``DATA``, ``HEADERS`` or ``PUSH_PROMISE`` frame parses with its whole
+payload silently discarded.
 
-What the grouping does
-----------------------
+The Grouping
+------------
 
 A conditional expression binds looser than ``-``, so::
 
     length=lambda pkt: pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0
 
-groups as ``(pkt['__length__'] - pkt['pad_len']) if pkt['flags']['bit_3'] else 0``
--- the whole subtraction is the ``if`` arm and the ``else`` arm is a bare ``0``.
-``0`` reaches :class:`~pcapkit.corekit.fields.strings.BytesField` as "read no
-octets at all", so every frame *without* the ``PADDED`` flag reads its payload as
-``b''``. The intent is to subtract nothing rather than to read nothing::
+reads no octets at all without ``PADDED``, the common case, and nothing raises or warns. The
+intent subtracts nothing instead::
 
     length=lambda pkt: pkt['__length__'] - (pkt['pad_len'] if pkt['flags']['bit_3'] else 0)
 
-``__length__`` is the *remaining* declared length at the field, so the unpadded
-arm wants ``__length__`` itself, which is what subtracting a zero padding length
-gives. Padding is rare in HTTP/2, so the broken arm is the common one: nothing
-raises, nothing warns, and ``info.data`` is simply empty.
+:meth:`~pcapkit.protocols.schema.Schema.unpack` decrements ``packet['__length__']`` by each
+field's width, so at the payload it is ``len(data) + pad_len`` for a padded ``DATA`` frame and
+``len(data)`` for an unpadded one: both arms are exact, with no off-by-one, which #668 asked to
+be checked rather than assumed. The two expressions agree whenever ``PADDED`` is set, so the
+padded cases prove that from behaviour and catch a "fix" that breaks the padded arm.
 
-Why the arithmetic comes out
-----------------------------
+Construction
+------------
 
-:meth:`~pcapkit.protocols.schema.Schema.unpack` decrements
-``packet['__length__']`` by every field's width as it goes, so at the payload
-field ``__length__`` is whatever the preceding fields left. For a padded
-``DATA`` frame whose declared payload is ``1 + len(data) + pad_len``, the
-one-octet ``pad_len`` field has already been consumed, leaving
-``len(data) + pad_len``; subtracting ``pad_len`` gives ``len(data)``. For the
-unpadded frame nothing precedes the payload, so ``__length__`` *is*
-``len(data)``. Both arms are therefore exact, and the padded arm has no
-off-by-one -- which #668 asked to be checked separately rather than assumed.
-:class:`HTTPv2DataFramePayloadLengthUnitTests` and its siblings assert both.
-
-Note also that the two expressions are *equal whenever ``PADDED`` is set*
-(``(A - B) if T else 0`` and ``A - (B if T else 0)`` are both ``A - B`` for
-truthy ``T``), so only the unpadded arm differs between them. The padded
-cases below are here to prove that from behaviour rather than from the shape of
-the conditional, and to catch a "fix" that repairs the unpadded arm by breaking
-the padded one.
-
-It breaks construction as well as parsing
------------------------------------------
-
-:class:`~pcapkit.corekit.fields.strings.BytesField` consults its ``length``
-callback on the *pack* path too, so the ``else 0`` arm does not merely discard a
-payload on read -- it declines to write one. Measured with that grouping,
+:class:`~pcapkit.corekit.fields.strings.BytesField` consults ``length`` when packing too, so
+the ``else 0`` arm writes no payload either. Measured with that grouping,
 ``bytes(HTTP(type=Frame.DATA, sid=1, frame={'data': DATA_PAYLOAD}))`` packed
-``000015000000000001``: nine octets of header whose length field declares
-**21**, with the body absent. A reader walking a stream by that length field is
-handed a frame twelve octets shorter than it claims, which desynchronises
-everything after it. #668 is filed as a parse-side defect and the construct side
-needs no code change of its own, so
-:class:`HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests` asserts that half
-rather than leaving it implied.
+``000015000000000001``: a header declaring **21** octets and no body, which desynchronises a
+reader walking the stream. #668 is filed against parsing and this half needs no code of its
+own, so :class:`HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests` asserts it.
 
-Why the assertions are on bytes and not on lengths
---------------------------------------------------
+Assertions
+----------
 
-``self.assertEqual(len(info.data), 12)`` passes under a fix that reads the right
-*number* of octets from the wrong offset, and under one that drops the
-subtraction entirely if the payload and the padding happen to add up. So every
-assertion here names the octets. The padding in each padded case is a
-distinctive non-zero pattern (:data:`PADDING`) rather than the zeros
-:rfc:`9113#section-6.1` tells a sender to use, precisely so that a fix which
-forgets to subtract it shows up as ``PAYLOAD + PADDING`` -- a different byte
-string -- rather than as a coincidentally equal length. pcapkit does not police
-padding content, so this is input its parser has to handle either way.
+Every assertion names octets: a length check passes a fix that reads the right count from the
+wrong offset. The padding is a distinctive non-zero :data:`PADDING` rather than the zeros
+:rfc:`9113#section-6.1` asks a sender for, so a fix that forgets to subtract it shows as
+``PAYLOAD + PADDING``; pcapkit does not police padding content.
 
-Why the zero-length payload cases are here
-------------------------------------------
-
-Each padded frame type has a "frame of only padding" case, where ``pad_len``
-accounts for the whole payload area and the payload is legitimately empty. Those
-are not padding of the test matrix: with only the ``DATA`` one present -- every
-other fixture carrying a non-empty payload -- the module would be satisfied by a
-wrong fix returning ``max(computed, 1)`` for the ``fragment`` fields, which
-leaks a padding octet into the fragment and swallows a ``SchemaWarning: packet
-length < 0: -1``. ``0`` is a legitimate answer from
-these callbacks and has to be asserted as one, at the wire and at the callback
-both; :meth:`HTTPv2PayloadLengthCallbackUnitTests.\
-test_the_padded_arm_reaches_zero_and_is_not_clamped` is the latter.
-
-The clean controls
-------------------
+Each padded type has an only-padding frame, whose payload is legitimately empty. It catches a
+wrong fix returning ``max(computed, 1)`` for the ``fragment`` fields, which leaks a padding
+octet and swallows ``SchemaWarning: packet length < 0: -1``. ``0`` is asserted at the wire and
+at the callback, the latter by
+:meth:`HTTPv2PayloadLengthCallbackUnitTests.test_the_padded_arm_reaches_zero_and_is_not_clamped`.
 
 :attr:`~pcapkit.protocols.application.httpv2.schema.ContinuationFrame.fragment`,
 :attr:`~pcapkit.protocols.application.httpv2.schema.UnassignedFrame.data` and
-:attr:`~pcapkit.protocols.application.httpv2.schema.GoawayFrame.debug` use the
-plain ``length=lambda pkt: pkt['__length__']`` with no conditional, and each
-carries its payload correctly with or without the defect.
-:class:`HTTPv2PlainLengthFormControlUnitTests` asserts them, because they are
-what shows the field machinery is not at fault -- it is the conditional's
-grouping alone.
+:attr:`~pcapkit.protocols.application.httpv2.schema.GoawayFrame.debug` use the plain
+``length=lambda pkt: pkt['__length__']``. :class:`HTTPv2PlainLengthFormControlUnitTests`
+asserts them as the controls that clear the field machinery.
 
-Why the round-trip suite cannot see it
---------------------------------------
+Round-Trip Blind Spot
+---------------------
 
-:mod:`tests.protocols.test_option_roundtrip_unit` drives every HTTP/2 frame
-type, but through ``make`` -> parse -> ``make``, and ``make`` writes the length
-field from ``HTTP._make_http_length``. Both sides therefore agree on an empty
-payload and the octets match. Its generator also passes no ``data`` or
-``fragment`` argument for these frames (measured: ``kwargs={}`` for
-``httpv2-frame/DATA``, ``/HEADERS`` and ``/PUSH_PROMISE``), so the payload it
-round-trips is ``b''`` and there is nothing for the callback to lose.
+:mod:`tests.protocols.test_option_roundtrip_unit` drives every HTTP/2 frame type through
+``make`` -> parse -> ``make``, where ``HTTP._make_http_length`` writes the length field, so
+both sides agree on an empty payload; its generator also passes these frames no ``data`` or
+``fragment`` (measured: ``kwargs={}``).
 :meth:`tests.protocols.application.test_http_unit.HTTPUnitTests.test_httpv2_frame_readers_cover_successful_frames`
-drives the readers with hand-built schema stubs rather than wire bytes, so the
-length callback never runs there at all. This module reads wire octets, which is
-the gap -- and asserts the packed octets too.
+uses schema stubs, so the callback never runs there. This module reads and packs wire octets.
 
 This module is unit tier: it builds its own octets and reads no capture.
 

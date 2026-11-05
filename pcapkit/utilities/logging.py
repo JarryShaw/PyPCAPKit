@@ -374,10 +374,8 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
     return target
 
 
-# NOTE: import only guarantees the logger *a* handler, leaving the application's
-# level, propagation and handlers alone, as ``reset()`` would not. Re-execution is
-# idempotent, so the devmode handler is tested by stream, not identity (each run
-# builds a new one).
+# NOTE: import only guarantees *a* handler, leaving the application's setup alone
+# as ``reset()`` would not; the devmode handler is matched by stream, not identity.
 if not logger.handlers:
     logger.addHandler(logging.NullHandler())
 

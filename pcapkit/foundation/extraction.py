@@ -73,24 +73,20 @@ if TYPE_CHECKING:
     #: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``
     #: aliases are spellable for a type checker as they are accepted at runtime.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
-    # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; each
-    # copy needs updating when a new engine lands. The duplication is left
-    # as-is on purpose.
+    # NOTE: deliberately duplicated verbatim in ``pcapkit.interface.misc``; update
+    # both copies when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
                       'pypcapfile']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
-    # NOTE: the PyPCAP and PCAP_CT engines perform no dissection, so their
-    # "packet" is the ``(timestamp, bytes)`` pair that ``pcap.pcap`` yields.
-    # One member covers both: they read the same interface, from two independent
-    # distributions of it.
+    # NOTE: the PyPCAP and PCAP_CT engines dissect nothing, so their packet is the
+    # ``(timestamp, bytes)`` pair ``pcap.pcap`` yields; one member covers both.
     Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket,
                    PCAPFilePacket, Tuple[float, bytes]]
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
-    # NOTE: every caller discards the callback's result, so it is typed ``Any``:
-    # any two-argument callback is accepted, whatever it returns, e.g.
-    # ``lambda e, f: sys.stdout.write(str(f))``.
+    # NOTE: every caller discards the result, so any two-argument callback is
+    # accepted, e.g. ``lambda e, f: sys.stdout.write(str(f))``.
     VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
@@ -328,12 +324,8 @@ class Extractor(Generic[_P]):
         'dpkt': ModuleDescriptor('pcapkit.foundation.engines.dpkt', 'DPKT'),
         'pyshark': ModuleDescriptor('pcapkit.foundation.engines.pyshark', 'PyShark'),
         'pypcap': ModuleDescriptor('pcapkit.foundation.engines.pypcap', 'PyPCAP'),
-        # NOTE: ``pcap-ct`` is a separate distribution that reimplements the
-        # ``pypcap`` interface, and it installs the same top-level ``pcap``
-        # module. It gets its own entry rather than sharing ``pypcap``'s because
-        # the two are independent projects with different install requirements
-        # and different Python version coverage; ``PCAP_CT.__engine_module__``
-        # explains how ``import_test`` tells them apart.
+        # NOTE: ``pcap-ct`` installs the same ``pcap`` module as ``pypcap`` but is an independent
+        # project; ``PCAP_CT.__engine_module__`` explains how ``import_test`` tells them apart.
         'pcap_ct': ModuleDescriptor('pcapkit.foundation.engines.pcap_ct', 'PCAP_CT'),
         'pypcapfile': ModuleDescriptor('pcapkit.foundation.engines.pypcapfile', 'PyPCAPFile'),
     }  # type: dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]
@@ -608,15 +600,8 @@ class Extractor(Generic[_P]):
             return
         if not isinstance(engine, type):
             raise RegistryError(f'engine must be a class, not {engine!r}')
-        # NOTE: checked against the public ``Engine``, the class third-party engines are
-        # meant to extend and the one carrying the ``engine=`` registration hook. The
-        # built-ins derive from ``EngineBase`` directly, so this door refuses them;
-        # they go through :meth:`_register_internal_engine` instead, which checks the
-        # base. The wider ``EngineBase`` is deliberately not accepted here: it is
-        # the internal base of the built-ins, and a class deriving only from it
-        # lacks the ``engine=`` hook, so the public door admits the public base
-        # alone (#513, #1016). The exception is the built-in a name shipped with,
-        # restored above, which the library registered itself (#1363).
+        # NOTE: the public door admits ``Engine`` subclasses only, not bare ``EngineBase``, which
+        # lacks the ``engine=`` hook (#513, #1016); a shipped built-in is restored above (#1363).
         if not issubclass(engine, Engine):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
         cls._register_internal_engine(name, engine)
@@ -700,10 +685,8 @@ class Extractor(Generic[_P]):
             return
         if not isinstance(reassembly, type):
             raise RegistryError(f'reassembly must be a class, not {reassembly!r}')
-        # NOTE: ``Reassembly`` rather than ``ReassemblyBase``, for the reason given in
-        # :meth:`register_engine` above -- see #1016. Built-ins go through
-        # :meth:`_register_internal_reassembly`, except the one a name shipped
-        # with, restored above (#1363).
+        # NOTE: ``Reassembly`` rather than ``ReassemblyBase``, as in :meth:`register_engine`
+        # (#1016); built-ins go through :meth:`_register_internal_reassembly` (#1363).
         if not issubclass(reassembly, Reassembly):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
         cls._register_internal_reassembly(protocol, reassembly)
@@ -788,10 +771,8 @@ class Extractor(Generic[_P]):
             return
         if not isinstance(traceflow, type):
             raise RegistryError(f'traceflow must be a class, not {traceflow!r}')
-        # NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, for the reason given in
-        # :meth:`register_engine` above -- see #1016. Built-ins go through
-        # :meth:`_register_internal_traceflow`, except the one a name shipped
-        # with, restored above (#1363).
+        # NOTE: ``TraceFlow`` rather than ``TraceFlowBase``, as in :meth:`register_engine`
+        # (#1016); built-ins go through :meth:`_register_internal_traceflow` (#1363).
         if not issubclass(traceflow, TraceFlow):
             raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
         cls._register_internal_traceflow(protocol, traceflow)
@@ -1031,11 +1012,8 @@ class Extractor(Generic[_P]):
             if not os.path.isfile(ifnm):
                 raise FileNotFound(2, 'No such file or directory', ifnm)
         else:
-            # NOTE: a binary IO object need not have a ``name`` -- an
-            # :class:`io.BytesIO` has none, and one wrapping a descriptor has an
-            # :obj:`int` (#1506). The name is only a label here: the stream is
-            # read as given, and the output name comes from ``fout`` alone. So
-            # fall back to ``<BytesIO>``-style, after Python's own ``<stdin>``.
+            # NOTE: a binary IO object need not have a ``str`` ``name`` (#1506); it is only a label
+            # here, so fall back to a ``<BytesIO>``-style one, after Python's own ``<stdin>``.
             name = getattr(fin, 'name', None)
             ifnm = name if isinstance(name, str) else f'<{type(fin).__name__}>'
 
@@ -1043,23 +1021,15 @@ class Extractor(Generic[_P]):
             ofnm = None
             ext = None
         else:
-            # NOTE: ``__output__`` is a defaultdict, so look ``fmt`` up with
-            # :meth:`dict.get` -- subscripting would insert an unknown format
-            # into the registry before the error below is raised.
+            # NOTE: ``__output__`` is a defaultdict; subscripting would insert an
+            # unknown format into the registry before the error below is raised.
             entry = cls.__output__.get(fmt)
             registered = entry[1] if entry is not None else None
             if registered is None:
                 raise FormatError(f'unknown output format: {fmt!r}')
 
-            # NOTE: ``__output__`` spells its extensions with the leading dot,
-            # and so does every ``ext=`` handed to
-            # :func:`pcapkit.foundation.registry.foundation.register_dumper`.
-            # The value we hand back, though, is documented bare and is used
-            # bare -- ``Extractor._fext`` reaches the engines, which each
-            # compose a per-frame name as ``f'{name}.{ext._fext}'``. Leaving the
-            # dot on is what produced ``Frame 1..json`` (see #358), so
-            # normalise it away once, here, rather than in every engine that
-            # composes a per-frame name.
+            # NOTE: registered extensions carry the leading dot but the value returned is bare, so
+            # strip it once here; per-frame names otherwise read ``Frame 1..json`` (#358).
             ext = registered[1:] if registered.startswith('.') else registered
 
             if (parent := os.path.split(fout)[0]):
@@ -1313,29 +1283,21 @@ class Extractor(Generic[_P]):
         if format is None:
             format = 'tree'
 
-        # NOTE: the engine is settled first, because the format checks below and
-        # in the trace settings depend on which engine *runs*: an unavailable
-        # one falls back to the default engine, which writes PCAP perfectly well.
+        # NOTE: settled first, since the format and trace checks depend on which
+        # engine *runs*: an unavailable one falls back to the default engine.
         self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
         self._select_engine()
 
-        # NOTE: the third-party engines' adapters hand the output writer each
-        # frame as a plain :obj:`dict` built by ``packet2dict``, which carries
-        # no record header, so there is nothing for the PCAP writer to write.
-        # The flow tracer has the same limitation where an engine's adapters
-        # build no frame record, and is given the same replacement below.
+        # NOTE: these engines' adapters hand the writer a plain :obj:`dict` with no record
+        # header, so the PCAP writer has nothing to write; the flow tracer gets the same fix below.
         if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
                 and format in ('pcap', 'cap')):
             warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "
                  "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
             format = 'json'
 
-        # NOTE: these engines hand ``_ifnm`` to their library as a *path*, so a
-        # stream without a ``str`` name -- labelled ``<BytesIO>`` by
-        # :meth:`make_name` -- would be opened as a file of that name (#1506).
-        # Refuse before anything runs, rather than relying on no such file
-        # existing. ``dpkt``, ``pypcapfile`` and the default engine read
-        # ``_ifile`` and take a stream as it is.
+        # NOTE: these engines open ``_ifnm`` as a path, so a stream without a ``str`` name would
+        # be opened as a file named ``<BytesIO>`` (#1506); refuse before anything runs.
         if (self._exnam in _PATH_ENGINES and not isinstance(fin, str)
                 and not isinstance(getattr(fin, 'name', None), str)):
             raise UnsupportedCall(f"'Extractor(engine={self._exnam})' requires a file on disk, "
@@ -1367,13 +1329,8 @@ class Extractor(Generic[_P]):
             self._flag_v = verbose
             self._vfunc_default = verbose
             if verbose:
-                # NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for
-                # user-facing output on stdout, not diagnostics -- the frame
-                # chains are a feature of the tool, so they stay on ``print``
-                # rather than becoming log records a consumer has to configure
-                # a handler to see (and on a different stream at that). Of the
-                # built-in engines only PCAP and PCAPNG keep this callback, so
-                # its frame is theirs; the others install their own.
+                # NOTE: ``verbose=True`` and ``-v`` ask for user-facing output, so this stays on
+                # ``print`` rather than logging; only PCAP and PCAPNG keep this callback.
                 self._vfunc = lambda e, f: print(
                     f'Frame {e._frnum:>3d}: {cast("Frame | PCAPNG", f).protochain}'  # pylint: disable=protected-access
                 )
@@ -1446,33 +1403,16 @@ class Extractor(Generic[_P]):
         if trace:
             trace_obj_tcp = None
 
-            # NOTE: these engines' flow tracing adapters report the frame as a
-            # plain :obj:`dict`, which the PCAP trace dumper cannot re-serialise
-            # -- :meth:`PCAPIO._append_value
-            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` reaches for
-            # ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
-            # attribute 'packet'``. ``None`` has to be caught along with ``'pcap'``
-            # here, and replaced by a format that *can* take a mapping, because
-            # :meth:`TraceFlow.__init__
-            # <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__>`
-            # itself substitutes ``'pcap'`` for ``None``.
-            #
-            # The guard is written from what the adapters produce, not from which
-            # engines are seen to crash, because an engine that dissects nothing
-            # never feeds the tracer and so hides the defect rather than avoiding
-            # it (#406). DPKT and Scapy are off the list because their adapters
-            # build a PCAP frame record from the captured octets (#1507).
+            # NOTE: these adapters report plain :obj:`dict` frames the PCAP dumper cannot serialise,
+            # and ``None`` means ``'pcap'`` (#406); DPKT and Scapy build frame records (#1507).
             if (self._exnam in ('pyshark', 'pypcapfile')
                     and trace_format in ('pcap', 'cap', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = 'json'
 
-            # NOTE: PyShark hands the tracer dissected *fields*, not the octets
-            # behind them, so there is no payload for a flow to reassemble -- which
-            # is the same reason :mod:`pcapkit.toolkit.pyshark` carries no
-            # ``tcp_reassembly`` at all. Refuse rather than analyse empty payloads
-            # into an empty answer that looks like a real one.
+            # NOTE: PyShark hands the tracer fields, not octets, so there is no payload to
+            # reassemble; refuse rather than return an empty answer that looks real.
             if trace_analyse and self._exnam == 'pyshark':
                 warn(f"'Extractor(engine={self._exnam})' does not expose packet payloads; "
                      "using 'trace_analyse=False' instead", AttributeWarning,
@@ -1505,22 +1445,16 @@ class Extractor(Generic[_P]):
         # NOTE: a Windows pipe says it is seekable and then does not seek (#2097).
         if not can_seek(self._ifile):
             logger.debug('input stream is not seekable, wrapping it in SeekableReader')
-            # NOTE: ``stream_closing`` decides whether closing the wrapper also
-            # closes the stream underneath it, so it follows *ownership*: only a
-            # handle this class opened itself is ours to release. A non-seekable
-            # stream always came from the caller, so the polarity here is the
-            # same one ``_cleanup`` uses (#610).
+            # NOTE: ``stream_closing`` follows ownership, closing only a handle this class opened; a
+            # non-seekable stream always came from the caller, so this matches ``_cleanup`` (#610).
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
                                          stream_closing=self._flag_s)
         elif not hasattr(self._ifile, 'peek'):
             logger.debug('input stream has no peek(), wrapping it in PeekableStream')
             self._ifile = cast('BufferedReader', PeekableStream(self._ifile))
 
-        # NOTE: the #606 backstop for an extraction abandoned before EOF. GraalPy
-        # never calls ``__del__``, so it is a ``weakref.finalize`` as well (#1997).
-        # It closes over the stream alone -- a reference to ``self`` would keep
-        # the extractor alive for as long as the finaliser is -- and it is only
-        # registered for a stream this class owns, so a caller's is never closed.
+        # NOTE: the #606 backstop for an extraction abandoned before EOF, a ``weakref.finalize`` as
+        # GraalPy never calls ``__del__`` (#1997); it holds the owned stream only, never ``self``.
         self._finalizer = None
         if self._owns_input():
             self._finalizer = weakref.finalize(self, _release_input, self._ifile)
@@ -1538,34 +1472,27 @@ class Extractor(Generic[_P]):
             # NOTE: make_dumper() names every subclass it builds 'DictDumper', so the
             # useful name is the output class it wraps.
             logger.debug('dumping %s output to %s via %s', fmt, ofnm, output.__name__)
-            # NOTE: only the writer *class* is kept here. The writer itself is
-            # created by :meth:`_open_output` once the engine has read the global
-            # header, which the PCAP writer needs in order to write its own.
+            # NOTE: only the writer *class*; :meth:`_open_output` creates the writer
+            # once the engine has read the global header the PCAP writer needs.
             self._ofile = dumper  # output file
         else:
             logger.debug('file output disabled')
 
-        # NOTE: we use peek() to read the magic number, as the file pointer
-        # will not be moved after reading; however, the returned bytes object
-        # may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes
+        # NOTE: peek() reads the magic number without moving the file pointer,
+        # but may return other than 4 bytes, hence the [:4].
         try:
             self._magic = self._ifile.peek(4)[:4]
             if len(self._magic) < 4:
-                # NOTE: ``peek`` makes at most one read of the stream, which a pipe or a
-                # raw stream may answer with fewer than four octets, so a short peek is
-                # not a short file. Read them instead, and seek back (#1586).
+                # NOTE: a pipe or raw stream may answer ``peek``'s one read with fewer
+                # than four octets, so read them instead and seek back (#1586).
                 position = self._ifile.tell()
                 self._magic = self._ifile.read(4)
                 self._ifile.seek(position, os.SEEK_SET)
 
             self.run()    # start extraction
         except BaseException:
-            # NOTE: a constructor that raises leaves the caller nothing to close,
-            # and Windows cannot delete a file still open (#2100). ``_cleanup``
-            # releases the input and the engine, if one was chosen (#2107);
-            # ``failed`` keeps it from finishing a trace whose capture never
-            # reached its end, and from letting an error out of the engine's close
-            # replace the one being handled here.
+            # NOTE: a raising constructor leaves the caller nothing to close (#2100), so ``_cleanup``
+            # releases input and engine (#2107); ``failed`` skips the trace and keeps this error.
             self._cleanup(failed=True)
             raise
 
@@ -1665,8 +1592,7 @@ class Extractor(Generic[_P]):
         """
         logger.debug('closing %s on context exit after %d frame(s)', self._ifnm, self._frnum)
         # NOTE: ownership, not the ``with`` statement, decides who closes the
-        # input (#610, #1999): entering the block does not hand the caller's
-        # stream over to this class.
+        # input (#610, #1999); entering the block does not take the caller's stream.
         self._release()
 
     def __del__(self) -> 'None':
@@ -1742,11 +1668,8 @@ class Extractor(Generic[_P]):
             instead of :data:`False`.
 
         """
-        # NOTE: read through ``__dict__``, and answer for the *stream* rather
-        # than for the flag alone, so that this is :data:`False` rather than
-        # raising on a partially constructed instance -- ``_flag_s`` is assigned
-        # early in ``__init__`` and ``_ifile`` only much later, so a constructor
-        # that failed in between leaves the flag set and no stream behind it.
+        # NOTE: read through ``__dict__`` and answered for the stream, so a constructor that
+        # failed between setting ``_flag_s`` and ``_ifile`` yields :data:`False`, not an error.
         ifile = self.__dict__.get('_ifile')
         if ifile is None:
             return False
@@ -1792,9 +1715,6 @@ class Extractor(Generic[_P]):
         read on a pipe whose writer is open but idle *blocks*; it does not report
         end of stream. So a pipe reports it only once the writer has closed --
         permanently -- and a capture that merely pauses never reaches here at all.
-        Measured: a pipe paused mid-capture for 1.5s blocked for the whole pause
-        and then delivered its remaining frames, with this method not consulted
-        until after the writer closed.
 
         For a **seekable regular file**, only the microseconds between two
         immediately consecutive probes, because such a file does not block -- it
@@ -1889,12 +1809,8 @@ class Extractor(Generic[_P]):
                 an :exc:`Exception` from its close is logged rather than raised.
 
         """
-        # NOTE: *Ownership* decides who closes the input, not seekability --
-        # see :meth:`_owns_input` and #610. Keying on seekability
-        # (``not self._flag_s``) gets both halves wrong at once: the handle this
-        # class opened itself is never closed, leaking a descriptor and emitting
-        # the ``ResourceWarning`` #606 tripped over, while a stream the caller
-        # supplied and still needs *is* closed.
+        # NOTE: ownership, not seekability, decides who closes the input (#610): keying on
+        # ``not self._flag_s`` leaks our own handle (#606) and closes the caller's.
         if self._owns_input():
             self._ifile.close()
         self._detach_finalizer()

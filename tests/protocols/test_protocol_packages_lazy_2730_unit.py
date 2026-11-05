@@ -159,9 +159,8 @@ class LazyPackageSweepTests(unittest.TestCase):
                 self.assertIs(getattr(pcapkit, name), getattr(pcapkit.protocols, name))
 
     def test_dir_lists_what_an_eager_import_bound(self) -> 'None':
-        # NOTE: the eager import bound every submodule its imports name, and any
-        # other one already imported; the first are listed whether imported or
-        # not, as they are not on a cold import.
+        # NOTE: ``dir`` lists what an eager import binds: each submodule the exports name,
+        # loaded or not, plus any other submodule already imported.
         for package in PACKAGES:
             module = importlib.import_module(package)
             named = {source[len(package) + 1:].split('.')[0] for (source, _, _) in declared(package).values()

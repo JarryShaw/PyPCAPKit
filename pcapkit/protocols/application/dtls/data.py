@@ -84,10 +84,8 @@ class DTLS(Protocol):
     #: :class:`~pcapkit.protocols.application.ssl.data.ChangeCipherSpec`
     #: respectively *only when the record is cleartext*, i.e. ``epoch == 0``
     #: (as decided by :meth:`SSL._tls_content_is_cleartext
-    #: <pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext>`) --
-    #: an encrypted record of any of those three types, which is any record
-    #: at a later epoch, stays raw :obj:`bytes` instead, same as every other
-    #: content type.
+    #: <pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext>`);
+    #: any other record is raw :obj:`bytes`.
     content: 'Any'
 
     if TYPE_CHECKING:

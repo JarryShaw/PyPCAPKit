@@ -136,9 +136,8 @@ class LazyExportSweepTests(unittest.TestCase):
                     self.assertIs(value, getattr(module, name))
 
     def test_dir_lists_what_an_eager_import_bound(self) -> 'None':
-        # NOTE: the eager import bound every submodule its imports name, and any
-        # other one already imported; the first are listed whether imported or
-        # not, as they are not on a cold import.
+        # NOTE: an eager import binds every submodule its imports name, plus any
+        # already imported; the first are listed even when a cold import lacks them.
         for package in PACKAGES:
             module = importlib.import_module(package)
             named = {source[len(package) + 1:].split('.')[0] for (source, _, _) in declared(package).values()

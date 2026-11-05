@@ -32,10 +32,8 @@ class TLS(Protocol):
     #: :class:`~pcapkit.protocols.application.ssl.data.ChangeCipherSpec` respectively *only when the record is
     #: cleartext* (as decided by
     #: :meth:`SSL._tls_content_is_cleartext
-    #: <pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext>`) --
-    #: an encrypted record of any of those three types, which is the common
-    #: case for TLS 1.2 post-handshake traffic, stays raw :obj:`bytes` instead,
-    #: same as every other content type.
+    #: <pcapkit.protocols.application.ssl.protocol.SSL._tls_content_is_cleartext>`);
+    #: any other record is raw :obj:`bytes`.
     content: 'Any'
 
     if TYPE_CHECKING:

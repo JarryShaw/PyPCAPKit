@@ -185,11 +185,8 @@ REGISTRIES_WITH_UNASSIGNED_RANGES = (
     ('pcapkit.const.hip.registration', 'Registration'),
     ('pcapkit.const.hip.registration_failure', 'RegistrationFailure'),
     ('pcapkit.const.hip.suite', 'Suite'),
-    # NOTE: hip.transport.Transport is deliberately absent here: its FLAG
-    # bound (0-3) covers every defined code with no unassigned gap, so its
-    # process() emits no range branch at all -- nothing for this sweep to
-    # exercise. It still carries get()/register()/_unregistered_member,
-    # which ALL_REGISTRIES below covers.
+    # NOTE: hip.transport.Transport is absent: its FLAG bound (0-3) leaves no
+    # unassigned gap to sweep. ALL_REGISTRIES below covers its get()/register().
     ('pcapkit.const.ospf.authentication', 'Authentication'),
     ('pcapkit.const.ospf.packet', 'Packet'),
     ('pcapkit.const.sctp.cause_code', 'CauseCode'),
@@ -2367,11 +2364,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
 
         for cls in (TCP, UDP, SCTP, DCCP):
             with self.subTest(registry=cls.__name__):
-                # NOTE: ``_value2member_map_`` is keyed by AppType's own
-                # formatted ``_value_`` string (``'svc [port - proto]'``),
-                # never by the bare port -- so the side table that would grow
-                # from a mint here is ``__registry__``, checked below, not
-                # this one.
+                # NOTE: ``_value2member_map_`` is keyed by the formatted ``_value_``
+                # (``'svc [port - proto]'``), not the port, so a mint grows ``__registry__``.
                 self.assertFalse(cls.__registry__.getlist(226))
                 before = len(cls.__members__)
 

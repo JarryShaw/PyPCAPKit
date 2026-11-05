@@ -757,11 +757,8 @@ class MHUnitTests(unittest.TestCase):
             self.assertNotIn('public_key_test', cga_schema_missing_test)
             self.assertEqual(dict(cga_schema_missing_test), given)
 
-            # NOTE: The data model's ``length`` is the whole option, the schema's is
-            # its ``Option Length`` field. A 4-octet ``PadN`` spends 2 octets on its
-            # type and length fields, so ``Option Length`` is 2 and the schema packs
-            # back to the 4 octets the data model described. Asserting 4 here would
-            # assert the two-octet overshoot.
+            # NOTE: The data model's ``length`` is the whole option, the schema's its
+            # ``Option Length``: a 4-octet ``PadN`` has ``Option Length`` 2.
             remade = proto._make_opt_pad(
                 Option.Pad1,
                 data.PadOption(type=Option.PadN, length=4, data=b'\x00\x00'),
@@ -1362,12 +1359,8 @@ class MHUnitTests(unittest.TestCase):
         mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
         exp_type = Option.Experimental_Mobility_Option
 
-        # NOTE: Every case below is 8-octet aligned and so draws no padding option,
-        # which keeps these cases about the FMIPv6 message and option types.
-        # ``_make_opt_pad`` round-tripping a ``PadN`` data model two octets too
-        # long, by copying the data model's whole-option ``length`` into the
-        # schema's ``Option Length`` field, is covered by
-        # ``test_mh_padding_option_data_model_round_trips``.
+        # NOTE: Every case is 8-octet aligned and draws no padding option; padding
+        # is ``test_mh_padding_option_data_model_round_trips``'s to cover.
         cases = [
             ('FBU', Packet.Fast_Binding_Update, {
                 'seq': 0x1234, 'ack': True, 'home': True, 'lla_compat': False,
@@ -1636,15 +1629,10 @@ class MHUnitTests(unittest.TestCase):
         :class:`~pcapkit.corekit.enum.EnumLookup` (GitHub issue #930), which
         makes both **advertise** the base's two-argument ``get(key, default)``.
         This guards against either keeping a one-argument ``@staticmethod``
-        override, so that calling it with a ``default`` raises
-        ``TypeError: get() takes 1 positional argument but 2 were given``. Per
-        the owner's final ruling on GitHub pull request #940, the overrides are
-        deleted rather than widened: both classes inherit ``get`` from the base,
-        as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus` -- the
-        module's pure re-parents -- do, so ``default`` works the same way on
-        every class here, because there is only one implementation to call.
-        Measured at 382375811, the one-argument overrides raise the
-        ``TypeError`` above.
+        override, which raises ``TypeError`` on a ``default``. The owner ruled on
+        pull request #940 that the overrides are deleted rather than widened, so
+        every class here, like :class:`LMAAddressCode` and
+        :class:`LocalizedRoutingStatus`, has the one inherited implementation.
         """
         from pcapkit.protocols.internet.mh.protocol import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
@@ -2825,29 +2813,15 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_length_derived_addresses_reject_a_bool(self) -> None:
         """A :obj:`bool` address must not be silently sized and emitted. See #508.
 
-        These are exactly the options of the test above, and the defect is a
-        consequence of what that test pins: because the option length is derived
-        from the address family, the maker has to convert the argument *itself*,
-        ahead of the schema. A bare :func:`ipaddress.ip_address` therefore turned
-        ``True`` into ``0.0.0.1`` and ``False`` into ``0.0.0.0``, sized the option
-        as IPv4, and packed it with no exception and no warning -- so #500's guard
-        in :meth:`~pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process`
-        never saw a :obj:`bool` at all. Measured without the fix:
+        The options of the test above derive their length from the address
+        family, so the maker converts the argument *itself*, ahead of the
+        schema; a bare :func:`ipaddress.ip_address` would turn ``True`` into
+        ``0.0.0.1`` and pack it silently, out of reach of #500's guard in
+        :meth:`~pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process`.
 
-        .. code-block:: text
-
-           _make_opt_bid(address=True)     -> 23080001000000000001
-           _make_opt_lmaa(address=True)    -> 2906010000000001
-           _make_opt_lma_up(address=True)  -> 3b06000000000001
-           _make_fid_suboption(address=True, Target_Care_of_Address)
-                                          -> 0506000000000001
-           _make_opt_dmnp(prefix=True, prefix_length=24)
-                                          -> 3706801800000001
-
-        ``_make_opt_dmnp`` is the reason the sweep in #508 undercounted this: at
-        its default ``prefix_length=64`` the bool is converted to an IPv4 address
-        and then rejected by the *prefix length* range check, which reads as a
-        guard but is not one. An IPv4-valid prefix length exposes it.
+        ``_make_opt_dmnp`` uses an IPv4-valid ``prefix_length``: at the default
+        64 the *prefix length* range check rejects the bool, which reads as a
+        guard but is not one.
         """
         import ipaddress
 

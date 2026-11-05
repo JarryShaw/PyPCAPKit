@@ -160,32 +160,17 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
     """
     length = 0
     for name, field in schema.__fields__.items():
-        # NOTE: A forward match consumes nothing and contributes no octets to
-        # ``bytes(schema)`` either, see the ``ForwardMatchField`` branches of
-        # :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` and
-        # :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`.
+        # NOTE: A forward match consumes nothing and adds no octets to ``bytes(schema)``, see
+        # the ``ForwardMatchField`` branches of ``Schema.pack`` and ``Schema.unpack``.
         if isinstance(field, ForwardMatchField):
             continue
 
-        # NOTE: The only conditional field a Quick-Start suboption has is the
-        # ``length`` octet it inherits from :class:`Option`, whose test is false
-        # only for ``EOOL`` and ``NOP`` -- neither of which is a Quick-Start
-        # function -- so it is always on the wire and always counted.
+        # NOTE: A Quick-Start suboption's only conditional field is the inherited ``length``,
+        # false only for ``EOOL`` and ``NOP``, neither a Quick-Start function, so always counted.
         inner = field.field if isinstance(field, ConditionalField) else field
 
-        # NOTE: ``_length_callback`` rather than a ``length < 0`` test, because a
-        # dynamically sized field does not report a negative width: it reports
-        # whatever its template says, and the templates fall back to a
-        # "reasonable default" of ``1024s`` -- measured on ``LSROption.remainder``,
-        # a ``PaddingField`` with a length callback, which reports 1024. So the
-        # callback's presence is the only reliable signal, and reaching for it is
-        # worth one private access. A :class:`~pcapkit.corekit.fields.misc.SwitchField`
-        # is named separately because its width is dynamic *without* a length
-        # callback: it carries a
-        # :class:`~pcapkit.corekit.fields.misc.NoValueField` until its own selector
-        # resolves it, and so reports a width of zero rather than refusing to
-        # answer. That is exactly what :class:`_QSOption` -- the outer wrapper,
-        # which is not itself a suboption -- would hand back here.
+        # NOTE: A dynamic field reports its template's default width, so the length callback is
+        # the signal; a ``SwitchField`` has none and reports zero until resolved.
         if (isinstance(inner, SwitchField)
                 or getattr(inner, '_length_callback', None) is not None):  # pylint: disable=protected-access
             raise FieldValueError(
@@ -223,10 +208,8 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         leftover octets are read as a further, fabricated option.
 
     """
-    # NOTE: The enumeration admits the whole four-bit range, ``0`` to ``15``,
-    # as an ``Unassigned`` member for every code but ``0`` and ``8``, and only
-    # those have a schema registered. A value past four bits, which only a
-    # caller-built packet can carry, fails the lookup and is just as unassigned.
+    # NOTE: Every four-bit code but ``0`` and ``8`` is an ``Unassigned`` member with no schema;
+    # a value past four bits, only in a caller-built packet, fails the lookup, as unassigned.
     try:
         func = Enum_QSFunction.get(pkt['flags']['func'])
     except EnumValueError:
@@ -395,11 +378,8 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         """
         ts_flag = Enum_TSFlag.get(self.flags['flag'])
 
-        # NOTE: Only the slots wholly before the pointer have been filled in, so
-        # the rest are kept apart, as the raw 32-bit words, in ``remaining``. A
-        # pre-specified address is part of the option's content whether or not
-        # its timestamp has been filled in yet, so that flag consumes every whole
-        # address and timestamp pair. A paired flag never splits a pair.
+        # NOTE: Slots past the pointer are unfilled and stay raw in ``remaining``, but pre-specified
+        # addresses count either way, so that flag uses all; a paired flag never splits a pair.
         if ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
             used = len(self.ts_data)
         else:
@@ -469,15 +449,8 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         remaining: 'tuple[int, ...]'
         timestamp: 'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'
 
-        # NOTE: The keyword is ``ts_data``, the name of the field above, not
-        # ``data``. ``data`` is the *derived* attribute :meth:`post_process`
-        # writes and is declared just above; passing it as a constructor
-        # argument would drop the timestamps in silence, because
-        # :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.Schema.__update__>` answers an unknown
-        # field name with an
-        # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an
-        # error.
+        # NOTE: The keyword is ``ts_data``, not the derived ``data``, which as an unknown field
+        # draws only an ``UnknownFieldWarning`` and so drops the timestamps silently.
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', ts_data: 'list[int]', remainder: 'bytes' = ...) -> 'None': ...
 
 

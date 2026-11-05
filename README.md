@@ -38,8 +38,7 @@ pip install pypcapkit[cli]          # command line interface
 pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
 ```
 
-Each engine is a separate extra; `all` bundles only the core addons. Some engines
-need more than `pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or
+Some engines need more than `pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or
 an older interpreter -- and `pypcap` and `pcap-ct` must not be installed together. The
 [engine prerequisites](https://jarryshaw.github.io/PyPCAPKit/engines.html#engine-prerequisites)
 give each constraint and its reason. Asking for an engine that cannot run here warns

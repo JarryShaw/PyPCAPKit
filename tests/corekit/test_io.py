@@ -94,10 +94,8 @@ class SeekableReaderTests(unittest.TestCase):
 
                 with self.assertRaises(self.exceptions.UnsupportedOperation) as caught:
                     reader.truncate(*args)
-                # NOTE: the contract names OSError, so the refusal has to be one. pcapkit's
-                # UnsupportedOperation subclasses io.UnsupportedOperation, which subclasses
-                # OSError, so the in-library exception satisfies the stdlib contract as it
-                # stands -- there is no choice to make between the two here.
+                # NOTE: the contract names OSError; pcapkit's UnsupportedOperation subclasses
+                # io.UnsupportedOperation, an OSError, so it satisfies both.
                 self.assertIsInstance(caught.exception, OSError)
                 self.assertIsInstance(caught.exception, io.UnsupportedOperation)
                 self._close_reader(reader)
@@ -260,8 +258,7 @@ class SeekableReaderTests(unittest.TestCase):
         reader.read(2)
         self.assertEqual(reader.seek(-1, io.SEEK_CUR), 1)
         # NOTE: the end is a buffer's worth past the position, 1 + 4, so one before it is
-        # 4. Without the #1586 fix it is the buffer's far edge, 0 + 4 -- which a full
-        # buffer's edge reaches no further than the stream has been read.
+        # 4; without the #1586 fix it is the buffer's far edge, 0 + 4.
         self.assertEqual(reader.seek(-1, io.SEEK_END), 4)
         with mock.patch.object(self.io_module, 'warn') as warn:
             self.assertEqual(reader.seek(20), 6)
@@ -269,9 +266,8 @@ class SeekableReaderTests(unittest.TestCase):
 
         self.assertTrue(reader.seekable())
         self.assertFalse(reader.writable())
-        # NOTE: an omitted size means the current position, per :meth:`io.IOBase.truncate`.
-        # The position is 6 and the buffer starts at 2, so 4 octets of it are kept, not the
-        # 0 an omitted size is resized to without issue #622's fix.
+        # NOTE: an omitted size means the current position (:meth:`io.IOBase.truncate`),
+        # 6 less the buffer start 2, so 4 octets are kept; without #622's fix, 0.
         self.assertEqual(reader._buffer_set, 2)
         self.assertEqual(reader._truncate_buffer(None), 4)
         self.assertEqual(reader._truncate_buffer(6), 6)
@@ -386,9 +382,8 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader._truncate_buffer(8), 8)
         self.assertEqual(reader.seek(0), 0)
 
-        # NOTE: the stream holds five octets, so five is the whole of what an eight octet
-        # request can be answered with; without the fix it returns b'\x00\x00\x00e' -- four
-        # octets, the content displaced by the padding, and one octet of it lost outright.
+        # NOTE: the stream holds five octets, the whole answer to an eight-octet request;
+        # without the fix it returns b'\x00\x00\x00e', the content displaced by padding.
         self.assertEqual(reader.read(8), b'abcde')
         self._close_reader(reader)
 

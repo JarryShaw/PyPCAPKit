@@ -991,10 +991,8 @@ class OptionEnumField(EnumField):
         namespace = self._opt_ns
         members_ns = self._namespace.__members_ns__
         if value not in members_ns.get('opt', {}) and value not in members_ns.get(namespace, {}):
-            # NOTE: An unregistered member of ``self._namespace``, per
-            # ``EnumField._unregistered_member``, carrying the attributes of a real
-            # OptionType member in the order ``OptionType.__new__`` sets them, so
-            # ``DictDumper.object_hook`` dumps its keys in the same order.
+            # NOTE: An unregistered member carrying a real OptionType member's attributes in the
+            # order ``OptionType.__new__`` sets them, so ``DictDumper.object_hook`` dumps them alike.
             opt_name = f'{namespace}_unknown'
             return self._unregistered_member(
                 self._namespace, f'{opt_name} [{value:d}]',
@@ -1100,8 +1098,8 @@ class Option(EnumSchema[Enum_OptionType]):
         Args:
             code: Option type code.
             cls: Option type schema.
-            ns: Namespace of option type enumeration. If not given, the value
-                will be inferred from the option type code.
+            ns: Namespace of option type enumeration, inferred from the option
+                type code if not given.
 
         A registration that displaces another schema for the same code is
         reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`, as
@@ -1170,18 +1168,15 @@ class Option(EnumSchema[Enum_OptionType]):
         Args:
             code: Option type code. It can be either a single option type enumeration
                 or a list of option type enumerations.
-            ns: Namespace of option type enumeration. If not given, the value
-                will be inferred from the option type code. Spelled ``ns`` rather
-                than ``namespace`` because ``abc.ABCMeta.__new__()`` names its
-                own fourth parameter ``namespace``, and before Python 3.11 that
-                parameter is positional-or-keyword rather than positional-only --
-                so a class keyword literally called ``namespace`` binds it twice.
+            ns: Namespace of option type enumeration, inferred from the option
+                type code if not given. Not ``namespace``: before Python 3.11,
+                ``abc.ABCMeta.__new__()`` takes its own parameter of that name by
+                keyword too, so a class keyword so named binds it twice.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
-        If ``code`` is provided, the subclass will be registered to the
-        :attr:`__enum__` mapping with the given ``code``. If ``code`` is
-        not given, the subclass will not be registered.
+        Given ``code``, the subclass is registered under it in the
+        :attr:`__enum__` mapping; otherwise it is not registered.
 
         Examples:
 
@@ -1802,10 +1797,8 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     padding_data: 'bytes' = PaddingField(align=4, after=captured_area('captured_len'))
     #: Options.
     options: 'list[Option]' = OptionAreaField(
-        # NOTE: The padding is recomputed here rather than read back from
-        # ``padding_data``: a PaddingField is written straight into the schema
-        # buffer while packing and never lands in the packet data, so its name
-        # is not a key here on the packing path.
+        # NOTE: Padding is recomputed, not read from ``padding_data``: a PaddingField packs straight
+        # into the schema buffer, never the packet data, so its name is no key on the packing path.
         length=bounded_area(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]
                                         - (size := captured_area('captured_len')(pkt)) - pad_length(size, 4)),
         base_schema=_EPB_Option,
@@ -2372,10 +2365,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
         entry_data = io.BytesIO(self.entry)
         while True:
             entry = OrderedMultiDict()  # type: OrderedMultiDict[str, str | bytes]
-            # a blank line that was actually *read* -- as opposed to the
-            # block's own NUL padding, or simply running out of octets --
-            # is the separator the format puts between entries, so it
-            # starts another one, even an empty one
+            # a blank line actually *read*, not NUL padding or the end of the octets, is the
+            # format's separator, so it starts another entry, even an empty one
             separator = False
 
             while True:
@@ -2584,9 +2575,8 @@ class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
         zigbee_key_has_trailing,
     )
 
-    # NOTE: The two zero octets after the PAN ID are the Decryption Secrets
-    # Block's own padding, which Secrets Length does not count, so they belong
-    # to :attr:`DecryptionSecretsBlock.padding_data` rather than to this schema.
+    # NOTE: The two zero octets after the PAN ID are the block's own padding, uncounted by Secrets
+    # Length, so they belong to :attr:`DecryptionSecretsBlock.padding_data`, not this schema.
 
     if TYPE_CHECKING:
         def __init__(self, key: 'bytes', panid: 'int',

@@ -112,10 +112,8 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
         # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, which the
         # reassembled packet does not carry (RFC 8200, section 4.5), so subtract it.
         hdr_len = ipv6_info.hdr_len - cast('IPv6_Frag', ipv6_frag).length
-        # NOTE: The reassembly machinery writes the payload into its datagram
-        # buffer over the span ``tl - ihl``, so ``tl`` is derived from the
-        # payload actually handed over rather than from ``raw_len``: the two
-        # agree, but only the former cannot drift out of step with it.
+        # NOTE: ``tl`` comes from the payload handed over, not ``raw_len``, as
+        # reassembly writes the payload over ``tl - ihl``.
         payload = bytearray(ipv6_info.fragment.payload)
 
         frame_info = cast('Packet', frame.info)
@@ -280,12 +278,8 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
         time=block.timestamp,
         number=block.number,
         time_epoch=block.timestamp_epoch,
-        # NOTE: ``len`` is the on-wire length and ``cap_len`` the captured one,
-        # which is the way round Wireshark's ``packet-frame.c`` registers the two
-        # field names this pair borrows. Do not swap them to match some other
-        # reader: this is the reference, and the PCAP reader in
-        # :mod:`pcapkit.protocols.misc.pcap.frame.protocol` follows it (#618), on the
-        # strength of those registered names.
+        # NOTE: ``len`` on-wire and ``cap_len`` captured, as Wireshark's
+        # ``packet-frame.c`` registers them; the PCAP reader follows suit (#618).
         len=block.original_len,
         cap_len=block.captured_len,
     )

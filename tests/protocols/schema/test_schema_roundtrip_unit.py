@@ -102,9 +102,8 @@ class TestSchemaRoundTrip(unittest.TestCase):
 
         raw = bytes.fromhex('0302eeee04')
         rebuilt = outer.from_dict(outer.unpack(raw, len(raw), None).to_dict())
-        # NOTE: The unread octets travel through ``to_dict`` as the nested
-        # value's ``__remainder__`` (#1380); a nested schema that never had any
-        # is zero-filled to the declared width.
+        # NOTE: unread octets travel through ``to_dict`` as the nested ``__remainder__``
+        # (#1380); a nested schema without one is zero-filled to the declared width.
         self.assertEqual(rebuilt.pack(), raw)
         self.assertEqual(outer(n=3, inner=inner(x=2), tail=4).pack(), bytes.fromhex('0302000004'))
 

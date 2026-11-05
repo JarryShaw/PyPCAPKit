@@ -156,10 +156,8 @@ class Buffer(Info, Generic[_AT]):
     reassembly: 'Optional[TCP_Reassembly]'
 
     if TYPE_CHECKING:
-        # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
-        # ``unused-argument`` is reported against the ``def``, so wrapping the
-        # signature leaves every parameter on a continuation line outside the
-        # disable's reach.
+        # NOTE: one line, however long: ``# pylint: disable`` is line-scoped and
+        # ``unused-argument`` is reported against the ``def``.
         def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool', reassembly: 'Optional[TCP_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 

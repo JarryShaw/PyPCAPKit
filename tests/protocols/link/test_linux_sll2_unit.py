@@ -77,7 +77,7 @@ class TestLinuxSLL2(unittest.TestCase):
     def test_netlink_arphrd_dispatches_to_netlink(self) -> None:
         """``ARPHRD_NETLINK`` dispatches to
         :class:`~pcapkit.protocols.link.netlink.protocol.Netlink`, not
-        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (:issue:`2500`), through
+        :class:`~pcapkit.protocols.misc.raw.protocol.Raw` (#2500), through
         :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`.
         """
         import struct
@@ -136,7 +136,7 @@ class TestLinuxSLL2(unittest.TestCase):
         """``ARPHRD_FRAD`` is a key of
         :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`,
         so its ``protocol_type`` is never looked up as an EtherType, per
-        tcpdump.org's LINUX_SLL2 page (:issue:`2460`).
+        tcpdump.org's LINUX_SLL2 page (#2460).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll.protocol import LinuxSLL, _resolve_next_layer_proto
@@ -150,7 +150,7 @@ class TestLinuxSLL2(unittest.TestCase):
         """A FRAD payload too short for its header is kept as
         :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, which records
         ``protocol_type`` as a plain :class:`int`, not an EtherType member
-        (:issue:`2460`).
+        (#2460).
         """
         from pcapkit.const.linux.arphrd import ARPHRD
         from pcapkit.protocols.link.linux_sll2.protocol import LinuxSLL2

@@ -60,13 +60,8 @@ def _reraise_as_field_value_error(description: str) -> 'Iterator[None]':
     try:
         yield
     except FieldValueError:
-        # NOTE: ``FieldValueError`` is itself a ``ValueError``, so without this
-        # clause first, a ``FieldValueError`` raised inside the ``with`` block
-        # (e.g. a version-mismatch check) would be caught below and re-wrapped,
-        # losing its original message. Callers are expected to keep such
-        # raises outside the ``with`` block, but this is the same ordering
-        # trap ``ProtocolError`` carries at ``exceptions.py``, so it is guarded
-        # here too rather than relied upon by convention alone.
+        # NOTE: ``FieldValueError`` is a ``ValueError``, so it is re-raised here first rather
+        # than re-wrapped below, guarding the same ordering trap as ``ProtocolError``.
         raise
     except ValueError as error:
         raise FieldValueError(f'{description}: {error}') from error
@@ -208,10 +203,8 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
             else:
                 ip = ipaddress.ip_address(value)
 
-    # NOTE: Checked outside the ``with`` block above, and after it, because an
-    # :mod:`ipaddress` object taken from the branch that skips the conversion
-    # has not been version-checked at all -- ``IPv6Address(IPv4Address(...))``
-    # would have raised, but returning the object unchanged cannot.
+    # NOTE: Checked after the ``with`` block, as an :mod:`ipaddress` object returned unchanged
+    # by the branch that skips the conversion has not been version-checked.
     if version is not None and ip.version != version:
         raise FieldValueError(f'{description}: IP version mismatch: {ip.version} != {version}')
     return ip

@@ -240,11 +240,8 @@ class ProtocolIsInheritedTests(unittest.TestCase):
             getattr(importlib.import_module(module_name), class_name)
             for module_name, class_name, _ in CONVERTED
         ]
-        # NOTE: resolved from the re-imported module rather than reusing the
-        # module-scope import. purge_modules() above drops every ``pcapkit``
-        # entry from ``sys.modules``, so the freshly imported registries inherit
-        # a *new* EnumRegistry class object -- identity against the outer one
-        # would fail for a reason that says nothing about the product.
+        # NOTE: from the re-imported module, since purge_modules() above gives the
+        # fresh registries a new EnumRegistry and the module-scope one fails identity.
         cls.base = importlib.import_module('pcapkit.corekit.enum').EnumRegistry
         cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 

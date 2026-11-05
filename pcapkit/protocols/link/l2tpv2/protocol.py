@@ -79,14 +79,8 @@ __all__ = ['L2TPv2']
 _UDP: 'ModuleDescriptor[AppType_UDP]' = ModuleDescriptor('pcapkit.const.reg.apptype.udp', 'UDP')
 
 
-# NOTE: ``schema`` and ``data`` are stated here rather than inherited from
-# :class:`~pcapkit.protocols.link.l2tp.protocol.L2TP`, which declares none: the base is
-# version-agnostic and the header schema is not. They must be passed explicitly
-# in any case, since
-# :meth:`ProtocolBase.__init_subclass__ <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`
-# resolves an omitted schema by looking the *subclass name* up in
-# :mod:`pcapkit.protocols.schema` -- there is no ``L2TPv2`` there -- and assigns
-# unconditionally, so omitting them would silently bind ``Schema_Raw``/``Data_Raw``.
+# NOTE: ``schema`` and ``data`` are explicit because the version-agnostic base declares none,
+# and an omitted one is looked up by class name and would silently bind ``Schema_Raw``.
 class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              schema=Schema_L2TP, data=Data_L2TP):
     """This class implements Layer Two Tunnelling Protocol version 2.
@@ -215,19 +209,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         schema = self.__header__
         _flag = schema.flags
 
-        # NOTE: :rfc:`2661` §3.1 fixes ``Ver`` at 2 and reserves 1 "to permit
-        # detection of L2F packets should they arrive intermixed with L2TP
-        # packets", while :rfc:`3931` uses 3 -- so a datagram carrying any other
-        # nibble is a different protocol, exactly as ``version`` documents.
-        # Refuse it rather than parse it: every field after this word has a
-        # different meaning (or no meaning) in another version, so continuing
-        # reports a tunnel and session ID assembled out of octets that are
-        # neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise
-        # yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read
-        # out of the lower half of a Session ID and the first two octets of the
-        # PPP frame behind it (#548). This is also what keeps the hard-coded
-        # ``Literal[2]`` of ``version`` true, instead of disagreeing with
-        # ``info.version`` on the same datagram.
+        # NOTE: Any ``Ver`` but 2 is another protocol (RFC 2661 Section 3.1), whose later fields
+        # mean something else, so it is refused rather than misread (#548).
         if _flag['version'] != 2:
             raise ProtocolError(f'{self.alias}: invalid version: {_flag["version"]}')
 
@@ -261,9 +244,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         if _size:
             self._read_fileng(_size)
 
-        # NOTE: Octets captured past the Length field belong to this layer,
-        # since its own length field is what leaves them out of the payload,
-        # and the rebuild keeps them as captured (#1455).
+        # NOTE: Octets captured past the Length field belong to this layer, as its own
+        # length field leaves them out of the payload; the rebuild keeps them (#1455).
         if schema.trailer:
             l2tp.__update__([
                 ('trailer', schema.trailer),
@@ -333,8 +315,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         """
         type_ = self._make_index(type, Enum_Type, bits=1, name='type')
-        # NOTE: :rfc:`2661` §3.1 makes ``S`` mark the presence of *both* Ns and
-        # Nr, so a header cannot carry one without the other. Refuse a lone
+        # NOTE: :rfc:`2661` §3.1 makes ``S`` mark *both* Ns and Nr, so refuse a lone
         # value rather than drop it, or invent the other on the wire.
         if (ns is None) != (nr is None):
             raise ProtocolError(f'{self.alias}: ns and nr must be given together')
@@ -348,10 +329,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         elif not length_flag and total_length is not None:
             raise ProtocolError(f'{self.alias}: total_length given without the Length field')
 
-        # NOTE: An explicit ``total_length`` is not checked against the octets
-        # at hand, so that a ``from_data`` rebuild of a capture truncated by
-        # snaplen keeps the length the sender declared, as UDP does
-        # (#1155).
+        # NOTE: An explicit ``total_length`` is not checked against the octets, so a rebuild
+        # of a snaplen-truncated capture keeps the declared length, as UDP does (#1155).
         if length_flag and total_length is None:
             total_length = 6 + 2 * (1 + 2 * seq + (offset is not None)) + (offset or 0) + len(payload)
 
@@ -443,14 +422,11 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             'priority': data.flags.prio,
             'reserved': data.flags.reserved,
             'version': data.version,
-            # NOTE: Passed as ``total_length`` since ``length`` is the parse
-            # length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so
-            # under that key it would never reach :meth:`make`, and the rebuild
-            # would drop both the Length field and the ``L`` flag (#1172).
+            # NOTE: As ``total_length``: ``length`` is ProtocolBase's parse length and would
+            # never reach :meth:`make`, dropping the Length field and ``L`` flag (#1172).
             'total_length': data.length,
-            # NOTE: Passed so that a control message captured without ``L``
-            # rebuilds as captured, rather than gaining the Length field
-            # :meth:`make` would give it by default.
+            # NOTE: So a control message captured without ``L`` rebuilds as captured, not
+            # gaining the Length field :meth:`make` gives by default.
             'length_flag': data.flags.len,
             'tunnel_id': data.tunnelid,
             'session_id': data.sessionid,

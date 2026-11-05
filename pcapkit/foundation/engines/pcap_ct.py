@@ -69,18 +69,16 @@ class PCAP_CT(EngineBase['RawFrame']):
        **not** use it by default. Its :file:`libpcap.cfg` reads ``LIBPCAP = None``
        as published, which sends its loader to
        :func:`ctypes.util.find_library`, so the library actually mapped is the
-       host's ``libpcap.so.1``. Measured on one Linux host: the same
-       ``libpcap`` 1.11.0b29 wheel loaded ``/usr/lib64/libpcap.so.1.5.3`` under one
-       interpreter and linuxbrew's 1.11.0 under another, purely because their
-       loader search paths differ.
+       host's ``libpcap.so.1``, and one wheel can load different libraries under
+       two interpreters whose loader search paths differ.
 
-       This has consequences. With no system :manpage:`libpcap(3)` at all,
+       With no system :manpage:`libpcap(3)` at all,
        ``import pcap`` raises :exc:`OSError` -- not :exc:`ImportError` -- which
        :meth:`unsupported_reason` exists partly to catch. And the
        :manpage:`libpcap(3)` *version* in play is a property of the host rather
        than of the wheel, which is why the PCAP-NG note on :meth:`run` does not
        rely on it. Setting ``LIBPCAP = tcpdump`` in :file:`libpcap.cfg` selects the
-       vendored copy instead -- verified loading, and reporting libpcap 1.10.6.
+       vendored copy instead.
 
     Being the same interface, it has the same limits. Offline, |pcap|_ is a
     savefile reader and nothing more: iteration yields the ``(timestamp, bytes)``
@@ -172,36 +170,30 @@ class PCAP_CT(EngineBase['RawFrame']):
     def unsupported_reason(cls) -> 'Optional[str]':
         """Why this engine cannot run here, or :data:`None` when it can.
 
-        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, and it answers questions the import test cannot.
+        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
+        its engine, *before* the import test, and answers what that test cannot.
 
         **Which distribution owns** |pcap|_. Upstream `PyPCAP`_ owns that name
         just as legitimately, and ``import pcap._pcap`` -- what
-        :attr:`__engine_module__` names -- separates them only as long as upstream
-        keeps shipping a single extension module. Asking
+        :attr:`__engine_module__` names -- separates them only while upstream
+        ships a single extension module. Asking
         :func:`~pcapkit.foundation.engines._pcap_backend.probe` states the check
         rather than inferring it from an import that happens to fail.
 
-        **Whether a system** :manpage:`libpcap(3)` **exists at all.** This is the
-        important one, and it is measured rather than theoretical. `pcap-ct`_ needs
-        no compiler because it is :mod:`ctypes`, but at *runtime* it imports the
-        `libpcap`_ distribution, whose Linux loader calls
-        :func:`ctypes.util.find_library` and raises :exc:`OSError` --
-        ``Cannot find libpcap.so library`` -- when there is none.
-        :exc:`OSError` is not an :exc:`ImportError`, so
-        :meth:`Extractor.import_test
+        **Whether a system** :manpage:`libpcap(3)` **exists at all.** `pcap-ct`_
+        is :mod:`ctypes` and needs no compiler, but at runtime it imports the
+        `libpcap`_ distribution, whose Linux loader raises :exc:`OSError` --
+        ``Cannot find libpcap.so library`` -- when there is none. That is not an
+        :exc:`ImportError`, so :meth:`Extractor.import_test
         <pcapkit.foundation.extraction.Extractor.import_test>` lets it through and
         the extraction dies rather than falling back. Reporting it here turns that
         into the ordinary "engine unavailable" path.
 
-        There is deliberately **no Python version bound in either direction.**
-        Measured on 3.10.20 and 3.14.7: ``pcap-ct`` 1.3.0b3 with ``libpcap``
-        1.11.0b29 installs and reads :file:`examples/captures/in.pcap` identically
-        on both, so this engine covers the whole range the project supports. The
-        floor in the ``PCAP_CT`` extra's markers exists only because
-        :file:`pyproject.toml` advertises ``requires-python >= 3.8``, and on
-        an interpreter below 3.10 the distributions simply will not be installed --
-        which the import test then reports correctly on its own.
+        There is deliberately **no Python version bound**: this engine reads
+        captures identically across the whole supported range. The floor in the
+        ``PCAP_CT`` extra's markers exists only because :file:`pyproject.toml`
+        advertises ``requires-python >= 3.8``; below 3.10 the distributions are
+        not installed, which the import test reports on its own.
 
         Returns:
             A phrase naming the real cause, or :data:`None`. A |pcap|_ that is
@@ -258,12 +250,8 @@ class PCAP_CT(EngineBase['RawFrame']):
                 backstop for that path.
 
         """
-        # NOTE: the probe comes *before* ``import pcap``, and the order is
-        # load-bearing rather than stylistic. A bare ``import pcap`` here would
-        # raise ``OSError: Cannot find libpcap.so library`` on a host with no
-        # system libpcap, escaping both this constructor and ``Extractor``'s
-        # import test; ``probe`` performs the same import with that failure
-        # caught, so the check below can report it as a reason instead.
+        # NOTE: probe before ``import pcap``: a bare import raises ``OSError`` on a host without
+        # libpcap, escaping ``Extractor``'s import test; ``probe`` reports it as a reason.
         self._backend = _pcap_backend.probe()
 
         collision = _pcap_backend.collision_reason(self._backend)
@@ -389,12 +377,8 @@ class PCAP_CT(EngineBase['RawFrame']):
             warn("'Extractor(engine=pcap_ct)' object does not support flow tracing; "
                  f"so 'tcp={ext._tcp}' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
-        # NOTE: ``promisc=False`` is defensive only -- the offline branch of
-        # ``pcap.pcap`` ignores it, but ``pcap-ct`` falls through to opening the
-        # name as a live device when ``pcap_open_offline`` fails, and we do not
-        # want that attempt to request promiscuous mode. (That fallback is also
-        # why a bad path surfaces as ``OSError: ... No such device exists``,
-        # which is what the ``os.path.isfile`` check above pre-empts.)
+        # NOTE: ``promisc=False`` is defensive: ``pcap-ct`` falls back to a live device when
+        # ``pcap_open_offline`` fails, which must not request promiscuous mode.
         self._handle = self._expkg.pcap(name=ext._ifnm, promisc=False)
         self._dlink = Enum_LinkType.get(self._handle.datalink())
 

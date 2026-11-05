@@ -577,14 +577,10 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     ip, tcp = _carrier(packet)
     if ip is not None and tcp is not None and _has_fixed_header(tcp) and _has_addresses(ip):
 
-        # NOTE: the link type is keyed on ``frame.encap_type`` (``WTAP_ENCAP_*``)
-        # through ``ENCAP_TYPE_TO_LINKTYPE``, and on the root layer's filter name
-        # only when that field is absent: one filter name serves several DLTs, so
-        # it alone gives ``RAW`` for ``rawip6`` and ``NULL`` for ``DLT_LOOP`` (#843).
-        #
-        # A miss raises ``MissingKeyError`` rather than substituting a DLT (#775),
-        # since ``NULL`` and ``RAW`` are real DLTs. The frame layer is found by
-        # name, as ``frame_info`` is ``pkt_comment`` on a commented packet.
+        # NOTE: keyed on ``frame.encap_type``, the filter name only as a fallback since
+        # one name serves several DLTs (#843); a miss raises rather than guess (#775).
+
+        # found by name: ``frame_info`` is ``pkt_comment`` on a commented packet
         frame = _frame_layer(packet)
         if frame is None:
             raise ProtocolError(f'{_ENGINE}: packet {packet.number} has no frame layer')

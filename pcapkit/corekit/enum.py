@@ -119,12 +119,8 @@ class EnumLookup:
         _member_map_: 'dict[str, Self]'
         _member_names_: 'list[str]'
         _value2member_map_: 'dict[Any, Self]'
-        # NOTE: deliberately ``Any`` rather than ``type``. Annotating the member
-        # data type precisely makes ``cls._member_type_.__new__(cls, value)``
-        # resolve to ``type.__new__``, which mypy then reads as building a
-        # *class* rather than an instance -- mypy errors for a call that is
-        # correct. Which concrete type it is depends on the Enum base each
-        # subclass picks, so there is nothing more precise to say here anyway.
+        # NOTE: ``Any``, not ``type``, as a precise type makes mypy read
+        # ``cls._member_type_.__new__(cls, value)`` as building a class, not an instance.
         _member_type_: 'Any'
 
     @classmethod
@@ -409,10 +405,8 @@ class EnumLookup:
                                        quiet=True) from None
                 return cls._value2member_map_[default]
         try:
-            # NOTE: GitHub issue #1845. Every ValueError raised in this block is
-            # this method's own lookup miss -- answered with ``default`` below,
-            # or raised as the miss -- so a loud one is quiet here, whoever
-            # constructed it.
+            # NOTE: Every ValueError raised here is this method's own lookup miss, so a loud
+            # one is quiet here, whoever constructed it (#1845).
             with CaughtByCaller(ValueError):
                 cls._validate_value(key)
                 return cls(key)  # type: ignore[call-arg]

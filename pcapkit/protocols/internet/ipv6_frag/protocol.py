@@ -161,12 +161,8 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             length = len(self)
         schema = self.__header__
 
-        # NOTE: The on-wire Fragment Offset is a 13-bit count of 8-octet units
-        # (:rfc:`8200#section-4.5`), but ``Data_IPv6_Frag.offset`` carries octets
-        # so that it matches ``Data_IPv4.offset`` and can be handed straight to
-        # the reassembly machinery, which indexes the datagram buffer with it
-        # (:meth:`pcapkit.foundation.reassembly.ip.IP.reassembly`). Scale here,
-        # exactly as :meth:`pcapkit.protocols.internet.ipv4.protocol.IPv4.read` does.
+        # NOTE: Scaled from 8-octet units to octets, as ``IPv4.read`` does, so reassembly can
+        # index the datagram buffer with ``offset`` directly.
         ipv6_frag = Data_IPv6_Frag(
             next=schema.next,
             reserved_octet=schema.reserved,
@@ -311,9 +307,8 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
         # NOTE: A capture cut before the octet read none of it (#1458).
         reserved_octet = cls._fill_short_read(getattr(data, 'reserved_octet', b'\x00'),
                                               size=1, model=data, field='reserved')
-        # NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while
-        # ``data.offset`` is in octets (see :meth:`read`), so scale back down to
-        # keep the data-to-schema round trip exact.
+        # NOTE: ``make`` takes ``offset`` in 8-octet units but ``data.offset`` is in octets (see
+        # :meth:`read`), so scale it down for an exact data-to-schema round trip.
         return {
             'next': data.next,
             'reserved_octet': reserved_octet,

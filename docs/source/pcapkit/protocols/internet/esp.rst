@@ -23,10 +23,9 @@ ESP - Encapsulating Security Payload
    :class:`pcapkit.const.esp.integrity.Integrity` instead (:issue:`2534`).
 
 :mod:`pcapkit.protocols.internet.esp.protocol` contains
-:class:`~pcapkit.protocols.internet.esp.protocol.ESP`,
-which implements the extractor for Encapsulating
-Security Payload (ESP) [*]_, and the security association, algorithm and
-status types documented below. The ESP structure is described as below:
+:class:`~pcapkit.protocols.internet.esp.protocol.ESP`, the extractor for
+Encapsulating Security Payload (ESP) [*]_, and the security association,
+algorithm and status types below. The ESP structure:
 
 ======= ========= ===================== ==============================================
 Octets      Bits        Name                    Description
@@ -40,20 +39,18 @@ Octets      Bits        Name                    Description
   ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)
 ======= ========= ===================== ==============================================
 
-ESP is **not** self describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``
-fields *inside* the ciphertext, and leaves the length of the ``Integrity
-Check Value`` to be determined by the Security Association (SA), which is
-negotiated out of band. Therefore:
+ESP is **not** self describing: :rfc:`4303` puts ``Pad Length`` and ``Next Header``
+*inside* the ciphertext, and leaves the ``Integrity Check Value``'s length to the
+Security Association (SA), negotiated out of band. So:
 
 * **Without** SA context, :class:`~pcapkit.protocols.internet.esp.protocol.ESP`
-  parses the ``SPI`` and ``Sequence Number``, reports the remainder as an
-  opaque encrypted payload, and says so through
-  :attr:`esp.status <pcapkit.protocols.internet.esp.data.ESP.status>`.
-  It does *not* guess at the trailer, and it does not raise.
-* **With** SA context, :class:`~pcapkit.protocols.internet.esp.protocol.ESP` splits
-  off the ICV, verifies integrity, decrypts, strips the padding using
-  ``Pad Length``, and dispatches the recovered plaintext to the next layer
-  using ``Next Header`` -- so an ESP tunnelled TCP segment decodes as TCP.
+  parses the ``SPI`` and ``Sequence Number`` and reports the rest as an opaque
+  encrypted payload, saying so through
+  :attr:`esp.status <pcapkit.protocols.internet.esp.data.ESP.status>`. It
+  neither guesses at the trailer nor raises.
+* **With** SA context, it splits off the ICV, verifies integrity, decrypts,
+  strips the padding by ``Pad Length``, and dispatches the plaintext on
+  ``Next Header`` -- so an ESP-tunnelled TCP segment decodes as TCP.
 
 .. versionadded:: 1.5.0
 
@@ -81,8 +78,8 @@ negotiated out of band. Therefore:
 Security Associations
 ---------------------
 
-SA context is supplied through the generic, protocol keyed context channel
-in :mod:`pcapkit.corekit.context`:
+SA context is supplied through the protocol-keyed context channel of
+:mod:`pcapkit.corekit.context`:
 
 .. code-block:: python
 
@@ -134,23 +131,21 @@ in :mod:`pcapkit.corekit.context`:
 Algorithm Registries
 --------------------
 
-ESP has no algorithm registry of its own -- an SA's algorithms are negotiated
-by IKEv2 -- so :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` and
-:class:`Integrity <pcapkit.const.esp.integrity.Integrity>` are generated from
-the IKEv2 *transform ID* sub-registries and enumerate everything **IANA has
+ESP has no algorithm registry of its own -- IKEv2 negotiates an SA's
+algorithms -- so :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` and
+:class:`Integrity <pcapkit.const.esp.integrity.Integrity>` are generated into
+:mod:`pcapkit.const.esp` from the IKEv2 *transform ID* sub-registries, and
+re-exported from this module. They enumerate everything **IANA has
 registered**: 3DES, AES-CTR, the AES-CCM and Camellia families,
 ChaCha20-Poly1305, the implicit IV variants of :rfc:`8750`, the :rfc:`9227`
 MGM suites, and the transforms long since deprecated.
 
-Both enumerations are generated into :mod:`pcapkit.const.esp` and re-exported
-from this module.
-
-Both enumerations additionally carry each transform's prefix-stripped spelling
-as an alias, since that is how ESP and :rfc:`8221` name the algorithms, so
+Each also carries a transform's prefix-stripped spelling as an alias, as ESP
+and :rfc:`8221` name the algorithms, so
 :attr:`Cipher.AES_CBC <pcapkit.const.esp.cipher.Cipher.AES_CBC>` and
 :attr:`Cipher.ENCR_AES_CBC <pcapkit.const.esp.cipher.Cipher.ENCR_AES_CBC>`
-are the same member. The registry spells the "no integrity algorithm"
-transform ``NONE`` rather than ``AUTH_NONE``, and :attr:`Integrity.NONE
+are one member. The registry spells "no integrity algorithm" ``NONE``, not
+``AUTH_NONE``, and :attr:`Integrity.NONE
 <pcapkit.const.esp.integrity.Integrity.NONE>` follows it.
 
 .. _esp-algorithm-support:
@@ -158,10 +153,8 @@ transform ``NONE`` rather than ``AUTH_NONE``, and :attr:`Integrity.NONE
 Algorithm Support
 -----------------
 
-A registry enumerates what IANA assigned an ID to, which is far more than
-:mod:`pcapkit` implements. **Registration is not support.** A member of either
-enumeration says only that IANA assigned the transform an ID; what
-:mod:`pcapkit` can actually apply is the separate, explicit
+**Registration is not support.** A member of either enumeration says only that
+IANA assigned the transform an ID; what :mod:`pcapkit` can apply is the separate
 :data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` and
 :data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` tables, and
 :meth:`CipherSuite.get <pcapkit.protocols.internet.esp.protocol.CipherSuite.get>` /
@@ -179,16 +172,15 @@ refuse anything outside them rather than half-working:
    algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
    ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
 
-Decryption requires the optional |cryptography|_ dependency
-(``pip install pypcapkit[crypto]``). :mod:`pcapkit` imports and works
-without it; an SA that names an AES suite simply degrades to the opaque
-payload path, with a warning.
+An AES suite needs the optional |cryptography|_ dependency
+(``pip install pypcapkit[crypto]``). :mod:`pcapkit` works without it; an SA
+naming such a suite then warns and leaves its payloads opaque.
 
-The supported set is anchored on the *mandatory to implement* algorithms of
-:rfc:`8221`. The tables below are the authority on what an SA may actually
-name; the rows marked ``yes`` are exactly the keys of
-:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES`, and everything else the
-registry lists is enumerated and rejected.
+The supported set is anchored on :rfc:`8221`'s *mandatory to implement*
+algorithms. The tables below are the authority on what an SA may name: the rows
+marked ``yes`` are exactly the keys of
+:data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES`, and everything else
+the registry lists is enumerated and rejected.
 
 ============================ =================== ============ ==================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
@@ -226,10 +218,10 @@ MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, delibe
 "MD5, DES-MAC, KPDK-MD5" above covers ``AUTH_HMAC_MD5_96``,
 ``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``.
 
-Each implemented suite applies its algorithm with the parameters below, as
+The implemented suites' parameters, as
 :data:`~pcapkit.protocols.internet.esp.protocol.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` record them. Lengths
-and sizes are in octets.
+:data:`~pcapkit.protocols.internet.esp.protocol.INTEGRITY_SUITES` record them, with
+lengths and sizes in octets:
 
 ========================== =========== ============== ============== ============== ============== =============== =========================
 Encryption                 ``is_aead`` ``iv_length``  ``block_size`` ``icv_length`` ``key_sizes``  ``salt_length`` ``requires_cryptography``
@@ -271,18 +263,17 @@ Known Limitations
 -----------------
 
 * **Extended Sequence Numbers (ESN,** :rfc:`4303` **§2.2.1) are not
-  supported.** The high-order 32 bits of an ESN are not transmitted, and a
-  stateless parser cannot recover them; they are required both for the ICV
-  computation and for the AEAD associated data. An ESN protected packet
-  therefore fails the integrity check *cleanly* rather than being decoded.
-* **Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.**
-  TFC padding is indistinguishable from real payload without inspecting the
-  inner protocol's own length field, so it is handed to the next layer as
-  part of the plaintext.
+  supported.** An ESN's high-order 32 bits are not transmitted, so a stateless
+  parser cannot recover them for the ICV or the AEAD associated data; an
+  ESN-protected packet fails the integrity check *cleanly* rather than being
+  decoded.
+* **Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.** It
+  cannot be told from real payload without the inner protocol's own length
+  field, so the next layer gets it as plaintext.
 * **Anti-replay is not performed.** :mod:`pcapkit` is an analyser, not a
   receiver; the sequence number is reported, never checked.
-* The ICV is *verified* but a failure is reported rather than raised, so
-  that one bad packet does not abort a capture.
+* An ICV failure is reported rather than raised, so one bad packet does not
+  abort a capture.
 
 Processing Status
 -----------------

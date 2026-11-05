@@ -406,12 +406,8 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         """
         import pathlib
 
-        # NOTE: the class statement names EnumRegistry and the first method after
-        # the enumeration block is a classmethod, because
-        # get/get_all/register/register_alias live on
-        # pcapkit.corekit.enum.EnumRegistry (#775's tier 2), not on these
-        # templates -- no generated `@staticmethod get` closes the block,
-        # leaving `_missing_` next.
+        # NOTE: the lookup methods live on pcapkit.corekit.enum.EnumRegistry (#775's
+        # tier 2), so the first method after the enumeration block is ``_missing_``.
         block = re.compile(
             r'class \w+\(EnumRegistry, IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @classmethod',
             re.S)

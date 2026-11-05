@@ -255,13 +255,8 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         token = field_module._zero_pad_ledger.set(None)
         self.addCleanup(field_module._zero_pad_ledger.reset, token)
 
-        # NOTE: deliberately *not* read off the module. The behavioural tests
-        # below have to fail on their assertions when the budget is absent, not
-        # on an :exc:`AttributeError` raised here before any of them runs -- a
-        # setup that reaches for a name absent without the fix turns every
-        # case in the class into the same uninformative error and proves nothing
-        # about behaviour. Only the two cases that exist to pin the constants
-        # themselves name them.
+        # NOTE: not read off the module, so that without the fix the tests below fail
+        # on their assertions rather than all on one AttributeError raised here.
         self.unconditional = 65536
 
     def pad_until_refused(self, declared: int, supplied: bytes,

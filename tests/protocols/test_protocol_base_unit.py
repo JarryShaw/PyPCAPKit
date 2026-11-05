@@ -52,13 +52,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             def length(self) -> int:
                 return 2
 
-            # NOTE: ``value`` and ``next_protocol`` are declared parameters rather
-            # than names read out of ``**kwargs``, and ``make`` declares the
-            # un-prefixed parse limits, because a construction keyword no signature
-            # declares is refused rather than dropped (#617). Both spellings are
-            # faithful to what the library does -- ``IPv4.make`` really does take a
-            # ``protocol`` -- and declaring them is the pattern #617 asks for, as
-            # against naming them in ``__keywords__``.
+            # NOTE: an undeclared construction keyword is refused (#617), so these are declared
+            # parameters, as ``IPv4.make`` declares ``protocol``, rather than ``__keywords__`` names.
             def read(self, length: int | None = None, *, value: int = 0,
                      next_protocol: object = None, **kwargs: object) -> DummyData:
                 data = DummyData(value=value)

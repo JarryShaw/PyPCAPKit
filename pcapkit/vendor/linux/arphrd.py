@@ -22,20 +22,8 @@ if TYPE_CHECKING:
 __all__ = ['ARPHRD']
 
 ###############################################################################
-# NOTE: this crawler does not crawl. Its source is the Linux kernel header
-# ``<linux/if_arp.h>``, which assigns ``ARPHRD_*`` values in C source under the
-# kernel's own versioning, not an IANA or IETF table :mod:`pcapkit.vendor` could
-# scrape. Per the const-vendor-pairing convention, a hand-maintained registry
-# still gets a crawler, reading :data:`~pcapkit.vendor.linux.arphrd.DATA`
-# instead of fetching a URL -- the same shape as
-# :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.
-#
-# pcapkit names only the ``ARPHRD_*`` values its Linux "cooked" capture
-# dissector (:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL`) actually
-# matches on, not every value the header defines. The rest of the ARP
-# hardware-type numbering is IANA's own
-# (:class:`~pcapkit.const.arp.hardware.Hardware`), which differs for most
-# non-Ethernet types.
+# NOTE: reads the hand-maintained :data:`~pcapkit.vendor.linux.arphrd.DATA`, as ``<linux/if_arp.h>``
+# is no scrapable table; it names only the values ``LinuxSLL`` matches on.
 ###############################################################################
 
 #: ARPHRD hardware-type registry, transcribed from ``<linux/if_arp.h>`` for the

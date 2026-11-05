@@ -58,7 +58,7 @@ concurrency:
 #
 #   * An ``environment:`` naming one that does not exist is created implicitly,
 #     with no protection rules, and the job proceeds unapproved -- as
-#     ``github-pages`` has, with ``"protection_rules": []``, since 2021. So
+#     ``github-pages`` has, with ``"protection_rules": []``. So
 #     ``github-release`` needs creating under Settings -> Environments with a
 #     required reviewer.
 #   * Leave each one's "Deployment branches and tags" at "No restriction": a

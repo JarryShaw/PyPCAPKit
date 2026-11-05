@@ -353,9 +353,8 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     if strict:
         raise UnsupportedCall(f'{cls.__name__}: unexpected keyword(s): {listed}')
 
-    # NOTE: A warning, not an error: ``_make_data`` generated these keys, so the
-    # caller cannot fix them, and raising would break ``from_data`` outright.
-    # The default ``stacklevel`` blames the ``from_data`` call, outside pcapkit.
+    # NOTE: A warning, not an error: the caller cannot fix keys ``_make_data`` generated, and
+    # raising would break ``from_data``; the default ``stacklevel`` blames that call.
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
          UnknownFieldWarning)
@@ -957,9 +956,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         elif cast('Optional[_ST]', self.__header__) is None:
             self.__header__ = cast('_ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         elif self._make_raw and _holds_raw(self.__header__):
-            # NOTE: A schema may accept octets that :meth:`read` then rejects,
-            # e.g. an option whose length runs past the option area, so the
-            # read is covered too (#1394).
+            # NOTE: A schema may accept octets :meth:`read` rejects, e.g. an option
+            # overrunning the option area, so the read is covered too (#1394).
             try:
                 parsed = cast('_ST', type(self.__header__).unpack(io.BytesIO(self._data), length, packet))  # type: ignore[call-arg,misc]
                 if _raw_where_parsed(self.__header__, parsed):
@@ -1236,9 +1234,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         if incumbent is not None:
             incumbent_repr, protocol_repr = repr(incumbent), repr(protocol)
             if incumbent_repr == protocol_repr:
-                # NOTE: #710: two distinct classes whose repr() -- module plus
-                # qualname -- coincide, e.g. a factory building a fresh class of
-                # the same name on every call; id() is what tells them apart.
+                # NOTE: #710: distinct classes can share a repr(), e.g. a factory's
+                # fresh class of one name per call; id() tells them apart.
                 incumbent_repr = f'{incumbent_repr} (id={id(incumbent):#x})'
                 protocol_repr = f'{protocol_repr} (id={id(protocol):#x})'
             warn(f'protocol {name} already registered, overwriting {incumbent_repr} '
@@ -1501,16 +1498,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         #: bool: Whether to stop parsing the next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
-        # NOTE: ``_import_next_layer`` passes the outer context as ``packet=``; the schema
-        # reads ``__packet__``, e.g. the IPv6 addresses HOPOPT MPL and RPL need (GH-382).
-        # A copy, since ``Schema.unpack`` writes into it and the IPv6 extension header
-        # walk hands one dict to each header in turn, which would leak stale fields.
+        # NOTE: ``packet=`` from ``_import_next_layer`` reaches the schema as ``__packet__`` (GH-382),
+        # copied since ``Schema.unpack`` writes into it and IPv6 extension headers share one dict.
         if parsing and '__packet__' not in kwargs and isinstance(kwargs.get('packet'), dict):
             kwargs['__packet__'] = dict(kwargs['packet'])
 
-        # NOTE: Construction only: every ``make`` ends in ``**kwargs``, so a misspelt field
-        # (``seq`` for ``seq_no``) would keep its default silently (#617). Parse keywords,
-        # whatever the engines forward, go unchecked: dropping one changes no octet.
+        # NOTE: Construction only: every ``make`` ends in ``**kwargs``, so a misspelt field would
+        # keep its default silently (#617). Parse keywords go unchecked: dropping one changes no octet.
         if not parsing:
             _check_construction_keywords(
                 type(self), kwargs, strict=not self.__reconstructing__)
@@ -1549,9 +1543,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         if file is None:
             _data = self.pack(**kwargs)
-            # NOTE: A header rebuilt from a short read holds only what was captured, parsed
-            # back at the width ``from_data`` passes, not read from what ``make`` filled in
-            # past the cut (#2703, #2761); a payload ``_make_payload`` rebuilds gives its octets.
+            # NOTE: A short read's header is rebuilt from what was captured, at ``from_data``'s width,
+            # not from ``make``'s fill past the cut (#2703, #2761); a rebuilt payload keeps its octets.
             if self.__short_read__ is not None and not rebuilding.get():
                 self.__header__ = None  # type: ignore[assignment]
         else:
@@ -3137,10 +3130,8 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         """
         super().__init_subclass__(schema, data, code, *args, **kwargs)
 
-        # NOTE: #2763: named once ``code`` is accepted, never over a held name; the
-        # descriptor naming the class itself stays, to be resolved on lookup.
-        # #2784: not inspect.isabstract, which reads __flags__: GraalPy freezes them
-        # at that read, so the abstract flag ABCMeta sets next would never show.
+        # NOTE: #2763: registered after ``code`` is accepted, never over a held name or this class's
+        # own descriptor. #2784: not inspect.isabstract, whose __flags__ read GraalPy freezes early.
         if not isabstract(cls):
             name = cls.__name__.upper()
             incumbent = ProtocolBase.__registry__.setdefault(name, cls)

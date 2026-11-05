@@ -138,18 +138,8 @@ class TLSKeyLabel(Vendor):
         for item in reader:
             label, desc, ref = item[0].strip(), item[1].strip(), item[2].strip()
 
-            # NOTE: fails loudly rather than guessing. A silent fallback to
-            # '9850' here would mis-cite a future row referenced by anything
-            # other than a bare ``[RFCnnnn]``, and blindly appending
-            # ``#section-4.2`` below to whatever number *did* match would
-            # mis-cite a row citing a different RFC entirely -- section 4.2 is
-            # specifically RFC 9850's own "TLS SSLKEYLOGFILE Labels" registry
-            # section, not a fact about any other RFC's structure. All ten
-            # rows fetched on 2026-09-28 are ``[RFC9850]``, so each takes the
-            # ``rfc == '9850'`` branch; a future registry
-            # change either still fits it or raises here for a human to look
-            # at, rather than rendering a citation nobody checked. IANA has
-            # spelt it ``[RFC 9850]`` since 2026-10-13, which fits too (#1664).
+            # NOTE: raise rather than guess a citation; ``#section-4.2`` is RFC 9850's
+            # own registry section, true of no other RFC (#1664).
             match = re.fullmatch(r'\[RFC\s*(\d+)\]', ref)
             if match is None:
                 raise ValueError(
@@ -163,12 +153,8 @@ class TLSKeyLabel(Vendor):
             sufs = self.wrap_comment(f'{desc}, c.f., :rfc:`{rfc}{section}`.')
 
             pref = f"{renm} = '{label}'"
-            # NOTE: mirrors the ``nosec B105`` bandit suppression every
-            # such member carried in the hand-written
-            # ``pcapkit.protocols.misc.pcapng.protocol.TLSKeyLabel`` (#882) --
-            # bandit's B105 (hardcoded password string) flags a string
-            # constant assigned to a name containing ``SECRET``, which most
-            # of these labels' names do.
+            # NOTE: bandit's B105 flags a string assigned to a name containing
+            # ``SECRET``, as most of these labels are (#882).
             if 'SECRET' in label:
                 pref += '  # nosec B105'
 

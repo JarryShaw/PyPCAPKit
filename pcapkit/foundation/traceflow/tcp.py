@@ -113,9 +113,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         <pcapkit.foundation.reassembly.data.tcp.Datagram.packet>` can parse alone.
         Where a sender **pipelines** -- several requests in flight before any reply
         -- they all carry the same acknowledgement number, so they share a bucket
-        and are concatenated after all. Measured: two requests sent back to back
-        on one acknowledgement number come back as a single datagram carrying
-        ``b'req1req2'``, which
+        and are concatenated after all, as
         ``test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`` in
         :file:`tests/foundation/traceflow/test_tcp.py` pins. So this narrows the
         concatenation to within one exchange rather than eliminating it, and an
@@ -384,13 +382,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         if not self._analyse:
             return None
 
-        # NOTE: imported here rather than at module scope. ``traceflow`` and
-        # ``reassembly`` are sibling subpackages and this is the only edge between
-        # them; at module scope it is evaluated while ``pcapkit/__init__`` is still
-        # running, which is the import cycle that already runs through
-        # ``foundation.extraction``. Kept off the per-*packet* path by caching the
-        # segment model here: this runs once per flow, ``_make_segment`` once per
-        # packet.
+        # NOTE: imported here, since at module scope this sibling-subpackage edge joins the
+        # ``foundation.extraction`` import cycle; cached per flow, not per packet.
         from pcapkit.foundation.reassembly.data.tcp import Packet as Reasm_Packet
         from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 

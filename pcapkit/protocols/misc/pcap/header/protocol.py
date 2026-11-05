@@ -168,10 +168,8 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         schema = self.__header__
 
         _magn = schema.magic_number
-        # NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic
-        # number is matched rather than rejected as unhashable. The lookup
-        # cannot miss: ``magic_number_callback`` has already raised for a magic
-        # number this mapping does not hold.
+        # NOTE: looked up as :obj:`bytes`, so a :obj:`bytearray` is not rejected as unhashable;
+        # it cannot miss, as ``magic_number_callback`` has already raised for any not held here.
         self._byte, self._nsec = MAGIC_NUMBER[bytes(_magn)]
 
         header = Data_Header(

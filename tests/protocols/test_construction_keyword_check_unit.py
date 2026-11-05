@@ -138,11 +138,8 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
     class DummySchema(Schema):
         payload: bytes = PayloadField(length=lambda packet: packet['__length__'], default=b'')
 
-    # NOTE: A ``class`` statement rather than a ``type()`` call with a namespace
-    # dict, on both counts: a generic base needs ``__mro_entries__`` resolution
-    # that ``type()`` does not do, and ``read``/``make`` have to be *in* the body
-    # because :class:`abc.ABCMeta` computes ``__abstractmethods__`` at class
-    # creation and assigning them afterwards leaves the class abstract.
+    # NOTE: a ``class`` statement, not ``type()``: a generic base needs ``__mro_entries__``, and
+    # ``ABCMeta`` fixes ``__abstractmethods__`` at creation, so ``read``/``make`` sit in the body.
     class DummyProtocol(Protocol[DummyData, DummySchema],
                         schema=DummySchema, data=DummyData):
         __layer__ = 'Internet'

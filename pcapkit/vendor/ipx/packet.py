@@ -31,43 +31,8 @@ finally:
 __all__ = ['Packet']
 
 ###############################################################################
-# NOTE: this crawler does not crawl: the registry below is maintained by hand;
-# see #518. It is the same failure, on the same article and the same removal
-# revision, that keeps the sibling socket crawler maintained by hand (#507).
-#
-# Its source was the packet-type table in
-# https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure,
-# and two separate things broke that. Wikipedia answers ``requests``'
-# default ``python-requests/<version>`` User-Agent with HTTP 403 (measured
-# 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent, 200
-# and 114117 bytes for a descriptive one). ``Vendor._request`` answers that
-# half by sending the descriptive agent
-# :func:`~pcapkit.vendor.default.get_user_agent` builds -- but that only gets the
-# crawler as far as a page that does not hold the data. The table was deleted
-# from the article on 2026-08-25, in revision 1371327031 ("deleted some
-# irrelevant technical tables"), leaving the live page (revision 1372814585)
-# with a single ``wikitable`` -- the IPX header format one, headers
-# ``['Octets', 'Field']`` -- so that ``find_all('table', class_='wikitable')[1]``
-# raises ``IndexError`` even once the fetch succeeds.
-#
-# Pointing ``LINK`` at the last revision that still carries the table
-# (``oldid=1368657333``, re-measured 2026-09-19: 200, 118834 bytes, 4
-# ``wikitable``s, ``table[1]`` headers ``['Value', 'Meaning/Protocol']``, 8 body
-# rows) would have worked, and scraping it with a table-reading ``process()``
-# reproduces the committed constant file byte for byte. It is still the wrong
-# fix: a network fetch pinned to a frozen snapshot is all of the fragility of a
-# crawler with none of the freshness, and it would go on selecting a table by
-# index out of a document that nothing stops from changing shape again.
-#
-# What settles it is that the registry is closed. IPX packet types were Novell's
-# to assign -- :rfc:`1362`, :rfc:`1551` and :rfc:`1634` all say "Packet Types
-# also need to be assigned by Novell" -- and no Novell remains to assign
-# them. IPX will not gain new packet types, so there is nothing for a
-# crawler to pick up on its next run.
-#
-# The table below is therefore transcribed from that last revision that carried
-# it, row for row, and each entry names the primary source for the assignment
-# where one exists.
+# NOTE: maintained by hand, not crawled (#518, as #507): the Wikipedia table is gone
+# from the live article, and IPX packet types are a closed Novell registry.
 ###############################################################################
 
 #: IPX packet type registry, transcribed from the last revision of the Wikipedia
@@ -88,10 +53,8 @@ __all__ = ['Packet']
 #: from, and -- type 4 apart -- no RFC assigns them. The note on each row below
 #: says which sources do and do not carry its number.
 DATA = {
-    # NOTE: not a protocol assignment. The scraped table listed 0 as "Unknown",
-    # and it doubles as the IPX protocol's own default for the ``type`` field.
-    # Wireshark calls the same value plain ``IPX``. The archived revision is the
-    # only source for the word "Unknown".
+    # NOTE: no protocol assignment but the ``type`` field's default; "Unknown" is
+    # the archived revision's word alone, and Wireshark's is ``IPX``.
     0: ('Unknown', 'Unknown'),
 
     # :rfc:`1582` ("Extensions to RIP to Support Demand Circuits", 1994) and
@@ -111,14 +74,8 @@ DATA = {
     2: ('Echo Packet', 'Echo Packet'),
     3: ('Error Packet', 'Error Packet'),
 
-    # NOTE: the best-sourced row in the table, by a distance. :rfc:`1362`,
-    # :rfc:`1551` and :rfc:`1634` all state "The packets use the IPX defined
-    # packet type 04 defining a Packet Exchange Packet", and tabulate it as
-    # ``| Packet Type | 04 | Packet Exchange Packet |``. :rfc:`1791` adds "UDP
-    # over IPX uses the IPX packet type 4, a normal IPX packet type" and "TCP,
-    # like UDP, uses IPX packet type 4". :rfc:`1132` gives it from the other
-    # side -- "IPX packets may be unicast by setting the IPX header Packet Type
-    # field to 0x04".
+    # NOTE: the best-sourced row: :rfc:`1362`, :rfc:`1551`, :rfc:`1634`, :rfc:`1791`
+    # and :rfc:`1132` all give packet type 4.
     4: ('PEP', '``PEP``, Packet Exchange Protocol, used for SAP (Service Advertising Protocol)'),
 
     # :rfc:`1553` names the protocol -- "The Sequenced Packet Exchange (SPX) is
@@ -132,20 +89,8 @@ DATA = {
     # (0x11) rests on Wireshark and the archived revision.
     17: ('NCP', '``NCP``, NetWare Core Protocol'),
 
-    # NOTE: :rfc:`1132`, "A Standard for the Transmission of 802.2 Packets over
-    # IPX Networks", assigns this one outright: "IPX packets may be broadcast by
-    # setting the IPX header Packet Type field to 0x14" -- 0x14 being 20.
-    # Wireshark calls it ``WANBCAST`` / "NetBIOS Broadcast".
-    #
-    # The archived table rendered the row as ``Broadcast[4]``, where ``[4]`` is
-    # Wikipedia's own footnote marker for its citation of that RFC rather than
-    # any part of the name, and it leaked into the generated member name. Both
-    # the name and the comment are kept verbatim so that regenerating the
-    # constant file stays a no-op against the last scraped output: renaming the
-    # member would break :attr:`pcapkit.const.ipx.packet.Packet.Broadcast_4` for
-    # anyone using it, which is a call for the maintainer rather than for #518.
-    # This is the same artefact, from the same article, as the ``LLC_4`` member
-    # #507 flagged in :mod:`pcapkit.vendor.ipx.socket`.
+    # NOTE: :rfc:`1132` assigns 0x14; ``[4]`` is Wikipedia's footnote marker, kept verbatim,
+    # as renaming :attr:`~pcapkit.const.ipx.packet.Packet.Broadcast_4` breaks it (#518).
     20: ('Broadcast[4]', 'Broadcast[4]'),
 }  # type: dict[int, tuple[str, str]]
 

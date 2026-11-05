@@ -126,10 +126,8 @@ class TestPathEngines(unittest.TestCase):
 
     @unittest.skipUnless(importlib.util.find_spec('pyshark') is not None, 'pyshark is not installed')
     def test_pyshark_refuses_unnamed_stream(self) -> None:
-        # NOTE: PyShark rules itself out on some interpreters (CPython 3.14), and
-        # the extraction would then fall back to the default engine, which reads
-        # the stream perfectly well. Clear that reason so the refusal is what is
-        # under test; it fires before any PyShark code runs.
+        # NOTE: PyShark rules itself out on some interpreters (CPython 3.14), falling
+        # back to the default engine; clearing that reason keeps the refusal under test.
         from pcapkit.foundation.engines.pyshark import PyShark  # pylint: disable=import-outside-toplevel
 
         with mock.patch.object(PyShark, 'unsupported_reason', return_value=None):

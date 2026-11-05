@@ -727,10 +727,8 @@ class Vendor(metaclass=VendorMeta):
         if self.LINK is None:
             return self.request()  # type: ignore[unreachable]
 
-        # NOTE: both branches below send this. Wikimedia rejects ``requests``'
-        # default agent with HTTP 403, so a crawler without it fetches 126 bytes
-        # of robot-policy text and retries MAX_RETRY times against a refusal
-        # that no amount of retrying will lift; see #518.
+        # NOTE: both branches send this, as Wikimedia rejects ``requests``' default
+        # agent with HTTP 403 that no retry lifts (#518).
         headers = {'User-Agent': get_user_agent()}
 
         try:
@@ -806,11 +804,8 @@ class Vendor(metaclass=VendorMeta):
                         try:
                             input('Press ENTER to continue...')  # nosec
                         except Exception as exc:
-                            # NOTE: once ``input()`` fails, this loop would spin at
-                            # full speed (26.7 million lines, 2.6 GB measured in #522).
-                            # The terminal can still go mid-wait: a closed ``stdin``
-                            # raises ``ValueError``, a dropped one ``EOFError``, a
-                            # vanished ``sys.stdin`` ``RuntimeError``.
+                            # NOTE: give up once ``input()`` fails on a closed, dropped or
+                            # vanished stdin, or this spins at full speed (2.6 GB in #522).
                             warn(f'Connection failed; cannot prompt for manual intervene ({exc})...',
                                  VendorRequestWarning, stacklevel=2)
                             raise error from exc

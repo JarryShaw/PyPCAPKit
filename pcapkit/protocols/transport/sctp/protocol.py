@@ -422,11 +422,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_param_addrtypes`
          - :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._make_param_addrtypes`
 
-    This class supports parsing of every error cause defined
-    by :rfc:`9260#section-3.3.10`, which are directly mapped to the
-    :class:`pcapkit.const.sctp.cause_code.CauseCode` enumeration; see
-    :attr:`self.__cause__ <SCTP.__cause__>` for the mapping. Unknown cause
-    codes fall through to
+    It parses every error cause :rfc:`9260#section-3.3.10` defines, by
+    :class:`pcapkit.const.sctp.cause_code.CauseCode` code, as mapped in
+    :attr:`self.__cause__ <SCTP.__cause__>`. Any other code falls through to
     :meth:`~pcapkit.protocols.transport.sctp.protocol.SCTP._read_cause_donone`.
 
     .. versionadded:: 1.5.0

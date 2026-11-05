@@ -327,12 +327,8 @@ class ExportComparisonTests(unittest.TestCase):
             return same_order or not (left in ordered and right in ordered)
 
         def verbatim_ne(one: object, two: object) -> bool:
-            # NOTE: Werkzeug's OrderedMultiDict, kept verbatim in
-            # pcapkit.corekit.multidict (the owner's option 3 on #1484), has no
-            # ``__ne__``, so ``!=`` is dict's and compares the internal buckets.
-            # Python asks it first when it is the left operand, and when it is
-            # the right one of a bare MultiDict, which overrides nothing either;
-            # no code outside that module is then consulted.
+            # NOTE: the verbatim Werkzeug OrderedMultiDict (#1484) has no ``__ne__``, so
+            # where Python asks it first, as below, ``!=`` is dict's bucket comparison.
             return type(one) is OrderedMultiDict or (type(one) is MultiDict and type(two) is OrderedMultiDict)
 
         for (left, make_left), (right, make_right) in itertools.product(kinds.items(), repeat=2):
@@ -408,9 +404,8 @@ class InfoFinalisationTests(unittest.TestCase):
         exported = info.to_dict()
         self.assertIs(type(exported), _OrderedMultiDict)
         self.assertIsInstance(exported, OrderedMultiDict)
-        # NOTE: The order across keys is that of the Info's own keys, which is
-        # not part of its contract and differs on PyPy (#2003); the values of
-        # one key keep theirs.
+        # NOTE: the order across keys is the Info's own, which is not contract and differs
+        # on PyPy (#2003); the values of one key keep theirs.
         self.assertEqual(sorted(key for key, _ in exported.items(multi=True)), ['grouped', 'nested', 'nested', 'ordered'])
         self.assertEqual({key: [type(value) for value in exported.getlist(key)] for key in exported},
                          {'nested': [_OrderedMultiDict, _OrderedMultiDict], 'ordered': [_OrderedMultiDict],

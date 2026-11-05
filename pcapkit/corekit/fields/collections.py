@@ -247,33 +247,8 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         if self._item_type is None:
             return file.read(length)
 
-        # NOTE: ``SchemaField`` is imported at module level rather than inside
-        # this method body -- there is no cyclic import to dodge by doing so;
-        # :mod:`pcapkit.corekit.fields.misc` does not import this module. A local
-        # ``from ... import`` re-resolves against :data:`sys.modules` on *every*
-        # call, and normally that is a cheap dict lookup returning the same
-        # cached module -- except when something has popped
-        # :mod:`pcapkit.corekit.fields.misc` out of :data:`sys.modules` since
-        # this ``ListField`` was built (the ``#439`` regression tests do exactly
-        # that, to get a clean ABC-cache state between cases). The next call
-        # would then re-execute the module from scratch and mint a *second*,
-        # distinct ``SchemaField`` class, while ``self._item_type`` -- built long
-        # before, from the first one -- is still an instance of the original.
-        # ``isinstance`` against the new class would report :data:`False` for an
-        # item that plainly is a ``SchemaField``, ``is_schema`` would go the
-        # wrong way, and the item loop's other branch would bill each item by its
-        # *declared* length instead of by what it actually consumed -- so a
-        # malformed TCP SACK option's length check could raise
-        # :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead
-        # of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
-        # :meth:`TCP._read_mode_sack
-        # <pcapkit.protocols.transport.tcp.protocol.TCP._read_mode_sack>`, depending on
-        # unrelated things that ran earlier in the same process. Cf. #525.
-        # Importing at module level, once, for the life of this module object,
-        # closes that off: ``SchemaField`` then stays whatever class this
-        # module resolved at its own import time, regardless of what happens to
-        # :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`
-        # afterwards.
+        # NOTE: ``SchemaField`` is imported at module level: a re-executed ``misc`` (as the #439 tests
+        # force) would mint a second class this ``isinstance`` misses, mis-sizing items (#525).
         is_schema = isinstance(self._item_type, SchemaField)
         if length > 0:
             start = file.tell()
@@ -317,22 +292,8 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         length = self._length
         item_type = cast('FieldBase', self._item_type)
 
-        # NOTE: The item-typed branch below sizes each item by ``field.length``,
-        # which is what it read, but the schema branch sizes it by ``len(data)``,
-        # which is only what the schema *recorded*. A schema that reads nothing
-        # records nothing, so ``length -= len(data)`` makes no progress and the
-        # loop spins forever. The zero-fill in ``unpack`` gives the item the data
-        # ends inside octets to read, and every item before it reads octets of the
-        # data, but an item schema may still consume none of them. Remembering where the
-        # previous item ended is what bounds the iteration count, since it does
-        # not depend on what the schema reports. Cf. #431, which is the same
-        # defect in the ``OptionField`` subclass.
-        #
-        # ``start`` is where the field itself begins. The comparison needs stream
-        # positions, but the diagnostic wants an offset into the field, and the two
-        # only coincide when the field happens to be reading from the front of its
-        # stream -- which it does when handed a :obj:`bytes` buffer and does not
-        # when handed a live file.
+        # NOTE: A schema item that reads nothing records ``len(data) == 0`` and would spin forever, so
+        # progress is measured by stream position (#431); ``start`` turns positions into field offsets.
         start = offset = file.tell()
 
         temp = []  # type: list[_TL]
@@ -358,12 +319,8 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
                 end = file.tell()
                 if end <= offset:
-                    # NOTE: ``len(temp)`` counts the items already parsed, so it
-                    # names the failing one as a count rather than as an ordinal --
-                    # "after 2 item(s)" rather than "item 2", which would read as
-                    # the second item when it is the third. The ``OptionField``
-                    # message below names the option code in this slot and so has
-                    # no index to be read either way.
+                    # NOTE: ``len(temp)`` counts items already parsed, so it reads "after N item(s)",
+                    # not an ordinal that would be off by one.
                     raise FieldValueError(
                         f'Field {self.name} has an item that consumed no data: '
                         f'after {len(temp)} item(s), at offset {offset - start} of '
@@ -483,22 +440,8 @@ class OptionField(ListField, Generic[_TS]):
             raise FieldValueError('Field <option> has no registry.')
         self._registry = registry
 
-        # NOTE: Decided once, here, rather than per option in ``unpack``. See the
-        # docstring above for what the fast path requires and why a base schema
-        # that does not meet it is accommodated rather than rejected.
-        #
-        # The conditions above are exactly what makes reading the type field alone
-        # the same read that ``Schema.unpack`` performs for it: it must sit at the
-        # front of the option, ``Schema.unpack`` must handle it through its generic
-        # branch rather than one of the special ones (a ``NumberField`` is never
-        # ``PayloadField``, ``PaddingField``, ``ConditionalField``,
-        # ``ForwardMatchField``, ``SwitchField`` or ``OptionField``), and its width
-        # must not depend on packet state that the full unpack would have
-        # established first.
-        #
-        # Every test is written so that an unexpected base schema selects the full
-        # unpack instead of raising, so this cannot turn a working registration
-        # into an import-time failure.
+        # NOTE: Decided once here (see the docstring); each test falls back to the full unpack rather than
+        # raising, so an unexpected base schema cannot turn a registration into an import-time failure.
         fields = getattr(self._base_schema, '__fields__', {})
         type_field = fields.get(type_name)
 
@@ -570,28 +513,8 @@ class OptionField(ListField, Generic[_TS]):
         else:
             file = buffer
 
-        # NOTE: The loop below sizes each option by ``len(data)`` -- the size of
-        # the schema the option reported -- and that is not always the number of
-        # octets the option took from ``file``. The two part company for a schema
-        # whose ``post_process`` returns a *nested* schema, since ``len(data)``
-        # then measures the nested schema rather than what the outer one read. So
-        # ``len(data)`` cannot be the loop's progress measure: an option that
-        # over-reads leaves ``length`` above zero with ``file`` already exhausted,
-        # every field of the next option reads ``b''``, and an option that read
-        # nothing reports ``len(data) == 0`` and leaves ``length`` untouched --
-        # which spins forever, with no exception and no diagnostic. Cf. #431.
-        #
-        # Remembering where the previous option ended gives the loop a measure of
-        # progress that does not depend on what a schema reports, and one octet of
-        # it per iteration is what bounds the iteration count. ``length`` is
-        # decremented by ``len(data)`` as well, so the guard changes nothing for
-        # an option area that parses.
-        #
-        # ``start`` is where the option area itself begins. The comparison needs
-        # stream positions, but the diagnostic wants an offset into the area, and
-        # the two only coincide when the field happens to be reading from the front
-        # of its stream -- which it does when handed a :obj:`bytes` buffer and does
-        # not when handed a live file.
+        # NOTE: ``len(data)`` measures the reported schema, not the octets read, so an option reading
+        # nothing would spin forever; stream position bounds the loop (#431), ``start`` maps it to offsets.
         start = offset = file.tell()
 
         # make a copy of the ``packet`` dict so that we can include
@@ -599,49 +522,12 @@ class OptionField(ListField, Generic[_TS]):
         new_packet = packet.copy()
         new_packet[self.name] = OrderedMultiDict()
 
-        # NOTE: Where it can, this reads the base schema's type field alone rather
-        # than the whole base schema. The option schema below re-reads the same
-        # octets from the rewound stream, and the base schema's result is used for
-        # nothing but the type code, so unpacking it in full parses every option
-        # twice -- 2274 schema unpacks for 1137 options of
-        # ``examples/captures/profile.pcapng``.
-        #
-        # Reading the type field alone deliberately mirrors what
-        # :meth:`Schema.unpack <pcapkit.protocols.schema.Schema.unpack>`
-        # does for one field -- ``field(packet)``, read ``field.length`` octets,
-        # then ``field.unpack(byte, packet.copy())`` -- rather than reaching for
-        # :func:`struct.unpack`. That keeps ``code``'s enumeration type, which both
-        # the ``self._eool`` comparison and the ``OrderedMultiDict`` key depend on,
-        # and it is what makes the two spellings equivalent rather than merely
-        # similar.
-        #
-        # ``self._type_field`` is :data:`None` for a base schema that the shortcut
-        # does not fit -- see the class docstring -- and the full unpack is used
-        # for it instead. Whichever way the code was read, ``consumed`` is the
-        # number of octets to rewind to get back to the front of the option.
+        # NOTE: Reads only the type field, as ``Schema.unpack`` reads it, so no option is parsed twice and
+        # ``code`` keeps its enum type; a None ``_type_field`` falls back to the full unpack.
         type_field = self._type_field
 
-        # NOTE: An option whose declared length runs past the octets behind it
-        # reads short, and every field reading off the end pads the missing
-        # octets with zeros, so the option would rebuild octets that were never
-        # there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH
-        # ``PadN`` declaring 3 with none. Nothing downstream can tell, because
-        # the schema records the zeros as values. Cf. #1325.
-        #
-        # So the stream is read through a proxy that notes any short read, and
-        # an option that began with at least one octet present and then read
-        # short is rejected. An option that begins at the end of the data reads
-        # nothing at all and is left to the end-of-option-list and progress
-        # handling below, which is what an option area declared longer than its
-        # octets relies on.
-        #
-        # Unless the data ends inside the area: fewer octets are left than it
-        # declares, as a capture cut short leaves them. An option the cut lands
-        # inside, or in front of, is not one running past its area, and is read
-        # as the short read :meth:`Schema.unpack` records (#2694). An enclosing
-        # layer that knows the data ends at the length it declares, not at a cut,
-        # says so with ``__capture_cut__`` false in ``packet``, and the area then
-        # runs past that length.
+        # NOTE: An option reading short past its octets would rebuild zeros as values, so it is rejected
+        # (#1325) unless a capture cut ends the data inside the area, read as a short read (#2694).
         if isinstance(buffer, bytes):
             present = len(buffer)
         else:
@@ -671,12 +557,8 @@ class OptionField(ListField, Generic[_TS]):
                 code = field.unpack(byte, packet.copy())
                 consumed = len(byte)
 
-            # NOTE: The data ends where this option would begin, inside the area: the
-            # cut leaves no option to read, so the list ends with the data, and
-            # :meth:`Schema.unpack` records the cut from the rest of the area left
-            # as ``option_padding`` (#2694). Where no cut ends it, the area runs
-            # past the data. A registry whose end-of-option-list code is 0 reads its
-            # exhausted type as that code, and stops at it below.
+            # NOTE: A cut where this option would begin ends the list, the rest left as ``option_padding``
+            # (#2694); with no cut the area runs past the data, and a 0 end-of-list code stops below.
             if not consumed and short and code != self._eool:
                 if cut:
                     break
@@ -692,10 +574,8 @@ class OptionField(ListField, Generic[_TS]):
             # unpack option using option schema
             data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
 
-            # NOTE: An option the cut lands inside stands when the fields it
-            # declares fit the area, as ``__length__`` left at zero or more shows,
-            # and it read the octets there (#2694). One whose fields reach past
-            # the area runs past both (#1325).
+            # NOTE: An option the cut lands inside stands if its fields fit the area (``__length__`` >= 0)
+            # and it read octets there (#2694); one reaching past the area runs past both (#1325).
             stands = (cut and packet['__length__'] >= 0 and file.tell() > offset
                       and self._accepts_cut(data))
             if tracker.short and consumed > 0 and not stands and not self._accepts_short_read(data):
@@ -715,23 +595,8 @@ class OptionField(ListField, Generic[_TS]):
             if code == self._eool:
                 break
 
-            # NOTE: The progress check comes *after* the end-of-option-list break,
-            # and that order is not incidental. An area declared longer than the
-            # octets behind it -- an over-long ``ihl``, or a capture cut short by
-            # the snapshot length -- exhausts ``file`` early, and the exhausted
-            # read then decodes the type field as 0. For the IPv4, TCP and PCAP-NG
-            # registries 0 *is* the end-of-option-list code, so the break above
-            # absorbs that case and reports the rest of the area as padding.
-            # Checking progress first would turn all of those into errors: measured
-            # on ``IPv4(bytes.fromhex('4a00001800010000400600000a0000010a000002'))``,
-            # 20 octets of options declared with none present, and on a TCP segment
-            # with a data offset of 10 and four option octets, both of which parse.
-            #
-            # The registries that spin are the ones where 0 is *not* the
-            # end-of-option-list code, so they never reach the break: HOPOPT,
-            # IPv6-Opts and MH read 0 as ``Pad1``, HIP as an unassigned parameter,
-            # SCTP as a DATA chunk. Those are what this guards, and one octet of
-            # measured progress per surviving iteration is what bounds the loop.
+            # NOTE: Checked after the end-of-list break, where an exhausted read decoding as a 0 end code ends
+            # as padding; registries whose 0 is not that code (e.g. HOPOPT ``Pad1``) would otherwise spin.
             end = file.tell()
             if end <= offset:
                 raise FieldValueError(

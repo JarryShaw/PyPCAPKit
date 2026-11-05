@@ -1,48 +1,31 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #2411: the ESP read path and one warning missed the ``ESP:`` prefix.
 
-#2366 (fixing #2297) put the house ``ESP: <lowercase description>`` prefix on
-:meth:`ESP.make <pcapkit.protocols.internet.esp.protocol.ESP.make>`'s
-:exc:`~pcapkit.utilities.exceptions.ProtocolError` messages and on
+#2366 prefixed the :exc:`~pcapkit.utilities.exceptions.ProtocolError` messages of
+:meth:`ESP.make <pcapkit.protocols.internet.esp.protocol.ESP.make>` and
 :meth:`SecurityAssociation.unavailable
-<pcapkit.protocols.internet.esp.protocol.SecurityAssociation.unavailable>`, but eight
-sites were outside its checklist and kept the bare wording -- so the *same*
-condition read two different ways depending on which direction it was hit from
-(``ESP: no security association for SPI 0x...`` from ``make``, and
-``no security association for SPI 0x...`` from ``read``).
+<pcapkit.protocols.internet.esp.protocol.SecurityAssociation.unavailable>` but not
+these, so the same condition read two ways depending on direction:
 
-The eight, as #2411 enumerates them:
-
-* three diagnostics returned by :meth:`ESP._read_trailer
-  <pcapkit.protocols.internet.esp.protocol.ESP._read_trailer>` -- the one for a
-  plaintext too short to hold a trailer, the one for a pad length the
-  plaintext cannot hold, and the padding-pattern one, which is both returned
-  and warned with (:class:`ReadTrailerMessages`);
-* four built inline in :meth:`ESP.read
+* the diagnostics :meth:`ESP._read_trailer
+  <pcapkit.protocols.internet.esp.protocol.ESP._read_trailer>` returns, one of
+  them also warned (:class:`ReadTrailerMessages`);
+* those built inline in :meth:`ESP.read
   <pcapkit.protocols.internet.esp.protocol.ESP.read>` and surfaced as
   :attr:`esp.error <pcapkit.protocols.internet.esp.data.ESP.error>`
   (:class:`ReadErrorMessages`);
 * the integrity-key warning in :meth:`SecurityAssociation.__init__
   <pcapkit.protocols.internet.esp.protocol.SecurityAssociation.__init__>`
-  (:class:`IntegrityKeyWarning`). :func:`~pcapkit.utilities.warnings.warn`
-  blames the caller's frame rather than the protocol, so the message text is
-  the only thing that names ESP at all -- it needs the prefix more than the
-  exceptions do, not less.
+  (:class:`IntegrityKeyWarning`).
 
-Every message is pinned **whole**, not by substring: the existing tests in
-``tests/protocols/internet/test_esp_unit.py`` match fragments and so pass with
-or without a prefix, which is exactly why the omission survived #2366. This
-follows the pinning style of
-``tests/protocols/test_maker_invalid_format_messages_2296_unit.py`` and its
-#2406 companion.
+Every message is pinned **whole**: :mod:`tests.protocols.internet.test_esp_unit`
+matches fragments, which pass with or without a prefix. The style follows
+:mod:`tests.protocols.test_maker_invalid_format_messages_2296_unit`.
 
-Nothing here needs |cryptography|_ bar
-:meth:`ReadErrorMessages.test_aead_tag_mismatch_names_the_protocol`: an
-``ENCR_NULL`` SA exercises the trailer and the separate-integrity paths on
-:mod:`hmac` and :mod:`hashlib` alone.
-
-:mod:`pcapkit` is imported inside each test, after
-:func:`~tests._support.reimport_once_per_class`.
+Only :meth:`ReadErrorMessages.test_aead_tag_mismatch_names_the_protocol` needs
+``cryptography``: an ``ENCR_NULL`` SA reaches the trailer and separate-integrity
+paths on :mod:`hmac` and :mod:`hashlib` alone. :mod:`pcapkit` is imported inside
+each test, after :func:`~tests._support.reimport_once_per_class`.
 
 """
 
@@ -86,8 +69,7 @@ class ESPMessageTestCase(unittest.TestCase):
         """A Security Association for :data:`SPI`, ``ENCR_NULL`` unless told otherwise.
 
         ``ENCR_NULL`` returns the payload as its own plaintext and needs no
-        |cryptography|_, so it reaches the trailer and separate-integrity
-        paths that carry the messages under test without a cipher in the way.
+        ``cryptography``, so it reaches the paths under test without a cipher.
 
         """
         from pcapkit.protocols.internet.esp.protocol import SecurityAssociation
@@ -114,10 +96,10 @@ class ESPMessageTestCase(unittest.TestCase):
 
 
 class ReadTrailerMessages(ESPMessageTestCase):
-    """``ESP._read_trailer``'s three diagnostics name the protocol.
+    """``ESP._read_trailer``'s diagnostics name the protocol.
 
-    ``_read_trailer`` is a :func:`staticmethod`, so it has no ``self.alias`` to
-    read and spells the prefix literally -- the same way every site in
+    ``_read_trailer`` is a :func:`staticmethod` with no ``self.alias``, so it
+    spells the prefix literally, as
     :class:`~pcapkit.protocols.internet.esp.protocol.SecurityAssociation` does.
 
     """
@@ -183,7 +165,7 @@ class ReadTrailerMessages(ESPMessageTestCase):
 
 
 class ReadErrorMessages(ESPMessageTestCase):
-    """``ESP.read``'s four inline diagnostics name the protocol.
+    """``ESP.read``'s inline diagnostics name the protocol.
 
     ``read`` is an instance method, so it spells the prefix ``{self.alias}:``,
     as ``ESP.make``'s messages do.
@@ -256,8 +238,7 @@ class IntegrityKeyWarning(ESPMessageTestCase):
     """``SecurityAssociation.__init__``'s integrity-key warning names the protocol.
 
     :func:`~pcapkit.utilities.warnings.warn` reports the *caller's* frame, so
-    without the prefix the text is all a reader has to go on -- there is no
-    ``pcapkit/protocols/internet/esp/protocol.py`` in the location it prints.
+    the prefix is the only thing naming ESP.
 
     """
 

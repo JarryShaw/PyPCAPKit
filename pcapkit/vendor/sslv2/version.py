@@ -7,6 +7,10 @@
 This module contains the vendor crawler for **SSLv2 Protocol Version**, which
 is automatically generating :class:`pcapkit.const.sslv2.version.Version`.
 
+Any other version resolves to an unregistered member rather than raising, as an
+SSLv3-capable client sends an SSLv2-framed ``CLIENT-HELLO`` reading ``0x0300``
+(:rfc:`6101#appendix-E`).
+
 """
 
 import collections
@@ -21,23 +25,8 @@ if TYPE_CHECKING:
 __all__ = ['Version']
 
 ###############################################################################
-# NOTE: this crawler does not crawl. Its source is the expired Netscape SSLv2
-# draft, draft-hickman-netscape-ssl-00, which is not an IANA (or any other)
-# live registry a crawler could re-fetch -- there is nothing upstream of this
-# module to go stale against. Per the const-vendor-pairing convention, a
-# hand-maintained registry still gets a crawler, reading
-# :data:`~pcapkit.vendor.sslv2.version.DATA` instead of fetching a URL -- the
-# same shape as :mod:`pcapkit.vendor.linux.arphrd`,
-# :mod:`pcapkit.vendor.ipx.packet` and :mod:`pcapkit.vendor.ipx.socket`.
-#
-# SSLv2 carries no record-layer version field; ``CLIENT-VERSION`` and
-# ``SERVER-VERSION`` are handshake-body fields, which is why the registry
-# below names a single value rather than a numbered range: any value other
-# than ``SSL-2.0`` is not necessarily malformed -- per :rfc:`6101#appendix-E`,
-# an SSLv3-capable client sends an SSLv2-framed ``CLIENT-HELLO`` whose version
-# reads ``768`` (``0x0300``) -- so :meth:`~pcapkit.const.sslv2.version.Version._missing_`
-# resolves any other in-range value to an unregistered member instead of
-# raising.
+# NOTE: reads the hand-maintained :data:`~pcapkit.vendor.sslv2.version.DATA`, as
+# draft-hickman-netscape-ssl-00 is no live registry.
 ###############################################################################
 
 #: SSLv2 protocol version registry, transcribed from

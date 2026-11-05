@@ -166,18 +166,11 @@ class FoundationRegistryTests(unittest.TestCase):
         Deliberately does **not** mock, because the point is to exercise the gate.
 
         """
-        # NOTE: the public ``register_*`` guards accept ``Engine``/``Reassembly``/
-        # ``TraceFlow`` (the registration surface third parties extend), so the public
-        # door refuses a built-in under any name other than the one it shipped with
-        # (#1016, #1363) -- see
-        # ``test_public_registration_rejects_base_only_classes`` below. What #513
-        # guards -- that pcapkit's *own* classes are registrable through a real,
-        # unmocked gate -- is checked through the internal
-        # ``Extractor._register_internal_*`` path rather than the public wrappers.
+        # NOTE: the public ``register_*`` refuse a built-in under any name but its own
+        # (#1016, #1363), so #513's real gate goes through ``_register_internal_*``.
         #
-        # NOTE: imported inside the test because ``setUp`` puts the class's own ``pcapkit``
-        # import in ``sys.modules``, which is why every sibling test imports locally too.
-        # ``Extractor`` is needed by name here so the registries can be read back.
+        # NOTE: imported locally, as every sibling is, since ``setUp`` puts the class's
+        # own ``pcapkit`` import in ``sys.modules``.
         from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
@@ -199,18 +192,13 @@ class FoundationRegistryTests(unittest.TestCase):
                 mock.patch.dict(Extractor.__traceflow__):
             for name, func, klass, store in cases:
                 with self.subTest(kind=name, accepted=True):
-                    # NOTE: a distinct key per call, so this neither collides with the
-                    # built-in registrations already present nor emits the
-                    # ``already registered, overwriting`` warning.
+                    # NOTE: a distinct key per call, so it neither collides with a built-in
+                    # nor emits the ``already registered, overwriting`` warning.
                     key = f'unit-513-{name}'
                     func(key, klass)
 
-                    # NOTE: the registry is read back rather than merely asserting that
-                    # no exception escaped. Without this, the test passes against a
-                    # helper that runs the ``issubclass`` gate and then silently drops
-                    # the class -- measured, not hypothetical: inserting a bare
-                    # ``return`` after the check and before the registry write leaves
-                    # this test reporting ``1 passed, 6 subtests passed``, exit 0.
+                    # NOTE: read back, since a helper that runs the ``issubclass`` gate and
+                    # then drops the class raises nothing.
                     self.assertIn(key, store)
                     self.assertIs(store[key], klass)
 

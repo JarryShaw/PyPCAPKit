@@ -65,17 +65,11 @@ class PCAPToolkitTests(unittest.TestCase):
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
 
-        # NOTE: ``offset`` here stands in for ``Data_IPv6_Frag.offset``, which is in
-        # octets (the 8-octet on-wire units are scaled in ``IPv6_Frag.read``), so the
-        # toolkit passes it through to ``fo`` unscaled. ``id`` is deliberately
-        # different from the IPv6 header's flow label below, so that a ``bufid``
-        # keyed on the wrong one of the two is visible.
+        # NOTE: ``offset`` mirrors ``Data_IPv6_Frag.offset``, in octets, so ``fo`` gets
+        # it unscaled; ``id`` differs from the flow label so a wrong ``bufid`` shows.
         #
-        # ``length`` mirrors :attr:`IPv6_Frag.length
-        # <pcapkit.protocols.protocol.ProtocolBase.length>`, which is the 8 octets
-        # the toolkit subtracts back off ``hdr_len`` to reach the boundary before
-        # the Fragment header. A fake without it cannot show that subtraction
-        # happening at all.
+        # ``length`` is ``IPv6_Frag.length``, the 8 octets the toolkit subtracts from
+        # ``hdr_len`` to reach the boundary before the Fragment header.
         fragment = types.SimpleNamespace(
             length=8,
             info=types.SimpleNamespace(next=TransType.TCP, offset=8, mf=True, id=4321),

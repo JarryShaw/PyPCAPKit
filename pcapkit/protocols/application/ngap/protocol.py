@@ -22,13 +22,12 @@ see
 :func:`pcapkit.foundation.registry.protocols.transport.register_sctp`.
 
 An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded
-in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). There is no
-header to read and no framing to resolve: the whole payload is the encoding,
-and none of its structure is visible until an ASN.1 decoder has run over it.
+in **aligned PER** (ALIGNED PACKED ENCODING RULES, :abbr:`APER`). The whole
+payload is the encoding, with no header or framing of its own, so none of its
+structure is visible until an ASN.1 decoder has run over it.
 
 Decoding therefore needs the optional |pycrate|_ dependency
-(``pip install pypcapkit[NGAP]``). :mod:`pcapkit` imports and works without
-it; an NGAP payload simply degrades to the opaque payload path, exactly as an
+(``pip install pypcapkit[NGAP]``). Without it an NGAP payload degrades as an
 unregistered PPID would, because
 :meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which
 :class:`~pcapkit.protocols.transport.sctp.protocol.SCTP` inherits, is wrapped in
@@ -62,14 +61,12 @@ ASN.1 / |pycrate|_ shape                                    :mod:`pcapkit` model
 ``INTEGER``, ``OCTET STRING``, ``ENUMERATED``, ``BOOLEAN``  kept as :obj:`int`, :obj:`bytes`, :obj:`str`, :obj:`bool`
 ==========================================================  ==========================================================
 
-That is a deliberate trade. Every elementary procedure and protocol IE
-works on the day it is decoded, and a new 3GPP release needs no
-code change here; what is given up is per-IE typing, so an IE's value is
-reported in the specification's own shape rather than as a
-:mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU
-kind, procedure code, criticality, message type name and the IE list -- are
-surfaced as first-class fields on
-:class:`~pcapkit.protocols.application.ngap.data.NGAP` regardless.
+That is a deliberate trade: every elementary procedure and protocol IE
+decodes, and a new 3GPP release needs no code change here, at the cost of
+per-IE typing, so an IE's value is reported in the specification's own shape.
+The PDU kind, procedure code, criticality, message type name and IE list are
+first-class fields on :class:`~pcapkit.protocols.application.ngap.data.NGAP`
+regardless.
 
 Known Limitations
 -----------------
@@ -85,15 +82,14 @@ Known Limitations
 * **The specification version is that of the installed decoder, not this
   package's.** :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
   :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` were generated from
-  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era). A |pycrate|_ that
-  carries a newer
-  NGAP will decode values these enumerations do not name. Such a value
+  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era), so a newer NGAP in
+  |pycrate|_ decodes values these enumerations do not name. Such a value
   resolves to a non-registering member called ``Unassigned`` rather than
   failing or adding a member to either enumeration -- see
   :meth:`pcapkit.corekit.enum.EnumRegistry._unregistered_member`.
 * **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk
   is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP
-  fragmentation fails to decode rather than being reassembled first.
+  fragmentation fails to decode.
 * **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.

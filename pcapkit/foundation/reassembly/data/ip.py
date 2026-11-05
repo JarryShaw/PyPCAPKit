@@ -157,16 +157,8 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     conflict: 'tuple[tuple[int, int], ...]'
 
     if TYPE_CHECKING:
-        # NOTE: one signature, not a pair of ``@overload``\\ s keyed on
-        # ``completed``. Such a pair would correlate a complete datagram with a
-        # ``bytes`` payload and a parsed ``packet``, and an incomplete one with a
-        # tuple of fragments and ``packet=None``, but that correlation does not hold:
-        # under ``strict=False`` an *incomplete* datagram is reported as one
-        # contiguous ``bytes`` -- its holes zero-filled, or only the prefix up to
-        # the first hole while the total length is unknown -- and analysed.
-        # Overloads keyed on a literal cannot be selected from a ``completed``
-        # computed at runtime anyway, so they would make the reassemblers' own calls
-        # untypeable while promising a correlation the code does not keep.
+        # NOTE: no ``@overload`` pair keyed on ``completed``: under ``strict=False`` an incomplete
+        # datagram is reported as ``bytes`` and analysed, so that correlation does not hold.
         def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred[TransType]]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 @info_final

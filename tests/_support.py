@@ -180,10 +180,8 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
     pending = 0
     started = time.monotonic()
     try:
-        # NOTE: ``signal.alarm`` returns the seconds left on the alarm it
-        # replaces, or zero when there was none. That return value is the only
-        # record of an enclosing deadline, so it is read here rather than
-        # discarded -- there is no way to ask for it again afterwards.
+        # NOTE: ``signal.alarm`` returns the seconds left on the alarm it replaces
+        # (zero if none), the only record of an enclosing deadline, so it is kept.
         pending = signal.alarm(seconds)
         armed = True
         started = time.monotonic()

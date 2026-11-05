@@ -631,9 +631,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             length = len(self)
         schema = self.__header__
 
-        # NOTE: The two fixed bits are reserved for SHIM6 compatibility and
-        # "MUST be ignored when receiving" (:rfc:`7401#section-5.1`), so they
-        # are kept as read rather than validated.
+        # NOTE: The two fixed bits "MUST be ignored when receiving" (:rfc:`7401#section-5.1`),
+        # so they are kept as read rather than validated.
         # Header Length below 4 cannot cover the two HITs, and would leave a
         # negative parameter length below.
         if schema.len < 4:
@@ -1641,11 +1640,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if schema.len % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
-        # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
-        # more than six (6) Cipher IDs in one HIP_CIPHER parameter. Conversely, a
-        # recipient MUST be prepared to handle received transport parameters that
-        # contain more than six Cipher IDs by accepting the first six Cipher IDs and
-        # dropping the rest. [:rfc:`7401#section-5.2.8`]
+        # NOTE: A recipient accepts the first six Cipher IDs and drops the rest
+        # [:rfc:`7401#section-5.2.8`].
         ciphers = schema.ciphers
         if len(ciphers) > 6:
             warn(f'HIPv{version}: [ParamNo {schema.type}] invalid format', ProtocolWarning)
@@ -3392,15 +3388,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 reserved = locator.reserved
                 lifetime = math.floor(locator.lifetime.total_seconds())
             else:
-                # NOTE: Through ``parse_ip_address`` because the locator is packed
-                # to octets *here*, ahead of the schema, so a bare
-                # ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``
-                # and hand the schema's ``SwitchField`` plain bytes that its guard
-                # cannot question. The ``version=6`` argument is the *IP* version
-                # rather than the HIP one the message names, and it keeps the
-                # ``int`` widening this signature documents: ``0x102`` is
-                # ``::102``, not the ``0.0.1.2`` that ``ipaddress.ip_address``
-                # would give.
+                # NOTE: Packed here, ahead of the schema's guard, so ``parse_ip_address`` refuses a
+                # ``bool``; ``version=6`` is the IP version, reading ``0x102`` as ``::102``.
                 ip_val = parse_ip_address(
                     ip, f'HIPv{version}: [ParamNo {code}] invalid locator', version=6)
 
@@ -3456,18 +3445,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         return Schema_LocatorSetParameter(
             type=code,
-            # NOTE: ``Locator.len`` is ``Locator Length``, which
-            # :rfc:`8046#section-4` gives "in 4-octet units" and which counts
-            # only the ``Locator`` field, so a locator record is the eight
-            # fixed octets (traffic type, locator type, locator length,
-            # reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This
-            # parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,
-            # "length of the Contents, in bytes", so it is the sum of those
-            # record sizes. Summing ``locator['len']`` instead gives ``4n``
-            # where the contents are ``24n`` octets for plain IPv6 locators,
-            # mis-declaring the record and starving the reader's ``ListField``
-            # -- see ``LocatorSetParameter.locators`` in
-            # :mod:`pcapkit.protocols.internet.hip.schema`.
+            # NOTE: Each record is eight fixed octets plus ``Locator Length`` 4-octet units
+            # (RFC 8046 Section 4), and the parameter's ``Length`` is their sum in octets.
             len=sum(8 + locator['len'] * 4 for locator in locators),
             locators=locators,
         )
@@ -3971,16 +3950,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             iv=iv,
             data=data,
         )
-        # NOTE: ``cipher`` is not a schema field: ``ENCRYPTED``'s own wire
-        # format carries no cipher ID, only the preceding ``HIP_CIPHER``
-        # parameter does. Passed as a constructor keyword it draws an
-        # ``UnknownFieldWarning`` and is dropped, leaving ``pre_unpack`` to fall
-        # back to its sibling lookup, which a standalone ``make`` call gives no
-        # ``HIP_CIPHER`` parameter to search; the parameter would then be treated as
-        # cipher-less and silently packed without its IV. Setting the
-        # already-resolved ``cipher_id`` as a plain attribute instead reaches
-        # ``pack()``'s packet context via ``packet.update(self.__dict__)``,
-        # where ``pre_unpack`` honours it ahead of that lookup.
+        # NOTE: Not a schema field, as only ``HIP_CIPHER`` carries the cipher ID; set as an
+        # attribute it reaches ``pre_unpack`` via the packet context, so the IV is packed.
         schema.cipher = cipher_id
         return schema
 

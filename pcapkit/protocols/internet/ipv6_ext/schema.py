@@ -204,10 +204,8 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]', *, prefix: 'str',
        (:issue:`2727`).
 
     """
-    # NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode
-    # bit forward-matched above belongs to whatever follows the option. Unless
-    # the data ends inside the forward match before ``Opt Data Len``, the
-    # option's second octet, which then reads as zero (#2727).
+    # NOTE: With ``Opt Data Len`` 0 the forward-matched mode bit belongs to what follows the
+    # option, unless the data ends before ``Opt Data Len``, which then reads as zero (#2727).
     record = pkt.get('__short_read__')
     cut = record is not None and record[0] == 'test' and record[1] < 2
     if pkt['test']['len'] == 0 and not cut:
@@ -295,9 +293,8 @@ def quick_start_data_selector(pkt: 'dict[str, Any]', *, base: 'EnumMeta',
         # as raw data, sized by its own ``Opt Data Len``.
         return SchemaField(length=pkt['flags']['len'] + 2, schema=unassigned)
 
-    # NOTE: The suboption schemas carry the option's own ``type`` and ``len``
-    # octets, so this is the width of the whole option: the two header octets
-    # plus the six data octets :rfc:`4782#section-3.2` gives both functions.
+    # NOTE: The suboption schemas carry the option's ``type`` and ``len`` octets, so this is the
+    # whole option: two header octets plus the six data octets of :rfc:`4782#section-3.2`.
     return SchemaField(length=8, schema=schema)
 
 

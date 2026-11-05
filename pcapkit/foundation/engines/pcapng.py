@@ -263,11 +263,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 self._write_file(block.info, name=self._block_name('Decryption Secrets'))
 
             elif block.info.type == Enum_BlockType.Interface_Statistics_Block:
-                # NOTE: The interface ID is bounds-checked while the block is
-                # parsed, by ``PCAPNG._get_interface``. Re-checking it here
-                # cannot fire: parsing an ISB resolves its interface to read the
-                # block's timestamp, so a block that reaches this branch has
-                # already been validated.
+                # NOTE: no interface ID check here: parsing an ISB already resolved its interface
+                # through ``PCAPNG._get_interface`` to read the block's timestamp.
                 isb_info = cast('Data_InterfaceStatisticsBlock', block.info)
                 self._ctx.statistics.append(isb_info)
 
@@ -468,9 +465,8 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 if block_type == Enum_BlockType.Decryption_Secrets_Block:
                     secrets = int.from_bytes(self._peek(16)[12:16], byteorder)
                     size = max(size, BLOCK_MINIMUM[block_type] + secrets + pad_length(secrets, 4))
-        # NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a block
-        # longer than that is read ahead only so far; the reader moves past the
-        # rest itself (#1975).
+        # NOTE: no buffer holds more than :data:`sys.maxsize` octets; the reader
+        # moves past the rest of a longer block itself (#1975).
         ifile._read_ahead_size = min(size, sys.maxsize)
 
     def _check_packet_block_context(self) -> 'None':

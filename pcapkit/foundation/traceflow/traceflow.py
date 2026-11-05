@@ -578,12 +578,8 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
             :meth:`pcapkit.foundation.extraction.Extractor.register_traceflow`.
 
         """
-        # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
-        # idea ``engine`` -- so guessing the other base's keyword, or ``name=``,
-        # is the expected mistake, not a careless one. Left in ``**kwargs`` it
-        # would be dropped by the bare ``super().__init_subclass__()`` below,
-        # leaving the class silently unregistered: no exception, no warning.
-        # See the sibling note in ``Engine.__init_subclass__``.
+        # NOTE: ``engine=`` or ``name=`` here is the expected mistake, and left in ``**kwargs``
+        # it would silently skip registration; see ``Engine.__init_subclass__``.
         if args or kwargs:
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
             raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')

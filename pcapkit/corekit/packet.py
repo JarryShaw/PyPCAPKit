@@ -75,12 +75,8 @@ class DeferredPacket:
         #: an instance of any other class, :data:`None` included, is not.
         __deferred__: 'ClassVar[Type[Callable[[], Any]]]'
 
-    # NOTE: the ``super()`` calls below are suppressed for both checkers. They are
-    # undefined *on this mixin*, which is what a mixin is -- the base arrives at
-    # the point of use, where every subclass is declared
-    # ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`
-    # supplies each of them. Neither mypy nor pylint can see that from here, and
-    # pylint calls it an *error* rather than a warning.
+    # NOTE: The ``super()`` calls below are suppressed for both checkers, as the base arrives
+    # with each ``class X(DeferredPacket, Info)``, which neither mypy nor pylint sees from here.
 
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Refuse a subclass that does not keep the contract.
@@ -144,10 +140,8 @@ class DeferredPacket:
             AttributeError: If ``name`` is not ``packet``.
 
         """
-        # NOTE: reached only for names absent from ``__dict__``, which ``packet``
-        # always is -- see ``__additional__`` in the module docstring. Everything
-        # else has to raise, or a typo would silently answer with the resolved
-        # ``packet``.
+        # NOTE: Reached only for names absent from ``__dict__``, as ``packet`` always is; anything
+        # else raises, or a typo would silently answer with the resolved ``packet``.
         if name != 'packet':
             raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}')
         return self.__analyse__()
@@ -158,9 +152,8 @@ class DeferredPacket:
         return super().__getitem__(name)  # type: ignore[misc] # pylint: disable=no-member
 
     def __contains__(self, name: 'object') -> 'bool':
-        # NOTE: ``Mapping.__contains__`` answers by fetching the value, which
-        # would resolve the placeholder merely to decide that the field exists.
-        # ``packet`` is a declared field, so it is always there.
+        # NOTE: ``Mapping.__contains__`` would fetch, and so resolve, the
+        # placeholder; ``packet`` is a declared field, so it is always there.
         return name == 'packet' or super().__contains__(name)  # type: ignore[misc] # pylint: disable=no-member
 
     def __str__(self) -> 'str':

@@ -6,19 +6,20 @@ IPv6-Ext - IPv6 Extension Header
 
 :mod:`pcapkit.protocols.internet.ipv6_ext.protocol` contains
 :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`
-only, which plays a double role. It is the shared **base class** of every
-IPv6 extension header this package implements, supplying the
-``extension``-mode contract: the guards that make
-:attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.payload` and
-:attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protochain`
-unavailable on a header parsed as part of an IPv6 chain. Each subclass guards
-its own ``protocol`` the same way; this class's
-:attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protocol` deliberately
-does not. It also implements a
-**generic** extractor for IPv6 extension headers [*]_, for a header with no
-dedicated parser. :rfc:`6564#section-4`
-requires, with an RFC 2119 **MUST**, that any IPv6 extension header defined since
-April 2012 carry the same first two octets:
+only, in a double role:
+
+* the **base class** of every IPv6 extension header this package implements,
+  supplying the ``extension``-mode guards that make
+  :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.payload` and
+  :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protochain`
+  unavailable on a header parsed as part of an IPv6 chain. Each subclass guards
+  its own ``protocol`` the same way; this class's
+  :attr:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.protocol`
+  deliberately does not.
+* a **generic** extractor [*]_ for a header with no dedicated parser.
+  :rfc:`6564#section-4` requires, with an RFC 2119 **MUST**, that any IPv6
+  extension header defined since April 2012 carry the same first two octets, so
+  those are parseable without knowing anything else about the header:
 
 ======= ========= ===================== =====================================
 Octets      Bits        Name                    Description
@@ -28,11 +29,6 @@ Octets      Bits        Name                    Description
                                               excluding the first 8 octets)
   2          16   ``payload``                 Header-specific content
 ======= ========= ===================== =====================================
-
-so those two octets are parseable without knowing anything else about the
-header. The sections below the class give the headers that depart from that
-rule, the ways this class is dispatched to, and why an overrun stops the walk
-instead of clipping it.
 
 .. autoclass:: pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext
    :no-members:
@@ -60,12 +56,11 @@ instead of clipping it.
 Length Rules
 ------------
 
-:rfc:`6564#section-5` is explicit that the generic layout is **not
-retroactive** -- it applies only to newly defined extension headers -- which is
-why the pre-existing headers need the closed exception table below rather than
-being assumed to conform. (:rfc:`8200#section-4.8` restates the layout without
-a MUST and mislabels the generic length field as the length of the Destination
-Options header; cite :rfc:`6564#section-4` instead.)
+The generic layout is **not retroactive** (:rfc:`6564#section-5`), so the
+headers that predate it get the closed exception table below rather than being
+assumed to conform. :rfc:`8200#section-4.8` restates the layout without a MUST
+and mislabels its length field as the Destination Options header's; cite
+:rfc:`6564#section-4` instead.
 
 The exception table, verified against IANA's ``protocol-numbers-1.csv``
 *IPv6 Extension Header* column and each cited RFC:
@@ -94,29 +89,25 @@ This table classifies by *wire format* alone, over every code
 which match IANA's *IPv6 Extension Header Types* registry exactly
 (:issue:`925`).
 
-``Shim6`` conforms to the generic rule (:rfc:`5533`) but has no dedicated parser class; see
-:ref:`ipv6-ext-entry-paths` for how it reaches this class by direct dispatch.
+``Shim6`` conforms to the generic rule but has no dedicated parser; it reaches
+this class as :ref:`ipv6-ext-entry-paths` describes.
 
-:rfc:`8200#section-4.5` sets Encapsulating Security Payload aside: ESP is not
-an extension header, and the RFC lists it among upper-layer headers.
-:rfc:`4303` puts its Next Header inside the encrypted trailer, with no length
-field in the cleartext part. 253 and 254 are reserved for private
-experimentation (:rfc:`3692`) with no wire format at all. None of them is
-reachable through this class, by construction; see
-:meth:`IPv6._import_next_layer
-<pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer>`. Each still enters
-:meth:`IPv6._decode_next_layer
-<pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`'s walk, being a real
-:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member, but they
-part ways there. ``ESP`` resolves to its own dedicated parser, which decodes
-any plaintext it recovers itself and whose info carries a ``next`` of
-:data:`None` whenever the payload stays opaque, so the walk ends the ordinary
-way with ``ExtensionHeader(None)`` failing at the top of the next iteration.
-``253`` and ``254`` have no dedicated parser and resolve to plain
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw`, whose info has no ``next``
-*attribute*. For these two, and any future IANA code without an
-implementation, the walk stops on a *structural* check (does the parsed layer
-carry a ``next`` at all?) rather than on a list of codes.
+:rfc:`8200#section-4.5` counts ESP among upper-layer headers, not extension
+headers, and 253 and 254 are reserved for experimentation (:rfc:`3692`), with no
+wire format at all. None of them reaches this class, by
+construction (:meth:`IPv6._import_next_layer
+<pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer>`). Each is still
+an :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member, so it enters
+the walk below, where they part ways:
+
+* ``ESP`` resolves to its own parser, which decodes any plaintext it recovers
+  itself and reports a ``next`` of :data:`None` while the payload stays opaque,
+  so ``ExtensionHeader(None)`` fails at the next membership check and the walk
+  ends.
+* ``253`` and ``254`` resolve to plain
+  :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, whose info has no ``next``
+  *attribute*. For these, and any future IANA code without an implementation,
+  the walk stops on that *structural* check rather than on a list of codes.
 
 .. _ipv6-ext-walk:
 
@@ -156,28 +147,21 @@ header chain, and where it stops:
        click IMP "ipv6.html#pcapkit.protocols.internet.ipv6.protocol.IPv6._import_next_layer"
        click EXIT "../protocol.html#protocol-next-layer-dispatch"
 
-An ESP header whose payload stays opaque carries a ``next`` of :data:`None`, so the
-walk ends at the next membership check.
-
 .. _ipv6-ext-entry-paths:
 
 Entry Paths
 -----------
 
 This class is reached by direct dispatch only.
-:attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` is a real
-IANA extension header (:rfc:`5533`) with no dedicated parser, so
+:attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6` (:rfc:`5533`)
+has no dedicated parser, so
 :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.Protocol._lookup_next_layer>`
 would default it to plain :class:`~pcapkit.protocols.misc.raw.protocol.Raw`, whose
-missing ``next`` field would end the walk in
-:meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.protocol.IPv6._decode_next_layer>`
-there (:issue:`891`). This module registers this class for that code instead,
-at the bottom of the module, so dispatch reaches a working generic parser
-directly. The registration is global, shared by every
+missing ``next`` would end the walk (:issue:`891`); this module registers this
+class for that code instead. The registration is global, shared by every
 :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
 :meth:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.__post_init__` gates on
-``version == 6`` to keep it from also activating for an IPv4 payload that
-carries protocol number 140; see its docstring.
+``version == 6`` to keep an IPv4 payload of protocol number 140 out.
 
 A header with a dedicated class whose parser raises does not reach this class.
 :func:`~pcapkit.corekit.decorators.beholder` makes it plain
@@ -190,28 +174,22 @@ The Overrun Guard
 -----------------
 
 The house convention for a declared length that does not fit what remains
-is warn-and-clip: emit a warning naming what was declared against what is
-left, then read only what is left. See
-:func:`pcapkit.protocols.misc.pcapng.schema.bounded_area` and
-:meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read`.
+is warn-and-clip: warn, naming what was declared against what is left, then read
+only what is left -- as :func:`pcapkit.protocols.misc.pcapng.schema.bounded_area`
+and :meth:`pcapkit.protocols.misc.pcapng.protocol.PCAPNG.read` do.
 
-This class follows that convention's *warning* -- a
-:class:`~pcapkit.utilities.warnings.SchemaWarning`, as
-:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area` emits -- and
-deliberately diverges on the *action*. Clipping is right when the declared
-length only governs how much of the current object to read, since there is
-always a well-defined "what is left" to fall back to. Here the declared length
-also decides *where the next header starts*; a clipped skip distance points at
-whatever bytes end the buffer, which are not a header. Continuing from there
-would fabricate a layer and record a false entry in
-:class:`~pcapkit.corekit.protochain.ProtoChain`, which reads as a parsed fact
-rather than a guess. So :meth:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read`
-warns in the same form as
-:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area`, then **stops the
-walk**: this instance absorbs every remaining octet and reports :data:`None`
-for ``next``, which the caller's loop already reads as "no more extension
-headers". The chain ends honestly at the bad header instead of inventing what
-follows it.
+This class keeps the *warning* -- a
+:class:`~pcapkit.utilities.warnings.SchemaWarning`, in
+:func:`~pcapkit.protocols.misc.pcapng.schema.bounded_area`'s form -- and
+deliberately diverges on the *action*. Clipping is right where the declared
+length governs only how much of the current object to read. Here it also
+decides *where the next header starts*, and a clipped skip points at whatever
+bytes end the buffer, which are not a header: continuing would fabricate a layer
+and record a false :class:`~pcapkit.corekit.protochain.ProtoChain` entry, which
+reads as a parsed fact. So :meth:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext.read`
+warns, then **stops the walk**: this instance absorbs every remaining octet and
+reports a ``next`` of :data:`None`, which the walk already reads as no more
+extension headers.
 
 Header Schemas
 --------------

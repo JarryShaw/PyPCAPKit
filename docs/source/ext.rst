@@ -1,19 +1,18 @@
 Customisation & Extensions
 ==========================
 
-:mod:`pcapkit` is built for customisation: new protocols, layers, fields and
-even new file formats can all be added from outside the library.
+New protocols, layers, fields and file formats can all be added to
+:mod:`pcapkit` from outside the library.
 
 ---------------------
 Customising Protocols
 ---------------------
 
-:class:`~pcapkit.protocols.protocol.Protocol` is the most essential concept
-and class in :mod:`pcapkit`: the user-facing abstract base class for a
-protocol, which is responsible for parsing and/or constructing the protocol
-packets, as in the network stack. The built-in protocol classes derive from
-its internal base, :class:`~pcapkit.protocols.protocol.ProtocolBase`,
-rather than from :class:`~pcapkit.protocols.protocol.Protocol` itself.
+:class:`~pcapkit.protocols.protocol.Protocol` is the user-facing abstract base
+class of a protocol, which parses and constructs its packets. The built-in
+protocol classes and layer base classes derive from its internal base,
+:class:`~pcapkit.protocols.protocol.ProtocolBase`, rather than from
+:class:`~pcapkit.protocols.protocol.Protocol` itself.
 
 The protocol classes :mod:`pcapkit` ships:
 
@@ -138,76 +137,29 @@ The protocol classes :mod:`pcapkit` ships:
 New Protocol
 ------------
 
-To add a new protocol to an existing layer, you need to create a new class
-inherited from that layer's base class, specifically, the
+A protocol in an existing layer subclasses that layer's base class:
 :class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
-:class:`~pcapkit.protocols.transport.transport.Transport`, and
-:class:`~pcapkit.protocols.application.application.Application` classes, which
-are the base classes for link, internet, transport, and application layer
-protocols, respectively.
+:class:`~pcapkit.protocols.transport.transport.Transport` or
+:class:`~pcapkit.protocols.application.application.Application`.
 
 .. important::
 
-   The :class:`~pcapkit.protocols.protocol.Protocol` class is the user-facing
-   abstract base class for protocols, and it is not recommended to inherit from
-   it directly, unless you are going to create a new protocol stack, e.g., a new
-   miscellaneous protocol stack as in :mod:`pcapkit.protocols.misc` module. The
-   layer base classes above, like the built-in miscellaneous protocols,
-   derive from :class:`~pcapkit.protocols.protocol.ProtocolBase` rather than
-   from :class:`~pcapkit.protocols.protocol.Protocol`.
+   Subclass :class:`~pcapkit.protocols.protocol.Protocol` directly only for a new
+   protocol stack, such as the miscellaneous protocols of
+   :mod:`pcapkit.protocols.misc`.
 
-Besides, you need to implement the corresponding schema and data model for the
-new protocol. The schema is a :class:`~pcapkit.protocols.schema.Schema`
-subclass that defines the field structure of the protocol, and the data model
-is a :class:`~pcapkit.protocols.data.Data` subclass that defines the data
-attributes of the protocol.
+Each protocol also needs a schema and a data model:
 
-.. note::
+*  the schema, a :class:`~pcapkit.protocols.schema.Schema` subclass, lays out the
+   fields that parse and construct a packet, each a class attribute set to a
+   :class:`~pcapkit.corekit.fields.field.Field` instance;
+*  the data model, a :class:`~pcapkit.protocols.data.Data` subclass, holds a
+   parsed packet, each attribute a bare type annotation.
 
-   The schema classes are used for parsing and/or constructing the protocol
-   packets, each field should be defined as a class attribute with the value of
-   a :class:`~pcapkit.corekit.fields.field.Field` subclass instance.
-
-   The data classes are used for storing the parsed protocol packets. Each data
-   attribute should be defined as a class attribute with no value besides the
-   type annotations of the corresponding field.
-
-Once the class exists, register it through
-:mod:`pcapkit.foundation.registry.protocols`, picking the registry that matches
-the protocol's layer -- a link layer protocol goes to
-:func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`, and so on.
-
-The registry function per protocol type:
-
-+-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+--------------------+
-| Protocol Type     | Registry Function                                                                                                                                  | Notes              |
-+===================+===========================================================================+========================================================================+====================+
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcap`      | Registry functions |
-+ Link Layer        + :func:`~pcapkit.foundation.registry.protocols.misc.register_linktype`     +------------------------------------------------------------------------+ on the left column +
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.misc.register_pcapng`    | are combined calls |
-+-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+ to those on the    +
-| Internet Layer    | :func:`~pcapkit.foundation.registry.protocols.link.register_ethertype`                                                                             | right columns.     |
-+-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
-| Transport Layer   | :func:`~pcapkit.foundation.registry.protocols.internet.register_transtype`                                                                         | It is recommended  |
-+-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+ to use those on    +
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_tcp`  | the left columns   |
-+ Application Layer + :func:`~pcapkit.foundation.registry.protocols.transport.register_apptype` +------------------------------------------------------------------------+ when registering   +
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_udp`  | new protocols.     |
-+                   +---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_sctp` |                    |
-+                   +---------------------------------------------------------------------------+------------------------------------------------------------------------+                    +
-|                   |                                                                           | :func:`~pcapkit.foundation.registry.protocols.transport.register_dccp` |                    |
-+-------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------+--------------------+
-
-A protocol carried over IPX is keyed by IPX Packet Type rather than by IP protocol
-number, so it registers through
-:func:`~pcapkit.foundation.registry.protocols.internet.register_ipx`; one carried over BSD
-loopback is keyed by address family rather than by EtherType, and registers through
-:func:`~pcapkit.foundation.registry.protocols.link.register_loopback`.
-
-A table belongs to the protocol that reads it, and is keyed by that protocol's own
-code for its payload:
+Then register the class through :mod:`pcapkit.foundation.registry.protocols`,
+into the table of the protocol that carries it. A table belongs to the protocol
+that reads it, and is keyed by that protocol's own code for its payload:
 
 .. mermaid::
 
@@ -245,14 +197,8 @@ A miss in any table gives that table's fallback, normally
 Samples
 ~~~~~~~
 
-The following code snippet shows how to create a new protocol class:
-
-.. note::
-
-   Following is a PoC implementation of a new internet layer protocol. For
-   demonstration purposes, we use the IPv4 protocol as an example, where the
-   comprehensive implementation can be found in the
-   :mod:`pcapkit.protocols.internet.ipv4.protocol` module.
+A sketch of a new internet layer protocol, modelled on IPv4, whose full
+implementation is :mod:`pcapkit.protocols.internet.ipv4.protocol`:
 
 .. code-block:: python
 
@@ -310,70 +256,63 @@ The following code snippet shows how to create a new protocol class:
 
 .. important::
 
-   **Declare every construction keyword your protocol accepts.** Building a
-   protocol *through its constructor* with a keyword that no signature
-   declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than
-   discarding it silently, so a misspelling costs an exception instead of a
-   silently wrong field. The accepted set is read from :func:`inspect.signature` -- the union of every
-   keyword-taking parameter of ``make``, ``read``, ``pack``, ``unpack``,
-   ``__post_init__`` and ``__init__`` anywhere in the class's MRO -- which is
-   wider than ``make`` alone because :meth:`Protocol.__post_init__
-   <pcapkit.protocols.protocol.Protocol.__post_init__>` hands the same
-   ``**kwargs`` to the construction and to the parse, so a keyword only ``read``
-   declares still travels through ``make``.
+   **Declare every construction keyword your protocol accepts.** Constructing a
+   protocol with a keyword no signature declares raises
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, so a misspelling fails
+   instead of building a wrong field. The accepted set, read by
+   :func:`inspect.signature`, is the union of the keyword-taking parameters of
+   ``make``, ``read``, ``pack``, ``unpack``, ``__post_init__`` and ``__init__``
+   across the MRO: :meth:`Protocol.__post_init__
+   <pcapkit.protocols.protocol.Protocol.__post_init__>` hands one ``**kwargs``
+   to both construction and parse, so a keyword only ``read`` declares still
+   travels through ``make``.
 
-   Shapes a signature cannot express are declared on the class instead, via
-   :attr:`Protocol.__keywords__
-   <pcapkit.protocols.protocol.Protocol.__keywords__>`:
+   A keyword no signature can express is listed in :attr:`Protocol.__keywords__
+   <pcapkit.protocols.protocol.Protocol.__keywords__>` instead:
 
    .. code-block:: python
 
       class MyIPv4(Internet[IPv4Data, IPv4Schema],
                    schema=IPv4Schema, data=IPv4Data):
-          #: A keyword read out of ``**kwargs`` by name rather than declared as a
-          #: parameter, as ``ESP.read`` does with ``packet``. Unioned down the MRO.
+          #: Read out of ``**kwargs`` by name, as ``IPv6_Ext.read`` does with
+          #: ``alias``; unioned down the MRO.
           __keywords__ = frozenset({'my_extra_keyword'})
 
           def read(self, length=None, **kwargs):
               extra = kwargs.get('my_extra_keyword')
               ...
 
-   Setting it to :obj:`None` skips the check entirely, and is meant only for a
-   *dispatcher* whose real signature belongs to a class chosen at call time --
+   :obj:`None` skips the check, and is meant only for a *dispatcher* whose real
+   signature belongs to a class chosen at call time, such as
    :class:`~pcapkit.protocols.application.http.protocol.HTTP`, whose
-   :meth:`~pcapkit.protocols.application.http.protocol.HTTP.make` builds the HTTP version it
-   is given, is the
-   only such class in the library. Unlike a set, :obj:`None` is not inherited, so a
-   subclass of a dispatcher is checked normally. Prefer a declared parameter to
-   either: it is also what documents the keyword to your callers.
+   :meth:`~pcapkit.protocols.application.http.protocol.HTTP.make` builds the
+   version it is given. Unlike a set, :obj:`None` is not inherited, so a
+   dispatcher's subclasses stay checked. Prefer a declared parameter to either,
+   since it also documents the keyword.
 
    Parsing is unaffected. :meth:`Protocol.from_data
-   <pcapkit.protocols.protocol.Protocol.from_data>` checks the keywords its
-   caller passes just as strictly, raising
-   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, but only warns with
-   :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key that comes
-   from your ``_make_data`` -- a mismatch there is a disagreement between two of
-   your own mappings rather than a caller's typo.
+   <pcapkit.protocols.protocol.Protocol.from_data>` checks its caller's keywords
+   as strictly, but only warns with
+   :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key from your
+   ``_make_data``, a disagreement between two of your own mappings rather than a
+   caller's typo.
 
    .. warning::
 
       The check lives in :meth:`Protocol.__init__
       <pcapkit.protocols.protocol.Protocol.__init__>`, where every producer's
       keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
-      leads to -- but **not** a direct ``SomeProtocol.make(...)`` call, which still
-      discards an undeclared keyword in silence. ``object.__new__(cls).make(...)``
-      is the idiom that reaches it, used by this package's own tests and by
-      :meth:`HTTP.make <pcapkit.protocols.application.http.protocol.HTTP.make>` to reach its
-      versioned implementation. Covering that would mean interposing on every
-      ``make`` in the tree -- a larger change this package deliberately does not
-      make. Construct through the constructor to get the check.
+      leads to, but **not** ``make`` called on a bare instance, such as
+      ``object.__new__(cls).make(...)``, which drops an undeclared keyword
+      silently. This package's tests and :meth:`HTTP.make
+      <pcapkit.protocols.application.http.protocol.HTTP.make>` call ``make`` that
+      way. Covering it would mean interposing on every ``make`` in the tree, which
+      this package deliberately does not do.
 
 .. note::
 
-   Registering after the fact, as above, is one option. The other is passing
-   ``code=`` at class definition, which is **opt-in** -- a class that omits it
-   stays unregistered, exactly as if no ``register_*`` call had been made
-   either:
+   Instead of a ``register_*`` call, pass ``code=`` at class definition; a class
+   with neither stays unregistered:
 
    .. code-block:: python
 
@@ -382,36 +321,33 @@ The following code snippet shows how to create a new protocol class:
                    code=EtherType.Internet_Protocol_version_4):
           ...
 
-   The key's own type decides which registry it goes to -- an
-   :class:`~pcapkit.const.reg.ethertype.EtherType` member always means
-   :class:`~pcapkit.protocols.link.link.Link`, a
-   :class:`~pcapkit.const.reg.transtype.TransType` member always means
-   :class:`~pcapkit.protocols.internet.internet.Internet`, and so on -- so a
-   raw :class:`int`, such as a TCP or UDP port, cannot say which registry it
-   belongs to and must be given explicitly: ``code={TCP: 21}``. Either form
-   may appear in an iterable to register one class into several registries
-   at once. See
-   :meth:`ProtocolBase.__init_subclass__
-   <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>` for the full
+   The key's type picks the registry -- an
+   :class:`~pcapkit.const.reg.ethertype.EtherType` member means
+   :class:`~pcapkit.protocols.link.link.Link`'s, a
+   :class:`~pcapkit.const.reg.transtype.TransType` member
+   :class:`~pcapkit.protocols.internet.internet.Internet`'s, and so on -- so a
+   raw :class:`int`, such as a TCP or UDP port, names its registry explicitly:
+   ``code={TCP: 21}``. An iterable of either form registers into several at
+   once. :meth:`ProtocolBase.__init_subclass__
+   <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>` gives the full
    rule, and
-   :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code` for
-   what runs underneath it.
+   :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
+   runs underneath it.
 
 Extending Existing Protocol
 ---------------------------
 
-Several protocols carry customisable attributes -- the option headers of IPv4,
-for one. To add handling for one of them, check the protocol class for the
-extension point you need, then register your methods against it.
+Several protocols carry extension points, such as the options of IPv4. To
+handle a new code, register your methods against the protocol's extension
+point.
 
 .. warning::
 
-   Do not inherit from the protocol class directly -- it may cause unexpected
-   errors. Use the helper registry functions in
-   :mod:`pcapkit.foundation.registry.protocols` instead.
+   Do not subclass the protocol class for this, which may cause unexpected
+   errors; use the registry functions in
+   :mod:`pcapkit.foundation.registry.protocols`.
 
-The extension points of each protocol class, with the registry function that
-writes them:
+The extension points, with the registry function that writes each:
 
 +-------------------+---------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------+
 | Protocol Type     | Protocol Class                                                      | Extensible Registry                                                                                    | Registry Function                                                                   |
@@ -470,20 +406,19 @@ writes them:
 And Speaking of Library Foundations...
 --------------------------------------
 
-:mod:`pcapkit.foundation` carries the library's own machinery -- extraction,
-reassembly, flow tracing and the registries behind them -- and each part of it
-is extensible in the same way the protocols are.
+:mod:`pcapkit.foundation` carries extraction, reassembly, flow tracing and the
+registries behind them, each extensible as the protocols are.
 
 Extractor Engines
 -----------------
 
-:mod:`pcapkit.foundation.engines` holds the built-in engines that read packets
-out of an input PCAP, PCAP-NG or other capture file. The shipped engines derive
-from :class:`~pcapkit.foundation.engines.engine.EngineBase`;
-:class:`~pcapkit.foundation.engines.engine.Engine` is the subclass to build your
-own on, since it is the one carrying the ``engine=`` registration hook.
+:mod:`pcapkit.foundation.engines` holds the engines that read packets out of a
+capture file. The shipped engines derive from
+:class:`~pcapkit.foundation.engines.engine.EngineBase`; build your own on
+:class:`~pcapkit.foundation.engines.engine.Engine`, which carries the
+``engine=`` registration hook.
 
-The available engines and the file formats they read:
+The engines and the file formats they read:
 
 +---------------------+-----------------------------------------------------------+----------------------------------------+
 | Engine Type         | Engine Class                                              | Supported File Formats                 |
@@ -507,12 +442,11 @@ The available engines and the file formats they read:
 
 .. note::
 
-   An engine is free to support less than :class:`~pcapkit.foundation.extraction.Extractor`
-   offers, and several do. `PyPCAP`_ and `pcap-ct`_ perform no protocol dissection
-   whatsoever, so they support neither reassembly nor flow tracing; `PyPCAPFile`_
-   has no IPv6 decoder, so it supports IPv4 and TCP reassembly but not IPv6. What
-   matters is that the gap is *announced* -- each engine warns, or raises, for the
-   capability it cannot provide, rather than silently producing an empty result.
+   An engine may support less than :class:`~pcapkit.foundation.extraction.Extractor`
+   offers. `PyPCAP`_ and `pcap-ct`_ dissect no protocol, so they support neither
+   reassembly nor flow tracing; `PyPCAPFile`_ has no IPv6 decoder, so it
+   reassembles IPv4 and TCP but not IPv6. Each engine warns, or raises, for a
+   capability it cannot provide rather than silently producing an empty result.
    The exceptions pass without a warning: `PyPCAPFile`_ and `DPKT`_ leave TCP
    behind some tags, tunnels and extension headers out of TCP reassembly and
    flow tracing, `DPKT`_ also leaves IPv4 in IPv6, and IPv6 in IPv4, out of IP
@@ -524,23 +458,17 @@ The available engines and the file formats they read:
 .. note::
 
    `PyPCAP`_ and `pcap-ct`_ are two distributions of one :manpage:`libpcap(3)`
-   interface, and both install a top-level |pcap|_ module, so they are two
-   engines rather than one: ``engine='pypcap'`` and ``engine='pcap_ct'``. Upstream
-   `PyPCAP`_ cannot be installed on Python 3.12 or newer, and `pcap-ct`_ can --
-   which is why both exist. See
-   :doc:`pcapkit/foundation/engines/index` for which to pick.
+   interface, both installing a top-level |pcap|_ module, and are two engines:
+   ``engine='pypcap'`` and ``engine='pcap_ct'``. Both exist because upstream
+   `PyPCAP`_ cannot be installed on Python 3.12 or newer and `pcap-ct`_ can.
+   :doc:`pcapkit/foundation/engines/index` says which to pick.
 
 Samples
 ~~~~~~~
 
-The following code snippet shows how to create a new engine class:
-
-.. note::
-
-   Following is a PoC implementation of a new engine based on :mod:`scapy`. For documentation
-   purposes, we use the :class:`~pcapkit.foundation.engines.scapy.Scapy` engine as an example,
-   where the comprehensive implementation can be found in the :mod:`pcapkit.foundation.engines.scapy`
-   module.
+A sketch of a new engine on :mod:`scapy`, modelled on
+:class:`~pcapkit.foundation.engines.scapy.Scapy`, whose full implementation is
+:mod:`pcapkit.foundation.engines.scapy`:
 
 .. code-block:: python
 
@@ -554,77 +482,48 @@ The following code snippet shows how to create a new engine class:
        from scapy.packet import Packet
 
 
-   # NOTE: The ``engine`` keyword is what registers the engine with the Extractor,
-   # and it is the key ``Extractor(engine=...)`` will look it up under. It is
-   # required: registration is opt-in, so omitting it defines a perfectly usable
-   # class that is simply not selectable by name. Note that __engine_name__ is
-   # *not* an opt-in -- it sets the name the engine reports about itself, which
-   # it does whether or not the engine is registered.
+   # NOTE: ``engine`` registers the class under the key ``Extractor(engine=...)``
+   # looks up; without it, the class is not selectable by name.
    class MyScapy(Engine['Packet'], engine='scapy'):
 
        __engine_name__ = 'Scapy'  # friendly name of the engine
        __engine_module__ = 'scapy'  # module name that the engine is based on
 
        def __init__(self, extractor: 'Extractor') -> 'None':
-           # NOTE: the API entry point of the underlying engine module should
-           # be imported here, instead of at the top of the module, to avoid
-           # dependency issues.
+           # NOTE: Imported here, not at module level, so the engine's
+           # library stays an optional dependency.
            from scapy import sendrecv  # import API entry point
 
            self._expkg = sendrecv  # store API entry point
-           self._extmp = None  # intermediate storage for the iterator
-                               # generated by the API entry point
+           self._extmp = None  # iterator over the packets, set by run()
 
            super().__init__(extractor)  # initialise base class
 
-       # NOTE: The following methods are the core methods of the engine class,
-       # which are responsible for parsing the input file and extracting the
-       # network packets for further processing. It is expected to create an
-       # iterator instance that yields the network packets, and store it in
-       # the intermediate storage, i.e., self._extmp for further processing,
-       # using the API entry point as in the self._expkg attribute.
+       # NOTE: Open the input through ``self._expkg`` and store an iterator
+       # over its packets in ``self._extmp``.
        def run(self) -> 'None':
            ext = self._extractor  # get extractor instance
 
-           # NOTE: You may wish to do some pre-processing here, e.g., to
-           # check if there's any extraction protocol and/or layer thresholds
-           # set by the user (some engines may not support this feature); or
-           # to set up the verbose handler for the underlying engine module,
-           # as in the following code snippet. Install it only when the user
-           # asked for the default output, i.e., `verbose=True`, which sets
-           # `ext._vfunc_default`: a callable given as `verbose=` is the
-           # user's own handler, already stored as `ext._vfunc`, so it must
-           # be kept rather than replaced.
+           # NOTE: Replace the verbose handler only for ``verbose=True``; a
+           # callable ``verbose=`` is the user's own, already in ``ext._vfunc``.
 
            if ext._vfunc_default:  # check if the default verbose output is requested
-               # NOTE: PyPCAPKit has its own bundled supporting functions for
-               # third-party libraries, e.g., the `packet2chain` function is
-               # to convert a given Packet instance of the Scapy library to a
-               # human-readable string, which is used for verbose output.
+               # NOTE: pcapkit.toolkit bundles per-engine helpers;
+               # ``packet2chain`` renders a Scapy packet as its protocol chain.
                from pcapkit.toolkit.scapy import packet2chain  # import utility function
 
                ext._vfunc = lambda extractor, packet: print(
                    f'Frame {extractor._frnum:>3d}: {packet2chain(packet)}'
                )  # print verbose message as `Frame XXX: Ethernet:IP:TCP:...`
 
-           # NOTE: The extractor's shared global-header step parses the global
-           # header with the built-in engine and, unless output is disabled,
-           # dumps it and sets the output format that `ext.format` reports.
+           # NOTE: Parse the global header with the built-in engine and, unless
+           # output is disabled, dump it and set ``ext.format``.
            ext.record_header()
 
-           # NOTE: Here we use the API entry point, i.e., scapy.sendrecv.sniff,
-           # to read the input file and extract the network packets. The API
-           # entry point returns an iterable instance, which is then converted
-           # as an iterator and stored in the intermediate storage for further
-           # processing.
            self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))
 
-       # NOTE: The following methods are the helper methods of the engine class,
-       # which are responsible for extracting the network packets from the
-       # intermediate storage, i.e., self._extmp, and returning the extracted
-       # network packets for further processing. It is also expected to handle
-       # necessary actions, including but not limited to, verbose output, file
-       # output, reassembly and flow tracing, etc.
+       # NOTE: Return the next packet from ``self._extmp``, handling its
+       # verbose output, file output, reassembly and flow tracing.
        def read_frame(self) -> 'Packet':
            from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
                                               tcp_reassembly, tcp_traceflow)  # import utility functions
@@ -635,32 +534,21 @@ The following code snippet shows how to create a new engine class:
            ext._frnum += 1  # increment frame number
            ext._vfunc(ext, packet)  # print verbose message
 
-           # NOTE: The following code snippet is to handle the file output,
-           # i.e., to write the packet to the output file if the output file
-           # is specified by the user.
+           # NOTE: Dump the packet unless output is disabled.
            frnum = f'Frame {ext._frnum}'
            if not ext._flag_q:
                info = packet2dict(packet)  # convert packet to dict-like object
 
-               # NOTE: Now, we need to check if output file is to be a single
-               # file. If so, we can directly write the packet to the output
-               # file, i.e., ext._ofile; otherwise, we need to create a new
-               # dumper instance by initialising ext._ofile, and write the
-               # packet to the dumper instance. For more information, please
-               # refer to the documentation of DictDumper library.
+               # NOTE: In split mode (``ext._flag_f``) ``ext._ofile`` is a dumper
+               # class, built per frame; otherwise it is one dumper instance.
                if ext._flag_f:
                    ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
                    ofile(info, name=frnum)
                else:
                    ext._ofile(info, name=frnum)
 
-           # NOTE: The following code snippet is to handle the reassembly of
-           # the network packets, i.e., to reassemble the fragmented packets
-           # into a complete packet. Before reassembly, we need to convert
-           # the packet to a tailored format, i.e., a dict-like object, which
-           # is then passed to the reassembly function. For more information,
-           # please refer to the documentation of pcapkit.foundation.reassembly
-           # module.
+           # NOTE: Each toolkit helper converts the packet to its reassembly's
+           # format, or gives None for a packet it does not apply to.
            if ext._flag_r:
                if ext._ipv4:
                    data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
@@ -675,21 +563,14 @@ The following code snippet shows how to create a new engine class:
                    if data_tcp is not None:
                        ext._reasm.tcp(data_tcp)
 
-           # NOTE: The following code snippet is to handle the flow tracing of
-           # the network packets, i.e., to trace a series of packets as they
-           # will compose as a flow and/or stream. Before flow tracing, we need
-           # to convert the packet to a tailored format, i.e., a dict-like object,
-           # which is then passed to the flow tracing function. For more
-           # information, please refer to the documentation of
-           # pcapkit.foundation.traceflow module.
+           # NOTE: Flow tracing, likewise.
            if ext._flag_t:
                if ext._tcp:
                    data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
                    if data_tf_tcp is not None:
                        ext._trace.tcp(data_tf_tcp)
 
-           # NOTE: The following code snippet is to record extracted frames
-           # into the internal storage, i.e., ext._frame, for further processing.
+           # NOTE: Store the frame when storing is on (``ext._flag_d``).
            if ext._flag_d:
                ext._frame.append(packet)
 
@@ -698,17 +579,11 @@ The following code snippet shows how to create a new engine class:
 Output Dumpers
 --------------
 
-:mod:`pcapkit.dumpkit` wraps :mod:`DictDumper <dictdumper>`, which writes the
-extracted packets to the output file. New output formats are added by
-subclassing a dumper, on the same extensibility :mod:`DictDumper <dictdumper>`
-itself offers.
+:mod:`pcapkit.dumpkit` builds on :mod:`DictDumper <dictdumper>`, which writes
+the extracted packets to the output file, and whose own documentation covers its
+dumpers. A new output format is a dumper subclass.
 
-.. seealso::
-
-   :mod:`DictDumper <dictdumper>`'s own documentation covers the dumpers in
-   detail.
-
-The available output dumpers and their formats:
+The output dumpers and their formats:
 
 +----------------------------------+------------------------------------------------+------------------+
 | Dumper Format                    | Dumper Class                                   | Output Extension |
@@ -727,14 +602,8 @@ The available output dumpers and their formats:
 Samples
 ~~~~~~~
 
-The following code snippet shows how to create a new dumper class:
-
-.. note::
-
-   Following is a PoC implementation of a new dumper for the PCAP format. For
-   documentation purposes, we use the :class:`~pcapkit.dumpkit.pcap.PCAPIO`
-   dumper as an example, where the comprehensive implementation can be found
-   in the :mod:`pcapkit.dumpkit.pcap` module.
+A sketch of a PCAP dumper, modelled on :class:`~pcapkit.dumpkit.pcap.PCAPIO`,
+whose full implementation is :mod:`pcapkit.dumpkit.pcap`:
 
 .. code-block:: python
 
@@ -749,106 +618,81 @@ The following code snippet shows how to create a new dumper class:
        from typing import Optional
 
 
-   # NOTE: We need to specify the output file format and extension here at the
-   # class definition, as in the following code snippet. Such that PyPCAPKit
-   # will be able to automatically register our dumper class to the corresponding
-   # dumper registries, and use it to dump the extracted network packets.
+   # NOTE: ``fmt`` registers the dumper under that output format, with ``ext``
+   # its file extension; without ``fmt``, the class is not registered.
    class MyDumper(Dumper, fmt='pcap', ext='.pcap'):
 
-       # NOTE: This property names the file format of the dumper, as a string.
-       # It is not the file extension -- that is the ``ext`` given at class
-       # definition above.
+       # NOTE: The format name, not the extension, which is ``ext`` above.
        @property
        def kind(self) -> 'str':
            return 'pcap'
 
-       # NOTE: We need to collect some necessary information here thru the necessary
-       # arguments, e.g., the file name, link-layer protocol, etc., which will be
-       # used to generate the top-level header of the output file.
+       # NOTE: Take what the file header needs, e.g. the link-layer protocol,
+       # and keep any state later frames need.
        def __init__(self, fname: 'str', *, ...) -> 'None':
-           # NOTE: We can do some pre-processing here if necessary, e.g., to
-           # save the nanosecond-resolution flag, link-layer protocol type, etc.,
-           # such that we can use them later when dumping the network packets.
            self._fnum = 1  # initialise frame number counter to 1
 
-           super().__init__(fname, ...)  # initialise base class with the file name
-                                         # and other necessary arguments
+           super().__init__(fname, ...)  # initialise base class
 
-       # NOTE: We need to overwrite the original ``__call__`` method, cause the
-       # PCAP file format is a binary format, thus we need to re-open the output
-       # file in binary mode, instead of the default text mode.
+       # NOTE: Overridden because PCAP is binary, so the file reopens in binary
+       # rather than text mode.
        def __call__(self, value: 'Frame', name: 'Optional[str]' = None) -> 'MyDumper':
            with open(self._file, 'ab') as file:
                self._append_value(value, file, name or f'Frame {self._fnum}')  # append value to the file
            return self
 
-       # NOTE: The following method will be called at the initialisation of the
-       # dumper class, which is expected to write the top-level header of the
-       # output file.
+       # NOTE: Called on initialisation, to write the file header.
        def _dump_header(self, *, ...) -> 'None':
            packet = Header(...)  # create PCAP header instance based on the given arguments
 
            with open(self._file, 'wb') as file:
                file.write(packet.data)  # write the header to the output file
 
-       # NOTE: The following method is to write the network packets to the output
-       # file. It is expected to convert the network packet to a tailored format,
-       # i.e., a Frame instance, which is then converted to the binary format and
-       # written to the output file.
+       # NOTE: Write one packet, here as a PCAP frame.
        def _append_value(self, value: 'Frame', file: 'IO[bytes]', name: 'str') -> 'None':
            packet = Frame(...)  # create PCAP frame instance based on the given arguments
 
            file.write(packet.data)  # write the frame to the output file
-
-           # NOTE: We can do some post-processing here if necessary, e.g., to
-           # update the frame number counter, etc., such that we can use them
-           # later when dumping other network packets.
            self._fnum += 1  # increment frame number counter
 
 Reassembly and Flow Tracing
 ---------------------------
 
 :mod:`pcapkit.foundation.reassembly` reassembles fragmented packets;
-:mod:`pcapkit.foundation.traceflow` follows packets that compose a flow or
-stream. The shipped classes derive from
+:mod:`pcapkit.foundation.traceflow` follows the packets of a flow. The shipped
+classes derive from
 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` and
-:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`;
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and
-:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` are the ones to build
-your own on, since they carry the ``protocol=`` registration hook.
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`; build your own on
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` or
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, which carry the
+``protocol=`` registration hook.
 
 The reassembly and flow tracing classes, per protocol:
 
-+---------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| Protocol                                                | Reassembly Class                                 | Flow Tracing Class                            |
-+=========================================================+==================================================+===============================================+
-| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4` | :class:`pcapkit.foundation.reassembly.ipv4.IPv4` |                                               |
-+---------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6` | :class:`pcapkit.foundation.reassembly.ipv6.IPv6` |                                               |
-+---------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
-| :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`  | :class:`pcapkit.foundation.reassembly.tcp.TCP`   | :class:`pcapkit.foundation.traceflow.tcp.TCP` |
-+---------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
++------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
+| Protocol                                                   | Reassembly Class                                 | Flow Tracing Class                            |
++============================================================+==================================================+===============================================+
+| :class:`~pcapkit.protocols.internet.ipv4.protocol.IPv4`    | :class:`pcapkit.foundation.reassembly.ipv4.IPv4` |                                               |
++------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
+| :class:`~pcapkit.protocols.internet.ipv6.protocol.IPv6`    | :class:`pcapkit.foundation.reassembly.ipv6.IPv6` |                                               |
++------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
+| :class:`~pcapkit.protocols.transport.tcp.protocol.TCP`     | :class:`pcapkit.foundation.reassembly.tcp.TCP`   | :class:`pcapkit.foundation.traceflow.tcp.TCP` |
++------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
+| :class:`~pcapkit.protocols.application.dtls.protocol.DTLS` | :class:`pcapkit.foundation.reassembly.dtls.DTLS` |                                               |
++------------------------------------------------------------+--------------------------------------------------+-----------------------------------------------+
 
 .. seealso::
 
-   Please refer to the documentation of :mod:`pcapkit.foundation.reassembly` and
-   :mod:`pcapkit.foundation.traceflow` modules for more information about the
-   reassembly and flow tracing classes, as well as the underlying algorithms.
+   :mod:`pcapkit.foundation.reassembly` and :mod:`pcapkit.foundation.traceflow`
+   document the classes and their algorithms.
 
 New Implementation
 ~~~~~~~~~~~~~~~~~~
 
-A new reassembly or flow tracing class subclasses
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` or
-:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`:
-
-.. note::
-
-   Following is a PoC implementation of a new reassembly class for the IPv4
-   protocol. For documentation purposes, we use the
-   :class:`~pcapkit.foundation.reassembly.ipv4.IPv4` reassembly class as an
-   example, where the comprehensive implementation can be found in the
-   :mod:`pcapkit.foundation.reassembly.ipv4` module.
+A sketch of an IPv4 reassembly class, modelled on
+:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`, whose full implementation is
+:mod:`pcapkit.foundation.reassembly.ipv4`; a flow tracing class subclasses
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` the same way:
 
 .. code-block:: python
 
@@ -862,99 +706,64 @@ A new reassembly or flow tracing class subclasses
    if TYPE_CHECKING:
        from typing import TypeAlias
 
-   # NOTE: We need to specify some useful data structure before creating the
-   # reassembly class, e.g., the data model for the reassembled packet, the
-   # data model for the reassembly table, etc., which will be used to store
-   # the reassembled packet and the reassembly table, respectively.
+   # NOTE: First the data models the class is generic over.
 
-   BufferID: 'TypeAlias' = ...  # a tuple-like object to identify the reassembly
-                                # table entry's ID, e.g. (src, dst, id, proto)
-                                # for both IPv4 and IPv6, and
+   BufferID: 'TypeAlias' = ...  # key of a reassembly table entry, e.g.
+                                # (src, dst, id, proto) for IPv4 and IPv6,
                                 # (src, srcport, dst, dstport) for TCP
 
 
    @info_final
    class Packet(Info):
 
-       # NOTE: This is the data model for the extracted packet, which is
-       # expected to be a dict-like object, and will be used to store the
-       # information from the extracted packets to be reassembled.
+       # NOTE: An extracted packet, as the reassembly reads it.
        ...
 
 
    @info_final
    class DatagramID(Info):
 
-       # NOTE: This is the data model for the reassembled datagram's ID,
-       # which is expected to be a dict-like object, and will be used to
-       # store the information to identify the reassembled datagram.
+       # NOTE: The key identifying a reassembled datagram.
        ...
 
 
    @info_final
    class Datagram(Info):
 
-       # NOTE: This is the data model for the reassembled datagram, which
-       # is expected to be a dict-like object, and will be used to store
-       # the information of the reassembled datagram.
+       # NOTE: A reassembled datagram.
        ...
 
 
    @info_final
    class Buffer(Info):
 
-       # NOTE: This is the data model for the reassembly table, which is
-       # expected to be a dict-like object, and will be used to store the
-       # information of each buffered entry in the reassembly table, that
-       # is to be reassembled with the following fragmented packets.
+       # NOTE: A reassembly table entry, buffering fragments until complete.
        ...
 
 
-   # NOTE: Now we can create the reassembly class, which is expected to be
-   # a subclass of the base class, i.e., Reassembly, and implement the core
-   # methods, i.e., reassembly and submit, for reassembling the fragmented
-   # packets and submitting the reassembled datagram, respectively.
-   #
-   # The ``protocol`` keyword is what registers the class, and it is the key it
-   # will be looked up under. It is required: registration is opt-in, so omitting
-   # it defines a perfectly usable class that is simply not selectable by name.
-   # Note that __protocol_name__ is *not* an opt-in -- it sets the name the class
-   # reports about itself, registered or not. Note also that the keyword is
-   # spelled ``protocol`` here and ``engine`` on Engine above.
+   # NOTE: ``protocol`` registers the class under that key; without it, the
+   # class is not selectable by name.
    class MyReassembly(Reassembly[Packet, Datagram, BufferID, Buffer],
                       protocol='ipv4'):
 
        __protocol_name__ = 'IPv4'  # name of the protocol
        __protocol_type__ = IPv4  # type of the protocol
 
-       # NOTE: This method is to reassemble the fragmented packets, i.e.,
-       # ``info`` formatted as a ``Packet`` instance, into the reassembly
-       # table, i.e., ``self._buffer`` formatted as a dict of ``BufferID``
-       # mapped to ``Buffer`` instances.
+       # NOTE: Buffer ``info`` in ``self._buffer``, a dict of ``BufferID`` to
+       # ``Buffer``.
        def reassembly(self, info: 'Packet') -> 'None':
            ...  # reassembly algorithm implementation
 
-           # NOTE: Once the fragmented packets are reassembled, we need to
-           # submit the reassembled datagram, i.e., ``Datagram`` instance,
-           # to the storage, i.e., ``self._dtgram``, for further processing.
+           # NOTE: Once a buffer is complete, store its datagrams.
            self._dtgram.extend(
                self.submit(...)  # submit reassembled datagram
            )
 
-       # NOTE: This method is to convert the reassembled datagram, i.e.,
-       # ``buf`` formatted as a ``Buffer`` instance, to a ``Datagram``
-       # instance, which is then submitted to the storage, i.e.,
-       # ``self._dtgram``.
+       # NOTE: Convert a complete ``Buffer`` into ``Datagram`` instances.
        def submit(self, buf: 'Buffer', *, bufid: 'BufferID') -> 'list[Datagram]':
-           datagram = ...  # submit algorithm implementation, e.g., to convert
-                           # the reassembled datagram to a list of ``Datagram``
-                           # instances, which is then returned for further
-                           # processing by the caller
+           datagram = ...  # list of ``Datagram`` instances
 
-           # NOTE: Before we submit the reassembled datagram, we need to
-           # run the registered callback functions, if any, to process the
-           # reassembled datagram, e.g., to check if the reassembled datagram
-           # is to be discarded, etc.
+           # NOTE: Run the registered callbacks on the submission.
            for callback in self.__callback_fn__:
                callback(datagram)  # run callback functions
            return datagram
@@ -962,9 +771,8 @@ A new reassembly or flow tracing class subclasses
 Callback Functions
 ~~~~~~~~~~~~~~~~~~
 
-Callback functions can be registered on the reassembly and flow tracing
-classes, to inspect the reassembled datagrams or traced flows as they are
-produced.
+A callback registered on a reassembly or flow tracing class inspects the
+datagrams or flows as they are produced.
 
 .. seealso::
 
@@ -982,7 +790,6 @@ callback runs as each flow is finalised and takes that flow's
 :class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Each should return
 :obj:`None`; any return value is ignored.
 
-A reassembly callback can modify its list in place, which discards datagrams,
-but prefer not to: if the reassembly or tracing result itself is wrong for your
-purpose, subclass the reassembly or flow tracing class and change its algorithm
-instead.
+A reassembly callback can discard datagrams by modifying its list in place, but
+prefer not to: if the result itself is wrong for your purpose, subclass the
+class and change its algorithm instead.

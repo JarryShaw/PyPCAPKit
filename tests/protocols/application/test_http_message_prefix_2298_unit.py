@@ -112,7 +112,7 @@ class TestHTTPv2SettingsMessage(unittest.TestCase):
         from pcapkit.protocols.application.httpv2.protocol import HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # ``None`` is no longer rejected: it builds a parameterless ``SETTINGS``
+        # ``None`` is not rejected: it builds a parameterless ``SETTINGS``
         # frame (#2274), pinned in test_httpv2_frame_default_2274_unit.py.
         for settings, tail in ((42, '42'), ('x', "'x'"), (4.5, '4.5')):
             with self.subTest(settings=settings):

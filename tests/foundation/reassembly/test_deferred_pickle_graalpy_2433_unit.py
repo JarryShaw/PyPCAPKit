@@ -1,56 +1,24 @@
 # -*- coding: utf-8 -*-
-""":class:`Deferred` could not be pickled under protocol 0 or 1 on GraalPy 25.4.
+""":class:`Deferred` pickles under protocol 0 and 1 on GraalPy 25.4.
 
-GitHub issue :issue:`2433`, fixed by :pr:`2435`.
+GitHub issue #2433, fixed by PR #2435.
 
-:issue:`2423` and :issue:`2425` (pinned in
-:mod:`tests.foundation.reassembly.test_deferred_pickle_2423_unit`) gave
-``Deferred`` a ``__getstate__``/``__setstate__`` pair so protocol 0 and 1 no
-longer raised *there*. Neither method is where GraalPy 25.4 actually fails,
-though: :meth:`object.__reduce_ex__` hands protocol 0 and 1 to
-:func:`copyreg._reduce_ex`, which walks ``type(self).__mro__`` for a base to
-compute a base-object state from *before* ``__getstate__`` is ever consulted.
-On CPython that walk passes :class:`~typing.Generic` (a heap type there,
-whose own ``__new__`` is just the inherited, differently-bound
-``object.__new__``) and stops at :class:`object`. On GraalPy, ``Generic`` is
-itself a non-heap (built-in) type, so the walk's first check breaks on
-``Generic`` directly and calls ``Generic(self)``, raising::
+Below protocol 2, :meth:`object.__reduce_ex__` hands the instance to
+:func:`copyreg._reduce_ex`, whose MRO walk stops at the first non-heap base. On
+CPython that is :class:`object`; on GraalPy :class:`~typing.Generic` is a
+built-in type, so the walk calls ``Generic(self)`` and raises::
 
     TypeError: typing.Generic() takes no arguments
 
 ``Deferred`` reduces under protocol 0 and 1 as protocol 2 does, through
-:class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` (#2714), so
-``copyreg._reduce_ex`` -- and its MRO walk -- is not called for those two
-protocols at all. #2435 first did so with a reduction of its own, which
-hard-coded the ``base=object, state=None`` outcome the walk reached on CPython.
+:class:`~pcapkit.utilities.pickle.ReduceAsProtocol2` (#2714), so the walk never
+runs. GraalPy is not in this repository's regular environment, so
+:class:`DeferredGraalPyPickleTests` patches :func:`copyreg._reduce_ex` to raise
+the :exc:`TypeError` real GraalPy 25.4.4 raises.
 
-A cross-reviewer confirmed this directly against real GraalPy 25.4.4
-(``graalpy3.13-community-25.4.4``, downloaded from the
-``oracle/graalpython`` GitHub releases and checksum-verified): this
-module's tests, together with
-:mod:`tests.foundation.reassembly.test_deferred_pickle_2423_unit`, are red
-on ``main`` and green on this fix there, and the full
-:file:`tests/foundation/reassembly/` suite passes clean on this fix on
-both CPython and real GraalPy 25.4.4 (with the generated sample captures
-present -- run :file:`examples/generators/make_samples.py` first if
-reproducing). GraalPy is not available in this repository's regular
-environment, so :class:`DeferredGraalPyPickleTests` below reproduces the
-failure mode by monkeypatching :func:`copyreg._reduce_ex` to raise the exact
-:exc:`TypeError` real GraalPy does -- RED against ``main`` (which still
-routes protocol 0 and 1 through ``object.__reduce_ex__`` ->
-``copyreg._reduce_ex``) and GREEN against this fix (which never calls
-``copyreg._reduce_ex`` for those two protocols at all).
-
-The cross-review on this fix's first revision found a second, independent
-regression in the same method, fixed alongside this test: the protocol 0/1
-branch unconditionally built a hard-coded ``(copyreg._reconstructor, ...)``
-tuple, silently dropping a *subclass*'s own ``__reduce__`` override at
-exactly those two protocols, while protocol 2 and above -- going through
-``object.__reduce_ex__`` unchanged, which always checks for and calls a
-non-default ``__reduce__`` -- kept honouring it.
-:class:`DeferredSubclassReduceOverrideTests` pins the fixed behaviour. It is
-new coverage rather than a regression proof: the override check is new to
-this fix, not something an earlier release got right and then lost.
+:class:`DeferredSubclassReduceOverrideTests` pins that a subclass's own
+``__reduce__`` is honoured at every protocol, which a hard-coded protocol 0/1
+reduction drops.
 
 """
 
@@ -62,10 +30,8 @@ from unittest import mock
 from pcapkit.foundation.reassembly.data.data import Deferred as _Deferred
 from tests._support import reimport_once_per_class
 
-#: Test tier (#1958): cross-interpreter pickling behaviour, same reasoning as
-#: ``tests/foundation/reassembly/test_deferred_pickle_2423_unit.py`` gives for
-#: itself -- pinned on ``ALL`` because it is exactly the kind of thing that can,
-#: and here did, differ between interpreters.
+#: Test tier (#1958): cross-interpreter pickling behaviour belongs on ``ALL``, as in
+#: ``tests/foundation/reassembly/test_deferred_pickle_2423_unit.py``.
 __tier__ = 'ALL'
 
 
@@ -76,26 +42,12 @@ def _analyze(proto: 'object', payload: 'bytes') -> 'tuple[object, bytes]':
 
 def _rebuild_reduce_override_sub(analyze: 'object', proto: 'object', payload: 'bytes',
                                   marker: 'object') -> '_ReduceOverrideSub':
-    """Module-level rebuild function ``_ReduceOverrideSub.__reduce__`` names.
-
-    Has to be importable by qualified name, like ``_analyze`` above, for the
-    same reason given in ``test_deferred_pickle_2423_unit.py``'s module
-    docstring: :mod:`pickle` locates a reduction's callable by name, and a
-    function local to a test method is not importable.
-
-    """
+    """Rebuild function of ``_ReduceOverrideSub.__reduce__``, module-level for :mod:`pickle`."""
     return _ReduceOverrideSub(analyze, proto, payload, marker)
 
 
 class _ReduceOverrideSub(_Deferred):
-    """A ``Deferred`` subclass overriding ``__reduce__``.
-
-    Module-level for the same reason ``_rebuild_reduce_override_sub`` above
-    is: :mod:`pickle` has to be able to locate this class by its qualified
-    name to build a real pickle, which a class nested in a test method is
-    not.
-
-    """
+    """A ``Deferred`` subclass overriding ``__reduce__``, module-level for :mod:`pickle`."""
 
     #: Set by ``__reduce__`` below; read back by the tests. A plain boolean
     #: rather than object identity, since the restored instance after a real
@@ -117,11 +69,8 @@ class _ReduceOverrideSub(_Deferred):
 class DeferredGraalPyPickleTests(unittest.TestCase):
     """Protocol 0 and 1 must not route through ``copyreg._reduce_ex`` at all.
 
-    GraalPy 25.4's failure happens inside that function, before
-    ``__getstate__`` is ever consulted (see the module docstring), so the fix
-    this file pins is that pickling a ``Deferred`` never calls it for
-    protocol 0 or 1 -- simulated here by making the call raise the same
-    :exc:`TypeError` real GraalPy does.
+    GraalPy fails inside that function, simulated here by making it raise the
+    :exc:`TypeError` GraalPy does.
 
     """
 
@@ -129,13 +78,7 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_protocol_0_1_survive_a_copyreg_reduce_ex_failure(self) -> None:
-        """RED on ``main`` (pre-:issue:`2433`), GREEN on this fix.
-
-        A cross-reviewer ran this test against real GraalPy 25.4.4 and
-        confirmed the result, in addition to the monkeypatched reproduction
-        here; see the module docstring for how.
-
-        """
+        """Protocol 0 and 1 round-trip while ``copyreg._reduce_ex`` raises GraalPy's error."""
         from pcapkit.foundation.reassembly.data.data import Deferred
 
         deferred = Deferred(_analyze, 42, b'payload')
@@ -152,11 +95,9 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
                     self.assertIs(restored.analyze, _analyze)
 
     def test_protocol_2_and_above_never_call_copyreg_reduce_ex(self) -> None:
-        """Protocol >= 2 is untouched by this fix -- it never walked the MRO.
+        """Protocol 2 never calls ``copyreg._reduce_ex`` either.
 
-        Patching ``copyreg._reduce_ex`` to blow up therefore has no effect at
-        protocol 2 and above, confirming the bypass above is specific to
-        protocol 0 and 1 rather than a blanket detour around the function.
+        So the bypass above is specific to protocol 0 and 1, not a blanket detour.
 
         """
         from pcapkit.foundation.reassembly.data.data import Deferred
@@ -170,14 +111,7 @@ class DeferredGraalPyPickleTests(unittest.TestCase):
 
 
 class DeferredSubclassReduceOverrideTests(unittest.TestCase):
-    """A subclass's own ``__reduce__`` must be honoured at every protocol.
-
-    Cross-review finding on this fix's first revision: the hard-coded
-    protocol 0/1 tuple ignored such an override, while protocol 2 and above
-    (going through ``object.__reduce_ex__`` unchanged) did not. New coverage
-    rather than a regression proof -- see the module docstring.
-
-    """
+    """A subclass's own ``__reduce__`` must be honoured at every protocol."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

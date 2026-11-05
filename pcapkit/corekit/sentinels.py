@@ -128,10 +128,8 @@ class SentinelMeta(abc.ABCMeta):
 
         klass = super().__new__(cls, name, bases, attrs, **kwargs)
 
-        # NOTE: ``type.__setattr__`` rather than an assignment, which would
-        # reach :meth:`__setattr__` below. The writes ``abc.ABCMeta.__new__``
-        # made above went through it, which is why the type is marked frozen
-        # only now.
+        # NOTE: ``type.__setattr__``, not an assignment, which would reach :meth:`__setattr__`
+        # below; ``abc.ABCMeta.__new__``'s writes went through it, so the type is frozen only now.
         if not klass.__abstractmethods__:
             type.__setattr__(klass, '_instance', object.__new__(cast('Type[Sentinel]', klass)))
             type.__setattr__(klass, '__final__', True)

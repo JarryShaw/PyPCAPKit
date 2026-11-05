@@ -1527,11 +1527,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             raise ProtocolError(f'MH: [Type {type_val}] invalid data: must be bytes, a dict, '
                                 f'an MH data model or a Packet schema, not {data!r}')
 
-        # NOTE: The header has to be a multiple of 8 octets, so the message data
-        # needs padding until ``len(data) + 6`` is aligned. Rounding ``length`` up
-        # without emitting that padding (as ``math.ceil`` would) declares a header
-        # longer than the bytes that follow it, and the re-parse then reads
-        # whatever happens to be past the end of the buffer.
+        # NOTE: Padded until ``len(data) + 6`` is a multiple of 8; rounding ``length`` up alone
+        # would declare octets never emitted, and the re-parse would read past the buffer.
         data_val = self._pad_mh_message(data_val)
 
         # NOTE: A capture cut short rebuilds with the Header Len it declared, not one
@@ -4084,11 +4081,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         fraction = schema.timestamp['fraction']
 
         try:
-            # NOTE: Not the stdlib's ``fromtimestamp``, which takes no time
-            # after 3000 on Windows (#2099). The whole seconds go in as an int
-            # and the fraction as a timedelta, which rounds it to microseconds
-            # half to even as one float did, but loses no precision to the
-            # seconds, so the last second of 9999 is not carried past it.
+            # NOTE: Not the stdlib's, which stops at 3000 on Windows (#2099); the whole seconds
+            # go in as an int, so the fraction cannot carry the last second of 9999 past it.
             timestamp = (fromtimestamp(seconds, datetime.timezone.utc)
                          + datetime.timedelta(seconds=fraction / 65536))  # type: Optional[dt_type]
         except ValueError:
@@ -7707,68 +7701,32 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             subtype_val = self._make_index(subtype, Enum_MNIDSubtype, bits=8, name='MN-ID subtype')
 
         if isinstance(identifier, int) and identifier < 0:
-            # NOTE: checked before the subtype dispatch below, not inside it,
-            # because *no* subtype has a wire form for a negative identifier and
-            # each one fails differently on its own: ``int.to_bytes`` raises
-            # ``OverflowError`` and ``ipaddress.IPv6Address`` an
-            # ``AddressValueError`` -- itself a bare :exc:`ValueError`, which is
-            # exactly the class of leak this handler exists to stop, and which a
-            # guard living inside the ``elif isinstance(identifier, int)`` branch
-            # could not catch, since the ``IPv6_Address`` dispatch never reaches
-            # it.
+            # NOTE: Checked before the subtype dispatch, since no subtype can pack a
+            # negative identifier and each would leak a different bare stdlib error.
             raise ProtocolError(
                 f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_val!r} '
                 f'identifier must be a non-negative int, not {identifier!r}')
 
         if isinstance(identifier, bool):
-            # NOTE: checked before the subtype dispatch, because ``bool`` is an
-            # ``int`` subclass and so would otherwise be converted by
-            # *different* paths below -- ``IPv6Address(1)``, that is ``::1``, for
-            # ``IPv6_Address``, and a one-octet identifier for the
-            # ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake
-            # in every case rather than a value anyone means, so it is refused
-            # before either path can give it a plausible-looking wire form. A
-            # caller who genuinely wants the integer should pass ``int(flag)``.
+            # NOTE: Checked before the dispatch, since a ``bool`` would otherwise pack as
+            # ``::1`` or as one octet; a caller wanting the integer passes ``int(flag)``.
             raise ProtocolError(
                 f'{self.alias}: [OptNo {type}] MN-ID identifier must not be a '
                 f'bool, not {identifier!r} -- pass int({identifier!r}) if the '
                 f'numeric value is what is wanted')
 
-        # NOTE: The wire format is chosen by ``subtype_val`` (see ``mn_id_selector``),
-        # not by the Python type of ``identifier``, so the width has to be taken from
-        # the former. For the ``IPv6_Address`` subtype the schema always packs a fixed
-        # 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
-        # ignores any declared length), so ``identifier`` is normalised to that wire
-        # form here as well, keeping the packed bytes and the declared length derived
-        # from one value instead of two independent computations.
+        # NOTE: ``subtype_val`` picks the wire format (see ``mn_id_selector``), not the type
+        # of ``identifier``; an ``IPv6_Address`` always packs 16 octets, so it is normalised.
         if subtype_val == Enum_MNIDSubtype.IPv6_Address:
             if isinstance(identifier, int) and identifier >= 1 << 128:
-                # NOTE: the upper-bound mirror of the negative-int guard above, and
-                # it belongs here rather than up there because this bound is
-                # subtype-*dependent*: ``2**140`` is a perfectly good identifier for
-                # the ``BytesField`` subtypes -- it simply packs into more
-                # octets -- and only ``IPv6_Address`` caps at 128 bits. Left
-                # unguarded, :class:`ipaddress.IPv6Address` raises
-                # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
-                # handler would otherwise ship with its lower bound guarded and its
-                # upper bound leaking. Checked explicitly rather than by
-                # wrapping the construction below, because that would also
-                # swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or
-                # ``None`` reaching here -- which the branch below handles.
+                # NOTE: Only ``IPv6_Address`` caps at 128 bits, so this bound lives here, and is
+                # checked explicitly so the ``try`` below handles only unconvertible types.
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
                     f'identifier must be an int below 2**128, not {identifier!r}')
             if not isinstance(identifier, ipaddress.IPv6Address):
-                # NOTE: catches ipaddress.AddressValueError -- itself a bare
-                # ValueError -- for every identifier ipaddress.IPv6Address
-                # cannot turn into an address: bytes of the wrong length, a
-                # str that is not an IPv6 literal, or a type it does not
-                # accept at all (float, None, list, dict, bytearray,
-                # memoryview -- ipaddress.IPv6Address only ever dispatches on
-                # bytes, int or str). The ``try`` wraps only this call, not
-                # the whole branch, so it cannot swallow the ProtocolError
-                # raised above for an out-of-range int, which is also a
-                # ValueError subclass.
+                # NOTE: Wraps only this call, turning ``AddressValueError`` for anything
+                # ``IPv6Address`` cannot convert into a ``ProtocolError``.
                 try:
                     identifier = ipaddress.IPv6Address(identifier)
                 except ValueError as error:
@@ -7779,15 +7737,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             id_len = 16
         elif isinstance(identifier, int):
             if subtype_val == Enum_MNIDSubtype.NAI:
-                # NOTE: NAI's field is a StringField (see mn_id_selector), so an
-                # int has to become text -- and unlike the numeric subtypes below,
-                # there is no non-arbitrary way to do that. str(identifier) packs
-                # and round-trips fine, but an NAI is a network access identifier
-                # ('user@realm', RFC 4283), and a bare decimal-digit string is not
-                # one: it is mechanically valid and semantically nonsense, i.e.
-                # a value that is silently accepted and packs into the wrong
-                # thing. Rejected instead, with the explicit spelling a caller
-                # who really wants a decimal-digit NAI can use.
+                # NOTE: A decimal-digit string is not an NAI (``user@realm``, RFC 4283), so an
+                # int is refused rather than packed as text.
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI identifier '
                     f'must be str, not int -- pass str({identifier!r}) if a '
@@ -7797,18 +7748,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             id_len = self._uint_size(identifier, minimum=1)
             identifier = identifier.to_bytes(id_len, 'big')
         elif subtype_val == Enum_MNIDSubtype.NAI:
-            # NOTE: NAI's field is a StringField (see mn_id_selector), which
-            # calls ``identifier.encode(...)`` to pack -- so anything but a
-            # genuine str leaks a bare stdlib exception: AttributeError for
-            # bytes/list/dict (no ``.encode``), TypeError for float/None/an
-            # ipaddress.IPv6Address (no ``__len__`` either, so this branch's
-            # own ``len()`` call below would be the one to raise). Guarded
-            # here, before ``len()``, rather than relying on whichever of
-            # those two happens to fire first. Deliberately not
-            # decoding a ``bytes`` identifier here: an NAI that happens to be
-            # ASCII-encodable is still the caller handing over the wrong
-            # representation, the same "accepts a value that means the wrong
-            # thing" as for an int.
+            # NOTE: The ``StringField`` packs with ``.encode``, so a non-str would leak a bare
+            # stdlib error; ``bytes`` is refused rather than decoded, as the wrong representation.
             if not isinstance(identifier, str):
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype NAI '
@@ -7817,24 +7758,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             # ones, so the length counts those rather than characters (#2684).
             id_len = len(getattr(identifier, 'raw', None) or identifier.encode())
         else:
-            # NOTE: every other subtype's field is a
-            # BytesField(length=pkt['length'] - 1) (see mn_id_selector),
-            # which hands ``identifier`` to ``struct.pack('Ns', ...)``
-            # unconverted -- so anything but bytes leaks a bare stdlib
-            # exception: struct.error for str/list/dict (struct's ``s``
-            # format demands a bytes object), TypeError for float/None/an
-            # ipaddress.IPv6Address (no ``__len__``, so this branch's own
-            # ``len()`` call below would raise instead). Guarded here,
-            # before ``len()``, for the same reason as the NAI branch above.
-            #
-            # bytearray is accepted alongside bytes -- unlike every other
-            # wrong type here, it already round-trips correctly through
-            # ``struct.pack('Ns', ...)`` (measured), so rejecting it would
-            # be a gratuitous behaviour change to a type nothing here is
-            # actually broken for. memoryview looks equally bytes-like but
-            # does *not* survive struct's ``s`` format (measured: same
-            # ``struct.error`` as str/list/dict), so it is rejected with
-            # everything else rather than let through to leak anyway.
+            # NOTE: The ``BytesField`` packs with ``struct``'s ``s`` format, which takes only
+            # ``bytes`` and ``bytearray``; anything else would leak a bare stdlib error.
             if not isinstance(identifier, (bytes, bytearray)):
                 raise ProtocolError(
                     f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_val!r} '
@@ -8865,14 +8790,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if address is None:
             length = 4
         else:
-            # NOTE: Converted through ``parse_ip_address`` rather than with
-            # ``ipaddress.ip_address``, because the conversion happens *here* --
-            # the option length below is derived from the family, so it cannot
-            # wait for the schema -- and a bare conversion therefore turns a
-            # ``bool`` into a perfectly ordinary ``IPv4Address`` that the
-            # schema's own guard can no longer tell from a real address: it
-            # would pack ``address=True`` as ``23080001000000000001``, i.e. a
-            # care-of address of ``0.0.0.1``.
+            # NOTE: Converted here, as the length follows the family, so ``parse_ip_address``
+            # refuses a ``bool`` that would otherwise pack as ``0.0.0.1``.
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {type}] invalid care-of address')
             length = 8 if addr.version == 4 else 20
@@ -9163,14 +9082,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if isinstance(address, bytes) and len(address) not in (4, 16):
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid address: {address!r}')
 
-        # NOTE: The address is normalised rather than passed through, so that the
-        # schema attribute holds the same type it would after a parse. The width is
-        # then taken from the address itself rather than from ``code``, so that the
-        # two cannot be emitted disagreeing. Normalising *here*, ahead of the
-        # schema, is also why the conversion goes through ``parse_ip_address``:
-        # ``ipaddress.ip_address(True)`` is ``0.0.0.1``, and the schema's own
-        # guard cannot see that it was ever a ``bool``, and it would pack
-        # ``address=True`` as ``2906010000000001``.
+        # NOTE: Normalised here, so the attribute matches a parse and the width follows the
+        # address; ``parse_ip_address`` refuses a ``bool`` the schema's guard would never see.
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid address')
 
@@ -9744,12 +9657,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             prefix = option.prefix
 
-        # NOTE: Through ``parse_ip_address`` because the ``V`` flag and the width
-        # are both derived from the family here, ahead of the schema, so a bare
-        # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
-        # guard: ``prefix=True`` with an IPv4-valid ``prefix_length`` would pack
-        # as ``3706801800000001``. The default ``prefix_length=64`` masks it
-        # behind the range check below, so this site can look already guarded.
+        # NOTE: The ``V`` flag and width follow the family here, so ``parse_ip_address`` refuses
+        # a ``bool``; the default ``prefix_length`` only hides it behind the range check.
         addr = parse_ip_address(
             prefix, f'{self.alias}: [OptNo {type}] invalid mobile network prefix')
         ipv4 = addr.version == 4
@@ -9924,12 +9833,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if address is None:
             return Schema_LMAUserPlaneAddressOption(type=type, length=2, reserved=reserved, address=b'')
 
-        # NOTE: Through ``parse_ip_address`` because the option length below is
-        # derived from the family here, ahead of the schema, so a bare
-        # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
-        # guard, packing ``address=True`` as ``3b06000000000001``.
-        # ``None`` is handled above and stays an absent address, which is a
-        # legitimate value here and not what is being rejected.
+        # NOTE: The length follows the family here, so ``parse_ip_address`` refuses a ``bool``
+        # the schema's guard would never see; ``None`` stays an absent address.
         addr = parse_ip_address(
             address, f'{self.alias}: [OptNo {type}] invalid LMA user-plane address')
 
@@ -10419,12 +10324,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if option is not None:
             flag = option.flag
             reserved = option.reserved
-            # NOTE: ``list()`` rather than a cast: the data model stores the
-            # prefixes as a :obj:`tuple`, which
-            # :class:`~pcapkit.corekit.fields.collections.ListField` refuses to
-            # pack -- it raises ``ProtocolUnbound: unsupported type <class
-            # 'tuple'>``; a cast would be a no-op at runtime, so re-making a
-            # parsed Multi-Prefix extension could not work at all.
+            # NOTE: ``list()``, not a cast: the data model holds a :obj:`tuple`, which
+            # ``ListField`` refuses to pack.
             prefixes = list(option.prefixes)
         else:
             prefixes = prefixes or []
@@ -10434,12 +10335,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_MultiPrefixExtension(
             type=type,
-            # NOTE: The extension data is the 4-octet flags word followed by one
-            # **8**-octet prefix apiece, since
-            # :attr:`~pcapkit.protocols.internet.mh.schema.MultiPrefixExtension.prefixes`
-            # is a list of :class:`~pcapkit.corekit.fields.numbers.UInt64Field`.
-            # Counting 16 octets per prefix would declare more octets than are
-            # emitted, so a re-parse would run off the end of the extension.
+            # NOTE: A 4-octet flags word, then 8 octets per prefix, as each is a
+            # ``UInt64Field`` in ``MultiPrefixExtension.prefixes``.
             length=4 + len(prefixes) * 8,
             flags={
                 'P': int(flag),
@@ -10505,8 +10402,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         of the option, in octets, excluding the Option Type and Option
         Length fields"* -- so the whole option, which is what every
         ``_read_opt_*`` below reports back as the parsed option's own
-        ``.length``, is two octets more. The read-side call sites share this
-        helper so the arithmetic lives in one place. The exceptions are the
+        ``.length``, is two octets more. The exceptions are the
         options whose ``Option Length`` is not that octet count: a ``Pad1``
         option, which has no ``Option Length`` field at all (see the ``Note:``
         on :meth:`_read_opt_pad` below), the BADF option, whose length leaves
@@ -10514,18 +10410,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         and acknowledgement options, whose length counts 32-bit words (see
         :meth:`_read_opt_mcast`). Do NOT drop the ``+ 2``.
 
-        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
-        option, whose Option Type and Option Length are one octet each. It
-        is **not** a universal contract for everything this class parses:
-        a CGA extension's Extension Type and Extension Data Length are two
-        octets each [:rfc:`4581#section-2`], so those readers use
-        :meth:`_mh_extension_length` instead. Reusing this helper for them
-        would report every parsed CGA extension two octets short.
+        A CGA extension's type and length fields are two octets each
+        [:rfc:`4581#section-2`], so its readers use :meth:`_mh_extension_length`
+        instead; this helper would report each one two octets short.
 
-        Note that only the *stored-length* read-side call sites are
-        collected here -- most ``_make_opt_*`` methods recompute the wire
-        ``Option Length`` from ``len(value)`` rather than reading a parsed
-        ``.length`` back, so they have nothing to unify against this helper.
+        Only the read side's stored lengths go through it; most ``_make_opt_*``
+        methods recompute ``Option Length`` from the value instead.
 
         Args:
             schema_length: raw ``Option Length`` field value, as read off the wire.
@@ -10588,11 +10478,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             else:
                 meth, maker = name
 
-            # NOTE: The capture cut this option short, as its short read records, so
-            # the octets it lacks read as zeros and it is short of its length. It
-            # stands if its parser takes those zeros and its maker writes the octets
-            # captured back (#2694); otherwise it is refused, as an option running
-            # past the data is (#1325).
+            # NOTE: A cut-short option reads its missing octets as zeros; it stands if its parser
+            # takes them and its maker writes the captured ones back (#2694), else it is refused.
             if '__short_read__' in schema.__dict__:
                 try:
                     with CaughtByCaller(BaseError):

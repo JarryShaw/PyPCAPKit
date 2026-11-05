@@ -89,18 +89,10 @@ def get_parser() -> 'ArgumentParser':
                         help=('Stop dissecting each frame after this protocol, e.g. '
                               '"IPv4" (case-insensitive); the rest of the frame is '
                               'kept as raw data. Third-party engines ignore it.'))
-    # NOTE: ``choices`` rather than a free-form string, because the layer names
-    # are a closed set (``pcapkit.foundation.extraction.Layers``) and a name
-    # outside it is not rejected anywhere downstream -- it simply never matches a
-    # protocol's ``__layer__`` and the parse silently runs to the top of the
-    # stack, which is the failure mode GH-356 was about. ``type=str.lower`` keeps
-    # ``-L Internet`` accepted, matching ``Extractor.__init__``, which lowercases
-    # the value anyway.
-    #
-    # The defaults are :data:`None` and not the ``'None'``/``'null'`` strings:
-    # ``Extractor.__init__`` substitutes its own sentinels for an
-    # omitted value, so passing the strings would only work because it happens to
-    # lowercase ``'None'`` into the sentinel it wants.
+    # NOTE: ``choices``, as nothing downstream rejects an unknown layer name and the
+    # parse would silently run to the top of the stack (GH-356).
+    # NOTE: the defaults are :data:`None`, for which ``Extractor.__init__``
+    # substitutes its own sentinels, not the ``'None'``/``'null'`` strings.
     parser.add_argument('-L', '--layer', action='store', dest='layer', default=None, metavar='LAYER',
                         type=str.lower, choices=['link', 'internet', 'transport', 'application', 'none'],
                         help=('Stop dissecting each frame after its protocol in this '

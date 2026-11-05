@@ -123,20 +123,16 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     def unsupported_reason(cls) -> 'Optional[str]':
         """Why this engine cannot run here, or :data:`None` when it can.
 
-        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, because the import test cannot answer this question.
-        |pcapfile|_'s top-level package imports perfectly well on Python 3.12
-        and newer -- it is ``pcapfile.linklayer`` that fails, and
-        ``pcapfile.savefile`` imports it -- so a guard that only tries
-        ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then
-        escapes from :meth:`__init__` as a hard error instead of degrading to the
-        default engine with a warning, which is what happens when the package is
-        simply absent.
+        Consulted when :class:`~pcapkit.foundation.extraction.Extractor` settles
+        its engine, *before* the import test, which cannot answer this.
+        |pcapfile|_'s top-level package imports on Python 3.12 and newer; it is
+        ``pcapfile.linklayer`` that fails, imported by ``pcapfile.savefile``. So
+        ``import pcapfile`` succeeds and the :exc:`ModuleNotFoundError` escapes
+        from :meth:`__init__` as a hard error instead of degrading to the default
+        engine with a warning.
 
-        The version is checked rather than the import attempted so that the answer
-        does not depend on which of the package's submodules happens to be
-        imported first, and so it is the same answer on a machine that has never
-        installed |pcapfile|_ at all.
+        The version is checked rather than the import attempted, so the answer
+        does not depend on which submodule happens to be imported first.
 
         Returns:
             A short phrase naming the limitation, or :data:`None`.

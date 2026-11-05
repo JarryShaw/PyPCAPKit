@@ -159,9 +159,8 @@ class ShapeTests(unittest.TestCase):
         from pcapkit.vendor.ftp.command import LINE
 
         rendered = LINE('Command', 'FTP Command', '<ENUM>', '<FEAT>', 'pcapkit.vendor.ftp.command')
-        # NOTE: through ``getattr_static`` because both descriptor kinds carry
-        # ``__func__`` there, while ``Command.get.__func__`` exists only on the
-        # bound classmethod -- so this compares sources on either shape.
+        # NOTE: via ``getattr_static``, where both descriptor kinds carry ``__func__``;
+        # ``Command.get.__func__`` exists only on the bound classmethod.
         source = inspect.getsource(inspect.getattr_static(Command, 'get').__func__)
         self.assertIn(source.rstrip('\n'), rendered)
         # A count rather than ``assertIn``, so a failure reports a number instead

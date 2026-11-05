@@ -304,12 +304,8 @@ class EngineConstantTests(unittest.TestCase):
     def test_scapy_constant_selects_the_scapy_engine(self) -> None:
         self._assert_selects('Scapy')
 
-    # NOTE: ``PyShark`` has no selection case of its own. It is covered by the two
-    # tests above, but running it needs the :program:`tshark` *binary* as well as the
-    # :mod:`pyshark` package, and the engine drives it as a subprocess -- so a
-    # stand-in would be a stand-in for the whole extraction rather than for a module,
-    # and would stop testing the routing this class is about. Its constant's value is
-    # asserted against the registry above, which is what a wrong constant would break.
+    # NOTE: no ``PyShark`` selection case: it drives :program:`tshark` as a subprocess,
+    # so a stand-in would replace the whole extraction. Its constant is checked above.
 
     def _fake_pcap_module(self, *, is_pcap_ct: bool):
         """A stand-in :mod:`pcap` module, as one distribution or the other.

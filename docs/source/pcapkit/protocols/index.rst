@@ -3,7 +3,7 @@ Protocol Family
 
 .. module:: pcapkit.protocols
 
-:mod:`pcapkit.protocols` is the collection of all protocol families.
+:mod:`pcapkit.protocols` holds the protocol families.
 
 .. toctree::
    :maxdepth: 2
@@ -15,9 +15,8 @@ Protocol Family
    application/index
    misc/index
 
-All protocol classes are :class:`~pcapkit.protocols.protocol.ProtocolBase`
-subclasses, which parse extracted binary packet data and/or construct a packet
-from given information. The class hierarchy of :mod:`pcapkit.protocols`:
+Every protocol class subclasses :class:`~pcapkit.protocols.protocol.ProtocolBase`,
+parsing a packet from its octets or building one from field values:
 
 .. mermaid::
 
@@ -196,12 +195,12 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
 Protocol Registry
 -----------------
 
-The registry of protocol classes by name is
-:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`.
+:attr:`ProtocolBase.__registry__ <pcapkit.protocols.protocol.ProtocolBase.__registry__>`
+maps names to protocol classes.
 :attr:`ProtocolMeta.registry <pcapkit.protocols.protocol.ProtocolMeta.registry>` reads it
 as ``AnyProtocol.registry``, a read-only view importing nothing, and
 :meth:`ProtocolBase.get_protocol <pcapkit.protocols.protocol.ProtocolBase.get_protocol>`
-looks a name up in it and returns the class.
+returns the class a name maps to.
 
 .. versionremoved:: 1.6.0
 
@@ -212,8 +211,8 @@ looks a name up in it and returns the class.
 
 .. seealso::
 
-   Please refer to :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`
-   for more information.
+   :func:`pcapkit.foundation.registry.protocols.protocol.register_protocol`, which
+   registers a protocol.
 
 Header Schema
 -------------
@@ -343,5 +342,5 @@ Data Model
 
       .. seealso::
 
-         Please refer to :func:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-         for more information with the inserted names to be excluded.
+         :func:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`,
+         which inserts ``__next_name__`` and ``__next_type__``.

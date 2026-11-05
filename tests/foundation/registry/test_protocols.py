@@ -541,10 +541,8 @@ class ProtocolRegistryTests(unittest.TestCase):
                 for patch in patches:
                     patch.stop()
 
-        # NOTE: a member with no explicit transport protocol registers under its
-        # own ``proto``, which names exactly the registry it lives in -- so a TCP
-        # member reaches TCP alone, since ``proto`` names one transport rather
-        # than the whole IANA set (GitHub issue #806).
+        # NOTE: with no explicit transport a member registers under its own ``proto``,
+        # one transport rather than the whole IANA set (#806), so a TCP one reaches TCP.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
@@ -562,9 +560,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: naming both transport protocols is the explicit way to reach both,
-        # one argument each, and it is the only way, since no member's ``proto``
-        # carries a composite to fan out from.
+        # NOTE: naming both transport protocols, one argument each, is the only way to
+        # reach both, since no member's ``proto`` is a composite.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
@@ -574,11 +571,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: ``class_`` is positional, at the sibling position --
-        # maintainer ruling on #815 -- so a class name and a transport
-        # fit in the same call: the class name third, since ``module``
-        # here is a ``str``, and the transport from the fourth position
-        # onward.
+        # NOTE: ``class_`` is positional at the sibling position (ruled on #815): with a
+        # ``str`` module the class name is third and the transports follow.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
@@ -596,16 +590,14 @@ class ProtocolRegistryTests(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry.register_apptype(65004, UnitProtocol)
 
-        # NOTE: a composite is refused: one call registers under one transport
-        # protocol, and without an ``IntFlag`` base (#808) ``tcp | udp`` is a
-        # bare ``int`` rather than a member.
+        # NOTE: a composite is refused: one call registers one transport, and without
+        # an ``IntFlag`` base (#808) ``tcp | udp`` is a bare ``int``.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65005, UnitProtocol,
                                       TransportProtocol.tcp | TransportProtocol.udp)
 
-        # NOTE: a ``str`` transport is coerced to the member with that name --
-        # GitHub pull request #815 ruling -- so a single string reaches the same
-        # registry the equivalent member would.
+        # NOTE: a ``str`` transport is coerced to the member of that name (ruled on
+        # #815), reaching the same registry the member would.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
             with mock.patch.object(reg_transport.UDP, 'register') as udp_register:
                 with mock.patch.object(reg_protocol, 'register_protocol') as register_protocol:
@@ -638,13 +630,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry.register_apptype(65009, UnitProtocol, 'bogus')
 
-        # NOTE: a composite name such as ``'tcp|udp'`` raises for the same
-        # reason the equivalent composite member is refused above: one call
-        # registers under one transport protocol. On an ``IntFlag`` base,
-        # which ``TransportProtocol`` does not have (#808), aenum's ``Flag``
-        # getitem parses a ``'|'``-joined name into a composite value on its
-        # own, so a resolver built on it unguarded would accept this silently
-        # instead of refusing it.
+        # NOTE: refused like the composite member above; on an ``IntFlag`` base (#808)
+        # aenum's getitem would parse ``'tcp|udp'`` into a composite and accept it.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65010, UnitProtocol, 'tcp|udp')
 
@@ -676,17 +663,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
 
-        # NOTE: case-insensitivity does not loosen either refusal above --
-        # ``'TCP|UDP'.lower()`` is still ``'tcp|udp'``, not a member name, and
-        # ``'BOGUS'.lower()`` is still ``'bogus'``, matching no member either.
+        # NOTE: case-insensitivity loosens neither refusal: ``'TCP|UDP'`` and ``'BOGUS'``
+        # lowercase to no member name.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65016, UnitProtocol, 'TCP|UDP')
         with self.assertRaises(RegistryError):
             registry.register_apptype(65017, UnitProtocol, 'BOGUS')
 
-        # NOTE: a ``str`` and its equivalent member reach the registry
-        # identically -- same code, same module -- so a caller cannot tell
-        # which form was passed from the resulting registry state.
+        # NOTE: a ``str`` and its member reach the registry identically, so the
+        # resulting state cannot tell which form was passed.
         with mock.patch.object(reg_transport.TCP, 'register') as tcp_register_str:
             with mock.patch.object(reg_protocol, 'register_protocol'):
                 registry.register_apptype(65011, UnitProtocol, 'tcp')
@@ -695,14 +680,8 @@ class ProtocolRegistryTests(unittest.TestCase):
                 registry.register_apptype(65011, UnitProtocol, TransportProtocol.tcp)
         self.assertEqual(tcp_register_str.call_args, tcp_register_member.call_args)
 
-        # NOTE: anything that is neither a ``str`` nor a ``TransportProtocol``
-        # member raises before the registry loop touches anything.
-        # ``TransportProtocol`` is an ``int`` subclass, so an unguarded fall-through
-        # would let ``registries.get(1)`` resolve to ``TCP`` just as
-        # ``registries.get(TransportProtocol.tcp)`` does -- registering the
-        # port and then exploding on ``proto.name`` before ``register_protocol``
-        # ran, leaving a half-written registry behind. ``True`` is included
-        # because it is an ``int`` subclass and so takes the same path as ``1``.
+        # NOTE: neither a ``str`` nor a member raises before the registry loop, since
+        # ``1`` (or ``True``) would resolve to TCP and leave a half-written registry.
         for bad_transport in (1, True, None):
             with self.subTest(transport=bad_transport):
                 with mock.patch.object(reg_transport.TCP, 'register') as tcp_register:
@@ -714,14 +693,8 @@ class ProtocolRegistryTests(unittest.TestCase):
                 udp_register.assert_not_called()
                 register_protocol.assert_not_called()
 
-        # NOTE: further maintainer ruling on #815: ``class_`` is positional, at the
-        # sibling position, and whether the third positional is a class name or a
-        # transport is decided by ``type(module)`` alone, never by what the value
-        # looks like. Checked against the *real* ``TCP``/``UDP`` registries rather
-        # than mocks, because the branch lives inside the function body and a mock's
-        # ``call_args`` cannot distinguish "landed in ``transport`` and got
-        # registered" from "landed in ``class_`` and was silently dropped" as
-        # cleanly as the registry contents can.
+        # NOTE: per #815, ``type(module)`` alone decides whether the third positional is a
+        # class or a transport; real registries show a silent drop that mocks would hide.
         self._guard_registry(reg_transport.TCP.__proto__, 65200)
         self._guard_registry(reg_transport.UDP.__proto__, 65200)
         with mock.patch.object(reg_protocol, 'register_protocol'):
@@ -729,10 +702,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertNotIn(65200, reg_transport.TCP.__proto__)
         self.assertIs(reg_transport.UDP.__proto__[65200], UnitProtocol)
 
-        # NOTE: two members after a class module preserve call order --
-        # prepended, not appended -- so naming ``udp`` then ``tcp`` still
-        # reaches ``udp`` first and ``tcp`` second, exactly as naming only
-        # members would.
+        # NOTE: members after a class module keep call order (prepended, not appended):
+        # ``udp`` then ``tcp``, as naming only members would.
         self._guard_registry(reg_transport.TCP.__proto__, 65201)
         self._guard_registry(reg_transport.UDP.__proto__, 65201)
         with mock.patch.object(reg_protocol, 'register_protocol'):
@@ -740,9 +711,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIs(reg_transport.TCP.__proto__[65201], UnitProtocol)
         self.assertIs(reg_transport.UDP.__proto__[65201], UnitProtocol)
 
-        # NOTE: a ``str`` transport after a class module reaches ``transport``
-        # the same way a member does, then goes through the ``str``-coercion
-        # path.
+        # NOTE: a ``str`` transport after a class module reaches ``transport`` as a
+        # member does, then goes through ``str`` coercion.
         self._guard_registry(reg_transport.TCP.__proto__, 65202)
         self._guard_registry(reg_transport.UDP.__proto__, 65202)
         with mock.patch.object(reg_protocol, 'register_protocol'):
@@ -750,19 +720,16 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertNotIn(65202, reg_transport.TCP.__proto__)
         self.assertIs(reg_transport.UDP.__proto__[65202], UnitProtocol)
 
-        # NOTE: with a ``str`` module, the third positional is ``class_`` --
-        # a real class name, resolved through ``ModuleDescriptor`` -- and,
-        # with no transport named, the port's own ``AppType`` member supplies
-        # one, exactly as it would with no ``class_`` involved at all.
+        # NOTE: with a ``str`` module the third positional is ``class_``, resolved via
+        # ``ModuleDescriptor``; with no transport, the port's ``AppType`` member gives one.
         self._guard_registry(reg_transport.TCP.__proto__, AppType_TCP.TCP_3exmp.port)
         self._guard_registry(reg_transport.UDP.__proto__, AppType_TCP.TCP_3exmp.port)
         with mock.patch.object(reg_protocol, 'register_protocol'):
             registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module[0], raw_module[1])
         self.assertEqual(reg_transport.TCP.__proto__[AppType_TCP.TCP_3exmp.port].__name__, 'Raw')
 
-        # NOTE: ``class_`` and a further transport combine: the class name
-        # stays in ``class_``, and the transport reaches ``transport`` from
-        # the fourth position onward.
+        # NOTE: ``class_`` and a further transport combine: the class name stays in
+        # ``class_`` and the transport reaches ``transport`` from the fourth position.
         self._guard_registry(reg_transport.TCP.__proto__, 65203)
         self._guard_registry(reg_transport.UDP.__proto__, 65203)
         with mock.patch.object(reg_protocol, 'register_protocol'):
@@ -770,16 +737,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertNotIn(65203, reg_transport.TCP.__proto__)
         self.assertEqual(reg_transport.UDP.__proto__[65203].__name__, 'Raw')
 
-        # NOTE: this is not a heuristic on the value -- with a ``str`` module,
-        # a ``str`` third argument is *always* a class name, even one that
-        # happens to spell a transport's own name. ``'tcp'`` is looked up as a
-        # class in ``raw_module[0]``, which has none, so it fails the same way
-        # any other wrong class name would: a ``ProtocolError`` naming
-        # ``'tcp'`` itself, not a ``RegistryError`` about an unknown transport
-        # -- proof it was never coerced as one. The ``ProtocolError`` rather
-        # than a bare stdlib ``AttributeError`` is GitHub issue #832's; the
-        # property that a ``str`` third positional is resolved as a class
-        # name, never sniffed as a transport, is what this pins.
+        # NOTE: with a ``str`` module a ``str`` third argument is always a class name:
+        # ``'tcp'`` fails as a missing class (#832's ProtocolError), never as a transport.
         with mock.patch.object(reg_protocol, 'register_protocol'):
             with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(65204, raw_module[0], 'tcp', TransportProtocol.udp)

@@ -2,9 +2,8 @@
 """GitHub issue #2500: Linux Netlink socket framing (``nlmsghdr``).
 
 :class:`~pcapkit.protocols.link.netlink.protocol.Netlink` dissects the ``arphrd_type``
-``ARPHRD_NETLINK`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+``ARPHRD_NETLINK`` payload of
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` (see
 :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 16-octet ``nlmsghdr`` fields, the byte-order heuristic
 :func:`~pcapkit.protocols.link.netlink.protocol.nlmsg_byteorder` resolves (see
@@ -189,7 +188,7 @@ class TestNetlink(unittest.TestCase):
     def test_make_explicit_nlmsg_len_is_written_as_given(self) -> None:
         """An explicit ``nlmsg_len`` is written as given, not recomputed --
         the same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.protocol.UDP.make>`
-        keeps an explicit ``total_length`` (:issue:`1155`).
+        keeps an explicit ``total_length`` (#1155).
         """
         from pcapkit.protocols.link.netlink.protocol import Netlink
 

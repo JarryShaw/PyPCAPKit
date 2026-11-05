@@ -787,15 +787,8 @@ class SecurityAssociation:
             raise ProtocolError(f'ESP: invalid SPI: {spi!r}')
 
         if isinstance(destination, bool):
-            # NOTE: checked before the ``ipaddress.ip_address`` call below, for
-            # the same reason as ``_reject_bool`` in
-            # ``pcapkit.corekit.schema.ipaddress`` (this module calls
-            # ``ipaddress.ip_address`` directly rather than through a Field, so
-            # it needs its own copy of the guard): ``bool`` is an ``int``
-            # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
-            # ``2**32`` as IPv4 -- so without this check, ``destination=True``
-            # would silently become ``IPv4Address('0.0.0.1')``, with no
-            # exception and no warning.
+            # NOTE: ``ip_address`` is called directly, not through a field, so the field's ``bool``
+            # guard is repeated; ``True`` would otherwise become ``IPv4Address('0.0.0.1')``.
             raise ProtocolError(
                 f'ESP: invalid destination: must not be a bool, not {destination!r} -- '
                 f'pass int({destination!r}) if the numeric value is what is wanted')
@@ -829,9 +822,8 @@ class SecurityAssociation:
         if self.integrity is not Integrity.NONE:
             expected = self.integrity_suite.key_size
             if len(self.__integrity_key__) != expected:
-                # NOTE: #2411 -- the ``ESP:`` prefix matters more here than on
-                # the exceptions above: ``warn`` reports the caller's frame, so
-                # the message text is the only thing that names the protocol.
+                # NOTE: #2411 -- ``warn`` reports the caller's frame, so here, more than on the
+                # exceptions above, the ``ESP:`` prefix is all that names the protocol.
                 warn(f'ESP: invalid integrity key: {self.integrity.name} expects a '
                      f'{expected}-octet key, got {len(self.__integrity_key__)} octets; '
                      f'the ICV will very likely fail to verify', ProtocolWarning)
@@ -1149,13 +1141,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
                 version=version, packet=packet, warning=False,
             )
 
-        # NOTE: The ICV length comes from the security association, not from
-        # |cryptography|_, so the split and the truncation check are both
-        # possible whether or not the algorithms are available. Doing them
-        # first means a truncated packet is reported as TRUNCATED rather than
-        # masked as UNSUPPORTED, and that an UNSUPPORTED packet still reports
-        # the ``icv`` it carries -- which for a combined-mode algorithm is the
-        # authentication tag a caller may well want to see.
+        # NOTE: The ICV length comes from the association, so splitting first reports a truncated
+        # packet as TRUNCATED, not UNSUPPORTED, and an UNSUPPORTED one still carries its ``icv``.
         icv_length = association.icv_length
         if icv_length > len(data):
             return self._make_opaque(

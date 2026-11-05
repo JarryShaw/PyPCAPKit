@@ -396,10 +396,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Payload for protocol construction.
 
         """
-        # NOTE: IPv6 parses its upper layer after the headers it walked, not one
-        # past itself, but its walk stops short of an extension header only
-        # where that header is kept raw (at a limit, in a later fragment, or
-        # where it does not parse), so no rebuilt upper layer reads this place.
+        # NOTE: IPv6 parses its upper layer after the headers it walked, and its walk stops short
+        # only of a header kept raw, so no rebuilt upper layer reads this place.
         token = _exthdr_rebuilt.set(cls._rebuilt_exthdr_depth() + 1)
         try:
             return super()._make_payload(data)
@@ -448,9 +446,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             message = (f'{self.alias}: a chain of IPv6 extension headers reached the limit of '
                        f'{limit} headers; the rest of the packet, from Next '
                        f'Header {int(cast("int", proto))}, is left undissected')
-            # NOTE: Inside a payload being rebuilt, the layer it is rebuilt for
-            # warns of the same octets once its own parse gets here, as for
-            # :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
+            # NOTE: Inside a payload being rebuilt, the layer it is rebuilt for warns of the
+            # same octets once its own parse gets here, as for ``config.FRAME_LAYER_LIMIT``.
             if not rebuilding.get():
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
@@ -498,9 +495,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             or to the end of the parent's (:issue:`2689`).
 
         """
-        # NOTE: The length this layer hands on bounds the payload, so octets the
-        # capture cut off the frame past it are none of the next layer's (#2653).
-        # A layer declaring none hands the frame's cut on instead (#2689).
+        # NOTE: The length this layer hands on bounds the payload, so a cut past it is none of
+        # the next layer's (#2653); a layer declaring none hands the frame's cut on (#2689).
         token = frame_length.set(None) if declared else None
         try:
             next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]

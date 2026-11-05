@@ -487,11 +487,8 @@ class ARP(Link[Data_ARP, Schema_ARP],
             :exc:`AttributeError`, bool or not.
 
         """
-        # NOTE: checked before the ``ptype`` dispatch, for the placement reason
-        # ``_reject_bool`` in ``pcapkit.corekit.schema.ipaddress`` gives: the
-        # non-IP branches below never reach ``parse_ip_address``, so without it
-        # a ``bool`` gets their generic ``ProtocolError`` rather than the
-        # ``FieldValueError`` the IP branches raise for it (#2166).
+        # NOTE: Checked before the ``ptype`` dispatch, so a ``bool`` raises ``FieldValueError``
+        # on the non-IP branches too, not their generic ``ProtocolError`` (#2166).
         if isinstance(addr, bool):
             raise FieldValueError(
                 f'{self.__class__.__name__}: invalid protocol address: must not be a bool, '

@@ -257,9 +257,7 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
 
         self.assertEqual(data.length, 12)
         self.assertIsNone(data.rkey)
-        # NOTE: the option is the only thing in the segment's payload-free options list, so it
-        # is the last 12 octets of the packed segment -- the fixed 20-octet TCP header plus
-        # this option is the whole packet.
+        # NOTE: the segment is the 20-octet header plus this sole option, so the option is its last 12 octets.
         self.assertEqual(packed[-12:], bytes([0x1E, 0x0C, 0x00, 0x00]) + bytes.fromhex('0102030405060708'))
 
     def test_with_key_round_trip_is_twenty_octets(self) -> None:

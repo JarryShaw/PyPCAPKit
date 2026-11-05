@@ -119,45 +119,18 @@ class AHUnitTests(unittest.TestCase):
         post_init.assert_called_once()
 
     def test_docstring_cites_the_extension_header_registry(self) -> None:
-        """GitHub issue #931.
+        """GitHub issue #931: the class docstring cites the right authorities.
 
-        The class docstring's extension-header *membership* claim must
-        rest on IANA's authoritative *IPv6 Extension Header Types*
-        registry (and this package's own registry, generated from it),
-        not the ``protocol-numbers-1.csv`` *IPv6 Extension Header* column
-        that #926 repointed the const generator away from -- that column
-        is a derived signal, not the registry :rfc:`8200#section-4` names
-        as authoritative, and disagreed with it on header 147
-        (``BIT_EMU``).
-
-        :rfc:`4302#section-3.1.1` is cited too, but only for what it
-        actually says: an IPv6-context placement recommendation ("should
-        appear after hop-by-hop, routing, and fragmentation extension
-        headers"), not a membership assertion -- membership is the
-        registry's claim, per
-        ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
-        "being *in* that registry is what makes something an extension
-        header" ruling.
-        Rephrasing the placement sentence as "places it among the IPv6
-        extension headers" overstates the RFC.
-
-        The section's separate IPv4-context sentence ("placed after the
-        IP header ... before the next layer protocol") is legitimate
-        prose here too -- it is the primary-source evidence that AH
-        also travels directly as an IPv4 payload, exactly as
-        :mod:`~pcapkit.protocols.internet.hip.protocol` cites its own IPv4
-        appendix for the same reason. Per
-        ``docs/source/contributing/conventions/extension-header-subclassing.rst``'s
-        "own-protocolhood on its own is not sufficient" ruling (MH is the
-        settling case),
-        that fact *qualifies* an already-standalone header for a base
-        besides :class:`~pcapkit.protocols.internet.ipv6_ext.protocol.IPv6_Ext`;
-        it does not *make* the header standalone, and the RFC has no
-        say in which base is named, so a claim that the RFC "makes it a
-        standalone protocol" or "names ``IPsec`` as the second base" is
-        unsupported by the cited section. So this test targets the wrong
-        phrasings themselves rather than banning "IPv4" outright, which
-        would forbid the legitimate use kept above.
+        Membership rests on IANA's *IPv6 Extension Header Types* registry, which
+        :rfc:`8200#section-4` names as authoritative, not on the
+        ``protocol-numbers-1.csv`` column #926 moved the const generator off
+        (it disagreed on 147, ``BIT_EMU``). :rfc:`4302#section-3.1.1` is cited
+        only for what it says: IPv6 placement after hop-by-hop, routing and
+        fragmentation, and IPv4 placement after the IP header. Per
+        :ref:`extension-header-subclassing`'s *The IPv4-Payload Test*, the IPv4
+        sentence *qualifies* AH for a second base; it neither makes AH
+        standalone nor names the base. So the test bans the wrong phrasings, not
+        the word "IPv4".
         """
         import re
 
@@ -171,10 +144,8 @@ class AHUnitTests(unittest.TestCase):
         self.assertNotIn('second base', doc)
         self.assertNotIn('directly after an IPv4 header', doc)
 
-        # Pin the claim, not just the phrase: whatever the RFC-placement
-        # parenthetical attached directly to the registry-membership
-        # sentence says, it must not smuggle in IPv4 evidence for that
-        # claim, regardless of how a future revision words it.
+        # Pin the claim, not just the phrase: the parenthetical on the
+        # membership sentence carries no IPv4 evidence, however it is worded.
         membership_clause = re.search(r'registry lists it at 51 \((.*?)\)', doc)
         self.assertIsNotNone(membership_clause, 'could not locate the membership clause')
         self.assertNotIn('IPv4', membership_clause.group(1))

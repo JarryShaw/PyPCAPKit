@@ -432,11 +432,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         """
         next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
-        # NOTE: No options is not the same as no options area. The header is at
-        # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
-        # padding options. Passing the empty list through the same path produces
-        # them; returning ``[], 0`` would emit the 2 fixed octets alone, under a
-        # ``Hdr Ext Len`` that ``(0 - 6) // 8`` makes ``-1``.
+        # NOTE: No options still means six octets of padding options; returning ``[], 0``
+        # would emit the fixed two octets alone under a ``Hdr Ext Len`` of ``-1``.
         options_value, total_length = self._make_hopopt_options(
             options if options is not None else [])
 
@@ -606,10 +603,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             else:
                 meth, maker = name
 
-            # NOTE: The capture cut this option short, as its short read records, so
-            # the octets it lacks read as zeros. It stands if its parser takes those
-            # zeros and its maker writes the octets captured back (#2694); otherwise
-            # it is refused, as an option running past the data is (#1325).
+            # NOTE: A capture-cut option reads its missing octets as zeros; it stands if its parser
+            # takes them and its maker writes the captured ones back (#2694), or is refused (#1325).
             if '__short_read__' in schema.__dict__:
                 try:
                     with CaughtByCaller(BaseError):
@@ -714,9 +709,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             total_length += pad_len
             return options_list, total_length
 
-        # NOTE: Options given as parsed data are emitted as they are, padding
-        # included and in place, so that a parsed header rebuilds byte for
-        # byte; only a header left short of alignment gets trailing padding.
+        # NOTE: Parsed options are emitted as they are, padding in place, so a parsed header
+        # rebuilds byte for byte; only a header short of alignment gets trailing padding.
         options_list = []
         for key, option in options.items(multi=True):
             code = self._make_index(key, Enum_Option, bits=8, name='option type')
@@ -1000,10 +994,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             if TYPE_CHECKING:
                 schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
-            # NOTE: An unresolvable *string* key raises KeyError rather than
-            # minting a member, so only a hand-constructed schema hits this
-            # guard. An unassigned *wire* value still mints via _missing_ and
-            # never reaches here.
+            # NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value
+            # mints via _missing_, so only a hand-constructed schema reaches this guard.
             tid_key = None
             try:
                 tid_key = schema.info['type']
@@ -1253,10 +1245,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             ProtocolError: If the option is malformed.
 
         """
-        # NOTE: An unresolvable *string* key raises KeyError rather than
-        # minting a member, so only a hand-constructed schema hits this guard.
-        # An unassigned *wire* value still mints via _missing_ and never
-        # reaches here.
+        # NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value
+        # mints via _missing_, so only a hand-constructed schema reaches this guard.
         seed_key = None
         try:
             seed_key = schema.flags['type']
@@ -2293,32 +2283,19 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
     def _hopopt_option_length(schema_len: 'int') -> 'int':
         """Compute a HOPOPT option's whole-option length from its on-the-wire ``Opt Data Len``.
 
-        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
-        (what each ``Schema_*Option.len`` here holds) counts *"the length of
-        the Option Data field of this option, in octets"* -- i.e. it
-        excludes the Option Type and Opt Data Len fields themselves, so the
-        whole option, which is what every ``_read_opt_*`` below reports back
-        as the parsed option's own ``.length``, is two octets more. This is
-        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
-        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
-        one helper so the arithmetic has a single home. Do NOT drop the
-        ``+ 2``.
+        Per :rfc:`8200#section-4.2`, ``Opt Data Len`` (each ``Schema_*Option.len``)
+        counts *"the length of the Option Data field of this option, in octets"*,
+        so the whole option, which each ``_read_opt_*`` reports as ``.length``,
+        is two octets more. Do NOT drop the ``+ 2``.
 
-        Section 4.2 is the citation because it defines the TLV option format and
-        contains the sentence quoted above. The Hop-by-Hop Options header this
-        class implements is :rfc:`8200#section-4.3`, but it defers option
-        encoding to Section 4.2 (*"one or more TLV-encoded options, as
-        described in Section 4.2"*) and its only length field is
-        ``Hdr Ext Len``, *"the length of the Hop-by-Hop Options header in
-        8-octet units, not including the first 8 octets"*: the whole header, a
-        different quantity from one option's ``Opt Data Len`` in octets.
-        Section 4.3 remains the reference for the header itself, as in the
-        ``Note:`` on the whole extension header being a multiple of 8 octets.
+        Section 4.2 is cited because the Hop-by-Hop Options header of
+        :rfc:`8200#section-4.3` defers option encoding to it (*"one or more
+        TLV-encoded options, as described in Section 4.2"*), and its own
+        ``Hdr Ext Len`` is *"the length of the Hop-by-Hop Options header in
+        8-octet units, not including the first 8 octets"*, not one option's.
 
-        Note that only the *stored-length* read-side call sites are
-        collected here -- most ``_make_opt_*`` methods recompute the wire
-        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed
-        ``.length`` back, so they have nothing to unify against this helper.
+        Only the read side's stored lengths go through it; most ``_make_opt_*``
+        methods recompute ``Opt Data Len`` from the value instead.
 
         Args:
             schema_len: raw ``Opt Data Len`` field value, as read off the wire.

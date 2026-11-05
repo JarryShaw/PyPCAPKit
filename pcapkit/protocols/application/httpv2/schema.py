@@ -167,8 +167,8 @@ class FrameType(EnumSchema[Enum_Frame]):
 
         """
         # Seeded with ``Flags(0)``, as the construct path is, so a frame with no
-        # flag set, routine in HTTP/2, still reports ``__flags__`` as ``Flags``:
-        # an ``in`` test on a plain ``int`` raises TypeError. The memberless
+        # flag set still reports ``__flags__`` as ``Flags``: an ``in`` test on a
+        # plain ``int`` raises TypeError. The memberless
         # ``FrameType.Flags``, which Python 3.11+ refuses to call, keeps the
         # plain ``int`` for the frame schemas that inherit it unchanged.
         flags = self.Flags(0) if self.Flags.__members__ else 0

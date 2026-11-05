@@ -341,14 +341,11 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
        rather than by its attributes (:issue:`2733`).
 
     """
-    # NOTE: ``dictdumper`` 0.8.5 escapes keys and values itself (DictDumper#123,
-    # #772). The ``plist`` writer, which ``'xml'`` maps to as well, still needs a
-    # string XML 1.0 cannot spell written as bytes (#1262), and an aware datetime
-    # converted to UTC before ``<date>`` (#1448).
+    # NOTE: ``plist`` (and ``'xml'``) still needs XML-1.0-unspellable strings written
+    # as bytes (#1262) and aware datetimes in UTC (#1448); ``dictdumper`` escapes the rest.
     is_plist_output = issubclass(output, dictdumper.plist.PLIST)
-    # NOTE: ``dictdumper.json`` escapes a character above ``U+FFFF`` as one five-
-    # or six-digit ``\uXXXX``, misread as a four-digit escape and text (#1261);
-    # ``_append_string`` and ``_append_object`` below write a surrogate pair.
+    # NOTE: ``dictdumper.json`` escapes a character above ``U+FFFF`` as one long
+    # ``\uXXXX``; the overrides below write a surrogate pair instead (#1261).
     is_json_output = issubclass(output, dictdumper.json.JSON)
     # NOTE: ``dictdumper.plist`` skips every ``None`` value and item, so a
     # ``plist`` report would lack keys the ``json`` one has (#1257).
@@ -412,9 +409,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             if counts[key] > 1:
                 result.setdefault(key, []).append(val)
             else:
-                # NOTE: read by indexing, so that a model overriding it is
-                # honoured -- the traceflow and reassembly models resolve a
-                # deferred ``packet`` there.
+                # NOTE: indexed, so the traceflow and reassembly models can
+                # resolve a deferred ``packet`` there.
                 result[key] = model[key]
         return result
 
@@ -511,9 +507,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             elif isinstance(o, NoValueType):
                 result = '<NO_VALUE>'
             elif isinstance(o, OrderedMultiDict):
-                # NOTE: one single-key mapping per entry, in wire order, since a
-                # mapping keyed by name would group repeats under the first (#1263);
-                # keys an ``Info`` export excludes are left out, as in ``fields`` (#2003).
+                # NOTE: one single-key mapping per entry, in wire order, so repeats
+                # stay apart (#1263); excluded keys are left out, as in ``fields`` (#2003).
                 skip = excluded(o)
                 result = [
                     {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}

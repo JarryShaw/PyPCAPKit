@@ -129,10 +129,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         reserved: int
 
 
-# NOTE: The option helpers are shared with HOPOPT and live in
-# :mod:`pcapkit.protocols.internet.ipv6_ext.schema`. The functions below bind
-# what differs between the two headers: the ``IPv6-Opts`` error prefix, and the
-# option schemas of this module.
+# NOTE: The option helpers shared with HOPOPT live in ``ipv6_ext.schema``; these bind the
+# ``IPv6-Opts`` error prefix and this module's option schemas.
 
 
 def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
@@ -497,11 +495,8 @@ Option.register(Enum_Option.Quick_Start, _QuickStartOption)
 class QuickStartOption(Option, EnumSchema[Enum_QSFunction]):
     """Header schema for IPv6-Opts quick start options."""
 
-    # NOTE: This declaration scopes the QS-function registry to this class. Without
-    # it the subclasses below register into the *parent* ``Option`` registry, whose
-    # keys are IPv6-Opts option *types* -- and since ``Quick_Start_Request`` is 0
-    # and ``Report_of_Approved_Rate`` is 8, they would clobber option types 0
-    # (``Pad1``) and 8 (``SMF_DPD``). ``hopopt.py`` carries the same declaration.
+    # NOTE: Scopes the QS-function registry here; in the parent's, keyed by option type, the
+    # subclasses below would clobber ``Pad1`` (0) and ``SMF_DPD`` (8).
     __enum__: 'DefaultDict[Enum_QSFunction, Type[QuickStartOption]]' = collections.defaultdict(lambda: None)  # type: ignore[arg-type,return-value]
 
     #: Flags.

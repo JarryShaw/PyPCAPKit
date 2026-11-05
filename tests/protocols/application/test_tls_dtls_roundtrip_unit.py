@@ -2,7 +2,7 @@
 """TLS and DTLS records rebuild byte for byte.
 
 Hand-crafted wire octets for every content type and handshake-message shape
-the TLS and DTLS dissectors implement (:issue:`2437`): ``handshake`` carrying a ``ClientHello``,
+the TLS and DTLS dissectors implement (#2437): ``handshake`` carrying a ``ClientHello``,
 a ``ServerHello``, a message-TYPE-level-only type, and several messages
 coalesced in one record; ``alert``; ``change_cipher_spec``;
 ``application_data``; and, for DTLS, both an unfragmented handshake message

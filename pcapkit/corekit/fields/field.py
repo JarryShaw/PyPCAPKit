@@ -56,8 +56,7 @@ _T = TypeVar('_T')
 #: back the *same* default object to every context, so a mutable default would
 #: be the shared global this is meant to avoid.
 #:
-#: Measured, because the two cases differ and the difference is easy to state
-#: wrongly: a thread gets its own ledger, but an :mod:`asyncio` task does *not*
+#: A thread gets its own ledger, but an :mod:`asyncio` task does *not*
 #: -- :func:`asyncio.create_task` copies the current context, and a copied
 #: context carries the same list object, so a task started after a ledger exists
 #: shares and mutates it. :func:`_zero_pad_budget` is how such a task gets a
@@ -182,10 +181,8 @@ def _zero_filled_items(name: 'str', length: 'int', data: 'bytes',
                 )
         ledger[1] += padding
 
-    # NOTE: The items credit the zeros they read as octets supplied, so they are taken off in
-    # advance and those left unread given back, an enclosing fill's too, which it took off
-    # (#2756, #2760); items that fail credit an unknown share, so the octets read go back as
-    # they were.
+    # NOTE: Items credit the zeros they read as supplied octets, so the fill is debited up front and the
+    # unread rest given back (#2756, #2760); a failed item restores the ledger as it was.
     read = ledger[0]
     ledger[0] -= padding
     filled = io.BytesIO(data + bytes(padding))
@@ -271,13 +268,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         _template: 'str'
         _callback: 'Callable[[Self, dict[str, Any]], None]'
 
-    # NOTE: Declared on the class, not only assigned in :meth:`__init__`, so that
-    # :attr:`default` is answerable for every field. A field class is free to
-    # replace :meth:`__init__` without chaining to this one -- as
-    # :class:`~pcapkit.corekit.fields.collections.ListField` does, since a list of
-    # fields takes no default value of its own -- and reading :attr:`default` off
-    # one of those would otherwise raise :exc:`AttributeError` for a private
-    # attribute rather than report that the field declares no default. See #422.
+    # NOTE: Declared on the class so :attr:`default` answers even for a field whose ``__init__`` does
+    # not chain to this one, as ``ListField``'s does not (#422).
     _default: '_T | NoValueType' = NO_VALUE
 
     @property
@@ -472,12 +464,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         pre_processed = self.pre_process(value, packet)
 
-        # NOTE: CPython's ``s`` and ``p`` formats take a bytearray, PyPy's take
-        # bytes alone (``TypeError: expected bytes, got bytearray object``), so a
-        # bytearray is handed over as bytes, packing identically on both (#2004).
-        # The ``c`` format is converted too: CPython's refuses a bytearray and
-        # GraalPy's takes one, so converting it packs alike everywhere (#2015).
-        # A memoryview is left to the engine, which CPython refuses for all three.
+        # NOTE: A bytearray goes over as bytes for ``s``/``p`` (PyPy refuses it, #2004) and ``c`` (CPython
+        # refuses it, #2015), so every engine packs alike; a memoryview is left to the engine.
         if isinstance(pre_processed, bytearray) and self.template[-1:] in ('s', 'p', 'c'):
             pre_processed = bytes(pre_processed)
         return struct.pack(self.template, pre_processed)
@@ -528,18 +516,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         if not isinstance(buffer, bytes):
             buffer = buffer.read(length)
 
-        # NOTE: ``length`` is frequently wire-derived -- resolved by a
-        # ``_length_callback`` against the very packet being parsed, per
-        # :meth:`Field.__call__` below, or by a schema's own selector building a
-        # field from a value it just read off the wire (e.g. HIP's
-        # ``host_id_hi_selector`` returning ``BytesField(length=pkt['hi_len'])``) --
-        # and is thus attacker-controlled: a corrupt or hostile capture can
-        # declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a
-        # length that ``buffer`` falls short of is provably bogus: the padding
-        # cannot recover data that was never in the buffer, only zero-fill for
-        # it, and no field this large is legitimate to begin with. Honouring it
-        # would allocate and zero-fill up to ``length`` octets on nothing but
-        # the packet's own say-so. Cf. #554.
+        # NOTE: ``length`` is often wire-derived, so past ``MAX_ZERO_PAD_LENGTH`` a length the buffer falls
+        # short of is bogus, and honouring it would zero-fill on the packet's own say-so (#554).
         ceiling = config.MAX_ZERO_PAD_LENGTH
         if ceiling != -1 and length > ceiling and len(buffer) < length:
             raise FieldValueError(
@@ -547,22 +525,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 f'but only {len(buffer)} octet(s) are available.'
             )
 
-        # NOTE: The ceiling above bounds one field; this bounds their sum. A
-        # declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every
-        # time it is declared, so 200 of them amplify 4,800 wire octets into
-        # 50.0 MiB of retained zeros with the ceiling doing exactly what it was
-        # written to do. Cf. #573.
-        #
-        # ``max(length, 0)`` is defensive rather than a case anything is known to
-        # reach. :attr:`length` here resolves through :func:`struct.calcsize`, so
-        # it cannot be negative; the classes that instead answer it straight out
-        # of ``self._length``, which *is* negative for a variable-length field --
-        # :class:`~pcapkit.corekit.fields.misc.PayloadField` and
-        # :class:`~pcapkit.corekit.fields.misc.SchemaField` -- each replace this
-        # method outright and so never arrive here. The clamp costs one
-        # comparison and stops a negative width ever *granting* padding allowance
-        # for reading nothing, which is the one way this bookkeeping could be
-        # turned against itself.
+        # NOTE: The ceiling above bounds one field and this bounds their sum (#573); ``max(length, 0)``
+        # is defensive, so a negative width can never grant padding allowance.
         width = max(length, 0)
         supplied = len(buffer) if len(buffer) < width else width
         padding = width - supplied
@@ -618,26 +582,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 )
             ledger[1] += padding
 
-        # NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*
-        # octets of the field -- the buffer ran out, so what is missing is
-        # whatever came after what was read -- so the zeros belong at the end,
-        # where the unread octets were. ``rjust()`` would put them at the
-        # front, which asserts that the octets never read were the *leading*
-        # ones, and that is wrong for every byte order rather than only for
-        # little-endian ones. Under ``rjust()``, one octet of a four-octet
-        # little-endian 120 (``0x78``) reads as 2,013,265,920, and three octets
-        # of a four-octet big-endian ``0x01020304`` read as ``0x10203``.
-        # ``ljust()`` answers 120 and ``0x1020300``. The big-endian error is the
-        # more dangerous of the two -- it scales the value *down*, so it passes a
-        # sanity check far more easily than the inflated little-endian one. See
-        # #604.
-        #
-        # The choice decides what a truncated field *reports*, not *whether* a
-        # truncated capture parses, which must not change: the
-        # accommodation itself is deliberate (#431) and the budget above is built
-        # around preserving it. An entirely empty buffer pads to all zeros either
-        # way, so the end-of-option-list and ``Pad1`` reads the option and list
-        # loops depend on are unaffected.
+        # NOTE: ``ljust()``, not ``rjust()``: a short read lost the trailing octets, so zeros go at the end
+        # for any byte order (#604); it changes what a cut field reports, not whether it parses (#431).
         value = struct.unpack(self.template, buffer[:length].ljust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 

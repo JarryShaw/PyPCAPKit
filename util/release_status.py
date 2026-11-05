@@ -219,10 +219,8 @@ def report() -> 'int':
     # Reconcile each job against its OWN evidence, not against each other: a
     # self-heal mixes jobs that skipped because their artefact existed with jobs
     # that ran, and demanding uniformity would read that mix as #888.
-    # NOTE: a list, not a generator, on purpose: every publisher's evidence is
-    # read before any verdict, as the shell form's ``set -u`` reads each one,
-    # so an unset evidence variable ends the script even after a failure. A
-    # generator would short-circuit at the first unreconciled publisher.
+    # NOTE: a list, so every publisher's evidence is read and an unset one ends the
+    # script, as ``set -u`` would; a generator would stop at the first failure.
     all_reconciled = all([reconciled(job, evidence) for job, evidence in TARGETS])  # pylint: disable=use-a-generator
     results = [var(job) for job, _ in TARGETS]
     all_skipped = all(result == 'skipped' for result in results)

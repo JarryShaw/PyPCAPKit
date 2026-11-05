@@ -69,13 +69,8 @@ class TheAenumPremiseTests(unittest.TestCase):
                          'aenum imports with builtins.NoneType bound; the shim in '
                          'pcapkit/utilities/compat.py may no longer be needed')
         if ON_GRAALPY:
-            # NOTE: GraalPy's ``ImportStarNode.doImport`` (oracle/graalpython,
-            # ``graalpython/com.oracle.graal.python/src/com/oracle/graal/python/
-            # nodes/bytecode/ImportStarNode.java``) catches the AttributeError of
-            # a missing ``__all__`` name in the handler for a missing ``__all__``,
-            # whose module-dict fallback skips ``_`` names. So ``_common``'s
-            # star import binds no ``_Addendum`` and ``_constant`` fails on it
-            # (#2083). An AttributeError here means GraalPy now matches CPython.
+            # NOTE: GraalPy's ``ImportStarNode`` skips ``_`` names when an ``__all__`` name
+            # is missing, so ``_Addendum`` is unbound (#2083); CPython raises AttributeError.
             self.assertEqual(proc.stdout.split()[1], 'NameError', proc.stdout)
             self.assertIn("'_Addendum'", proc.stdout)
         else:

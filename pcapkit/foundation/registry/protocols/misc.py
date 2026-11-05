@@ -107,9 +107,8 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
             subclass.
 
     """
-    # NOTE: this writes into both Frame's and PCAP-NG's registries, which are
-    # keyed alike, so the key check is the same for either and Frame names it.
-    # :func:`register_pcap` and :func:`register_pcapng` name one each.
+    # NOTE: Frame's and PCAP-NG's registries are keyed alike, so one key check
+    # serves both and Frame names it.
     _check_code(code, Enum_LinkType, Frame)
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))

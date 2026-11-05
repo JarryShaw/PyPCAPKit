@@ -199,9 +199,8 @@ class OptionLengthCutTests(unittest.TestCase):
                         raw = whole[:cut]
                         with self.subTest(header=cls.__name__, option=whole.hex(), cut=cut):
                             header, messages = self.parse(lambda: cls(raw))  # pylint: disable=cell-var-from-loop
-                            # NOTE: An SMF_DPD option the data ends in before its
-                            # ``Opt Data Len`` sizes its identifier schema by the zero
-                            # read there, at two octets, which its fields run past.
+                            # NOTE: An SMF_DPD option cut before ``Opt Data Len``
+                            # sizes its identifier at two octets, which its fields overrun.
                             if code != Option.SMF_DPD or cut > start + 1:
                                 self.assertEqual(messages, [])
                             self.assertEqual((header.data, refusals(messages)), (raw, []))

@@ -111,9 +111,8 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     args_ = [f'{key}=NO_VALUE' for key in cls.__fields__]
     dict_ = [f'{key}={key}' for key in cls.__fields__]
 
-    # NOTE: Only where the class defines none (``hasattr`` is always true). Without it,
-    # ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.
-    # ``NoPayload`` declares an argument-less ``__init__`` so that none is generated.
+    # NOTE: Only where the class defines none, as ``NoPayload`` does (``hasattr`` is always true);
+    # without one, ``Schema(...)`` skips ``__post_init__``, leaving omitted fields as field objects.
     if '__init__' not in cls.__dict__:
         # NOTE: A typed ``__init__`` only for a class with fields, own or inherited.
         if args_:
@@ -351,11 +350,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
         """Convert :class:`Schema` into :obj:`dict`.
 
         Important:
-            We only convert nested :class:`Schema` objects into :obj:`dict` if
-            they are the direct value of the :class:`Schema` object's attribute.
-            Should such :class:`Schema` objects be nested within other data
-            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
-            leave them intact rather than converting them into :obj:`dict`.
+            Only a nested :class:`Schema` that is an attribute's direct value
+            is converted into :obj:`dict`; one held within another type, such
+            as :obj:`list`, :obj:`tuple` or :obj:`set`, is left intact.
 
         Note:
             A schema unpacked as the value of a
@@ -421,13 +418,9 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             Packed :class:`Schema` as :obj:`bytes`.
 
         Notes:
-            Since we do not know the length of the packet, we use a
-            reasonable default value ``-1`` for the ``__length__``
-            field, as the :class:`~pcapkit.corekit.fields.field.Field`
-            class will consider negative value as a placeholder.
-
-            If you want to pack the packet with the correct length,
-            please provide the ``__length__`` value before packing.
+            The packet's length being unknown, ``__length__`` defaults to
+            ``-1``, which :class:`~pcapkit.corekit.fields.field.Field` takes
+            as a placeholder; give ``__length__`` to pack the correct length.
 
         """
         if packet is None:
@@ -486,9 +479,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 continue
 
             if isinstance(field, PaddingField):
-                # NOTE: the octets as captured, or zeros when there are none
-                # (#1223) -- see :meth:`PaddingField.pack
-                # <pcapkit.corekit.fields.strings.PaddingField.pack>`.
+                # NOTE: the octets as captured, or zeros when there are none (#1223), per
+                # :meth:`PaddingField.pack <pcapkit.corekit.fields.strings.PaddingField.pack>`.
                 self.__buffer__[field.name] = field.pack(data, packet)
                 continue
 
@@ -509,9 +501,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 temp = bytes(field.length)
 
             if isinstance(field, SchemaField) and len(temp) < field.length:
-                # NOTE: Re-emit the ``__remainder__`` a nested schema left unread while it still
-                # packs to its ``__remainder_offset__``; else zero-fill, keeping the declared
-                # width (#1292, #1380). Not for a SwitchField: PCAP-NG's spans the whole stream.
+                # NOTE: Re-emit a nested schema's unread ``__remainder__`` at its ``__remainder_offset__``,
+                # else zero-fill the width (#1292, #1380); not a SwitchField's, which spans the stream.
                 if isinstance(data, Schema):
                     record = data.__dict__  # type: Mapping[str, Any]
                 elif isinstance(data, collections.abc.Mapping):
@@ -711,15 +702,13 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
-                # NOTE: A forward match consumes neither the stream nor ``__length__``, and its
-                # buffer is zeroed, as in ``pack``, so ``len(self)`` counts consumed octets only.
-                # The rewind is by the octets read, which come back short near the stream's end.
+                # NOTE: A forward match consumes neither the stream nor ``__length__``, and its buffer
+                # is zeroed as in ``pack``; the rewind is by the octets read, short near the end.
                 data.seek(-len(byte), io.SEEK_CUR)
                 self.__buffer__[field.name] = b''
 
-                # NOTE: Left out of the record, but the values it matched past the
-                # end of the data are zeros all the same, so the fields after it
-                # are told (#2727).
+                # NOTE: Left out of the record, but what it matched past the end of the
+                # data is zeros all the same, so the fields after it are told (#2727).
                 if len(byte) < length:
                     packet.setdefault('__short_read__', (field.name, len(byte)))
             elif isinstance(field, OptionField) and field.option_padding > 0:
@@ -828,10 +817,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
                 :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.
 
         """
-        # NOTE: The earliest a bare ``@final`` can be caught, once per class, as in
-        # ``Info.__new__``. Both markers are inherited, so read from ``cls.__dict__``:
-        # an inherited ``BASE`` would skip finalising and leak bookkeeping from
-        # ``to_dict`` (#1498), and an inherited ``__final__`` would blame a subclass.
+        # NOTE: Catches a bare ``@final`` once per class, as in ``Info.__new__``, via ``cls.__dict__``:
+        # inherited, ``BASE`` leaks ``to_dict`` bookkeeping (#1498) and ``__final__`` blames a subclass.
         if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise SchemaError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
@@ -859,9 +846,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
         """
         for name, field in self.__fields__.items():
-            # NOTE: With a fallback, as ``from_dict`` seeds only the keys it is given. Only
-            # ``NO_VALUE`` is unset: a ``None`` is a chosen absence, as ``unpack`` stores
-            # for a failed ConditionalField, so a default here would break the round trip.
+            # NOTE: A fallback, as ``from_dict`` seeds only given keys. Only ``NO_VALUE`` is unset:
+            # ``None`` is a chosen absence, as ``unpack`` stores for a failed ConditionalField.
             value = self.__dict__.get(name, NO_VALUE)
             if value is not NO_VALUE:
                 continue
@@ -881,10 +867,8 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
 
     def __update__(self, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
                    **kwargs: '_VT') -> 'None':
-        # NOTE: Keys with the same names as the class's builtin methods will be
-        # renamed with the class name prefixed as mangled class variables
-        # implicitly and internally. Such mapping information will be stored
-        # within the ``__map__`` attribute.
+        # NOTE: A key named like a builtin method is stored as ``_<ClassName><key>``,
+        # the renaming kept both ways in ``__map__`` and ``__map_reverse__``.
 
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
@@ -909,7 +893,6 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             if key in self.__builtin__:
                 new_key = f'_{__name__}{key}'
 
-                # NOTE: We keep record of the mapping bidirectionally.
                 self.__map__[key] = new_key
                 self.__map_reverse__[new_key] = key
 
@@ -918,9 +901,7 @@ class Schema(ReduceAsProtocol2, Mapping[str, _VT], Generic[_VT], metaclass=Schem
             # if key in self.__dict__:
             #     raise KeyExists(f'{key!r} already exists')
 
-            # NOTE: We don't rewrite the key names here, just keep the
-            # original ones, even though they might break on the ``.``
-            # (:obj:`getattr`) operator.
+            # NOTE: Keys are kept as given, even where ``getattr`` cannot reach them.
 
             # if isinstance(key, str):
             #     key = re.sub(r'\W', '_', key)
@@ -1159,7 +1140,7 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
 
     Examples:
 
-        To create an enumeration mapping supported schema, simply
+        Subclass it with the enumeration:
 
         .. code-block:: python
 
@@ -1169,8 +1150,7 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                # if the enumeration number is not found in the mapping
                __default__ = lambda: UnknownSchema  # by default, None
 
-        then, you can use inheritance to create a list of schemas
-        for this given enumeration mapping:
+        then subclass that per code, or list of codes:
 
         .. code-block:: python
 

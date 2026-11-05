@@ -44,16 +44,9 @@ __all__ = [
 
 #: Attribute a frame's capture timestamp is stashed under.
 #:
-#: `DPKT`_ keeps the two halves of a record apart -- its reader yields
-#: ``(timestamp, bytes)`` and only the bytes become a packet -- so a frame on its
-#: own does not know when it was captured. Anything that reads a frame *after* the
-#: extraction loop has moved on therefore has no way back to the timestamp unless
-#: the engine puts it somewhere, and this is where
-#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` puts it.
-#:
-#: A `DPKT`_ packet carries a :attr:`~object.__dict__`, so this is an ordinary
-#: attribute rather than anything exotic; the name is spelled out here so that
-#: nothing has to know it by hand.
+#: `DPKT`_'s reader yields ``(timestamp, bytes)`` and only the bytes become a
+#: packet, so :class:`~pcapkit.foundation.engines.dpkt.DPKT` stashes the
+#: timestamp here for anything that reads a frame after the extraction loop.
 TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 
 #: Attribute a frame's record octets are stashed under.
@@ -727,21 +720,14 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
                      ipaddress.ip_address(ipv6.src)),            # source IP address
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),            # destination IP address
-                # NOTE: The reassembly key is the Fragment header's Identification
-                # (:rfc:`8200#section-4.5`), not the IPv6 header's Flow Label. The
-                # label is optional and routinely zero, so keying on it collapses
-                # every datagram between one address pair into a single buffer and
-                # interleaves their fragments.
+                # NOTE: keyed on the Fragment header's Identification, not the Flow
+                # Label, which is routinely zero and would merge every datagram.
                 ipv6_frag.id,                                    # identification
                 Enum_TransType.get(ipv6_frag.nxt),               # next header field in IPv6 Fragment Header
             ),
             num=count,                                           # original packet range number
-            # NOTE: ``IP6FragmentHeader.frag_off`` is a ``__bit_fields__`` property
-            # over the 13-bit on-wire Fragment Offset, i.e. already shifted out of
-            # the flags word, so it counts 8-octet units (:rfc:`8200#section-4.5`).
-            # The reassembly machinery indexes the datagram buffer with ``fo``, so
-            # the units have to become octets here, exactly as
-            # :func:`pcapkit.toolkit.scapy.ipv6_reassembly` does.
+            # NOTE: ``frag_off`` is already shifted out of the flags word, so it
+            # counts 8-octet units; reassembly indexes by octets.
             fo=ipv6_frag.frag_off * 8,                           # fragment offset
             ihl=hdr_len,                                         # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m_flag),                           # more fragment flag

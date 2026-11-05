@@ -31,36 +31,8 @@ finally:
 __all__ = ['Socket']
 
 ###############################################################################
-# NOTE: this crawler does not crawl: the registry below is maintained by hand;
-# see #507.
-#
-# Its source was the well-known-socket table in
-# https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number,
-# and two separate things broke that. Wikipedia answers ``requests``'
-# default ``python-requests/<version>`` User-Agent with HTTP 403 (measured
-# 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent,
-# 200 and 114117 bytes for a descriptive one), so ``Vendor._request`` could not
-# fetch the page at all. And the table itself was deleted from the article on
-# 2026-08-25, in revision 1371327031 ("deleted some irrelevant technical
-# tables"), leaving the page with a single ``wikitable`` -- the IPX header
-# format one -- so that ``find_all('table', class_='wikitable')[3]`` raises
-# ``IndexError`` even once the fetch is fixed.
-#
-# Pointing ``LINK`` at the last revision that still carries the table
-# (``oldid=1368657333``) would have worked, but it buys none of what a crawler
-# is for: a network fetch pinned to a frozen snapshot is all of the fragility
-# with none of the freshness, and it would still be selecting the table by
-# index out of a document that nothing stops from changing shape again. The
-# registry itself is closed, which is what settles it -- IPX socket numbers
-# were Novell's to assign, and Novell's own documentation still ends the list
-# with "software developers writing NetWare applications can contact Novell to
-# reserve well-known sockets". No Novell remains to contact, and IPX
-# will not gain new socket numbers, so there is nothing for a crawler to pick
-# up on its next run.
-#
-# The table below is therefore transcribed from that last revision that carried
-# it, row for row, and each entry names the primary source for the assignment
-# where one exists.
+# NOTE: maintained by hand, not crawled (#507): the Wikipedia table is gone from
+# the live article, and IPX socket numbers are a closed Novell registry.
 ###############################################################################
 
 #: Socket number registry, transcribed from the last revision of the Wikipedia
@@ -71,19 +43,8 @@ __all__ = ['Socket']
 #: rendered above it. Names go through :meth:`~Vendor.rename`, so the generated
 #: member is the :meth:`~Vendor.safe_name` of the first element.
 DATA = {
-    # NOTE: 0x0000 was never listed as a well-known socket in the scraped
-    # registry table, but it is the IPX protocol's own default for the
-    # ``dst``/``src`` socket field (an ordinary "unspecified socket"), so it
-    # must be present regardless of what the registry says; see #492.
-    #
-    # That is a statement about the *scraped table*, not about the number being
-    # unsourced. XSIS 028112 Appendix D (cited under RANGES below) reserves it
-    # in the primary standard: "The socket numbers zero and all ones are
-    # reserved to mean unknown and all, respectively." The same sentence
-    # reserves all-ones -- 0xFFFF, to mean "all" -- and this table has no entry
-    # for that; ``_missing_`` resolves 0xFFFF through the "Dynamically Assigned"
-    # range instead. Adding it would change the generated file, so it is left
-    # out.
+    # NOTE: absent from the scraped table, but the IPX default for the ``dst``/``src``
+    # socket field (#492); all-ones (0xFFFF) is left to ``_missing_``'s dynamic range.
     0x0000: ('Unspecified', "Unspecified socket; this is IPX's own default for the dst/src socket field."),
 
     # Sockets in the "Registered by Xerox" range below. These are formally
@@ -118,23 +79,11 @@ DATA = {
     # Processes", https://www.novell.com/documentation/nw6p/ipx_enu/data/hvvqznoa.html
     # -- still live. That page is also the citation the article itself used.
     #
-    # NOTE: Table 2 has **seven** rows and not all of them are below. In full
-    # it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456
-    # Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have
-    # never been in this enumeration, and 0x9004 is independently reserved by
-    # :rfc:`1634#section-4`, "Information Exchange Packet Formats" -- "The
-    # socket number 0x9004 is a Novell reserved socket number for exclusive use
-    # with IPX WAN protocol exchange" -- and by the same section of the two RFCs
-    # it obsoletes: :rfc:`1551` word for word, and :rfc:`1362` with
-    # "information exchange" for "protocol exchange". So they are known
-    # omissions with good sourcing, not rows nobody noticed. Adding them would
-    # add members to the generated file and so give up the byte-identity proof
-    # #507 rests on.
+    # The archived revision writes "NetBIOS" and "Diagnostic Packet" for Novell's
+    # "Novell NetBIOS" and "Diagnostics", kept against renaming.
     #
-    # Some of the rows below also depart from Novell's own wording: Novell writes
-    # "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and
-    # "Diagnostic Packet". Those are the archived revision's strings, kept for
-    # the same member-renaming reason as everything else here.
+    # NOTE: Table 2's 0x9001 NLSP and 0x9004 IPXWAN (:rfc:`1634#section-4`) are known
+    # omissions: adding them would break the byte-identity #507 rests on.
     0x0451: ('NetWare Core Protocol', 'NetWare Core Protocol, NCP – used by Novell NetWare servers'),
     0x0452: ('Service Advertising Protocol', 'Service Advertising Protocol, SAP'),
     0x0453: ('Routing Information Protocol', 'Routing Information Protocol, RIP'),
@@ -159,23 +108,8 @@ DATA = {
     0x0457: ('Serialization Packet', 'Serialization Packet, used for NCP as well'),
     0x4003: ('Used by Novell NetWare Client', 'Used by Novell NetWare Client'),
 
-    # NOTE: :rfc:`1132`, "A Standard for the Transmission of 802.2 Packets over
-    # IPX Networks", reserves this one -- "The IPX socket 0x8060 has been
-    # reserved by Novell for the implementation of this protocol."
-    #
-    # The archived table renders the row as ``LLC[4]``, where ``[4]`` is
-    # Wikipedia's own footnote marker for its citation of that RFC rather than
-    # any part of the protocol name -- the cell markup is an ``<a>`` reading
-    # "LLC" followed by ``<sup id="cite_ref-RFC1132_4-1">``. The spaces in
-    # ``LLC [ 4 ]`` are not in the page at all: they are an artefact of the
-    # scrape, which joined the cell's strings with a space and so picked up the
-    # ``<span class="cite-bracket">`` wrappers around the ``[`` and ``]`` as
-    # separate tokens. The value is right and the explanation of it was not.
-    # Both the name and the comment are kept verbatim so that
-    # regenerating the constant file stays a no-op against the last scraped
-    # output: renaming the member would break
-    # :attr:`pcapkit.const.ipx.socket.Socket.LLC_4` for anyone using it, which
-    # is a call for the maintainer rather than for #507.
+    # NOTE: :rfc:`1132` reserves 0x8060; ``[4]`` is Wikipedia's footnote marker, kept
+    # verbatim, as renaming :attr:`~pcapkit.const.ipx.socket.Socket.LLC_4` breaks it (#507).
     0x8060: ('LLC_4', 'LLC [ 4 ]'),
 
     # :rfc:`1791`, "TCP And UDP Over IPX Networks With Fixed Path MTU" -- "The
@@ -183,24 +117,8 @@ DATA = {
     # receive the packets on IPX/IPXF socket 0x9092", and "IPXF fragments are
     # received by IPXF on the IPX socket 0x9093".
     #
-    # NOTE: the name ``TCP over IPXF`` is wrong, and it is the archived
-    # revision's wording rather than the RFC's. RFC 1791 reserves 0x9091 for TCP
-    # over plain **IPX**: the section that assigns it is s3, "Running TCP Over
-    # IPX", which opens "Unlike UDP, TCP runs directly over IPX", and the same
-    # section ends "Hence, running TCP over IPXF is not recommended." So the
-    # member name describes the one arrangement the cited RFC advises against.
-    # Only the name is wrong; 0x9091 is the right value for TCP. It is kept for
-    # the member-renaming reason set out above, and is the strongest candidate in
-    # this table for a rename with a deprecated alias.
-    #
-    # ``UDP over IPXF`` for 0x9092, by contrast, is accurate: "UDP must run on
-    # IPXF rather than directly on IPX", and the socket is named as
-    # "IPX/IPXF socket 0x9092".
-    #
-    # One more scruple about wording: "reserved" is the RFC's own word for
-    # 0x9091 only. For 0x9092 and 0x9093 it says packets "must" be sent and
-    # received on them, which amounts to the same reservation in practice but is
-    # an inference rather than a quote.
+    # NOTE: ``TCP over IPXF`` is the archived wording, kept against renaming: RFC 1791
+    # section 3 assigns 0x9091 to TCP over plain IPX and advises against IPXF.
     0x9091: ('TCP over IPXF', 'TCP over IPXF'),
     0x9092: ('UDP over IPXF', 'UDP over IPXF'),
     0x9093: ('IPXF', 'IPXF, IPX Fragmentation Protocol'),
@@ -232,16 +150,8 @@ DATA = {
 #: dynamic sockets", so the upper bound is 0x7FFF. The transcribed 0x4FFF is
 #: kept because widening it would change the generated ``_missing_``.
 RANGES = [
-    # NOTE: order is significant. The generated ``_missing_`` tests these in
-    # sequence and returns on the first match, so a wide range placed before a
-    # narrower one it fully contains would mask that narrower one -- it would
-    # never be reached, and the socket would be misdescribed under the wide
-    # range's name instead. See GitHub issue #841, which found exactly that:
-    # ``(0x0020, 0x003F)`` is a strict subset of ``(0x0001, 0x0BB8)``, and both
-    # ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` are strict subsets of
-    # ``(0x0BB9, 0xFFFF)``. Each subset range is therefore listed ahead of the
-    # wider range that contains it, rather than in the order the rows appeared
-    # in the archived revision.
+    # NOTE: order matters: ``_missing_`` returns on the first match, so each range
+    # precedes any wider one containing it (#841).
     (0x0020, 0x003F, 'Experimental'),
     (0x0001, 0x0BB8, 'Registered by Xerox'),
     (0x4000, 0x4FFF, 'Dynamically Assigned Socket Numbers'),
@@ -314,10 +224,8 @@ class Socket(Vendor):
 
             enum.append(f'#: {self.wrap_comment(desc)}\n    {renm} = {pval}')
 
-        # NOTE: the range names are emitted raw, spaces and all, rather than
-        # through ``safe_name``, because that is what the scrape did and what
-        # the shipped constant file contains; sanitising them here would rename
-        # every member ``_missing_`` builds for a range; see #507.
+        # NOTE: range names are emitted raw, not through ``safe_name``, as the shipped
+        # constant file has them; sanitising would rename every range member (#507).
         for start, stop, name in RANGES:
             miss.append(f'if 0x{start:04X} <= value <= 0x{stop:04X}:')
             miss.append(f'    #: {self.wrap_comment(name)}')

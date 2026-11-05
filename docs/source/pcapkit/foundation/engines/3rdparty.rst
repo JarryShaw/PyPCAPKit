@@ -107,9 +107,8 @@ The `PyShark`_ engine for :class:`~pcapkit.foundation.extraction.Extractor`.
    ``asyncio.get_event_loop_policy().get_event_loop()``. With no running loop,
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
-   ``RuntimeError: There is no current event loop in thread 'MainThread'``. 3.13
-   was not measured, and is expected to work, being on the
-   deprecated-but-functional side of that change.
+   ``RuntimeError: There is no current event loop in thread 'MainThread'``; it
+   extracts a capture on 3.13.
 
    **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
    parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults

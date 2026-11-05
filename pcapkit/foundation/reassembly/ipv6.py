@@ -44,15 +44,12 @@ def _next_header_offset(header: 'bytes') -> 'int':
     position = IPV6_HEADER_LEN
     proto = header[offset]
 
-    # NOTE: ``header[position]`` is the Next Header field of the extension
-    # header starting at ``position`` and ``header[position + 1]`` its length,
-    # but which of the two length encodings applies is decided by the *previous*
-    # header's Next Header value -- hence ``proto`` trailing one step behind.
+    # NOTE: the length encoding of the header at ``position`` is decided by the previous
+    # header's Next Header value, hence ``proto`` trailing one step behind.
     while position + 1 < len(header):
         offset = position
-        # NOTE: AH is the one extension header that does not measure its
-        # length in 8-octet units (:rfc:`4302#section-2.2`), which is why it
-        # is singled out rather than falling to the common case below.
+        # NOTE: AH is the one extension header whose length is not in 8-octet
+        # units (:rfc:`4302#section-2.2`), so it is singled out.
         if proto == Enum_TransType.AH:
             position += (header[position + 1] + 2) * 4
         else:

@@ -704,11 +704,9 @@ class _MPTCP(Schema):
     #: option header: this schema is what :attr:`Option.registry
     #: <pcapkit.protocols.schema.EnumSchema.registry>` dispatches to
     #: for ``kind == Multipath_TCP`` and, unlike the other option schemas, it
-    #: does not inherit :class:`Option` and so consumes ``kind`` and ``length``
-    #: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,
-    #: ``length`` in bits 8-15, and the subtype in bits 16-19 of this 3-octet
-    #: window -- which is why ``subtype`` reads from bit 16 and ``length`` has
-    #: to read from bit 8.
+    #: does not inherit :class:`Option`, so it consumes ``kind`` and ``length``
+    #: itself. In this 3-octet window ``length`` is bits 8-15 and the subtype
+    #: bits 16-19 (:rfc:`8684` section 3).
     test: 'MPTCPSubtypeTest' = ForwardMatchField(BitField(length=3, namespace={
         'length': (8, 8),
         'subtype': (16, 4),

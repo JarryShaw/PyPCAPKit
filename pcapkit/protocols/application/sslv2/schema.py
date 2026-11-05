@@ -95,7 +95,7 @@ def sslv2_hello_probe_is_plausible(msg_type: 'Enum_HandshakeType', probe: 'bytes
             and ``SERVER_HELLO`` are checked, every other type is vacuously
             plausible.
         probe: The body's first ``min(10, inner_length)`` octets, forward-matched
-            by :attr:`SSLv2.probe` -- not yet actually consumed.
+            by :attr:`SSLv2.probe` -- not yet consumed.
         inner_length: The body's declared length (``RECORD-LENGTH`` minus the
             one octet :attr:`SSLv2.msg_type` already consumed).
 

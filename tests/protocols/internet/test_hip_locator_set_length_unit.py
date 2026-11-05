@@ -1,75 +1,43 @@
 # -*- coding: utf-8 -*-
 """HIP ``LOCATOR_SET`` counts ``Length`` in bytes and pads from its own length.
 
-GitHub issue #679. Two defects, neither fixable alone:
+GitHub issue #679 fixed two defects together:
 
-1. ``LocatorSetParameter.padding`` read the **nested** ``Locator.len`` rather than
-   the parameter's. A :class:`~pcapkit.corekit.fields.collections.ListField` packs
-   each nested schema into the enclosing packet context --
-   :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>` opens with
-   ``packet.update(self.__dict__)`` -- and :class:`Locator` declares a ``len`` of
-   its own, so by the time ``padding`` was evaluated ``pkt['len']`` was the last
-   locator's. That is 4 for any IPv6 locator whatever the count, so that
-   expression appended exactly four octets to every ``LOCATOR_SET``.
-2. The parameter's ``len`` was ``sum(Locator.len)``, in the 4-octet units
+1. ``LocatorSetParameter.padding`` read the nested ``Locator.len`` rather than
+   the parameter's: :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
+   opens with ``packet.update(self.__dict__)``, so each nested locator
+   overwrites ``pkt['len']`` in the shared context.
+2. ``Length`` was ``sum(Locator.len)``, in the 4-octet units
    :rfc:`8046#section-4` gives ``Locator Length``, where :rfc:`7401`
-   Section 5.2.1's ``Length`` is "length of the Contents, in bytes". So contents of
-   24, 48 and 120 octets declared ``Length`` 4, 8 and 20 -- ``4n`` where the
-   contents are ``24n``.
+   Section 5.2.1 counts bytes.
 
-Why they had to move together
------------------------------
+Why Shapes, Not Counts
+----------------------
 
-Always-4 padding gives ``4 + 24n + 4 = 24n + 8``; and because ``24n`` is a
-multiple of eight, the RFC total for a byte-count ``Length`` of ``24n`` is
-``11 + 24n - 3``, the same ``24n + 8``. So the two errors cancelled and the
-parameter was conformant -- 32, 56 and 128 octets at n = 1, 2, 5 -- which is why
-#651 and #664 deliberately excluded this one site: correcting the padding alone
-would have left ``24n + 4``, four octets short at every count.
+For *n* plain IPv6 locators the errors cancel: always-4 padding gives
+``4 + 24n + 4``, the RFC total for a ``Length`` of ``24n``. So a sweep over *n*
+cannot tell broken from fixed, and fixing either defect alone is
+non-conformant. The other shapes do discriminate; unfixed, they packed:
 
-**The cancellation was never general, and that is the whole reason this module
-sweeps shapes rather than counts.** It needs every locator to be 24 octets and
-there to be at least one of them. Measured on ``f0999858e``, the shapes where it
-does not hold were non-conformant without the fix:
-
-===================  ==============  ======  =========================
+===================  ================  ======  =========================
 shape                declared ``len``  packed  RFC total for the contents
-===================  ==============  ======  =========================
-empty, n = 0         0               **4**   8
-plain IPv6, n = 1    4               32      32
-plain IPv6, n = 2    8               56      56
-plain IPv6, n = 5    20              128     128
-SPI, n = 1           5               **35**  32
-SPI, n = 2           10              **63**  64
-plain then SPI       9               **59**  56
-SPI then plain       9               **60**  56
-===================  ==============  ======  =========================
+===================  ================  ======  =========================
+empty, n = 0         0                 **4**   8
+plain IPv6, n = 1    4                 32      32
+plain IPv6, n = 2    8                 56      56
+plain IPv6, n = 5    20                128     128
+SPI, n = 1           5                 **35**  32
+SPI, n = 2           10                **63**  64
+plain then SPI       9                 **59**  56
+SPI then plain       9                 **60**  56
+===================  ================  ======  =========================
 
-The SPI-bearing and mixed shapes were not even multiples of eight, nor was the
-empty one. A sweep over n = 1..5 of
-plain locators passes by cancellation without the fix and would pass a half-fix
-too, so it discriminates nothing; the empty set, the SPI-bearing variant and a
-mixed set in both orders are the shapes that do.
-
-The reader consumed the same quantity
--------------------------------------
-
-This is why #679 was judged a different class of change from #664's
-one-expression padding fix rather than a second instance of it.
-``LocatorSetParameter.locators`` is declared
-``ListField(length=lambda pkt: pkt['len'])``, and :meth:`Schema.unpack
-<pcapkit.protocols.schema.Schema.unpack>` reads exactly ``field.length``
-octets off the stream and hands only those to the list. With ``Length`` at ``4n``
-a set of *n* plain locators was offered ``4n`` octets of a ``24n``-octet
-contents, so -- measured on ``f0999858e`` -- n = 2 and n = 5 both parsed **one**
-truncated locator, warned ``SchemaWarning: packet length < 0``, left the
-remainder of the record unconsumed, and repacked to something other than what was
-read. In a whole packet that remainder was read as a second, fabricated
-parameter: a one-copy ``LOCATOR_SET`` frame parsed as *two* parameters. The
-expression was right and the quantity was wrong, so fixing the unit repairs the
-reader rather than breaking it -- which
+The reader consumes the same quantity: ``LocatorSetParameter.locators`` is
+``ListField(length=lambda pkt: pkt['len'])``, so a ``4n`` ``Length`` offered it
+part of a ``24n``-octet contents. It parsed one truncated locator, and in a
+whole packet read the remainder as a second, fabricated parameter.
 :meth:`test_every_shape_parses_back_to_the_locators_it_was_built_from` and
-:meth:`test_a_lone_locator_set_parameter_survives_a_hip_packet` assert directly.
+:meth:`test_a_lone_locator_set_parameter_survives_a_hip_packet` pin the reader.
 """
 from __future__ import annotations
 
@@ -89,21 +57,14 @@ HIP_BASE = {
     'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b'',
 }
 
-#: A plain IPv6 locator: ``Locator Length`` 4, so 8 + 16 = 24 octets.
+#: A plain IPv6 locator, ``Locator Length`` 4, so 8 + 16 = 24 octets.
 PLAIN = {'ip': '2001:db8::1'}
-#: An SPI-bearing locator: ``Locator Length`` 5, so 8 + 20 = 28 octets.
-#:
-#: ``type=1`` is not redundant. ``_make_param_locator_set`` sets
-#: ``length = 5`` when ``spi`` is given but leaves ``type`` at its default 0, and
-#: :func:`~pcapkit.protocols.internet.hip.schema.locator_value_selector` accepts
-#: only ``type == 0, len == 4`` or ``type == 1, len == 5`` -- so ``spi=`` without
-#: an explicit ``type=1`` raises ``FieldValueError: invalid locator type or
-#: length``. That is a separate rough edge in the maker, and without ``type=1``
-#: these shapes could not reach the SPI path at all.
+#: An SPI-bearing locator, ``Locator Length`` 5, so 8 + 20 = 28 octets.
+#: ``type=1`` restates what ``_make_param_locator_set`` derives from ``spi``.
 SPI = {'ip': '2001:db8::2', 'spi': 0xdeadbeef, 'type': 1}
 
-#: Every shape, with the octets each locator record occupies. Ordered so that the
-#: shapes the cancellation covers come first and the ones it does not follow.
+#: Every shape, with its contents in octets; the shapes the cancellation covers
+#: come first.
 SHAPES = (
     ('empty', [], 0),
     ('plain n=1', [PLAIN], 24),
@@ -119,10 +80,9 @@ SHAPES = (
 def rfc_total(length: 'int') -> 'int':
     """:rfc:`7401#section-5.2.1`'s ``Total Length = 11 + Length - (Length + 3) % 8``.
 
-    Written out here rather than imported from
+    Written out rather than imported from
     :func:`pcapkit.protocols.internet.hip.schema.parameter_total_len`, so the
-    packed octets are compared against the RFC rather than against the library's
-    own reading of it.
+    check is against the RFC, not the library's reading of it.
 
     Args:
         length: The parameter's ``Length`` field, i.e. its contents in octets.
@@ -165,11 +125,8 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     def test_every_shape_packs_the_rfc_total(self) -> None:
         """Each shape's record is ``11 + Length - (Length + 3) % 8`` octets.
 
-        Shapes, not counts. Sampling counts within the homogeneous plain-IPv6
-        shape is exactly how the cancellation stayed hidden: n = 1, 2 and 5 all
-        passed on ``f0999858e`` and all would pass a fix to only one of the two
-        defects. The empty set, the SPI variant and the two mixed orders are what
-        distinguish the three states -- broken, half-fixed and right.
+        The empty set, the SPI variant and the two mixed orders are what tell
+        broken, half-fixed and fixed apart; the plain shapes cannot.
         """
         for name, locators, contents in SHAPES:
             with self.subTest(shape=name):
@@ -198,12 +155,8 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     def test_the_plain_shapes_pack_their_rfc_octet_counts(self) -> None:
         """n = 1, 2, 5 pack 32, 56 and 128 octets.
 
-        These are the shapes where the two defects cancel exactly, and the
-        reason #651 and #664 left this parameter alone, so they are also the
-        three a correct fix must not move -- if they change, something has gone
-        wrong whatever the other shapes do. Only the two ``Length`` octets
-        differ from ``f0999858e``: ``0018`` at n = 1 where it packed ``0004``,
-        and so on.
+        The defects cancel exactly at these shapes, so a correct fix must not
+        move their totals; only the ``Length`` octets change.
         """
         for locators, total, length in (([PLAIN], 32, 24),
                                         ([PLAIN, PLAIN], 56, 48),
@@ -217,16 +170,12 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     def test_padding_comes_from_the_parameters_length_not_the_locators(self) -> None:
         """The padding callback reads the parameter's ``Length``.
 
-        This is the discriminating assertion for the *first* defect on its own,
-        and it is built by hand rather than through the maker precisely so that
-        the two lengths disagree. A parameter ``len`` of 9 over a single locator
-        whose own ``len`` is 4 needs ``rfc_total(9) - 4 - 9`` = 3 padding octets;
-        reading the shadowed nested value instead gives
-        ``parameter_padding_len({'len': 4})`` = 0 under the RFC formula, so a
-        shadowed read packs 28 octets where the parameter's ``Length`` gives 31.
-        The declared ``Length`` deliberately does not match the 24 octets the
-        locator actually occupies, so the record total here is not meaningful --
-        the padding count is what is under test.
+        Built by hand so the two lengths disagree, which isolates the *first*
+        defect. A parameter ``len`` of 9 over one locator whose own ``len`` is 4
+        needs ``rfc_total(9) - 4 - 9`` = 3 padding octets; the shadowed read
+        gives ``parameter_padding_len({'len': 4})`` = 0, packing 28 octets
+        instead of 31. ``Length`` deliberately mismatches the locator's 24
+        octets, so only the padding count is under test.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.schema import (Locator, LocatorSetParameter,
@@ -257,11 +206,9 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     def test_the_snapshot_survives_the_nested_locators(self) -> None:
         """The packet context keeps the parameter's ``Length`` under its own key.
 
-        The mechanism, asserted rather than inferred: after a pack, the shared
-        context's ``len`` has been overwritten by the last nested locator's while
-        :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN` still holds
-        the parameter's. Without this the two would be indistinguishable at the
-        one shape where the numbers happen to agree.
+        After a pack the shared context's ``len`` is the last nested locator's,
+        while :data:`~pcapkit.protocols.internet.hip.schema.LOCATOR_SET_LEN`
+        still holds the parameter's.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
@@ -284,19 +231,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         """The reader consumes the whole contents and repacks identically.
 
         ``ListField(length=lambda pkt: pkt['len'])`` is handed ``Length`` octets
-        and no more, so this is the half of #679 that a padding fix could not
-        have reached. Measured on ``f0999858e``, every non-empty shape parsed
-        exactly **one** locator regardless of how many it was built with, warned
-        ``SchemaWarning: packet length < 0``, and repacked to something other
-        than what it read.
-
-        The residual warnings are asserted to be absent *at the parameter level*
-        only for the empty shape. Every nested :class:`Locator` raises one of
-        them per field, because ``SchemaField`` seeds a nested schema's
-        ``__length__`` at the ``-1`` placeholder
-        :meth:`Schema.pack <pcapkit.protocols.schema.Schema.pack>`
-        documents; that is unrelated to ``Length`` units, and it fires once per
-        locator actually parsed rather than once per truncated first locator.
+        and no more, so this is the half of #679 a padding fix cannot reach.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
@@ -318,8 +253,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
                     msg=f'{name}: repacking what was read did not reproduce it')
 
                 # And the data model reports the whole record, not a derivative
-                # of the wrong unit. On ``f0999858e`` this read 12 for the
-                # 32-octet n = 1 record.
+                # of the wrong unit.
                 data = hip._read_param_locator_set(  # type: ignore[arg-type]
                     back, version=2, options=None)  # type: ignore[arg-type]
                 self.assertEqual(data.length, len(raw))
@@ -329,13 +263,9 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
     def test_a_lone_locator_set_parameter_survives_a_hip_packet(self) -> None:
         """One copy in a real packet builds, parses, and yields one parameter.
 
-        The end-to-end consequence of the ``Length`` unit, and the sharpest of
-        these assertions because it catches the silent case rather than the loud
-        one. Measured on ``f0999858e``: the empty shape raised, the SPI and mixed
-        shapes raised ``ProtocolError: HIPv2: invalid format`` -- and the three
-        plain shapes *succeeded* while parsing **two** parameters, the second
-        fabricated out of the 20n octets the reader never consumed, with a
-        reported ``length`` of 12 for a 32-octet record.
+        It catches the silent case: with the wrong unit the plain shapes parsed
+        without error but yielded a second parameter fabricated from the octets
+        the reader never consumed.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
@@ -349,9 +279,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
                 octets = built.data
 
                 with warnings.catch_warnings():
-                    # The per-locator ``__length__`` warnings described above are
-                    # noise unrelated to ``Length`` units; the assertions below
-                    # are what this case is about.
+                    # Warnings are not under test here.
                     warnings.simplefilter('ignore')
                     parsed = HIP(octets, len(octets), extension=True)
 

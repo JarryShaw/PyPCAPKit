@@ -164,19 +164,12 @@ class RegisterValidatesEveryRegistry1816Tests(unittest.TestCase):
                         self.assertIsNotNone(_oracle(cls, value))
 
     def test_validate_value_mirrors_the_range_check_of_missing(self) -> None:
-        # NOTE: one-way checks, each direction on its own, rather than an
-        # equivalence. A value inside the range that matches neither a member
-        # nor an unassigned range -- ``CauseCode(0)``, ``MPTCPOption(16)`` --
-        # falls through ``_missing_``, so the constructor refuses it although the
-        # range check passed; such a value is ``register``'s to mint, and is not
-        # out of range. ``ResponseKind`` and ``GroupingInformation`` fall through
-        # the same way outside their range rather than raising, so the second
-        # check never reaches them; the pinned bounds below do. ``AppType``
-        # itself is skipped: with no transport, its ``_missing_`` and its
-        # ``register`` both refuse every value, which the test above covers.
+        # NOTE: one-way checks: an in-range value matching no member or unassigned
+        # range (``CauseCode(0)``) is ``register``'s to mint, not out of range.
         from pcapkit.utilities.exceptions import EnumValueError
 
         for cls in _registries():
+            # Without a transport AppType refuses every value; the test above covers it.
             if not _resolves_through_missing(cls) or _label(cls) == APPTYPE:
                 continue
             for value in (*BOUNDARIES, NOT_AN_INT, 1.5, None, b'\x01'):
@@ -200,9 +193,8 @@ class RegisterValidatesEveryRegistry1816Tests(unittest.TestCase):
     def test_every_registered_value_passes_validate_value(self) -> None:
         for cls in _registries():
             for member in cls:  # type: ignore[attr-defined]
-                # NOTE: ``OptionType`` and ``AppType`` hold a formatted or service
-                # string as the value; what their hook guards is the option code
-                # or port the member carries beside it.
+                # NOTE: ``OptionType`` and ``AppType`` values are strings; their hook
+                # guards the option code or port the member carries beside it.
                 code = getattr(member, 'opt_value', getattr(member, 'port', member._value_))
                 hook = cls._validate_value  # type: ignore[attr-defined]
                 with self.subTest(registry=_label(cls), member=member._name_):

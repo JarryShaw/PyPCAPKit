@@ -162,10 +162,8 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
 
     ip_info = ip.info
     raw = ip.payload
-    # NOTE: a Raw with no error is one the caller asked for, by stopping the
-    # dissection at a ``layer`` or ``protocol``, not a segment TCP rejected.
-    # Nor is one past config.FRAME_LAYER_LIMIT, which carries an error all the same:
-    # the frame is not dissected past it, so its TCP is not read (#1610).
+    # NOTE: neither a Raw with no error (the caller stopped at a ``layer`` or
+    # ``protocol``) nor one past config.FRAME_LAYER_LIMIT is a rejected segment (#1610).
     if (not isinstance(raw, Raw) or raw.info.error is None
             or raw._past_layer_limit  # pylint: disable=protected-access
             or ip_info.protocol != Enum_TransType.TCP):
@@ -313,10 +311,8 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         # NOTE: ``Data_IPv6.hdr_len`` counts the Fragment header, which the
         # reassembled packet does not carry (RFC 8200, section 4.5), so subtract it.
         hdr_len = ipv6_info.hdr_len - cast('IPv6_Frag', ipv6_frag).length
-        # NOTE: The reassembly machinery writes the payload into its datagram
-        # buffer over the span ``tl - ihl``, so ``tl`` is derived from the
-        # payload actually handed over rather than from ``raw_len``: the two
-        # agree, but only the former cannot drift out of step with it.
+        # NOTE: ``tl`` comes from the payload handed over, not ``raw_len``, as
+        # reassembly writes the payload over ``tl - ihl``.
         payload = bytearray(ipv6_info.fragment.payload)
 
         data = IP_Packet(

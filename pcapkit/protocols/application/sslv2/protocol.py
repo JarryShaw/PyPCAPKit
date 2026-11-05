@@ -18,20 +18,17 @@ for the header's exact shape.
 
 SSLv1 was never publicly released, so it has no wire format to dissect.
 
-Decoding ``CLIENT-HELLO``/``SERVER-HELLO`` bodies assumes the record is
-genuinely cleartext. Per the draft's §5.4, most other message types are sent
-*encrypted* once session keys exist, and this package implements no
-decryption -- so a ``CLIENT-HELLO``/``SERVER-HELLO``-tagged record that is
-actually ciphertext (e.g. a replayed or malformed capture) is only partly
-caught. Before decoding, the body's own declared sub-field lengths are
-checked against the record's ``RECORD-LENGTH`` (see
-:func:`~pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_is_plausible`):
-when they do not add up, the body is kept as raw octets instead. When they
-happen to add up, the ciphertext still decodes as if it were the hello's own
-fields, rather than failing cleanly. ``CIPHER-SPECS-DATA`` itself is kept as
-an opaque concatenation of 3-octet ``CIPHER-KIND`` entries in every case;
-none of the draft's own constraints on it, or on e.g. ``session_id`` being
-``0`` or ``16`` octets, are validated here.
+Decoding a ``CLIENT-HELLO`` or ``SERVER-HELLO`` body assumes it is cleartext:
+most other message types are sent *encrypted* once session keys exist (the
+draft's §5.4), and this package implements no decryption. A hello-tagged record
+that is actually ciphertext is only partly caught. Its body is kept as raw
+octets when its declared sub-field lengths do not add up to the record's
+``RECORD-LENGTH`` (see
+:func:`~pcapkit.protocols.application.sslv2.schema.sslv2_hello_probe_is_plausible`),
+and decodes as if it were the hello's own fields when they happen to.
+``CIPHER-SPECS-DATA`` is kept as an opaque run of 3-octet ``CIPHER-KIND``
+entries, and none of the draft's constraints on it, or on ``session_id`` being
+``0`` or ``16`` octets, are validated.
 
 .. [*] https://datatracker.ietf.org/doc/html/draft-hickman-netscape-ssl-00
 

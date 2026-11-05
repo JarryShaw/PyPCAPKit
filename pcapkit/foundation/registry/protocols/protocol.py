@@ -344,22 +344,8 @@ linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.
         return
 
     if isinstance(code, (enum.Enum, aenum.Enum)):
-        # NOTE: read with ``getattr``, not out of the type's own ``vars()`` as
-        # the ``__proto_key__`` check in ``register_protocol_code`` does. That
-        # read is deliberately non-inheriting because a protocol subclass can
-        # own a registry keyed by something other than its parent's -- Loopback
-        # does. No enum registry can be in that position: declaring a
-        # destination means having members, and aenum refuses to extend an
-        # enumeration with members, so none of these registries has a subclass
-        # and none can gain one. The one enum registry that is subclassed is
-        # AppType, a memberless base partitioned by transport protocol, and its
-        # subclass relationship is irrelevant here only because AppType itself
-        # declares no ``__proto_dest__`` at all -- the inheriting read finds
-        # nothing to inherit, so none of its parts reaches this branch. A
-        # class-level destination would in fact be the wrong model for it:
-        # ``register_apptype`` routes each member to the registry named by that
-        # member's own transport protocol, which one shared destination for the
-        # whole family could not express.
+        # NOTE: ``getattr`` may inherit: aenum refuses to extend an enumeration with members, so
+        # no registry has a subclass, and the memberless ``AppType`` declares no ``__proto_dest__``.
         destinations = getattr(type(code), '__proto_dest__', None)
         if not destinations:
             raise RegistryError(
@@ -466,13 +452,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
         if owner is None:
             continue
 
-        # NOTE: the pairing is read out of the owner's own ``vars()`` rather than
-        # with ``getattr``, which walks the MRO and would hand a class keeping a
-        # registry of its own its parent's pairing --
-        # :attr:`Loopback.__proto__ <pcapkit.protocols.link.loopback.protocol.Loopback.__proto__>`
-        # is keyed by address family rather than by EtherType, so inheriting
-        # :class:`Link`'s would reject every key it does accept. A class is
-        # checked against the registry it owns, or not at all.
+        # NOTE: read from the owner's own ``vars()``, not ``getattr``, so a class keeping its own
+        # registry, as ``Loopback`` does by address family, is not checked against its parent's.
         pairing = vars(owner).get('__proto_key__')
         if pairing is not None:
             kind, number = pairing

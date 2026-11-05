@@ -378,9 +378,8 @@ class PCAP_CTEngineTests(unittest.TestCase):
     def test_run_warns_on_layer_and_protocol_threshold(self) -> None:
         from pcapkit.utilities.warnings import AttributeWarning
 
-        # NOTE: ``BaseWarning.__init__`` installs an ``ignore`` filter for its own
-        # category outside development mode, so the warning never reaches
-        # ``assertWarns``; the ``warn`` call itself is what can be observed.
+        # NOTE: outside development mode ``BaseWarning.__init__`` ignores its own
+        # category, so the ``warn`` call is observed rather than ``assertWarns``.
         for overrides in ({'_exlyr': 'internet'}, {'_exptl': 'tcp'}):
             with self.subTest(overrides=overrides):
                 extractor, _ = self.make_extractor(**overrides)

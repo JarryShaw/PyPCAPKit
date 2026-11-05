@@ -65,9 +65,8 @@ class InfoClassTests(unittest.TestCase):
         # NOTE: GitHub issue #2003 -- ``__excluded__`` keys are left out of
         # ``repr`` and ``str`` only; iteration and ``to_dict`` carry them.
         self.assertEqual(list(bag), ['items', 'visible', 'hidden', 'extra'])
-        # NOTE: GitHub issue #1296 -- ``len`` counts exactly the keys
-        # iteration yields, so the internal bookkeeping attributes are not
-        # counted.
+        # NOTE: #1296 -- ``len`` counts exactly the keys iteration yields, not the
+        # internal bookkeeping attributes.
         self.assertEqual(len(bag), 4)
         self.assertEqual(str(bag), 'Bag(items=conflict, visible=1, extra=3)')
         self.assertIn('items=', repr(bag))
@@ -228,12 +227,8 @@ class OwnAnnotationsTests(unittest.TestCase):
         self.assertIs(infoclass.get_annotations, compat.get_annotations)
 
     def test_the_pre_3_10_reader_gives_the_same_signatures(self) -> None:
-        # NOTE: a stand-in for ``compat.get_annotations`` below 3.10 -- the
-        # class's own ``__dict__`` entry, as ``tests.utilities.test_compat`` pins
-        # the real fallback to be -- so every leg checks that branch. It is sound
-        # on 3.14 too because this module's ``from __future__ import
-        # annotations`` stores a class's own annotations in its ``__dict__``
-        # there as well.
+        # NOTE: stands in for the below-3.10 ``compat.get_annotations``, so every leg
+        # checks that branch; this module's future import keeps it sound on 3.14.
         from pcapkit.corekit import infoclass
 
         def pre_3_10_reader(obj: type) -> dict:
@@ -249,10 +244,8 @@ class OwnAnnotationsTests(unittest.TestCase):
             v: int
 
         class Holder(Info):
-            # NOTE: an annotation is resolved in the namespace of the class
-            # declaring it; ``Kind`` stands in for a base module's globals.
-            # Below 3.10, ``Sub`` read ``child`` as its own and resolved it in
-            # its own namespace, where ``Kind`` is unknown, so it was skipped.
+            # NOTE: ``Kind`` stands in for a base module's globals; resolving ``child``
+            # in ``Sub``'s namespace instead, where ``Kind`` is unknown, skips it.
             Kind = Leaf
             child: Kind
 

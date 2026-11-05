@@ -3,13 +3,10 @@ Registry Helpers
 
 .. module:: pcapkit.interface.registry
 
-:mod:`pcapkit.interface.registry` contains the helpers the
-registrars use to compare registry entries and to put back
-the entry a registry shipped with, so that an override of a
-built-in can be undone (:issue:`1363`, :issue:`1364`).
-
-They back the registrars of
-:class:`~pcapkit.foundation.extraction.Extractor` --
+:mod:`pcapkit.interface.registry` holds the helpers the registrars use to
+compare registry entries and to put back the entry a registry shipped with, so
+that an override of a built-in can be undone (:issue:`1363`, :issue:`1364`).
+They back the registrars of :class:`~pcapkit.foundation.extraction.Extractor` --
 :meth:`~pcapkit.foundation.extraction.Extractor.register_engine`,
 :meth:`~pcapkit.foundation.extraction.Extractor.register_reassembly`,
 :meth:`~pcapkit.foundation.extraction.Extractor.register_traceflow` and

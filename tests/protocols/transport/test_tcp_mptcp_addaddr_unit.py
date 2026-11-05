@@ -186,11 +186,8 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport.tcp.data import MPTCPAddAddress as Data_MPTCPAddAddress
         from pcapkit.const.tcp.option import Option as Enum_Option
 
-        # NOTE: ``opt.addr`` has to already be an ``IPv4Address``/``IPv6Address``, as it
-        # would be coming from a real ``_read_mptcp_addaddr`` result (``schema.address``,
-        # parsed through ``IPv4AddressField``/``IPv6AddressField``) -- the ``opt is not
-        # None`` branch below reads ``opt.addr`` straight into ``addr_val`` and skips
-        # ``parse_ip_address`` entirely, unlike the keyword-argument branch.
+        # NOTE: ``opt.addr`` must already be an address object, as a parsed one is: the ``opt``
+        # branch uses it as-is, skipping the keyword branch's ``parse_ip_address``.
         opt = Data_MPTCPAddAddress(
             kind=Enum_Option.Multipath_TCP,
             length=10,

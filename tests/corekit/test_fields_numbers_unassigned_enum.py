@@ -366,11 +366,8 @@ class UnassignedEnumFieldTests(unittest.TestCase):
                     f'first {escaped[:3]}'
                 )
 
-        # NOTE: Every registry is swept before anything is asserted, so a
-        # report names every one that failed rather than only the first. A bare
-        # ``assertEqual`` inside the loop would abort at the first failing
-        # registry and leave the rest unmeasured, which is the difference between
-        # "this registry regressed" and "the fallback is gone".
+        # NOTE: every registry is swept before asserting, so the report names every
+        # failing one rather than stopping at the first.
         self.assertEqual(summary, [], '; '.join(summary))
 
 

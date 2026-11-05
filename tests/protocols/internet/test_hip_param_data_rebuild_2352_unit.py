@@ -1,49 +1,33 @@
 # -*- coding: utf-8 -*-
 """A HIP ``(code, data)`` pair rebuilds the parameter it was parsed from.
 
-GitHub issue #2352. ``HIP(parameters=[(code, parsed_data)], ...)`` expanded the
-parsed parameter as ``**kwargs`` into its ``_make_param_*`` constructor, so
-every field whose constructor keyword is spelled differently never arrived and
-the parameter came back with that value at its default -- ``HIP_TRANSFORM``
-keeps its suites in ``suite_id`` and ``_make_param_hip_transform`` takes them as
-``suites``, which rebuilt the parameter empty, as ``0241000000000000``. The
-constructor now takes the data model positionally, as the
-``parameters=parsed.info.parameters`` path already did.
+GitHub issue #2352. Expanding the parsed parameter as ``**kwargs`` into its
+``_make_param_*`` constructor dropped every field whose keyword is spelled
+differently -- ``HIP_TRANSFORM`` keeps ``suite_id`` but takes ``suites``, so it
+rebuilt empty. The constructor takes the data model positionally, as the
+``parameters=parsed.info.parameters`` path does.
 
-The mismatch is not confined to ``HIP_TRANSFORM``:
-:meth:`HIPParameterDataRebuildTests.cases` carries one non-default value for
-each parameter the bug reached, and
+:meth:`HIPParameterDataRebuildTests.cases` carries one non-default value per
+affected parameter, and
 :meth:`HIPParameterDataRebuildTests.test_every_renaming_parameter_has_a_case`
-compares that list against the constructors, so a parameter that starts
-spelling a *top-level* field differently tomorrow cannot land without a
-round-trip case here.
+reads each constructor's keyword-only parameters against its data model's
+annotations, so a new *top-level* renaming cannot land without a case. What
+the check misses is listed by hand:
 
-That comparison is only partly mechanical, though, so three cases are listed by
-hand rather than caught by it and a fourth parameter needs a second case the
-check cannot ask for. What it does mechanically is read each constructor's
-keyword-only parameters against its data model's own annotations. Everything
-else is by name or by hand:
+* :data:`DERIVED` exempts ``flags`` and ``lifetime`` *by name*, so ``ROUTE_DST``
+  and ``ROUTE_VIA``, whose ``symmetric`` and ``must_follow`` live in a nested
+  ``flags`` model, are not derived.
+* A *nested* collision is invisible to it: ``LOCATOR_SET``'s keyword and field
+  agree, yet each nested
+  :class:`~pcapkit.protocols.internet.hip.data.Locator`'s ``locator`` key
+  reached ``_make_locator``'s ``locator`` parameter and raised
+  ``AttributeError``.
+* ``HOST_ID`` renames ``algorithm`` to ``hi_algorithm``, but an ECDSA-curve host
+  identity hides the loss because the constructor re-derives the algorithm
+  from the curve, so a raw-``hi`` case is here too.
 
-* :data:`DERIVED` exempts ``flags`` and ``lifetime`` *by name*, rather than
-  establishing that the constructor takes a nested model apart into one keyword
-  per member. ``ROUTE_DST`` and ``ROUTE_VIA`` keep ``symmetric`` and
-  ``must_follow`` inside a nested ``flags`` model that ``**param`` dropped
-  wholesale, and that exemption is why they are listed here instead of derived.
-* A *nested* collision is invisible to it. ``LOCATOR_SET``'s keyword and field
-  are both spelled ``locator_set``, so the check passes it over, yet expanding
-  the parsed parameter handed each nested
-  :class:`~pcapkit.protocols.internet.hip.data.Locator`'s own ``locator`` key
-  to ``_make_locator``'s ``locator`` parameter and raised ``AttributeError:
-  'IPv6Address' object has no attribute 'locator'``.
-* ``HOST_ID`` the check does find -- it renames ``algorithm`` to
-  ``hi_algorithm`` -- but a case built on an ECDSA-curve host identity hides
-  the loss, because the constructor re-derives the algorithm from the curve.
-  Only a raw-``hi`` host identity, carrying no curve to re-derive from, loses
-  it, so both shapes are here.
-
-Every case builds its own octets in memory and reads no capture. :class:`HIP`
-is imported inside each test, after
-:func:`~tests._support.reimport_once_per_class`, for the reason
+Every case builds its octets in memory. :class:`HIP` is imported inside each
+test, after :func:`~tests._support.reimport_once_per_class`, for the reason
 :mod:`tests.protocols.link.test_ethernet_mac_roundtrip_unit` gives.
 
 """
@@ -93,13 +77,11 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
     def cases() -> 'dict[str, tuple[object, dict[str, object]]]':
         """One non-default value per parameter the bug reached.
 
-        Keyed by case name rather than by parameter code, because ``HOST_ID``
-        needs two: the ECDSA-curve one, which round-tripped by accident, and
-        the raw-``hi`` one, which did not.
+        Keyed by case name, because ``HOST_ID`` needs two: the ECDSA-curve one
+        and the raw-``hi`` one.
 
-        A default is useless here: an empty suite list rebuilds as an empty
-        suite list whether or not the value reached the constructor, which is
-        exactly why the sweep in
+        A default value is useless: it rebuilds the same whether or not it
+        reached the constructor, which is why
         :mod:`tests.protocols.test_option_roundtrip_unit` could not see this.
 
         """
@@ -245,15 +227,9 @@ class HIPParameterDataRebuildTests(unittest.TestCase):
     def test_every_renaming_parameter_has_a_case(self) -> None:
         """Every renaming constructor is covered by :meth:`cases`.
 
-        The renaming set is read off the constructors rather than listed, so
-        that a parameter which starts spelling a *top-level* field differently
-        is caught here instead of silently dropping the value again. Two things
-        are not mechanical, and the cases for them are listed in :meth:`cases`
-        by hand: :data:`DERIVED` exempts fields by name rather than by
-        establishing that the constructor derives them, and a *nested*
-        collision -- ``LOCATOR_SET``'s -- is invisible here, because the
-        keyword and the field agree at the top level and only the data model
-        one level down disagrees.
+        The renaming set is read off the constructors rather than listed. What
+        this cannot see -- fields :data:`DERIVED` exempts by name, and a
+        *nested* collision such as ``LOCATOR_SET``'s -- has hand-listed cases.
 
         """
         import inspect

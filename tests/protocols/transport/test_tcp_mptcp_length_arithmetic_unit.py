@@ -4,126 +4,95 @@
 GitHub issue #576: the check of the sibling ``_make_mptcp_*`` helpers' length arithmetic that
 #567 suggests, outside the scope of #579 (``MPTCP.subtype`` and MP_CAPABLE).
 
-An MPTCP option carries its own octet count in its ``Length`` field, and each of these
-places has to agree on it: the ``_make_mptcp_*`` maker that *writes* that octet, the schema
-in :mod:`pcapkit.protocols.transport.tcp.schema` whose fields actually *pack* the octets, and
-the ``_read_mptcp_*`` reader whose guard *accepts* it coming back. These tests guard against
-any of them disagreeing with :rfc:`8684` at each site below; at MP_FASTCLOSE all of them can
-disagree with each other.
+Three places must agree with :rfc:`8684` on an MPTCP option's ``Length`` octet: the
+``_make_mptcp_*`` maker that *writes* it, the schema in
+:mod:`pcapkit.protocols.transport.tcp.schema` whose fields *pack* the octets, and the
+``_read_mptcp_*`` reader whose guard *accepts* it.
 
-What each site is, and where its number comes from
---------------------------------------------------
+Sites
+-----
 
-Every length here is derived from the figure named, by adding up the octets that figure
-draws. The fixed head is 2 octets of ``Kind``/``Length`` plus the subtype row, which is 1
-octet where the subtype's 4 bits are followed by 4 bits of flags or reserved, and 2 octets
-where they are followed by 12 reserved bits.
+Each length adds up the octets the named figure draws. The head is ``Kind`` 1 + ``Length`` 1
+plus the subtype row: 1 octet where 4 bits of flags or reserved follow the subtype, 2 where 12
+reserved bits do.
 
-* **MP_FASTCLOSE** -- :rfc:`8684` section 3.5, figure 14. Head 4 (``Kind`` 1 + ``Length`` 1 +
-  subtype-and-12-reserved-bits 2) + the receiver's key 8 = **12**, which the maker,
-  :class:`~pcapkit.protocols.transport.tcp.schema.MPTCPFastclose` and
-  ``_read_mptcp_fastclose`` all have to agree on: a schema with no reserved field packs
-  **11**, and a reader requiring **16** wants a number neither of the other two nor the RFC
-  produces. Note section 3.5, not 3.7: 3.7 is Fallback (MP_FAIL), and #576's own text cites
-  3.7 here in error.
-* **MP_JOIN-SYN/ACK** -- :rfc:`8684` section 3.2, figure 6. Head 4 (``Kind`` 1 + ``Length`` 1 +
-  subtype/rsv/``B`` 1 + ``Address ID`` 1) + the truncated HMAC 8 + the random number 4 =
-  **16**. **12** is ``_make_join_syn``'s own correct length for the *SYN* form of figure 5
-  -- that one carries a 4-octet token where this one carries an 8-octet HMAC -- so copying
-  it across without recomputing is the mistake to catch; a ``_read_join_synack`` requiring
-  **20** contradicts its own docstring figure.
-* **MP_JOIN-ACK** -- :rfc:`8684` section 3.2, figure 7. Head 4 (``Kind`` 1 + ``Length`` 1 +
-  subtype-and-12-reserved-bits 2) + the full 160-bit HMAC 20 = **24**, which the reader
-  requires, so a maker writing **8** produces nothing that parses back at all.
-* **REMOVE_ADDR** -- :rfc:`8684` section 3.4.2, figure 13, which states ``Length = 3 + n``
-  outright: head 3 (``Kind`` 1 + ``Length`` 1 + subtype-and-4-reserved-bits 1) + one octet per
-  Address ID. A constant **4** is correct for exactly one list length -- and
-  ``examples.generators.options``' fixture passes ``addr_id=[1]``, so the round-trip suite
-  exercises only that one.
-* **MP_PRIO** -- :rfc:`8684` section 3.3.8, figure 11: head 3 (``Kind`` 1 + ``Length`` 1 +
-  subtype/rsv/``B`` 1) and **nothing else**, since section 5 of that document "specifies the
-  removal of the AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical attack
-  in which a subflow could be forced into backup mode. So **3**, with :rfc:`6824`'s 4-octet
-  Address ID form still accepted as legacy. Because
-  :attr:`~pcapkit.protocols.transport.tcp.schema.MPTCPPriority.addr_id` is conditional on
-  ``pkt['length'] == 4``, a maker writing a constant **4** satisfies its own predicate: a
-  caller who gives no Address ID gets a phantom all-zero one anyway.
-* **DSS** -- :rfc:`8684` section 3.3, figure 9. Head 4, then the Data ACK (4 octets, or 8 when
-  ``a`` is set) if ``A``, the Data Sequence Number (4, or 8 when ``m`` is set), the Subflow
-  Sequence Number (4), the Data-Level Length (2) and the Checksum (2) if ``M``. All flags set
-  gives 28, which is the maximum the section states in prose.
+================  ==================  ========  ===============================================
+Option            RFC 8684            Length    What the tests catch
+================  ==================  ========  ===============================================
+MP_FASTCLOSE      3.5, figure 14      12        a schema with no reserved field packs 11; a
+                                                reader requiring 16 matches nothing. #576
+                                                cites 3.7 (Fallback) here in error.
+MP_JOIN-SYN/ACK   3.2, figure 6       16        12, the SYN form's length (a 4-octet token
+                                                where this has an 8-octet HMAC), copied
+                                                across; a reader requiring 20.
+MP_JOIN-ACK       3.2, figure 7       24        a maker writing 8, which parses back as
+                                                nothing.
+REMOVE_ADDR       3.4.2, figure 13    3 + n     a constant 4, right only for one Address ID,
+                                                the sole list ``examples.generators.options``
+                                                passes.
+MP_PRIO           3.3.8, figure 11    3         a constant 4, which satisfies
+                                                ``MPTCPPriority.addr_id``'s ``length == 4``
+                                                predicate and adds a phantom all-zero Address
+                                                ID. :rfc:`6824`'s 4-octet form stays accepted
+                                                as legacy.
+DSS               3.3, figure 9       4 to 28   the schema, below.
+================  ==================  ========  ===============================================
 
-DSS is the one entry that is not a defect where #576 puts it
-------------------------------------------------------------
+DSS
+---
 
-#576 files the DSS defect against ``_make_mptcp_dss``'s length expression and suggests the
-fix "will also change what its maker needs to compute". Re-derived from figure 9, that
-expression is **correct**. Read as a base plus widening
-increments rather than one term per field:
+#576 files a defect against ``_make_mptcp_dss``'s length expression, which figure 9 shows is
+correct:
 
 .. code-block:: python
 
     4 + (4 if flag_A else 0) + (4 if flag_a else 0) + (12 if flag_M else 0) + (4 if flag_m else 0)
 
-the 4 is the head; ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 to widen it to
-8; ``M`` contributes 12 (a 4-octet DSN, the 4-octet SSN, the 2-octet Data-Level Length and the
-2-octet Checksum) and ``m`` a further 4 to widen the DSN to 8. Every combination matches the
-figure, and all flags set gives 4 + 4 + 4 + 12 + 4 = 28.
+The 4 is the head; ``A`` adds the 4-octet Data ACK and ``a`` widens it to 8; ``M`` adds 12 (a
+4-octet DSN, the 4-octet SSN, the 2-octet Data-Level Length and the 2-octet Checksum) and ``m``
+widens the DSN to 8. All flags set gives 28, the maximum the section states.
 
-What can go wrong is the *schema* that expression describes. Guards against
-``MPTCPDSS.ack`` and ``MPTCPDSS.dsn`` sizing themselves with ``NumberField(length=lambda pkt:
-8 if pkt['flags']['a'] else 0)`` -- **0** octets in the unextended case, where the figure says
-4 -- under which the option goes onto the wire 4 (or, with both fields unextended, 8) octets
-shorter than its own ``Length`` octet declares, and the ``ack``/``dsn`` values the caller
-supplied are simply not present. Measured that way with the generator's own override
-arguments: 12 octets packed against a declared 20.
+What can go wrong is the schema. An ``MPTCPDSS.ack`` or ``MPTCPDSS.dsn`` sized
+``NumberField(length=lambda pkt: 8 if pkt['flags']['a'] else 0)`` packs **0** octets where the
+figure says 4, so the option is shorter than its ``Length`` octet and lacks the caller's values:
+measured with the generator's override arguments, 12 octets packed against a declared 20.
 
-A callable length also has to pack at all. :class:`~pcapkit.corekit.fields.numbers.NumberField`
-builds its template once at ``__init__`` with the placeholder length ``-1``, and recomputes
-``_need_process`` from the width in force rather than latching it from that placeholder
-(#598), so a callable length packs and unpacks both widths; latched, the 8-octet form
-``_make_mptcp_dss(DSS, ack=1 << 40)`` raises ``struct.error: required argument is not an
-integer``. The schema selects between :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
-and :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at
-class level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
-:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector` uses in that
-module -- for the narrower reason recorded in
-:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_dss_ack_selector`'s own note, which is
-about :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s condition-blind ``length`` and
-not about wire absence. Swapping the two would be a behaviour change.
-:class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms.
+A callable length also has to pack. :class:`~pcapkit.corekit.fields.numbers.NumberField`
+recomputes ``_need_process`` from the width in force rather than latching it from its ``-1``
+placeholder (#598); latched, ``_make_mptcp_dss(DSS, ack=1 << 40)`` raises ``struct.error``. The
+schema picks :class:`~pcapkit.corekit.fields.numbers.UInt32Field` or
+:class:`~pcapkit.corekit.fields.numbers.UInt64Field` through a
+:class:`~pcapkit.corekit.fields.misc.SwitchField`, as
+:func:`~pcapkit.protocols.transport.tcp.schema.mptcp_add_address_selector` does, for the reason
+in :func:`~pcapkit.protocols.transport.tcp.schema.mptcp_dss_ack_selector`'s note
+(:class:`~pcapkit.corekit.fields.misc.ConditionalField`'s condition-blind ``length``, not wire
+absence); swapping the two would change behaviour. :class:`TCPMPTCPDSSExtendedFieldsUnitTests`
+covers the 8-octet forms.
 
-MP_JOIN-SYN is not a defect either
------------------------------------
+MP_JOIN-SYN
+-----------
 
-#576's body lists three MP_JOIN forms and a comment on the issue corrects the attribution.
-Re-derived here: :rfc:`8684` section 3.2 figure 5 gives ``Length = 12`` for the initial SYN --
-head 4 (``Kind`` 1 + ``Length`` 1 + subtype/rsv/``B`` 1 + ``Address ID`` 1) + the receiver's
-token 4 + the random number 4 -- ``_make_join_syn`` writes 12 and ``_read_join_syn`` guards
-``!= 12``. All three agree. :class:`TCPMPTCPJoinSYNIsCorrectUnitTests` pins that, so a later
-pass does not "fix" a correct number.
+#576 lists it among the MP_JOIN forms, and a comment there corrects that. :rfc:`8684` section 3.2
+figure 5 gives ``Length = 12`` (head 4 + the receiver's token 4 + the random number 4);
+``_make_join_syn`` writes 12 and ``_read_join_syn`` guards ``!= 12``.
+:class:`TCPMPTCPJoinSYNIsCorrectUnitTests` pins that, so a later pass does not "fix" it.
 
 Coverage
 --------
 
-One test class per site, not one test for every site, so a regression names the option it broke.
+One test class per site, so a regression names the option it broke. Each asserts the maker's
+**byte-exact** packed option, not only its ``length`` octet, since the two disagreeing is the
+defect. Where the reader guard is at stake too (MP_FASTCLOSE, MP_JOIN-SYN/ACK), a second test
+parses spec-correct octets spliced into a real segment through
+:class:`~pcapkit.protocols.transport.tcp.protocol.TCP`, so pack- and parse-side bugs cannot
+cancel out in a closed round trip, the blind spot
+:mod:`tests.protocols.test_option_roundtrip_unit` names; the pattern is
+:mod:`tests.protocols.transport.test_tcp_mptcp_capable_length_unit`'s for #567.
 
-Each class asserts the **byte-exact** packed option from its maker rather than only its
-``length`` octet -- a declared length and a packed length can disagree, which is the whole
-defect, so both are checked, and the octets themselves pin that the payload really is where
-the figure puts it. Where the *reader* guard is also at stake (MP_FASTCLOSE, MP_JOIN-SYN/ACK) a
-second test splices hand-built, spec-correct octets into a real TCP segment and parses them
-back through :class:`~pcapkit.protocols.transport.tcp.protocol.TCP` proper, so a pack-side and a
-parse-side bug cannot cancel out behind a closed round trip -- the pattern
-:mod:`tests.protocols.transport.test_tcp_mptcp_capable_length_unit` uses for #567, and
-the blind spot :mod:`tests.protocols.test_option_roundtrip_unit`'s own docstring names ("a
-defect can leave the cycle closed").
-
-The MP_JOIN classes drive the makers directly and reach the readers by parsing bytes, where
-``_flags`` *is* set, rather than going through the public ``TCP()`` constructor: that keeps
-them a check on the *length arithmetic* of each form rather than on the dispatch.
+The MP_JOIN classes call the makers directly and reach the readers by parsing, where ``_flags``
+is set, so they check length arithmetic rather than dispatch;
 :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit` covers all three
-layouts through ``TCP()`` proper. C.f. #587, #603.
+layouts through ``TCP()`` (#587, #603).
 
 """
 from __future__ import annotations

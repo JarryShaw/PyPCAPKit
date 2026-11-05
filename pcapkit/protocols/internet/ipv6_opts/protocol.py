@@ -424,11 +424,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         """
         next_value = self._make_index(next, Enum_TransType, bits=8, name='next header')
 
-        # NOTE: No options is not the same as no options area. The header is at
-        # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
-        # padding options. Passing the empty list through the same path produces
-        # them; returning ``[], 0`` would emit the 2 fixed octets alone, under a
-        # ``Hdr Ext Len`` that ``(0 - 6) // 8`` makes ``-1``.
+        # NOTE: No options still means six octets of padding options; returning ``[], 0``
+        # would emit the fixed two octets alone under a ``Hdr Ext Len`` of ``-1``.
         options_value, total_length = self._make_ipv6_opts(
             options if options is not None else [])
 
@@ -598,10 +595,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             else:
                 meth, maker = name
 
-            # NOTE: The capture cut this option short, as its short read records, so
-            # the octets it lacks read as zeros. It stands if its parser takes those
-            # zeros and its maker writes the octets captured back (#2694); otherwise
-            # it is refused, as an option running past the data is (#1325).
+            # NOTE: A capture-cut option reads its missing octets as zeros; it stands if its parser
+            # takes them and its maker writes the captured ones back (#2694), or is refused (#1325).
             if '__short_read__' in schema.__dict__:
                 try:
                     with CaughtByCaller(BaseError):
@@ -706,9 +701,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             total_length += pad_len
             return options_list, total_length
 
-        # NOTE: Options given as parsed data are emitted as they are, padding
-        # included and in place, so that a parsed header rebuilds byte for
-        # byte; only a header left short of alignment gets trailing padding.
+        # NOTE: Parsed options are emitted as they are, padding in place, so a parsed header
+        # rebuilds byte for byte; only a header short of alignment gets trailing padding.
         options_list = []
         for key, option in options.items(multi=True):
             code = self._make_index(key, Enum_Option, bits=8, name='option type')
@@ -992,10 +986,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             if TYPE_CHECKING:
                 schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
-            # NOTE: An unresolvable *string* key raises KeyError rather than
-            # minting a member, so only a hand-constructed schema hits this
-            # guard. An unassigned *wire* value still mints via _missing_ and
-            # never reaches here.
+            # NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value
+            # mints via _missing_, so only a hand-constructed schema reaches this guard.
             tid_key = None
             try:
                 tid_key = schema.info['type']
@@ -1245,10 +1237,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        # NOTE: An unresolvable *string* key raises KeyError rather than
-        # minting a member, so only a hand-constructed schema hits this guard.
-        # An unassigned *wire* value still mints via _missing_ and never
-        # reaches here.
+        # NOTE: An unresolvable *string* key raises KeyError and an unassigned *wire* value
+        # mints via _missing_, so only a hand-constructed schema reaches this guard.
         seed_key = None
         try:
             seed_key = schema.flags['type']
@@ -2285,28 +2275,16 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
     def _ipv6_opts_option_length(schema_len: 'int') -> 'int':
         """Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.
 
-        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
-        (what each ``Schema_*Option.len`` here holds) counts *"the length of
-        the Option Data field of this option, in octets"* -- i.e. it
-        excludes the Option Type and Opt Data Len fields themselves, so the
-        whole option, which is what every ``_read_opt_*`` below reports back
-        as the parsed option's own ``.length``, is two octets more. This is
-        the ``+2``/``-2`` mismatch between the two (see ``Data_PadOption.length``
-        vs. ``Schema_PadOption.len`` below). The read-side half lives in this
-        one helper so the arithmetic has a single home. Do NOT drop the
-        ``+ 2``.
+        Per :rfc:`8200#section-4.2`, ``Opt Data Len`` (each ``Schema_*Option.len``)
+        counts *"the length of the Option Data field of this option, in octets"*,
+        so the whole option, which each ``_read_opt_*`` reports as ``.length``,
+        is two octets more. Do NOT drop the ``+ 2``.
 
-        Section 4.2 is the citation because it defines the TLV option format and
-        contains the sentence quoted above. IPv6-Opts itself is the Destination
-        Options header of :rfc:`8200#section-4.6`, which carries those TLVs but
-        says nothing about their internal length arithmetic. Section 4.3 is the
-        Hop-by-Hop Options header, a different header from the one this class
-        implements.
+        Section 4.2 is cited because the Destination Options header of
+        :rfc:`8200#section-4.6` carries those options without defining their length.
 
-        Note that only the *stored-length* read-side call sites are
-        collected here -- most ``_make_opt_*`` methods recompute the wire
-        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed
-        ``.length`` back, so they have nothing to unify against this helper.
+        Only the read side's stored lengths go through it; most ``_make_opt_*``
+        methods recompute ``Opt Data Len`` from the value instead.
 
         Args:
             schema_len: raw ``Opt Data Len`` field value, as read off the wire.

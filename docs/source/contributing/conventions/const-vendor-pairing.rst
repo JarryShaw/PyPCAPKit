@@ -7,9 +7,8 @@ Const-Vendor Pairing
 under** :mod:`pcapkit.vendor`, with no exception. A registry copied from an IANA,
 IETF or similar web-published table is never hand-maintained -- the crawler
 re-scrapes the source and regenerates the module, so a hand edit to the generated
-file is silently discarded on the next run. Raised in cross-review of :pr:`2441`,
-which deferred the TLS crawlers; ruled on :issue:`2495`, where the owner allowed no
-exception and pointed a hand-maintained registry at the ``DATA`` attribute below.
+file is silently discarded on the next run. Ruled on :issue:`2495`, which points a
+hand-maintained registry at the ``DATA`` attribute below.
 
 The ``DATA`` Attribute, for a Registry With No Web Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

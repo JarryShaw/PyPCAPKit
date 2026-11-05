@@ -726,13 +726,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             the analyser.
 
         """
-        # NOTE: ``_make_port`` is protected, and reached from outside its own
-        # class as :meth:`SCTP._decode_next_layer
-        # <pcapkit.protocols.transport.sctp.protocol.SCTP._decode_next_layer>` reaches
-        # ``ProtocolBase._decode_next_layer``. Duplicating it here instead would
-        # put a second port normaliser beside the maker path's, free to drift
-        # from it; it is idempotent, so a ``bufid`` that already holds a member
-        # passes through unchanged.
+        # NOTE: the protected ``_make_port`` is reused rather than duplicated, so no second port
+        # normaliser drifts from the maker path's; it is idempotent on members.
         return (TCP_Protocol._make_port(bufid[1], Enum_TransportProtocol.tcp),  # pylint: disable=protected-access
                 TCP_Protocol._make_port(bufid[3], Enum_TransportProtocol.tcp))  # pylint: disable=protected-access
 
@@ -849,11 +844,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # if this buffer is complete -- or if it is not, and ``strict``
             # asked for one contiguous payload rather than the received runs
             #
-            # NOTE: ``strict=False`` deliberately reports the whole
-            # payload buffer with its holes zero-filled, which is what
-            # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream
-            # it is reconstructing best-effort. ``completed`` says so, rather than
-            # reporting :attr:`Completion.COMPLETE` for a buffer with holes in it.
+            # NOTE: ``strict=False`` reports the buffer with holes zero-filled, as
+            # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants, and ``completed`` says so.
             else:
                 payload = buffer.raw
                 if payload:    # strip empty buffer

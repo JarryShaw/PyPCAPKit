@@ -3,36 +3,34 @@ User Defined Exceptions
 
 .. module:: pcapkit.utilities.exceptions
 
-:mod:`pcapkit.utilities.exceptions` holds refined built-in exceptions,
-which make it possible to show only user error stack information [*]_
-when an exception is raised on user's operation.
+:mod:`pcapkit.utilities.exceptions` holds :mod:`pcapkit`'s exceptions, each
+refining a built-in one, grouped below by that built-in.
 
 Loud and Quiet Errors
 ---------------------
 
-Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
-**loud** act: the error is logged once at :data:`logging.CRITICAL` on the
-``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), and outside development mode
-an exception hook is installed on :func:`sys.excepthook` and
+A :class:`~pcapkit.utilities.exceptions.BaseError` is **loud** by default: it is
+logged once at :data:`logging.CRITICAL` on the ``pcapkit`` logger
+(:data:`~pcapkit.utilities.logging.logger`), and outside development mode an
+exception hook is installed on :func:`sys.excepthook` and
 :func:`threading.excepthook`, the first time a loud error needs it, so the user
-sees the exception line rather than a walk through :mod:`pcapkit`'s internals.
-That hook only shortens the printing of a
-:class:`~pcapkit.utilities.exceptions.BaseError` itself; every other exception
-is handed on to whichever hook was previously installed, unchanged.
+sees the exception line rather than a walk through :mod:`pcapkit`'s
+internals [*]_. The hook shortens only a
+:class:`~pcapkit.utilities.exceptions.BaseError`; it hands every other exception,
+unchanged, to the hook installed before it.
 
-``quiet=True`` marks an error that :mod:`pcapkit` raises as **internal control
-flow** and expects to catch itself -- the
-:exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind
-:meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>` is the archetype.
-Such an error emits nothing on any channel and touches no process-global state.
-It is still an ordinary exception carrying its message, so ``except`` clauses and
-:func:`repr` are unaffected.
+``quiet=True`` marks an error :mod:`pcapkit` raises as **internal control flow**
+and catches itself -- the :exc:`~pcapkit.utilities.exceptions.MissingKeyError`
+behind :meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>` is the
+archetype. It emits nothing on any channel and touches no process-global state,
+but is otherwise an ordinary exception carrying its message.
 
-An error is also quiet when it is constructed inside a
+An error constructed inside a
 :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block naming one of its
-classes. That is how :mod:`pcapkit` marks as control flow an error raised by
-code it calls but does not own, such as a generated ``_validate_value``
-override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
+classes is quiet too. That is how :mod:`pcapkit` marks as control flow an error
+raised by code it calls but does not own, such as a generated
+``_validate_value`` override, which cannot pass ``quiet=True`` itself
+(:issue:`1845`).
 :func:`~pcapkit.corekit.decorators.beholder` runs the whole call to a next layer in
 such a block for :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so a refusal it
 keeps as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is recorded on that layer's ``error``
@@ -59,13 +57,13 @@ What decides whether a constructed error is loud:
 
 .. versionchanged:: 1.5.0
 
-   In 1.4.x, ``quiet=True`` logged at ``ERROR`` instead of ``CRITICAL`` rather
-   than not logging, and :data:`sys.tracebacklimit` was set on both paths. A
-   single :meth:`MultiDict.get() <pcapkit.corekit.multidict.MultiDict.get>` miss therefore
-   produced an ``ERROR`` record -- one per frame when parsing unfragmented IPv6 with
-   reassembly enabled -- and truncated the tracebacks of unrelated exceptions for the rest
-   of the process. Those records never corresponded to a fault; to observe internal lookup
-   misses, catch the exception rather than read the log (:issue:`362`).
+   ``quiet=True`` logs nothing, where 1.4.x logged at ``ERROR``, and neither path
+   sets :data:`sys.tracebacklimit`. In 1.4.x a single :meth:`MultiDict.get()
+   <pcapkit.corekit.multidict.MultiDict.get>` miss gave an ``ERROR`` record -- one per
+   frame when parsing unfragmented IPv6 with reassembly on -- and truncated unrelated
+   tracebacks for the rest of the process, though no such record was a fault. To
+   observe internal lookup misses, catch the exception rather than read the log
+   (:issue:`362`).
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:

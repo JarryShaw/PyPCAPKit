@@ -376,9 +376,8 @@ class LazyConstImportTests(unittest.TestCase):
             ['pcapkit.const.ipv4.option_number', 'pcapkit.const.reg.apptype.apptype',
              'pcapkit.const.tcp.option', 'pcapkit.const.vlan.priority_level'],
         ])
-        # NOTE: pcapkit.const exports APPTYPE, the memberless base, and none of
-        # the per-transport registries, so its star import loads every other
-        # enumeration and none of those.
+        # NOTE: pcapkit.const exports the memberless APPTYPE but no per-transport
+        # registry, so its star import loads every other enumeration but not those.
         self.assertEqual(out['loaded'], [])
         self.assertEqual(out['same'], [True] * 4)
         self.assertTrue(out['star'])
@@ -440,9 +439,8 @@ class RegistriesMappingTests(unittest.TestCase):
     """Every method of the lazy mapping, on a private instance in this process."""
 
     def setUp(self) -> 'None':
-        # NOTE: a private import, so that the package starts cold -- the shared
-        # one has every registry loaded, since tests/conftest.py pins them --
-        # and nothing bound here outlives the class.
+        # NOTE: a private import starts the package cold (tests/conftest.py pins
+        # every registry in the shared one), and nothing bound here outlives the class.
         reimport_once_per_class(self, restore=True)
         self.make()
 
@@ -549,9 +547,8 @@ class RegistriesMappingTests(unittest.TestCase):
         self.assertEqual(copied, registries)
 
     def test_it_is_an_immutable_info(self) -> 'None':
-        # NOTE: GitHub issue #2726. As a dict subclass it had every dict method,
-        # and the | operator from Python 3.9 (#1694); as an Info it has the
-        # read-only mapping interface, and nothing it does imports a registry.
+        # NOTE: an Info rather than a dict subclass (#2726): only the read-only
+        # mapping interface, and nothing it does imports a registry.
         registries, proto = self.registries, self.proto
         self.assertIsInstance(registries, self.info)
         self.assertNotIsInstance(registries, dict)

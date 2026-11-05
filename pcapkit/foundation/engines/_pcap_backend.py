@@ -162,8 +162,7 @@ def _purge() -> 'None':
     """Drop the |pcap|_ and ``libpcap`` module trees from :data:`sys.modules`.
 
     Called after a failed import so that the *next* probe reproduces the same
-    failure. Without it a second attempt reports something else entirely, which
-    was measured rather than imagined.
+    failure. Without it a second attempt reports a different error.
 
     Both ``pcap-ct``'s and ``libpcap``'s package initialisers open with
     ``from .__about__ import * ; del __about__``, which is **not safe to re-run**:

@@ -687,15 +687,8 @@ class AppTypeSplitTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import AppType
 
         source = inspect.getsource(AppType._missing_.__func__)  # type: ignore[attr-defined]
-        # NOTE: the emitted form is the attribute access
-        # ``TransportProtocol.tcp`` (GitHub issue #768), not
-        # ``TransportProtocol.get('tcp')``, so the capture is a bare identifier
-        # rather than a quoted literal. The call is
-        # ``cls._unregistered_member(value, '<label>', TransportProtocol.X)``,
-        # not a minting ``extend_enum(cls, f'<name>_{value}', value,
-        # '<label>', TransportProtocol.X)`` (GitHub issue #860 step 2 PR 2);
-        # the ``if``/``cls.__transport__`` conditions this test is actually
-        # about have the same shape either way.
+        # NOTE: the transport is emitted as ``TransportProtocol.tcp`` (#768), a bare
+        # identifier, in a non-minting ``cls._unregistered_member`` call (#860).
         branches = re.findall(r'\n        if (.+?):\n            #:.*?\n            '
                               r"return cls\._unregistered_member\(value, .+?, "
                               r'(?:TransportProtocol\.(\w+)|cls\.__transport__)\)',
@@ -717,13 +710,8 @@ class AppTypeSplitTests(unittest.TestCase):
                 if proto == '':
                     self.assertNotIn('cls.__transport__', condition)
                 else:
-                    # NOTE: anchored at the end rather than a bare `assertIn`,
-                    # which would pass on a prefix collision -- e.g. `claim`
-                    # ending in ``TransportProtocol.tc`` would falsely match a
-                    # condition actually naming ``TransportProtocol.tcp``. Not
-                    # reachable, since none of the declared names
-                    # is a prefix of another, but the check should not depend
-                    # on that being true to stay correct.
+                    # NOTE: ``endswith`` rather than ``assertIn``, which a prefix
+                    # (``TransportProtocol.tc`` of ``...tcp``) would also satisfy.
                     self.assertTrue(condition.endswith(claim), condition)
 
     def test_a_bare_int_composite_is_refused_as_a_whole(self) -> None:
@@ -822,10 +810,8 @@ class AppTypeSplitTests(unittest.TestCase):
 
         before = {cls: len(cls) for cls in (TCP, UDP, SCTP, DCCP)}
         for proto in composites:
-            # NOTE: not ``proto.name`` -- ``proto`` is a bare ``int``, since
-            # ``TransportProtocol`` has no ``IntFlag`` base (GitHub issue #808),
-            # and a bare int has no ``.name``. ``hex`` still
-            # tells the subTests apart on failure.
+            # NOTE: ``hex`` rather than ``proto.name``: with no ``IntFlag`` base
+            # on ``TransportProtocol`` (#808), ``proto`` is a bare ``int``.
             with self.subTest(proto=hex(proto)):
                 with self.assertRaises(ValueError) as via_get:
                     AppType.get(80, proto=proto)
@@ -964,13 +950,8 @@ class AppTypeSplitTests(unittest.TestCase):
                     # And the member is still reachable, under its own transport.
                     self.assertIn(member, cls.get_all(port))
 
-                    # NOTE: the blast radius, still named. ``tcp`` is the lowest
-                    # bit of a ``tcp | udp`` composite, so the TCP registry's
-                    # answer is what #759's lowest-bit dispatch resolved it to;
-                    # where that differs from the member's own registry's
-                    # answer, that lookup returned a service the registry does
-                    # not answer at all. Those are the rows below, answered
-                    # from UDP as they should be.
+                    # NOTE: TCP's answer is what #759's lowest-bit dispatch gave the
+                    # ``tcp | udp`` composite; the rows where it differs were wrong.
                     if TCP.get(port).svc != cls.get(port).svc:
                         divergent.append((cls.__name__, port, svc,
                                           TCP.get(port).svc, cls.get(port).svc))

@@ -403,8 +403,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             dst=schema.dst,
         )
 
-        # NOTE: An ``ihl`` declaring more header than was captured leaves the
-        # missing octets to read as zeros, which ``from_data`` then rebuilds;
+        # NOTE: An ``ihl`` past the captured header reads zeros that ``from_data`` would rebuild;
         # rejecting it keeps the octets as captured inside the parent (#1404).
         if len(self) < ipv4.hdr_len:
             raise ProtocolError(f'{self.alias}: header length {ipv4.hdr_len} runs past the end of '
@@ -429,10 +428,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                                                     offload=(b'\x00\x00',))),
             ])
 
-        # NOTE: Octets captured past the Total Length belong to this layer,
-        # since its own length field is what leaves them out of the payload: an
-        # Ethernet carrier hands the whole rest of its frame here, padding
-        # included, and the rebuild keeps them as captured (#1209).
+        # NOTE: Octets captured past the Total Length belong to this layer, as its own length
+        # leaves them out of the payload, and the rebuild keeps them as captured (#1209).
         if schema.trailer:
             ipv4.__update__([
                 ('trailer', schema.trailer),
@@ -448,13 +445,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         # NOTE: A capture ending at or inside the header has no payload; a zero length
         # makes it a ``NoPayload`` rather than a default-filled header (#1167).
-        #
-        # A Total Length of 0 is what TCP segmentation offload leaves on the sending
-        # host: the payload is the rest of the frame, with no trailer, as Wireshark
-        # ("presumed TSO") and dpkt read it. Any other Total Length shorter than the
-        # header is Wireshark's "Bogus IP length": no payload, and the rest is trailer.
-        # Either way the rebuild writes the Total Length back as it was (#1547).
         if len(self) > ipv4.hdr_len:
+            # NOTE: A zero Total Length is TSO's, so the rest of the frame is payload; one under the
+            # header is a "Bogus IP length", so the rest is trailer. Both are written back (#1547).
             if ipv4.len == 0:
                 _plen = len(self) - ipv4.hdr_len
             else:
@@ -462,10 +455,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             _plen = 0
 
-        # NOTE: A later fragment (non-zero Fragment Offset) starts with no upper-layer
-        # header (:rfc:`791#section-3.2`), though ``protocol`` names the first fragment's.
-        # Nothing is dispatched on, so the octets stay Raw and ``'UDP' in frame`` does not
-        # hold (#1553); reassembly takes ``packet.payload`` as captured.
+        # NOTE: A later fragment has no upper-layer header (:rfc:`791#section-3.2`), so its octets
+        # stay Raw and ``'UDP' in frame`` does not hold (#1553); reassembly takes them as captured.
         proto = None if ipv4.offset else ipv4.protocol
         # NOTE: A Total Length of 0 declares none, so the frame's lengths are the
         # only record of a cut and the payload keeps them (#2689).
@@ -571,11 +562,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         ihl = self._make_uint(5 + math.ceil(options_length / 4), bits=4, name='IHL')
 
-        # NOTE: An explicit ``total_length`` is written as given, so that a
-        # ``from_data`` rebuild of a capture truncated by snaplen keeps the
-        # length the sender declared instead of the one that was recorded
-        # (#1155). Computed from the octets at hand otherwise, which is
-        # what a plain ``IPv4(payload=...)`` wants.
+        # NOTE: Written as given, so a truncated capture keeps its declared length (#1155);
+        # otherwise computed from the octets at hand.
         if total_length is None:
             total_length = ihl * 4 + len(payload)
         total_length = self._make_uint(total_length, bits=16, name='total length')
@@ -748,10 +736,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Key-value pairs for protocol construction.
 
         """
-        # NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while
-        # ``data.offset`` is in octets (see :meth:`read`), so scale back down to
-        # keep the data-to-schema round trip exact, mirroring
-        # :meth:`pcapkit.protocols.internet.ipv6_frag.protocol.IPv6_Frag._make_data`.
+        # NOTE: ``make`` takes ``offset`` in 8-octet units but ``data.offset`` is in octets, so
+        # scale it down for an exact round trip, as ``IPv6_Frag._make_data`` does.
         return {
             'tos_pre': data.tos.pre,
             'tos_del': data.tos['del'],
@@ -768,17 +754,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'checksum': data.checksum,
             'src': data.src,
             'dst': data.dst,
-            # NOTE: ``options`` is only present on ``data`` when the packet's
-            # ``hdr_len`` exceeds the fixed 20-octet header (see :meth:`read`),
-            # so read it defensively rather than assuming it always exists.
+            # NOTE: ``options`` is on ``data`` only when ``hdr_len`` exceeds the fixed header
+            # (see :meth:`read`), so it is read defensively.
             'options': getattr(data, 'options', None),
-            # NOTE: The parsed total length is passed through rather than left
-            # to ``make`` to recompute, so that a truncated capture rebuilds
-            # with the length that was on the wire (#1155).
+            # NOTE: Passed through rather than recomputed by ``make``, so a truncated capture
+            # rebuilds with the length that was on the wire (#1155).
             'total_length': data.len,
-            # NOTE: And the octets after the End of Option List, which no option
-            # records. The header length is not passed: it follows from the
-            # options and these octets, so edited options recompute it.
+            # NOTE: And the octets after End of Option List, which no option records. The header
+            # length is not passed, so edited options recompute it.
             'padding': getattr(data, 'padding', None),
             'payload': cls._make_payload(data),
             # NOTE: And the octets captured past the Total Length (#1209).
@@ -923,11 +906,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         # force alignment to 32-bit boundary
         #
-        # NOTE: Once, after the last option. An EOOL after each unaligned
-        # option would end the list there, and every later option would be
-        # lost on parse. The terminator is an EOOL option *schema*, like the
-        # NOP padding: the ``options`` field takes only schemas and
-        # :obj:`bytes`, not the bare wire code.
+        # NOTE: One EOOL after the last option, as one after each would end the list there;
+        # a schema, since ``options`` takes only schemas and :obj:`bytes`.
         pad_len = pad_length(total_length, 4)
         if pad_len:
             total_length += pad_len
@@ -1929,13 +1909,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ts_list = (ts_list + list(remaining or ()))[:slots]
             ts_list += [0] * (slots - len(ts_list))
 
-        # NOTE: ``ts_data`` is the field on
-        # :class:`~pcapkit.protocols.internet.ipv4.schema.TSOption`; ``data`` is
-        # the attribute its ``post_process`` *derives* from ``ts_data``. Passing
-        # ``data`` would drop every timestamp, since :meth:`Schema.__update__
-        # <pcapkit.protocols.schema.Schema.__update__>` only warns
-        # ``UnknownFieldWarning`` for an unknown name, leaving ``ts_data`` bound
-        # to its class-level ``ListField`` for ``post_process`` to iterate.
+        # NOTE: ``ts_data`` is the field; the derived ``data`` would draw only an
+        # ``UnknownFieldWarning`` and drop every timestamp.
         return Schema_TSOption(
             type=kind,
             length=length,

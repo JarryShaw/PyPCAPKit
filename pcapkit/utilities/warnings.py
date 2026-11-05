@@ -45,9 +45,9 @@ directly -- ``-W ignore::pcapkit.utilities.warnings.BaseWarning`` is rejected
 with ``Invalid -W option ignored: invalid module name``. CPython imports the
 category while parsing the option, which happens before :mod:`site` has added
 ``site-packages`` to :data:`sys.path`, so no installed package's own category can
-be named there; this is not specific to :mod:`pcapkit`.
+be named there.
 
-Note that all of the above governs the :mod:`warnings` channel only. The
+All of the above governs the :mod:`warnings` channel only. The
 ``pcapkit`` logger is configured separately, e.g. with
 ``logging.getLogger('pcapkit').setLevel(logging.ERROR)``.
 

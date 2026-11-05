@@ -2,14 +2,13 @@
 """GitHub issue #2502: the IEEE 802.11 radiotap header.
 
 :class:`~pcapkit.protocols.link.radiotap.protocol.Radiotap` dissects the
-``arphrd_type`` ``ARPHRD_IEEE80211_RADIOTAP`` payload that
-:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` previously kept whole as
-:class:`~pcapkit.protocols.misc.raw.protocol.Raw` (see
+``arphrd_type`` ``ARPHRD_IEEE80211_RADIOTAP`` payload of
+:class:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL` (see
 :attr:`LinuxSLL.__proto__ <pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__>`). Covers the
 fixed 8-octet start, the present-flags chain (plain and extended), the
 field-data region being skipped rather than decoded, the 802.11 MAC frame
 being handed to :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11`
-(:issue:`2575`), malformed/truncated headers, and byte-exact round trips.
+(#2575), malformed/truncated headers, and byte-exact round trips.
 The Radiotap-dispatch side of ``LinuxSLL1``/``LinuxSLL2`` is covered in their
 own test modules.
 
@@ -72,7 +71,7 @@ class TestRadiotap(unittest.TestCase):
         """A non-empty bitmask with a field-data region: the region is
         skipped over whole, per the module docstring's *Scope* section, and
         the 802.11 MAC frame behind it is handed to
-        :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` (:issue:`2575`).
+        :class:`~pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11` (#2575).
         """
         from pcapkit.protocols.link.ieee802_11.protocol import IEEE802_11
         from pcapkit.protocols.link.radiotap.protocol import Radiotap
@@ -284,7 +283,7 @@ class TestRadiotap(unittest.TestCase):
     def test_make_explicit_it_len_is_written_as_given(self) -> None:
         """An explicit ``it_len`` is written as given, not recomputed -- the
         same reason :meth:`UDP.make <pcapkit.protocols.transport.udp.protocol.UDP.make>`
-        keeps an explicit ``total_length`` (:issue:`1155`), and
+        keeps an explicit ``total_length`` (#1155), and
         :meth:`Netlink.make <pcapkit.protocols.link.netlink.protocol.Netlink.make>`
         keeps an explicit ``nlmsg_len``.
         """

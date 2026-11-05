@@ -126,11 +126,8 @@ class PCAPIO(DumperBase):
         """
         #: int: Frame counter.
         self._fnum = 1
-        # NOTE: Both of these only record how the dumper was configured -- the
-        # values that shape the output reach it through :meth:`self._dump_header
-        # <_dump_header>`'s own arguments, and are readable afterwards from
-        # :attr:`self._ghdr <_ghdr>`. They are kept because they are part of the
-        # instance surface a subclass may already read.
+        # NOTE: record-only, as the output is shaped by ``_dump_header``'s arguments;
+        # kept because a subclass may read them.
         #: bool: Nanosecond-resolution file flag.
         self._nsec = nanosecond
         #: Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int: Data link type.
@@ -233,11 +230,8 @@ class PCAPIO(DumperBase):
             the end of the file (:issue:`1541`).
 
         """
-        # NOTE: The payload is read before the metadata so that a caller passing a
-        # mapping rather than a dissected frame -- which the flow-tracing adapters
-        # of several engines do -- still fails naming ``packet``.
-        # :mod:`pcapkit.foundation.extraction` cites that error when it
-        # substitutes a dict-capable trace format for those engines up front.
+        # NOTE: payload first, so a mapping passed for a frame fails naming ``packet``,
+        # the error :mod:`pcapkit.foundation.extraction` cites.
         packet = value.packet
         frame_info = value.frame_info
         ts_sec, ts_frac = self._make_timestamp(frame_info, value.time_epoch)
@@ -286,9 +280,8 @@ class PCAPIO(DumperBase):
         ts_sec = frame_info.ts_sec
         ts_usec = frame_info.ts_usec
 
-        # NOTE: In integers rather than in :class:`decimal.Decimal`, whose
-        # context precision would round a long fraction, e.g. from an interface
-        # with a binary ``if_tsresol``.
+        # NOTE: in integers, as :class:`decimal.Decimal`'s context precision would
+        # round a long fraction, e.g. from a binary ``if_tsresol``.
         num, den = decimal.Decimal(time_epoch).as_integer_ratio()
         offset = num - ts_sec * den  # ``time_epoch - ts_sec``, over ``den``
         if (_truncates_to(offset * self._tsres, den, ts_usec)

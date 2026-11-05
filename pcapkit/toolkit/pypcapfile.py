@@ -96,12 +96,8 @@ IPV4_FLAG_MF = 0b001
 #: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.
 _ipv6_tcp_warned = collections.OrderedDict()  # type: OrderedDict[int, Any]
 
-# NOTE: the definitions from here to ``packet2timestamp``, and
-# ``_default_accepts``, ``_default_extension_header`` and
-# ``_walk_extension_headers`` below, are kept for :mod:`pcapkit.toolkit.scapy`:
-# it imports the rest, and ``_walk_extension_headers`` uses
-# ``_default_extension_header``. This module's adapters use none of them
-# (#1708).
+# NOTE: unused here; kept for :mod:`pcapkit.toolkit.scapy`, as are the
+# ``_default_*`` and ``_walk_extension_headers`` helpers below (#1708).
 
 #: IP protocol numbers of the headers :func:`_walk_extension_headers` steps
 #: over inside IPv4: AH and the IPv6 Hop-by-Hop Options, Routing, Fragment,

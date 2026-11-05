@@ -226,9 +226,8 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             packet: packet data
 
         """
-        # NOTE: Keep the declared span (``4 + Hdr Ext Len * 8``) for post_process, which
-        # splits ``Addresses[1..n]`` by it: by then ``__length__`` is counted down to zero.
-        # pack calls this before setting ``__length__``, and needs no span.
+        # NOTE: Keep the declared span for post_process to split ``Addresses[1..n]`` by, as
+        # ``__length__`` is zero by then; pack calls this before setting it, needing no span.
         if '__length__' in packet:
             packet['__rpl_length__'] = packet['__length__']
 
@@ -244,14 +243,8 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         """
         buffer = self.addresses
         if not isinstance(buffer, bytes):
-            # NOTE: Built via ``make`` (IPv6_Route._make_data_type_rpl), ``addresses`` is a
-            # ``list[bytes]`` of already-compressed addresses, which Schema.pack packs as is,
-            # so there is nothing to decompress.
-            #
-            # NOTE: ``ip`` must still be set: Protocol.__post_init__ packs then unpacks, and
-            # IPv6_Route.read hands *this* schema to _read_data_type_rpl, which would raise
-            # AttributeError without it. A full-width (16-octet) item is decoded as the parse
-            # path decodes an uncompressed one; anything else passes through untouched.
+            # NOTE: Built via ``make``, ``addresses`` holds compressed ``bytes`` packed as is, but
+            # ``ip`` must still be set, as IPv6_Route.read hands this schema to _read_data_type_rpl.
             self.ip = [
                 cast('IPv6Address', ipaddress.ip_address(item))
                 if isinstance(item, bytes) and len(item) == 16 else item
@@ -268,17 +261,14 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         ilen = 16 - cmpr_i
         elen = 16 - cmpr_e
 
-        # NOTE: Split by the span ``Hdr Ext Len`` declares, less ``pad_len``, not by the
-        # octets read: on a truncated capture the latter decodes ``Addresses[1]`` as
-        # ``Addresses[n]``. _read_data_type_rpl rejects a malformed span, so it is only
-        # clamped here.
+        # NOTE: Split by the declared span, not the octets read, which on a cut capture decode
+        # ``Addresses[1]`` as ``Addresses[n]``; _read_data_type_rpl rejects a malformed span.
         declared = packet.get('__rpl_length__', len(buffer) + 4 + self.pad['pad_len'])
         area = max(declared - 4 - self.pad['pad_len'], 0)
         widths = [ilen] * (max(area - elen, 0) // ilen) + [elen]
 
-        # NOTE: Only an item read at full width is decoded. A truncated one stays the raw
-        # octets read, without the ``dst`` prefix, so a rebuild writes them back; one cut
-        # off entirely is not listed.
+        # NOTE: Only an item read at full width is decoded; a truncated one stays raw, without
+        # the ``dst`` prefix, so a rebuild writes it back, and one cut off is not listed.
         addr = []  # type: list[IPv6Address | bytes]
         counter = 0
         for index, width in enumerate(widths):

@@ -549,12 +549,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(mapped_options[1].mss, 1300)
         self.assertEqual(type(mapped_options[-1]).__name__, 'EndOfOptionList')
 
-        # NOTE: the MP_JOIN forms reach ``_make_mode_mp`` through :func:`mptcp_option`,
-        # i.e. through ``TCP()`` itself, rather than by writing ``proto._flags`` here.
-        # ``_flags`` is then the ``Enum_Flags`` member production assigns, resolved in
-        # production's order relative to the option build. C.f. #603. The options that do
-        # not read ``_flags`` keep calling ``proto._make_mode_mp`` directly, since going
-        # through the constructor would tell us nothing extra about them.
+        # NOTE: MP_JOIN goes through ``TCP()`` via ``mptcp_option``, so ``_flags`` is the ``Enum_Flags`` production
+        # assigns, in production's order (#603); options that ignore ``_flags`` call ``_make_mode_mp`` directly.
         join_syn = tcp_data.MPTCPJoinSYN(
             kind=Option.Multipath_TCP,
             length=12,
@@ -935,15 +931,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_mptcp_fastclose(MPTCPOption.MP_FASTCLOSE,
                                                      key=123).to_dict()['key'], 123)
 
-        # NOTE: a segment with neither SYN nor ACK selects no MP_JOIN layout, and the
-        # library's own ``ProtocolError`` is what a caller must get for it. Reaching that
-        # through ``TCP()`` rather than through a hand-written ``proto._flags = set()``
-        # makes this one assertion catch both defects #603 is about: if ``TCP.make``
-        # built the options before resolving the flags (#587), ``_flags`` would not
-        # exist yet and this would raise ``AttributeError``; if the accumulator were
-        # seeded with the ``cast('Enum_Flags', 0)`` no-op, ``_flags`` would be a plain
-        # ``int`` and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError``. A
-        # ``set`` gives the right answer for the wrong reason and hides both.
+        # NOTE: neither SYN nor ACK must raise ``ProtocolError``; via ``TCP()``, not a hand-set ``set``, it also
+        # catches #603's defects: options built before flags (#587) raise ``AttributeError``, an ``int`` seed ``TypeError``.
         with self.assertRaises(ProtocolError):
             mptcp_option(subtype=MPTCPOption.MP_JOIN)
         with self.assertRaises(ProtocolError):
@@ -986,11 +975,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         )
         self.assertEqual(proto._read_mode_mp(unknown, options=options).data, b'\x0a\x01')
 
-        # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without the
-        # receiver's key and 20 octets with it (#567), so the first two cases
-        # use 12 and 20. The rejection case uses 32, which is not an MP_CAPABLE
-        # length under the RFC or under the wrong 20/32 split #567 guards
-        # against, so it is a genuine rejection.
+        # NOTE: MP_CAPABLE is 12 octets, or 20 with the receiver's key (RFC 8684 section 3.1, #567); the
+        # rejection uses 32, a length under neither the RFC nor the wrong 20/32 split #567 guards against.
         capable_no_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 1, 'ext': 0, 'deny_join': 0, 'reserved': 0, 'hsa': 1}, skey=1, rkey=2),
@@ -1017,18 +1003,8 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_CAPABLE,
             ), options=options)
 
-        # NOTE: ``proto.make(...)`` rather than ``proto._flags = {Flags.SYN}``. Both
-        # dispatchers read the same attribute with the same ``in`` tests, and ``make`` is
-        # the public entry point that assigns it, so this installs the ``Enum_Flags``
-        # member production assigns instead of a ``set`` that merely answers ``in``. C.f.
-        # #603. ``read`` seeds ``Enum_Flags(0)`` as ``make`` does (#616), so either entry
-        # point serves for the flagless case further down; ``make`` is used because these
-        # rows are about the dispatchers rather than about parsing, and
-        # :meth:`test_a_flagless_segment_seeds_its_connection_flags_as_an_enum` below
-        # covers the parsed side. Either way ``mptcp_data_selector`` rejects a flagless
-        # MP_JOIN in the schema layer first, and
-        # ``tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`` pins both
-        # halves against real segments.
+        # NOTE: ``proto.make(...)`` installs the ``Enum_Flags`` production assigns, not a bare ``set`` (#603); the
+        # parsed side is pinned below and in ``test_tcp_mptcp_join_flag_ordering_unit`` against real segments.
         proto.make(syn=True)
         join_syn = mark(
             MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 1},
@@ -1045,13 +1021,8 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_JOIN,
             ), options=options)
 
-        # NOTE: :rfc:`8684` section 3.2 figure 6 gives MP_JOIN-SYN/ACK as 16
-        # octets -- kind (1) + length (1) + subtype/flags (1) + addr_id (1) +
-        # the truncated HMAC (8) + the nonce (4) -- which is also exactly what
-        # MPTCPJoinSYNACK packs, so the accepted case uses 16. The rejection case
-        # uses 20, the wrong constant filed under #576, which no MP_JOIN form
-        # produces, so it is a genuine rejection rather than an off-by-one near
-        # the correct length.
+        # NOTE: MP_JOIN-SYN/ACK is 16 octets (RFC 8684 section 3.2 figure 6), as ``MPTCPJoinSYNACK`` packs;
+        # the rejection uses 20, the wrong constant filed under #576, which no MP_JOIN form produces.
         proto.make(syn=True, ack=True)
         join_synack = mark(
             MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 0},
@@ -1111,12 +1082,8 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.ADD_ADDR,
             ), options=options)
 
-        # NOTE: length 5, not 4: :rfc:`8684` section 3.4.2 figure 13 gives
-        # ``Length = 3 + n``, so a two-Address-ID REMOVE_ADDR is 5 octets. The
-        # reader only requires ``>= 3`` and does not cross-check the list against
-        # the length, so 4 would pass -- but it is the constant #576 keeps out of
-        # ``_make_mptcp_remove``, which is worth not leaving in a test as though
-        # it were correct.
+        # NOTE: 5, not 4: REMOVE_ADDR is ``3 + n`` octets (RFC 8684 section 3.4.2 figure 13). The reader only
+        # checks ``>= 3``, so 4 would pass, but it is the wrong constant #576 keeps out of ``_make_mptcp_remove``.
         remove = mark(
             MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value, 'reserved': 0}, addr_id=[1, 2]),
             5,
@@ -1161,11 +1128,8 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_FAIL,
             ), options=options)
 
-        # NOTE: :rfc:`8684` section 3.5 figure 14 gives MP_FASTCLOSE as 12 octets
-        # -- kind (1) + length (1) + subtype-and-reserved (2) + the receiver's key
-        # (8) -- which is what MPTCPFastclose packs, reserved octet included
-        # (#576). The rejection case uses 16, the wrong constant filed under
-        # #576, which the RFC never produces for this option.
+        # NOTE: MP_FASTCLOSE is 12 octets (RFC 8684 section 3.5 figure 14), reserved octet included, as
+        # ``MPTCPFastclose`` packs; the rejection uses 16, the wrong constant filed under #576.
         fastclose = mark(
             MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value, 'reserved': 0}, key=123),
             12,
@@ -1255,11 +1219,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             {'test': {'subtype': MPTCPOption.Reserved_for_Private_Use.value}},
         )
         self.assertIs(processed, inner)
-        # ``post_process`` assigns only the attributes the construction path assigns too
-        # (#2293). ``option`` is no longer among them: it was never a declared field and
-        # nothing read it, and ``kind`` -- a real field, so set on both paths and the one
-        # actually packed -- already carries the option number. ``kind`` is passed to the
-        # schema above rather than asserted off ``post_process``, which does not set it.
+        # ``post_process`` assigns only what construction assigns too (#2293), so not the undeclared ``option``;
+        # the declared ``kind`` carries the option number, passed in above as ``post_process`` does not set it.
         self.assertFalse(hasattr(processed, 'option'))
         self.assertEqual(processed.kind, Option.Multipath_TCP)
         self.assertEqual(processed.length, 3)

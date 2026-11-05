@@ -122,9 +122,8 @@ if TYPE_CHECKING:
 
     FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
     # NB: ``Flags`` is bound just above, so it goes in unquoted. Quoted, it would
-    # leave a bare ``ForwardRef('Flags')`` inside the alias, which every *other*
-    # module that spells ``FrameConstructor`` in an annotation would have to
-    # resolve in its own namespace -- where the name does not exist.
+    # leave a bare ``ForwardRef('Flags')`` in the alias, which another module
+    # annotating with ``FrameConstructor`` cannot resolve in its own namespace.
     FrameConstructor = Callable[[DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], Tuple[Schema_FrameType, Flags]]
 
@@ -426,10 +425,9 @@ class HTTPv2(HTTPBase[Data_HTTP, Schema_HTTP],
                 constructor derives from ``frame``.
             reserved: Reserved bit of the frame header.
             sid: Stream ID of HTTP/2 frame.
-            frame: Frame data of HTTP/2 frame. Omitting it, i.e. :data:`None`,
-                builds the frame type's own default payload, exactly as ``{}``
-                does. An explicit :obj:`bytes` value, ``b''`` included, is
-                packed as raw octets instead.
+            frame: Frame data of HTTP/2 frame. Omitted (:data:`None`), the frame
+                type's own default payload is built, as for ``{}``; a
+                :obj:`bytes` value, ``b''`` included, is packed as raw octets.
             payload: Octets after the frame, e.g. the next frame.
             preface: Whether the HTTP/2 connection preface goes ahead of the
                 frame; :meth:`pack` writes it.

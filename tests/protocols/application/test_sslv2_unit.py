@@ -2,7 +2,7 @@
 """Unit tests for :mod:`pcapkit.protocols.application.sslv2.protocol`.
 
 SSLv2's record header is 2 or 3 octets depending on the high bit of its first
-octet (:issue:`2457`), so every case below is built and read back in both
+octet (#2457), so every case below is built and read back in both
 header forms, for both handshake messages this package parses the body of --
 ``CLIENT-HELLO`` and ``SERVER-HELLO`` -- plus one message type it does not
 (``CLIENT-FINISHED``), which must still round-trip as raw octets rather than

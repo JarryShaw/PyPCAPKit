@@ -1,61 +1,40 @@
 # -*- coding: utf-8 -*-
 """The HIP ``R1_COUNTER`` generation counter is eight octets, not four.
 
-GitHub issue #672. :rfc:`7401#section-5.2.3` states the width twice -- its
-diagram labels the field "R1 generation counter, 8 bytes", and the prose below it
-says the parameter "contains a 64-bit unsigned integer in network byte order" --
-so nothing here is inferred from a figure.
-:rfc:`5201#section-5.2.3` gives the same ``Reserved, 4 bytes`` plus 8-octet
-counter layout, which is why both codes that reach
-:class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter` are affected:
-``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129).
+GitHub issue #672. :rfc:`7401#section-5.2.3` gives the width twice, in the
+diagram ("R1 generation counter, 8 bytes") and the prose ("a 64-bit unsigned
+integer"), and :rfc:`5201#section-5.2.3` has the same layout, so both codes that
+reach :class:`~pcapkit.protocols.internet.hip.schema.R1CounterParameter` are
+covered: ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129).
 
-Guards against ``counter`` being a
-:class:`~pcapkit.corekit.fields.numbers.UInt32Field`. The parameter would then
-*declare* the correct ``len=12`` -- 4 octets of ``Reserved`` plus 8 of counter,
-which is the ``Length 12`` the RFC states -- and *pack* only eight of those
-twelve, for a record of 12 octets where :rfc:`7401` Section 5.2.1's
-``Total Length = 11 + Length - (Length + 3) % 8`` makes it 16.
-Four short, at ``4 (mod 8)``, in both directions: a conformant receiver reading
-``Length = 12`` consumes 16 octets and takes four octets of the next parameter as
-this one's tail, and a real peer's 16-octet ``R1_COUNTER`` leaves its last four
-octets to be read as the following parameter's ``Type``.
+With a :class:`~pcapkit.corekit.fields.numbers.UInt32Field` counter the parameter
+still *declares* ``len=12`` but packs a 12-octet record where :rfc:`7401`
+Section 5.2.1's ``Total Length = 11 + Length - (Length + 3) % 8`` gives 16, so
+a receiver and pcapkit disagree by four octets in both directions.
 
-Why a round trip cannot see it
+Why a Round Trip Cannot See It
 ------------------------------
 
-Three things can hide it at once, and the third is the reason this module asserts
-against the RFC's arithmetic rather than against a round trip.
+Three things hide it at once, so this module asserts against the RFC's
+arithmetic rather than a round trip:
 
-1. With two copies of each parameter in a frame, two four-octet shortfalls sum
-   to eight, so the record area stays 8-aligned and ``HIP.make``'s
+1. Two copies of each parameter in a frame sum two four-octet shortfalls to
+   eight, so the record area stays 8-aligned and ``HIP.make``'s
    ``total_length // 8 + 4`` comes out exact.
-2. A padding rule that aligns the parameter *contents* rather than the record
-   (the #651 defect) appends, at ``Length = 12``, exactly the four surplus octets
-   this parameter would be missing. So correcting the padding does not break
-   ``R1_COUNTER``; it stops compensating for it.
-3. The round trip cannot see it at all, because pcapkit's reader would consume
-   exactly the twelve octets its writer wrote. Only a comparison against the RFC's own
-   stride -- or a real peer -- can tell the difference, which is what
-   :meth:`test_r1_counter_record_is_the_rfc_total_at_both_codes` does, with the
-   formula spelled out locally rather than taken from the library.
+2. A padding rule that aligns the *contents* rather than the record (#651)
+   appends, at ``Length = 12``, exactly the four missing octets.
+3. pcapkit's reader consumes exactly the twelve octets its writer wrote. Only the
+   RFC's stride, spelled out locally in
+   :meth:`test_r1_counter_record_is_the_rfc_total_at_both_codes`, tells.
 
-A zero counter hides it from the fixture too
---------------------------------------------
+A Zero Counter Hides It from the Fixture
+----------------------------------------
 
-Without an entry in ``_hip_overrides()``, the generator builds ``R1_COUNTER``
-with ``counter = 0``. Given the four-octet field and two copies of each
-parameter in a frame, an RFC-only walk over
-:file:`options-internet.pcap` reads ``Length = 12``, advances 16 over a 12-octet
-record, lands four octets inside the second copy, and finds a phantom
-``Type = 0, Length = 0`` record in that copy's own zeroed contents -- whose
-"padding" is four zero octets, so its zero-padding check passes and the walk
-ends tidily on the area boundary. Measured on
-``f0999858e``: patching one counter to ``aabbccdd`` turns that silence into
-``frame 101: type 0 padding not zeroed: aabbccdd``. A zero-valued field cannot
-discriminate a width defect from a correct one, so
-:meth:`test_the_generator_gives_r1_counter_a_non_zero_counter` pins the override
-that stops the fixture hiding the next one.
+With a zero counter, an RFC-only walk over :file:`options-internet.pcap` that
+strides 16 over a 12-octet record lands on a phantom all-zero record in the
+second copy, whose zero-padding check passes.
+:meth:`test_the_generator_gives_r1_counter_a_non_zero_counter` pins the
+``_hip_overrides()`` entry that keeps the fixture discriminating.
 """
 from __future__ import annotations
 
@@ -67,9 +46,8 @@ from tests._support import reimport_once_per_class
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: Header fields shared by every HIP packet built here. The same set
-#: :data:`examples.generators.option_families.hip.HIP_BASE` uses, so a failure here is not a
-#: failure to drive the constructor.
+#: Header fields shared by every HIP packet built here, as in
+#: :data:`examples.generators.option_families.hip.HIP_BASE`.
 HIP_BASE = {
     'next': 6, 'packet': 1, 'checksum': b'\x00\x00',
     'controls_anonymous': False, 'shit': 0, 'rhit': 0, 'payload': b'',
@@ -79,10 +57,9 @@ HIP_BASE = {
 def rfc_total(length: 'int') -> 'int':
     """:rfc:`7401#section-5.2.1`'s ``Total Length = 11 + Length - (Length + 3) % 8``.
 
-    Written out here rather than imported from
-    :func:`pcapkit.protocols.internet.hip.schema.parameter_total_len`, so that
-    this module compares the packed octets against the RFC and not against the
-    library's own reading of it.
+    Written out rather than imported from
+    :func:`pcapkit.protocols.internet.hip.schema.parameter_total_len`, so the
+    check is against the RFC, not the library's reading of it.
 
     Args:
         length: The parameter's ``Length`` field, i.e. its contents in octets.
@@ -169,20 +146,13 @@ class HIPR1CounterWidthTests(unittest.TestCase):
     def test_a_lone_r1_counter_parameter_survives_a_hip_packet(self) -> None:
         """One copy in a real packet builds, parses, and gives the counter back.
 
-        ``HIP.make`` derives the header's ``len`` as ``total_length // 8 + 4``,
+        ``HIP.make`` derives the header's ``len`` as ``total_length // 8 + 4``
         and ``_read_hip_param`` compares the recovered length exactly, so a
-        parameter that is not a multiple of eight on its own cannot survive
-        alone -- the floor division drops the remainder. Measured on
-        ``f0999858e`` this raised ``ProtocolError: HIPv2: invalid format`` at
-        both codes; pairing two copies of the parameter in one frame conceals
-        that.
+        parameter that is not a multiple of eight cannot survive alone; two
+        copies in one frame conceal that.
 
-        Code 128 is deliberately not exercised here. ``R1CounterParameter`` is
-        registered for 128 as well as 129 (#690), so 128 reaches this same
-        class rather than parsing as an ``UnassignedParameter`` -- that
-        coverage lives in
-        :meth:`HIPUnitTests.test_hip_r1_counter_code_128_resolves_to_its_own_schema`,
-        not here; this module stays scoped to the width (#672).
+        Code 128's dispatch is covered by
+        :meth:`HIPUnitTests.test_hip_r1_counter_code_128_resolves_to_its_own_schema`.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip.protocol import HIP
@@ -206,19 +176,9 @@ class HIPR1CounterWidthTests(unittest.TestCase):
     def test_the_generator_gives_r1_counter_a_non_zero_counter(self) -> None:
         """``_hip_overrides()`` must not leave this counter at zero.
 
-        Not a style preference. The RFC-only walk over
-        :file:`options-internet.pcap` reported no violation on this parameter for
-        as long as the counter was zero, because every octet it mis-read while
-        striding 16 over a 12-octet record was itself zero -- so its
-        zero-padding check passed on a phantom record it had fabricated out of
-        the second copy. Measured on ``f0999858e``: a non-zero counter takes that
-        walk from 1 violation to 2, the new one being ``frame 101: type 0 padding
-        not zeroed: aabbccdd``.
-
-        With the width right, the walk finds nothing here either way. This
-        pins the override anyway, because a fixture that cannot discriminate a
-        wrong width from a right one is what let this defect survive as long as
-        it did -- the same trap #608 fell into with the ``SOLUTION`` field.
+        With the width right the walk passes either way. The override is pinned
+        because a zero-valued field cannot tell a wrong width from a right one,
+        the trap #608 fell into with the ``SOLUTION`` field.
         """
         from pcapkit.const.hip.parameter import Parameter
 

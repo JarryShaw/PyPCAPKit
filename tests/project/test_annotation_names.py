@@ -3,10 +3,9 @@
 
 The package writes its annotations as string literals and imports the names they
 need inside an ``if TYPE_CHECKING:`` block. Nothing at runtime evaluates those
-strings, so a name that is *never imported at all* costs nothing until a type
-checker or a documentation build looks at it -- at which point it is an error in a
-file that has been passing tests for months. Issue #642 found these, and mypy
-2.3.1 agreed they were the complete set:
+strings, so a name *never imported at all* passes every test until a type checker
+or a documentation build reads it. Issue #642 found these, and mypy 2.3.1 agreed
+they were the complete set:
 
 .. code-block:: text
 
@@ -14,22 +13,18 @@ file that has been passing tests for months. Issue #642 found these, and mypy
    pcapkit/protocols/internet/ipv6_route/schema.py:136:77: error: Name "Protocol" is not defined  [name-defined]
    pcapkit/protocols/internet/ipv6_route/schema.py:271:24: error: Name "Optional" is not defined  [name-defined]
 
-This module is the same check without mypy: cheap enough to run on every commit,
-and it does not depend on a type checker being installed or on which version of
-one. Without the #642 fix it reports exactly those, name for name and line
-for line, which is what says it is measuring the right thing.
+This module is the same check without mypy, cheap enough for every commit and
+independent of any type checker or its version. Without the #642 fix it reports
+exactly those, name for name and line for line.
 
-A deliberate non-goal: this says nothing about whether the annotations resolve at
-*runtime*. They do not, and not because of anything this catches --
-``TYPE_CHECKING`` is :data:`False` when the interpreter runs, so a
-``TYPE_CHECKING``-only import is absent from the module namespace either way.
-:func:`typing.get_type_hints` raises :exc:`NameError` on most of the annotated
-functions in :mod:`pcapkit.utilities.logging`, mostly for ``Optional`` and
-``Union``, which *are* imported in its ``TYPE_CHECKING`` block. Making those
-resolve is a repository-wide decision about the idiom, not a missing import, and
-is out of scope here. What this module pins is the narrower and entirely
-uncontroversial invariant: a name a reader sees in an annotation should be a name
-the file brought into scope.
+A deliberate non-goal: whether the annotations resolve at *runtime*. They do not,
+for a reason this cannot catch -- ``TYPE_CHECKING`` is :data:`False` at runtime, so
+a ``TYPE_CHECKING``-only import is absent from the namespace either way.
+:func:`typing.get_type_hints` raises :exc:`NameError` on most annotated functions
+in :mod:`pcapkit.utilities.logging`, mostly for ``Optional`` and ``Union``, which
+*are* imported in its ``TYPE_CHECKING`` block. Making those resolve is a
+repository-wide decision about the idiom, out of scope here. This module pins the
+narrower invariant: a name in an annotation is one the file brought into scope.
 
 This module is unit-tier: it reads source text and never imports the package.
 

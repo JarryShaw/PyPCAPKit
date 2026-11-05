@@ -105,6 +105,4 @@ The Reference
 order. Its utilities are ``_make_data()`` and the helpers that ``read()`` and
 ``make()`` name, and nothing else, and there is more than one helper, so the
 first-use order of subgroup b shows as well as each reader preceding its maker.
-Chosen on :issue:`2614`, when the MAC address pair of
-:class:`~pcapkit.protocols.link.ethernet.protocol.Ethernet`, the reference before it,
-moved to the base class.
+Chosen on :issue:`2614`.

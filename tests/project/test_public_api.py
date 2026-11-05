@@ -18,21 +18,18 @@ Request and Report variants and updated the *intermediate*
 ``pcapkit/protocols/data/internet/__init__.py`` -- but not the aggregator above
 it, which re-exports the same names a second time under the same prefixes.
 
-It stayed broken for about three and a half years. That is the interesting part:
-the failure is a one-line typo with a loud, immediate, deterministic symptom, and
-nothing caught it, because nothing in the suite ever star-imported the package.
-A name in :attr:`__all__` is otherwise inert -- it is read by ``import *`` and by
-Sphinx, and by nothing that the tests exercised.
+That one-line typo had a loud, deterministic symptom and went uncaught for about
+three and a half years, because nothing in the suite star-imported the package: a
+name in :attr:`__all__` is read only by ``import *`` and by Sphinx.
 
-Star-importing is therefore the whole mechanism here: ``from x import *`` is the
-one operation that reads every entry of :attr:`__all__` and raises on the first
-one that does not resolve. :meth:`PublicAPISurfaceTests.test_star_import_of_every_public_subpackage`
-performs the real statement, so the user-visible symptom is what regresses;
-:meth:`PublicAPISurfaceTests.test_every_all_entry_resolves` then does the cheaper
-:func:`hasattr` sweep over every module rather than only the packages, and names
-the offending symbol instead of failing on the first one.
+So star-importing is the mechanism: ``from x import *`` reads every entry of
+:attr:`__all__` and raises on the first that does not resolve.
+:meth:`PublicAPISurfaceTests.test_star_import_of_every_public_subpackage` runs the
+real statement, so the user-visible symptom is what regresses;
+:meth:`PublicAPISurfaceTests.test_every_all_entry_resolves` adds the cheaper
+:func:`hasattr` sweep over every module, naming each offending symbol.
 
-Two scoping decisions, both measured rather than assumed.
+Two scoping decisions, both measured.
 
 **Nothing is excluded, :mod:`pcapkit.vendor` included.** The vendor crawlers
 ``import requests`` and ``import bs4`` at module scope, which reads as a reason to
@@ -46,56 +43,49 @@ of its ``sys.path`` save-and-restore, private as ``_path``; the attributes
 :mod:`pcapkit.vendor` itself left unlisted are recorded in
 :data:`DELIBERATE_NON_EXPORTS`.
 
-No import is wrapped in a skip, either. That is deliberate and also measured: with
-``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
-non-vendor module imported in that measurement, because each optional dependency is guarded at its import site -- e.g.
+**No import is wrapped in a skip.** Measured with ``dpkt``, ``scapy``, ``emoji``,
+``cryptography`` and ``pycrate`` all absent, every non-vendor module imported,
+because each optional dependency is guarded at its import site -- e.g.
 ``pcapkit/toolkit/scapy.py`` catches :exc:`ModuleNotFoundError` and degrades to
 ``scapy = None`` with a warning. The vendor modules need nothing past the ``test``
-extra at import time: the NGAP crawlers import ``pycrate`` only inside the
-method that reads it. So an import failure in this sweep is a real defect and is
-allowed to fail the test, rather than being softened into a skip that would let
-the next :attr:`__all__` bug through.
+extra at import time: the NGAP crawlers import ``pycrate`` only inside the method
+that reads it. So an import failure here is a real defect and fails the test,
+rather than becoming a skip that lets the next :attr:`__all__` bug through.
 
 **The converse -- every public attribute appears in :attr:`__all__` -- holds for
 every public *package*, against a written-down allowlist of exclusions.** That is
 issue #533, and scope is what makes it a test rather than noise.
 
-When #533 was measured, the converse applied to every *module* flagged 2848
-names across 286. That is not a failing test, it is a wall: a module's namespace
-holds whatever it imported in order to do its job, and none of that is its public
-surface. Applied to the public *packages* there were then, it flagged 45 names
-across 12 -- small enough to read, triage, and write down one at a time. A
-package's namespace is a composed thing: it holds what its :file:`__init__.py`
-chose to pull in, so a public attribute it has and does not export is a decision
-in one direction or the other, and the assertion exists to make that decision
-explicit instead of leaving it to be guessed at.
+Measured on #533, the converse over every *module* flagged 2848 names across 286
+-- a wall, not a test, since a module's namespace holds whatever it imported to do
+its job. Over the public *packages* it flagged 45 names across 12, few enough to
+triage one at a time. A package's namespace holds what its :file:`__init__.py`
+chose to pull in, so a public attribute it does not export is a decision either
+way, and the assertion makes that decision explicit.
 
-:data:`DELIBERATE_NON_EXPORTS` is where the decisions are recorded, and it is
-load-bearing rather than an escape hatch: without it the assertion is
-unsatisfiable, and with it every exclusion is something somebody wrote down and a
-reviewer can argue with. Of the names the package sweep flagged, about half were
-genuine omissions and are exported -- among them the ``register_*_callback`` and
-``register_extractor_*`` functions that :mod:`pcapkit.foundation` withheld while
-listing the other registry functions, ``ReassemblyManager`` and
-``TraceFlowManager``, which are defined *below* the :attr:`__all__` literal that
-forgot them and imported by name from several modules, and the decorators
-:mod:`pcapkit.utilities` then advertised in its own module docstring (in
-:mod:`pcapkit.corekit.decorators`, #1735). The rest are listed with their
-reasons, as are the names :mod:`pcapkit.vendor` added once it joined the sweep
-(#1772), and
+:data:`DELIBERATE_NON_EXPORTS` records the decisions. It is load-bearing, not an
+escape hatch: without it the assertion is unsatisfiable, and with it every
+exclusion is written down for a reviewer to argue with. Of the names the package
+sweep flagged, about half were genuine omissions and are exported -- among them
+the ``register_*_callback`` and ``register_extractor_*`` functions that
+:mod:`pcapkit.foundation` withheld while listing the other registry functions,
+``ReassemblyManager`` and ``TraceFlowManager``, which are defined *below* the
+:attr:`__all__` literal that forgot them and imported by name from several
+modules, and the decorators :mod:`pcapkit.utilities` then advertised in its own
+module docstring (in :mod:`pcapkit.corekit.decorators`, #1735). The rest are
+listed with their reasons, as are the names :mod:`pcapkit.vendor` added once it
+joined the sweep (#1772), and
 :meth:`~PublicAPISurfaceTests.test_the_non_export_allowlist_is_tight` stops the
 list rotting into a silencer: every entry has to name a package that exists, an
-attribute that package really holds, and a name its :attr:`__all__` really omits,
-so an entry stops being true the moment the tree moves under it.
+attribute that package really holds, and a name its :attr:`__all__` really
+omits, so an entry stops being true the moment the tree moves under it.
 
-:data:`AGGREGATORS` keeps an assertion of its own even though the package-wide one
-covers those packages too, because the guarantee is a stronger one: it admits no
-allowlist at all. Those packages are pure re-export surfaces -- each
-wildcard-imports its children and re-lists their names, so every public attribute
-it has came from a child that already chose to export it, and any name missing from
-its :attr:`__all__` is an oversight by construction. That is precisely how #515
-happened, and this is the assertion that makes the next one fail immediately
-instead of in three years.
+:data:`AGGREGATORS` keeps an assertion of its own, though the package-wide one
+covers them, because it admits no allowlist at all. Those packages are pure
+re-export surfaces -- each wildcard-imports its children and re-lists their names
+-- so every public attribute came from a child that already exported it, and a
+name missing from their :attr:`__all__` is an oversight by construction, which is
+how #515 happened.
 
 Further assertions cover the rest of the family, because a name can fail to be
 exported in more ways than by being misspelled. Each of them guards against a
@@ -121,7 +111,7 @@ defect the package had:
   class exists at ``pcapkit/const/mh/handover_initiate_status.py`` and is used by
   :mod:`pcapkit.protocols.internet.mh.protocol`, yet it was never imported into the package
   and so ``pcapkit.const.mh.MH_HandoverInitiateStatus`` did not resolve at all.
-  Note that a duplicate is invisible to
+  A duplicate is invisible to
   :meth:`~PublicAPISurfaceTests.test_every_all_entry_resolves`, because the name
   it repeats does resolve -- only counting the entries finds it.
 

@@ -33,11 +33,8 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SCTPUnitTests(unittest.TestCase):
-    # NOTE: Unlike the sibling TCP/UDP unit tests, this module does not purge
-    # and re-import :mod:`pcapkit` per test: nothing here depends on import-time
-    # behaviour, and the re-import costs several seconds a test. Every test that
-    # mutates a class-level registry restores it -- ``__proto__`` through the
-    # ``_proto_registry`` helper below, the sub-registries in a ``finally``.
+    # NOTE: no per-test re-import of ``pcapkit``, unlike TCP/UDP: nothing here is import-time. A test that
+    # mutates a registry restores it, ``__proto__`` via ``_proto_registry`` and the rest in a ``finally``.
 
     ##########################################################################
     # Helpers.

@@ -118,36 +118,15 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
 
     :meta decorator:
     """
-    # NOTE: keyed on ``__finalised__`` rather than on
-    # :func:`~pcapkit.utilities.compat.final`'s ``__final__``, because the two
-    # record different facts and only this one records *this function having
-    # run*. Decorators apply bottom-up, so ``@info_final`` over ``@final``
-    # reaches here with ``__final__`` already set by a decorator that generated
-    # nothing: a ``__final__`` test would read that as "already finalised", skip
-    # the generation, and hand back precisely the ``__init__``-less class
-    # :meth:`Info.__new__` refuses -- while the opposite order works. Keying
-    # on ``__finalised__`` is what makes the two orders agree.
-    #
-    # ``cls.__dict__`` rather than ``getattr``: ``__finalised__`` is an ordinary
-    # class attribute and so inherited, and a subclass declared *before* its
-    # parent was finalised reads FINAL through ``getattr`` while never having
-    # been finalised itself. Skipping it would skip the one operation it still
-    # needs -- silently, since this path only warns.
+    # NOTE: ``__finalised__``, not ``__final__``, so ``@info_final`` over ``@final`` still
+    # generates; read off ``cls.__dict__``, as an inherited ``FINAL`` says nothing of ``cls``.
     if cls.__dict__.get('__finalised__') == FinalisedState.FINAL:
         warn(f'{cls.__name__}: info class has been finalised; now skipping',
              InfoWarning, stacklevel=stacklevel())
         return cls
 
-    # NOTE: ``Info`` itself never reaches ``FinalisedState.BASE`` (see the
-    # ``cls is not Info`` guard below), so a bare ``Info()`` re-enters this
-    # function on *every* call rather than once -- and every line below this
-    # point, not just the ``__excluded__`` write, would otherwise redo the same
-    # ``dir()``-over-the-MRO scan each time. ``__base_ready__`` is a marker of
-    # its own, separate from ``__finalised__``, that records only "this base
-    # class's one-time setup already ran" -- checked and set in ``Info``'s own
-    # ``__dict__`` alone, so it is invisible to every check keyed on
-    # ``__finalised__`` staying ``NONE``. A subclass is never affected: it is
-    # promoted to ``BASE`` on its own first call and never reaches here again.
+    # NOTE: ``Info`` never reaches ``BASE``, so ``__base_ready__``, in its own ``__dict__`` and
+    # apart from ``__finalised__``, stops a bare ``Info()`` redoing this setup on every call.
     if cls is Info and cls.__dict__.get('__base_ready__'):
         return cls
 
@@ -158,11 +137,8 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     cls.__builtin__ = set(temp)
     cls.__excluded__.extend(cls.__builtin__)
 
-    # NOTE: We only generate ``__init__`` method for subclasses of the
-    # ``Info`` class, rather than itself, plus that such class does not
-    # override the ``__init__`` method of the meta class. A multi-mapping
-    # :class:`Info` (:class:`_MultiInfo`) declares no fields and keeps the
-    # mapping constructor it inherits (#1484).
+    # NOTE: Only a subclass of ``Info`` not overriding ``__init__`` gets one; a :class:`_MultiInfo`
+    # declares no fields and keeps the mapping constructor it inherits (#1484).
     if '__init__' not in cls.__dict__ and cls is not Info and not issubclass(cls, _MultiInfo):
         args_ = []  # type: list[str]
         dict_ = []  # type: list[str]
@@ -173,14 +149,8 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
             if cls_ is Info:
                 break
 
-            # NOTE: We iterate in reversed order to ensure that the type
-            # annotations of the superclasses are considered first. Each class
-            # contributes only the annotations it declares itself, on every
-            # Python version: below 3.10 (bpo-43901), ``__annotations__`` of a
-            # class declaring none is its nearest base's, so a field-less
-            # subclass would read Info's ``__finalised__``, ``__additional__``
-            # and ``__excluded__`` as its fields (#1692). See
-            # :func:`~pcapkit.utilities.compat.get_annotations`.
+            # NOTE: Reversed so superclass annotations come first. Each class gives only its own,
+            # as below 3.10 a field-less class reads its base's (bpo-43901, #1692).
             for key in reversed(get_annotations(cls_)):
                 # NOTE: We skip duplicated annotations to avoid duplicate
                 # argument in function definition.
@@ -190,9 +160,8 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
                 args_.append(key)
                 dict_.append(f'{key}={key}')
 
-        # NOTE: We reverse the two lists such that the order of the
-        # arguments is the same as the order of the type annotations, i.e.,
-        # from the most base class to the most derived class.
+        # NOTE: reversed to match the order of the type annotations, from the
+        # most base class to the most derived.
         args_.reverse()
         dict_.reverse()
 
@@ -224,22 +193,8 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
     if not _finalised:
-        # NOTE: ``Info`` itself must never receive this promotion. ``__finalised__``
-        # is an ordinary class attribute, and this branch is only ever reached with
-        # ``cls`` bound to ``Info`` when something bare-constructs ``Info()``
-        # directly -- every real subclass reaches :meth:`Info.__new__` with ``cls``
-        # bound to itself. Writing ``BASE`` onto ``Info.__dict__`` would therefore
-        # make *every* subclass declared afterwards inherit ``BASE`` from ``Info``,
-        # so its own ``cls.__finalised__ == FinalisedState.NONE`` test in
-        # :meth:`Info.__new__` would never see ``NONE`` again -- silently defeating
-        # both that one-shot auto-finalisation and the bare-``@final`` guard nested
-        # inside it, for every class declared after the first bare ``Info()``
-        # anywhere in the process. See GitHub issue #778's cross-review, which
-        # demonstrated the bypass with a class declared after such a call.
-        #
-        # ``__base_ready__`` is set instead, for the short-circuit at the top of
-        # this function -- own-``__dict__`` only, so it neither inherits nor
-        # touches ``__finalised__``.
+        # NOTE: Never promote ``Info`` itself, as every later subclass would inherit ``BASE`` and
+        # skip its one-shot finalisation (#778); ``__base_ready__`` marks ``Info`` instead.
         if cls is not Info:
             cls.__finalised__ = FinalisedState.BASE
         else:
@@ -404,25 +359,15 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
                 ``__final__`` marker in its own ``__dict__``.
 
         """
-        # NOTE: the whole ancestry rather than ``cls.__bases__``, because the
-        # direct bases alone leave a one-line way round the rule: declare the
-        # subclass *before* applying the decorator to its parent, and every
-        # further descendant of that subclass is then unguarded, since the
-        # marker sits two levels up rather than one. Walking the MRO costs one
-        # dict lookup per ancestor, once per class declaration.
-        #
-        # ``base.__dict__`` rather than ``getattr`` for the reason given in
-        # :func:`info_final`: ``__final__`` is inherited, so a ``getattr`` here
-        # would read it off every descendant and reject declarations that
-        # predate the marker rather than the ones the rule is about.
+        # NOTE: The whole MRO, not ``cls.__bases__``, so a marker two levels up still guards;
+        # ``base.__dict__``, as an inherited ``__final__`` would reject declarations predating it.
         for base in cls.__mro__[1:]:
             if base.__dict__.get('__final__'):
                 raise InfoError(f'{cls.__name__}: cannot subclass {base.__name__}, '
                                 'which is final')
 
-        # NOTE: ``*args`` and ``**kwargs`` are forwarded rather than swallowed, so
-        # that a class keyword nobody accepts still reaches ``object`` and fails
-        # there.
+        # NOTE: forwarded rather than swallowed, so a class keyword nobody
+        # accepts still reaches ``object`` and fails there.
         super().__init_subclass__(*args, **kwargs)
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Self':  # pylint: disable=unused-argument
@@ -452,27 +397,8 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
                 ``__dict__`` without :attr:`FinalisedState.FINAL`.
 
         """
-        # NOTE: ``final`` lands after the class exists, so no class-creation
-        # hook sees a bare ``@final``. First instantiation is the next event this
-        # library controls, and where the damage surfaces: with no generated
-        # ``__init__``, construction falls through to :meth:`__update__` and
-        # fails with ``TypeError: 'int' object is not iterable``, naming neither
-        # the class nor the mistake.
-        #
-        # The check sits inside the NONE branch, so a finalised class never
-        # evaluates it, and the raise leaves ``__finalised__`` unset, so a
-        # second attempt fails again.
-        #
-        # Both lookups read ``cls.__dict__``, not ``getattr``, as both markers
-        # are inherited. A subclass inheriting ``BASE`` or ``FINAL`` was never
-        # finalised itself, so it lacks the ``__excluded__`` names
-        # ``info_final`` adds and would leak ``__map__``, ``__map_reverse__``
-        # and ``__multi__`` from ``to_dict()`` (#1490). A subclass declared
-        # before an ancestor's bare ``@final`` landed inherits that marker, and
-        # ``getattr`` would blame it for the ancestor's mistake, as
-        # ``OwnDictRuleTests.test_a_subclass_that_
-        # predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it``
-        # pins.
+        # NOTE: A bare ``@final`` lands after class creation, so it is caught here; both lookups
+        # read ``cls.__dict__``, as an inherited marker says nothing of this class (#1490).
         if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise InfoError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
@@ -480,9 +406,8 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
             cls = info_final(cls, _finalised=False)
         self = super().__new__(cls)
 
-        # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
-        # here under ``self`` to avoid them being considered as class variables
-        # and thus being shared by all instances.
+        # NOTE: set on ``self`` so that ``__map__`` and ``__map_reverse__`` are
+        # not class variables shared by all instances.
         super().__setattr__(self, '__map__', {})
         super().__setattr__(self, '__map_reverse__', {})
         super().__setattr__(self, '__multi__', {})
@@ -504,20 +429,14 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
                    **kwargs: 'VT') -> 'None':
-        # NOTE: Keys with the same names as the class's builtin methods will be
-        # renamed with the class name prefixed as mangled class variables
-        # implicitly and internally. Such mapping information will be stored
-        # within the :attr:`__map__` attribute.
+        # NOTE: Keys clashing with the class's builtin methods are stored under mangled
+        # names, recorded in :attr:`__map__`.
 
-        # NOTE: A :class:`MultiDict` *adds* its values to the ones already held,
-        # as :meth:`MultiDict.update` does: a key already present keeps its
-        # value and records the new one in :attr:`__multi__`. Anything else
-        # replaces the values held.
+        # NOTE: A :class:`MultiDict` *adds* its values, as :meth:`MultiDict.update` does, with
+        # repeats recorded in :attr:`__multi__`; anything else replaces the values held.
 
-        # NOTE: A :class:`MultiDict` or :class:`OrderedMultiDict` held as a
-        # *value* -- the option lists the parsers build -- is stored as a
-        # :class:`MultiInfo` or :class:`OrderedMultiInfo`, so that a finalised
-        # instance holds no mutable mapping (#1484).
+        # NOTE: A held :class:`MultiDict` or :class:`OrderedMultiDict` becomes a :class:`MultiInfo`
+        # or :class:`OrderedMultiInfo`, so a finalised instance holds no mutable mapping (#1484).
 
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
@@ -559,9 +478,8 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
             # if key in self.__dict__:
             #     raise KeyExists(f'{key!r} already exists')
 
-            # NOTE: We don't rewrite the key names here, just keep the
-            # original ones, even though they might break on the ``.``
-            # (:obj:`getattr`) operator.
+            # NOTE: key names are kept as given, even where they break the
+            # ``.`` (:obj:`getattr`) operator.
 
             # if isinstance(key, str):
             #     key = re.sub(r'\W', '_', key)
@@ -597,9 +515,8 @@ class Info(ReduceAsProtocol2, Mapping[str, VT], Generic[VT], metaclass=InfoMeta)
         return f'<{type(self).__name__} {args}>'
 
     def __len__(self) -> 'int':
-        # NOTE: count exactly the keys :meth:`__iter__` yields, so the
-        # bookkeeping attributes and the dunder keys ``__included__`` does not
-        # name are not counted, while the keys in ``__excluded__`` are (#2003).
+        # NOTE: count exactly what :meth:`__iter__` yields, so ``__excluded__``
+        # keys count and bookkeeping or unnamed dunder keys do not (#2003).
         return sum(1 for key in self.__dict__ if not self.__hidden(key))
 
     def __iter__(self) -> 'Iterator[str]':
@@ -916,9 +833,8 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
         """Create the instance with the empty multi-mapping :meth:`__update__` adds to."""
         self = super().__new__(cls)
-        # NOTE: the multi-mapping class's own ``__init__``, which follows Info
-        # and Mapping in the MRO, gives the empty storage -- including
-        # OrderedMultiDict's bucket chain -- for ``__update__`` to add to.
+        # NOTE: the multi-mapping's own ``__init__``, after Info and Mapping in the
+        # MRO, gives the empty storage (and bucket chain) ``__update__`` adds to.
         with self.__writing():  # pylint: disable=protected-access
             super(Info, self).__init__()  # pylint: disable=bad-super-call
         return self
@@ -939,9 +855,8 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
             **kwargs: More pairs, added after ``dict_``.
 
         """
-        # NOTE: every pair is *added*, as the multi-mapping's own constructor
-        # and ``update`` do: a mapping's list values count as one pair each,
-        # and a MultiDict gives every value of each key.
+        # NOTE: every pair is *added*, as the multi-mapping's constructor does: a
+        # list value is one pair per item, and a MultiDict gives every value.
         pairs = () if dict_ is None else iter_multi_items(dict_)  # type: Iterable[tuple[Any, Any]]
         with self.__writing():
             for (key, value) in itertools.chain(pairs, kwargs.items()):
@@ -1014,11 +929,8 @@ class MultiInfo(ReduceToItems, _MultiInfo[KT, VT], MultiDict[KT, VT]):
 
     """
 
-    # NOTE: :class:`Info` and :class:`~collections.abc.Mapping` precede
-    # MultiDict in the MRO, so the mapping protocol is bound back to MultiDict's
-    # own (``__len__``, ``__contains__`` and ``__str__`` are those of
-    # :obj:`dict` and :obj:`object`). ``__eq__`` and ``__ne__`` are defined
-    # below instead.
+    # NOTE: :class:`Info` and :class:`~collections.abc.Mapping` precede MultiDict in the MRO, so
+    # the mapping protocol is bound back to MultiDict's own; ``__eq__`` and ``__ne__`` are below.
     __getitem__ = MultiDict.__getitem__  # type: ignore[assignment]
     __iter__ = MultiDict.__iter__  # type: ignore[assignment]
     __len__ = MultiDict.__len__
@@ -1034,20 +946,15 @@ class MultiInfo(ReduceToItems, _MultiInfo[KT, VT], MultiDict[KT, VT]):
     get = MultiDict.get
 
     def __eq__(self, other: 'object') -> 'bool':
-        # NOTE: MultiDict's ``__eq__`` is :obj:`dict`'s, which compares the
-        # internal storage, so against an OrderedMultiDict -- whose values sit
-        # in buckets -- it answers False where the OrderedMultiDict, asked the
-        # other way round, answers True. The ordered side decides, as it does
-        # for a bare MultiDict, which Python asks it first for being its
-        # subclass (#1484).
+        # NOTE: MultiDict's ``__eq__`` is dict's and disagrees with OrderedMultiDict's, so the
+        # ordered side decides, as it does for a bare MultiDict, its subclass (#1484).
         if isinstance(other, OrderedMultiDict):
             return NotImplemented
         return MultiDict.__eq__(self, other)
 
     def __ne__(self, other: 'object') -> 'bool':
-        # NOTE: the inverse of :meth:`__eq__`, with the ordered side's
-        # ``__eq__`` asked directly rather than its ``__ne__``: Werkzeug's
-        # OrderedMultiDict has none, and dict's compares the internal storage.
+        # NOTE: asks the ordered side's ``__eq__``, since Werkzeug's OrderedMultiDict
+        # has no ``__ne__`` and dict's compares the internal storage.
         if isinstance(other, OrderedMultiDict):
             result = other.__eq__(self)
         else:
@@ -1103,11 +1010,8 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
 
     """
 
-    # NOTE: as for :class:`MultiInfo`, the mapping protocol is bound back to
-    # OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and
-    # dict's compares the internal buckets, so two equal option lists would
-    # compare ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports
-    # (#1484).
+    # NOTE: As for :class:`MultiInfo`, the mapping protocol is OrderedMultiDict's own; ``__ne__``
+    # is :func:`_ne`, since dict's compares the internal buckets (#1484).
     __getitem__ = OrderedMultiDict.__getitem__  # type: ignore[assignment]
     __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]
     __len__ = OrderedMultiDict.__len__

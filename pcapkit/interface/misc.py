@@ -122,10 +122,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
                            trace_bidirectional=trace_bidirectional,
                            trace_analyse=trace_analyse)  # type: ignore[var-annotated]
 
-    # NOTE: ``Extractor.engine`` is the engine instance, never its name, so
-    # dispatch on its type with ``isinstance`` (#399), which also lets a subclass
-    # of a built-in engine reach the matching adapter. The pcapkit-native adapters
-    # read the frame number off the frame; the third-party ones take ``count``.
+    # NOTE: dispatch on the engine instance with ``isinstance`` (#399), so a subclass
+    # of a built-in engine reaches its adapter; only third-party adapters take ``count``.
     exeng = extraction.engine
     tcp_reassembly = None  # type: Optional[ReassemblyAdapter]
     pass_count = True

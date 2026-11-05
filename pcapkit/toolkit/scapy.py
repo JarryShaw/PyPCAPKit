@@ -540,12 +540,8 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             return None
         if not _frame(packet):  # a zero-length frame (#1676)
             return None
-        # NOTE: ``bytes(ipv4)`` ends with the frame's trailer, which Scapy files
-        # as padding at the end of the packet however deep the IPv4 layer, so
-        # only the octets inside every IP datagram above it are kept, the
-        # Payload Length of IPv6 carrying it included (#1623). The IHL
-        # and Total Length are read off them, as Scapy leaves ``ihl`` and
-        # ``len`` None on a layer built by hand until it is built (#1676).
+        # NOTE: keep only the octets inside every enclosing datagram, dropping the
+        # trailer Scapy files as padding (#1623); read IHL and Total Length off them (#1676).
         octets = _within_datagrams(ipv4)
         ihl = (octets[0] & 0x0F) * 4 if octets else IPV4_HEADER_LEN
         if len(octets) < max(ihl, IPV4_HEADER_LEN):     # a header those octets cut short
@@ -561,20 +557,15 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 Enum_TransType.get(ipv4.proto),        # payload protocol type
             ),
             num=count,                                 # original packet range number
-            # NOTE: Scapy reports ``IP.frag`` in on-wire 8-octet units
-            # (:rfc:`791#section-3.1`), but the reassembly machinery indexes the
-            # datagram buffer with ``fo`` in octets, so it must be scaled -- the
-            # same scaling this module's own IPv6 path already applies to
-            # ``IPv6ExtHdrFragment.offset`` below.
+            # NOTE: ``IP.frag`` counts 8-octet units (:rfc:`791#section-3.1`);
+            # reassembly indexes by octets.
             fo=ipv4.frag * 8,                          # fragment offset
             ihl=ihl,                                   # internet header length
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=int.from_bytes(octets[2:4], 'big'),     # total length, header includes
             header=octets[:ihl],                       # raw bytes type header
-            # NOTE: this keeps the octets past the Total Length, since the
-            # reassembly machinery cuts the payload at ``tl - ihl`` itself.
-            # :func:`ipv6_reassembly` derives its ``tl`` from the payload, so it
-            # has to cut them (#1584).
+            # NOTE: octets past the Total Length stay, as reassembly cuts at
+            # ``tl - ihl`` itself (#1584).
             payload=bytearray(octets[ihl:]),           # raw bytearray type payload
             timestamp=float(packet.time),              # capture timestamp
         )
@@ -627,10 +618,8 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         if (ipv6_frag := _fragment_header(ipv6)) is None:
             return None                        # dismiss not fragmented packet
 
-        # NOTE: ``len()`` of a Scapy layer spans that layer and everything after
-        # it, so the difference is the unfragmentable part -- every octet before
-        # the Fragment header, which is the only part of the header the
-        # reassembled packet keeps (:rfc:`8200#section-4.5`).
+        # NOTE: ``len()`` of a Scapy layer spans everything after it, so this is
+        # the unfragmentable part before the Fragment header (:rfc:`8200#section-4.5`).
         hdr_len = len(ipv6) - len(ipv6_frag)
         # the fragment's data stops at the Payload Length, so neither it nor
         # ``tl`` below counts the frame's trailer (#1584)
@@ -646,16 +635,13 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                 Enum_TransType.get(ipv6_frag.nh),         # next header field in IPv6 Fragment Header
             ),
             num=count,                                    # original packet range number
-            # NOTE: Scapy reports ``IPv6ExtHdrFragment.offset`` in on-wire 8-octet
-            # units (:rfc:`8200#section-4.5`), but the reassembly machinery indexes
-            # the datagram buffer with ``fo``, so it must be scaled into octets.
+            # NOTE: ``IPv6ExtHdrFragment.offset`` counts 8-octet units
+            # (:rfc:`8200#section-4.5`); reassembly indexes by octets.
             fo=ipv6_frag.offset * 8,                      # fragment offset
             ihl=hdr_len,                                  # header length, only headers before IPv6-Frag
             mf=bool(ipv6_frag.m),                         # more fragment flag
-            # NOTE: ``len(ipv6)`` counts the Fragment header, so it overstates
-            # this by 8 -- and the reassembly machinery writes the payload over
-            # the span ``tl - ihl``, so using it would leave 8 octets of stray
-            # zeroes in every reassembled datagram.
+            # NOTE: not ``len(ipv6)``, which counts the Fragment header and would
+            # leave 8 stray zero octets in every reassembled datagram.
             tl=hdr_len + len(payload),                    # total length, header includes
             header=bytes(ipv6)[:hdr_len],                 # raw bytes type header before IPv6-Frag
             payload=payload,                              # raw bytearray type payload after IPv6-Frag
@@ -736,9 +722,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     if (found := _tcp_carrier(packet)) is not None:
         ip, tcp, header, payload = found
 
-        # NOTE: the link type the Scapy engine attaches with ``attach_linktype``,
-        # not one inferred from the first layer, which a raw IPv4 interface's
-        # packets share with no link type (#1517).
+        # NOTE: the link type ``attach_linktype`` attached, not one inferred from
+        # the first layer, which raw IPv4 shares with no link type (#1517).
         linktype = getattr(packet, LINKTYPE_ATTR, None)
         if linktype is not None:
             protocol = Enum_LinkType.get(linktype)

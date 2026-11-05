@@ -62,7 +62,7 @@ exception, except for these, which pass without a warning:
 
 Every engine also answers a preflight check,
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
-:meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
+the :class:`~pcapkit.foundation.extraction.Extractor` constructor consults
 before importing the engine. An engine that cannot run here therefore gives one
 warning naming the cause (a Python version, a missing :program:`tshark`, a
 missing :manpage:`libpcap(3)`, the wrong |pcap|_ distribution) and falls back

@@ -286,10 +286,8 @@ class NestedTypeResolverTests(unittest.TestCase):
         class Node(Info):
             nxt: int
 
-        # NOTE: the annotation is rebound to the class object itself, because a
-        # locally declared class is not resolvable by name from its module's
-        # globals, and ``Optional[Node]`` would be pinned by :mod:`typing`'s own
-        # argument cache and so never collected whatever this code does.
+        # NOTE: rebound to the class itself: a local class is not resolvable by name,
+        # and :mod:`typing`'s cache would keep ``Optional[Node]`` from being collected.
         Node.__annotations__['nxt'] = Node
 
         self.assertIn('nxt', _nested_info_types(Node))

@@ -36,7 +36,7 @@ Please include whatever you have:
   sensitive from a capture first**, since a pcap from a real network tends to carry
   more than the bug.
 
-## What to expect
+## What to Expect
 
 This is a single-maintainer project, so response is best-effort:
 
@@ -48,7 +48,7 @@ This is a single-maintainer project, so response is best-effort:
 If a report is declined, you are told why -- most often that it describes expected
 behaviour for a packet parser, which the threat model below covers.
 
-## Threat model
+## Threat Model
 
 `pcapkit` parses attacker-controlled bytes by design: a capture file or a live
 stream off the wire is untrusted input. Vulnerabilities in that parsing are in
@@ -71,7 +71,7 @@ Out of scope:
 - needing elevated privileges to capture live traffic, which is the operating
   system's requirement rather than this project's.
 
-## Handling untrusted captures
+## Handling Untrusted Captures
 
 The parser cannot always tell a capture truncated in transit from one crafted to
 look that way, from inside the field that declares the length. So for captures you

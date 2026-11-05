@@ -10,9 +10,8 @@ classes follow: :mod:`~pcapkit.protocols.application.httpv1.protocol`,
 
 A dispatched layer is its version's class (#2524), so the key its enclosing layer
 stores it under follows that class's name, ``httpv1`` or ``httpv2``, as a member
-built directly does. Since the members no longer share the base's name,
-registering one keeps its own key rather than displacing the base under
-``'HTTP'``.
+built directly does. As the members do not share the base's name, registering
+one keeps its own key rather than displacing the base under ``'HTTP'``.
 
 This module is unit-tier: the segments are built in memory.
 
