@@ -9,4 +9,6 @@ TCP Datagram Analysis
 application-layer payload of a TCP datagram that
 :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembled.
 
+.. versionadded:: 1.6.0
+
 .. autofunction:: pcapkit.foundation.analysis.tcp.tcp_datagram

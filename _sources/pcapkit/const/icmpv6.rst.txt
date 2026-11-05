@@ -19,6 +19,8 @@ enumerations include:
    * - :class:`ICMPv6_ParameterProblemCode <pcapkit.const.icmpv6.parameter_problem_code.ParameterProblemCode>`
      - ICMPv6 Parameter Problem Codes [*]_
 
+.. versionadded:: 1.6.0
+
 ICMPv6 Type Numbers
 ====================
 

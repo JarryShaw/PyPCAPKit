@@ -31,6 +31,8 @@ was written in is ambiguous (Netlink [*]_ is kernel/userspace IPC, not wire
 format) and is guessed by :func:`nlmsg_byteorder`; either way it is kept as
 ``netlink.byteorder``.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.netlink.protocol.Netlink
    :no-members:
    :show-inheritance:

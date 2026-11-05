@@ -23,6 +23,8 @@ vendor crawlers include:
    * - :class:`DCCP_DropCode <pcapkit.vendor.dccp.drop_code.DropCode>`
      - DCCP Drop Codes [*]_
 
+.. versionadded:: 1.6.0
+
 DCCP Packet Types
 =================
 

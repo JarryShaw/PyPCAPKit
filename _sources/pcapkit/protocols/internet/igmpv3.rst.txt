@@ -46,6 +46,8 @@ Octets      Bits        Name                               Description
   8          64   ``igmpv3.records``                 Group Record [1..M]
 ======= ========= ================================== ===================================
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.igmpv3.protocol.IGMPv3
    :no-members:
    :show-inheritance:

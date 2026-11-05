@@ -39,6 +39,8 @@ dispatch is shared, see :mod:`~pcapkit.protocols.link.linux_sll.protocol`. Its
 :attr:`~pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2.alias` is ``'LINUX_SLL2'``;
 see :ref:`linux-sll-labels`.
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2
    :no-members:
    :show-inheritance:

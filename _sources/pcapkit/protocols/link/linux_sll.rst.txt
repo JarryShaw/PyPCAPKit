@@ -27,6 +27,8 @@ names the version. Its
 :meth:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.from_data` gives the version
 whose data model it is handed (:issue:`2574`).
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.link.linux_sll.protocol.LinuxSLL
    :no-members:
    :show-inheritance:

@@ -37,6 +37,8 @@ model, and an Extension frame, are read as the minimal frame format of
 S1G Beacon lay out B8-B15 of Frame Control differently; see
 :class:`~pcapkit.protocols.link.ieee802_11.data.FrameControl`.
 
+.. versionadded:: 1.6.0
+
 Scope
 -----
 

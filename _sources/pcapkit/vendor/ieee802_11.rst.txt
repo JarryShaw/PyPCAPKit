@@ -31,6 +31,8 @@ Available vendor crawlers include:
    on Wikipedia's *802.11 frame types* page [*]_, which reproduces Table 9-1
    with the Trigger frame of IEEE Std 802.11ax-2021.
 
+.. versionadded:: 1.6.0
+
 Frame Types
 ===========
 

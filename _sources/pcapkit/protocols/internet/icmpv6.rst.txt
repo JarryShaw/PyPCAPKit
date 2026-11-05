@@ -19,6 +19,8 @@ Octets      Bits        Name                    Description
   4          32   ``icmpv6.data``           Message Body
 ======= ========= ======================= ===================================
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.icmpv6.protocol.ICMPv6
    :no-members:
    :show-inheritance:

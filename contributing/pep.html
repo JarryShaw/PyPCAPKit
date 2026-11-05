@@ -461,7 +461,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – unreleased</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../changelog/1.6.0.html">1.6.0 – 2026-11-05</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.1.html">1.5.1 – 2026-10-30</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – 2026-10-29</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -610,12 +610,15 @@ the ones outstanding are,</p>
 NTP, ONC/RPC, POP, QUIC, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet,
 XMPP</p></li>
 </ul>
-<p>Several of these come in pairs that want a shared abstract base rather than two
+<p>Several protocols came in pairs that wanted a shared abstract base rather than two
 independent implementations, in the way
 <a class="reference internal" href="../pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.protocol.IP" title="pcapkit.protocols.internet.ip.protocol.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> and
-<a class="reference internal" href="../pcapkit/protocols/internet/icmp.html#pcapkit.protocols.internet.icmp.protocol.ICMP" title="pcapkit.protocols.internet.icmp.protocol.ICMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMP</span></code></a> already cover their families:
-IP and IPsec, and TLS/SSL with DTLS. <strong>Done</strong> for TLS/SSL
-with DTLS: <a class="reference internal" href="../pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2" title="pcapkit.protocols.application.sslv2.protocol.SSLv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code></a>,
+<a class="reference internal" href="../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.protocol.IPsec" title="pcapkit.protocols.internet.ipsec.protocol.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> cover their families.
+<strong>Done</strong> in 1.6.0:
+<a class="reference internal" href="../pcapkit/protocols/internet/icmp.html#pcapkit.protocols.internet.icmp.protocol.ICMP" title="pcapkit.protocols.internet.icmp.protocol.ICMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMP</span></code></a> is the base of ICMPv4 and
+ICMPv6, <a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL" title="pcapkit.protocols.link.linux_sll.protocol.LinuxSLL"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL</span></code></a> that of the two
+Linux cooked-capture headers, and
+<a class="reference internal" href="../pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2" title="pcapkit.protocols.application.sslv2.protocol.SSLv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code></a>,
 <a class="reference internal" href="../pcapkit/protocols/application/tls.html#pcapkit.protocols.application.tls.protocol.TLS" title="pcapkit.protocols.application.tls.protocol.TLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLS</span></code></a> and
 <a class="reference internal" href="../pcapkit/protocols/application/dtls.html#pcapkit.protocols.application.dtls.protocol.DTLS" title="pcapkit.protocols.application.dtls.protocol.DTLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">DTLS</span></code></a> share
 <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> as their base by name, and only
@@ -797,7 +800,8 @@ registered or the decoder rejects it (<a class="extlink-issue reference external
 message is message-TYPE-level framing only. Decryption is a
 separate question and is not needed to make the record structure legible, in
 the same way <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> parses
-without keys.</p>
+without keys. <strong>Still open:</strong> a TLS record split across TCP segments is not
+reassembled, and stays <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>.</p>
 <p><strong>Done</strong> for SSLv2 too (draft-hickman-netscape-ssl-00, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2457">#2457</a>):
 <a class="reference internal" href="../pcapkit/protocols/application/sslv2.html#pcapkit.protocols.application.sslv2.protocol.SSLv2" title="pcapkit.protocols.application.sslv2.protocol.SSLv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSLv2</span></code></a> shares
 <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a> by name only, since its 2- or
@@ -856,7 +860,17 @@ RARP, IPv4, IPv6, IPX and both VLAN tags.</p></li>
 <a class="reference internal" href="../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.protocol.UDP.__proto__" title="pcapkit.protocols.transport.udp.protocol.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a>, out of
 a registry carrying every IANA service name: TCP 20 to FTP-DATA, 21 to FTP and
 443 to TLS, ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to
-L2TPv2 and 5684 to DTLS.</p></li>
+L2TPv2 and 5684 to DTLS. <a class="reference internal" href="../pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__" title="pcapkit.protocols.transport.dccp.protocol.DCCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DCCP.__proto__</span></code></a>, keyed by the same
+registry, binds no port, so every DCCP payload is
+<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> until something calls
+<a class="reference internal" href="../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.transport.register_dccp" title="pcapkit.foundation.registry.protocols.transport.register_dccp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_dccp()</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="../pcapkit/const/linux.html#pcapkit.const.linux.arphrd.ARPHRD" title="pcapkit.const.linux.arphrd.ARPHRD"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARPHRD</span></code></a> – the values in <a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__" title="pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinuxSLL.__proto__</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2510">#2510</a>), each an
+<code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> neither Linux cooked-capture header reads as an EtherType
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>): <code class="docutils literal notranslate"><span class="pre">NETLINK</span></code>, <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code>, <code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code>, <code class="docutils literal notranslate"><span class="pre">FRAD</span></code> and
+<code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code>. Behind radiotap,
+<a class="reference internal" href="../pcapkit/protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a> dissects the MAC header
+and keeps the frame body <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2575">#2575</a>).</p></li>
 <li><p><a class="reference internal" href="../pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
 – the values in <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.protocol.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a>: PPIDs 60 and 66, each to
 <a class="reference internal" href="../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.protocol.NGAP" title="pcapkit.protocols.application.ngap.protocol.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>. Every other DATA chunk
@@ -902,7 +916,9 @@ the parsed output.</p></li>
 <a class="reference internal" href="../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>, which reads the four-octet
 address family word and hands 2 to IPv4 and 24, 28 or 30 to IPv6
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1574">#1574</a>). <code class="docutils literal notranslate"><span class="pre">RAW</span></code> has no binding of its own: its bare IPv4 or IPv6 is
-dispatched by the version nibble of the first octet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1502">#1502</a>).</p></li>
+dispatched by the version nibble of the first octet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1502">#1502</a>). Neither
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code> nor <code class="docutils literal notranslate"><span class="pre">RAW</span></code> stands in for an unknown link type: the toolkit raises for
+a link-layer name it cannot resolve rather than defaulting to <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.NULL" title="pcapkit.const.reg.linktype.LinkType.NULL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinkType.NULL</span></code></a>.</p></li>
 </ul>
 <p>Follow-ups to the bindings above:</p>
 <ul class="simple">
@@ -927,9 +943,9 @@ segment’s HTTP version is decided by its payload rather than asserted by its
 port number. That depends on the proxy identifying the version positively
 instead of guessing, since a guess path is wrong on non-HTTP input.</p></li>
 </ul>
-<p><strong>Done.</strong> ICMP (1), ICMPv6 (58) and IGMP (2) – the internet layer gaps most
-likely to be met in a real capture – are all implemented; ECN and Shim6
-above are the open ones.</p>
+<p><strong>Done.</strong> ICMP (1), IGMP (2), DCCP (33), GRE (47) and ICMPv6 (58) – the IP
+protocol numbers most likely to be met in a real capture – are all implemented
+and bound; ECN and Shim6 above are the open ones.</p>
 </section>
 </section>
 <section id="pcapng-support">
@@ -1194,7 +1210,9 @@ exact value stays in the sibling field every timestamp already has, such as
 <p><strong>Still open.</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html"><span class="doc">Packets Reassembly</span></a> covers IPv4, IPv6, TCP and DTLS
 handshake messages (see <a class="reference internal" href="#dtls">DTLS</a> above), and no more.
-IPv4 and IPv6 share the <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
+IPv4 and IPv6 share the <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, except that a fragment overlapping
+another abandons an IPv6 datagram, as <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> requires, where IPv4
+overwrites the octets it overlaps (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2547">#2547</a>). TCP uses the <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
 back together, and <a class="reference internal" href="../pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> has no SCTP reassembler.</p>
@@ -1206,7 +1224,7 @@ reassembler needs, on
 those two bits outside the construction path. So each fragment is dispatched on
 its own PPID as though it were a whole PDU, and a registered upper layer is
 handed half a message. Related holes compound it: only the <em>first</em> DATA
-chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
+chunk of a bundle is dispatched at all, and I-DATA [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8260.html"><strong>RFC 8260</strong></a>], chunk type 64,
 is not dissected – so the MID and FSN fields that exist precisely to make
 interleaved reassembly tractable are never parsed, and an I-DATA-only packet
 yields no payload whatsoever. FORWARD TSN (192) and I-FORWARD-TSN (194) are
@@ -1249,7 +1267,7 @@ flows instead.</p>
 <p>What ends a bidirectional flow is worth stating, because the obvious answer is
 wrong. A teardown – a FIN from each endpoint, or a RST from either – is
 <em>recorded</em> but does not finalise the flow: the four-way close of
-<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
+<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
 arrives after the second FIN, and finalising on that FIN drops the ACK from the
 flow and lets it open a fresh buffer under the same canonical buffer ID – which
 a later connection reusing those endpoints then merges into. Duplicates of that
@@ -1268,7 +1286,7 @@ of buffering a traced payload, the tracer <strong>delegates to</strong>
 <a class="reference internal" href="../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
 per-direction payload buffer of its own. A buffer that concatenated payloads in
 capture order would be silently wrong on the first retransmission or reordered
-segment, where the <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
+segment, where the <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
 reassembler is not – so
 <a class="reference internal" href="../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the segment
 fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
@@ -1309,18 +1327,18 @@ than
 the honest answer, since the capture never shows the deadline passing; feeding
 every frame’s timestamp to every enabled reassembler would close the gap and
 is worth doing on its own account.</p>
-<p>On the numbers: the 15 seconds <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
+<p>On the numbers: the 15 seconds <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> names is that RFC’s <em>initial</em> timer
 setting, a lower bound which
 <code class="docutils literal notranslate"><span class="pre">TIMER</span> <span class="pre">&lt;-</span> <span class="pre">MAX(TIMER,TTL)</span></code> then raises toward the 4.25-minute TTL ceiling –
-not a deadline. <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
+not a deadline. <span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
 (“The reassembly timeout value SHOULD be a fixed value, not set from the
 remaining TTL… between 60 seconds and 120 seconds”), so IPv4 uses 60
-seconds, agreeing with the 60 <span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
+seconds, agreeing with the 60 <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
 <strong>TCP is left with no timeout at all</strong>, since no specification gives stream
 reassembly a deadline and an idle connection is ordinary rather than
 pathological; <code class="docutils literal notranslate"><span class="pre">timeout</span></code> enables one on request.</p>
-<p>Related things are <em>not</em> done. <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
-<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
+<p>Related things are <em>not</em> done. <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
+<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
 the offset-zero fragment has been received; a parser sends nothing, so the
 condition is only reported in the log record. And the memory motive is
 narrowed rather than removed – an in-flight IP datagram identifier still
@@ -1337,6 +1355,8 @@ reassembly, and the <code class="docutils literal notranslate"><span class="pre"
 </section>
 <section id="checksum-and-integrity-verification">
 <h2>Checksum and Integrity Verification<a class="headerlink" href="#checksum-and-integrity-verification" title="Link to this heading">¶</a></h2>
+<p><strong>Partly done.</strong> The one’s-complement half shipped in 1.6.0; of the cryptographic
+half, ESP’s is done and HIP’s is open.</p>
 <p>These protocols parse a checksum or CRC field —
 <a class="reference internal" href="../pcapkit/protocols/link/gre.html#pcapkit.protocols.link.gre.protocol.GRE" title="pcapkit.protocols.link.gre.protocol.GRE"><code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code></a>,
 <a class="reference internal" href="../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.protocol.HIP" title="pcapkit.protocols.internet.hip.protocol.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a>,
@@ -1368,7 +1388,7 @@ which live in the <em>enclosing</em> layer. So verification needs a parsed proto
 reach back to its parent, which is a structural question about
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> rather than an arithmetic one.
 That is precisely why SCTP came first and is not evidence the rest are easy:
-<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the common header and chunks with
+<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-6.8"><strong>RFC 9260 Section 6.8</strong></a> defines its CRC32c over the common header and chunks with
 the checksum field zeroed and <strong>no pseudo-header</strong>, so it can be verified from
 the SCTP packet alone. Note also that SCTP’s CRC32c is a hand-rolled lookup table
 in <a class="reference internal" href="../pcapkit/protocols/transport/sctp.html#module-pcapkit.protocols.transport.sctp.protocol" title="pcapkit.protocols.transport.sctp.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.protocol</span></code></a>, not a library call, so it is not
@@ -1413,11 +1433,10 @@ the two paths then share one definition instead of agreeing by coincidence.</p><
 <p>One case was left to implementation time, since it is about wording rather
 than design: <strong>checksum offload</strong>. A capture taken on the sending
 host routinely contains checksums the NIC had not computed yet, so the field is
-zero or garbage on the wire and “invalid” is the wrong word for it. Whatever
-status enumeration this grows should be able to say <em>not computed</em> distinctly
-from <em>wrong</em>, or it will cry wolf on the commonest capture there is —
-<a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESPStatus" title="pcapkit.protocols.internet.esp.protocol.ESPStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESPStatus</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code> member is the
-model for how to spell “expected, not an error”.</p>
+zero or garbage on the wire and “invalid” is the wrong word for it. The status
+has to say <em>not computed</em> distinctly from <em>wrong</em>, or it cries wolf on the
+commonest capture there is; it is settled below as <code class="docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code>, spelled after
+<a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESPStatus" title="pcapkit.protocols.internet.esp.protocol.ESPStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESPStatus</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code>.</p>
 <p><strong>The one’s-complement half is done</strong> for every protocol named above
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2472">#2472</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2475">#2475</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2618">#2618</a>), on
 <a class="reference internal" href="../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a>
@@ -1427,9 +1446,9 @@ as the offload question above asked; the owner accepted the toggles and the
 offload heuristic on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>.</p>
 <ul class="simple">
 <li><p><strong>Every checksum path is togglable, and verifying and computing default apart.</strong> Parsing
-verifies only under <span class="target" id="index-50"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>, off by default;
+verifies only under <span class="target" id="index-51"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_VERIFY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_VERIFY</span></code></a>, off by default;
 construction computes a checksum the caller leaves out unless
-<span class="target" id="index-51"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a> turns it off.</p></li>
+<span class="target" id="index-52"></span><a class="reference internal" href="../pcapkit/utilities/config.html#envvar-PCAPKIT_CHECKSUM_COMPUTE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CHECKSUM_COMPUTE</span></code></a> turns it off.</p></li>
 <li><p><strong>The toggle is an environment variable</strong>, with a per-call override only where
 a caller needs one. A checksum given to <code class="docutils literal notranslate"><span class="pre">make()</span></code> is written as given, which is
 what keeps a rebuild byte for byte; there is no
@@ -1441,8 +1460,8 @@ payload; <code class="docutils literal notranslate"><span class="pre">make()</sp
 <li><p><strong>Offload is</strong> <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code></a>,
 modelled on <code class="docutils literal notranslate"><span class="pre">NO_SA</span></code>: a zero IPv4 or TCP checksum, or a TCP or UDP one holding
 the pseudo-header’s sum alone, as Linux offload leaves it, never warns. So does
-a zero UDP checksum over IPv4 (<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>), but not over IPv6, where it is
-mandatory (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a>).</p></li>
+a zero UDP checksum over IPv4 (<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>), but not over IPv6, where it is
+mandatory (<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-8.1"><strong>RFC 8200 Section 8.1</strong></a>).</p></li>
 <li><p><strong>A fragment is</strong>
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NO_PSEUDO_HEADER</span></code></a>,
 atomic ones aside: TCP, UDP, ICMP, ICMPv6 and IGMP checksums cover all of the
@@ -1451,9 +1470,9 @@ checksum covers, so it is verified when the fragment holds that much, and
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a>
 otherwise.</p></li>
 <li><p><strong>IGMP covers the whole IP payload in every version, and GRE its header and
-payload only when</strong> <code class="docutils literal notranslate"><span class="pre">C</span></code> <strong>is set</strong> (<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.5"><strong>RFC 2236 Section 2.5</strong></a>,
-<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>, <span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html#section-2.5"><strong>RFC 2784 Section 2.5</strong></a>). The IGMPv1 rule follows
-<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html"><strong>RFC 2236</strong></a>, which updates <span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a>’s 8-octet one. A GRE header with <code class="docutils literal notranslate"><span class="pre">C</span></code>
+payload only when</strong> <code class="docutils literal notranslate"><span class="pre">C</span></code> <strong>is set</strong> (<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html#section-2.5"><strong>RFC 2236 Section 2.5</strong></a>,
+<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html#section-4.1.2"><strong>RFC 3376 Section 4.1.2</strong></a>, <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html#section-2.5"><strong>RFC 2784 Section 2.5</strong></a>). The IGMPv1 rule follows
+<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2236.html"><strong>RFC 2236</strong></a>, which updates <span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1112.html"><strong>RFC 1112</strong></a>’s 8-octet one. A GRE header with <code class="docutils literal notranslate"><span class="pre">C</span></code>
 clear is <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NOT_COMPUTED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NOT_COMPUTED</span></code></a>,
 and <code class="docutils literal notranslate"><span class="pre">make()</span></code> computes one when <code class="docutils literal notranslate"><span class="pre">checksum_present</span></code> asks without giving it
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2618">#2618</a>). Neither GRE nor the Linux cooked-capture header carries a
@@ -1469,7 +1488,7 @@ header the data ends inside is
 the message rebuilt on its own reads
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED" title="pcapkit.corekit.checksum.internet.ChecksumStatus.TRUNCATED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TRUNCATED</span></code></a> as well, an
 ICMP one included (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2711">#2711</a>).</p></li>
-<li><p><strong>DCCP covers what its Checksum Coverage gives</strong> (<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-9.2"><strong>RFC 4340 Section 9.2</strong></a>), over
+<li><p><strong>DCCP covers what its Checksum Coverage gives</strong> (<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html#section-9.2"><strong>RFC 4340 Section 9.2</strong></a>), over
 a pseudo-header that carries the whole packet’s length, as TCP’s does, so a
 fragment is
 <a class="reference internal" href="../pcapkit/corekit/checksum/internet.html#pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER" title="pcapkit.corekit.checksum.internet.ChecksumStatus.NO_PSEUDO_HEADER"><code class="xref py py-attr docutils literal notranslate"><span class="pre">NO_PSEUDO_HEADER</span></code></a>
@@ -1484,8 +1503,7 @@ checksum. No value is
 DCCP has no checksum to leave out, and Linux computed it in software rather
 than offloading it. Settled at implementation (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>).</p></li>
 </ul>
-<p>The cryptographic half is sequenced for <strong>wave 3</strong>, and could be done sooner
-since ESP has already laid the groundwork.</p>
+<p>HIP’s cryptographic half is open, on the groundwork ESP has already laid.</p>
 </section>
 <section id="deterministic-construction-arguments">
 <h2>Deterministic Construction Arguments<a class="headerlink" href="#deterministic-construction-arguments" title="Link to this heading">¶</a></h2>
@@ -1540,25 +1558,36 @@ family, and it removes the root cause of the <a class="extlink-issue reference e
 family rather than leaving its next instance to be found and patched the same
 way.</p>
 </section>
-<section id="release-plan-1-5-0-in-two-steps">
-<h2>Release Plan — 1.5.0 in Two Steps<a class="headerlink" href="#release-plan-1-5-0-in-two-steps" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is the current version, and the release is sequenced
-against the waves above in two deliberate steps:</p>
+<section id="release-plan">
+<h2>Release Plan<a class="headerlink" href="#release-plan" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is the current version, and editing it is what starts
+a release.</p>
+<section id="in-one-step">
+<h3>1.6.0, in One Step<a class="headerlink" href="#in-one-step" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">1.6.0</span></code> is released in one step, with no beta. Its version edit rides in
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2483">#2483</a> with the 1.6.0 changelog, so merging that pull request is the single
+push that starts the release, as ruled in review of <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2483">#2483</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2449">#2449</a>).
+As a final version it takes the <code class="docutils literal notranslate"><span class="pre">main</span></code> Anaconda label and a full GitHub
+release, as step 2 of <a class="reference internal" href="#in-two-steps">1.5.0, in Two Steps</a> did.</p>
+</section>
+<section id="in-two-steps">
+<h3>1.5.0, in Two Steps<a class="headerlink" href="#in-two-steps" title="Link to this heading">¶</a></h3>
+<p>The 1.5.0 release came in two deliberate steps:</p>
 <ol class="arabic simple">
-<li><p><strong>A beta —</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> <strong>— when wave 1’s remaining issues are closed.</strong>
-<em>Done.</em> Wave 1’s feature work had landed already; what remained was the
+<li><p><strong>A beta —</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> <strong>— when the remaining defects are closed.</strong>
+<em>Done.</em> The feature work had landed already; what remained was the
 defect tail in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a>, and closing it earned a
-beta rather than a final release, because the consistency sweep below had not
-run yet and was expected to find things.</p></li>
-<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>when the post-wave-1 consistency sweep is done.</strong>
-<em>Done.</em> The sweep is described under <a class="reference internal" href="#delivery-sequence">Delivery Sequence</a> below — prose
-against code, missing tests, unaligned changes, packet formats against the
-specifications, and duplicated logic. Its whole point was to find what
+beta rather than a final release, because the consistency sweep of step 2 had
+not run yet and was expected to find things.</p></li>
+<li><p><strong>The official</strong> <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> <strong>when a library-wide consistency sweep is done.</strong>
+<em>Done.</em> The sweep checked prose against code, missing tests, unaligned
+changes, packet formats against the specifications, and duplicated logic,
+each finding reproduced before it was filed. Its whole point was to find what
 one-at-a-time defect work does not, and its verified findings are closed:
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/490">#490</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/492">#492</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/493">#493</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/494">#494</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/495">#495</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/496">#496</a>, alongside the prose strand’s own
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>. A later defect wave made the prose strand’s ground move again,
-so it ran a second time as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; that is closed too. <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>. A later round of defect fixes moved the prose strand’s ground
+again, so it ran a second time as <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>; that is closed too. <code class="docutils literal notranslate"><span class="pre">1.5.0</span></code>
 shipped once this work was in.</p></li>
 </ol>
 <p><strong>The version string is the release button, so it is worth knowing exactly what
@@ -1636,107 +1665,19 @@ the workflow itself; editing the version string is the whole of it, which is
 precisely why it should be its own commit rather than a line folded into
 something else.</p>
 </section>
-<section id="delivery-sequence">
-<h2>Delivery Sequence<a class="headerlink" href="#delivery-sequence" title="Link to this heading">¶</a></h2>
-<p>The items above are ordered by subject rather than by when anyone intends to do
-them. This section records the intended <strong>order</strong>, so that a contributor can see
-what is being worked on, what is queued behind it, and — more usefully — which
-items are queued because they <em>depend</em> on something rather than merely because
-nobody has started them.</p>
-<p>It is a sequencing note, not a commitment: nothing here is claimed, and an item
-being in a later wave is not a reason to leave it alone if you want it now. Say
-so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a> and it moves.</p>
-<p><strong>Wave 1 — done.</strong> The Mobility Header registry completion, the protocol
-bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
-<a class="reference internal" href="../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.protocol.VLAN" title="pcapkit.protocols.link.vlan.protocol.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a> C-Tag/S-Tag split, the option
-round-trip coverage harness, and reassembly’s <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> timeout with
-bidirectional flow tracing. Its defect tail closed out through the
-post-wave-1 consistency sweep described under <a class="reference internal" href="#release-plan-1-5-0-in-two-steps">Release Plan — 1.5.0 in Two
-Steps</a> above.</p>
-<p><strong>Wave 2 — the protocol pairs that want a shared abstract base, done</strong> (ruled on
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2564">#2564</a>), per <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above: <strong>TLS/SSL with DTLS</strong> and
-<strong>IGMP</strong> and <strong>DCCP</strong> on their own. These are grouped because the shared-base
-question is the design work and doing either half of a pair alone would answer it
-twice.</p>
-<p><strong>DCCP — done within wave 2</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>).
-<a class="reference internal" href="../pcapkit/protocols/transport/dccp.html#pcapkit.protocols.transport.dccp.protocol.DCCP" title="pcapkit.protocols.transport.dccp.protocol.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a> dissects every <span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html"><strong>RFC 4340</strong></a> packet
-type and DCCP-Listen (<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5596.html"><strong>RFC 5596</strong></a>), with short and long sequence numbers, and the
-options <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html"><strong>RFC 4340</strong></a> defines; its checksum is verified and computed over
-<a class="reference internal" href="../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a>, as <a class="reference internal" href="#checksum-and-integrity-verification">Checksum and
-Integrity Verification</a> above describes. The Data Checksum option’s CRC-32c is
-recorded and not checked.</p>
-<p><strong>Done within wave 2 — ICMP/ICMPv6 shared base.</strong> <a class="reference internal" href="../pcapkit/protocols/internet/icmp.html#pcapkit.protocols.internet.icmp.protocol.ICMP" title="pcapkit.protocols.internet.icmp.protocol.ICMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMP</span></code></a>
-is the abstract base <a class="reference internal" href="../pcapkit/protocols/internet/icmpv4.html#pcapkit.protocols.internet.icmpv4.protocol.ICMPv4" title="pcapkit.protocols.internet.icmpv4.protocol.ICMPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv4</span></code></a> and
-<a class="reference internal" href="../pcapkit/protocols/internet/icmpv6.html#pcapkit.protocols.internet.icmpv6.protocol.ICMPv6" title="pcapkit.protocols.internet.icmpv6.protocol.ICMPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">ICMPv6</span></code></a> share for selector composition
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2436">#2436</a>); each implements its own message-type parsing independently rather than
-through a shared method body. The two are distinguished by whether they carry pseudo-header
-checksums (ICMPv6 does; ICMPv4 does not), both verified and computed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>).</p>
-<p><strong>IGMP — done within wave 2</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2439">#2439</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>).
-The three concrete classes <a class="reference internal" href="../pcapkit/protocols/internet/igmpv1.html#pcapkit.protocols.internet.igmpv1.protocol.IGMPv1" title="pcapkit.protocols.internet.igmpv1.protocol.IGMPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv1</span></code></a>,
-<a class="reference internal" href="../pcapkit/protocols/internet/igmpv2.html#pcapkit.protocols.internet.igmpv2.protocol.IGMPv2" title="pcapkit.protocols.internet.igmpv2.protocol.IGMPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv2</span></code></a> and
-<a class="reference internal" href="../pcapkit/protocols/internet/igmpv3.html#pcapkit.protocols.internet.igmpv3.protocol.IGMPv3" title="pcapkit.protocols.internet.igmpv3.protocol.IGMPv3"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMPv3</span></code></a> share one read path on
-the abstract <a class="reference internal" href="../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP" title="pcapkit.protocols.internet.igmp.protocol.IGMP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IGMP</span></code></a> base, which
-<a class="reference internal" href="../pcapkit/protocols/internet/igmp.html#pcapkit.protocols.internet.igmp.protocol.IGMP._classify" title="pcapkit.protocols.internet.igmp.protocol.IGMP._classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_classify()</span></code></a> dispatches to the right
-one. IGMPv1/v2 share one 8-octet message shape; IGMPv3 (<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>) adds the
-Membership Query’s source-list extension and the Membership Report’s
-group-record list, each a shape of its own.</p>
-<p><strong>Done within wave 2 — TLS/SSL with DTLS.</strong> The <a class="reference internal" href="#dtls">DTLS</a> section above lists
-what is decoded: the shared <a class="reference internal" href="../pcapkit/protocols/application/ssl.html#pcapkit.protocols.application.ssl.protocol.SSL" title="pcapkit.protocols.application.ssl.protocol.SSL"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSL</span></code></a>
-base, SSLv2 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2457">#2457</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2567">#2567</a>), TLS, DTLS, handshake message
-framing, the hello and
-<code class="docutils literal notranslate"><span class="pre">EncryptedExtensions</span></code> extension lists with their registered extension bodies
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2514">#2514</a>), and handshake-fragment reassembly (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2440">#2440</a>).</p>
-<p><strong>Done ahead of wave 2 — handlers for the</strong> <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code>,
-<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code> <strong>link types.</strong> Each is a
-genuine DLT that a capture can legitimately be rooted in — <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> (0)
-is BSD’s loopback encapsulation, <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> (101) an IP packet with no link
-header at all, and <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code> (113) with <code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code> (276) the
-Linux “cooked” capture header every <code class="docutils literal notranslate"><span class="pre">tcpdump</span> <span class="pre">-i</span> <span class="pre">any</span></code> capture uses.
-<a class="reference internal" href="../pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.protocol.Loopback" title="pcapkit.protocols.link.loopback.protocol.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a> dissects <code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code> and
-<code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1574">#1574</a>), the frame dispatcher reads <code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code> as IPv4
-or IPv6 by its version nibble (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1502">#1502</a>), and
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll1.html#pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1" title="pcapkit.protocols.link.linux_sll1.protocol.LinuxSLL1"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL1</span></code></a> with
-<a class="reference internal" href="../pcapkit/protocols/link/linux_sll2.html#pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2" title="pcapkit.protocols.link.linux_sll2.protocol.LinuxSLL2"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinuxSLL2</span></code></a> dissect the Linux
-cooked-capture variants (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2438">#2438</a>). The <code class="docutils literal notranslate"><span class="pre">arphrd_type</span></code> values
-neither header treats as carrying an EtherType each have a dissector of their own
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2460">#2460</a>), dispatched through <a class="reference internal" href="../pcapkit/protocols/link/linux_sll.html#pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__" title="pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinuxSLL.__proto__</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2510">#2510</a>):
-<code class="docutils literal notranslate"><span class="pre">NETLINK</span></code> to <a class="reference internal" href="../pcapkit/protocols/link/netlink.html#pcapkit.protocols.link.netlink.protocol.Netlink" title="pcapkit.protocols.link.netlink.protocol.Netlink"><code class="xref py py-class docutils literal notranslate"><span class="pre">Netlink</span></code></a>, <code class="docutils literal notranslate"><span class="pre">IPGRE</span></code> and
-<code class="docutils literal notranslate"><span class="pre">IP6GRE</span></code> to <a class="reference internal" href="../pcapkit/protocols/link/gre.html#pcapkit.protocols.link.gre.protocol.GRE" title="pcapkit.protocols.link.gre.protocol.GRE"><code class="xref py py-class docutils literal notranslate"><span class="pre">GRE</span></code></a>, <code class="docutils literal notranslate"><span class="pre">FRAD</span></code> to
-<a class="reference internal" href="../pcapkit/protocols/link/frad.html#pcapkit.protocols.link.frad.protocol.FRAD" title="pcapkit.protocols.link.frad.protocol.FRAD"><code class="xref py py-class docutils literal notranslate"><span class="pre">FRAD</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">IEEE80211_RADIOTAP</span></code> to
-<a class="reference internal" href="../pcapkit/protocols/link/radiotap.html#pcapkit.protocols.link.radiotap.protocol.Radiotap" title="pcapkit.protocols.link.radiotap.protocol.Radiotap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Radiotap</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2502">#2502</a>), which decodes its
-optional fields (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2576">#2576</a>) and hands the 802.11 frame to
-<a class="reference internal" href="../pcapkit/protocols/link/ieee802_11.html#pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11" title="pcapkit.protocols.link.ieee802_11.protocol.IEEE802_11"><code class="xref py py-class docutils literal notranslate"><span class="pre">IEEE802_11</span></code></a>, which dissects the MAC
-header and keeps the frame body <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2575">#2575</a>).
-Neither <code class="docutils literal notranslate"><span class="pre">NULL</span></code> nor <code class="docutils literal notranslate"><span class="pre">RAW</span></code> is an honest stand-in for “unknown
-link type”, which is why the toolkit raises for an unresolvable link-layer
-name instead of defaulting to <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.NULL" title="pcapkit.const.reg.linktype.LinkType.NULL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinkType.NULL</span></code></a>.</p>
-<p><strong>Wave 3 — the remaining protocols</strong> from the same list, taken three or four at a
-time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
-new transport and wants that settled first, the rest because a capture in
-the wild is rare enough that the work buys little until the commoner protocols
-are in.</p>
-<p><strong>Sequenced after wave 2 — the Mobility Header sub-layer registry.</strong> Several
-mobility options carry a payload belonging to another protocol, and those
-payloads want carrying as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> through a
-per-payload registry rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> — see <a class="reference internal" href="#mobility-header">Mobility Header</a>
-above, which describes the payloads in question and why a registry of their own
-is wanted instead of
-<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>. It is
-sequenced <em>after</em> wave 2 rather than by preference: the multicast options embed
-<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html"><strong>RFC 9777</strong></a> MLD (which obsoletes <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a>; <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html"><strong>RFC 2710</strong></a> for MLDv1), which
-rides in <strong>ICMPv6</strong>, and <span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMPv3</strong> group records. ICMPv6 and
-IGMP, IGMPv3 included (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>), are both wave 2 deliverables, done;
-MLD itself is a follow-up to ICMPv6 (see <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a>
-above). Landing the registry first would give a dispatch table with
-<a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> to register. The
-counter-argument is real though, and worth weighing rather than dismissing: changing the
-parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is the
-disruptive half, since it changes what existing captures dump to, so there is a case for
-taking that churn early and registering dissectors later. The remaining format, the
-<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of <span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a
-registry of its own and nobody has claimed it.</p>
-<p><strong>Wave 3 — per-entry coverage of the option and parameter registries.</strong> The
+</section>
+<section id="remaining-work">
+<h2>Remaining Work<a class="headerlink" href="#remaining-work" title="Link to this heading">¶</a></h2>
+<p>The items above are ordered by subject, and each says what it leaves open. This
+section adds the open work that spans several of them, and says which items
+<em>depend</em> on something rather than merely waiting for someone to start them. Nothing here is claimed: if you want an item,
+say so in the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">discussion thread</a>.</p>
+<p><strong>The remaining protocols</strong> from the list under <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above,
+taken three or four at a time. QUIC, DSL, FDDI and ISDN come last: QUIC because it
+is really HTTP/3 over a new transport and wants that settled first, the rest
+because a capture in the wild is rare enough that the work buys little until the
+commoner protocols are in.</p>
+<p><strong>Per-entry coverage of the option and parameter registries.</strong> The
 option, parameter, block and frame registries are <em>enumerated</em> but not
 <em>implemented</em> throughout: a code can be registered, and named, and still have no
 working per-entry read/make pair behind it. The goal of this item is to close
@@ -1769,98 +1710,38 @@ such as the SCTP chunk types under <a class="reference internal" href="#sctp">SC
 generic handlers and parse as opaque.</p>
 <p>This is deliberately <strong>not</strong> the same request as the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch
 registries. Those name whole protocols, so closing a gap there means
-implementing a dissector — bounded by protocol work that already has its own
-waves above. The option and parameter registries are per-entry formats inside
-protocols that already exist, so the work is self-contained and does not wait on
-anything. Their enumerating harness already exists and already fails when a
+implementing a dissector, which is the protocol work above. The option and
+parameter registries are per-entry formats inside protocols that already exist,
+so the work is self-contained and does not wait on anything. Their enumerating harness already exists and already fails when a
 registered code has no case, which is how the shortfall is known at all; what is
 missing is the implementations behind the codes, not the accounting of them.
 <code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_registry_unit.py</span></code> gives the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>
 family the same accounting for the separate question of whether a registered
 protocol’s dispatch reaches it.</p>
-<p><strong>Between wave 1 and wave 2 — a library-wide consistency sweep, done</strong>, its
-findings listed under <a class="reference internal" href="#release-plan-1-5-0-in-two-steps">Release Plan — 1.5.0 in Two Steps</a> above. Clearing
-defects one at a time, each found because something else was being worked on
-nearby, is a poor way to find the rest of them. So the sweep is deliberate, and
-divided into strands:</p>
-<ul>
-<li><p><strong>Prose against code.</strong> Docstrings, the README, and inline comments checked
-against what the code does. A docstring outliving the thing it described is a
-demonstrated failure mode here rather than a hypothetical one. Includes the
-rule that a docstring names the real defining module rather than the
-re-export.</p></li>
-<li><p><strong>Missing tests.</strong> Not coverage percentage, which says nothing useful here, but
-named gaps: registry entries with no round-trip case, error paths that no test
-reaches, and behaviour asserted only in prose. The option round-trip harness
-already enumerates its own coverage and fails when a registered code has no
-case; the sweep asks which <em>other</em> registries deserve the same treatment.</p></li>
-<li><p><strong>Unaligned changes.</strong> Drift where one half of a pair moved and the other did
-not — a schema whose data model disagrees with it, a maker whose annotation
-admits what its schema cannot hold, an <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entry naming a
-case that no longer fails. Several wave 1 defects were exactly this shape.</p></li>
-<li><p><strong>Packet formats against the specifications.</strong> The most valuable strand, and
-the one with the clearest evidence behind it: reading the RFC field-by-field
-against the schema is what produced
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/472">#472</a> — HIP
-parameters sizing their list entries at one octet where <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> §5.4 and
-<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a> §5.1.2 specify sixteen bits — and the same method then <em>cleared</em>
-the further
-<code class="docutils literal notranslate"><span class="pre">EnumField(length=1)</span></code> sites in the same file against <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
-<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8002.html"><strong>RFC 8002</strong></a>, <span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html"><strong>RFC 8003</strong></a>, <span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> and <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6078.html"><strong>RFC 6078</strong></a>. It both finds real
-defects and retires suspicion, which is why it is worth doing exhaustively
-rather than opportunistically.</p></li>
-<li><p><strong>Duplicated logic that wants a shared module.</strong> The same method or the same
-arithmetic written out in several protocols, where one definition would do.
-This strand has the sharpest evidence of them all, because duplication here has
-already <em>caused</em> defects rather than merely offended tidiness:</p>
-<ul class="simple">
-<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/487">#487</a> existed because
-<a class="reference internal" href="../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.make" title="pcapkit.protocols.internet.ipv6_route.protocol.IPv6_Route.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Route.make()</span></code></a>
-computed <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> in <strong>separate</strong> branches with different wrong units, and the
-read side computed the inverse elsewhere with yet another. The fix was not new
-arithmetic but one helper per direction, each documenting the <span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>
-unit and saying what its counterpart is.</p></li>
-<li><p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/483">#483</a> was the scapy
-toolkit adapter passing a fragment offset unscaled where every sibling
-adapter scaled it. Every adapter restates the same field mapping, so a
-convention that holds in all but one is invisible until a capture is
-wrong.</p></li>
-</ul>
-<p>So the strand is not a style pass. Look for arithmetic that encodes a wire
-unit, field-mapping tables restated per engine, and guards of the same shape
-repeated per registered type — and where extraction is not worth it, say so
-with the reason rather than leaving the duplication unexplained. Note also that
-two candidates may look alike and differ deliberately: TCP and IP reassembly
-resolve overlaps in <em>opposite</em> directions because <span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> and <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>
-§3.10 specify opposite resolutions, so “these two functions are nearly
-identical” is a question to answer against the specification, not a defect on
-its face.</p>
-</li>
-</ul>
-<p>The sweep’s output is <strong>verified issues, not a list of suspicions</strong> — each entry
-reproduced before it is filed, with the reproduction in the issue. An audit that
-files what it merely suspects transfers the work rather than doing it, and this
-project has already had to correct a finding whose count and whose diagnosis were
-both wrong when re-derived.</p>
-<p><strong>Queued for wave 3 — cryptographic integrity verification.</strong> See <a class="reference internal" href="#checksum-and-integrity-verification">Checksum
-and Integrity Verification</a> above. HIP’s <code class="docutils literal notranslate"><span class="pre">HIP_MAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RVS_HMAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RELAY_HMAC</span></code>
-and its signature parameters could start whenever, since
+<p><strong>Cryptographic integrity verification.</strong> See <a class="reference internal" href="#checksum-and-integrity-verification">Checksum and Integrity
+Verification</a> above. HIP’s <code class="docutils literal notranslate"><span class="pre">HIP_MAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RVS_HMAC</span></code>/<code class="docutils literal notranslate"><span class="pre">RELAY_HMAC</span></code> and its
+signature parameters can be taken up at any point, since
 <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.protocol.ESP" title="pcapkit.protocols.internet.esp.protocol.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> has already established both the
-keying-context channel and the report-rather-than-raise policy. The
-one’s-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) is <strong>done</strong>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2470">#2470</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2472">#2472</a> to <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2475">#2475</a>), and DCCP’s with it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2489">#2489</a>),
-as are IGMP’s and GRE’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2618">#2618</a>).</p>
-<p><strong>IP pseudo-header — done</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2471">#2471</a>).
-<a class="reference internal" href="../pcapkit/protocols/misc/checksum.html#pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo" title="pcapkit.protocols.misc.checksum.ip_pseudo.protocol.IP_Pseudo"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Pseudo</span></code></a> is the
-<strong>pseudo-protocol class</strong> for the IP family the owner settled on, serving both
-the parsing and the constructing path, rather than a back-reference from a
-parsed protocol to its parent.</p>
-<p><strong>Deterministic construction arguments — done</strong> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2594">#2594</a>). See
-<a class="reference internal" href="#deterministic-construction-arguments">Deterministic Construction Arguments</a> above: every <code class="docutils literal notranslate"><span class="pre">make()</span></code> takes an enum
-field as the member or an <code class="docutils literal notranslate"><span class="pre">int</span></code>, with no string-to-enum inference and no
-<code class="docutils literal notranslate"><span class="pre">X_default</span></code>, <code class="docutils literal notranslate"><span class="pre">X_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">X_reversed</span></code> keywords behind it, and
-<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.resolve_index" title="pcapkit.protocols.protocol.Protocol.resolve_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.resolve_index</span></code></a>
-resolves a bare string first.</p>
+keying-context channel and the report-rather-than-raise policy.</p>
+<p><strong>The Mobility Header sub-layer registry.</strong> Several
+mobility options carry a payload belonging to another protocol, and those
+payloads want carrying as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> through a
+per-payload registry rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> — see <a class="reference internal" href="#mobility-header">Mobility Header</a>
+above, which describes the payloads in question and why a registry of their own
+is wanted instead of
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>. Its
+prerequisites are the protocols the multicast options embed: <span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9777.html"><strong>RFC 9777</strong></a> MLD
+(which obsoletes <span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a>; <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html"><strong>RFC 2710</strong></a> for MLDv1), which rides in <strong>ICMPv6</strong>,
+and <span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a> <strong>IGMPv3</strong> group records. ICMPv6 and IGMPv3 are implemented
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2448">#2448</a>); MLD is not (see <a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a> above), so a registry
+landed first would have only <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> to
+register for it. The
+counter-argument to waiting is real though, and worth weighing rather than dismissing: changing the
+parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.protocol.Raw" title="pcapkit.protocols.misc.raw.protocol.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is the
+disruptive half, since it changes what existing captures dump to, so there is a case for
+taking that churn early and registering dissectors later. The remaining format, the
+<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, is a registry of
+its own, and nobody has claimed it.</p>
 </section>
 </section>
 
@@ -1929,8 +1810,12 @@ resolves a bare string first.</p>
 <li><a class="reference internal" href="#reassembly-beyond-ip-and-tcp">Reassembly Beyond IP and TCP</a></li>
 <li><a class="reference internal" href="#checksum-and-integrity-verification">Checksum and Integrity Verification</a></li>
 <li><a class="reference internal" href="#deterministic-construction-arguments">Deterministic Construction Arguments</a></li>
-<li><a class="reference internal" href="#release-plan-1-5-0-in-two-steps">Release Plan — 1.5.0 in Two Steps</a></li>
-<li><a class="reference internal" href="#delivery-sequence">Delivery Sequence</a></li>
+<li><a class="reference internal" href="#release-plan">Release Plan</a><ul>
+<li><a class="reference internal" href="#in-one-step">1.6.0, in One Step</a></li>
+<li><a class="reference internal" href="#in-two-steps">1.5.0, in Two Steps</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#remaining-work">Remaining Work</a></li>
 </ul>
 </li>
 </ul>
@@ -1942,7 +1827,7 @@ resolves a bare string first.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=cb7e6255"></script>
+</div><script src="../_static/documentation_options.js?v=cf6e66ff"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

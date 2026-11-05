@@ -11,6 +11,8 @@ one's-complement checksums share, such as
 :class:`~pcapkit.corekit.checksum.internet.ChecksumStatus`, is in
 :mod:`pcapkit.corekit.checksum.internet`.
 
+.. versionadded:: 1.6.0
+
 IP Pseudo-Header
 ================
 
