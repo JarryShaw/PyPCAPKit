@@ -19,6 +19,8 @@ vendor crawlers include:
    * - :class:`ICMP_ParameterProblemCode <pcapkit.vendor.icmp.parameter_problem_code.ParameterProblemCode>`
      - ICMP Parameter Problem Codes [*]_
 
+.. versionadded:: 1.6.0
+
 ICMP Type Numbers
 =================
 

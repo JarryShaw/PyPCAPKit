@@ -9,6 +9,8 @@ DTLS Handshake-Message Reassembly
 DTLS handshake message split across several records back to origin
 (:rfc:`6347#section-4.2.3`).
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.foundation.reassembly.dtls.DTLS
    :no-members:
    :show-inheritance:

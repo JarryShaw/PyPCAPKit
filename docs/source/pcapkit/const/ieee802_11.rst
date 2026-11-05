@@ -22,6 +22,8 @@ Available enumerations include:
    * - :class:`IEEE802_11_ExtensionSubtype <pcapkit.const.ieee802_11.extension_subtype.ExtensionSubtype>`
      - Extension Frame Subtypes
 
+.. versionadded:: 1.6.0
+
 Frame Types
 ===========
 

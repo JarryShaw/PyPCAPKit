@@ -13,6 +13,8 @@ refused without it, since the link type rather than the header names the
 version. Its :meth:`~pcapkit.protocols.link.linux_sll.protocol.LinuxSLL.from_data` gives
 the one whose data model it is handed (:issue:`2574`).
 
+.. versionadded:: 1.6.0
+
 """
 import collections
 from typing import TYPE_CHECKING, Generic, cast

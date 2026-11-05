@@ -36,6 +36,8 @@ Octets      Bits        Name                    Description
   4          32   ``igmpv1.group``          Group Address
 ======= ========= ========================= ===================================
 
+.. versionadded:: 1.6.0
+
 .. autoclass:: pcapkit.protocols.internet.igmp.protocol.IGMP
    :no-members:
    :show-inheritance:

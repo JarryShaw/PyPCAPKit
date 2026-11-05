@@ -13,6 +13,8 @@ Available enumerations include:
    * - :class:`Linux_ARPHRD <pcapkit.const.linux.arphrd.ARPHRD>`
      - Linux ARP Hardware Types [*]_
 
+.. versionadded:: 1.6.0
+
 ARP Hardware Types
 ==================
 
