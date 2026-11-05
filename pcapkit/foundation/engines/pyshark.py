@@ -145,10 +145,8 @@ class PyShark(EngineBase['PySharkPacket']):
         running loop. Measured: 3.10 and 3.11 return a loop
         silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14
         raises ``RuntimeError: There is no current event loop in thread
-        'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was
-        not measured; it is expected to work, since it is on the
-        deprecated-but-functional side of that progression, and that expectation
-        is the one thing here that is inferred rather than observed.
+        'MainThread'``; on 3.13 |pyshark|_ extracted a capture. Hence
+        :attr:`PYTHON_CEILING` is ``(3, 14)``.
 
         **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around
         Wireshark's command-line tool and does no parsing itself, so it is useless

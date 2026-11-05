@@ -809,7 +809,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
     #: and whether a bare :class:`int` is a valid key too. Declared by the class
     #: *owning* the registry, so
     #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
