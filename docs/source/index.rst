@@ -45,6 +45,7 @@ analysis.
    contributing/conventions/index
    contributing/releasing
    contributing/workflows
+   contributing/maintenance
    contributing/pep
 
 About

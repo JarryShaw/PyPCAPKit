@@ -9,8 +9,9 @@ built with: user-refined exceptions and warnings, logging, the tunable limits
 of :mod:`~pcapkit.utilities.config`, a compatibility layer, timestamp
 conversion, pickle reductions, the
 :mod:`context variables <pcapkit.utilities.contextvars>` its modules share,
-:mod:`lazy imports <pcapkit.utilities.importlib>` for a package's exports, and
-wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
+:mod:`lazy imports <pcapkit.utilities.importlib>` for a package's exports, an
+:mod:`abstract-class check <pcapkit.utilities.inspect>` that reads no interpreter
+flag, and wrappers around third-party libraries. It imports nothing from :mod:`pcapkit`
 outside itself; see :ref:`utilities-or-corekit`.
 
 .. toctree::
@@ -25,6 +26,7 @@ outside itself; see :ref:`utilities-or-corekit`.
    pickle
    contextvars
    importlib
+   inspect
 
 Version Compatibility
 =====================
