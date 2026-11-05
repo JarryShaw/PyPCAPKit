@@ -43,6 +43,24 @@ wrote under ``pcapkit/const/``, new and deleted ones included
 (:issue:`1685`), and is what
 starts the automated path described below.
 
+The steps of a ``vendor-update`` run, from the crawl to the push:
+
+.. mermaid::
+
+   flowchart TD
+       CRAWL["Update Vendor<br/>crawls the registries"] --> TEST{"Test the regenerated<br/>tree: finished?"}
+       TEST -->|"yes: failing modules go<br/>back to HEAD's copy"| VERIFY
+       TEST -->|"no: failed or timed out"| DISCARD["Discard untested const changes"]
+       DISCARD --> VERIFY{"Verify Changed files<br/>anything changed?"}
+       VERIFY -->|no| NONE["commits nothing"]
+       VERIFY -->|yes| CLASSIFY{"Classify Changed files<br/>vendor_code_changed.py"}
+       CLASSIFY -->|"comments and docstrings only"| DOCS["Commit documentation<br/>changes, no bump"]
+       CLASSIFY -->|"any other change,<br/>or the step failing"| BUMP["Bump Version<br/>util/bump_version.py"]
+       DOCS -->|"held: raised by its own<br/>documentation commit"| NONE
+       BUMP --> COMMIT["Commit changes, new<br/>const modules too"]
+       DOCS -->|committed| PUSH["Push changes to main<br/>not on a manual run"]
+       COMMIT --> PUSH
+
 The same script is also the manual entry point: run
 ``python util/bump_version.py`` and commit the result to ``main`` for a
 release that is not a vendor-registry refresh -- a feature or a fix that has

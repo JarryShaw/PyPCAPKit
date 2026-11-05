@@ -8,6 +8,25 @@ Which of the two support packages a module belongs in. Settled by the owner on
 who uses them. This rule can be checked from the import graph alone, and it needed
 the fewest moves: one.
 
+The questions this page asks, as one decision:
+
+.. mermaid::
+
+   flowchart TD
+       NEW["a new support module,<br/>helper or ContextVar"] --> LAYER{"a schema-layer<br/>helper used<br/>outside it?"}
+       LAYER -->|no| OWNED{"a helper in<br/>one protocol's<br/>schema?"}
+       LAYER -->|yes| SCHEMA["corekit.schema<br/>one module per group"]
+       OWNED -->|"used beyond that<br/>protocol, and generic"| SCHEMA
+       OWNED -->|no| VAR{"a ContextVar?"}
+       OWNED -->|"used by that<br/>protocol alone"| STAY["stays beside<br/>that schema"]
+       VAR -->|"set or read by<br/>several modules"| CTX["utilities.contextvars"]
+       VAR -->|no| UTIL{"usable by any<br/>code, importing<br/>no pcapkit but<br/>utilities?"}
+       VAR -->|"used by one<br/>module only"| PRIV["private, in<br/>that module"]
+       UTIL -->|yes| VER{"differs by<br/>interpreter<br/>version?"}
+       UTIL -->|no| CORE["corekit"]
+       VER -->|yes| COMPAT["utilities.compat, behind<br/>a sys.version_info gate"]
+       VER -->|no| OWN["a utilities module,<br/>not compat"]
+
 :mod:`pcapkit.utilities` **is for cross-cutting services**: exceptions, warnings,
 logging, the compatibility layer, configuration, and wrappers around third-party
 libraries such as :mod:`~pcapkit.utilities.chardet`. The question to ask of a module

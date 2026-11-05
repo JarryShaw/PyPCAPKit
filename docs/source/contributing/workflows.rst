@@ -1016,6 +1016,38 @@ triggers; the ``gate-only: true`` reusable calls documented above skip it via
 its ``if: ${{ always() && inputs.gate-only != true }}``, so it is never
 produced -- and never expected -- on those paths.
 
+The ``needs:`` graph of ``unit-tests.yml``, as a transitive reduction (``changes`` is
+also a direct need of ``coverage`` and ``required-checks``); a dashed job reaches no
+required context:
+
+.. mermaid::
+
+   flowchart TD
+       CH["changes<br/>Classify changed files"]
+       PV["python-versions"]
+       CH --> PT["project-tests"]
+       CH --> T["test"]
+       PV --> T
+       CH --> TL["test-latest-tier"]
+       PV --> TL
+       CH --> IEP["integration<br/>engine-tests<br/>pypcap-parity"]
+       PV --> IEP
+       T --> COV["coverage"]
+       TL --> COV
+       COV ~~~ IEP
+       PT --> RC["required-checks<br/>Required checks passed"]
+       T --> RC
+       TL --> RC
+       COV --> RC
+       IEP --> RC
+       T --> UO["unittest-ordering<br/>not on a pull request"]
+       CH --> K["test-ktlo<br/>integration-ktlo<br/>pypcap-parity-ktlo"]
+       PV --> K
+       RC ~~~ UO
+       UO ~~~ K
+       classDef off stroke-dasharray:4 2
+       class K,UO off
+
 .. _ktlo-tier:
 
 Python versions are tiered -- supported and KTLO

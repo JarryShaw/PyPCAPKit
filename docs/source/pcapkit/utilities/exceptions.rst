@@ -38,6 +38,25 @@ such a block for :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so a refusa
 keeps as :class:`~pcapkit.protocols.misc.raw.protocol.Raw` is recorded on that layer's ``error``
 alone (:issue:`2588`).
 
+What decides whether a constructed error is loud:
+
+.. mermaid::
+
+   flowchart TD
+       NEW["a BaseError<br/>is constructed"] --> QUIET{"quiet=True?"}
+       QUIET -->|yes| SILENT["quiet: nothing logged,<br/>no hook touched"]
+       QUIET -->|no| CAUGHT{"inside a CaughtByCaller<br/>block naming one<br/>of its classes?"}
+       CAUGHT -->|yes| SILENT
+       CAUGHT -->|no| DEV{"PCAPKIT_DEVMODE?"}
+       DEV -->|yes| DEVLOG["logger.critical, with<br/>traceback and stack<br/>under PCAPKIT_VERBOSE"]
+       DEV -->|no| LOG["logger.critical"]
+       LOG --> HOOK["\_install\_excepthook<br/>sys.excepthook and<br/>threading.excepthook"]
+       SILENT --> RAISE["an ordinary exception<br/>for the caller to catch"]
+       DEVLOG --> RAISE
+       HOOK --> RAISE
+
+       click CAUGHT "exceptions.html#pcapkit.utilities.exceptions.CaughtByCaller"
+
 .. versionchanged:: 1.5.0
 
    In 1.4.x, ``quiet=True`` logged at ``ERROR`` instead of ``CRITICAL`` rather
