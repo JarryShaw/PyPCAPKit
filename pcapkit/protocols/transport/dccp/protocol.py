@@ -211,7 +211,7 @@ class DCCP(Transport[Data_DCCP, Schema_DCCP],
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw.protocol', 'Raw'),
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
     #: and whether a bare :class:`int` is valid too, as for
     #: :attr:`TCP.__proto_key__ <pcapkit.protocols.transport.tcp.protocol.TCP.__proto_key__>`.
     __proto_key__: 'ClassVar[tuple[Type[EnumRegistry], bool]]' = (Enum_AppType, True)

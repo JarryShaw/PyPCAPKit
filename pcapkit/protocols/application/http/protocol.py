@@ -232,7 +232,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         #: Saved subclass protocol data (only for HTTP base class).
         _http: 'HTTP[_PT, _ST]'
 
-    #: Octets consumed ahead of the identified version's header: the HTTP/2
+    #: Octets consumed ahead of the identified version's header -- the HTTP/2
     #: connection preface, when :meth:`_guess_version` found one. They are header,
     #: so :meth:`read` adds them to :attr:`length`; otherwise
     #: :meth:`Protocol.__init__ <pcapkit.protocols.protocol.Protocol.__init__>`

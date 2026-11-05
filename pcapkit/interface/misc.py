@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     ReassemblyAdapter = Callable[..., 'Optional[TCP_Data]']
 
     ByteOrder = Literal['little', 'big']
-    #: Every output format key shipped in :attr:`Extractor.__output__
-    #: <pcapkit.foundation.extraction.Extractor.__output__>` and
-    #: :attr:`TraceFlow.__output__
+    #: Every output format key shipped in
+    #: :attr:`Extractor.__output__ <pcapkit.foundation.extraction.Extractor.__output__>`
+    #: and :attr:`TraceFlow.__output__
     #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>`, aliases
     #: included (``'cap'``, ``'xml'``, ``'text'``, ``'txt'``).
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']

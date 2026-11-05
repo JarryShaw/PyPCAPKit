@@ -427,7 +427,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         },
     )
 
-    #: What :attr:`__proto__` is keyed by: the enum a key must be a member of,
+    #: What :attr:`__proto__` is keyed by -- the enum a key must be a member of,
     #: and whether a bare :class:`int` is valid too. Read by
     #: :func:`~pcapkit.foundation.registry.protocols.protocol.register_protocol_code`
     #: to check a ``code=`` key as
